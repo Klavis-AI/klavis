@@ -44,13 +44,13 @@ class BotContext(ABC):
         self.llm_id = llm_id
         
     @abstractmethod
-    def get_channel_id(self) -> str:
+    def get_channel_id(self) -> Optional[str]:
         """
         Get the channel ID for the current context.
         Must be implemented by platform-specific subclasses.
         
         Returns:
-            String representation of the channel ID
+            String representation of the channel ID, or None if not applicable
         """
         pass
         
@@ -215,7 +215,8 @@ class BaseBot(ABC):
 
         if USE_PRODUCTION_DB:
             conversation_result = await database.find_or_create_conversation(
-                channel_id=str(context.get_channel_id()),
+                conversation_id=context.conversation_id if context.conversation_id else None,
+                channel_id=context.get_channel_id(),
                 mcp_client_id=context.mcp_client_id,
                 thread_id=context.get_thread_id(),
             )
@@ -232,7 +233,7 @@ class BaseBot(ABC):
                 "conversation": Conversation(
                     id="dummy_conversation_id",
                     messages=[],
-                    channel_id=str(context.get_channel_id()),
+                    channel_id=context.get_channel_id(),
                     thread_id=context.get_thread_id(),
                 )
             }
@@ -287,7 +288,7 @@ class BaseBot(ABC):
         pass
 
     @abstractmethod
-    async def get_messages_history(self, context: BotContext, limit: int = 6) -> List[ChatMessage]:
+    async def get_messages_history(self, conversation: Conversation, context: BotContext, limit: int = 6) -> List[ChatMessage]:
         """
         Get the messages history.
         """

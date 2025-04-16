@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from mcp_client import MCPClient
 from base_bot import BaseBot, BotContext
-from llms import ChatMessage, MessageRole, TextContent, FileContent
+from llms import ChatMessage, MessageRole, TextContent, Conversation
 from config import USE_PRODUCTION_DB
 
 # Configure logging
@@ -66,7 +66,7 @@ class WebBotContext(BotContext):
         )
         self.conversation_id = conversation_id
 
-    def get_channel_id(self) -> str:
+    def get_channel_id(self) -> Optional[str]:
         """
         Get the channel ID for the current context.
         For web bot, we use the user_id as channel_id if no conversation_id is provided.
@@ -169,7 +169,7 @@ class WebBot(BaseBot):
         return StreamingResponse(content=stream_generator(), media_type="text/event-stream")
 
     async def get_messages_history(
-        self, context: WebBotContext, limit: int = 6
+        self, conversation: Conversation, context: WebBotContext, limit: int = 6
     ) -> List[ChatMessage]:
         """
         Get the previous messages for the conversation.
@@ -182,32 +182,15 @@ class WebBot(BaseBot):
         Returns:
             List of ChatMessage objects representing previous messages
         """
+        
         if USE_PRODUCTION_DB:
-            from database import database
-            
-            try:
-                # Get conversation from database
-                conversation_result = await database.find_or_create_conversation(
-                    channel_id=context.get_channel_id(),
-                    mcp_client_id=context.mcp_client_id,
-                    thread_id=context.get_thread_id(),
-                )
-                
-                if conversation_result["error"]:
-                    logger.error(f"Error retrieving conversation: {conversation_result['error']}")
-                    return []
-                
-                # Get the messages from the conversation
-                messages = conversation_result["conversation"].messages
-                
-                # Limit the number of messages, considering the tool calls, we multiply by 3
-                return messages[-limit*3:] if len(messages) > limit*3 else messages
-                
-            except Exception as e:
-                logger.error(f"Error retrieving previous messages: {e}", exc_info=True)
-                return []
+            # Get the messages from the conversation
+            messages = conversation.messages
+        
+            # Limit the number of messages, considering the tool calls, we multiply by 3
+            return messages[-limit*3:] if len(messages) > limit*3 else messages
         else:
-            # Return empty list when database not in use
+            # Return user query when database not in use
             logger.info("Database operations skipped: get_messages_history")
             return [ChatMessage(role=MessageRole.USER, content=[TextContent(text=context.user_message)])]
 
@@ -283,10 +266,13 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
                         content=[f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"],
                         media_type="text/event-stream"
                     )
-                messages_history = await web_bot.get_messages_history(context)
                 mcp_client = await web_bot.initialize_mcp_client(
                     context=context,
                     server_urls=server_urls
+                )
+                messages_history = await web_bot.get_messages_history(
+                    conversation=mcp_client.conversation,
+                    context=context,
                 )
 
                 response = await web_bot.process_query_with_streaming(

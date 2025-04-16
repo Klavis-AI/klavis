@@ -14,7 +14,7 @@ from discord.ui import View
 from dotenv import load_dotenv
 
 from base_bot import BaseBot, BotContext
-from llms import ChatMessage, MessageRole, TextContent, FileContent
+from llms import ChatMessage, MessageRole, TextContent, FileContent, Conversation
 from config import USE_PRODUCTION_DB
 
 # Load environment variables
@@ -74,16 +74,16 @@ class DiscordBotContext(BotContext):
         self.is_dm = is_dm
         self.thread = thread
 
-    def get_channel_id(self) -> str:
+    def get_channel_id(self) -> Optional[str]:
         """
         Get the Discord channel ID for the current context.
 
         Returns:
-            String representation of the channel ID
+            String representation of the channel ID, or None if not applicable
         """
         if self.channel:
             return str(self.channel.id)
-        return ""
+        return None
 
     def get_thread_id(self) -> Optional[str]:
         """
@@ -236,10 +236,13 @@ class DiscordBot(BaseBot):
                         )
                         return
 
-                messages_history = await self.get_messages_history(context)
-                mcp_client = await self.initialize_mcp_client(
-                    context=context, server_urls=server_urls
-                )
+                    mcp_client = await self.initialize_mcp_client(
+                        context=context, server_urls=server_urls
+                    )
+                    messages_history = await self.get_messages_history(
+                        conversation=mcp_client.conversation,
+                        context=context,
+                    )
 
                 try:
                     # Process the query and return the result from the streaming implementation
@@ -528,7 +531,7 @@ class DiscordBot(BaseBot):
         await channel.send(embed=welcome_embed, view=view)
 
     async def get_messages_history(
-        self, context: BotContext, limit: int = 6
+        self, conversation: Conversation, context: BotContext, limit: int = 6
     ) -> List[ChatMessage]:
         """
         Get the previous messages for the conversation.
