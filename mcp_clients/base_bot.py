@@ -251,11 +251,13 @@ class BaseBot(ABC):
             await mcp_client.connect_to_server(server_url)
 
         try:
-            # Process the query (implement streaming in platform-specific subclasses)
-            await self.process_query_with_streaming(mcp_client, messages_history, context)
-
+            # Process the query and return the result from the streaming implementation
+            response = await self.process_query_with_streaming(mcp_client, messages_history, context)
+            
             # Clean up MCP client resources
             await mcp_client.cleanup()
+            
+            return response
 
         except Exception as e:
             logger.error(f"Error processing query: {e}", exc_info=True)
@@ -263,6 +265,7 @@ class BaseBot(ABC):
 
             # Ensure cleanup happens even on error
             await mcp_client.cleanup()
+            return None
 
     async def store_new_messages(
         self, conversation_id: str, messages: List[ChatMessage]
