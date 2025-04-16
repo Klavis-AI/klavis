@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from base_bot import BaseBot, BotContext
 from llms import ChatMessage, MessageRole, TextContent, FileContent
 from config import USE_PRODUCTION_DB
+
 # Load environment variables
 load_dotenv()
 
@@ -197,7 +198,7 @@ class DiscordBot(BaseBot):
                                 context,
                                 f"You need to link your {context.platform_name} account with our website to use the AI assistant features. I have sent you a Direct Message to link your account.",
                             )
-                        
+        
                         try:
                             await message.author.send(
                                 f"You need to link your {context.platform_name} account with our website to use the AI assistant features using the login button below.",
@@ -211,7 +212,7 @@ class DiscordBot(BaseBot):
                             )
                         except Exception as e:
                             logger.error(f"Error sending DM: {e}", exc_info=True)
-                        
+        
                         return
 
                     context.mcp_client_id = verification_result["mcp_client_id"]
@@ -226,7 +227,7 @@ class DiscordBot(BaseBot):
                             view=self.create_config_view(),
                         )
                         # Don't return here to allow processing with 0 MCP server
-                    
+        
                     usage_under_limit = await self.check_and_update_usage_limit(context)
                     if not usage_under_limit:
                         await self.send_message(
@@ -235,50 +236,40 @@ class DiscordBot(BaseBot):
                         )
                         return
 
-                    # Process mentions if the bot is mentioned in a server
-                    if is_dm:
-                        content = message.content.strip()
-                        if content:
-                            # Process the message content
-                            await self.process_query(
-                                query=content, context=context, server_urls=server_urls
-                            )
-                    else:
-                        # Extract the query (remove the mention)
-                        content = message.content.replace(
-                            f"<@{self.client.user.id}>", ""
-                        ).strip()
-                        if content:
-                            await self.process_query(
-                                query=content, context=context, server_urls=server_urls
-                            )
-        except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} after 300 seconds. Lock released.")
-            # Ensure the lock is released if timeout occurs (async with handles this)
-            # Inform the user about the timeout
-            await self.send_message(
-                context,
-                "The previous operation took too long and timed out. Please try again.",
-            )
-        # Lock is released automatically when exiting the 'async with' block,
-        # either normally or due to an exception (like TimeoutError).
+                messages_history = await self.get_messages_history(context)
+                mcp_client = await self.initialize_mcp_client(
+                    context=context, server_urls=server_urls
+                )
+
+                try:
+                    # Process the query and return the result from the streaming implementation
+                    await self.process_query_with_streaming(
+                        mcp_client, messages_history, context
+                    )
+                except Exception as e:
+                    logger.error(f"Error processing query: {e}", exc_info=True)
+                    await self.send_message(context, f"Error processing query: {str(e)}")
+                finally:
+                    await mcp_client.cleanup()
 
     async def on_member_join(self, member):
         """Event handler when a new member joins the server"""
         logger.info(f"New member joined: {member.name} ({member.id})")
-        
+
         try:
             # Create the welcome embed
             welcome_embed = self.create_welcome_embed(self.client.user)
-            
+
             # Create view with user information
             welcome_view = self.create_login_view(member.name, str(member.id))
-            
+
             # Send DM to the new member
             await member.send(embed=welcome_embed, view=welcome_view)
             logger.info(f"Sent welcome DM to new member: {member.name} ({member.id})")
         except discord.Forbidden:
-            logger.warning(f"Could not send DM to {member.name} - user may have DMs disabled")
+            logger.warning(
+                f"Could not send DM to {member.name} - user may have DMs disabled"
+            )
         except Exception as e:
             logger.error(f"Error sending welcome DM: {e}", exc_info=True)
 
@@ -350,7 +341,8 @@ class DiscordBot(BaseBot):
                 asyncio.timeout(300.0),
             ):
                 async for chunk in mcp_client.process_query_stream(
-                    messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
+                    messages_history,
+                    self.store_new_messages if USE_PRODUCTION_DB else None,
                 ):
                     buffer += chunk
                     # Check if the chunk contains a message split token
@@ -365,19 +357,25 @@ class DiscordBot(BaseBot):
                                 if "<special>" in part:
                                     # Extract the special message content
                                     special_content = part.split("<special>")[1].strip()
-                                    
+
                                     if special_content.startswith("[Calling tool"):
                                         # Use the helper method to create the embed
-                                        embed = self.create_tool_call_embed(special_content, title="📲 Tool Call")
-                                        await self.send_message(context, "", embed=embed)
+                                        embed = self.create_tool_call_embed(
+                                            special_content, title="📲 Tool Call"
+                                        )
+                                        await self.send_message(
+                                            context, "", embed=embed
+                                        )
                                     elif "still running" in special_content:
                                         # Create an embed for tool running status
                                         embed = Embed(
                                             title="⏳ Tool Running",
                                             description=special_content.strip("[]"),
-                                            color=Color.gold()
+                                            color=Color.gold(),
                                         )
-                                        await self.send_message(context, "", embed=embed)
+                                        await self.send_message(
+                                            context, "", embed=embed
+                                        )
                                 else:
                                     # Regular message
                                     await self.send_message(context, part)
@@ -392,13 +390,15 @@ class DiscordBot(BaseBot):
                         special_content = buffer.split("<special>")[1].strip()
                         if special_content.startswith("[Calling tool"):
                             # Use the helper method to create the embed
-                            embed = self.create_tool_call_embed(special_content, title="📲 Tool Call")
+                            embed = self.create_tool_call_embed(
+                                special_content, title="📲 Tool Call"
+                            )
                             return await self.send_message(context, "", embed=embed)
                         elif "still running" in special_content:
                             embed = Embed(
                                 title="⏳ Tool Running",
                                 description=special_content.strip("[]"),
-                                color=Color.gold()
+                                color=Color.gold(),
                             )
                             return await self.send_message(context, "", embed=embed)
                     return await self.send_message(context, buffer)
@@ -583,14 +583,16 @@ class DiscordBot(BaseBot):
 
         return chat_messages
 
-    def create_tool_call_embed(self, special_content: str, title: str = "📲 MCP Server Call") -> Embed:
+    def create_tool_call_embed(
+        self, special_content: str, title: str = "📲 MCP Server Call"
+    ) -> Embed:
         """
         Create an embed for tool calls with special handling for long-running tools.
-        
+
         Args:
             special_content: The special content string with tool information
             title: The title to use for the embed
-            
+
         Returns:
             Discord Embed object with appropriate tool information
         """
@@ -601,21 +603,17 @@ class DiscordBot(BaseBot):
             tool_name = tool_parts[0].replace("Calling tool", "").strip()
         except:
             pass
-            
+
         description = special_content.strip("[]")
-        
+
         footer_text = "Working on your request..."
         # Add footer note for long-running tools
         if any(tool in tool_name for tool in LONG_RUNNING_TOOLS):
             footer_text = "This tool may take several minutes to complete..."
-            
-        embed = Embed(
-            title=title,
-            description=description,
-            color=Color.blue()
-        )
+
+        embed = Embed(title=title, description=description, color=Color.blue())
         embed.set_footer(text=footer_text)
-        
+
         return embed
 
     def run(self):

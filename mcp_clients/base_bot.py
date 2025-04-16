@@ -180,14 +180,13 @@ class BaseBot(ABC):
             logger.info("Reading server URLs from local_mcp_servers.json")
             return data.get("server_urls", [])
 
-    async def process_query(
-        self, query: str, context: BotContext, server_urls: List[str] = None
+    async def initialize_mcp_client(
+        self, context: BotContext, server_urls: List[str] = None
     ) -> Any:
         """
-        Process a user query by creating an MCP client and processing the query.
+        Initialize an MCP client for the user.
 
         Args:
-            query: The query text from the user
             context: Bot context for the interaction
             server_urls: Optional list of MCP server URLs to connect to
 
@@ -239,8 +238,6 @@ class BaseBot(ABC):
             }
             logger.info("Database operations skipped: find_or_create_conversation")
 
-        messages_history = await self.get_messages_history(context)
-
         # Create a new MCP client for this query
         mcp_client = MCPClient(
             self.platform_name, api_name, provider, conversation_result["conversation"]
@@ -250,22 +247,7 @@ class BaseBot(ABC):
         for server_url in server_urls:
             await mcp_client.connect_to_server(server_url)
 
-        try:
-            # Process the query and return the result from the streaming implementation
-            response = await self.process_query_with_streaming(mcp_client, messages_history, context)
-            
-            # Clean up MCP client resources
-            await mcp_client.cleanup()
-            
-            return response
-
-        except Exception as e:
-            logger.error(f"Error processing query: {e}", exc_info=True)
-            await self.send_message(context, f"Error processing query: {str(e)}")
-
-            # Ensure cleanup happens even on error
-            await mcp_client.cleanup()
-            return None
+        return mcp_client
 
     async def store_new_messages(
         self, conversation_id: str, messages: List[ChatMessage]

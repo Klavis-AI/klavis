@@ -4,7 +4,7 @@ import asyncio
 from typing import Dict, Any, List, Optional
 import json
 
-from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi import FastAPI, Request, Depends, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -164,7 +164,7 @@ class WebBot(BaseBot):
                 # Yield error message within the stream
                 yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
                 yield f"data: {json.dumps({'type': 'done'})}\n\n" # Ensure done event is sent even on error
-
+                
         # Return the StreamingResponse directly
         return StreamingResponse(content=stream_generator(), media_type="text/event-stream")
 
@@ -225,7 +225,7 @@ web_bot = WebBot()
 
 # FastAPI routes
 @app.post("/api/query")
-async def process_query(request: QueryRequest):
+async def process_query(request: QueryRequest, background_tasks: BackgroundTasks):
     """
     Process a user query and respond with a streaming response.
     """
@@ -251,6 +251,7 @@ async def process_query(request: QueryRequest):
     
     # Process with a lock
     async def process_with_lock():
+        mcp_client = None
         async with web_bot.user_locks[user_id]:
             try:
                 # Verify user
@@ -282,14 +283,17 @@ async def process_query(request: QueryRequest):
                         content=[f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"],
                         media_type="text/event-stream"
                     )
-                
-                # Process the query using the base process_query method
-                # This now returns the StreamingResponse directly
-                response = await web_bot.process_query(
-                    query=request.query,
+                messages_history = await web_bot.get_messages_history(context)
+                mcp_client = await web_bot.initialize_mcp_client(
                     context=context,
                     server_urls=server_urls
                 )
+
+                response = await web_bot.process_query_with_streaming(
+                    mcp_client, messages_history, context
+                )
+
+                background_tasks.add_task(mcp_client.cleanup)
                 
                 # If process_query returned None (e.g., due to setup error handled in base class),
                 # return a generic error response.
