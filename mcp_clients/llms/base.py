@@ -292,7 +292,7 @@ class BaseLLM(ABC):
 
     @abstractmethod
     async def create_streaming_generator(
-        self, messages: list, available_tools: list
+        self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create a streaming generator with the given messages and tools
@@ -300,7 +300,7 @@ class BaseLLM(ABC):
         Args:
             messages: Message history
             available_tools: List of available tools
-
+            resources: List of available resources
         Yields:
             Text chunks from the streaming response
         """

@@ -6,6 +6,8 @@ import uuid
 import os
 import asyncio
 import time
+import base64
+import markitdown
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -424,6 +426,11 @@ class MCPClient:
         # Get all available tools from all servers
         available_tools = await self.list_all_tools()
         logger.info(f"Found {len(available_tools)} available tools across all servers")
+        resources = await self.list_all_resources()
+        text_resource_contents = []
+        for resource in resources:
+            resource_content = await self.read_resource(resource["server_id"], resource["uri"])
+            text_resource_contents.extend([content["text"] for content in resource_content if content["text"]])
 
         has_tool_call = True
 
@@ -434,7 +441,7 @@ class MCPClient:
             start_time = time.time()
             # Use the LLMClient to create the streaming generator
             async for chunk_text in self.llm_client.create_streaming_generator(
-                provider_messages, available_tools
+                provider_messages, available_tools, text_resource_contents
             ):
                 yield chunk_text
             logger.info(f"LLM took {time.time() - start_time} seconds to complete")
@@ -522,3 +529,85 @@ class MCPClient:
             Platform-specific message split token
         """
         return self.llm_client.get_message_split_token()
+
+    async def list_all_resources(self) -> List[Dict[str, Any]]: 
+        """
+        List all available resources from all connected servers
+
+        Returns:
+            List of resources provided by the server
+        """
+        resources = []
+        try:
+            for server_id in self.sessions.keys():
+                session = self.sessions[server_id]
+                response = await session.list_resources()
+                
+                # Handle direct resources
+                if hasattr(response, "resources"):
+                    resources.extend([
+                        {
+                            "uri": resource.uri,
+                            "name": resource.name,
+                            "description": resource.description if hasattr(resource, "description") else None,
+                            "mimeType": resource.mimeType if hasattr(resource, "mimeType") else None,
+                            "server_id": server_id,
+                        }
+                        for resource in response.resources
+                    ])
+                # TODO: Handle resource templates
+            return resources
+        except Exception as e:
+            logger.error(f"Error listing resources from server {server_id}: {str(e)}")
+            return []
+
+    async def read_resource(self, server_id: str, uri: str) -> List[Dict[str, Any]]:
+        """
+        Read a specific resource by its URI from a server
+
+        Args:
+            server_id: The ID of the server to read the resource from
+            uri: URI of the resource to read
+
+        Returns:
+            List of resource contents
+        """
+        if server_id not in self.sessions:
+            logger.error(f"Cannot read resource: Server {server_id} not found")
+            return []
+
+        try:
+            session = self.sessions[server_id]
+            response = await session.read_resource(uri)
+            
+            # Process the resource contents
+            contents = []
+            
+            for content in response.contents:
+                content_data = {
+                    "uri": content.uri,
+                    "mimeType": content.mimeType if hasattr(content, "mimeType") else None,
+                }
+                
+                # Handle text or binary content
+                if hasattr(content, "text") and content.text is not None:
+                    content_data["text"] = content.text
+                elif hasattr(content, "blob") and content.blob is not None:
+                    # Handle binary content
+                    if content.mimeType and "application/pdf" in content.mimeType.lower():
+                        # Convert base64 blob to bytes
+                        pdf_bytes = base64.b64decode(content.blob)
+                        # Use markitdown to convert PDF to markdown text
+                        markdown_text = markitdown.markitdown(pdf_bytes)
+                        content_data["text"] = markdown_text
+                    else:
+                        pass
+                    
+                contents.append(content_data)
+                
+            logger.info(f"Successfully read resource {uri} from server {server_id}")
+            return contents
+            
+        except Exception as e:
+            logger.error(f"Error reading resource {uri} from server {server_id}: {str(e)}")
+            return []

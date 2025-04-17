@@ -10,3 +10,4 @@ uvicorn>=0.34.0
 slack-bolt>=1.23.0
 httpx>=0.28.1
 openai>=1.72.0
+markitdown[all]

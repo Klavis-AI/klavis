@@ -40,7 +40,7 @@ class OpenAI(BaseLLM):
         self.max_tokens = 4000
 
     async def create_streaming_generator(
-        self, messages: list, available_tools: list
+        self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create an OpenAI streaming generator with the given messages and tools.
@@ -48,7 +48,7 @@ class OpenAI(BaseLLM):
         Args:
             messages: Message history (mutable, will be updated with assistant response).
             available_tools: List of available tools in OpenAI format.
-
+            resources: List of resources to be used in the conversation.
         Yields:
             Text chunks from the streaming response.
         """
@@ -63,6 +63,8 @@ class OpenAI(BaseLLM):
         }
 
         system_message_content = self.platform_config.get("system_message")
+        if resources:
+            system_message_content += "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n" + "\n\n".join(resources)
         if system_message_content and not messages[0].get("role") == "system":
             request_params["messages"].insert(
                 0, {"role": "system", "content": system_message_content}

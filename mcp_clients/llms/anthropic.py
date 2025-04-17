@@ -32,7 +32,7 @@ class Anthropic(BaseLLM):
         self.max_tokens = 4000  # Default max tokens
 
     async def create_streaming_generator(
-        self, messages: list, available_tools: list
+        self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create a streaming generator with the given messages and tools
@@ -40,18 +40,23 @@ class Anthropic(BaseLLM):
         Args:
             messages: Message history
             available_tools: List of available tools
-
+            resources: List of available resources
         Yields:
             Text chunks from the streaming response
         """
         logger.info(f"Creating streaming request to Claude with model: {self.model}")
 
         # Prepare request parameters
-        system_message = None
+        system_message = ""
 
         # Add system message if operating in a specific platform context
         if self.platform and self.platform_config.get("system_message"):
             system_message = self.platform_config["system_message"]
+        if resources:
+            system_message += (
+                "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n"
+                + "\n\n".join(resources)
+            )
 
         # Create request parameters
         request_params = {
@@ -341,9 +346,9 @@ class Anthropic(BaseLLM):
                         }
                     )
                 if content.type == ContentType.FILE:
-                    text = f"\nUser uploaded a file as attachment. The url is \"{content.url}\"."
+                    text = f'\nUser uploaded a file as attachment. The url is "{content.url}".'
                     if content.auth_token:
-                        text += f"The auth token is \"{content.auth_token}\"."
+                        text += f'The auth token is "{content.auth_token}".'
                     anthropic_message["content"].append(
                         {
                             "type": "text",
