@@ -44,11 +44,11 @@ For detailed MCP server setup instructions, please refer to the README file unde
 - [**GitHub**](mcp_servers/github/README.md): Perform GitHub repository operations
 - [**Markitdown**](mcp_servers/markitdown/README.md): Markdown conversion tool
 - [**Postgres**](mcp_servers/postgres/README.md): For PostgreSQL database operations
-- [**Report Generation**](mcp_servers/report_generation/README.md): Create professional reports from various data sources
+- [**Report Generation**](mcp_servers/report_generation/README.md): Create professional web reports from user query
 - [**Resend**](mcp_servers/resend/README.md): For email services
 - [**Slack**](mcp_servers/slack/README.md): For Slack API integration
 - [**Supabase**](mcp_servers/supabase/README.md): For database operations
-- [**YouTube**](mcp_servers/youtube/README.md): Download, analyze, and transform YouTube content
+- [**YouTube**](mcp_servers/youtube/README.md): Extract and convert YouTube video information
 
 ## 🏗️ Architecture
 
