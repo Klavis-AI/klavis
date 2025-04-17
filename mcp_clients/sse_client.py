@@ -150,8 +150,9 @@ async def run_session(read_stream, write_stream):
         await client.chat_loop()
 
 
-async def main(command_or_url: str, args: list[str], env: list[tuple[str, str]]):
-    env_dict = dict(env)
+async def main(command_or_url: str, args: list[str]):
+    # Use an empty dict for env
+    env_dict = {}
 
     if urlparse(command_or_url).scheme in ("http", "https"):
         # Use SSE client for HTTP(S) URLs
@@ -172,7 +173,7 @@ def cli():
     parser.add_argument("args", nargs="*", help="Additional arguments")
 
     args = parser.parse_args()
-    anyio.run(partial(main, args.command_or_url, args.args, args.env), backend="trio")
+    anyio.run(partial(main, args.command_or_url, args.args), backend="trio")
 
 
 if __name__ == "__main__":

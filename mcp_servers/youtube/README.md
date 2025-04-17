@@ -2,17 +2,33 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that retrieves transcripts/subtitles for a given YouTube video and converts them into Markdown format.
+A Model Context Protocol (MCP) server that retrieves transcripts/subtitles for a given YouTube video and provides video details when transcripts are unavailable.
 
-This server utilizes the `FastMCP` framework for handling MCP requests and `MarkItDown` for processing the YouTube video content.
+This server utilizes the `FastMCP` framework for handling MCP requests and the YouTube API.
 
 ## Features
 
 *   Provides a simple MCP endpoint to get YouTube video transcripts.
 *   Accepts a YouTube video URL as input.
-*   Returns the transcript/subtitles in Markdown format.
-*   Built with Python using `FastMCP` and `MarkItDown`.
+*   Returns the transcript/subtitles when available.
+*   Falls back to video details when transcript is unavailable.
+*   Supports proxy configuration for transcript retrieval.
+*   Built with Python using `FastMCP`.
 *   Can be run easily using Docker or a standard Python environment.
+
+## Environment Variables
+
+The following environment variables are used by the server:
+
+*   **Required**:
+    *   `YOUTUBE_API_KEY`: Your YouTube Data API key (required for fetching video details).
+
+*   **Optional**:
+    *   `YOUTUBE_MCP_SERVER_PORT`: Port for the MCP server (defaults to 5000).
+    *   `WEBSHARE_PROXY_USERNAME`: Username for Webshare proxy (optional, for circumventing regional restrictions).
+    *   `WEBSHARE_PROXY_PASSWORD`: Password for Webshare proxy (optional, for circumventing regional restrictions).
+
+For more information on using Webshare with YouTube Transcript API, refer to: [YouTube Transcript API - Using Webshare](https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#using-webshare)
 
 ## Running Locally
 
@@ -22,10 +38,15 @@ You can run this server locally using either Docker (recommended) or a Python vi
 
 *   **Docker:** If using the Docker method.
 *   **Python:** Python 3.11+ if using the virtual environment method.
-*   **`.env` File:** Create a file named `.env` in the root of the `klavis` project directory. While the current server code doesn't explicitly require environment variables, the underlying libraries (like `MarkItDown`) might need API keys or configurations in the future. The Docker setup copies this file, and it's good practice to have it for the virtual environment setup as well.
+*   **`.env` File:** Create a file named `.env` in the root of the `klavis` project directory with the required environment variables.
     ```bash
-    # Example .env content (add necessary variables if required)
-    # SOME_API_KEY=your_api_key_here
+    # Required
+    YOUTUBE_API_KEY=your_youtube_api_key_here
+    
+    # Optional
+    YOUTUBE_MCP_SERVER_PORT=5000
+    WEBSHARE_PROXY_USERNAME=your_proxy_username
+    WEBSHARE_PROXY_PASSWORD=your_proxy_password
     ```
 
 ### Using Docker (Recommended)
@@ -64,13 +85,8 @@ The server should now be running and accessible at `http://localhost:5000`.
     *   **Windows:** `venv\Scripts\activate`
 
 4.  **Install Dependencies:**
-    The server relies on local packages (`mcp`, `markitdown`) and packages listed in `requirements.txt`. Install them in editable mode first, then the requirements:
+    The server relies on packages listed in `requirements.txt`:
     ```bash
-    # Install local packages (ensure they are set up for installation e.g., with setup.py)
-    pip install -e mcp
-    pip install -e markitdown
-
-    # Install specific requirements for the youtube server
     pip install -r mcp_servers/youtube/requirements.txt
     ```
 
@@ -90,7 +106,12 @@ Once the server is running (either via Docker or Python environment), it listens
 
 You can interact with it using an MCP client or tool. The available tool is:
 
-*   `convert_youtube_to_markdown`:
-    *   **Description:** Retrieve the transcript/subtitles for a given YouTube video and convert it to markdown.
-    *   **Input Parameter:** `url` (string) - The URL of the YouTube video. Must start with `http` or `https`.
-    *   **Returns:** (string) - The transcript/subtitles in Markdown format.
+* `get_youtube_video_transcript`:
+  * **Description:** Retrieve the transcript/subtitles for a given YouTube video. When transcripts are unavailable, it will automatically fall back to fetching video details.
+  * **Input Parameter:** `url` (string) - The URL of the YouTube video (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+  * **Returns:** (Dict) - Contains the transcript data when available, or video details with an error message when transcript is unavailable.
+  * **Supported URL Formats:**
+    * Standard: `youtube.com/watch?v=VIDEO_ID`
+    * Short: `youtu.be/VIDEO_ID`
+    * Embedded: `youtube.com/embed/VIDEO_ID`
+    * Shorts: `youtube.com/shorts/VIDEO_ID`
