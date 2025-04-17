@@ -215,7 +215,7 @@ class BaseBot(ABC):
 
         if USE_PRODUCTION_DB:
             conversation_result = await database.find_or_create_conversation(
-                conversation_id=context.conversation_id if context.conversation_id else None,
+                conversation_id=context.conversation_id if hasattr(context, "conversation_id") else None,
                 channel_id=context.get_channel_id(),
                 mcp_client_id=context.mcp_client_id,
                 thread_id=context.get_thread_id(),
