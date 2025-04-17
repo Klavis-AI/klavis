@@ -186,6 +186,8 @@ class WebBot(BaseBot):
         if USE_PRODUCTION_DB:
             # Get the messages from the conversation
             messages = conversation.messages
+            
+            messages.append(ChatMessage(role=MessageRole.USER, content=[TextContent(text=context.user_message)]))
         
             # Limit the number of messages, considering the tool calls, we multiply by 3
             return messages[-limit*3:] if len(messages) > limit*3 else messages
