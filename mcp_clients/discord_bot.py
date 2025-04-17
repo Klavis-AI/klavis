@@ -183,72 +183,85 @@ class DiscordBot(BaseBot):
             return
 
         # Process the message with the lock acquired
-        async with self.user_locks[user_id]:
+        try:
+            # Add timeout for the processing block while lock is held
+            async with asyncio.timeout(300): 
+                async with self.user_locks[user_id]:
 
-            verification_result = await self.verify_user(context)
+                    verification_result = await self.verify_user(context)
 
-            if not verification_result["connected"]:
-                if not is_dm:
-                    # Send message in the current context
-                    await self.send_message(
-                        context,
-                        f"You need to link your {context.platform_name} account with our website to use the AI assistant features. I have sent you a Direct Message to link your account.",
-                    )
-                
-                try:
-                    await message.author.send(
-                        f"You need to link your {context.platform_name} account with our website to use the AI assistant features using the login button below.",
-                        view=self.create_login_view(message.author.name, user_id),
-                    )
-                except discord.Forbidden:
-                    await self.send_message(
-                        context,
-                        f"Your DMs are disabled. Use the login button below to link your account.",
-                        view=self.create_login_view(message.author.name, user_id),
-                    )
-                except Exception as e:
-                    logger.error(f"Error sending DM: {e}", exc_info=True)
-                
-                return
+                    if not verification_result["connected"]:
+                        if not is_dm:
+                            # Send message in the current context
+                            await self.send_message(
+                                context,
+                                f"You need to link your {context.platform_name} account with our website to use the AI assistant features. I have sent you a Direct Message to link your account.",
+                            )
+                        
+                        try:
+                            await message.author.send(
+                                f"You need to link your {context.platform_name} account with our website to use the AI assistant features using the login button below.",
+                                view=self.create_login_view(message.author.name, user_id),
+                            )
+                        except discord.Forbidden:
+                            await self.send_message(
+                                context,
+                                f"Your DMs are disabled. Use the login button below to link your account.",
+                                view=self.create_login_view(message.author.name, user_id),
+                            )
+                        except Exception as e:
+                            logger.error(f"Error sending DM: {e}", exc_info=True)
+                        
+                        return
 
-            context.mcp_client_id = verification_result["mcp_client_id"]
-            context.llm_id = verification_result["llm_id"]
+                    context.mcp_client_id = verification_result["mcp_client_id"]
+                    context.llm_id = verification_result["llm_id"]
 
-            server_urls = await self.get_server_urls(context)
+                    server_urls = await self.get_server_urls(context)
 
-            if not server_urls:
-                await self.send_message(
-                    context,
-                    "Not connected to any MCP server. Features are limited.",
-                    view=self.create_config_view(),
-                )
-                # Don't return here to allow processing with 0 MCP server
-            
-            usage_under_limit = await self.check_and_update_usage_limit(context)
-            if not usage_under_limit:
-                await self.send_message(
-                    context,
-                    "You have reached your usage limit. Please upgrade your account to continue.",
-                )
-                return
+                    if not server_urls:
+                        await self.send_message(
+                            context,
+                            "Not connected to any MCP server. Features are limited.",
+                            view=self.create_config_view(),
+                        )
+                        # Don't return here to allow processing with 0 MCP server
+                    
+                    usage_under_limit = await self.check_and_update_usage_limit(context)
+                    if not usage_under_limit:
+                        await self.send_message(
+                            context,
+                            "You have reached your usage limit. Please upgrade your account to continue.",
+                        )
+                        return
 
-            # Process mentions if the bot is mentioned in a server
-            if is_dm:
-                content = message.content.strip()
-                if content:
-                    # Process the message content
-                    await self.process_query(
-                        query=content, context=context, server_urls=server_urls
-                    )
-            else:
-                # Extract the query (remove the mention)
-                content = message.content.replace(
-                    f"<@{self.client.user.id}>", ""
-                ).strip()
-                if content:
-                    await self.process_query(
-                        query=content, context=context, server_urls=server_urls
-                    )
+                    # Process mentions if the bot is mentioned in a server
+                    if is_dm:
+                        content = message.content.strip()
+                        if content:
+                            # Process the message content
+                            await self.process_query(
+                                query=content, context=context, server_urls=server_urls
+                            )
+                    else:
+                        # Extract the query (remove the mention)
+                        content = message.content.replace(
+                            f"<@{self.client.user.id}>", ""
+                        ).strip()
+                        if content:
+                            await self.process_query(
+                                query=content, context=context, server_urls=server_urls
+                            )
+        except asyncio.TimeoutError:
+            logger.warning(f"Processing timed out for user {user_id} after 300 seconds. Lock released.")
+            # Ensure the lock is released if timeout occurs (async with handles this)
+            # Inform the user about the timeout
+            await self.send_message(
+                context,
+                "The previous operation took too long and timed out. Please try again.",
+            )
+        # Lock is released automatically when exiting the 'async with' block,
+        # either normally or due to an exception (like TimeoutError).
 
     async def on_member_join(self, member):
         """Event handler when a new member joins the server"""
