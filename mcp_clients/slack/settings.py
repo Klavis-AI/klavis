@@ -28,7 +28,7 @@ class SlackSettings(BaseSettings):
     # Message configuration - Mark these as ClassVar
     MAX_MESSAGE_LENGTH: ClassVar[int] = 3000
     MAX_BLOCK_MESSAGE_LENGTH: ClassVar[int] = 2000
-    STREAMING_TIMEOUT: ClassVar[float] = 300.0
+    STREAMING_TIMEOUT: ClassVar[float] = 200.0
     STREAMING_SLEEP_DELAY: ClassVar[float] = 0.05
 
     # UI configuration - Mark this as ClassVar

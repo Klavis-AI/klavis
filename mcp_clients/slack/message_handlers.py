@@ -201,7 +201,7 @@ def register_message_handlers(app, bot):
         
         # Process the message with the lock acquired
         try:
-            async with asyncio.timeout(300), bot.user_locks[user_id]:
+            async with asyncio.timeout(200), bot.user_locks[user_id]:
                 # Create Slack context with the bot token
                 slack_context = SlackBotContext(
                     platform_name="slack",
@@ -292,7 +292,7 @@ def register_message_handlers(app, bot):
                         await mcp_client.cleanup()
 
         except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 300 seconds. Lock released.")
+            logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
             try:
                 await client.chat_postMessage(
                     channel=channel_id,
@@ -346,7 +346,7 @@ def register_message_handlers(app, bot):
             logger.info(f"---Received DM from user {user_id} in channel {channel_id}: {text}")
             try:
                 # Process the message with the lock acquired
-                async with asyncio.timeout(300), bot.user_locks[user_id]:
+                async with asyncio.timeout(200), bot.user_locks[user_id]:
                     # Create Slack context with the bot token
                     slack_context = SlackBotContext(
                         platform_name="slack",
@@ -428,7 +428,7 @@ def register_message_handlers(app, bot):
                             logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {text}")
                             await mcp_client.cleanup()
             except asyncio.TimeoutError:
-                logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 300 seconds. Lock released.")
+                logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
                 try:
                     await client.chat_postMessage(
                         channel=channel_id,

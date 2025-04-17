@@ -29,7 +29,7 @@ class Anthropic(BaseLLM):
         super().__init__(message_format=LLMMessageFormat.ANTHROPIC)
         self.anthropic_client = AsyncAnthropic()
         self.model = model or "claude-3-5-sonnet-20241022"  # Default model
-        self.max_tokens = 4000  # Default max tokens
+        self.max_tokens = self.config.max_tokens  # Default max tokens
 
     async def create_streaming_generator(
         self, messages: list, available_tools: list, resources: list = None

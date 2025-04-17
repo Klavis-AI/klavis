@@ -144,7 +144,7 @@ class WebBot(BaseBot):
 
         async def stream_generator():
             try:
-                async with asyncio.timeout(300):
+                async with asyncio.timeout(200):
                     async for chunk in mcp_client.process_query_stream(
                         messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
                     ):
@@ -238,7 +238,7 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
     # Process with a lock
     async def process_with_lock():
         try:
-            async with asyncio.timeout(300), web_bot.user_locks[user_id]:
+            async with asyncio.timeout(200), web_bot.user_locks[user_id]:
                 try:
                     # Verify user
                     verification_result = await web_bot.verify_user(context)
@@ -301,7 +301,7 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
                         media_type="text/event-stream"
                     )
         except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} after 300 seconds. Lock released.")
+            logger.warning(f"Processing timed out for user {user_id} after 200 seconds. Lock released.")
             return StreamingResponse(
                 content=[f"data: {json.dumps({'type': 'error', 'content': 'Processing timed out'})}\n\n"],
                 media_type="text/event-stream"

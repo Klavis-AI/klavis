@@ -37,7 +37,7 @@ class OpenAI(BaseLLM):
         super().__init__()
         self.openai_client = AsyncOpenAI(api_key=api_key, base_url=base_url)
         self.model = model or "gpt-4o-mini"
-        self.max_tokens = 4000
+        self.max_tokens = self.config.max_tokens
 
     async def create_streaming_generator(
         self, messages: list, available_tools: list, resources: list = None

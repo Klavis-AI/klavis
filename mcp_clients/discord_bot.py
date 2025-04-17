@@ -186,7 +186,7 @@ class DiscordBot(BaseBot):
         # Process the message with the lock acquired
         try:
             # Add timeout for the processing block while lock is held
-            async with asyncio.timeout(300), self.user_locks[user_id]:
+            async with asyncio.timeout(200), self.user_locks[user_id]:
                 verification_result = await self.verify_user(context)
 
                 if not verification_result["connected"]:
@@ -253,7 +253,7 @@ class DiscordBot(BaseBot):
             finally:
                 await mcp_client.cleanup()
         except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} after 300 seconds. Lock released.")
+            logger.warning(f"Processing timed out for user {user_id} after 200 seconds. Lock released.")
             # Ensure the lock is released if timeout occurs (async with handles this)
             # Inform the user about the timeout
             await self.send_message(
@@ -347,7 +347,7 @@ class DiscordBot(BaseBot):
             buffer = ""
             async with (
                 context.thread.typing() if context.thread else context.channel.typing(),
-                asyncio.timeout(300.0),
+                asyncio.timeout(200.0),
             ):
                 async for chunk in mcp_client.process_query_stream(
                     messages_history,

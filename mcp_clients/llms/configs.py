@@ -18,5 +18,5 @@ class BaseLLMConfig(BaseModel):
         default=0, ge=0, le=2, description="Randomness in generation (0 to 2)."
     )
     max_tokens: int = Field(
-        default=3000, gt=0, description="The maximum number of tokens to generate."
+        default=4000, gt=0, description="The maximum number of tokens to generate."
     )
