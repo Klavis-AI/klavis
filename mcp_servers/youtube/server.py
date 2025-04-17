@@ -46,6 +46,16 @@ else:
     logger.info("Initializing YouTubeTranscriptApi without proxy")
     youtube_transcript_api = YouTubeTranscriptApi()
 
+def _format_time(seconds: float) -> str:
+    """Converts seconds into HH:MM:SS or MM:SS format."""
+    total_seconds = int(seconds)
+    minutes, sec = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours > 0:
+        return f"{hours:02d}:{minutes:02d}:{sec:02d}"
+    else:
+        return f"{minutes:02d}:{sec:02d}"
+
 def _extract_video_id(url: str) -> str:
     """
     Extract the YouTube video ID from various URL formats.
@@ -178,6 +188,7 @@ async def get_youtube_video_transcript(
 ) -> Dict[str, Any]:
     """
     Retrieve the transcript or video details for a given YouTube video.
+    The 'start' time in the transcript is formatted as MM:SS or HH:MM:SS.
     """
     try:
         video_id = _extract_video_id(url)
@@ -185,11 +196,17 @@ async def get_youtube_video_transcript(
         
         try:
             # Use the initialized API with or without proxy
-            transcript = youtube_transcript_api.fetch(video_id).to_raw_data()
+            raw_transcript = youtube_transcript_api.fetch(video_id).to_raw_data()
             
+            # Format the start time for each segment
+            formatted_transcript = [
+                {**segment, 'start': _format_time(segment['start'])} 
+                for segment in raw_transcript
+            ]
+
             return {
                 "video_id": video_id,
-                "transcript": transcript
+                "transcript": formatted_transcript
             }
         except Exception as transcript_error:
             logger.warning(f"Error fetching transcript: {transcript_error}. Falling back to video details.")
