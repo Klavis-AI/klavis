@@ -144,20 +144,21 @@ class WebBot(BaseBot):
 
         async def stream_generator():
             try:
-                async for chunk in mcp_client.process_query_stream(
-                    messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
-                ):
-                    # Check if this is a special message
-                    if "<special>" in chunk:
-                        # Extract the special message content
-                        special_content = chunk.split("<special>")[1].strip()
-                        yield f"data: {json.dumps({'type': 'special', 'content': special_content})}\n\n"
-                    else:
-                        # Regular message
-                        yield f"data: {json.dumps({'type': 'message', 'content': chunk})}\n\n"
+                async with asyncio.timeout(300):
+                    async for chunk in mcp_client.process_query_stream(
+                        messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
+                    ):
+                        # Check if this is a special message
+                        if "<special>" in chunk:
+                            # Extract the special message content
+                            special_content = chunk.split("<special>")[1].strip()
+                            yield f"data: {json.dumps({'type': 'special', 'content': special_content})}\n\n"
+                        else:
+                            # Regular message
+                            yield f"data: {json.dumps({'type': 'message', 'content': chunk})}\n\n"
 
-                # Send done event to signal end of stream
-                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                    # Send done event to signal end of stream
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
             except Exception as e:
                 logger.error(f"Error processing query stream: {e}", exc_info=True)
