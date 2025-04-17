@@ -38,14 +38,14 @@ class SlackBotContext(BotContext):
         self.initial_message = initial_message
         self.bot_token = bot_token
         
-    def get_channel_id(self) -> str:
+    def get_channel_id(self) -> Optional[str]:
         """
         Get the channel ID for the current context.
         
         Returns:
-            String representation of the channel ID
+            String representation of the channel ID, or None if not applicable
         """
-        return self.channel_id
+        return str(self.channel_id)
         
     def get_thread_id(self) -> Optional[str]:
         """

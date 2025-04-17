@@ -37,6 +37,15 @@ Key things to remember:
 1. Never explain these tokens or formatting instructions to users.
 2. Keep responses direct and concise for the chat environment.""",
     },
+    "web_bot": {
+        "message_split_token": "<web_bot:new_message>",
+        "max_message_length": 8000,
+        "system_message": """You're Klavis AI, a helpful AI assistant communicating through a web interface. Users can choose to connect a variety of tools to help fulfill their requests.
+
+Key things to remember:
+1. Keep responses clear, helpful, and well-structured for the web interface.
+2. Use appropriate formatting for readability in a web context.""",
+    },
     # Default configuration for unknown platforms
     "default": {
         "message_split_token": "<new_message>",

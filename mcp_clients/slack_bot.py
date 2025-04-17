@@ -14,7 +14,7 @@ from slack_sdk.web.async_client import AsyncWebClient
 import uvicorn
 
 from base_bot import BaseBot
-from llms import ChatMessage, MessageRole, TextContent, FileContent
+from llms import ChatMessage, MessageRole, TextContent, FileContent, Conversation
 from mcp_client import MCPClient
 from slack.context import SlackBotContext
 from slack.event_routes import LoggingMiddleware, setup_http_routes
@@ -414,7 +414,7 @@ class SlackBot(BaseBot):
             logger.error(f"Error processing query: {e}", exc_info=True)
             return await self.send_message(context, f"Error processing query: {str(e)}")
 
-    async def get_messages_history(self, slack_context: SlackBotContext, limit: int = 6) -> List[ChatMessage]:
+    async def get_messages_history(self, conversation: Conversation, slack_context: SlackBotContext, limit: int = 6) -> List[ChatMessage]:
         """
         Get the previous messages for the conversation.
         
