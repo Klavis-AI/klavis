@@ -201,96 +201,95 @@ def register_message_handlers(app, bot):
         
         # Process the message with the lock acquired
         try:
-            async with asyncio.timeout(300):
-                async with bot.user_locks[user_id]:
-                    # Create Slack context with the bot token
-                    slack_context = SlackBotContext(
-                        platform_name="slack",
-                        user_id=user_id,
-                        channel_id=channel_id,
-                        thread_ts=thread_ts,
-                        user_message=event,
-                        bot_token=bot_token
-                    )
+            async with asyncio.timeout(300), bot.user_locks[user_id]:
+                # Create Slack context with the bot token
+                slack_context = SlackBotContext(
+                    platform_name="slack",
+                    user_id=user_id,
+                    channel_id=channel_id,
+                    thread_ts=thread_ts,
+                    user_message=event,
+                    bot_token=bot_token
+                )
 
-                    verification_result = await bot.verify_user(slack_context)
+                verification_result = await bot.verify_user(slack_context)
 
-                    if not verification_result["connected"]:
-                        await remove_loading_reaction(client, channel_id, message_ts)
-                        # Get user information to pass to login blocks
-                        try:
-                            user_info = await client.users_info(user=user_id)
-                            if user_info["ok"]:
-                                username = user_info["user"].get("real_name", user_id)
-                            else:
-                                username = user_id
-                        except Exception as e:
-                            logger.error(f"Error getting user info: {e}")
+                if not verification_result["connected"]:
+                    await remove_loading_reaction(client, channel_id, message_ts)
+                    # Get user information to pass to login blocks
+                    try:
+                        user_info = await client.users_info(user=user_id)
+                        if user_info["ok"]:
+                            username = user_info["user"].get("real_name", user_id)
+                        else:
                             username = user_id
-                        
-                        # Get team ID from context
-                        team_id = context.get("team_id")
-                        
-                        try:
-                            # Send login blocks as a DM to the user
-                            await client.chat_postMessage(
-                                channel=user_id,  # Sending to user's DM
-                                text="Please login to use the Klavis.ai bot",
-                                blocks=create_login_blocks(username, user_id, team_id)
-                            )
+                    except Exception as e:
+                        logger.error(f"Error getting user info: {e}")
+                        username = user_id
+                    
+                    # Get team ID from context
+                    team_id = context.get("team_id")
+                    
+                    try:
+                        # Send login blocks as a DM to the user
+                        await client.chat_postMessage(
+                            channel=user_id,  # Sending to user's DM
+                            text="Please login to use the Klavis.ai bot",
+                            blocks=create_login_blocks(username, user_id, team_id)
+                        )
 
-                            # Notify in the thread that login instructions were sent via DM
-                            await client.chat_postMessage(
-                                channel=channel_id,
-                                thread_ts=thread_ts,
-                                text="I've sent you instructions on how to login via direct message. Please check your DMs to connect."
-                            )
-                        except Exception as e:
-                            logger.error(f"Error sending login message: {e}")
-                        return
-
-                    slack_context.mcp_client_id = verification_result["mcp_client_id"]
-                    slack_context.llm_id = verification_result["llm_id"]
-
-                    server_urls = await bot.get_server_urls(slack_context)
-                    if not server_urls:
-                        team_id = context.get("team_id")
-                        mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
-                        
+                        # Notify in the thread that login instructions were sent via DM
                         await client.chat_postMessage(
                             channel=channel_id,
                             thread_ts=thread_ts,
-                            blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
+                            text="I've sent you instructions on how to login via direct message. Please check your DMs to connect."
                         )
-                        # Don't return here to allow processing with 0 MCP server
-                        
-                    if clean_text:
-                        usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
-                        if not usage_under_limit:
-                            await bot.send_message(
-                                slack_context,
-                                "You have reached your usage limit. Please upgrade your account to continue.",
-                            )
-                            await remove_loading_reaction(client, channel_id, message_ts)
-                            return
-                            
-                        try:
-                            messages_history = await bot.get_messages_history(slack_context)
-                            mcp_client = await bot.initialize_mcp_client(
-                                context=slack_context, server_urls=server_urls
-                            )
+                    except Exception as e:
+                        logger.error(f"Error sending login message: {e}")
+                    return
 
-                            # Process the query and return the result from the streaming implementation
-                            await bot.process_query_with_streaming(
-                                mcp_client, messages_history, slack_context
-                            )
-                        except Exception as e:
-                            logger.error(f"Error processing query: {e}", exc_info=True)
-                            await bot.send_message(slack_context, f"Error processing query: {str(e)}")
-                        finally:
-                            await remove_loading_reaction(client, channel_id, message_ts)
-                            logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {clean_text}")
-                            await mcp_client.cleanup()
+                slack_context.mcp_client_id = verification_result["mcp_client_id"]
+                slack_context.llm_id = verification_result["llm_id"]
+
+                server_urls = await bot.get_server_urls(slack_context)
+                if not server_urls:
+                    team_id = context.get("team_id")
+                    mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
+                    
+                    await client.chat_postMessage(
+                        channel=channel_id,
+                        thread_ts=thread_ts,
+                        blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
+                    )
+                    # Don't return here to allow processing with 0 MCP server
+                    
+                if clean_text:
+                    usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
+                    if not usage_under_limit:
+                        await bot.send_message(
+                            slack_context,
+                            "You have reached your usage limit. Please upgrade your account to continue.",
+                        )
+                        await remove_loading_reaction(client, channel_id, message_ts)
+                        return
+                        
+                    try:
+                        mcp_client = await bot.initialize_mcp_client(
+                            context=slack_context, server_urls=server_urls
+                        )
+                        messages_history = await bot.get_messages_history(mcp_client.conversation, slack_context)
+
+                        # Process the query and return the result from the streaming implementation
+                        await bot.process_query_with_streaming(
+                            mcp_client, messages_history, slack_context
+                        )
+                    except Exception as e:
+                        logger.error(f"Error processing query: {e}", exc_info=True)
+                        await bot.send_message(slack_context, f"Error processing query: {str(e)}")
+                    finally:
+                        await remove_loading_reaction(client, channel_id, message_ts)
+                        logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {clean_text}")
+                        await mcp_client.cleanup()
 
         except asyncio.TimeoutError:
             logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 300 seconds. Lock released.")
@@ -345,76 +344,100 @@ def register_message_handlers(app, bot):
                 return
             
             logger.info(f"---Received DM from user {user_id} in channel {channel_id}: {text}")
-            
-            # Process the message with the lock acquired
-            async with bot.user_locks[user_id]:
-                # Create Slack context with the bot token
-                slack_context = SlackBotContext(
-                    platform_name="slack",
-                    user_id=user_id,
-                    channel_id=channel_id,
-                    thread_ts=thread_ts,
-                    user_message=event,
-                    bot_token=bot_token
-                )
+            try:
+                # Process the message with the lock acquired
+                async with asyncio.timeout(300), bot.user_locks[user_id]:
+                    # Create Slack context with the bot token
+                    slack_context = SlackBotContext(
+                        platform_name="slack",
+                        user_id=user_id,
+                        channel_id=channel_id,
+                        thread_ts=thread_ts,
+                        user_message=event,
+                        bot_token=bot_token
+                    )
 
-                verification_result = await bot.verify_user(slack_context)
+                    verification_result = await bot.verify_user(slack_context)
 
-                if not verification_result["connected"]:
-                    await remove_loading_reaction(client, channel_id, message_ts)
-                    # Get user information to pass to login blocks
-                    try:
-                        user_info = await client.users_info(user=user_id)
-                        if user_info["ok"]:
-                            username = user_info["user"].get("real_name", user_id)
-                        else:
+                    if not verification_result["connected"]:
+                        await remove_loading_reaction(client, channel_id, message_ts)
+                        # Get user information to pass to login blocks
+                        try:
+                            user_info = await client.users_info(user=user_id)
+                            if user_info["ok"]:
+                                username = user_info["user"].get("real_name", user_id)
+                            else:
+                                username = user_id
+                        except Exception as e:
+                            logger.error(f"Error getting user info: {e}")
                             username = user_id
-                    except Exception as e:
-                        logger.error(f"Error getting user info: {e}")
-                        username = user_id
-                    
-                    # Get team ID from context
-                    team_id = context.get("team_id")
-                    
-                    # Use create_login_blocks function to generate blocks with proper login URL
-                    await client.chat_postMessage(
-                        channel=channel_id,
-                        thread_ts=thread_ts,
-                        text="Please login to use the Klavis.ai bot",
-                        blocks=create_login_blocks(username, user_id, team_id)
-                    )
-                    return
-
-                slack_context.mcp_client_id = verification_result["mcp_client_id"]
-                slack_context.llm_id = verification_result["llm_id"]
-
-                server_urls = await bot.get_server_urls(slack_context)
-                if not server_urls:
-                    team_id = context.get("team_id")
-                    mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
-                    
-                    await client.chat_postMessage(
-                        channel=channel_id,
-                        thread_ts=thread_ts,
-                        blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
-                    )
-                    # Don't return here to allow processing with 0 MCP server
-                
-                # Process the message content
-                if text:
-                    usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
-                    if not usage_under_limit:
-                        await bot.send_message(
-                            slack_context,
-                            "You have reached your usage limit. Please upgrade your account to continue.",
-                        )
-                        await remove_loading_reaction(client, channel_id, message_ts)
-                        return
                         
-                    try:
-                        await bot.process_query(
-                            query=text, context=slack_context, server_urls=server_urls
+                        # Get team ID from context
+                        team_id = context.get("team_id")
+                        
+                        # Use create_login_blocks function to generate blocks with proper login URL
+                        await client.chat_postMessage(
+                            channel=channel_id,
+                            thread_ts=thread_ts,
+                            text="Please login to use the Klavis.ai bot",
+                            blocks=create_login_blocks(username, user_id, team_id)
                         )
-                    finally:
-                        await remove_loading_reaction(client, channel_id, message_ts)
-                        logger.info(f" --- Completed processing DM query from user {user_id} in channel {channel_id}: {text}")
+                        return
+
+                    slack_context.mcp_client_id = verification_result["mcp_client_id"]
+                    slack_context.llm_id = verification_result["llm_id"]
+
+                    server_urls = await bot.get_server_urls(slack_context)
+                    if not server_urls:
+                        team_id = context.get("team_id")
+                        mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
+                        
+                        await client.chat_postMessage(
+                            channel=channel_id,
+                            thread_ts=thread_ts,
+                            blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
+                        )
+                        # Don't return here to allow processing with 0 MCP server
+                    
+                    # Process the message content
+                    if text:
+                        usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
+                        if not usage_under_limit:
+                            await bot.send_message(
+                                slack_context,
+                                "You have reached your usage limit. Please upgrade your account to continue.",
+                            )
+                            await remove_loading_reaction(client, channel_id, message_ts)
+                            return
+                            
+                        try:
+                            mcp_client = await bot.initialize_mcp_client(
+                                context=slack_context, server_urls=server_urls
+                            )
+                            messages_history = await bot.get_messages_history(mcp_client.conversation, slack_context)
+
+                            # Process the query and return the result from the streaming implementation
+                            await bot.process_query_with_streaming(
+                                mcp_client, messages_history, slack_context
+                            )
+                        except Exception as e:
+                            logger.error(f"Error processing query: {e}", exc_info=True)
+                            await bot.send_message(slack_context, f"Error processing query: {str(e)}")
+                        finally:
+                            await remove_loading_reaction(client, channel_id, message_ts)
+                            logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {text}")
+                            await mcp_client.cleanup()
+            except asyncio.TimeoutError:
+                logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 300 seconds. Lock released.")
+                try:
+                    await client.chat_postMessage(
+                        channel=channel_id,
+                        text="The previous operation took too long and timed out. Please try again.",
+                        thread_ts=thread_ts
+                    )
+                except Exception as e:
+                    logger.error(f"Error sending timeout message: {e}")
+            finally:
+                # Ensure reaction is removed regardless of timeout or success/failure
+                await remove_loading_reaction(client, channel_id, message_ts)
+                # Lock is released automatically by async with when exiting the block or due to timeout/exception

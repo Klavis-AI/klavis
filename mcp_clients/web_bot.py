@@ -236,69 +236,75 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
     
     # Process with a lock
     async def process_with_lock():
-        mcp_client = None
-        async with web_bot.user_locks[user_id]:
-            try:
-                # Verify user
-                verification_result = await web_bot.verify_user(context)
-                
-                if not verification_result["connected"]:
-                    return StreamingResponse(
-                        content=[f"data: {json.dumps({'type': 'error', 'content': 'User not connected or verified'})}\n\n"],
-                        media_type="text/event-stream"
+        try:
+            async with asyncio.timeout(300), web_bot.user_locks[user_id]:
+                try:
+                    # Verify user
+                    verification_result = await web_bot.verify_user(context)
+                    
+                    if not verification_result["connected"]:
+                        return StreamingResponse(
+                            content=[f"data: {json.dumps({'type': 'error', 'content': 'User not connected or verified'})}\n\n"],
+                            media_type="text/event-stream"
+                        )
+                    
+                    # Set MCP client ID and LLM ID from verification result
+                    context.mcp_client_id = verification_result["mcp_client_id"]
+                    context.llm_id = verification_result["llm_id"]
+                    
+                    # Get server URLs
+                    server_urls = await web_bot.get_server_urls(context)
+                    
+                    if not server_urls:
+                        return StreamingResponse(
+                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Not connected to any MCP server'})}\n\n"],
+                            media_type="text/event-stream"
+                        )
+                    
+                    # Check usage limit
+                    usage_under_limit = await web_bot.check_and_update_usage_limit(context)
+                    if not usage_under_limit:
+                        return StreamingResponse(
+                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"],
+                            media_type="text/event-stream"
+                        )
+                    mcp_client = await web_bot.initialize_mcp_client(
+                        context=context,
+                        server_urls=server_urls
                     )
-                
-                # Set MCP client ID and LLM ID from verification result
-                context.mcp_client_id = verification_result["mcp_client_id"]
-                context.llm_id = verification_result["llm_id"]
-                
-                # Get server URLs
-                server_urls = await web_bot.get_server_urls(context)
-                
-                if not server_urls:
-                    return StreamingResponse(
-                        content=[f"data: {json.dumps({'type': 'error', 'content': 'Not connected to any MCP server'})}\n\n"],
-                        media_type="text/event-stream"
+                    messages_history = await web_bot.get_messages_history(
+                        conversation=mcp_client.conversation,
+                        context=context,
                     )
-                
-                # Check usage limit
-                usage_under_limit = await web_bot.check_and_update_usage_limit(context)
-                if not usage_under_limit:
-                    return StreamingResponse(
-                        content=[f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"],
-                        media_type="text/event-stream"
-                    )
-                mcp_client = await web_bot.initialize_mcp_client(
-                    context=context,
-                    server_urls=server_urls
-                )
-                messages_history = await web_bot.get_messages_history(
-                    conversation=mcp_client.conversation,
-                    context=context,
-                )
 
-                response = await web_bot.process_query_with_streaming(
-                    mcp_client, messages_history, context
-                )
+                    response = await web_bot.process_query_with_streaming(
+                        mcp_client, messages_history, context
+                    )
 
-                background_tasks.add_task(mcp_client.cleanup)
-                
-                # If process_query returned None (e.g., due to setup error handled in base class),
-                # return a generic error response.
-                if response is None:
-                    logger.error("process_query returned None, indicating an error during setup.")
+                    background_tasks.add_task(mcp_client.cleanup)
+                    
+                    # If process_query returned None (e.g., due to setup error handled in base class),
+                    # return a generic error response.
+                    if response is None:
+                        logger.error("process_query returned None, indicating an error during setup.")
+                        return StreamingResponse(
+                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Failed to process query due to internal error'})}\n\n"],
+                            media_type="text/event-stream"
+                        )
+                    
+                    return response
+                except Exception as e:
+                    logger.error(f"Error processing query: {e}", exc_info=True)
                     return StreamingResponse(
-                        content=[f"data: {json.dumps({'type': 'error', 'content': 'Failed to process query due to internal error'})}\n\n"],
+                        content=[f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"],
                         media_type="text/event-stream"
                     )
-                
-                return response
-            except Exception as e:
-                logger.error(f"Error processing query: {e}", exc_info=True)
-                return StreamingResponse(
-                    content=[f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"],
-                    media_type="text/event-stream"
-                )
+        except asyncio.TimeoutError:
+            logger.warning(f"Processing timed out for user {user_id} after 300 seconds. Lock released.")
+            return StreamingResponse(
+                content=[f"data: {json.dumps({'type': 'error', 'content': 'Processing timed out'})}\n\n"],
+                media_type="text/event-stream"
+            )
     
     # Start the processing task but don't wait for it
     return await process_with_lock()
