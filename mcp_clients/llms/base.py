@@ -38,7 +38,7 @@ Key things to remember:
 2. Keep responses direct and concise for the chat environment.""",
     },
     "web_bot": {
-        "message_split_token": "",
+        "message_split_token": "<web_bot:new_message>",
         "max_message_length": 8000,
         "system_message": """You're Klavis AI, a helpful AI assistant communicating through a web interface. Users can choose to connect a variety of tools to help fulfill their requests.
 
