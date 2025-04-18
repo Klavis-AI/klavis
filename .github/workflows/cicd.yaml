@@ -1,0 +1,274 @@
+name: KlavisAi CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  detect-changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      servers_changed: ${{ steps.filter.outputs.servers }}
+      clients_changed: ${{ steps.filter.outputs.clients }}
+      server_modules: ${{ steps.identify-modules.outputs.server_modules }}
+      client_modules: ${{ steps.identify-modules.outputs.client_modules }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for file changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            servers:
+              - 'mcp_servers/**'
+              - '.github/workflows/cicd.yaml'
+            clients:
+              - 'mcp_clients/**'
+              - '.github/workflows/cicd.yaml'
+      
+      - name: Identify changed modules
+        id: identify-modules
+        run: |
+          if [ "${{ steps.filter.outputs.servers }}" == "true" ]; then
+            CHANGED_SERVER_DIRS=$(git diff --name-only ${{ github.event.before || 'HEAD~1' }} ${{ github.sha }} | grep "^mcp_servers/" | cut -d/ -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "server_modules=${CHANGED_SERVER_DIRS}" >> $GITHUB_OUTPUT
+          else
+            echo "server_modules=[]" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ "${{ steps.filter.outputs.clients }}" == "true" ]; then
+            CHANGED_CLIENT_DIRS=$(git diff --name-only ${{ github.event.before || 'HEAD~1' }} ${{ github.sha }} | grep "^mcp_clients/" | cut -d/ -f2 | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "client_modules=${CHANGED_CLIENT_DIRS}" >> $GITHUB_OUTPUT
+          else
+            echo "client_modules=[]" >> $GITHUB_OUTPUT
+          fi
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8==6.1.0 black==25.1.0 isort==5.12.0 mypy==1.7.0
+          
+      - name: Lint with flake8
+        run: flake8 mcp_servers/ mcp_clients/
+        
+      - name: Check formatting with black
+        run: black --check mcp_servers/ mcp_clients/
+        
+      - name: Check import order with isort
+        run: isort --check-only --profile black mcp_servers/ mcp_clients/
+      
+      - name: Set up Node.js for TS files
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Node dependencies
+        run: |
+          npm install -g eslint typescript
+          npm init -y
+          npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+      
+      - name: Lint TypeScript files
+        run: |
+          find mcp_servers mcp_clients -name "*.ts" -not -path "*/node_modules/*" | xargs eslint || echo "TypeScript linting found issues"
+
+  test-servers:
+    name: Test MCP Servers
+    needs: [detect-changes, lint]
+    if: needs.detect-changes.outputs.servers_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server_dir: ['discord', 'supabase', 'firecrawl', 'firecrawl_deep_research', 'github', 'report_generation']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Determine language and setup environment
+        id: setup-env
+        run: |
+          if [ -f "mcp_servers/${{ matrix.server_dir }}/package.json" ]; then
+            echo "LANGUAGE=js" >> $GITHUB_OUTPUT
+            cd mcp_servers/${{ matrix.server_dir }}
+            npm install
+          elif [ -f "mcp_servers/${{ matrix.server_dir }}/requirements.txt" ]; then
+            echo "LANGUAGE=python" >> $GITHUB_OUTPUT
+            python -m pip install --upgrade pip
+            pip install -r mcp_servers/${{ matrix.server_dir }}/requirements.txt
+            pip install pytest pytest-cov
+          fi
+
+      - name: Run tests for JavaScript/TypeScript
+        if: steps.setup-env.outputs.LANGUAGE == 'js'
+        working-directory: mcp_servers/${{ matrix.server_dir }}
+        run: npm test
+          
+      - name: Run tests for Python
+        if: steps.setup-env.outputs.LANGUAGE == 'python'
+        run: |
+          cd mcp_servers/${{ matrix.server_dir }}
+          pytest --cov=. --cov-report=xml
+          
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          file: mcp_servers/${{ matrix.server_dir }}/coverage.xml
+          flags: mcp-servers-${{ matrix.server_dir }}
+
+  test-clients:
+    name: Test MCP Clients
+    needs: [detect-changes, lint]
+    if: needs.detect-changes.outputs.clients_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client_type: ['discord', 'slack']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f mcp_clients/requirements.txt ]; then
+            pip install -r mcp_clients/requirements.txt
+          fi
+          if [ -f mcp_clients/${{ matrix.client_type }}/requirements.txt ]; then
+            pip install -r mcp_clients/${{ matrix.client_type }}/requirements.txt
+          fi
+          pip install pytest pytest-cov
+          
+      - name: Run tests
+        run: |
+          cd mcp_clients
+          pytest --cov=${{ matrix.client_type }} --cov-report=xml ${{ matrix.client_type }}/
+          
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          file: mcp_clients/coverage.xml
+          flags: mcp-clients-${{ matrix.client_type }}
+
+  build-servers:
+    name: Build MCP Servers
+    needs: [test-servers]
+    if: needs.detect-changes.outputs.servers_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        server_dir: ['discord', 'supabase', 'firecrawl', 'firecrawl_deep_research', 'github', 'report_generation']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./mcp_servers/${{ matrix.server_dir }}
+          file: ./mcp_servers/${{ matrix.server_dir }}/Dockerfile
+          push: false
+          load: true
+          tags: klavisai-${{ matrix.server_dir }}:test
+          
+      - name: Verify image
+        run: docker image inspect klavisai-${{ matrix.server_dir }}:test
+        
+      - name: Cleanup
+        run: docker image rm klavisai-${{ matrix.server_dir }}:test
+
+  build-clients:
+    name: Build MCP Clients
+    needs: [test-clients]
+    if: needs.detect-changes.outputs.clients_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client_type: ['discord', 'slack']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./mcp_clients
+          file: ./mcp_clients/Dockerfile.${{ matrix.client_type }}
+          push: false
+          load: true
+          tags: klavisai-client-${{ matrix.client_type }}:test
+          
+      - name: Verify image
+        run: docker image inspect klavisai-client-${{ matrix.client_type }}:test
+        
+      - name: Cleanup
+        run: docker image rm klavisai-client-${{ matrix.client_type }}:test
+
+  workflow-status:
+    name: Workflow Status
+    needs: [lint, test-servers, test-clients, build-servers, build-clients]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check workflow status
+        run: |
+          if [[ "${{ needs.lint.result }}" == "success" && \
+                "${{ needs.test-servers.result }}" != "failure" && \
+                "${{ needs.test-clients.result }}" != "failure" && \
+                "${{ needs.build-servers.result }}" != "failure" && \
+                "${{ needs.build-clients.result }}" != "failure" ]]; then
+            echo "✅ All checks passed successfully!"
+            exit 0
+          else
+            echo "❌ Some checks failed!"
+            exit 1
+          fi
