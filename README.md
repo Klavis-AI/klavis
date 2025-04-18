@@ -4,7 +4,7 @@
   </picture>
 </div>
 
-<h1 align="center">Making MCPs Accessible for Everyone 🚀</h1>
+<h1 align="center">Open Source, easy to use MCPs 🚀</h1>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
@@ -13,9 +13,9 @@
 
 ## 📚 TL;DR
 
-Klavis AI is building open-source infrastructure to make Model Context Protocols (MCPs) easy for everyone. We provide:
+Klavis AI is building open source, easy to use MCPs on Slack, Discord and Web. We provide:
 
-- 💬 **Slack & Discord Clients**: Run MCPs directly from your favorite messaging platforms
+- 💬 **Slack & Discord & Web Clients**: Run MCPs directly from your favorite messaging platforms
 - ☁️ **Hosted MCP Servers**: Access powerful tools without infrastructure management
 - 🎛️ **Simple Web UI**: Configure and manage everything with no coding required
 

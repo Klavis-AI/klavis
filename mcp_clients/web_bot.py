@@ -32,11 +32,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Model definitions
 class QueryRequest(BaseModel):
     user_id: str
     query: str
-    conversation_id: Optional[str] = None  # Replacing channel_id with optional conversation_id
+    conversation_id: Optional[str] = (
+        None  # Replacing channel_id with optional conversation_id
+    )
 
 
 class WebBotContext(BotContext):
@@ -98,7 +101,7 @@ class WebBot(BaseBot):
         Initialize the Web bot.
         """
         super().__init__(platform_name="web_bot")
-        
+
         # Add user lock to prevent concurrent message processing
         self.user_locks = {}
 
@@ -146,7 +149,8 @@ class WebBot(BaseBot):
             try:
                 async with asyncio.timeout(200):
                     async for chunk in mcp_client.process_query_stream(
-                        messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
+                        messages_history,
+                        self.store_new_messages if USE_PRODUCTION_DB else None,
                     ):
                         # Check if this is a special message
                         if "<special>" in chunk:
@@ -164,10 +168,12 @@ class WebBot(BaseBot):
                 logger.error(f"Error processing query stream: {e}", exc_info=True)
                 # Yield error message within the stream
                 yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
-                yield f"data: {json.dumps({'type': 'done'})}\n\n" # Ensure done event is sent even on error
-                
+                yield f"data: {json.dumps({'type': 'done'})}\n\n"  # Ensure done event is sent even on error
+
         # Return the StreamingResponse directly
-        return StreamingResponse(content=stream_generator(), media_type="text/event-stream")
+        return StreamingResponse(
+            content=stream_generator(), media_type="text/event-stream"
+        )
 
     async def get_messages_history(
         self, conversation: Conversation, context: WebBotContext, limit: int = 6
@@ -183,19 +189,31 @@ class WebBot(BaseBot):
         Returns:
             List of ChatMessage objects representing previous messages
         """
-        
+
         if USE_PRODUCTION_DB:
+            from database.database import get_messages_for_conversation
+
             # Get the messages from the conversation
-            messages = conversation.messages
-            
-            messages.append(ChatMessage(role=MessageRole.USER, content=[TextContent(text=context.user_message)]))
-        
             # Limit the number of messages, considering the tool calls, we multiply by 3
-            return messages[-limit*3:] if len(messages) > limit*3 else messages
+            messages = await get_messages_for_conversation(conversation.id, limit * 3)
+
+            messages.append(
+                ChatMessage(
+                    role=MessageRole.USER,
+                    content=[TextContent(text=context.user_message)],
+                )
+            )
+
+            return messages
         else:
             # Return user query when database not in use
             logger.info("Database operations skipped: get_messages_history")
-            return [ChatMessage(role=MessageRole.USER, content=[TextContent(text=context.user_message)])]
+            return [
+                ChatMessage(
+                    role=MessageRole.USER,
+                    content=[TextContent(text=context.user_message)],
+                )
+            ]
 
     async def run(self):
         """
@@ -209,6 +227,7 @@ class WebBot(BaseBot):
 # Initialize the bot
 web_bot = WebBot()
 
+
 # FastAPI routes
 @app.post("/api/query")
 async def process_query(request: QueryRequest, background_tasks: BackgroundTasks):
@@ -216,7 +235,7 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
     Process a user query and respond with a streaming response.
     """
     user_id = request.user_id
-    
+
     # Create context
     context = WebBotContext(
         platform_name="web_bot",
@@ -224,17 +243,17 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
         conversation_id=request.conversation_id,
         user_message=request.query,
     )
-    
+
     # Check if user already has a request in progress
     if user_id not in web_bot.user_locks:
         web_bot.user_locks[user_id] = asyncio.Lock()
-        
+
     if web_bot.user_locks[user_id].locked():
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Another request is already being processed for this user"
+            detail="Another request is already being processed for this user",
         )
-    
+
     # Process with a lock
     async def process_with_lock():
         try:
@@ -242,36 +261,43 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
                 try:
                     # Verify user
                     verification_result = await web_bot.verify_user(context)
-                    
+
                     if not verification_result["connected"]:
                         return StreamingResponse(
-                            content=[f"data: {json.dumps({'type': 'error', 'content': 'User not connected or verified'})}\n\n"],
-                            media_type="text/event-stream"
+                            content=[
+                                f"data: {json.dumps({'type': 'error', 'content': 'User not connected or verified'})}\n\n"
+                            ],
+                            media_type="text/event-stream",
                         )
-                    
+
                     # Set MCP client ID and LLM ID from verification result
                     context.mcp_client_id = verification_result["mcp_client_id"]
                     context.llm_id = verification_result["llm_id"]
-                    
+
                     # Get server URLs
                     server_urls = await web_bot.get_server_urls(context)
-                    
+
                     if not server_urls:
                         return StreamingResponse(
-                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Not connected to any MCP server'})}\n\n"],
-                            media_type="text/event-stream"
+                            content=[
+                                f"data: {json.dumps({'type': 'error', 'content': 'Not connected to any MCP server'})}\n\n"
+                            ],
+                            media_type="text/event-stream",
                         )
-                    
+
                     # Check usage limit
-                    usage_under_limit = await web_bot.check_and_update_usage_limit(context)
+                    usage_under_limit = await web_bot.check_and_update_usage_limit(
+                        context
+                    )
                     if not usage_under_limit:
                         return StreamingResponse(
-                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"],
-                            media_type="text/event-stream"
+                            content=[
+                                f"data: {json.dumps({'type': 'error', 'content': 'Usage limit reached'})}\n\n"
+                            ],
+                            media_type="text/event-stream",
                         )
                     mcp_client = await web_bot.initialize_mcp_client(
-                        context=context,
-                        server_urls=server_urls
+                        context=context, server_urls=server_urls
                     )
                     messages_history = await web_bot.get_messages_history(
                         conversation=mcp_client.conversation,
@@ -283,30 +309,40 @@ async def process_query(request: QueryRequest, background_tasks: BackgroundTasks
                     )
 
                     background_tasks.add_task(mcp_client.cleanup)
-                    
+
                     # If process_query returned None (e.g., due to setup error handled in base class),
                     # return a generic error response.
                     if response is None:
-                        logger.error("process_query returned None, indicating an error during setup.")
-                        return StreamingResponse(
-                            content=[f"data: {json.dumps({'type': 'error', 'content': 'Failed to process query due to internal error'})}\n\n"],
-                            media_type="text/event-stream"
+                        logger.error(
+                            "process_query returned None, indicating an error during setup."
                         )
-                    
+                        return StreamingResponse(
+                            content=[
+                                f"data: {json.dumps({'type': 'error', 'content': 'Failed to process query due to internal error'})}\n\n"
+                            ],
+                            media_type="text/event-stream",
+                        )
+
                     return response
                 except Exception as e:
                     logger.error(f"Error processing query: {e}", exc_info=True)
                     return StreamingResponse(
-                        content=[f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"],
-                        media_type="text/event-stream"
+                        content=[
+                            f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+                        ],
+                        media_type="text/event-stream",
                     )
         except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} after 200 seconds. Lock released.")
-            return StreamingResponse(
-                content=[f"data: {json.dumps({'type': 'error', 'content': 'Processing timed out'})}\n\n"],
-                media_type="text/event-stream"
+            logger.warning(
+                f"Processing timed out for user {user_id} after 200 seconds. Lock released."
             )
-    
+            return StreamingResponse(
+                content=[
+                    f"data: {json.dumps({'type': 'error', 'content': 'Processing timed out'})}\n\n"
+                ],
+                media_type="text/event-stream",
+            )
+
     # Start the processing task but don't wait for it
     return await process_with_lock()
 
@@ -322,8 +358,9 @@ async def health_check():
 def main():
     """Run the web bot with uvicorn"""
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)
 
 
 if __name__ == "__main__":
-    main() 
+    main()
