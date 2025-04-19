@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # Copy the project into the image
-ADD . /app
+COPY . .
 
 # Sync the project
 RUN --mount=type=cache,target=/root/.cache/uv \
