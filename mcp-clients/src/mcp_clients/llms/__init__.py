@@ -1,3 +1,4 @@
+from .anthropic import Anthropic
 from .base import (
     BaseLLMConfig,
     BaseLLM,
@@ -11,7 +12,6 @@ from .base import (
     ContentType,
     Conversation,
 )
-from .anthropic import Anthropic
 from .openai import OpenAI
 
 __all__ = [

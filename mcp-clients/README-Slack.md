@@ -5,7 +5,8 @@ This guide will help you set up your own Slack app and connect it to our applica
 ## Prerequisites
 
 - A Slack workspace where you have admin permissions
-- Python 3.8+ installed on your machine
+- Python 3.12+ installed on your machine
+- uv 0.6.14+ installed on your machine
 - Git repository cloned locally
 - ngrok installed (for local development)
 
@@ -45,7 +46,7 @@ This guide will help you set up your own Slack app and connect it to our applica
 
 1. Run your application (default port is 8080):
    ```bash
-   python mcp_clients/slack_bot.py
+   uv run slack_bot
    ```
 2. Start ngrok to create a secure tunnel to your local server:
    ```bash

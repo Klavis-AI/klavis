@@ -2,7 +2,9 @@
 Slack bot context module.
 """
 from typing import Dict, Any, Optional
-from base_bot import BotContext
+
+from mcp_clients.base_bot import BotContext
+
 
 class SlackBotContext(BotContext):
     """
@@ -11,14 +13,14 @@ class SlackBotContext(BotContext):
     """
 
     def __init__(
-        self,
-        platform_name: str,
-        user_id: str,
-        channel_id: str,
-        thread_ts: Optional[str] = None,
-        initial_message: Optional[Dict[str, Any]] = None,
-        user_message: Optional[Dict[str, Any]] = None,
-        bot_token: Optional[str] = None,
+            self,
+            platform_name: str,
+            user_id: str,
+            channel_id: str,
+            thread_ts: Optional[str] = None,
+            initial_message: Optional[Dict[str, Any]] = None,
+            user_message: Optional[Dict[str, Any]] = None,
+            bot_token: Optional[str] = None,
     ):
         """
         Initialize the Slack bot context.
@@ -37,7 +39,7 @@ class SlackBotContext(BotContext):
         self.thread_ts = thread_ts
         self.initial_message = initial_message
         self.bot_token = bot_token
-        
+
     def get_channel_id(self) -> Optional[str]:
         """
         Get the channel ID for the current context.
@@ -46,7 +48,7 @@ class SlackBotContext(BotContext):
             String representation of the channel ID, or None if not applicable
         """
         return str(self.channel_id)
-        
+
     def get_thread_id(self) -> Optional[str]:
         """
         Get the thread ID for the current context, if applicable.
@@ -54,4 +56,4 @@ class SlackBotContext(BotContext):
         Returns:
             String representation of the thread ID, or None if not applicable
         """
-        return self.thread_ts 
+        return self.thread_ts
