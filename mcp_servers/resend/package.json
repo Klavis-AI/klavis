@@ -1,5 +1,5 @@
 {
-  "name": "resend",
+  "name": "@klavis-ai/mcp-server-resend",
   "version": "1.0.0",
   "main": "index.js",
   "keywords": [],
