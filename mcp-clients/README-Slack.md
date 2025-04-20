@@ -10,6 +10,39 @@ This guide will help you set up your own Slack app and connect it to our applica
 - Git repository cloned locally
 - ngrok installed (for local development)
 
+## Setup
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone <your-repository-url> # Replace with the actual URL
+    cd klavis/mcp-clients # Navigate to the root directory of the project
+    ```
+
+2.  **Environment Variables:**
+
+   - Create a file named `.env` in the root directory of mcp-clients (`klavis/mcp-clients`) using the `.env.example` file.
+   - Replace the placeholder with actual values.
+
+3.  **Local MCP Servers Configuration:**
+
+   - When running locally (`USE_PRODUCTION_DB=False`), the bot reads the list of MCP server URLs to connect to from `src/mcp_clients/local_mcp_servers.json`.
+   - Create this file if it doesn't exist.
+   - Add the URLs of the MCP servers you want the local bot to connect to.
+
+    ```json
+    // mcp_clients/local_mcp_servers.json example
+    {
+      "server_urls": [
+        "http://localhost:8000/sse"
+        // Add other local or remote MCP server SSE endpoints here
+      ]
+    }
+    ```
+
+   - Replace `http://localhost:8000/sse` with the actual URL of your running MCP server(s).
+
+
 ## Step 1: Environment Setup
 
 1. Copy the example environment file to create your own:
