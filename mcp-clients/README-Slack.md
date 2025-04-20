@@ -77,15 +77,36 @@ This guide will help you set up your own Slack app and connect it to our applica
 
 ## Step 4: Start Local Development Environment
 
-1. Run your application (default port is 8080):
-   ```bash
-   uv run slack_bot
-   ```
-2. Start ngrok to create a secure tunnel to your local server:
-   ```bash
-   ngrok http 8080
-   ```
-3. Copy the HTTPS URL provided by ngrok (e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
+1.  **Create and Activate Virtual Environment:**
+    ```bash
+    # Make sure to navigate to the root directory of the project (skip if already done)
+    cd klavis/mcp-clients
+    ```
+    ```bash
+    # Create environment (only needs to be done once)
+    uv venv
+    # Activate environment
+    # Windows (Command Prompt/PowerShell):
+    .venv\Scripts\activate
+    # macOS/Linux (bash/zsh):
+    source .venv/bin/activate
+    ```
+2.  **Install Dependencies:**
+    ```bash
+    uv sync
+    ```
+3.  **Run the Bot (default port is 8080):**
+    Ensure your `.env` file exists in the `klavis/mcp-clients` root and `src/mcp_clients/local_mcp_servers.json` is configured.
+    ```bash
+    uv run slack_bot
+    ```
+    
+4.  **Start ngrok to create a secure tunnel to your local server:**
+    ```bash
+    ngrok http 8080
+    ```
+ 
+6. **Copy the HTTPS URL provided by ngrok**(e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
 
 ## Step 5: Configure Event Subscriptions
 
