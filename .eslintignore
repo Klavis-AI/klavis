@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+*.d.ts
+coverage/
+**/*.js
+!.eslintrc.js
+!.prettierrc.js
