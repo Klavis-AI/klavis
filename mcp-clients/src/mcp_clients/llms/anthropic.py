@@ -1,8 +1,11 @@
-import logging
 import json
+import logging
+import uuid
 from typing import Optional, Dict, Any, AsyncGenerator, List
+
 from anthropic import AsyncAnthropic
-from llms import (
+
+from mcp_clients.llms.base import (
     BaseLLM,
     LLMMessageFormat,
     ChatMessage,
@@ -12,7 +15,6 @@ from llms import (
     ToolResultContent,
     ContentType,
 )
-import uuid
 
 # Configure logging
 logger = logging.getLogger("anthropic_client")
@@ -32,7 +34,7 @@ class Anthropic(BaseLLM):
         self.max_tokens = self.config.max_tokens  # Default max tokens
 
     async def create_streaming_generator(
-        self, messages: list, available_tools: list, resources: list = None
+            self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create a streaming generator with the given messages and tools
@@ -54,8 +56,8 @@ class Anthropic(BaseLLM):
             system_message = self.platform_config["system_message"]
         if resources:
             system_message += (
-                "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n"
-                + "\n\n".join(resources)
+                    "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n"
+                    + "\n\n".join(resources)
             )
 
         # Create request parameters
@@ -114,8 +116,8 @@ class Anthropic(BaseLLM):
                         current_text += delta.text
                         yield delta.text
                     elif (
-                        delta.type == "input_json_delta"
-                        and block_index in current_tool_calls
+                            delta.type == "input_json_delta"
+                            and block_index in current_tool_calls
                     ):
                         # Accumulate JSON for tool input
                         current_tool_calls[block_index][
@@ -170,7 +172,7 @@ class Anthropic(BaseLLM):
             yield f"\n[Error in streaming process: {str(e)}]\n"
 
     async def non_streaming_response(
-        self, messages: list, available_tools: Optional[list] = None
+            self, messages: list, available_tools: Optional[list] = None
     ) -> Dict[str, Any]:
         """
         Get a non-streaming response from the LLM
@@ -223,7 +225,7 @@ class Anthropic(BaseLLM):
         Convert a list of Anthropic format messages to ChatMessage format
 
         Args:
-            anthropic_messages: List of messages in Anthropic format
+            raw_messages: List of messages in Anthropic format
 
         Returns:
             List of ChatMessages

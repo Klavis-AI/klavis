@@ -1,16 +1,18 @@
-import logging
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Tuple
-from mcp_client import MCPClient
-import time
 import json
+import logging
 import os
-from config import USE_PRODUCTION_DB
-# Define empty result structures for when database is not used
-from llms import Conversation, ChatMessage
-if USE_PRODUCTION_DB:
-   from database import database
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional, List
 
+import time
+
+from mcp_clients.config import USE_PRODUCTION_DB
+# Define empty result structures for when database is not used
+from mcp_clients.llms.base import Conversation, ChatMessage
+from mcp_clients.mcp_client import MCPClient
+
+if USE_PRODUCTION_DB:
+    from mcp_clients.database import database
 
 logger = logging.getLogger("base_bot")
 
@@ -22,12 +24,12 @@ class BotContext(ABC):
     """
 
     def __init__(
-        self,
-        platform_name: str,
-        user_id: str,
-        mcp_client_id: str = None,
-        llm_id: str = None,
-        user_message: Any = None,
+            self,
+            platform_name: str,
+            user_id: str,
+            mcp_client_id: str = None,
+            llm_id: str = None,
+            user_message: Any = None,
     ):
         """
         Initialize the bot context.
@@ -42,7 +44,7 @@ class BotContext(ABC):
         self.user_message = user_message
         self.mcp_client_id = mcp_client_id
         self.llm_id = llm_id
-        
+
     @abstractmethod
     def get_channel_id(self) -> Optional[str]:
         """
@@ -53,7 +55,7 @@ class BotContext(ABC):
             String representation of the channel ID, or None if not applicable
         """
         pass
-        
+
     @abstractmethod
     def get_thread_id(self) -> Optional[str]:
         """
@@ -101,7 +103,7 @@ class BaseBot(ABC):
         Verify the user.
         """
         start_time = time.time()
-        
+
         if USE_PRODUCTION_DB:
             verification_result = await database.get_user_connection_information(
                 context.platform_name, context.user_id
@@ -123,13 +125,13 @@ class BaseBot(ABC):
             logger.info("Database operations skipped: verify_user")
 
         return verification_result
-    
+
     async def check_and_update_usage_limit(self, context: BotContext) -> bool:
         """
         Check if the user has reached the usage limit and update it if so.
         """
         start_time = time.time()
-        
+
         if USE_PRODUCTION_DB:
             result = await database.check_and_update_usage_limit(context.mcp_client_id)
             logger.info(f"Check and update usage limit took {time.time() - start_time} seconds to complete")
@@ -143,13 +145,13 @@ class BaseBot(ABC):
             # Skip database operation, return dummy result
             logger.info("Database operations skipped: check_and_update_usage_limit")
             return True
-    
+
     async def get_server_urls(self, context: BotContext) -> List[str]:
         """
         Get the server URLs for the user.
         """
         start_time = time.time()
-        
+
         if USE_PRODUCTION_DB:
             mcp_servers = await database.get_connected_mcp_servers(
                 context.mcp_client_id
@@ -181,7 +183,7 @@ class BaseBot(ABC):
             return data.get("server_urls", [])
 
     async def initialize_mcp_client(
-        self, context: BotContext, server_urls: List[str] = None
+            self, context: BotContext, server_urls: List[str] = None
     ) -> Any:
         """
         Initialize an MCP client for the user.
@@ -251,7 +253,7 @@ class BaseBot(ABC):
         return mcp_client
 
     async def store_new_messages(
-        self, conversation_id: str, messages: List[ChatMessage]
+            self, conversation_id: str, messages: List[ChatMessage]
     ) -> None:
         """
         Store new messages in the conversation.
@@ -265,7 +267,7 @@ class BaseBot(ABC):
 
     @abstractmethod
     async def process_query_with_streaming(
-        self, mcp_client: MCPClient, messages_history: List[ChatMessage], context: BotContext
+            self, mcp_client: MCPClient, messages_history: List[ChatMessage], context: BotContext
     ) -> Any:
         """
         Process a query with streaming in a platform-specific way.
@@ -288,7 +290,8 @@ class BaseBot(ABC):
         pass
 
     @abstractmethod
-    async def get_messages_history(self, conversation: Conversation, context: BotContext, limit: int = 6) -> List[ChatMessage]:
+    async def get_messages_history(self, conversation: Conversation, context: BotContext, limit: int = 6) -> List[
+        ChatMessage]:
         """
         Get the messages history.
         """

@@ -1,13 +1,12 @@
-from typing import Any, Dict, List, Literal, Optional, Union, AsyncGenerator
-from pydantic import BaseModel, Field, model_validator
-from abc import ABC, abstractmethod
 import logging
-from enum import Enum
-
-from typing import List, Optional, Union, Dict, Any, Literal
-from datetime import datetime
 import uuid
+from abc import ABC, abstractmethod
+from datetime import datetime
+from enum import Enum
+from typing import AsyncGenerator
+from typing import List, Optional, Union, Dict, Any, Literal
 
+from pydantic import BaseModel, Field, model_validator
 
 logger = logging.getLogger("llm_client")
 
@@ -255,9 +254,9 @@ class BaseLLM(ABC):
     """
 
     def __init__(
-        self,
-        config: Optional[BaseLLMConfig] = None,
-        message_format: Optional[LLMMessageFormat] = LLMMessageFormat.OPENAI,
+            self,
+            config: Optional[BaseLLMConfig] = None,
+            message_format: Optional[LLMMessageFormat] = LLMMessageFormat.OPENAI,
     ):
         """
         Initialize the base LLM client
@@ -304,7 +303,7 @@ class BaseLLM(ABC):
 
     @abstractmethod
     async def create_streaming_generator(
-        self, messages: list, available_tools: list, resources: list = None
+            self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create a streaming generator with the given messages and tools
@@ -320,7 +319,7 @@ class BaseLLM(ABC):
 
     @abstractmethod
     async def non_streaming_response(
-        self, messages: list, available_tools: Optional[list] = None
+            self, messages: list, available_tools: Optional[list] = None
     ) -> Dict[str, Any]:
         """
         Get a non-streaming response from the LLM

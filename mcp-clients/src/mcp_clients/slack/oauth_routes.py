@@ -1,22 +1,24 @@
-import logging
-import json
 import base64
+import json
+import logging
 import urllib.parse
 from typing import Optional, Dict, Any
-from slack.settings import settings
-from slack_sdk.web.async_client import AsyncWebClient
-from config import USE_PRODUCTION_DB
 
 import httpx
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
+from slack_sdk.web.async_client import AsyncWebClient
+
+from mcp_clients.config import USE_PRODUCTION_DB
+from mcp_clients.slack.settings import settings
 
 if USE_PRODUCTION_DB:
-    from database.database import create_mcp_client, insert_slack_client_auth
+    from mcp_clients.database.database import create_mcp_client, insert_slack_client_auth
 
 # Configure logging
 logger = logging.getLogger("slack_oauth")
+
 
 class SlackOAuthResponse(BaseModel):
     """Model for Slack OAuth API response"""
@@ -31,6 +33,7 @@ class SlackOAuthResponse(BaseModel):
     bot_user_id: Optional[str] = None
     error: Optional[str] = None
 
+
 def setup_oauth_routes(router: APIRouter):
     """
     Set up OAuth routes for Slack app installation
@@ -38,37 +41,37 @@ def setup_oauth_routes(router: APIRouter):
     Args:
         router: FastAPI router to add routes to
     """
-    
+
     @router.get("/slack/oauth/install")
     async def install_slack_app(account_id: str = None):
         """
         Redirect to Slack OAuth authorization page
-        """   
+        """
         if not settings.SLACK_CLIENT_ID:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="SLACK_CLIENT_ID environment variable is not set"
             )
-            
+
         query_params = {
             "client_id": settings.SLACK_CLIENT_ID,
             "scope": settings.SLACK_SCOPES,
             "redirect_uri": settings.SLACK_REDIRECT_URI
         }
-        
+
         state = None
-         # Create state parameter with account_id if provided, this will be passed when user add Klavis powered Slack MCP Client
+        # Create state parameter with account_id if provided, this will be passed when user add Klavis powered Slack MCP Client
         if account_id:
             logger.info(f"Installing Klavis powered Slack MCP Client with account_id: {account_id}")
             state_data = {"account_id": account_id}
             state = base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
         if state:
             query_params["state"] = state
-        
+
         encoded_params = urllib.parse.urlencode(query_params)
-        
+
         auth_url = f"https://slack.com/oauth/v2/authorize?{encoded_params}"
-        
+
         logger.info(f"Redirecting to Slack OAuth: {auth_url}")
         return RedirectResponse(auth_url)
 
@@ -85,11 +88,11 @@ def setup_oauth_routes(router: APIRouter):
         if error:
             logger.error(f"OAuth error: {error}")
             return {"error": error}
-        
+
         if not code:
             logger.error("No authorization code received")
             return {"error": "No authorization code received"}
-        
+
         # Extract account_id from state parameter if it exists
         account_id = None
         if state:
@@ -100,31 +103,31 @@ def setup_oauth_routes(router: APIRouter):
                     logger.info(f"OAuth callback received with account_id: {account_id} (from state)")
             except Exception as e:
                 logger.error(f"Error decoding state parameter: {str(e)}")
-        
+
         oauth_response = await exchange_code_for_token(code)
-        
+
         if not oauth_response.ok:
             logger.error(f"OAuth token exchange failed: {oauth_response.error}")
             return {"error": oauth_response.error or "OAuth token exchange failed"}
-        
+
         logger.info(f"Successfully authenticated for team: {oauth_response.team}")
-        
+
         if not oauth_response.team or not oauth_response.team.get("id"):
             logger.error("Team ID not found in OAuth response")
             return {"error": "Team ID not found in OAuth response"}
-        
+
         # Get user profile to obtain username
         user_id = oauth_response.authed_user.get("id") if oauth_response.authed_user else None
         username = None
-        
+
         if user_id:
             username, _ = await get_user_profile(
-                user_id=user_id, 
+                user_id=user_id,
                 bot_token=oauth_response.access_token
             )
-        
+
         mcp_client_result = {"mcp_client": None}
-        
+
         if account_id and USE_PRODUCTION_DB:
             # Create Slack MCP Client with auth metadata
             mcp_client_result = await create_mcp_client(
@@ -135,30 +138,30 @@ def setup_oauth_routes(router: APIRouter):
                 external_username=username,
                 platform="slack",
             )
-            
+
             if mcp_client_result["error"]:
                 error_msg = f"Failed to create MCP client for account {account_id}"
                 logger.error(error_msg)
                 return {"error": error_msg}
-            
+
             # Save auth metadata to `slack_client_auth` table
             auth_result = await insert_slack_client_auth(
                 team_id=oauth_response.team.get("id"),
                 auth_metadata=oauth_response.model_dump()
             )
-            
+
             if auth_result["error"]:
                 logger.error(f"Failed to save Slack auth metadata: {auth_result['error']}")
                 # do not return, continue
-        
+
         # Send welcome message
         try:
             user_id = oauth_response.authed_user.get("id") if oauth_response.authed_user else None
             if user_id:
                 success, error_message = await send_welcome_message(
-                    user_id=user_id, 
+                    user_id=user_id,
                     username=username,
-                    bot_token=oauth_response.access_token, 
+                    bot_token=oauth_response.access_token,
                     mcp_client_result=mcp_client_result
                 )
                 if not success:
@@ -167,7 +170,7 @@ def setup_oauth_routes(router: APIRouter):
                 logger.warning("Could not identify installing user to send welcome message")
         except Exception as e:
             logger.error(f"Error sending welcome message: {str(e)}")
-        
+
         if account_id and mcp_client_result["mcp_client"] and mcp_client_result["mcp_client"].get("id"):
             # Redirect to client-specific page
             redirect_url = f"{settings.WEBSITE_URL}/home/mcp-client/{mcp_client_result['mcp_client'].get('id')}"
@@ -178,7 +181,7 @@ def setup_oauth_routes(router: APIRouter):
 
     async def exchange_code_for_token(code: str) -> SlackOAuthResponse:
         token_url = "https://slack.com/api/oauth.v2.access"
-        
+
         # Prepare data for token exchange using urllib.parse
         data = {
             "client_id": settings.SLACK_CLIENT_ID,
@@ -186,14 +189,14 @@ def setup_oauth_routes(router: APIRouter):
             "code": code,
             "redirect_uri": settings.SLACK_REDIRECT_URI
         }
-        
+
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 token_url,
                 data=data,
                 headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
-        
+
         data = response.json()
         return SlackOAuthResponse(**data)
 
@@ -204,14 +207,14 @@ def setup_oauth_routes(router: APIRouter):
                 headers={"Authorization": f"Bearer {bot_token}"},
                 params={"user": user_id}
             )
-            
+
         user_data = user_response.json()
         username = "slack_user"  # Default username
-        
+
         if user_data.get("ok") and user_data.get("user"):
             user_info = user_data.get("user", {})
             profile = user_info.get("profile", {})
-            
+
             # Try to get the best available username option
             if profile.get("display_name"):
                 username = profile.get("display_name")
@@ -219,11 +222,12 @@ def setup_oauth_routes(router: APIRouter):
                 username = profile.get("real_name")
             elif user_info.get("name"):
                 username = user_info.get("name")
-            
+
             # Remove spaces for URL safety
             username = username.replace(" ", "_")
-            
+
         return username, user_data
+
 
 async def send_welcome_message(user_id: str, username: str, bot_token: str, mcp_client_result: Dict[str, Any]):
     """
@@ -242,14 +246,14 @@ async def send_welcome_message(user_id: str, username: str, bot_token: str, mcp_
         else:
             dashboard_url = f"{settings.WEBSITE_URL}/home/mcp-client/{client_id}"
         welcome_blocks = create_welcome_blocks(dashboard_url)
-        
+
         client = AsyncWebClient(token=bot_token)
         response = await client.chat_postMessage(
             channel=user_id,
             text="Thanks for installing our app! 🎉",
             blocks=welcome_blocks
         )
-        
+
         if response["ok"]:
             return True, None
         else:
@@ -257,7 +261,8 @@ async def send_welcome_message(user_id: str, username: str, bot_token: str, mcp_
             return False, error_message
     except Exception as e:
         return False, str(e)
-    
+
+
 def create_welcome_blocks(dashboard_url: str):
     return [
         {
