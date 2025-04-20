@@ -14,7 +14,7 @@ from mcp_clients.config import USE_PRODUCTION_DB
 from mcp_clients.slack.settings import settings
 
 if USE_PRODUCTION_DB:
-    from mcp_clients.database import create_mcp_client, insert_slack_client_auth
+    from mcp_clients.database.database import create_mcp_client, insert_slack_client_auth
 
 # Configure logging
 logger = logging.getLogger("slack_oauth")

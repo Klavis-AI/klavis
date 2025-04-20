@@ -13,7 +13,7 @@ from mcp_clients.slack.settings import settings
 logger = logging.getLogger("slack_bot")
 
 if USE_PRODUCTION_DB:
-    from mcp_clients.database import get_mcp_client_id_by_slack_info
+    from mcp_clients.database.database import get_mcp_client_id_by_slack_info
 else:
     # Define dummy function when database is not used
     async def get_mcp_client_id_by_slack_info(team_id, user_id):
