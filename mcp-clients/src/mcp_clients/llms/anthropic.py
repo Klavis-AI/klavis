@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, AsyncGenerator, List
 
 from anthropic import AsyncAnthropic
 
-from mcp_clients.llms import (
+from mcp_clients.llms.base import (
     BaseLLM,
     LLMMessageFormat,
     ChatMessage,
@@ -225,7 +225,7 @@ class Anthropic(BaseLLM):
         Convert a list of Anthropic format messages to ChatMessage format
 
         Args:
-            anthropic_messages: List of messages in Anthropic format
+            raw_messages: List of messages in Anthropic format
 
         Returns:
             List of ChatMessages

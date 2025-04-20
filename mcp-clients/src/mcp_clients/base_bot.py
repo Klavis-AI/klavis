@@ -8,7 +8,7 @@ import time
 
 from mcp_clients.config import USE_PRODUCTION_DB
 # Define empty result structures for when database is not used
-from mcp_clients.llms import Conversation, ChatMessage
+from mcp_clients.llms.base import Conversation, ChatMessage
 from mcp_clients.mcp_client import MCPClient
 
 if USE_PRODUCTION_DB:

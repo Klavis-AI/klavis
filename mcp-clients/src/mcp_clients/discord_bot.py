@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from mcp_clients.base_bot import BaseBot, BotContext
 from mcp_clients.config import USE_PRODUCTION_DB
-from mcp_clients.llms import ChatMessage, MessageRole, TextContent, FileContent, Conversation
+from mcp_clients.llms.base import ChatMessage, MessageRole, TextContent, FileContent, Conversation
 from mcp_clients.mcp_client import MCPClient
 
 # Load environment variables

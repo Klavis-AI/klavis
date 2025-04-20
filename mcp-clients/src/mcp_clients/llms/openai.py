@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, AsyncGenerator, List
 import time
 from openai import AsyncOpenAI
 
-from mcp_clients.llms import (
+from mcp_clients.llms.base import (
     BaseLLM,
     ChatMessage,
     MessageRole,
@@ -35,7 +35,9 @@ class OpenAI(BaseLLM):
         Initialize the OpenAI client
 
         Args:
-            config: Optional configuration for OpenAI
+            api_key: Optional configuration for OpenAI
+            model: Optional model of GenAI
+            base_url: Optional url to connect to given api_key GenAI
         """
         super().__init__()
         self.openai_client = AsyncOpenAI(api_key=api_key, base_url=base_url)
@@ -226,7 +228,7 @@ class OpenAI(BaseLLM):
         Convert a list of OpenAI format messages to ChatMessage format
 
         Args:
-            openai_messages: List of messages in OpenAI format
+            raw_messages: List of messages in OpenAI format
 
         Returns:
             List of ChatMessages
@@ -250,9 +252,8 @@ class OpenAI(BaseLLM):
                         parsed_arguments = {}
 
                         if isinstance(arguments, str):
+                            import json
                             try:
-                                import json
-
                                 parsed_arguments = json.loads(arguments)
                             except json.JSONDecodeError as e:
                                 logger.error(

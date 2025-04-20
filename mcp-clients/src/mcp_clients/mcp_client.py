@@ -13,8 +13,10 @@ from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters, stdio_client
 from mcp.client.sse import sse_client
 
-from mcp_clients.llms import Conversation, BaseLLM, Anthropic, OpenAI, LLMMessageFormat, ContentType, MessageRole, \
+from mcp_clients.llms.anthropic import Anthropic
+from mcp_clients.llms.base import Conversation, BaseLLM, LLMMessageFormat, ContentType, MessageRole, \
     ToolResultContent, ChatMessage
+from mcp_clients.llms.openai import OpenAI
 
 # Load environment variables
 load_dotenv()

@@ -22,7 +22,7 @@ from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
 from mcp.client.stdio import StdioServerParameters, stdio_client
 
-from mcp_clients.llms import Anthropic
+from mcp_clients.llms.anthropic import Anthropic
 
 load_dotenv()  # load environment variables from .env
 

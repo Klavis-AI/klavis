@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from mcp_clients.base_bot import BotContext, BaseBot
 from mcp_clients.config import USE_PRODUCTION_DB
-from mcp_clients.llms import ChatMessage, Conversation, MessageRole, TextContent
+from mcp_clients.llms.base import ChatMessage, Conversation, MessageRole, TextContent
 from mcp_clients.mcp_client import MCPClient
 
 # Configure logging
