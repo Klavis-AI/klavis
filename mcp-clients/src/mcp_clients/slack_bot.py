@@ -22,7 +22,7 @@ from mcp_clients.slack.oauth_routes import setup_oauth_routes
 from mcp_clients.slack.settings import settings
 
 if USE_PRODUCTION_DB:
-    from database.database import get_slack_auth_metadata
+    from mcp_clients.database.database import get_slack_auth_metadata
 else:
     # Define dummy function when database is not used
     async def get_slack_auth_metadata(team_id):

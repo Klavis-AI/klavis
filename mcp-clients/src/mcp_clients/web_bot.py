@@ -190,7 +190,7 @@ class WebBot(BaseBot):
         """
 
         if USE_PRODUCTION_DB:
-            from database.database import get_messages_for_conversation
+            from mcp_clients.database.database import get_messages_for_conversation
 
             # Get the messages from the conversation
             # Limit the number of messages, considering the tool calls, we multiply by 3
