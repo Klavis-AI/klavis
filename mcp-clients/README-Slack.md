@@ -106,7 +106,7 @@ This guide will help you set up your own Slack app and connect it to our applica
     ngrok http 8080
     ```
  
-6. **Copy the HTTPS URL provided by ngrok**(e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
+5.  **Copy the HTTPS URL provided by ngrok**(e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
 
 ## Step 5: Configure Event Subscriptions
 
