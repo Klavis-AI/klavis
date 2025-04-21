@@ -4,7 +4,7 @@
   </picture>
 </div>
 
-<h1 align="center">Open Source, easy to use MCPs 🚀</h1>
+<h1 align="center">Open Source, easy to use MCPs on Slack, Discord and Web 🚀</h1>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
@@ -71,7 +71,7 @@ Located in the `mcp_servers/` directory, these service-specific modules expose c
 
 ### MCP Clients
 
-Located in the `mcp_clients/` directory, these client applications connect to MCP servers and interface with end-user platforms:
+Located in the `mcp-clients/` directory, these client applications connect to MCP servers and interface with end-user platforms:
 
 - **Discord Bot**: Interactive AI assistant for Discord
 - **Slack Bot**: Interactive AI assistant for Slack
@@ -88,7 +88,7 @@ Located in the `mcp_clients/` directory, these client applications connect to MC
 
 ### Adding a New Client Platform
 
-1. Create a new client module in `mcp_clients/`
+1. Create a new client module in `mcp-clients/`
 2. Extend the `base_bot.py` functionality
 3. Implement platform-specific message handling
 4. Connect to MCP servers using `mcp_client.py`
@@ -102,10 +102,10 @@ We love contributions! Join our [Discord community](https://discord.gg/cVNXvzs5)
 If you use Klavis in your research or project, please cite:
 
 ```bibtex
-@software{klavis2024,
+@software{klavis2025,
   author = {Klavis AI},
-  title = {Klavis: Open-Source Infrastructure for Model Context Protocols},
-  year = {2024},
+  title = {Klavis: Open-Source MCPs on Slack, Discord and Web},
+  year = {2025},
   publisher = {GitHub},
   url = {https://github.com/klavis-ai/klavis}
 }
