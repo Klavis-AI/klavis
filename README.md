@@ -32,8 +32,8 @@ You can find more case study videos on [our website](https://www.klavis.ai).
 ## 🚀 Quick Start
 
 For detailed MCP client setup instructions, please refer to the platform-specific documentation:
-- [**Discord Bot Setup Guide**](mcp_clients/README-Discord.md) - Complete instructions for setting up and running the Discord bot
-- [**Slack Bot Setup Guide**](mcp_clients/README-Slack.md) - Step-by-step guide for creating a Slack app and connecting it
+- [**Discord Bot Setup Guide**](mcp-clients/README-Discord.md) - Complete instructions for setting up and running the Discord bot
+- [**Slack Bot Setup Guide**](mcp-clients/README-Slack.md) - Step-by-step guide for creating a Slack app and connecting it
 
 For detailed MCP server setup instructions, please refer to the README file under each server folder.
 
@@ -95,7 +95,7 @@ Located in the `mcp-clients/` directory, these client applications connect to MC
 
 ## 🤝 Contributing
 
-We love contributions! Join our [Discord community](https://discord.gg/cVNXvzs5) to discuss ideas and get help.
+We love contributions! Join our [Discord community](https://discord.com/invite/P6fFgv2w) to discuss ideas and get help.
 
 ## 📚 Citation
 
