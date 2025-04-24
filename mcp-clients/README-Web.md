@@ -1,12 +1,13 @@
 # Klavis AI Web Bot (MCP Client) - Local Development
 
-This document provides instructions for setting up and running the Klavis AI Web Bot locally. This bot acts as a FastAPI backend, serving as a client for the Multi-Compute Platform (MCP) and allowing web frontends to interact with connected MCP servers and utilize their tools.
+This document provides instructions for setting up and running the Klavis AI Web Bot locally. This bot acts as a FastAPI backend, serving as a client for the Model Context Protocol (MCP) and allowing web frontends to interact with connected MCP servers and utilize their tools.
 
 **Note:** This README is intended for developers setting up the backend service. This backend is typically consumed by a separate web frontend application. The local development version can run with `USE_PRODUCTION_DB=False`, which uses local configuration files and might have different behavior compared to the hosted production service (e.g., user verification and database interactions might be different).
 
 ## Prerequisites
 
 *   **Python:** Version 3.12 or higher.
+*   **uv:** Version 0.6.14 or higher.
 *   **Docker:** Recommended for easiest setup and execution. ([Docker Desktop](https://www.docker.com/products/docker-desktop/))
 *   **Git:** For cloning the repository.
 *   **Required Python Libraries:** `fastapi`, `uvicorn`, `python-dotenv`, `aiohttp`, `mcp-client`, `openai`, `anthropic` (and others as specified in a requirements file).
@@ -16,11 +17,11 @@ This document provides instructions for setting up and running the Klavis AI Web
 1.  **Clone the Repository:**
     ```bash
     git clone <your-repository-url> # Replace with the actual URL
-    cd klavis # Navigate to the root directory of the project
+    cd klavis/mcp-clients # Navigate to the root directory of the project
     ```
 
 2.  **Environment Variables:**
-    *   Copy the example environment file if one exists, or create a new file named `.env` in the root directory (`klavis`).
+    *   Copy the example environment file if one exists, or create a new file named `.env` in the root directory (`klavis/mcp-clients`).
     *   Ensure the following variables are set:
 
     ```ini
@@ -34,7 +35,7 @@ This document provides instructions for setting up and running the Klavis AI Web
     *   `USE_PRODUCTION_DB` defaults to `False` if omitted, which is the correct setting for local development using `local_mcp_servers.json`. If set to `True`, ensure database connection variables are also present.
 
 3.  **Local MCP Servers Configuration (if `USE_PRODUCTION_DB=False`):**
-    *   When running locally without a production database, the bot reads the list of MCP server URLs to connect to from `mcp_clients/local_mcp_servers.json`.
+    *   When running locally without a production database, the bot reads the list of MCP server URLs to connect to from `src/mcp_clients/local_mcp_servers.json`.
     *   Create this file if it doesn't exist.
     *   Add the URLs of the MCP servers you want the local bot to connect to.
 
@@ -51,14 +52,15 @@ This document provides instructions for setting up and running the Klavis AI Web
 
 ## Running the Web Service
 
-You can run the service using Docker (recommended) or directly with Python in a virtual environment. Make sure you are in the `klavis` root directory.
+You can run the service using Docker (recommended) or directly with Python in a virtual environment. Make sure you are in the `klavis/mcp-clients` root directory.
 
 ### Method 1: Docker (Recommended)
 
 1.  **Build the Docker Image:**
-    *(Assuming a Dockerfile exists, e.g., `mcp_clients/Dockerfile.web`)*
+    *(Assuming a Dockerfile exists, e.g., `Dockerfile.web`)*
     ```bash
-    docker build -t klavis-web-bot -f mcp_clients/Dockerfile.web . 
+    # Make sure that docker daemon is running before executing the command
+    docker build -t klavis-web-bot -f Dockerfile.web .
     ```
     *(Note: The `.` at the end specifies the build context. Adjust `Dockerfile.web` if the filename differs.)*
 
@@ -66,7 +68,7 @@ You can run the service using Docker (recommended) or directly with Python in a 
     This command runs the bot using the environment variables from your `.env` file and mounts your local `local_mcp_servers.json` if needed.
     ```bash
     # If using local_mcp_servers.json
-    docker run --rm -p 8080:8080 --env-file .env -v ./mcp_clients/local_mcp_servers.json:/app/local_mcp_servers.json klavis-web-bot
+    docker run --rm -p 8080:8080 --env-file .env -v ./src/mcp_clients/local_mcp_servers.json:/app/src/mcp_clients/local_mcp_servers.json klavis-web-bot
 
     # If using production DB (no volume mount needed for local_mcp_servers.json)
     # docker run --rm -p 8080:8080 --env-file .env klavis-web-bot 
@@ -79,29 +81,33 @@ You can run the service using Docker (recommended) or directly with Python in a 
 ### Method 2: Python Virtual Environment
 
 1.  **Create and Activate Virtual Environment:**
+
     ```bash
-    # Create environment
-    python -m venv venv 
+    # Make sure to navigate to the root directory of the project (skip if already done)
+    cd klavis/mcp-clients
+    ```
+
+    ```bash
+    # Create environment (only needs to be done once)
+    uv venv
 
     # Activate environment
-    # Windows: .\venv\Scripts\activate 
-    # macOS/Linux: source venv/bin/activate 
+    # Windows (Command Prompt/PowerShell):
+    .venv\Scripts\activate
+    # macOS/Linux (bash/zsh):
+    source .venv/bin/activate
     ```
 
 2.  **Install Dependencies:**
-    *(Assuming a requirements file exists, e.g., `mcp_clients/requirements-web.txt`)*
-    ```bash
-    pip install -r mcp_clients/requirements-web.txt 
-    ```
-    *(Adjust the requirements file path/name as needed)*
 
-3.  **Run the Service:**
-    Ensure your `.env` file exists in the `klavis` root and `mcp_clients/local_mcp_servers.json` is configured if required.
     ```bash
-    # This command runs the Uvicorn server directly
-    python mcp_clients/web_bot.py 
-    # Alternatively, using uvicorn command for more options (like auto-reload)
-    # uvicorn mcp_clients.web_bot:app --host 0.0.0.0 --port 8080 --reload
+    uv sync
+    ```
+
+3.  **Run the Bot:**
+    Ensure your `.env` file exists in the `klavis/mcp-clients` root and `src/mcp_clients/local_mcp_servers.json` is configured.
+    ```bash
+    uv run web_bot
     ```
 
 ## API Endpoints
