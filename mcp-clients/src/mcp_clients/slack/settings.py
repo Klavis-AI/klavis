@@ -1,6 +1,8 @@
 import os
-from pydantic_settings import BaseSettings
 from typing import ClassVar
+
+from pydantic_settings import BaseSettings
+
 
 class SlackSettings(BaseSettings):
     """Settings for Slack integration"""
@@ -38,6 +40,7 @@ class SlackSettings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+
 
 # Create a global settings instance
 settings = SlackSettings()

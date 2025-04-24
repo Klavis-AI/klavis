@@ -1,30 +1,22 @@
-import logging
-from urllib.parse import urlparse
-from typing import Optional, Dict, Any, AsyncGenerator, List, Tuple
-from contextlib import AsyncExitStack
-import uuid
-import os
 import asyncio
-import time
 import base64
+import logging
+import os
+import uuid
+from contextlib import AsyncExitStack
+from typing import Any, AsyncGenerator, Dict, List, Tuple, Optional
+from urllib.parse import urlparse
+
 import markitdown
-from mcp.client.session import ClientSession
-from mcp.client.sse import sse_client
-from mcp.client.stdio import StdioServerParameters, stdio_client
-
-from llms import (
-    BaseLLM,
-    LLMMessageFormat,
-    ChatMessage,
-    MessageRole,
-    ToolResultContent,
-    ContentType,
-    Conversation,
-)
-
+import time
 from dotenv import load_dotenv
-from llms.anthropic import Anthropic
-from llms.openai import OpenAI
+from mcp import ClientSession, StdioServerParameters, stdio_client
+from mcp.client.sse import sse_client
+
+from mcp_clients.llms.anthropic import Anthropic
+from mcp_clients.llms.base import Conversation, BaseLLM, LLMMessageFormat, ContentType, MessageRole, \
+    ToolResultContent, ChatMessage
+from mcp_clients.llms.openai import OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -48,11 +40,11 @@ class MCPClient:
     """
 
     def __init__(
-        self,
-        platform_name: str = None,
-        api_name: str = None,
-        provider: str = None,
-        conversation: Conversation = None,
+            self,
+            platform_name: str = None,
+            api_name: str = None,
+            provider: str = None,
+            conversation: Conversation = None,
     ):
         """
         Initialize the MCP client.
@@ -79,9 +71,9 @@ class MCPClient:
         # Set platform context if provided
         if platform_name:
             self.llm_client.set_platform(platform_name)
-            
+
     def _initialize_llm_client(
-        self, api_name: str = None, provider: str = None
+            self, api_name: str = None, provider: str = None
     ) -> BaseLLM:
         """
         Initialize LLM client based on provided provider and set model based on api_name
@@ -126,12 +118,12 @@ class MCPClient:
         """
         if not isinstance(tool_args, dict):
             return tool_args
-            
+
         redacted_args = {}
         for key, value in tool_args.items():
             # Check if this parameter name matches any sensitive patterns
             is_sensitive = any(param in key.lower() for param in SENSITIVE_PARAMS)
-            
+
             if is_sensitive and isinstance(value, str):
                 # Redact the value, preserving first and last two characters if long enough
                 if len(value) > 8:
@@ -143,11 +135,11 @@ class MCPClient:
                 redacted_args[key] = self._redact_sensitive_args(value)
             else:
                 redacted_args[key] = value
-                
+
         return redacted_args
 
     async def connect_to_server(
-        self, url: str, args: list = None, env: Dict[str, str] = None
+            self, url: str, args: list = None, env: Dict[str, str] = None
     ) -> Tuple[str, Optional[str]]:
         """
         Connect to an MCP server via URL
@@ -206,7 +198,7 @@ class MCPClient:
             if server_id in self.exit_stacks:
                 await self.exit_stacks[server_id].aclose()
                 del self.exit_stacks[server_id]
-            logger.error(f"Error connecting to MCP server: {e}")
+            logger.exception(f"Error connecting to MCP server: {e}")
             return f"Error connecting to MCP server: {str(e)}", None
 
     async def refresh_tool_cache(self, server_id: str) -> List[Dict[str, Any]]:
@@ -252,7 +244,7 @@ class MCPClient:
             return []
 
     async def get_tools_for_server(
-        self, server_id: str, use_cache: bool = True
+            self, server_id: str, use_cache: bool = True
     ) -> List[Dict[str, Any]]:
         """
         Get the current tools available from a specific server
@@ -337,7 +329,7 @@ class MCPClient:
         return None
 
     async def _process_tool_call(
-        self, tool_name: str, arguments: dict[str, Any] | None = None
+            self, tool_name: str, arguments: dict[str, Any] | None = None
     ) -> AsyncGenerator[str, None]:
         """
         Process a tool call and return the result
@@ -369,7 +361,7 @@ class MCPClient:
             message_split_token = self.llm_client.get_message_split_token()
             # Create a task for the actual tool call
             tool_call_task = asyncio.create_task(session.call_tool(tool_name, arguments))
-            
+
             # Wait for the tool call to complete with progress updates every 30 seconds
             start_time = asyncio.get_event_loop().time()
             while not tool_call_task.done():
@@ -383,7 +375,7 @@ class MCPClient:
                     elapsed = int(asyncio.get_event_loop().time() - start_time)
                     logger.info(f"Tool call {tool_name} still running after {elapsed} seconds")
                     yield f"\n<special>[Tool {tool_name} still running... ({elapsed} seconds elapsed)]{message_split_token}\n"
-            
+
             # If we reach here, the task completed
             yield str(await tool_call_task)
         except Exception as e:
@@ -405,9 +397,9 @@ class MCPClient:
         )
 
     async def process_query_stream(
-        self,
-        messages_history: List[ChatMessage],
-        store_new_messages_callback: callable = None,
+            self,
+            messages_history: List[ChatMessage],
+            store_new_messages_callback: callable = None,
     ) -> AsyncGenerator[str, None]:
         """
         Process a query using Claude and available tools with streaming responses
@@ -441,7 +433,7 @@ class MCPClient:
             start_time = time.time()
             # Use the LLMClient to create the streaming generator
             async for chunk_text in self.llm_client.create_streaming_generator(
-                provider_messages, available_tools, text_resource_contents
+                    provider_messages, available_tools, text_resource_contents
             ):
                 yield chunk_text
             logger.info(f"LLM took {time.time() - start_time} seconds to complete")
@@ -475,7 +467,7 @@ class MCPClient:
                         # Redact sensitive information from tool arguments before displaying
                         display_args = self._redact_sensitive_args(tool_args) if tool_args else None
                         yield f"\n<special>[Calling tool {tool_name} with arguments {str(display_args)[:100]}...]{message_split_token}\n"
-                        
+
                         # Process tool call with progress updates
                         result_text = ""
                         start_time = time.time()
@@ -488,7 +480,7 @@ class MCPClient:
                                 result_text = update
                         logger.info(f"Tool {tool_name} took {time.time() - start_time} seconds to complete")
                         logger.info(f"Tool result: {result_text}")
-                        
+
                         # Add tool result to next user message
                         tool_result_content.append(
                             ToolResultContent(
@@ -505,7 +497,7 @@ class MCPClient:
         if store_new_messages_callback:
             start_time = time.time()
             await store_new_messages_callback(
-                self.conversation.id, chat_messages[messages_history_len - 1 :]
+                self.conversation.id, chat_messages[messages_history_len - 1:]
             )
             logger.info(f"Store new messages took {time.time() - start_time} seconds to complete")
 
@@ -530,7 +522,7 @@ class MCPClient:
         """
         return self.llm_client.get_message_split_token()
 
-    async def list_all_resources(self) -> List[Dict[str, Any]]: 
+    async def list_all_resources(self) -> List[Dict[str, Any]]:
         """
         List all available resources from all connected servers
 
@@ -542,7 +534,7 @@ class MCPClient:
             for server_id in self.sessions.keys():
                 session = self.sessions[server_id]
                 response = await session.list_resources()
-                
+
                 # Handle direct resources
                 if hasattr(response, "resources"):
                     resources.extend([
@@ -579,16 +571,16 @@ class MCPClient:
         try:
             session = self.sessions[server_id]
             response = await session.read_resource(uri)
-            
+
             # Process the resource contents
             contents = []
-            
+
             for content in response.contents:
                 content_data = {
                     "uri": content.uri,
                     "mimeType": content.mimeType if hasattr(content, "mimeType") else None,
                 }
-                
+
                 # Handle text or binary content
                 if hasattr(content, "text") and content.text is not None:
                     content_data["text"] = content.text
@@ -602,12 +594,12 @@ class MCPClient:
                         content_data["text"] = markdown_text
                     else:
                         pass
-                    
+
                 contents.append(content_data)
-                
+
             logger.info(f"Successfully read resource {uri} from server {server_id}")
             return contents
-            
+
         except Exception as e:
             logger.error(f"Error reading resource {uri} from server {server_id}: {str(e)}")
             return []

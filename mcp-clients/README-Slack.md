@@ -5,9 +5,43 @@ This guide will help you set up your own Slack app and connect it to our applica
 ## Prerequisites
 
 - A Slack workspace where you have admin permissions
-- Python 3.8+ installed on your machine
+- Python 3.12+ installed on your machine
+- uv 0.6.14+ installed on your machine
 - Git repository cloned locally
 - ngrok installed (for local development)
+
+## Setup
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone <your-repository-url> # Replace with the actual URL
+    cd klavis/mcp-clients # Navigate to the root directory of the project
+    ```
+
+2.  **Environment Variables:**
+
+   - Create a file named `.env` in the root directory of mcp-clients (`klavis/mcp-clients`) using the `.env.example` file.
+   - Replace the placeholder with actual values.
+
+3.  **Local MCP Servers Configuration:**
+
+   - When running locally (`USE_PRODUCTION_DB=False`), the bot reads the list of MCP server URLs to connect to from `src/mcp_clients/local_mcp_servers.json`.
+   - Create this file if it doesn't exist.
+   - Add the URLs of the MCP servers you want the local bot to connect to.
+
+    ```json
+    // mcp_clients/local_mcp_servers.json example
+    {
+      "server_urls": [
+        "http://localhost:8000/sse"
+        // Add other local or remote MCP server SSE endpoints here
+      ]
+    }
+    ```
+
+   - Replace `http://localhost:8000/sse` with the actual URL of your running MCP server(s).
+
 
 ## Step 1: Environment Setup
 
@@ -43,15 +77,36 @@ This guide will help you set up your own Slack app and connect it to our applica
 
 ## Step 4: Start Local Development Environment
 
-1. Run your application (default port is 8080):
-   ```bash
-   python mcp_clients/slack_bot.py
-   ```
-2. Start ngrok to create a secure tunnel to your local server:
-   ```bash
-   ngrok http 8080
-   ```
-3. Copy the HTTPS URL provided by ngrok (e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
+1.  **Create and Activate Virtual Environment:**
+    ```bash
+    # Make sure to navigate to the root directory of the project (skip if already done)
+    cd klavis/mcp-clients
+    ```
+    ```bash
+    # Create environment (only needs to be done once)
+    uv venv
+    # Activate environment
+    # Windows (Command Prompt/PowerShell):
+    .venv\Scripts\activate
+    # macOS/Linux (bash/zsh):
+    source .venv/bin/activate
+    ```
+2.  **Install Dependencies:**
+    ```bash
+    uv sync
+    ```
+3.  **Run the Bot (default port is 8080):**
+    Ensure your `.env` file exists in the `klavis/mcp-clients` root and `src/mcp_clients/local_mcp_servers.json` is configured.
+    ```bash
+    uv run slack_bot
+    ```
+    
+4.  **Start ngrok to create a secure tunnel to your local server:**
+    ```bash
+    ngrok http 8080
+    ```
+ 
+5.  **Copy the HTTPS URL provided by ngrok**(e.g., `https://7c2b-2601-645-8400-6db0-c0b0-639c-bb9d-5d8c.ngrok-free.app`)
 
 ## Step 5: Configure Event Subscriptions
 

@@ -1,8 +1,11 @@
 import logging
 import uuid
-from typing import Optional, Dict, Any, AsyncGenerator, List, Union
+from typing import Optional, Dict, Any, AsyncGenerator, List
+
+import time
 from openai import AsyncOpenAI
-from llms import (
+
+from mcp_clients.llms.base import (
     BaseLLM,
     ChatMessage,
     MessageRole,
@@ -11,7 +14,7 @@ from llms import (
     ToolResultContent,
     ContentType,
 )
-import time
+
 # Configure logging
 logger = logging.getLogger("openai_client")
 
@@ -23,16 +26,18 @@ class OpenAI(BaseLLM):
     """
 
     def __init__(
-        self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+            self,
+            api_key: Optional[str] = None,
+            model: Optional[str] = None,
+            base_url: Optional[str] = None,
     ):
         """
         Initialize the OpenAI client
 
         Args:
-            config: Optional configuration for OpenAI
+            api_key: Optional configuration for OpenAI
+            model: Optional model of GenAI
+            base_url: Optional url to connect to given api_key GenAI
         """
         super().__init__()
         self.openai_client = AsyncOpenAI(api_key=api_key, base_url=base_url)
@@ -40,7 +45,7 @@ class OpenAI(BaseLLM):
         self.max_tokens = self.config.max_tokens
 
     async def create_streaming_generator(
-        self, messages: list, available_tools: list, resources: list = None
+            self, messages: list, available_tools: list, resources: list = None
     ) -> AsyncGenerator[str, None]:
         """
         Create an OpenAI streaming generator with the given messages and tools.
@@ -64,7 +69,8 @@ class OpenAI(BaseLLM):
 
         system_message_content = self.platform_config.get("system_message")
         if resources:
-            system_message_content += "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n" + "\n\n".join(resources)
+            system_message_content += "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n" + "\n\n".join(
+                resources)
         if system_message_content and not messages[0].get("role") == "system":
             request_params["messages"].insert(
                 0, {"role": "system", "content": system_message_content}
@@ -128,8 +134,8 @@ class OpenAI(BaseLLM):
                             }
                         # Accumulate arguments string
                         if (
-                            tool_call_chunk.function
-                            and tool_call_chunk.function.arguments
+                                tool_call_chunk.function
+                                and tool_call_chunk.function.arguments
                         ):
                             accumulated_tool_calls[index]["function"][
                                 "arguments"
@@ -164,7 +170,7 @@ class OpenAI(BaseLLM):
             yield f"\n[Error in OpenAI streaming process: {str(e)}]\n"
 
     async def non_streaming_response(
-        self, messages: list, available_tools: Optional[list] = None
+            self, messages: list, available_tools: Optional[list] = None
     ) -> Dict[str, Any]:
         """
         Get a non-streaming response from OpenAI LLM.
@@ -222,7 +228,7 @@ class OpenAI(BaseLLM):
         Convert a list of OpenAI format messages to ChatMessage format
 
         Args:
-            openai_messages: List of messages in OpenAI format
+            raw_messages: List of messages in OpenAI format
 
         Returns:
             List of ChatMessages
@@ -246,9 +252,8 @@ class OpenAI(BaseLLM):
                         parsed_arguments = {}
 
                         if isinstance(arguments, str):
+                            import json
                             try:
-                                import json
-
                                 parsed_arguments = json.loads(arguments)
                             except json.JSONDecodeError as e:
                                 logger.error(
@@ -269,9 +274,9 @@ class OpenAI(BaseLLM):
 
             # Handle tool results
             if (
-                role == MessageRole.TOOL
-                and openai_message.get("content")
-                and openai_message.get("tool_call_id")
+                    role == MessageRole.TOOL
+                    and openai_message.get("content")
+                    and openai_message.get("tool_call_id")
             ):
                 content_list.append(
                     ToolResultContent(
@@ -313,7 +318,7 @@ class OpenAI(BaseLLM):
                         ),
                     }
                 )
-            
+
             if chat_message.role == MessageRole.USER:
                 str_content = ""
                 for content in chat_message.content:

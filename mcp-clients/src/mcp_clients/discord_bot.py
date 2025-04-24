@@ -1,21 +1,19 @@
-import os
-import logging
 import asyncio
-from typing import Dict, Any, List, Optional
+import logging
+import os
+from typing import Any, List, Optional
 from urllib.parse import quote
 
-from mcp_client import MCPClient
-
 import discord
-from discord.ext import commands
 from discord import Embed, Color, DMChannel, Thread
+from discord.ext import commands
 from discord.ui import View
-
 from dotenv import load_dotenv
 
-from base_bot import BaseBot, BotContext
-from llms import ChatMessage, MessageRole, TextContent, FileContent, Conversation
-from config import USE_PRODUCTION_DB
+from mcp_clients.base_bot import BaseBot, BotContext
+from mcp_clients.config import USE_PRODUCTION_DB
+from mcp_clients.llms.base import ChatMessage, MessageRole, TextContent, FileContent, Conversation
+from mcp_clients.mcp_client import MCPClient
 
 # Load environment variables
 load_dotenv()
@@ -48,13 +46,13 @@ class DiscordBotContext(BotContext):
     """
 
     def __init__(
-        self,
-        platform_name: str,
-        user_id: str,
-        is_dm: bool,
-        channel,
-        user_message,
-        thread,
+            self,
+            platform_name: str,
+            user_id: str,
+            is_dm: bool,
+            channel,
+            user_message,
+            thread,
     ):
         """
         Initialize the Discord bot context.
@@ -93,9 +91,9 @@ class DiscordBotContext(BotContext):
             String representation of the thread ID, or None if not applicable
         """
         if (
-            self.user_message
-            and hasattr(self.user_message, "thread")
-            and self.user_message.thread
+                self.user_message
+                and hasattr(self.user_message, "thread")
+                and self.user_message.thread
         ):
             return str(self.user_message.thread.id)
         return None
@@ -196,7 +194,7 @@ class DiscordBot(BaseBot):
                             context,
                             f"You need to link your {context.platform_name} account with our website to use the AI assistant features. I have sent you a Direct Message to link your account.",
                         )
-        
+
                     try:
                         await message.author.send(
                             f"You need to link your {context.platform_name} account with our website to use the AI assistant features using the login button below.",
@@ -210,7 +208,7 @@ class DiscordBot(BaseBot):
                         )
                     except Exception as e:
                         logger.error(f"Error sending DM: {e}", exc_info=True)
-        
+
                     return
 
                 context.mcp_client_id = verification_result["mcp_client_id"]
@@ -225,7 +223,7 @@ class DiscordBot(BaseBot):
                         view=self.create_config_view(),
                     )
                     # Don't return here to allow processing with 0 MCP server
-        
+
                 usage_under_limit = await self.check_and_update_usage_limit(context)
                 if not usage_under_limit:
                     await self.send_message(
@@ -301,11 +299,11 @@ class DiscordBot(BaseBot):
             await interaction.response.send_message(embed=welcome_embed, view=view)
 
     async def send_message(
-        self,
-        context: DiscordBotContext,
-        message: str,
-        view=None,
-        embed=None,
+            self,
+            context: DiscordBotContext,
+            message: str,
+            view=None,
+            embed=None,
     ) -> Any:
         """
         Send a message on Discord.
@@ -325,10 +323,10 @@ class DiscordBot(BaseBot):
             return await context.channel.send(message, view=view, embed=embed)
 
     async def process_query_with_streaming(
-        self,
-        mcp_client: MCPClient,
-        messages_history: List[ChatMessage],
-        context: DiscordBotContext,
+            self,
+            mcp_client: MCPClient,
+            messages_history: List[ChatMessage],
+            context: DiscordBotContext,
     ) -> Any:
         """
         Process a query with streaming in Discord-specific way.
@@ -350,8 +348,8 @@ class DiscordBot(BaseBot):
                 asyncio.timeout(200.0),
             ):
                 async for chunk in mcp_client.process_query_stream(
-                    messages_history,
-                    self.store_new_messages if USE_PRODUCTION_DB else None,
+                        messages_history,
+                        self.store_new_messages if USE_PRODUCTION_DB else None,
                 ):
                     buffer += chunk
                     # Check if the chunk contains a message split token
@@ -416,9 +414,9 @@ class DiscordBot(BaseBot):
             return await self.send_message(context, f"Error processing query: {str(e)}")
 
     def create_login_view(
-        self,
-        platform_username: str,
-        platform_user_id: str,
+            self,
+            platform_username: str,
+            platform_user_id: str,
     ) -> View:
         """
         Create a login config view with buttons
@@ -537,7 +535,7 @@ class DiscordBot(BaseBot):
         await channel.send(embed=welcome_embed, view=view)
 
     async def get_messages_history(
-        self, conversation: Conversation, context: BotContext, limit: int = 6
+            self, conversation: Conversation, context: BotContext, limit: int = 6
     ) -> List[ChatMessage]:
         """
         Get the previous messages for the conversation.
@@ -593,7 +591,7 @@ class DiscordBot(BaseBot):
         return chat_messages
 
     def create_tool_call_embed(
-        self, special_content: str, title: str = "📲 MCP Server Call"
+            self, special_content: str, title: str = "📲 MCP Server Call"
     ) -> Embed:
         """
         Create an embed for tool calls with special handling for long-running tools.
@@ -627,6 +625,7 @@ class DiscordBot(BaseBot):
 
     def run(self):
         """Run the Discord bot"""
+        print(DISCORD_TOKEN)
         self.client.run(DISCORD_TOKEN)
 
 
