@@ -1,24 +1,26 @@
 """
 Handlers for Slack message events, including app mentions and direct messages.
 """
-import logging
 import asyncio
-from typing import Dict, Any, List
 import logging
+from typing import Dict, Any, List
 from urllib.parse import quote
-from slack.settings import settings
-from slack.context import SlackBotContext
-from config import USE_PRODUCTION_DB
+
+from mcp_clients.config import USE_PRODUCTION_DB
+from mcp_clients.slack.context import SlackBotContext
+from mcp_clients.slack.settings import settings
 
 logger = logging.getLogger("slack_bot")
 
 if USE_PRODUCTION_DB:
-    from database.database import get_mcp_client_id_by_slack_info
+    from mcp_clients.database.database import get_mcp_client_id_by_slack_info
 else:
     # Define dummy function when database is not used
     async def get_mcp_client_id_by_slack_info(team_id, user_id):
-        logger.info(f"Database operations skipped: get_mcp_client_id_by_slack_info for team_id={team_id}, user_id={user_id}")
+        logger.info(
+            f"Database operations skipped: get_mcp_client_id_by_slack_info for team_id={team_id}, user_id={user_id}")
         return None
+
 
 def create_login_blocks(platform_username: str, platform_user_id: str, team_id: str = None) -> List[Dict[str, Any]]:
     """
@@ -34,15 +36,15 @@ def create_login_blocks(platform_username: str, platform_user_id: str, team_id: 
     """
     # Construct login URL with query parameters
     login_url = f"{settings.WEBSITE_URL}/auth/sign-in"
-    
+
     # URL encode the parameters
     encoded_username = quote(platform_username)
     login_url = f"{login_url}?platform=slack&external_user_id={platform_user_id}&external_username={encoded_username}"
-    
+
     # Add team_id if available
     if team_id:
         login_url = f"{login_url}&external_id={team_id}"
-    
+
     # Create blocks with login button
     return [
         {
@@ -69,7 +71,8 @@ def create_login_blocks(platform_username: str, platform_user_id: str, team_id: 
             ]
         }
     ]
-    
+
+
 def create_connect_mcp_server_blocks(mcp_client_id: str = None) -> List[Dict[str, Any]]:
     """
     Create Slack blocks with warning and a button to connect to MCP servers
@@ -82,11 +85,11 @@ def create_connect_mcp_server_blocks(mcp_client_id: str = None) -> List[Dict[str
     """
     # Construct configure URL
     configure_url = f"{settings.WEBSITE_URL}/home"
-    
+
     # Add mcp_client_id as path parameter if available
     if mcp_client_id:
         configure_url = f"{configure_url}/mcp-client/{mcp_client_id}"
-    
+
     # Create blocks with warning and connect button
     return [
         {
@@ -125,12 +128,13 @@ def create_connect_mcp_server_blocks(mcp_client_id: str = None) -> List[Dict[str
         },
     ]
 
+
 def register_message_handlers(app, bot):
     """Register all message-related event handlers with the Slack app."""
     # Add user lock to prevent concurrent message processing
     if not hasattr(bot, 'user_locks'):
         bot.user_locks = {}
-    
+
     async def add_loading_reaction(client, channel_id, message_ts):
         """Add loading reaction to a message"""
         try:
@@ -141,7 +145,7 @@ def register_message_handlers(app, bot):
             )
         except Exception as e:
             logger.error(f"Error adding loading reaction: {e}")
-    
+
     async def remove_loading_reaction(client, channel_id, message_ts):
         """Remove loading reaction from a message"""
         try:
@@ -152,30 +156,30 @@ def register_message_handlers(app, bot):
             )
         except Exception as e:
             logger.error(f"Error removing loading reaction: {e}")
-    
+
     @app.event("app_mention")
     async def handle_app_mention(event, context, client, ack, logger):
         """Handle mentions of the bot in public channels"""
         await ack()
-        
+
         # Retrieve the bot token from the context provided by the authorize method
         bot_token = context.get("bot_token")
         if not bot_token:
             logger.error("No bot token available in context")
             return
-            
+
         user_id = event.get("user")
         text = event.get("text", "")
         channel_id = event.get("channel")
         thread_ts = event.get("thread_ts", event.get("ts"))
         message_ts = event.get("ts")
-        
+
         await add_loading_reaction(client, channel_id, message_ts)
-        
+
         # Check if user has a message currently being processed
         if user_id not in bot.user_locks:
             bot.user_locks[user_id] = asyncio.Lock()
-            
+
         # Try to acquire the lock, but don't block if it's already locked
         if bot.user_locks[user_id].locked():
             try:
@@ -188,7 +192,7 @@ def register_message_handlers(app, bot):
             except Exception as e:
                 logger.error(f"Error sending busy message: {e}")
             return
-        
+
         # Extract clean text from mention (remove the bot mention)
         clean_text = text
         # Find the bot mention pattern and remove it
@@ -196,9 +200,9 @@ def register_message_handlers(app, bot):
             parts = text.split(">", 1)
             if len(parts) > 1:
                 clean_text = parts[1].strip()
-        
+
         logger.info(f"--- Received app mention from user {user_id} in channel {channel_id}: {clean_text}")
-        
+
         # Process the message with the lock acquired
         try:
             async with asyncio.timeout(200), bot.user_locks[user_id]:
@@ -226,10 +230,10 @@ def register_message_handlers(app, bot):
                     except Exception as e:
                         logger.error(f"Error getting user info: {e}")
                         username = user_id
-                    
+
                     # Get team ID from context
                     team_id = context.get("team_id")
-                    
+
                     try:
                         # Send login blocks as a DM to the user
                         await client.chat_postMessage(
@@ -255,14 +259,15 @@ def register_message_handlers(app, bot):
                 if not server_urls:
                     team_id = context.get("team_id")
                     mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
-                    
+
                     await client.chat_postMessage(
                         channel=channel_id,
                         thread_ts=thread_ts,
-                        blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
+                        blocks=create_connect_mcp_server_blocks(
+                            mcp_client_id or verification_result.get("mcp_client_id"))
                     )
                     # Don't return here to allow processing with 0 MCP server
-                    
+
                 if clean_text:
                     usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
                     if not usage_under_limit:
@@ -272,7 +277,7 @@ def register_message_handlers(app, bot):
                         )
                         await remove_loading_reaction(client, channel_id, message_ts)
                         return
-                        
+
                     try:
                         mcp_client = await bot.initialize_mcp_client(
                             context=slack_context, server_urls=server_urls
@@ -288,11 +293,13 @@ def register_message_handlers(app, bot):
                         await bot.send_message(slack_context, f"Error processing query: {str(e)}")
                     finally:
                         await remove_loading_reaction(client, channel_id, message_ts)
-                        logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {clean_text}")
+                        logger.info(
+                            f" --- Completed processing query from user {user_id} in channel {channel_id}: {clean_text}")
                         await mcp_client.cleanup()
 
         except asyncio.TimeoutError:
-            logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
+            logger.warning(
+                f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
             try:
                 await client.chat_postMessage(
                     channel=channel_id,
@@ -305,32 +312,33 @@ def register_message_handlers(app, bot):
             # Ensure reaction is removed regardless of timeout or success/failure
             await remove_loading_reaction(client, channel_id, message_ts)
             # Lock is released automatically by async with when exiting the block or due to timeout/exception
-    
+
     @app.event("message")
     async def handle_direct_message(event, context, client, ack, logger):
         """Handle direct messages to the bot"""
         # Only process DMs, not messages in channels
         if event.get("channel_type") == "im" and not event.get("bot_id"):
             await ack()
-            
+
             # Retrieve the bot token from the context provided by the authorize method
             bot_token = context.get("bot_token")
             if not bot_token:
                 logger.error("No bot token available in context")
                 return
-                
+
             user_id = event.get("user")
             text = event.get("text", "")
             channel_id = event.get("channel")
-            thread_ts = event.get("thread_ts", event.get("ts")) # since we reply DM in thread, we set thread_ts to event ts
+            thread_ts = event.get("thread_ts",
+                                  event.get("ts"))  # since we reply DM in thread, we set thread_ts to event ts
             message_ts = event.get("ts")
-            
+
             await add_loading_reaction(client, channel_id, message_ts)
-            
+
             # Check if user has a message currently being processed
             if user_id not in bot.user_locks:
                 bot.user_locks[user_id] = asyncio.Lock()
-                
+
             # Try to acquire the lock, but don't block if it's already locked
             if bot.user_locks[user_id].locked():
                 try:
@@ -342,7 +350,7 @@ def register_message_handlers(app, bot):
                 except Exception as e:
                     logger.error(f"Error sending busy message: {e}")
                 return
-            
+
             logger.info(f"---Received DM from user {user_id} in channel {channel_id}: {text}")
             try:
                 # Process the message with the lock acquired
@@ -371,10 +379,10 @@ def register_message_handlers(app, bot):
                         except Exception as e:
                             logger.error(f"Error getting user info: {e}")
                             username = user_id
-                        
+
                         # Get team ID from context
                         team_id = context.get("team_id")
-                        
+
                         # Use create_login_blocks function to generate blocks with proper login URL
                         await client.chat_postMessage(
                             channel=channel_id,
@@ -391,14 +399,15 @@ def register_message_handlers(app, bot):
                     if not server_urls:
                         team_id = context.get("team_id")
                         mcp_client_id = await get_mcp_client_id_by_slack_info(team_id, user_id)
-                        
+
                         await client.chat_postMessage(
                             channel=channel_id,
                             thread_ts=thread_ts,
-                            blocks=create_connect_mcp_server_blocks(mcp_client_id or verification_result.get("mcp_client_id"))
+                            blocks=create_connect_mcp_server_blocks(
+                                mcp_client_id or verification_result.get("mcp_client_id"))
                         )
                         # Don't return here to allow processing with 0 MCP server
-                    
+
                     # Process the message content
                     if text:
                         usage_under_limit = await bot.check_and_update_usage_limit(slack_context)
@@ -409,7 +418,7 @@ def register_message_handlers(app, bot):
                             )
                             await remove_loading_reaction(client, channel_id, message_ts)
                             return
-                            
+
                         try:
                             mcp_client = await bot.initialize_mcp_client(
                                 context=slack_context, server_urls=server_urls
@@ -425,10 +434,12 @@ def register_message_handlers(app, bot):
                             await bot.send_message(slack_context, f"Error processing query: {str(e)}")
                         finally:
                             await remove_loading_reaction(client, channel_id, message_ts)
-                            logger.info(f" --- Completed processing query from user {user_id} in channel {channel_id}: {text}")
+                            logger.info(
+                                f" --- Completed processing query from user {user_id} in channel {channel_id}: {text}")
                             await mcp_client.cleanup()
             except asyncio.TimeoutError:
-                logger.warning(f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
+                logger.warning(
+                    f"Processing timed out for user {user_id} in channel {channel_id} after 200 seconds. Lock released.")
                 try:
                     await client.chat_postMessage(
                         channel=channel_id,

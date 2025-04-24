@@ -1,18 +1,17 @@
-import os
-import logging
 import asyncio
-from typing import Dict, Any, List, Optional
 import json
+import logging
+from typing import Any, List, Optional
 
-from fastapi import FastAPI, Request, Depends, HTTPException, status, BackgroundTasks
+from fastapi import FastAPI, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from mcp_client import MCPClient
-from base_bot import BaseBot, BotContext
-from llms import ChatMessage, MessageRole, TextContent, Conversation
-from config import USE_PRODUCTION_DB
+from mcp_clients.base_bot import BotContext, BaseBot
+from mcp_clients.config import USE_PRODUCTION_DB
+from mcp_clients.llms.base import ChatMessage, Conversation, MessageRole, TextContent
+from mcp_clients.mcp_client import MCPClient
 
 # Configure logging
 logging.basicConfig(
@@ -49,11 +48,11 @@ class WebBotContext(BotContext):
     """
 
     def __init__(
-        self,
-        platform_name: str,
-        user_id: str,
-        conversation_id: Optional[str] = None,
-        user_message: Any = None,
+            self,
+            platform_name: str,
+            user_id: str,
+            conversation_id: Optional[str] = None,
+            user_message: Any = None,
     ):
         """
         Initialize the Web bot context.
@@ -106,9 +105,9 @@ class WebBot(BaseBot):
         self.user_locks = {}
 
     async def send_message(
-        self,
-        context: WebBotContext,
-        message: str,
+            self,
+            context: WebBotContext,
+            message: str,
     ) -> Any:
         """
         Send a message via web API.
@@ -127,10 +126,10 @@ class WebBot(BaseBot):
         return {"message": message}
 
     async def process_query_with_streaming(
-        self,
-        mcp_client: MCPClient,
-        messages_history: List[ChatMessage],
-        context: WebBotContext,
+            self,
+            mcp_client: MCPClient,
+            messages_history: List[ChatMessage],
+            context: WebBotContext,
     ) -> StreamingResponse:
         """
         Process a query with streaming in web-specific way.
@@ -149,8 +148,8 @@ class WebBot(BaseBot):
             try:
                 async with asyncio.timeout(200):
                     async for chunk in mcp_client.process_query_stream(
-                        messages_history,
-                        self.store_new_messages if USE_PRODUCTION_DB else None,
+                            messages_history,
+                            self.store_new_messages if USE_PRODUCTION_DB else None,
                     ):
                         # Check if this is a special message
                         if "<special>" in chunk:
@@ -176,7 +175,7 @@ class WebBot(BaseBot):
         )
 
     async def get_messages_history(
-        self, conversation: Conversation, context: WebBotContext, limit: int = 6
+            self, conversation: Conversation, context: WebBotContext, limit: int = 6
     ) -> List[ChatMessage]:
         """
         Get the previous messages for the conversation.
@@ -191,7 +190,7 @@ class WebBot(BaseBot):
         """
 
         if USE_PRODUCTION_DB:
-            from database.database import get_messages_for_conversation
+            from mcp_clients.database.database import get_messages_for_conversation
 
             # Get the messages from the conversation
             # Limit the number of messages, considering the tool calls, we multiply by 3

@@ -1,9 +1,9 @@
+import asyncio
 import logging
 import os
-import time
-import asyncio
 from typing import Any, Dict, List, Optional
 
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
@@ -11,19 +11,18 @@ from slack_bolt.async_app import AsyncApp
 from slack_bolt.authorization import AuthorizeResult
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
-import uvicorn
 
-from base_bot import BaseBot
-from llms import ChatMessage, MessageRole, TextContent, FileContent, Conversation
-from mcp_client import MCPClient
-from slack.context import SlackBotContext
-from slack.event_routes import LoggingMiddleware, setup_http_routes
-from slack.oauth_routes import setup_oauth_routes
-from slack.settings import settings
-from config import USE_PRODUCTION_DB
+from mcp_clients.base_bot import BaseBot
+from mcp_clients.config import USE_PRODUCTION_DB
+from mcp_clients.llms.base import ChatMessage, Conversation, MessageRole, TextContent, FileContent
+from mcp_clients.mcp_client import MCPClient
+from mcp_clients.slack.context import SlackBotContext
+from mcp_clients.slack.event_routes import LoggingMiddleware, setup_http_routes
+from mcp_clients.slack.oauth_routes import setup_oauth_routes
+from mcp_clients.slack.settings import settings
 
 if USE_PRODUCTION_DB:
-    from database.database import get_slack_auth_metadata
+    from mcp_clients.database.database import get_slack_auth_metadata
 else:
     # Define dummy function when database is not used
     async def get_slack_auth_metadata(team_id):
@@ -49,16 +48,17 @@ LONG_RUNNING_TOOLS = [
     "firecrawl_deep_research",
 ]
 
-
 app = FastAPI(title="Slack MCP Bot")
 
 # Add logging middleware
 app.add_middleware(LoggingMiddleware)
 
+
 # Add a health check endpoint
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "ok"}
+
 
 class SlackBot(BaseBot):
     """
@@ -82,7 +82,7 @@ class SlackBot(BaseBot):
 
         # Create slack handler
         self.slack_handler: AsyncSlackRequestHandler = AsyncSlackRequestHandler(self.app)
-        
+
         # Add user lock to prevent concurrent message processing
         self.user_locks = {}
 
@@ -91,7 +91,7 @@ class SlackBot(BaseBot):
 
         # Register HTTP routes
         self._setup_http_routes()
-        
+
         # Register event handlers
         self._setup_event_handlers()
 
@@ -100,22 +100,23 @@ class SlackBot(BaseBot):
         Set up OAuth routes for Slack app installation
         """
         setup_oauth_routes(router=self.router)
-        
+
     def _setup_http_routes(self) -> None:
         """Set up HTTP routes for the FastAPI integration"""
         setup_http_routes(router=self.router, slack_handler=self.slack_handler)
-        
+
     def _setup_event_handlers(self) -> None:
         """Set up event handlers for the Slack app"""
-        from slack.message_handlers import register_message_handlers
-        from slack.interactive_handlers import register_interactive_handlers
+        from mcp_clients.slack.message_handlers import register_message_handlers
+        from mcp_clients.slack.interactive_handlers import register_interactive_handlers
         # Register message handlers (app mentions and DMs)
         register_message_handlers(self.app, self)
         # Register interactive handlers (buttons, etc.)
         register_interactive_handlers(self.app)
 
     @staticmethod
-    async def authorize(enterprise_id: Optional[str], team_id: Optional[str], logger: logging.Logger) -> Optional[AuthorizeResult]:
+    async def authorize(enterprise_id: Optional[str], team_id: Optional[str], logger: logging.Logger) -> Optional[
+        AuthorizeResult]:
         """
         The function to authorize an incoming request from Slack by checking if there is a team/user in the installation data.
         
@@ -128,28 +129,28 @@ class SlackBot(BaseBot):
             AuthorizeResult: An authorization result object with the bot token information
         """
         logger.info(f"Authorizing Slack request for team_id={team_id}, enterprise_id={enterprise_id}")
-        
+
         if not team_id:
             logger.error("No team_id provided for authorization")
             return None
-            
+
         try:
             # Get auth data from database using the team_id
             auth_data = await get_slack_auth_metadata(team_id)
-            
+
             if not auth_data:
                 logger.error(f"No authorization information found for team {team_id}")
                 return None
-                
+
             # Extract token and IDs from auth metadata
             bot_token = auth_data.get("access_token")
             bot_id = auth_data.get("app_id")
             bot_user_id = auth_data.get("bot_user_id")
-            
+
             if not bot_token:
                 logger.error(f"No bot token found for team {team_id}")
                 return None
-                
+
             logger.info(f"Successfully authorized request for team {team_id}")
             return AuthorizeResult(
                 enterprise_id=enterprise_id,
@@ -161,7 +162,6 @@ class SlackBot(BaseBot):
         except Exception as e:
             logger.error(f"Error during Slack authorization: {str(e)}")
             return None
-
 
     async def send_message(self, context: SlackBotContext, message: str) -> Optional[Dict[str, Any]]:
         """
@@ -187,11 +187,11 @@ class SlackBot(BaseBot):
                 "channel": context.channel_id,
                 "text": message
             }
-            
+
             # Reply in thread if thread_ts is available (for both DMs and public channels)
             if context.thread_ts:
                 message_params["thread_ts"] = context.thread_ts
-            
+
             response = await client.chat_postMessage(**message_params)
             return response
         except SlackApiError as e:
@@ -211,7 +211,7 @@ class SlackBot(BaseBot):
         blocks = []
         header_text = ""
         fallback_text = ""
-        
+
         if special_content.startswith("[Calling tool"):
             # Extract tool name and arguments from the message
             content = special_content.strip("[]")
@@ -223,14 +223,14 @@ class SlackBot(BaseBot):
             except:
                 tool_name = ""
                 tool_args = content
-                
+
             header_text = "✨ MCP Server Call"
             fallback_text = "Tool call in progress"
-            
+
             waiting_message = "⏳ _Working on your request..._"
             if any(tool in tool_name for tool in LONG_RUNNING_TOOLS):
                 waiting_message = f"⏳ _This tool may take several minutes to complete..._"
-            
+
             blocks = [
                 {
                     "type": "header",
@@ -269,7 +269,7 @@ class SlackBot(BaseBot):
         elif "still running" in special_content:
             header_text = "Tool Running"
             fallback_text = "Tool still running"
-            
+
             blocks = [
                 {
                     "type": "header",
@@ -303,7 +303,7 @@ class SlackBot(BaseBot):
             # Default case
             header_text = "Special Message"
             fallback_text = "Special message received"
-            
+
             blocks = [
                 {
                     "type": "header",
@@ -324,9 +324,9 @@ class SlackBot(BaseBot):
                     "type": "divider"
                 }
             ]
-        
+
         return blocks, fallback_text
-        
+
     async def _send_special_message(self, context: SlackBotContext, special_content: str) -> Optional[Dict[str, Any]]:
         """
         Send a special message with formatted blocks.
@@ -339,7 +339,7 @@ class SlackBot(BaseBot):
             Optional response from the API call
         """
         blocks, fallback_text = await self._create_special_message_blocks(special_content)
-        
+
         # Create a client for this specific operation
         if hasattr(context, 'bot_token') and context.bot_token:
             client = AsyncWebClient(token=context.bot_token)
@@ -354,10 +354,10 @@ class SlackBot(BaseBot):
         return None
 
     async def process_query_with_streaming(
-        self, 
-        mcp_client: MCPClient, 
-        messages_history: List[ChatMessage], 
-        context: SlackBotContext
+            self,
+            mcp_client: MCPClient,
+            messages_history: List[ChatMessage],
+            context: SlackBotContext
     ) -> Optional[Dict[str, Any]]:
         """
         Process a query with streaming in Slack-specific way.
@@ -377,7 +377,7 @@ class SlackBot(BaseBot):
             buffer = ""
             async with asyncio.timeout(settings.STREAMING_TIMEOUT):
                 async for chunk in mcp_client.process_query_stream(
-                    messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
+                        messages_history, self.store_new_messages if USE_PRODUCTION_DB else None
                 ):
                     buffer += chunk
                     # Check if the chunk contains a message split token
@@ -414,7 +414,8 @@ class SlackBot(BaseBot):
             logger.error(f"Error processing query: {e}", exc_info=True)
             return await self.send_message(context, f"Error processing query: {str(e)}")
 
-    async def get_messages_history(self, conversation: Conversation, slack_context: SlackBotContext, limit: int = 6) -> List[ChatMessage]:
+    async def get_messages_history(self, conversation: Conversation, slack_context: SlackBotContext, limit: int = 6) -> \
+            List[ChatMessage]:
         """
         Get the previous messages for the conversation.
         
@@ -439,7 +440,7 @@ class SlackBot(BaseBot):
                 "channel": slack_context.channel_id,
                 "limit": limit + 1
             }
-            
+
             # If thread_ts is provided, get messages from that thread
             if hasattr(slack_context, 'thread_ts') and slack_context.thread_ts:
                 params["ts"] = slack_context.thread_ts
@@ -452,7 +453,7 @@ class SlackBot(BaseBot):
                 logger.info(f"--- History response: {response}")
             if response["ok"]:
                 messages = response["messages"]
-                
+
                 # Process each message
                 for message in messages:
                     content = []
@@ -492,19 +493,19 @@ class SlackBot(BaseBot):
                         role=role,
                         content=content,
                     )
-                    
+
                     chat_messages.append(chat_message)
-                
+
             else:
                 logger.error(f"Error fetching Slack conversation history: {response.get('error', 'Unknown error')}")
-                
+
         except Exception as e:
             logger.error(f"Error retrieving previous messages: {e}", exc_info=True)
             # Return empty list in case of error
             return []
-            
+
         return chat_messages
-    
+
     def get_router(self) -> APIRouter:
         """
         Get the FastAPI router for Slack endpoints.
@@ -513,7 +514,7 @@ class SlackBot(BaseBot):
             FastAPI router with Slack endpoints
         """
         return self.router
-    
+
     def run(self, port: Optional[int] = None) -> None:
         """
         Run the bot (placeholder - overridden by FastAPI integration)
@@ -523,11 +524,15 @@ class SlackBot(BaseBot):
         """
         pass
 
-# Initialize the bot and register its router with the app
-bot = SlackBot()
-app.include_router(bot.get_router())
+
+def main():
+    # Initialize the bot and register its router with the app
+    bot = SlackBot()
+    app.include_router(bot.get_router())
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 # For local development
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port) 
+    main()
