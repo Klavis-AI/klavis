@@ -1,6 +1,6 @@
 # MCP Clients
 
-This directory contains the client implementations for interacting with the Multi-Compute Platform (MCP).
+This directory contains the client implementations for interacting with the Model Context Protocol (MCP).
 
 ## Available Clients
 

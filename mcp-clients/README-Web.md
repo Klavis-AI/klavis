@@ -1,6 +1,6 @@
 # Klavis AI Web Bot (MCP Client) - Local Development
 
-This document provides instructions for setting up and running the Klavis AI Web Bot locally. This bot acts as a FastAPI backend, serving as a client for the Multi-Compute Platform (MCP) and allowing web frontends to interact with connected MCP servers and utilize their tools.
+This document provides instructions for setting up and running the Klavis AI Web Bot locally. This bot acts as a FastAPI backend, serving as a client for the Model Context Protocol (MCP) and allowing web frontends to interact with connected MCP servers and utilize their tools.
 
 **Note:** This README is intended for developers setting up the backend service. This backend is typically consumed by a separate web frontend application. The local development version can run with `USE_PRODUCTION_DB=False`, which uses local configuration files and might have different behavior compared to the hosted production service (e.g., user verification and database interactions might be different).
 

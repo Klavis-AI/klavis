@@ -1,6 +1,6 @@
 # Klavis AI Discord Bot (MCP Client) - Local Development
 
-This document provides instructions for setting up and running the Klavis AI Discord Bot locally for development and testing purposes. This bot acts as a client for the Multi-Compute Platform (MCP), allowing users to interact with connected MCP servers and utilize their tools through Discord.
+This document provides instructions for setting up and running the Klavis AI Discord Bot locally for development and testing purposes. This bot acts as a client for the Model Context Protocol (MCP), allowing users to interact with connected MCP servers and utilize their tools through Discord.
 
 **Note:** This README is intended for developers or users who want to run the bot on their own machine. For regular use, please invite the official Klavis AI bot available through [www.klavis.ai](https://www.klavis.ai). The local development version runs with `USE_PRODUCTION_DB=False`, which uses local configuration files and might have different behavior or features compared to the hosted production bot (e.g., user verification is skipped).
 
