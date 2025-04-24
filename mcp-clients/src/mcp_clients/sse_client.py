@@ -10,21 +10,19 @@ python sse_client.py <command_or_url> <args>
 
 import argparse
 import logging
-import sys
-import asyncio
-from functools import partial
-from urllib.parse import urlparse
-from typing import Optional
 from contextlib import AsyncExitStack
+from functools import partial
+from typing import Optional
+from urllib.parse import urlparse
 
 import anyio
-
+import sys
+from dotenv import load_dotenv
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
 from mcp.client.stdio import StdioServerParameters, stdio_client
 
-from anthropic import Anthropic
-from dotenv import load_dotenv
+from mcp_clients.llms.anthropic import Anthropic
 
 load_dotenv()  # load environment variables from .env
 
@@ -54,7 +52,7 @@ class MCPClient:
         ]
 
         response = await self.session.list_tools()
-        available_tools = [{ 
+        available_tools = [{
             "name": tool.name,
             "description": tool.description,
             "input_schema": tool.inputSchema
@@ -77,7 +75,7 @@ class MCPClient:
             elif content.type == 'tool_use':
                 tool_name = content.name
                 tool_args = content.input
-                
+
                 # Execute tool call
                 result = await self.session.call_tool(tool_name, tool_args)
                 final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
@@ -92,7 +90,7 @@ class MCPClient:
                     }]
                 })
                 messages.append({
-                    "role": "user", 
+                    "role": "user",
                     "content": [{
                         "type": "tool_result",
                         "tool_use_id": content.id,
@@ -116,20 +114,20 @@ class MCPClient:
         """Run an interactive chat loop"""
         print("\nMCP Client Started!")
         print("Type your queries or 'quit' to exit.")
-        
+
         while True:
             try:
                 query = input("\nQuery: ").strip()
-                
+
                 if query.lower() == 'quit':
                     break
-                    
+
                 response = await self.process_query(query)
                 print("\n" + response)
-                    
+
             except Exception as e:
                 print(f"\nError: {str(e)}")
-    
+
     async def cleanup(self):
         """Clean up resources"""
         await self.exit_stack.aclose()
@@ -145,7 +143,7 @@ async def run_session(read_stream, write_stream):
         logger.info("Initializing session")
         await session.initialize()
         logger.info("Initialized")
-        
+
         # Start the chat loop
         await client.chat_loop()
 
