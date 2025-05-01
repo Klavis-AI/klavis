@@ -13,10 +13,25 @@ import FirecrawlApp, {
     type FirecrawlDocument,
 } from '@mendable/firecrawl-js';
 import PQueue from 'p-queue';
+import { AsyncLocalStorage } from 'async_hooks';
 
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Added: Create AsyncLocalStorage for request context
+const asyncLocalStorage = new AsyncLocalStorage<{
+    firecrawlClient: FirecrawlApp;
+}>();
+
+// Added: Getter function for the client
+function getFirecrawlClient() {
+    const store = asyncLocalStorage.getStore();
+    if (!store) {
+        throw new Error('Firecrawl client not found in AsyncLocalStorage');
+    }
+    return store.firecrawlClient;
+}
 
 // Tool definitions
 const SCRAPE_TOOL: Tool = {
@@ -742,21 +757,6 @@ const server = new Server(
 
 // Get optional API URL
 const FIRECRAWL_API_URL = process.env.FIRECRAWL_API_URL;
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
-
-// Check if API key is required (only for cloud service)
-if (!FIRECRAWL_API_URL && !FIRECRAWL_API_KEY) {
-    console.error(
-        'Error: FIRECRAWL_API_KEY environment variable is required when using the cloud service'
-    );
-    process.exit(1);
-}
-
-// Initialize Firecrawl client with optional API URL
-const client = new FirecrawlApp({
-    apiKey: FIRECRAWL_API_KEY || '',
-    ...(FIRECRAWL_API_URL ? { apiUrl: FIRECRAWL_API_URL } : {}),
-});
 
 // Configuration for retries and monitoring
 const CONFIG = {
@@ -888,6 +888,7 @@ let operationCounter = 0;
 async function processBatchOperation(
     operation: QueuedBatchOperation
 ): Promise<void> {
+    const client = getFirecrawlClient();
     try {
         operation.status = 'processing';
         let totalCreditsUsed = 0;
@@ -946,6 +947,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const startTime = Date.now();
     try {
         const { name, arguments: args } = request.params;
+        const client = getFirecrawlClient();
 
         // Log incoming request with timestamp
         safeLog(
@@ -1468,25 +1470,56 @@ const app = express();
 
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport
-const transports: { [sessionId: string]: SSEServerTransport } = {};
+const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
-    const transport = new SSEServerTransport('/messages', res);
-    transports[transport.sessionId] = transport;
-    res.on("close", () => {
-        delete transports[transport.sessionId];
-    });
-    await server.connect(transport);
+const transport = new SSEServerTransport(`/messages`, res);
+
+  // Set up cleanup when connection closes
+  res.on('close', async () => {
+    console.log(`SSE connection closed for transport: ${transport.sessionId}`);
+    try {
+      transports.delete(transport.sessionId);
+    } finally {
+    }
+  });
+
+  transports.set(transport.sessionId, transport);
+
+  await server.connect(transport);
+
+  console.log(`SSE connection established with transport: ${transport.sessionId}`);
 });
 
 app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
-    const transport = transports[sessionId];
+    const transport = transports.get(sessionId);
     if (transport) {
-        await transport.handlePostMessage(req, res);
+        // Added: Get API key from env or header
+        const apiKey = req.headers['x-auth-token'] as string;
+
+        if (!apiKey && !FIRECRAWL_API_URL) {
+             console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
+             res.status(400).send({ error: 'API key is missing' });
+             return;
+        }
+
+        // Added: Instantiate client within request context
+        const firecrawlClient = new FirecrawlApp({
+            apiKey: apiKey || '', // Use empty string if only API URL is provided (self-hosted)
+            ...(FIRECRAWL_API_URL ? { apiUrl: FIRECRAWL_API_URL } : {}),
+        });
+
+        // Added: Run handler within AsyncLocalStorage context
+        asyncLocalStorage.run({ firecrawlClient }, async () => {
+            await transport.handlePostMessage(req, res);
+        });
     } else {
-        res.status(400).send('No transport found for sessionId');
+        console.error(`Transport not found for session ID: ${sessionId}`);
+        res.status(404).send({ error: "Transport not found" });
     }
 });
 
-app.listen(5000);
+app.listen(5000, () => {
+    console.log('server running on port 5000');
+});
