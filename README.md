@@ -95,7 +95,7 @@ Located in the `mcp-clients/` directory, these client applications connect to MC
 
 ## 🤝 Contributing
 
-We love contributions! Join our [Discord community](https://discord.com/invite/P6fFgv2w) to discuss ideas and get help.
+We love contributions! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit changes. Join our [Discord community](https://discord.com/invite/P6fFgv2w) to discuss ideas and get help.
 
 ## 📚 Citation
 
@@ -117,4 +117,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 🙏 Thanks for checking out Klavis AI! We're excited to hear your thoughts and build this with the community.
-</div> 
+</div>
