@@ -321,7 +321,8 @@ app.post("/messages", async (req, res) => {
 
         if (!apiKey && !FIRECRAWL_API_URL) {
             console.error('Error: Firecrawl API key is missing. Provide it via x-auth-token header.');
-            res.status(401).send({ error: 'API key is missing' });
+            transport.close();
+            res.status(401).send({ error: "Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?" });
             return;
         }
 

@@ -183,6 +183,12 @@ app.post("/messages", async (req, res) => {
     // Use environment variable for API key if available, otherwise use header
     const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
 
+    if (!apiKey) {
+      transport.close();
+      res.status(401).send({ error: "Unauthorized, Resend API key is missing. Have you set the resend API key?" });
+      return;
+    }
+
     const resendClient = new Resend(apiKey);
 
     asyncLocalStorage.run({ resendClient }, async () => {

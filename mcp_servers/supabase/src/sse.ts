@@ -17,20 +17,21 @@ const app = express();
 
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport
-const transports: { [sessionId: string]: SSEServerTransport } = {};
+const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
   const transport = new SSEServerTransport('/messages', res);
-  transports[transport.sessionId] = transport;
+  transports.set(transport.sessionId, transport);
   res.on("close", () => {
-    delete transports[transport.sessionId];
+    transports.delete(transport.sessionId);
+    console.log(`Transport closed for sessionId: ${transport.sessionId}`);
   });
   await server.connect(transport);
 });
 
 app.post("/messages", async (req, res) => {
   const sessionId = req.query.sessionId as string;
-  const transport = transports[sessionId];
+  const transport = transports.get(sessionId);
   if (transport) {
     // Use environment variable for auth token if set, otherwise use header
     const envAuthToken = process.env.SUPABASE_AUTH_TOKEN;
@@ -39,6 +40,7 @@ app.post("/messages", async (req, res) => {
       await transport.handlePostMessage(req, res);
     });
   } else {
+    console.error(`No transport found for sessionId: ${sessionId}`);
     res.status(400).send('No transport found for sessionId');
   }
 });

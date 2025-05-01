@@ -1,6 +1,7 @@
 import express from 'express';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
 import {
     Tool,
     CallToolRequestSchema,
@@ -1500,7 +1501,17 @@ app.post("/messages", async (req, res) => {
 
         if (!apiKey && !FIRECRAWL_API_URL) {
              console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
-             res.status(400).send({ error: 'API key is missing' });
+             const errorResponse = {
+                jsonrpc: '2.0' as '2.0',
+                error: {
+                  code: -32001,
+                  message: 'Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?'
+                },
+                id: 0
+             };
+             await transport.send(errorResponse);
+             await transport.close();
+             res.status(401).end(JSON.stringify({ error: "Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?" }));
              return;
         }
 
