@@ -55,20 +55,6 @@ const DEEP_RESEARCH_TOOL: Tool = {
     },
 };
 
-// Server implementation
-const server = new Server(
-    {
-        name: 'firecrawl-deep-research-mcp',
-        version: '1.0.0',
-    },
-    {
-        capabilities: {
-            tools: {},
-            logging: {},
-        },
-    }
-);
-
 // Get API config
 const FIRECRAWL_API_URL = process.env.FIRECRAWL_API_URL;
 
@@ -119,7 +105,7 @@ function safeLog(
         );
     } else {
         // For other transport types, use the normal logging mechanism
-        server.sendLoggingMessage({ level, data });
+        // server.sendLoggingMessage({ level, data });
     }
 }
 
@@ -172,131 +158,148 @@ function trimResponseText(text: string): string {
     return text.trim();
 }
 
-// Tool handlers
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [DEEP_RESEARCH_TOOL],
-}));
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const startTime = Date.now();
-    const client = getFirecrawlClient();
-    try {
-        const { name, arguments: args } = request.params;
-
-        // Log incoming request with timestamp
-        safeLog(
-            'info',
-            `[${new Date().toISOString()}] Received request for tool: ${name}`
-        );
-
-        if (!args) {
-            throw new Error('No arguments provided');
+const getFirecrawlDeepResearchMcpServer = () => {
+    // Server implementation
+    const server = new Server(
+        {
+            name: 'firecrawl-deep-research-mcp',
+            version: '1.0.0',
+        },
+        {
+            capabilities: {
+                tools: {},
+                logging: {},
+            },
         }
+    );
+    // Tool handlers
+    server.setRequestHandler(ListToolsRequestSchema, async () => ({
+        tools: [DEEP_RESEARCH_TOOL],
+    }));
 
-        if (name === 'firecrawl_deep_research') {
-            if (!args || typeof args !== 'object' || !('query' in args)) {
-                throw new Error('Invalid arguments for firecrawl_deep_research');
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+        const startTime = Date.now();
+        const client = getFirecrawlClient();
+        try {
+            const { name, arguments: args } = request.params;
+
+            // Log incoming request with timestamp
+            safeLog(
+                'info',
+                `[${new Date().toISOString()}] Received request for tool: ${name}`
+            );
+
+            if (!args) {
+                throw new Error('No arguments provided');
             }
 
-            try {
-                const researchStartTime = Date.now();
-                safeLog('info', `Starting deep research for query: ${args.query}`);
+            if (name === 'firecrawl_deep_research') {
+                if (!args || typeof args !== 'object' || !('query' in args)) {
+                    throw new Error('Invalid arguments for firecrawl_deep_research');
+                }
 
-                const response = await client.deepResearch(
-                    args.query as string,
-                    {
-                        maxDepth: args.maxDepth as number,
-                        timeLimit: args.timeLimit as number,
-                        maxUrls: args.maxUrls as number,
-                    },
-                    // Activity callback
-                    (activity: any) => {
-                        safeLog(
-                            'info',
-                            `Research activity: ${activity.message} (Depth: ${activity.depth})`
-                        );
-                    },
-                    // Source callback
-                    (source: any) => {
-                        safeLog(
-                            'info',
-                            `Research source found: ${source.url}${source.title ? ` - ${source.title}` : ''}`
-                        );
+                try {
+                    const researchStartTime = Date.now();
+                    safeLog('info', `Starting deep research for query: ${args.query}`);
+
+                    const response = await client.deepResearch(
+                        args.query as string,
+                        {
+                            maxDepth: args.maxDepth as number,
+                            timeLimit: args.timeLimit as number,
+                            maxUrls: args.maxUrls as number,
+                        },
+                        // Activity callback
+                        (activity: any) => {
+                            safeLog(
+                                'info',
+                                `Research activity: ${activity.message} (Depth: ${activity.depth})`
+                            );
+                        },
+                        // Source callback
+                        (source: any) => {
+                            safeLog(
+                                'info',
+                                `Research source found: ${source.url}${source.title ? ` - ${source.title}` : ''}`
+                            );
+                        }
+                    );
+
+                    // Log performance metrics
+                    safeLog(
+                        'info',
+                        `Deep research completed in ${Date.now() - researchStartTime}ms`
+                    );
+
+                    if (!response.success) {
+                        throw new Error(response.error || 'Deep research failed');
                     }
-                );
 
-                // Log performance metrics
-                safeLog(
-                    'info',
-                    `Deep research completed in ${Date.now() - researchStartTime}ms`
-                );
+                    // Monitor credits for cloud API
+                    if (!FIRECRAWL_API_URL && hasCredits(response)) {
+                        await updateCreditUsage(response.creditsUsed);
+                    }
 
-                if (!response.success) {
-                    throw new Error(response.error || 'Deep research failed');
+                    // Format the results
+                    const formattedResponse = {
+                        finalAnalysis: response.data.finalAnalysis,
+                        activities: response.data.activities,
+                        sources: response.data.sources,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: trimResponseText(formattedResponse.finalAnalysis),
+                            },
+                        ],
+                        isError: false,
+                    };
+                } catch (error) {
+                    const errorMessage =
+                        error instanceof Error ? error.message : String(error);
+                    return {
+                        content: [{ type: 'text', text: trimResponseText(errorMessage) }],
+                        isError: true,
+                    };
                 }
-
-                // Monitor credits for cloud API
-                if (!FIRECRAWL_API_URL && hasCredits(response)) {
-                    await updateCreditUsage(response.creditsUsed);
-                }
-
-                // Format the results
-                const formattedResponse = {
-                    finalAnalysis: response.data.finalAnalysis,
-                    activities: response.data.activities,
-                    sources: response.data.sources,
-                };
-
+            } else {
                 return {
                     content: [
-                        {
-                            type: 'text',
-                            text: trimResponseText(formattedResponse.finalAnalysis),
-                        },
+                        { type: 'text', text: trimResponseText(`Unknown tool: ${name}`) },
                     ],
-                    isError: false,
-                };
-            } catch (error) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error);
-                return {
-                    content: [{ type: 'text', text: trimResponseText(errorMessage) }],
                     isError: true,
                 };
             }
-        } else {
+        } catch (error) {
+            // Log detailed error information
+            safeLog('error', {
+                message: `Request failed: ${error instanceof Error ? error.message : String(error)}`,
+                tool: request.params.name,
+                arguments: request.params.arguments,
+                timestamp: new Date().toISOString(),
+                duration: Date.now() - startTime,
+            });
             return {
                 content: [
-                    { type: 'text', text: trimResponseText(`Unknown tool: ${name}`) },
+                    {
+                        type: 'text',
+                        text: trimResponseText(
+                            `Error: ${error instanceof Error ? error.message : String(error)}`
+                        ),
+                    },
                 ],
                 isError: true,
             };
+        } finally {
+            // Log request completion with performance metrics
+            safeLog('info', `Request completed in ${Date.now() - startTime}ms`);
         }
-    } catch (error) {
-        // Log detailed error information
-        safeLog('error', {
-            message: `Request failed: ${error instanceof Error ? error.message : String(error)}`,
-            tool: request.params.name,
-            arguments: request.params.arguments,
-            timestamp: new Date().toISOString(),
-            duration: Date.now() - startTime,
-        });
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: trimResponseText(
-                        `Error: ${error instanceof Error ? error.message : String(error)}`
-                    ),
-                },
-            ],
-            isError: true,
-        };
-    } finally {
-        // Log request completion with performance metrics
-        safeLog('info', `Request completed in ${Date.now() - startTime}ms`);
-    }
-});
+    });
+
+    return server;
+}
 
 const app = express();
 
@@ -309,6 +312,7 @@ app.get("/sse", async (req, res) => {
     res.on("close", () => {
         transports.delete(transport.sessionId);
     });
+    const server = getFirecrawlDeepResearchMcpServer();
     await server.connect(transport);
     console.log(`SSE connection established with transport: ${transport.sessionId}`);
 });

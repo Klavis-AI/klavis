@@ -8,10 +8,13 @@ import * as dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const server = createSupabaseMcpServer({
-  platform: {},
-  readOnly: true,
-});
+const getSupabaseMcpServer = () => {
+  const server = createSupabaseMcpServer({
+    platform: {},
+    readOnly: true,
+  });
+  return server;
+}
 
 const app = express();
 
@@ -25,6 +28,7 @@ app.get("/sse", async (req, res) => {
   res.on("close", () => {
     delete transports[transport.sessionId];
   });
+  const server = getSupabaseMcpServer();
   await server.connect(transport);
 });
 
