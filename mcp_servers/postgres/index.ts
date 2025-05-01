@@ -15,114 +15,117 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const server = new Server(
-  {
-    name: "klavis-ai/postgres",
-    version: "0.1.0",
-  },
-  {
-    capabilities: {
-      resources: {},
-      tools: {},
-    },
-  },
-);
-
 const SCHEMA_PATH = "schema";
 
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  const client = await getPool().connect();
-  try {
-    const result = await client.query(
-      "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
-    );
-    return {
-      resources: result.rows.map((row) => ({
-        uri: new URL(`${row.table_name}/${SCHEMA_PATH}`, getResourceBaseUrl()).href,
-        mimeType: "application/json",
-        name: `"${row.table_name}" database schema`,
-      })),
-    };
-  } finally {
-    client.release();
-  }
-});
-
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  const resourceUrl = new URL(request.params.uri);
-
-  const pathComponents = resourceUrl.pathname.split("/");
-  const schema = pathComponents.pop();
-  const tableName = pathComponents.pop();
-
-  if (schema !== SCHEMA_PATH) {
-    throw new Error("Invalid resource URI");
-  }
-
-  const client = await getPool().connect();
-  try {
-    const result = await client.query(
-      "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1",
-      [tableName],
-    );
-
-    return {
-      contents: [
-        {
-          uri: request.params.uri,
-          mimeType: "application/json",
-          text: JSON.stringify(result.rows, null, 2),
-        },
-      ],
-    };
-  } finally {
-    client.release();
-  }
-});
-
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: "query",
-        description: "Run a read-only SQL query",
-        inputSchema: {
-          type: "object",
-          properties: {
-            sql: { type: "string" },
-          },
-        },
+const getPostgresMcpServer = () => {
+  const server = new Server(
+    {
+      name: "klavis-ai/postgres",
+      version: "0.1.0",
+    },
+    {
+      capabilities: {
+        resources: {},
+        tools: {},
       },
-    ],
-  };
-});
+    },
+  );
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    const client = await getPool().connect();
+    try {
+      const result = await client.query(
+        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
+      );
+      return {
+        resources: result.rows.map((row) => ({
+          uri: new URL(`${row.table_name}/${SCHEMA_PATH}`, getResourceBaseUrl()).href,
+          mimeType: "application/json",
+          name: `"${row.table_name}" database schema`,
+        })),
+      };
+    } finally {
+      client.release();
+    }
+  });
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "query") {
-    const sql = request.params.arguments?.sql as string;
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const resourceUrl = new URL(request.params.uri);
+
+    const pathComponents = resourceUrl.pathname.split("/");
+    const schema = pathComponents.pop();
+    const tableName = pathComponents.pop();
+
+    if (schema !== SCHEMA_PATH) {
+      throw new Error("Invalid resource URI");
+    }
 
     const client = await getPool().connect();
     try {
-      await client.query("BEGIN TRANSACTION READ ONLY");
-      const result = await client.query(sql);
-      return {
-        content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
-        isError: false,
-      };
-    } catch (error) {
-      throw error;
-    } finally {
-      client
-        .query("ROLLBACK")
-        .catch((error) =>
-          console.warn("Could not roll back transaction:", error),
-        );
+      const result = await client.query(
+        "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1",
+        [tableName],
+      );
 
+      return {
+        contents: [
+          {
+            uri: request.params.uri,
+            mimeType: "application/json",
+            text: JSON.stringify(result.rows, null, 2),
+          },
+        ],
+      };
+    } finally {
       client.release();
     }
-  }
-  throw new Error(`Unknown tool: ${request.params.name}`);
-});
+  });
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: [
+        {
+          name: "query",
+          description: "Run a read-only SQL query",
+          inputSchema: {
+            type: "object",
+            properties: {
+              sql: { type: "string" },
+            },
+          },
+        },
+      ],
+    };
+  });
+
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    if (request.params.name === "query") {
+      const sql = request.params.arguments?.sql as string;
+
+      const client = await getPool().connect();
+      try {
+        await client.query("BEGIN TRANSACTION READ ONLY");
+        const result = await client.query(sql);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
+          isError: false,
+        };
+      } catch (error) {
+        throw error;
+      } finally {
+        client
+          .query("ROLLBACK")
+          .catch((error) =>
+            console.warn("Could not roll back transaction:", error),
+          );
+
+        client.release();
+      }
+    }
+    throw new Error(`Unknown tool: ${request.params.name}`);
+  });
+
+  return server;
+}
 
 const app = express();
 
@@ -156,6 +159,7 @@ app.get("/sse", async (req, res) => {
 
   transports.set(transport.sessionId, transport);
 
+  const server = getPostgresMcpServer();
   await server.connect(transport);
 
   console.log(`SSE connection established with transport: ${transport.sessionId}`);
