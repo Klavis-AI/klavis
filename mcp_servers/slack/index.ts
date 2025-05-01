@@ -653,6 +653,22 @@ app.post("/messages", async (req, res) => {
   if (transport) {
     const slack_token = req.headers['x-auth-token'] as string;
 
+    if (!slack_token) {
+      console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Slack token is missing. Have you set the Slack token?" }));
+      return;
+    }
+
     asyncLocalStorage.run({ slack_token }, async () => {
       await transport.handlePostMessage(req, res);
     });

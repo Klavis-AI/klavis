@@ -187,6 +187,21 @@ app.post("/messages", async (req, res) => {
   if (transport) {
     // Use environment variable for API key if available, otherwise use header
     const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
+    if (!apiKey) {
+      console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Resend API key is missing. Have you set the Resend API key?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Resend API key is missing. Have you set the Resend API key?" }));
+      return;
+    }
 
     const resendClient = new Resend(apiKey);
 

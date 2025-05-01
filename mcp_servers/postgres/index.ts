@@ -175,8 +175,18 @@ app.post("/messages", async (req, res) => {
     const databaseUrl = process.env.DATABASE_URL || req.headers['x-auth-token'] as string;
     
     if (!databaseUrl) {
-      console.error('No database URL provided in environment or headers');
-      res.status(400).send({ error: "No database URL provided" });
+      console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?" }));
       return;
     }
 
