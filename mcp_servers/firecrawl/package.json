@@ -1,5 +1,5 @@
 {
-    "name": "firecrawl-mcp",
+    "name": "@klavis-ai/mcp-server-firecrawl",
     "version": "1.7.2",
     "description": "MCP server for Firecrawl web scraping integration. Supports both cloud and self-hosted instances. Features include web scraping, batch processing, structured data extraction, and LLM-powered content analysis.",
     "type": "module",

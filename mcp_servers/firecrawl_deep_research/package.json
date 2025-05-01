@@ -1,5 +1,5 @@
 {
-    "name": "firecrawl-deep-research-mcp",
+    "name": "@klavis-ai/mcp-server-firecrawl-deep-research",
     "version": "1.0.0",
     "description": "MCP server for Firecrawl deep research integration. Specialized server for LLM-powered deep web research.",
     "type": "module",

@@ -9,6 +9,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsup --clean",
+    "start": "node dist/sse.cjs",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:e2e": "vitest --project e2e",
