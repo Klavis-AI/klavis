@@ -185,35 +185,74 @@ function getJiraClient(): JiraClient {
 }
 
 // Create a Jira API client
-function createJiraClient(baseUrl: string, authToken: string, jiraUsername: string): JiraClient {
-  return {
-    baseUrl,
-    authToken,
-    async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-      const url = new URL(path, baseUrl).toString();
-      
-      // For Jira Cloud API, use Basic Authentication with username and API token
-      // Format: base64encode(username:api_token)
-      const credentials = Buffer.from(`${jiraUsername}:${authToken}`).toString('base64');
-      
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Authorization': `Basic ${credentials}`,
+async function createJiraClient(authToken: string): Promise<JiraClient> {
+  // First, fetch the accessible resources to get the correct baseUrl
+  console.log('--- authToken: ', authToken);
+  const accessibleResourcesUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
+  
+  try {
+    const response = await fetch(accessibleResourcesUrl, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch accessible resources (${response.status}): ${errorText}`);
+    }
+
+    // Define the type for the resources
+    interface JiraResource {
+      id: string;
+      name: string;
+      url: string;
+      scopes: string[];
+      avatarUrl: string;
+    }
+
+    const resources = await response.json() as JiraResource[];
+    
+    // If no resources are found, throw an error
+    if (!resources || resources.length === 0) {
+      throw new Error('No accessible Jira resources found for this user');
+    }
+
+    // Use the first resource's URL as the baseUrl
+    const siteUrl = resources[0].url;
+    const baseUrl = siteUrl;
+
+    return {
+      baseUrl,
+      authToken,
+      async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+        const url = new URL(path, baseUrl).toString();
+        
+        const headers: Record<string, string> = {
+          ...options.headers as Record<string, string>,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
-      });
+          'Authorization': `Bearer ${authToken}`
+        };
+        
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Jira API error (${response.status}): ${errorText}`);
-      }
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Jira API error (${response.status}): ${errorText}`);
+        }
 
-      return response.json() as Promise<T>;
-    },
-  };
+        return response.json() as Promise<T>;
+      },
+    };
+  } catch (error) {
+    console.error('Error creating Jira client:', error);
+    throw error;
+  }
 }
 
 // Tool definitions
@@ -1331,8 +1370,6 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     const authToken = process.env.JIRA_API_KEY || req.headers['x-auth-token'] as string;
-    const jiraBaseUrl = process.env.JIRA_BASE_URL || req.headers['x-jira-base-url'] as string;
-    const jiraUsername = process.env.JIRA_USERNAME || req.headers['x-jira-username'] as string;
 
     if (!authToken) {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
@@ -1340,19 +1377,7 @@ app.post("/messages", async (req, res) => {
       return;
     }
 
-    if (!jiraBaseUrl) {
-      console.error('Error: Jira base URL is missing. Provide it via x-jira-base-url header.');
-      res.status(400).send({ error: 'Jira base URL is missing' });
-      return;
-    }
-    
-    if (!jiraUsername) {
-      console.error('Error: Jira username is missing. Provide it via x-jira-username header or JIRA_USERNAME env variable.');
-      res.status(400).send({ error: 'Jira username is missing' });
-      return;
-    }
-
-    const jiraClient = createJiraClient(jiraBaseUrl, authToken, jiraUsername);
+    const jiraClient = await createJiraClient(authToken);
 
     asyncLocalStorage.run({ jiraClient }, async () => {
       await transport!.handlePostMessage(req, res);
