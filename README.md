@@ -41,6 +41,7 @@ curl --request POST \
   "platformName": "<PLATFORM_NAME>"
 }'
 ```
+It will return an MCP server URL that takes care of everything for you!
 
 3. **Set up auth token or use our in-house OAuth flow (if the MCP Server requests private info)**
 ```bash
