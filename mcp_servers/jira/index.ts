@@ -769,10 +769,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Found ${response.total} issues. ${response.issues.length} issues returned.`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -829,10 +825,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Retrieved issue ${args.issue_key}: ${response.fields?.summary || 'No summary available'}`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -866,10 +858,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Found ${limitedFields.length} fields matching '${args.keyword || ''}'`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(limitedFields),
                 },
               ],
@@ -894,10 +882,6 @@ const getJiraMcpServer = () => {
             
             return {
               content: [
-                {
-                  type: "text",
-                  text: `Found ${response.total} issues in project ${args.project_key}. ${response.issues.length} issues returned.`,
-                },
                 {
                   type: "text",
                   text: JSON.stringify(response),
@@ -933,10 +917,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Found ${response.total} issues linked to Epic ${args.epic_key}. ${response.issues.length} issues returned.`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -963,10 +943,6 @@ const getJiraMcpServer = () => {
             
             return {
               content: [
-                {
-                  type: "text",
-                  text: `Found ${response.total} sprints on board ${args.board_id}. ${response.values.length} sprints returned.`,
-                },
                 {
                   type: "text",
                   text: JSON.stringify(response),
@@ -999,10 +975,6 @@ const getJiraMcpServer = () => {
             
             return {
               content: [
-                {
-                  type: "text",
-                  text: `Sprint created successfully! ID: ${response.id}, Name: ${response.name}`,
-                },
                 {
                   type: "text",
                   text: JSON.stringify(response),
@@ -1039,10 +1011,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Found ${response.total} issues in sprint ${args.sprint_id}. ${response.issues.length} issues returned.`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -1074,10 +1042,6 @@ const getJiraMcpServer = () => {
             
             return {
               content: [
-                {
-                  type: "text",
-                  text: `Sprint ${args.sprint_id} updated successfully!`,
-                },
                 {
                   type: "text",
                   text: JSON.stringify(response),
@@ -1163,10 +1127,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Issue created successfully! Key: ${response.key}`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -1243,10 +1203,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Issue ${args.issue_key} updated successfully!`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(updatedIssue),
                 },
               ],
@@ -1259,15 +1215,20 @@ const getJiraMcpServer = () => {
               throw new Error("Missing required argument: issue_key");
             }
             
-            await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
+            const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
               method: 'DELETE'
             });
             
+            // Note: Jira DELETE issue often returns 204 No Content on success.
+            // If the response is empty or undefined, return a success message.
+            // Otherwise, return the actual response.
+            const responseText = response ? JSON.stringify(response) : JSON.stringify({ message: `Issue ${args.issue_key} deleted successfully (status 204)` });
+
             return {
               content: [
                 {
                   type: "text",
-                  text: `Issue ${args.issue_key} deleted successfully!`,
+                  text: responseText,
                 },
               ],
             };
@@ -1306,10 +1267,6 @@ const getJiraMcpServer = () => {
               content: [
                 {
                   type: "text",
-                  text: `Comment added to issue ${args.issue_key}`,
-                },
-                {
-                  type: "text",
                   text: JSON.stringify(response),
                 },
               ],
@@ -1321,10 +1278,6 @@ const getJiraMcpServer = () => {
             
             return {
               content: [
-                {
-                  type: "text",
-                  text: `Retrieved ${response.issueLinkTypes.length} issue link types`,
-                },
                 {
                   type: "text",
                   text: JSON.stringify(response),
