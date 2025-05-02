@@ -1374,7 +1374,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const authToken = process.env.JIRA_API_KEY || req.headers['x-auth-token'] as string;
+    const authToken = req.headers['x-auth-token'] as string;
 
     if (!authToken) {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
