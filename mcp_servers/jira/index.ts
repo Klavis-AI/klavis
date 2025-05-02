@@ -33,6 +33,7 @@ const DEFAULT_READ_JIRA_FIELDS = [
 // Define interfaces for Jira API client
 interface JiraClient {
   baseUrl: string;
+  cloudId: string;
   authToken: string;
   fetch: <T>(path: string, options?: RequestInit) => Promise<T>;
 }
@@ -187,7 +188,6 @@ function getJiraClient(): JiraClient {
 // Create a Jira API client
 async function createJiraClient(authToken: string): Promise<JiraClient> {
   // First, fetch the accessible resources to get the correct baseUrl
-  console.log('--- authToken: ', authToken);
   const accessibleResourcesUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
   
   try {
@@ -219,15 +219,20 @@ async function createJiraClient(authToken: string): Promise<JiraClient> {
       throw new Error('No accessible Jira resources found for this user');
     }
 
-    // Use the first resource's URL as the baseUrl
+    // Use the first resource's cloud ID
+    const cloudId = resources[0].id;
+    // Store the site URL as well for reference
     const siteUrl = resources[0].url;
-    const baseUrl = siteUrl;
 
     return {
-      baseUrl,
+      baseUrl: siteUrl,
+      cloudId,
       authToken,
       async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-        const url = new URL(path, baseUrl).toString();
+        // Construct URL using the proper format
+        const url = path.startsWith('http')
+          ? path
+          : `https://api.atlassian.com/ex/jira/${cloudId}${path.startsWith('/') ? path : '/' + path}`;
         
         const headers: Record<string, string> = {
           ...options.headers as Record<string, string>,
