@@ -4,39 +4,59 @@
   </picture>
 </div>
 
-<h1 align="center">Open Source, easy to use MCPs on Slack, Discord and Web 🚀</h1>
+<h1 align="center">Production-ready MCP integration for any AI application</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
-[![Discord](https://img.shields.io/discord/1356754991989133462?color=7289DA&label=Community&logo=discord&logoColor=white)](https://discord.com/invite/P6fFgv2w)
+[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.com/invite/P6fFgv2w)
 [![YouTube Demo](https://img.shields.io/badge/Demo-YouTube-red)](https://www.youtube.com/@KlavisAI-w2l)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 📚 TL;DR
+## Introduction
 
-Klavis AI is building open source, easy to use MCPs on Slack, Discord and Web. We provide:
+Klavis AI makes it effortless to connect to production-ready MCP servers & clients at scale. Integrate with your AI application in under a minute, and scale to millions of users using our open-source infrastructure, hosted servers, and multi-platform clients!
 
-- 💬 **Slack & Discord & Web Clients**: Run MCPs directly from your favorite messaging platforms
-- ☁️ **Hosted MCP Servers**: Access powerful tools without infrastructure management
-- 🎛️ **Simple Web UI**: Configure and manage everything with no coding required
+## ✨ Key Features
 
-Whether you're a non-technical user wanting to leverage AI workflows or a developer looking to build and scale MCPs, Klavis makes it simple.
-
-## 🎬 Watch Our Demo
-
-See how easy it is to use MCPs (like our Report Generator, YouTube tools, and Document Converters) directly from Slack/Discord:
-
-[![Klavis AI Demo](https://i3.ytimg.com/vi/9-QQAhrQWw8/maxresdefault.jpg)](https://www.youtube.com/watch?v=9-QQAhrQWw8)
-
-You can find more case study videos on [our website](https://www.klavis.ai). 
+Klavis AI lowers the barrier to using MCPs by providing:
+- **Stable Production-Ready MCP Servers**: 100% connection guarantee with reliable MCP servers on dedicated infrastructure.
+- **Built-In Authentication**: Secure authentication out of the box with built-in OAuth flows and secrets management for both developers and end-users.
+- **High-Quality**: All our MCP Servers come from official sources or are internally evaluated by Klavis and our customers.
+- **MCP Client integration**: We support MCP Client integration, allowing you to interact via Klavis Slack, Discord, or web MCP client and integrate into your workflows seamlessly.
+- **100+ Tool Integrations & Customization**: Support for various tools and customized MCP servers tailored to your needs.
 
 ## 🚀 Quick Start
 
-For detailed MCP client setup instructions, please refer to the platform-specific documentation:
-- [**Discord Bot Setup Guide**](mcp-clients/README-Discord.md) - Complete instructions for setting up and running the Discord bot
-- [**Slack Bot Setup Guide**](mcp-clients/README-Slack.md) - Step-by-step guide for creating a Slack app and connecting it
+1. **Sign up for Klavis platform and create your [API key](https://docs.klavis.ai)**
 
-For detailed MCP server setup instructions, please refer to the README file under each server folder.
+2. **Create a new MCP server instance**
+```bash
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "<MCP_SERVER_NAME>",
+  "userId": "<USER_ID>",
+  "platformName": "<PLATFORM_NAME>"
+}'
+```
 
+3. **Set up auth token or use our in-house OAuth flow (if the MCP Server requests private info)**
+```bash
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<string>",
+  "authToken": "<string>"
+}'
+```
+
+Check out our [documentation](https://docs.klavis.ai) for more details!
+
+### MCP Servers
 - [**Discord**](mcp_servers/discord/README.md): For Discord API integration
 - [**Document Conversion (Pandoc)**](mcp_servers/pandoc/README.md): Convert between various file formats using Pandoc
 - [**Firecrawl**](mcp_servers/firecrawl/README.md): For web crawling and data collection
@@ -49,72 +69,17 @@ For detailed MCP server setup instructions, please refer to the README file unde
 - [**Slack**](mcp_servers/slack/README.md): For Slack API integration
 - [**Supabase**](mcp_servers/supabase/README.md): For database operations
 - [**YouTube**](mcp_servers/youtube/README.md): Extract and convert YouTube video information
-
-## 🏗️ Architecture
-
-Klavis consists of two main components:
-
-### MCP Servers
-
-Located in the `mcp_servers/` directory, these service-specific modules expose capabilities as tools:
-
-- **Report Generation**: Create professional reports from various data sources
-- **YouTube**: Download, analyze, and transform YouTube content
-- **Document Conversion**: Convert between various file formats using Pandoc
-- **GitHub**: Perform GitHub repository operations
-- **Slack**: For Slack API integration
-- **Supabase**: For database operations
-- **Firecrawl**: For web crawling and data collection
-- **Resend**: For email services
-- **Postgres**: For PostgreSQL database operations
-- **Discord**: For Discord API integration
+- [**Jira**](mcp_servers/jira/README.md): manage your sprint
+- And More!
 
 ### MCP Clients
-
-Located in the `mcp-clients/` directory, these client applications connect to MCP servers and interface with end-user platforms:
-
-- **Discord Bot**: Interactive AI assistant for Discord
-- **Slack Bot**: Interactive AI assistant for Slack
-- **Base Client**: Shared functionality for all platform clients
-
-## 🧩 Extending Klavis
-
-### Adding a New Tool
-
-1. Create a new directory in `mcp_servers/`
-2. Implement the MCP server interface
-3. Register your tools with appropriate schemas
-4. Connect to your client through the standard SSE protocol
-
-### Adding a New Client Platform
-
-1. Create a new client module in `mcp-clients/`
-2. Extend the `base_bot.py` functionality
-3. Implement platform-specific message handling
-4. Connect to MCP servers using `mcp_client.py`
+- [**Discord Bot Setup Guide**](mcp-clients/README-Discord.md)
+- [**Slack Bot Setup Guide**](mcp-clients/README-Slack.md)
+- [**Web Chat Setup Guide**](mcp-clients/README-Web.md)
 
 ## 🤝 Contributing
 
 We love contributions! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit changes. Join our [Discord community](https://discord.com/invite/P6fFgv2w) to discuss ideas and get help.
 
-## 📚 Citation
-
-If you use Klavis in your research or project, please cite:
-
-```bibtex
-@software{klavis2025,
-  author = {Klavis AI},
-  title = {Klavis: Open-Source MCPs on Slack, Discord and Web},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/klavis-ai/klavis}
-}
-```
-
 ## 📜 License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-<div align="center">
-🙏 Thanks for checking out Klavis AI! We're excited to hear your thoughts and build this with the community.
-</div>
