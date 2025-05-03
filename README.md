@@ -27,7 +27,7 @@ Klavis AI lowers the barrier to using MCPs by providing:
 
 ## 🚀 Quick Start
 
-1. **Sign up for Klavis platform and create your [API key](https://docs.klavis.ai)**
+1. **Sign up for Klavis platform and create your [API key](https://www.klavis.ai/home/api-keys)**
 
 2. **Create a new MCP server instance**
 ```bash
@@ -41,7 +41,7 @@ curl --request POST \
   "platformName": "<PLATFORM_NAME>"
 }'
 ```
-It will return an MCP server URL that takes care of everything for you!
+> **Note:** It will return an MCP server URL that takes care of everything for you!
 
 3. **Set up auth token or use our in-house OAuth flow (if the MCP Server requests private info)**
 ```bash
@@ -74,9 +74,9 @@ Check out our [documentation](https://docs.klavis.ai) for more details!
 - And More!
 
 ### MCP Clients
-- [**Discord Bot Setup Guide**](mcp-clients/README-Discord.md)
-- [**Slack Bot Setup Guide**](mcp-clients/README-Slack.md)
-- [**Web Chat Setup Guide**](mcp-clients/README-Web.md)
+- [**Discord MCP Client Setup Guide**](mcp-clients/README-Discord.md)
+- [**Slack MCP Client Setup Guide**](mcp-clients/README-Slack.md)
+- [**Web Chat MCP Client Setup Guide**](mcp-clients/README-Web.md)
 
 ## 🤝 Contributing
 
