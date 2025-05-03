@@ -28,7 +28,7 @@ const getResendMcpServer = () => {
   });
 
   server.tool(
-    "send-email",
+    "resend_send_email",
     "Send an email using Resend",
     {
       to: z.string().email().describe("Recipient email address"),
@@ -147,6 +147,112 @@ const getResendMcpServer = () => {
           {
             type: "text",
             text: `Email sent successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_create_audience",
+    "Create a new audience in Resend",
+    {
+      name: z.string().describe("Name of the audience to create"),
+    },
+    async ({ name }) => {
+      const resend = getResendClient();
+      const response = await resend.audiences.create({ name });
+
+      if (response.error) {
+        throw new Error(
+          `Failed to create audience: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Audience created successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_get_audience",
+    "Retrieve audience details by ID in Resend",
+    {
+      id: z.string().describe("ID of the audience to retrieve"),
+    },
+    async ({ id }) => {
+      const resend = getResendClient();
+      const response = await resend.audiences.get(id);
+
+      if (response.error) {
+        throw new Error(
+          `Failed to retrieve audience: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Audience retrieved successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_delete_audience",
+    "Delete an audience by ID in Resend",
+    {
+      id: z.string().describe("ID of the audience to delete"),
+    },
+    async ({ id }) => {
+      const resend = getResendClient();
+      const response = await resend.audiences.remove(id);
+
+      if (response.error) {
+        throw new Error(
+          `Failed to delete audience: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Audience deleted successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_list_audiences",
+    "List all audiences in Resend",
+    {},
+    async () => {
+      const resend = getResendClient();
+      const response = await resend.audiences.list();
+
+      if (response.error) {
+        throw new Error(
+          `Failed to list audiences: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Audiences retrieved successfully! ${JSON.stringify(response.data)}`,
           },
         ],
       };
