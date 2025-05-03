@@ -1,0 +1,21 @@
+{
+    "name": "klavis-ai-mcp-servers",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "lint": "eslint \"**/*.ts\" --max-warnings=0",
+        "lint:fix": "eslint \"**/*.ts\" --fix",
+        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+        "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.6",
+        "lint-staged": "^15.5.1",
+        "prettier": "^3.5.3"
+    }
+}
