@@ -259,6 +259,272 @@ const getResendMcpServer = () => {
     }
   );
 
+  server.tool(
+    "resend_create_contact",
+    "Create a new contact in a Resend audience",
+    {
+      email: z.string().email().describe("Email address of the contact"),
+      audienceId: z.string().describe("ID of the audience to add the contact to"),
+      firstName: z.string().optional().describe("First name of the contact"),
+      lastName: z.string().optional().describe("Last name of the contact"),
+      unsubscribed: z.boolean().optional().describe("Whether the contact is unsubscribed"),
+    },
+    async ({ email, audienceId, firstName, lastName, unsubscribed }) => {
+      const resend = getResendClient();
+      const response = await resend.contacts.create({
+        email,
+        audienceId,
+        firstName,
+        lastName,
+        unsubscribed,
+      });
+
+      if (response.error) {
+        throw new Error(
+          `Failed to create contact: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Contact created successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_get_contact",
+    "Retrieve a contact from a Resend audience by ID or email",
+    {
+      audienceId: z.string().describe("ID of the audience the contact belongs to"),
+      id: z.string().optional().describe("ID of the contact to retrieve"),
+      email: z.string().email().optional().describe("Email of the contact to retrieve"),
+    },
+    async ({ audienceId, id, email }) => {
+      if (!id && !email) {
+        throw new Error("Either contact ID or email must be provided");
+      }
+
+      const resend = getResendClient();
+      let response: any = null;
+      
+      if (id) {
+        // Lookup by ID
+        response = await resend.contacts.get({
+          id,
+          audienceId,
+        });
+      } else if (email) {
+        // Based on the provided examples, we need to use different method or params for email lookup
+        // Let's try to find the contact by email in the list
+        const listResponse = await resend.contacts.list({ audienceId });
+        
+        if (listResponse.error) {
+          throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
+        }
+        
+        const contactData = listResponse.data?.data?.find(contact => contact.email === email);
+        
+        if (!contactData) {
+          throw new Error(`Contact with email ${email} not found`);
+        }
+        
+        // Now get the full contact details by ID
+        response = await resend.contacts.get({
+          id: contactData.id,
+          audienceId,
+        });
+      }
+
+      if (!response) {
+        throw new Error("Failed to retrieve contact");
+      }
+
+      if (response.error) {
+        throw new Error(
+          `Failed to retrieve contact: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Contact retrieved successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_update_contact",
+    "Update a contact in a Resend audience by ID or email",
+    {
+      audienceId: z.string().describe("ID of the audience the contact belongs to"),
+      id: z.string().optional().describe("ID of the contact to update"),
+      email: z.string().email().optional().describe("Email of the contact to update"),
+      firstName: z.string().optional().describe("Updated first name"),
+      lastName: z.string().optional().describe("Updated last name"),
+      unsubscribed: z.boolean().optional().describe("Updated unsubscribed status"),
+    },
+    async ({ audienceId, id, email, firstName, lastName, unsubscribed }) => {
+      if (!id && !email) {
+        throw new Error("Either contact ID or email must be provided");
+      }
+
+      const resend = getResendClient();
+      let response: any = null;
+      
+      // Prepare update data
+      const updateData: any = {
+        audienceId,
+        ...(firstName !== undefined ? { firstName } : {}),
+        ...(lastName !== undefined ? { lastName } : {}),
+        ...(unsubscribed !== undefined ? { unsubscribed } : {})
+      };
+      
+      if (id) {
+        // Update by ID
+        updateData.id = id;
+        response = await resend.contacts.update(updateData);
+      } else if (email) {
+        // First check if we need to find the ID for this email
+        const listResponse = await resend.contacts.list({ audienceId });
+        
+        if (listResponse.error) {
+          throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
+        }
+        
+        const contactData = listResponse.data?.data?.find(contact => contact.email === email);
+        
+        if (!contactData) {
+          throw new Error(`Contact with email ${email} not found`);
+        }
+        
+        // Now update using the ID
+        updateData.id = contactData.id;
+        response = await resend.contacts.update(updateData);
+      }
+
+      if (!response) {
+        throw new Error("Failed to update contact");
+      }
+
+      if (response.error) {
+        throw new Error(
+          `Failed to update contact: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Contact updated successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_delete_contact",
+    "Delete a contact from a Resend audience by ID or email",
+    {
+      audienceId: z.string().describe("ID of the audience the contact belongs to"),
+      id: z.string().optional().describe("ID of the contact to delete"),
+      email: z.string().email().optional().describe("Email of the contact to delete"),
+    },
+    async ({ audienceId, id, email }) => {
+      if (!id && !email) {
+        throw new Error("Either contact ID or email must be provided");
+      }
+
+      const resend = getResendClient();
+      let response: any = null;
+      
+      if (id) {
+        // Delete by ID
+        response = await resend.contacts.remove({
+          id,
+          audienceId,
+        });
+      } else if (email) {
+        // First check if we need to find the ID for this email
+        const listResponse = await resend.contacts.list({ audienceId });
+        
+        if (listResponse.error) {
+          throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
+        }
+        
+        const contactData = listResponse.data?.data?.find(contact => contact.email === email);
+        
+        if (!contactData) {
+          throw new Error(`Contact with email ${email} not found`);
+        }
+        
+        // Now delete using the ID
+        response = await resend.contacts.remove({
+          id: contactData.id,
+          audienceId,
+        });
+      }
+
+      if (!response) {
+        throw new Error("Failed to delete contact");
+      }
+
+      if (response.error) {
+        throw new Error(
+          `Failed to delete contact: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Contact deleted successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_list_contacts",
+    "List all contacts in a Resend audience",
+    {
+      audienceId: z.string().describe("ID of the audience to list contacts from"),
+    },
+    async ({ audienceId }) => {
+      const resend = getResendClient();
+      const response = await resend.contacts.list({
+        audienceId,
+      });
+
+      if (response.error) {
+        throw new Error(
+          `Failed to list contacts: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Contacts retrieved successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
   return server;
 }
 
