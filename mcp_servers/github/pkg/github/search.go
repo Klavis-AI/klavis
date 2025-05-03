@@ -14,7 +14,7 @@ import (
 
 // SearchRepositories creates a tool to search for GitHub repositories.
 func SearchRepositories(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("search_repositories",
+	return mcp.NewTool("github_search_repositories",
 			mcp.WithDescription(t("TOOL_SEARCH_REPOSITORIES_DESCRIPTION", "Search for GitHub repositories")),
 			mcp.WithString("query",
 				mcp.Required(),
@@ -68,7 +68,7 @@ func SearchRepositories(getClient GetClientFn, t translations.TranslationHelperF
 
 // SearchCode creates a tool to search for code across GitHub repositories.
 func SearchCode(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("search_code",
+	return mcp.NewTool("github_search_code",
 			mcp.WithDescription(t("TOOL_SEARCH_CODE_DESCRIPTION", "Search for code across GitHub repositories")),
 			mcp.WithString("q",
 				mcp.Required(),
@@ -140,7 +140,7 @@ func SearchCode(getClient GetClientFn, t translations.TranslationHelperFunc) (to
 
 // SearchUsers creates a tool to search for GitHub users.
 func SearchUsers(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("search_users",
+	return mcp.NewTool("github_search_users",
 			mcp.WithDescription(t("TOOL_SEARCH_USERS_DESCRIPTION", "Search for GitHub users")),
 			mcp.WithString("q",
 				mcp.Required(),

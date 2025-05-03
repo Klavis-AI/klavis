@@ -16,7 +16,7 @@ import (
 
 // GetIssue creates a tool to get details of a specific issue in a GitHub repository.
 func GetIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_issue",
+	return mcp.NewTool("github_get_issue",
 			mcp.WithDescription(t("TOOL_GET_ISSUE_DESCRIPTION", "Get details of a specific issue in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -74,7 +74,7 @@ func GetIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool
 
 // AddIssueComment creates a tool to add a comment to an issue.
 func AddIssueComment(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("add_issue_comment",
+	return mcp.NewTool("github_add_issue_comment",
 			mcp.WithDescription(t("TOOL_ADD_ISSUE_COMMENT_DESCRIPTION", "Add a comment to an existing issue")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -144,7 +144,7 @@ func AddIssueComment(getClient GetClientFn, t translations.TranslationHelperFunc
 
 // SearchIssues creates a tool to search for issues and pull requests.
 func SearchIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("search_issues",
+	return mcp.NewTool("github_search_issues",
 			mcp.WithDescription(t("TOOL_SEARCH_ISSUES_DESCRIPTION", "Search for issues and pull requests across GitHub repositories")),
 			mcp.WithString("q",
 				mcp.Required(),
@@ -228,7 +228,7 @@ func SearchIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (
 
 // CreateIssue creates a tool to create a new issue in a GitHub repository.
 func CreateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_issue",
+	return mcp.NewTool("github_create_issue",
 			mcp.WithDescription(t("TOOL_CREATE_ISSUE_DESCRIPTION", "Create a new issue in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -346,7 +346,7 @@ func CreateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 
 // ListIssues creates a tool to list and filter repository issues
 func ListIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("list_issues",
+	return mcp.NewTool("github_list_issues",
 			mcp.WithDescription(t("TOOL_LIST_ISSUES_DESCRIPTION", "List issues in a GitHub repository with filtering options")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -464,7 +464,7 @@ func ListIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (to
 
 // UpdateIssue creates a tool to update an existing issue in a GitHub repository.
 func UpdateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("update_issue",
+	return mcp.NewTool("github_update_issue",
 			mcp.WithDescription(t("TOOL_UPDATE_ISSUE_DESCRIPTION", "Update an existing issue in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -606,7 +606,7 @@ func UpdateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 
 // GetIssueComments creates a tool to get comments for a GitHub issue.
 func GetIssueComments(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_issue_comments",
+	return mcp.NewTool("github_get_issue_comments",
 			mcp.WithDescription(t("TOOL_GET_ISSUE_COMMENTS_DESCRIPTION", "Get comments for a GitHub issue")),
 			mcp.WithString("owner",
 				mcp.Required(),

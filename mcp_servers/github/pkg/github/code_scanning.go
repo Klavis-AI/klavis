@@ -14,7 +14,7 @@ import (
 )
 
 func GetCodeScanningAlert(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_code_scanning_alert",
+	return mcp.NewTool("github_get_code_scanning_alert",
 			mcp.WithDescription(t("TOOL_GET_CODE_SCANNING_ALERT_DESCRIPTION", "Get details of a specific code scanning alert in a GitHub repository.")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -72,7 +72,7 @@ func GetCodeScanningAlert(getClient GetClientFn, t translations.TranslationHelpe
 }
 
 func ListCodeScanningAlerts(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("list_code_scanning_alerts",
+	return mcp.NewTool("github_list_code_scanning_alerts",
 			mcp.WithDescription(t("TOOL_LIST_CODE_SCANNING_ALERTS_DESCRIPTION", "List code scanning alerts in a GitHub repository.")),
 			mcp.WithString("owner",
 				mcp.Required(),

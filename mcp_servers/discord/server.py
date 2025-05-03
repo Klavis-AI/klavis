@@ -78,7 +78,7 @@ async def _make_discord_request(method: str, endpoint: str, json_data: Optional[
 
 
 @mcp.tool()
-async def get_server_info(
+async def discord_get_server_info(
     server_id: Annotated[
         str,
         Field(
@@ -109,7 +109,7 @@ async def get_server_info(
          raise e
 
 @mcp.tool()
-async def list_members(
+async def discord_list_members(
     server_id: Annotated[
         str,
         Field(
@@ -154,7 +154,7 @@ async def list_members(
         raise e
 
 @mcp.tool()
-async def create_text_channel(
+async def discord_create_text_channel(
     server_id: Annotated[
         str,
         Field(
@@ -205,7 +205,7 @@ async def create_text_channel(
         raise e
 
 @mcp.tool()
-async def add_reaction(
+async def discord_add_reaction(
     channel_id: Annotated[
         str,
         Field(
@@ -239,7 +239,7 @@ async def add_reaction(
         return f"Error adding reaction {emoji} to message {message_id}: {str(e)}"
 
 @mcp.tool()
-async def add_multiple_reactions(
+async def discord_add_multiple_reactions(
     channel_id: Annotated[
         str,
         Field(
@@ -286,7 +286,7 @@ async def add_multiple_reactions(
 
 
 @mcp.tool()
-async def remove_reaction(
+async def discord_remove_reaction(
     channel_id: Annotated[
         str,
         Field(
@@ -321,7 +321,7 @@ async def remove_reaction(
         return f"Error removing reaction {emoji} from message {message_id}: {str(e)}"
 
 @mcp.tool()
-async def send_message(
+async def discord_send_message(
     channel_id: Annotated[
         str,
         Field(
@@ -352,7 +352,7 @@ async def send_message(
         raise e
 
 @mcp.tool()
-async def read_messages(
+async def discord_read_messages(
     channel_id: Annotated[
         str,
         Field(
@@ -411,7 +411,7 @@ async def read_messages(
         raise e
 
 @mcp.tool()
-async def get_user_info(
+async def discord_get_user_info(
     user_id: Annotated[
         str,
         Field(
