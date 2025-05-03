@@ -15,7 +15,7 @@ import (
 
 // ListCommits creates a tool to get commits of a branch in a repository.
 func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("list_commits",
+	return mcp.NewTool("github_list_commits",
 			mcp.WithDescription(t("TOOL_LIST_COMMITS_DESCRIPTION", "Get list of commits of a branch in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -85,7 +85,7 @@ func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 
 // CreateOrUpdateFile creates a tool to create or update a file in a GitHub repository.
 func CreateOrUpdateFile(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_or_update_file",
+	return mcp.NewTool("github_create_or_update_file",
 			mcp.WithDescription(t("TOOL_CREATE_OR_UPDATE_FILE_DESCRIPTION", "Create or update a single file in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -190,7 +190,7 @@ func CreateOrUpdateFile(getClient GetClientFn, t translations.TranslationHelperF
 
 // CreateRepository creates a tool to create a new GitHub repository.
 func CreateRepository(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_repository",
+	return mcp.NewTool("github_create_repository",
 			mcp.WithDescription(t("TOOL_CREATE_REPOSITORY_DESCRIPTION", "Create a new GitHub repository in your account")),
 			mcp.WithString("name",
 				mcp.Required(),
@@ -260,7 +260,7 @@ func CreateRepository(getClient GetClientFn, t translations.TranslationHelperFun
 
 // GetFileContents creates a tool to get the contents of a file or directory from a GitHub repository.
 func GetFileContents(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_file_contents",
+	return mcp.NewTool("github_get_file_contents",
 			mcp.WithDescription(t("TOOL_GET_FILE_CONTENTS_DESCRIPTION", "Get the contents of a file or directory from a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -333,7 +333,7 @@ func GetFileContents(getClient GetClientFn, t translations.TranslationHelperFunc
 
 // ForkRepository creates a tool to fork a repository.
 func ForkRepository(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("fork_repository",
+	return mcp.NewTool("github_fork_repository",
 			mcp.WithDescription(t("TOOL_FORK_REPOSITORY_DESCRIPTION", "Fork a GitHub repository to your account or specified organization")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -400,7 +400,7 @@ func ForkRepository(getClient GetClientFn, t translations.TranslationHelperFunc)
 
 // CreateBranch creates a tool to create a new branch.
 func CreateBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_branch",
+	return mcp.NewTool("github_create_branch",
 			mcp.WithDescription(t("TOOL_CREATE_BRANCH_DESCRIPTION", "Create a new branch in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -485,7 +485,7 @@ func CreateBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (
 
 // PushFiles creates a tool to push multiple files in a single commit to a GitHub repository.
 func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("push_files",
+	return mcp.NewTool("github_push_files",
 			mcp.WithDescription(t("TOOL_PUSH_FILES_DESCRIPTION", "Push multiple files to a GitHub repository in a single commit")),
 			mcp.WithString("owner",
 				mcp.Required(),

@@ -15,7 +15,7 @@ import (
 
 // GetPullRequest creates a tool to get details of a specific pull request.
 func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_pull_request",
+	return mcp.NewTool("github_get_pull_request",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_DESCRIPTION", "Get details of a specific pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -73,7 +73,7 @@ func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc)
 
 // UpdatePullRequest creates a tool to update an existing pull request.
 func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("update_pull_request",
+	return mcp.NewTool("github_update_pull_request",
 			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_DESCRIPTION", "Update an existing pull request in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -190,7 +190,7 @@ func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFu
 
 // ListPullRequests creates a tool to list and filter repository pull requests.
 func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("list_pull_requests",
+	return mcp.NewTool("github_list_pull_requests",
 			mcp.WithDescription(t("TOOL_LIST_PULL_REQUESTS_DESCRIPTION", "List and filter repository pull requests")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -292,7 +292,7 @@ func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFun
 
 // MergePullRequest creates a tool to merge a pull request.
 func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("merge_pull_request",
+	return mcp.NewTool("github_merge_pull_request",
 			mcp.WithDescription(t("TOOL_MERGE_PULL_REQUEST_DESCRIPTION", "Merge a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -376,7 +376,7 @@ func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFun
 
 // GetPullRequestFiles creates a tool to get the list of files changed in a pull request.
 func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_pull_request_files",
+	return mcp.NewTool("github_get_pull_request_files",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_FILES_DESCRIPTION", "Get the list of files changed in a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -435,7 +435,7 @@ func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelper
 
 // GetPullRequestStatus creates a tool to get the combined status of all status checks for a pull request.
 func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_pull_request_status",
+	return mcp.NewTool("github_get_pull_request_status",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_STATUS_DESCRIPTION", "Get the combined status of all status checks for a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -508,7 +508,7 @@ func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelpe
 
 // UpdatePullRequestBranch creates a tool to update a pull request branch with the latest changes from the base branch.
 func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("update_pull_request_branch",
+	return mcp.NewTool("github_update_pull_request_branch",
 			mcp.WithDescription(t("TOOL_UPDATE_PULL_REQUEST_BRANCH_DESCRIPTION", "Update a pull request branch with the latest changes from the base branch")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -582,7 +582,7 @@ func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHe
 
 // GetPullRequestComments creates a tool to get the review comments on a pull request.
 func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_pull_request_comments",
+	return mcp.NewTool("github_get_pull_request_comments",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_COMMENTS_DESCRIPTION", "Get the review comments on a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -646,7 +646,7 @@ func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHel
 
 // GetPullRequestReviews creates a tool to get the reviews on a pull request.
 func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_pull_request_reviews",
+	return mcp.NewTool("github_get_pull_request_reviews",
 			mcp.WithDescription(t("TOOL_GET_PULL_REQUEST_REVIEWS_DESCRIPTION", "Get the reviews on a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -704,7 +704,7 @@ func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelp
 
 // CreatePullRequestReview creates a tool to submit a review on a pull request.
 func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_pull_request_review",
+	return mcp.NewTool("github_create_pull_request_review",
 			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_REVIEW_DESCRIPTION", "Create a review on a pull request")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -900,7 +900,7 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 
 // CreatePullRequest creates a tool to create a new pull request.
 func CreatePullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_pull_request",
+	return mcp.NewTool("github_create_pull_request",
 			mcp.WithDescription(t("TOOL_CREATE_PULL_REQUEST_DESCRIPTION", "Create a new pull request in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
