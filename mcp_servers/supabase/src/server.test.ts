@@ -118,7 +118,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'list_organizations',
+      name: 'supabase_list_organizations',
       arguments: {},
     });
 
@@ -138,7 +138,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'get_organization',
+      name: 'supabase_get_organization',
       arguments: {
         id: org.id,
       },
@@ -157,7 +157,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'get_cost',
+      name: 'supabase_get_cost',
       arguments: {
         type: 'project',
         organization_id: freeOrg.id,
@@ -179,7 +179,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'get_cost',
+      name: 'supabase_get_cost',
       arguments: {
         type: 'project',
         organization_id: paidOrg.id,
@@ -208,7 +208,7 @@ describe('tools', () => {
     priorProject.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'get_cost',
+      name: 'supabase_get_cost',
       arguments: {
         type: 'project',
         organization_id: paidOrg.id,
@@ -237,7 +237,7 @@ describe('tools', () => {
     priorProject.status = 'INACTIVE';
 
     const result = await callTool({
-      name: 'get_cost',
+      name: 'supabase_get_cost',
       arguments: {
         type: 'project',
         organization_id: paidOrg.id,
@@ -259,7 +259,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'get_cost',
+      name: 'supabase_get_cost',
       arguments: {
         type: 'branch',
         organization_id: paidOrg.id,
@@ -293,7 +293,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'list_projects',
+      name: 'supabase_list_projects',
       arguments: {},
     });
 
@@ -316,7 +316,7 @@ describe('tools', () => {
     });
 
     const result = await callTool({
-      name: 'get_project',
+      name: 'supabase_get_project',
       arguments: {
         id: project.id,
       },
@@ -352,7 +352,7 @@ describe('tools', () => {
     };
 
     const result = await callTool({
-      name: 'create_project',
+      name: 'supabase_create_project',
       arguments: newProject,
     });
 
@@ -378,7 +378,7 @@ describe('tools', () => {
     });
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'project',
         recurrence: 'monthly',
@@ -394,7 +394,7 @@ describe('tools', () => {
     };
 
     const result = await callTool({
-      name: 'create_project',
+      name: 'supabase_create_project',
       arguments: newProject,
     });
 
@@ -428,7 +428,7 @@ describe('tools', () => {
     };
 
     const createProjectPromise = callTool({
-      name: 'create_project',
+      name: 'supabase_create_project',
       arguments: newProject,
     });
 
@@ -454,7 +454,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     await callTool({
-      name: 'pause_project',
+      name: 'supabase_pause_project',
       arguments: {
         project_id: project.id,
       },
@@ -480,7 +480,7 @@ describe('tools', () => {
     project.status = 'INACTIVE';
 
     await callTool({
-      name: 'restore_project',
+      name: 'supabase_restore_project',
       arguments: {
         project_id: project.id,
       },
@@ -506,7 +506,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'get_project_url',
+      name: 'supabase_get_project_url',
       arguments: {
         project_id: project.id,
       },
@@ -529,7 +529,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'get_anon_key',
+      name: 'supabase_get_anon_key',
       arguments: {
         project_id: project.id,
       },
@@ -556,7 +556,7 @@ describe('tools', () => {
     const query = 'select 1+1 as sum';
 
     const result = await callTool({
-      name: 'execute_sql',
+      name: 'supabase_execute_sql',
       arguments: {
         project_id: project.id,
         query,
@@ -585,7 +585,7 @@ describe('tools', () => {
     const query = 'select 1+1 as sum';
 
     const result = await callTool({
-      name: 'execute_sql',
+      name: 'supabase_execute_sql',
       arguments: {
         project_id: project.id,
         query,
@@ -615,7 +615,7 @@ describe('tools', () => {
       'create table test (id integer generated always as identity primary key)';
 
     const resultPromise = callTool({
-      name: 'execute_sql',
+      name: 'supabase_execute_sql',
       arguments: {
         project_id: project.id,
         query,
@@ -648,7 +648,7 @@ describe('tools', () => {
       'create table test (id integer generated always as identity primary key)';
 
     const result = await callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: project.id,
         name,
@@ -659,7 +659,7 @@ describe('tools', () => {
     expect(result).toEqual([]);
 
     const listMigrationsResult = await callTool({
-      name: 'list_migrations',
+      name: 'supabase_list_migrations',
       arguments: {
         project_id: project.id,
       },
@@ -673,7 +673,7 @@ describe('tools', () => {
     ]);
 
     const listTablesResult = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: project.id,
         schemas: ['public'],
@@ -749,7 +749,7 @@ describe('tools', () => {
       'create table test (id integer generated always as identity primary key)';
 
     const resultPromise = callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: project.id,
         name,
@@ -785,7 +785,7 @@ describe('tools', () => {
     await project.db.exec('create table test.test_2 (id serial primary key);');
 
     const result = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: project.id,
         schemas: ['test'],
@@ -817,7 +817,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: project.id,
       },
@@ -857,7 +857,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'list_extensions',
+      name: 'supabase_list_extensions',
       arguments: {
         project_id: project.id,
       },
@@ -880,7 +880,7 @@ describe('tools', () => {
     const { callTool } = await setup({ accessToken: 'bad-token' });
 
     const listOrganizationsPromise = callTool({
-      name: 'list_organizations',
+      name: 'supabase_list_organizations',
       arguments: {},
     });
 
@@ -909,7 +909,7 @@ describe('tools', () => {
     const query = 'invalid sql';
 
     const applyMigrationPromise = callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: project.id,
         name,
@@ -941,7 +941,7 @@ describe('tools', () => {
     const query = 'invalid sql';
 
     const executeSqlPromise = callTool({
-      name: 'execute_sql',
+      name: 'supabase_execute_sql',
       arguments: {
         project_id: project.id,
         query,
@@ -981,7 +981,7 @@ describe('tools', () => {
 
     for (const service of services) {
       const result = await callTool({
-        name: 'get_logs',
+        name: 'supabase_get_logs',
         arguments: {
           project_id: project.id,
           service,
@@ -1010,7 +1010,7 @@ describe('tools', () => {
 
     const invalidService = 'invalid-service';
     const getLogsPromise = callTool({
-      name: 'get_logs',
+      name: 'supabase_get_logs',
       arguments: {
         project_id: project.id,
         service: invalidService,
@@ -1036,7 +1036,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1046,7 +1046,7 @@ describe('tools', () => {
 
     const branchName = 'test-branch';
     const result = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: branchName,
@@ -1089,7 +1089,7 @@ describe('tools', () => {
 
     const branchName = 'test-branch';
     const createBranchPromise = callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: branchName,
@@ -1118,7 +1118,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1127,7 +1127,7 @@ describe('tools', () => {
     });
 
     const branch = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: 'test-branch',
@@ -1136,7 +1136,7 @@ describe('tools', () => {
     });
 
     const listBranchesResult = await callTool({
-      name: 'list_branches',
+      name: 'supabase_list_branches',
       arguments: {
         project_id: project.id,
       },
@@ -1148,14 +1148,14 @@ describe('tools', () => {
     expect(listBranchesResult).toHaveLength(2);
 
     await callTool({
-      name: 'delete_branch',
+      name: 'supabase_delete_branch',
       arguments: {
         branch_id: branch.id,
       },
     });
 
     const listBranchesResultAfterDelete = await callTool({
-      name: 'list_branches',
+      name: 'supabase_list_branches',
       arguments: {
         project_id: project.id,
       },
@@ -1169,7 +1169,7 @@ describe('tools', () => {
     const mainBranch = listBranchesResultAfterDelete[0];
 
     const deleteBranchPromise = callTool({
-      name: 'delete_branch',
+      name: 'supabase_delete_branch',
       arguments: {
         branch_id: mainBranch.id,
       },
@@ -1197,7 +1197,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const result = await callTool({
-      name: 'list_branches',
+      name: 'supabase_list_branches',
       arguments: {
         project_id: project.id,
       },
@@ -1223,7 +1223,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1232,7 +1232,7 @@ describe('tools', () => {
     });
 
     const branch = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: 'test-branch',
@@ -1244,7 +1244,7 @@ describe('tools', () => {
     const migrationQuery =
       'create table sample (id integer generated always as identity primary key)';
     await callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: branch.project_ref,
         name: migrationName,
@@ -1253,7 +1253,7 @@ describe('tools', () => {
     });
 
     const mergeResult = await callTool({
-      name: 'merge_branch',
+      name: 'supabase_merge_branch',
       arguments: {
         branch_id: branch.id,
       },
@@ -1265,7 +1265,7 @@ describe('tools', () => {
 
     // Check that the migration was applied to the parent project
     const listResult = await callTool({
-      name: 'list_migrations',
+      name: 'supabase_list_migrations',
       arguments: {
         project_id: project.id,
       },
@@ -1294,7 +1294,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1303,7 +1303,7 @@ describe('tools', () => {
     });
 
     const branch = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: 'test-branch',
@@ -1315,7 +1315,7 @@ describe('tools', () => {
     const query =
       'create table test_untracked (id integer generated always as identity primary key)';
     await callTool({
-      name: 'execute_sql',
+      name: 'supabase_execute_sql',
       arguments: {
         project_id: branch.project_ref,
         query,
@@ -1323,7 +1323,7 @@ describe('tools', () => {
     });
 
     const firstTablesResult = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1334,14 +1334,14 @@ describe('tools', () => {
     );
 
     await callTool({
-      name: 'reset_branch',
+      name: 'supabase_reset_branch',
       arguments: {
         branch_id: branch.id,
       },
     });
 
     const secondTablesResult = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1370,7 +1370,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1379,7 +1379,7 @@ describe('tools', () => {
     });
 
     const branch = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: 'test-branch',
@@ -1391,7 +1391,7 @@ describe('tools', () => {
     const migrationQuery =
       'create table sample (id integer generated always as identity primary key)';
     await callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: branch.project_ref,
         name: migrationName,
@@ -1401,7 +1401,7 @@ describe('tools', () => {
 
     // Check that migration has been applied to the branch
     const firstListResult = await callTool({
-      name: 'list_migrations',
+      name: 'supabase_list_migrations',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1413,7 +1413,7 @@ describe('tools', () => {
     });
 
     const firstTablesResult = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1424,7 +1424,7 @@ describe('tools', () => {
     );
 
     await callTool({
-      name: 'reset_branch',
+      name: 'supabase_reset_branch',
       arguments: {
         branch_id: branch.id,
         migration_version: '0',
@@ -1433,7 +1433,7 @@ describe('tools', () => {
 
     // Check that all migrations have been reverted
     const secondListResult = await callTool({
-      name: 'list_migrations',
+      name: 'supabase_list_migrations',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1442,7 +1442,7 @@ describe('tools', () => {
     expect(secondListResult).toStrictEqual([]);
 
     const secondTablesResult = await callTool({
-      name: 'list_tables',
+      name: 'supabase_list_tables',
       arguments: {
         project_id: branch.project_ref,
       },
@@ -1470,7 +1470,7 @@ describe('tools', () => {
     project.status = 'ACTIVE_HEALTHY';
 
     const confirm_cost_id = await callTool({
-      name: 'confirm_cost',
+      name: 'supabase_confirm_cost',
       arguments: {
         type: 'branch',
         recurrence: 'hourly',
@@ -1479,7 +1479,7 @@ describe('tools', () => {
     });
 
     const branch = await callTool({
-      name: 'create_branch',
+      name: 'supabase_create_branch',
       arguments: {
         project_id: project.id,
         name: 'test-branch',
@@ -1491,7 +1491,7 @@ describe('tools', () => {
     const migrationQuery =
       'create table sample (id integer generated always as identity primary key)';
     await callTool({
-      name: 'apply_migration',
+      name: 'supabase_apply_migration',
       arguments: {
         project_id: project.id,
         name: migrationName,
@@ -1500,7 +1500,7 @@ describe('tools', () => {
     });
 
     const rebaseResult = await callTool({
-      name: 'rebase_branch',
+      name: 'supabase_rebase_branch',
       arguments: {
         branch_id: branch.id,
       },
@@ -1512,7 +1512,7 @@ describe('tools', () => {
 
     // Check that the production migration was applied to the branch
     const listResult = await callTool({
-      name: 'list_migrations',
+      name: 'supabase_list_migrations',
       arguments: {
         project_id: branch.project_ref,
       },
