@@ -525,6 +525,158 @@ const getResendMcpServer = () => {
     }
   );
 
+  server.tool(
+    "resend_create_broadcast",
+    "Create a new broadcast in Resend",
+    {
+      audienceId: z.string().describe("ID of the audience to send the broadcast to"),
+      from: z.string().describe("Sender email and name in the format 'Name <email@domain.com>'"),
+      subject: z.string().describe("Subject line of the broadcast"),
+      html: z.string().describe("HTML content of the broadcast. Can include variables like {{{FIRST_NAME|there}}} and {{{RESEND_UNSUBSCRIBE_URL}}}"),
+      name: z.string().optional().describe("Optional name for the broadcast"),
+      replyTo: z.string().optional().describe("Optional reply-to email address"),
+      previewText: z.string().optional().describe("Optional preview text that appears in email clients"),
+    },
+    async ({ audienceId, from, subject, html, name, replyTo, previewText }) => {
+      const resend = getResendClient();
+      const response = await resend.broadcasts.create({
+        audienceId,
+        from,
+        subject,
+        html,
+        ...(name && { name }),
+        ...(replyTo && { replyTo }),
+        ...(previewText && { previewText }),
+      });
+
+      if (response.error) {
+        throw new Error(
+          `Failed to create broadcast: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Broadcast created successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_get_broadcast",
+    "Retrieve a broadcast by ID from Resend",
+    {
+      id: z.string().describe("ID of the broadcast to retrieve"),
+    },
+    async ({ id }) => {
+      const resend = getResendClient();
+      const response = await resend.broadcasts.get(id);
+
+      if (response.error) {
+        throw new Error(
+          `Failed to retrieve broadcast: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Broadcast retrieved successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_send_broadcast",
+    "Send or schedule a broadcast in Resend",
+    {
+      id: z.string().describe("ID of the broadcast to send"),
+      scheduledAt: z.string().optional().describe("Optional scheduling time in natural language (e.g., 'in 1 hour', 'tomorrow at 9am')"),
+    },
+    async ({ id, scheduledAt }) => {
+      const resend = getResendClient();
+      
+      const sendOptions: any = {};
+      if (scheduledAt) sendOptions.scheduledAt = scheduledAt;
+
+      const response = await resend.broadcasts.send(id, sendOptions);
+
+      if (response.error) {
+        throw new Error(
+          `Failed to send broadcast: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Broadcast ${scheduledAt ? 'scheduled' : 'sent'} successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_delete_broadcast",
+    "Delete a broadcast by ID in Resend",
+    {
+      id: z.string().describe("ID of the broadcast to delete"),
+    },
+    async ({ id }) => {
+      const resend = getResendClient();
+      const response = await resend.broadcasts.remove(id);
+
+      if (response.error) {
+        throw new Error(
+          `Failed to delete broadcast: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Broadcast deleted successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
+  server.tool(
+    "resend_list_broadcasts",
+    "List all broadcasts in Resend",
+    {},
+    async () => {
+      const resend = getResendClient();
+      const response = await resend.broadcasts.list();
+
+      if (response.error) {
+        throw new Error(
+          `Failed to list broadcasts: ${JSON.stringify(response.error)}`
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Broadcasts retrieved successfully! ${JSON.stringify(response.data)}`,
+          },
+        ],
+      };
+    }
+  );
+
   return server;
 }
 
