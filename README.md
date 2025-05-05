@@ -8,7 +8,7 @@
 
 [![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
-[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.com/invite/P6fFgv2w)
+[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
 [![YouTube Demo](https://img.shields.io/badge/Demo-YouTube-red)](https://www.youtube.com/@KlavisAI-w2l)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
