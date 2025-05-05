@@ -27,6 +27,31 @@ Klavis AI lowers the barrier to using MCPs by providing:
 
 ## 🚀 Quick Start
 
+To run self hosted versions, check out the detailed readme in each MCP server and MCP client below.
+
+### MCP Servers
+- [**Discord**](mcp_servers/discord/README.md): For Discord API integration
+- [**Document Conversion (Pandoc)**](mcp_servers/pandoc/README.md): Convert between various file formats using Pandoc
+- [**Firecrawl**](mcp_servers/firecrawl/README.md): For web crawling and data collection
+- [**Firecrawl Deep Research**](mcp_servers/firecrawl_deep_research/README.md): For deeper web research tasks
+- [**GitHub**](mcp_servers/github/README.md): Perform GitHub repository operations
+- [**Markitdown**](mcp_servers/markitdown/README.md): Markdown conversion tool
+- [**Postgres**](mcp_servers/postgres/README.md): For PostgreSQL database operations
+- [**Report Generation**](mcp_servers/report_generation/README.md): Create professional web reports from user query
+- [**Resend**](mcp_servers/resend/README.md): For email services
+- [**Slack**](mcp_servers/slack/README.md): For Slack API integration
+- [**Supabase**](mcp_servers/supabase/README.md): For database operations
+- [**YouTube**](mcp_servers/youtube/README.md): Extract and convert YouTube video information
+- [**Jira**](mcp_servers/jira/README.md): manage your sprint
+- And More!
+
+### MCP Clients
+- [**Discord MCP Client Setup Guide**](mcp-clients/README-Discord.md)
+- [**Slack MCP Client Setup Guide**](mcp-clients/README-Slack.md)
+- [**Web Chat MCP Client Setup Guide**](mcp-clients/README-Web.md)
+
+### Hosted solutions
+
 1. **Sign up for Klavis platform and create your [API key](https://www.klavis.ai/home/api-keys)**
 
 2. **Create a new MCP server instance**
@@ -56,27 +81,6 @@ curl --request POST \
 ```
 
 Check out our [documentation](https://docs.klavis.ai) for more details!
-
-### MCP Servers
-- [**Discord**](mcp_servers/discord/README.md): For Discord API integration
-- [**Document Conversion (Pandoc)**](mcp_servers/pandoc/README.md): Convert between various file formats using Pandoc
-- [**Firecrawl**](mcp_servers/firecrawl/README.md): For web crawling and data collection
-- [**Firecrawl Deep Research**](mcp_servers/firecrawl_deep_research/README.md): For deeper web research tasks
-- [**GitHub**](mcp_servers/github/README.md): Perform GitHub repository operations
-- [**Markitdown**](mcp_servers/markitdown/README.md): Markdown conversion tool
-- [**Postgres**](mcp_servers/postgres/README.md): For PostgreSQL database operations
-- [**Report Generation**](mcp_servers/report_generation/README.md): Create professional web reports from user query
-- [**Resend**](mcp_servers/resend/README.md): For email services
-- [**Slack**](mcp_servers/slack/README.md): For Slack API integration
-- [**Supabase**](mcp_servers/supabase/README.md): For database operations
-- [**YouTube**](mcp_servers/youtube/README.md): Extract and convert YouTube video information
-- [**Jira**](mcp_servers/jira/README.md): manage your sprint
-- And More!
-
-### MCP Clients
-- [**Discord MCP Client Setup Guide**](mcp-clients/README-Discord.md)
-- [**Slack MCP Client Setup Guide**](mcp-clients/README-Slack.md)
-- [**Web Chat MCP Client Setup Guide**](mcp-clients/README-Web.md)
 
 ## 🤝 Contributing
 
