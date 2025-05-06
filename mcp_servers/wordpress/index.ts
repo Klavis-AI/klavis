@@ -275,7 +275,7 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     // Use WordPress credentials from environment or headers
-    const auth_token = req.headers['x-auth-token'] as string;
+    const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string;
 
     if (!auth_token) {
       console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
