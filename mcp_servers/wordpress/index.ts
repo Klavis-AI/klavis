@@ -26,7 +26,7 @@ const getWordPressMcpServer = () => {
     return {
       tools: [
         {
-          name: "create_post",
+          name: "wordpress_create_post",
           description: "Create a new WordPress post",
           inputSchema: {
             type: "object",
@@ -40,7 +40,7 @@ const getWordPressMcpServer = () => {
           },
         },
         {
-          name: "get_posts",
+          name: "wordpress_get_posts",
           description: "Get a list of WordPress posts",
           inputSchema: {
             type: "object",
@@ -53,7 +53,7 @@ const getWordPressMcpServer = () => {
           },
         },
         {
-          name: "update_post",
+          name: "wordpress_update_post",
           description: "Update an existing WordPress post",
           inputSchema: {
             type: "object",
@@ -68,26 +68,45 @@ const getWordPressMcpServer = () => {
           },
         },
         {
-          name: "get_tagged_posts",
-          description: "Get posts with a specific tag",
-          inputSchema: {
-            type: "object",
-            properties: {
-              tag: { type: "string", description: "Tag to search for" },
-              number: { type: "number", description: "Number of posts to retrieve", default: 10 }
-            },
-            required: ["tag"]
-          }
-        },
-        {
-          name: "get_top_posts",
-          description: "Get top posts for a site",
+          name: "wordpress_get_top_posts",
+          description: "Get top WordPress posts for a site",
           inputSchema: {
             type: "object",
             properties: {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
+          }
+        },
+        {
+          name: "wordpress_get_site_info",
+          description: "Get information about a WordPress site",
+          inputSchema: {
+            type: "object",
+            properties: {
+              site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
+            },
+            required: ["site"]
+          }
+        },
+        {
+          name: "wordpress_get_site_stats",
+          description: "Get statistics for a WordPress site",
+          inputSchema: {
+            type: "object",
+            properties: {
+              site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
+            },
+            required: ["site"]
+          }
+        },
+        {
+          name: "wordpress_get_user_sites",
+          description: "Get all WordPress sites the authenticated user has access to",
+          inputSchema: {
+            type: "object",
+            properties: {},
+            required: []
           }
         }
       ],
@@ -99,7 +118,7 @@ const getWordPressMcpServer = () => {
 
     try {
       switch (request.params.name) {
-        case 'create_post': {
+        case 'wordpress_create_post': {
           if (!params.site || !params.title || !params.content) {
             throw new Error('Site, title, and content are required for creating a post');
           }
@@ -118,7 +137,7 @@ const getWordPressMcpServer = () => {
           };
         }
 
-        case 'get_posts': {
+        case 'wordpress_get_posts': {
           if (!params.site) {
             throw new Error('Site is required for getting posts');
           }
@@ -135,7 +154,7 @@ const getWordPressMcpServer = () => {
           };
         }
 
-        case 'update_post': {
+        case 'wordpress_update_post': {
           if (!params.site || !params.postId) {
             throw new Error('Site and Post ID are required for updating a post');
           }
@@ -155,14 +174,13 @@ const getWordPressMcpServer = () => {
           };
         }
 
-        case 'get_tagged_posts': {
-          if (!params.tag) {
-            throw new Error('Tag is required for getting tagged posts');
+        case 'wordpress_get_top_posts': {
+          if (!params.site) {
+            throw new Error('Site is required for getting top posts');
           }
           
           const client = getClient();
-          const number = params.number || 10;
-          const response = await client.get(`/read/tags/${params.tag}/posts?number=${number}`);
+          const response = await client.get(`/sites/${params.site}/stats/top-posts`);
           const data = await response.json();
 
           return {
@@ -171,13 +189,39 @@ const getWordPressMcpServer = () => {
           };
         }
 
-        case 'get_top_posts': {
+        case 'wordpress_get_site_info': {
           if (!params.site) {
-            throw new Error('Site is required for getting top posts');
+            throw new Error('Site identifier is required');
           }
           
           const client = getClient();
-          const response = await client.get(`/sites/${params.site}/stats/top-posts`);
+          const response = await client.get(`/sites/${params.site}`);
+          const data = await response.json();
+
+          return {
+            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            isError: false,
+          };
+        }
+
+        case 'wordpress_get_site_stats': {
+          if (!params.site) {
+            throw new Error('Site identifier is required');
+          }
+          
+          const client = getClient();
+          const response = await client.get(`/sites/${params.site}/stats`);
+          const data = await response.json();
+
+          return {
+            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            isError: false,
+          };
+        }
+
+        case 'wordpress_get_user_sites': {
+          const client = getClient();
+          const response = await client.get('/me/sites');
           const data = await response.json();
 
           return {
@@ -275,7 +319,7 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     // Use WordPress credentials from environment or headers
-    const auth_token = req.headers['x-auth-token'] as string;
+    const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string;
 
     if (!auth_token) {
       console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
