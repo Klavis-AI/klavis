@@ -62,6 +62,7 @@ func NewServer(getClient GetClientFn, version string, readOnly bool, t translati
 	s.AddTool(SearchRepositories(getClient, t))
 	s.AddTool(GetFileContents(getClient, t))
 	s.AddTool(ListCommits(getClient, t))
+	s.AddTool(ListStargazers(getClient, t))
 	if !readOnly {
 		s.AddTool(CreateOrUpdateFile(getClient, t))
 		s.AddTool(CreateRepository(getClient, t))

@@ -630,3 +630,63 @@ func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (too
 			return mcp.NewToolResultText(string(r)), nil
 		}
 }
+
+// ListStargazers creates a tool to list users who have starred a GitHub repository.
+func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+	return mcp.NewTool("github_list_stargazers",
+			mcp.WithDescription(t("TOOL_LIST_STARGAZERS_DESCRIPTION", "Get list of users who have starred a GitHub repository")),
+			mcp.WithString("owner",
+				mcp.Required(),
+				mcp.Description("Repository owner (username or organization)"),
+			),
+			mcp.WithString("repo",
+				mcp.Required(),
+				mcp.Description("Repository name"),
+			),
+			WithPagination(),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			owner, err := requiredParam[string](request, "owner")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			repo, err := requiredParam[string](request, "repo")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			pagination, err := OptionalPaginationParams(request)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			opts := &github.ListOptions{
+				Page:    pagination.page,
+				PerPage: pagination.perPage,
+			}
+
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
+			stargazers, resp, err := client.Activity.ListStargazers(ctx, owner, repo, opts)
+			if err != nil {
+				return nil, fmt.Errorf("failed to list stargazers: %w", err)
+			}
+			defer func() { _ = resp.Body.Close() }()
+
+			if resp.StatusCode != 200 {
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read response body: %w", err)
+				}
+				return mcp.NewToolResultError(fmt.Sprintf("failed to list stargazers: %s", string(body))), nil
+			}
+
+			r, err := json.Marshal(stargazers)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal response: %w", err)
+			}
+
+			return mcp.NewToolResultText(string(r)), nil
+		}
+}
