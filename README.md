@@ -84,7 +84,7 @@ Check out our [documentation](https://docs.klavis.ai) for more details!
 
 ## 🤝 Contributing
 
-We love contributions! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit changes. Join our [Discord community](https://discord.com/invite/P6fFgv2w) to discuss ideas and get help.
+We love contributions! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit changes. Join our [Discord community](https://discord.gg/p7TuTEcssn) to discuss ideas and get help.
 
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
