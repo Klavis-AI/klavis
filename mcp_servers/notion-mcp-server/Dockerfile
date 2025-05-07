@@ -1,36 +1,42 @@
-# syntax=docker/dockerfile:1
-
-# Use Node.js LTS as the base image
 FROM node:20-slim AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json from the correct location
 COPY mcp_servers/notion-mcp-server/package*.json ./
 
 # Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --omit-dev
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-# Copy source code
+# Copy source code from the correct location
 COPY mcp_servers/notion-mcp-server/ ./
 
 # Build the package
 RUN --mount=type=cache,target=/root/.npm npm run build
 
-# Install package globally
-RUN --mount=type=cache,target=/root/.npm npm link
-
 # Minimal image for runtime
 FROM node:20-slim
 
-# Copy built package from builder stage
-COPY mcp_servers/notion-mcp-server/scripts/notion-openapi.json /usr/local/scripts/
-COPY --from=builder /usr/local/lib/node_modules/@notionhq/notion-mcp-server /usr/local/lib/node_modules/@notionhq/notion-mcp-server
-COPY --from=builder /usr/local/bin/notion-mcp-server /usr/local/bin/notion-mcp-server
+WORKDIR /app
 
-# Set default environment variables
-ENV OPENAPI_MCP_HEADERS="{}"
+# Copy necessary files for runtime
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/scripts/notion-openapi.json ./scripts/
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/index.ts ./
 
-# Set entrypoint
-ENTRYPOINT ["notion-mcp-server"]
+# Set environment variables
+ENV PORT=5000
+ENV NODE_ENV=production
+
+# Expose the port
+EXPOSE 5000
+
+# Install tsx for running TypeScript files directly
+RUN npm install -g tsx
+
+# Set entrypoint to run the server with tsx
+CMD ["tsx", "index.ts"]
