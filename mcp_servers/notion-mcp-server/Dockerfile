@@ -7,13 +7,13 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY mcp_servers/notion-mcp-server/package*.json ./
 
 # Install dependencies
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --omit-dev
 
 # Copy source code
-COPY . .
+COPY mcp_servers/notion-mcp-server/ ./
 
 # Build the package
 RUN --mount=type=cache,target=/root/.npm npm run build
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.npm npm link
 FROM node:20-slim
 
 # Copy built package from builder stage
-COPY scripts/notion-openapi.json /usr/local/scripts/
+COPY mcp_servers/notion-mcp-server/scripts/notion-openapi.json /usr/local/scripts/
 COPY --from=builder /usr/local/lib/node_modules/@notionhq/notion-mcp-server /usr/local/lib/node_modules/@notionhq/notion-mcp-server
 COPY --from=builder /usr/local/bin/notion-mcp-server /usr/local/bin/notion-mcp-server
 

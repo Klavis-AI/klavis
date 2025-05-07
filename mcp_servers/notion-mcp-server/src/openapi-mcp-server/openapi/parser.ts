@@ -168,7 +168,7 @@ export class OpenAPIToMCPConverter {
     openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }>
     zip: Record<string, { openApi: OpenAPIV3.OperationObject & { method: string; path: string }; mcp: NewToolMethod }>
   } {
-    const apiName = 'API'
+    const apiName = 'notion'
 
     const openApiLookup: Record<string, OpenAPIV3.OperationObject & { method: string; path: string }> = {}
     const tools: Record<string, { methods: NewToolMethod[] }> = {
@@ -184,10 +184,11 @@ export class OpenAPIToMCPConverter {
         const mcpMethod = this.convertOperationToMCPMethod(operation, method, path)
         if (mcpMethod) {
           const uniqueName = this.ensureUniqueName(mcpMethod.name)
+
           mcpMethod.name = uniqueName
           tools[apiName]!.methods.push(mcpMethod)
-          openApiLookup[apiName + '-' + uniqueName] = { ...operation, method, path }
-          zip[apiName + '-' + uniqueName] = { openApi: { ...operation, method, path }, mcp: mcpMethod }
+          openApiLookup[apiName + '_' + uniqueName] = { ...operation, method, path }
+          zip[apiName + '_' + uniqueName] = { openApi: { ...operation, method, path }, mcp: mcpMethod }
         }
       }
     }
@@ -509,7 +510,7 @@ export class OpenAPIToMCPConverter {
 
     const truncatedName = name.slice(0, 64 - 5) // Reserve space for suffix
     const uniqueSuffix = this.generateUniqueSuffix()
-    return `${truncatedName}-${uniqueSuffix}`
+    return `${truncatedName}_${uniqueSuffix}`
   }
 
   private generateUniqueSuffix(): string {

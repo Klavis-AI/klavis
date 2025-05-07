@@ -31,9 +31,9 @@
   "paths": {
     "/v1/users/{user_id}": {
       "get": {
-        "summary": "Retrieve a user",
+        "summary": "Retrieve a Notion user",
         "description": "",
-        "operationId": "get-user",
+        "operationId": "get_user",
         "parameters": [
           {
             "name": "user_id",
@@ -81,8 +81,8 @@
     },
     "/v1/users": {
       "get": {
-        "summary": "List all users",
-        "operationId": "get-users",
+        "summary": "List all Notion users",
+        "operationId": "get_users",
         "parameters": [
           {
             "name": "start_cursor",
@@ -125,9 +125,9 @@
     },
     "/v1/users/me": {
       "get": {
-        "summary": "Retrieve your token's bot user",
+        "summary": "Retrieve your Notion token's bot user",
         "description": "",
-        "operationId": "get-self",
+        "operationId": "get_self",
         "parameters": [],
         "responses": {
           "200": {
@@ -214,633 +214,11 @@
         "security": []
       }
     },
-    "/v1/databases/{database_id}/query": {
-      "post": {
-        "summary": "Query a database",
-        "description": "",
-        "operationId": "post-database-query",
-        "parameters": [
-          {
-            "name": "database_id",
-            "in": "path",
-            "description": "Identifier for a Notion database.",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "name": "filter_properties",
-            "in": "query",
-            "description": "A list of page property value IDs associated with the database. Use this param to limit the response to a specific page property value or values for pages that meet the `filter` criteria.",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "filter": {
-                    "type": "object",
-                    "description": "When supplied, limits which pages are returned based on the [filter conditions](ref:post-database-query-filter).",
-                    "or": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "type": "object",
-                          "properties": {
-                            "property": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "rich_text": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "url": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "email": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "phone_number": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "number": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "number"
-                                },
-                                "does_not_equal": {
-                                  "type": "number"
-                                },
-                                "contains": {
-                                  "type": "number"
-                                },
-                                "does_not_contain": {
-                                  "type": "number"
-                                },
-                                "starts_with": {
-                                  "type": "number"
-                                },
-                                "ends_with": {
-                                  "type": "number"
-                                }
-                              }
-                            },
-                            "checkbox": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "boolean"
-                                },
-                                "does_not_equal": {
-                                  "type": "boolean"
-                                }
-                              }
-                            },
-                            "select": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "multi_select": {
-                              "type": "object",
-                              "properties": {
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "status": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "date": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            },
-                            "created_time": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            },
-                            "last_edited_time": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      "maxItems": 100
-                    },
-                    "and": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "type": "object",
-                          "properties": {
-                            "property": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "rich_text": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "url": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "email": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "phone_number": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                },
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                },
-                                "starts_with": {
-                                  "type": "string"
-                                },
-                                "ends_with": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "number": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "number"
-                                },
-                                "does_not_equal": {
-                                  "type": "number"
-                                },
-                                "contains": {
-                                  "type": "number"
-                                },
-                                "does_not_contain": {
-                                  "type": "number"
-                                },
-                                "starts_with": {
-                                  "type": "number"
-                                },
-                                "ends_with": {
-                                  "type": "number"
-                                }
-                              }
-                            },
-                            "checkbox": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "boolean"
-                                },
-                                "does_not_equal": {
-                                  "type": "boolean"
-                                }
-                              }
-                            },
-                            "select": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "multi_select": {
-                              "type": "object",
-                              "properties": {
-                                "contains": {
-                                  "type": "string"
-                                },
-                                "does_not_contain": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "status": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string"
-                                },
-                                "does_not_equal": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "date": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            },
-                            "created_time": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            },
-                            "last_edited_time": {
-                              "type": "object",
-                              "properties": {
-                                "equals": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "after": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_before": {
-                                  "type": "string",
-                                  "format": "date"
-                                },
-                                "on_or_after": {
-                                  "type": "string",
-                                  "format": "date"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      "maxItems": 100
-                    }
-                  },
-                  "sorts": {
-                    "type": "array",
-                    "description": "When supplied, orders the results based on the provided [sort criteria](ref:post-database-query-sort).",
-                    "items": {
-                      "type": "object",
-                      "required": ["property", "direction"],
-                      "properties": {
-                        "property": {
-                          "type": "string"
-                        },
-                        "direction": {
-                          "enum": ["ascending", "descending"]
-                        }
-                      }
-                    }
-                  },
-                  "start_cursor": {
-                    "type": "string",
-                    "description": "When supplied, returns a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results."
-                  },
-                  "page_size": {
-                    "type": "integer",
-                    "description": "The number of items from the full list desired in the response. Maximum: 100",
-                    "default": 100
-                  },
-                  "archived": {
-                    "type": "boolean"
-                  },
-                  "in_trash": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      }
-    },
     "/v1/search": {
       "post": {
-        "summary": "Search by title",
+        "summary": "Search Notion by title",
         "description": "",
-        "operationId": "post-search",
+        "operationId": "post_search",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -900,262 +278,11 @@
         "security": []
       }
     },
-    "/v1/blocks/{block_id}/children": {
-      "get": {
-        "summary": "Retrieve block children",
-        "description": "",
-        "operationId": "get-block-children",
-        "parameters": [
-          {
-            "name": "block_id",
-            "in": "path",
-            "description": "Identifier for a [block](ref:block)",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "name": "start_cursor",
-            "in": "query",
-            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page_size",
-            "in": "query",
-            "description": "The number of items from the full list desired in the response. Maximum: 100",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 100
-            }
-          }
-        ],
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      },
-      "patch": {
-        "summary": "Append block children",
-        "description": "",
-        "operationId": "patch-block-children",
-        "parameters": [
-          {
-            "name": "block_id",
-            "in": "path",
-            "description": "Identifier for a [block](ref:block). Also accepts a [page](ref:page) ID.",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "children"
-                ],
-                "properties": {
-                  "children": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "paragraph": {
-                          "type": "object",
-                          "properties": {
-                            "rich_text": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "text": {
-                                    "type": "object",
-                                    "properties": {
-                                      "content": {
-                                        "type": "string",
-                                        "maxLength": 2000
-                                      },
-                                      "link": {
-                                        "type": ["object", "null"],
-                                        "properties": {
-                                          "url": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        "required": ["url"]
-                                      }
-                                    },
-                                    "additionalProperties": false,
-                                    "required": ["content"]
-                                  },
-                                  "type": {
-                                    "enum": ["text"]
-                                  }
-                                },
-                                "additionalProperties": false,
-                                "required": ["text"]
-                              },
-                              "maxItems": 100
-                            }
-                          },
-                          "additionalProperties": false,
-                          "required": ["rich_text"]
-                        },
-                        "bulleted_list_item": {
-                          "type": "object",
-                          "properties": {
-                            "rich_text": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "text": {
-                                    "type": "object",
-                                    "properties": {
-                                      "content": {
-                                        "type": "string",
-                                        "maxLength": 2000
-                                      },
-                                      "link": {
-                                        "type": ["object", "null"],
-                                        "properties": {
-                                          "url": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        "required": ["url"]
-                                      }
-                                    },
-                                    "additionalProperties": false,
-                                    "required": ["content"]
-                                  },
-                                  "type": {
-                                    "enum": ["text"]
-                                  }
-                                },
-                                "additionalProperties": false,
-                                "required": ["text"]
-                              },
-                              "maxItems": 100
-                            }
-                          },
-                          "additionalProperties": false,
-                          "required": ["rich_text"]
-                        },
-                        "type": {
-                          "enum": ["paragraph", "bulleted_list_item"]
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "description": "Child content to append to a container block as an array of [block objects](ref:block)"
-                  },
-                  "after": {
-                    "type": "string",
-                    "description": "The ID of the existing block that the new block should be appended after."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      }
-    },
-    "/v1/blocks/{block_id}": {
-      "get": {
-        "summary": "Retrieve a block",
-        "description": "",
-        "operationId": "retrieve-a-block",
-        "parameters": [
-          {
-            "name": "block_id",
-            "in": "path",
-            "description": "Identifier for a Notion block",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      },
-      "patch": {
-        "summary": "Update a block",
-        "description": "",
-        "operationId": "update-a-block",
-        "parameters": [
-          {
-            "name": "block_id",
-            "in": "path",
-            "description": "Identifier for a Notion block",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "object",
-                    "description": "The [block object `type`](ref:block#block-object-keys) value with the properties to be updated. Currently only `text` (for supported block types) and `checked` (for `to_do` blocks) fields can be updated.",
-                    "properties": {}
-                  },
-                  "archived": {
-                    "type": "boolean",
-                    "description": "Set to true to archive (delete) a block. Set to false to un-archive (restore) a block.",
-                    "default": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      },
-      "delete": {
-        "summary": "Delete a block",
-        "description": "",
-        "operationId": "delete-a-block",
-        "parameters": [
-          {
-            "name": "block_id",
-            "in": "path",
-            "description": "Identifier for a Notion block",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "responses": {},
-        "deprecated": false,
-        "security": []
-      }
-    },
     "/v1/pages/{page_id}": {
       "get": {
-        "summary": "Retrieve a page",
+        "summary": "Retrieve a Notion page",
         "description": "",
-        "operationId": "retrieve-a-page",
+        "operationId": "retrieve_a_page",
         "parameters": [
           {
             "name": "page_id",
@@ -1180,9 +307,9 @@
         "security": []
       },
       "patch": {
-        "summary": "Update page properties",
+        "summary": "Update Notion page properties",
         "description": "",
-        "operationId": "patch-page",
+        "operationId": "patch_page",
         "parameters": [
           {
             "name": "page_id",
@@ -1297,9 +424,9 @@
     },
     "/v1/pages": {
       "post": {
-        "summary": "Create a page",
+        "summary": "Create a Notion page",
         "description": "",
-        "operationId": "post-page",
+        "operationId": "post_page",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -1380,9 +507,9 @@
     },
     "/v1/databases": {
       "post": {
-        "summary": "Create a database",
+        "summary": "Create a Notion database",
         "description": "",
-        "operationId": "create-a-database",
+        "operationId": "create_a_database",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -1488,9 +615,9 @@
     },
     "/v1/databases/{database_id}": {
       "patch": {
-        "summary": "Update a database",
+        "summary": "Update a Notion database",
         "description": "",
-        "operationId": "update-a-database",
+        "operationId": "update_a_database",
         "parameters": [
           {
             "name": "database_id",
@@ -1597,9 +724,9 @@
         "security": []
       },
       "get": {
-        "summary": "Retrieve a database",
+        "summary": "Retrieve a Notion database",
         "description": "",
-        "operationId": "retrieve-a-database",
+        "operationId": "retrieve_a_database",
         "parameters": [
           {
             "name": "database_id",
@@ -1631,9 +758,9 @@
     },
     "/v1/pages/{page_id}/properties/{property_id}": {
       "get": {
-        "summary": "Retrieve a page property item",
+        "summary": "Retrieve a Notion page property item",
         "description": "",
-        "operationId": "retrieve-a-page-property",
+        "operationId": "retrieve_a_page_property",
         "parameters": [
           {
             "name": "page_id",
@@ -1697,9 +824,9 @@
     },
     "/v1/comments": {
       "get": {
-        "summary": "Retrieve comments",
+        "summary": "Retrieve Notion comments",
         "description": "Retrieves a list of un-resolved [Comment objects](ref:comment-object) from a page or block.",
-        "operationId": "retrieve-a-comment",
+        "operationId": "retrieve_a_comment",
         "parameters": [
           {
             "name": "block_id",
@@ -1746,9 +873,9 @@
         "security": []
       },
       "post": {
-        "summary": "Create comment",
+        "summary": "Create a Notion comment",
         "description": "Creates a comment in a page or existing discussion thread.",
-        "operationId": "create-a-comment",
+        "operationId": "create_a_comment",
         "requestBody": {
           "content": {
             "application/json": {
