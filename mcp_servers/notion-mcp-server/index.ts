@@ -5,75 +5,93 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import dotenv from 'dotenv';
 import { initProxy } from './src/init-server.js';
 import path from 'path';
-import { asyncLocalStorage } from './src/openapi-mcp-server/mcp/proxy.js';
+import { AsyncLocalStorage } from 'async_hooks';
 
 // Load environment variables
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const transports = new Map<string, SSEServerTransport>();
+// Create AsyncLocalStorage for request context
+const asyncLocalStorage = new AsyncLocalStorage<{
+  openapi_mcp_headers: string;
+}>();
 
+// Get the Notion MCP server
+const getNotionMcpServer = async () => {
   // Initialize the MCP proxy with OpenAPI spec
   const specPath = process.env.OPENAPI_SPEC_PATH || path.join(process.cwd(), 'scripts', 'notion-openapi.json');
   const baseUrl = process.env.BASE_URL ?? undefined;
   
-  const proxy = await initProxy(specPath, baseUrl);
+  const server = await initProxy(specPath, baseUrl);
+  return server;
+};
 
-  app.get("/sse", async (req, res) => {
-    const transport = new SSEServerTransport(`/messages`, res);
+const app = express();
 
-    // Set up cleanup when connection closes
-    res.on('close', async () => {
-      console.log(`SSE connection closed for transport: ${transport.sessionId}`);
-      try {
-        transports.delete(transport.sessionId);
-      } finally {
-      }
-    });
+const transports = new Map<string, SSEServerTransport>();
 
-    transports.set(transport.sessionId, transport);
+app.get("/sse", async (req, res) => {
+  const transport = new SSEServerTransport(`/messages`, res);
 
-    await proxy.connect(transport);
-
-    console.log(`SSE connection established with transport: ${transport.sessionId}`);
-  });
-
-  app.post("/messages", async (req, res) => {
-    const sessionId = req.query.sessionId as string;
-
-    let transport: SSEServerTransport | undefined;
-    transport = sessionId ? transports.get(sessionId) : undefined;
-    if (transport) {
-      // Use NOTION_API_KEY from environment if available, otherwise use header
-      const apiKey = process.env.NOTION_API_KEY || req.headers['x-auth-token'] as string;
-      
-      if (!apiKey) {
-        console.error('No Notion API key provided in environment or headers');
-        res.status(400).send({ error: "No Notion API key provided" });
-        return;
-      }
-
-      asyncLocalStorage.run({ openapi_mcp_headers: JSON.stringify({
-        'Authorization': `Bearer ${apiKey}`,
-        'Notion-Version': process.env.NOTION_VERSION || '2022-06-28',
-        'Content-Type': 'application/json'
-      }) }, async () => {
-        await transport.handlePostMessage(req, res);
-      });
-    } else {
-      console.error(`Transport not found for session ID: ${sessionId}`);
-      res.status(404).send({ error: "Transport not found" });
+  // Set up cleanup when connection closes
+  res.on('close', async () => {
+    console.log(`SSE connection closed for transport: ${transport.sessionId}`);
+    try {
+      transports.delete(transport.sessionId);
+    } finally {
     }
   });
 
-  const port = process.env.PORT || 5000;
-  app.listen(port, () => {
-    console.log(`Notion MCP server running on port ${port}`);
-  });
-}
+  transports.set(transport.sessionId, transport);
 
-startServer().catch(error => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
+  const server = await getNotionMcpServer();
+  await server.connect(transport);
+
+  console.log(`SSE connection established with transport: ${transport.sessionId}`);
+});
+
+app.post("/messages", async (req, res) => {
+  const sessionId = req.query.sessionId as string;
+  const transport = transports.get(sessionId);
+  if (transport) {
+    // Get API key from env or header
+    const apiKey = process.env.NOTION_API_KEY || req.headers['x-auth-token'] as string;
+    
+    if (!apiKey) {
+      console.error('Error: Notion API key is missing. Provide it via NOTION_API_KEY env var or x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Notion API key is missing. Have you set the Notion API key?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Notion API key is missing. Have you set the Notion API key?" }));
+      return;
+    }
+
+    // Create headers for Notion API
+    const headers = JSON.stringify({
+      'Authorization': `Bearer ${apiKey}`,
+      'Notion-Version': process.env.NOTION_VERSION || '2022-06-28',
+      'Content-Type': 'application/json'
+    });
+
+    // Run handler within AsyncLocalStorage context
+    asyncLocalStorage.run({ 
+      openapi_mcp_headers: headers
+    }, async () => {
+      await transport.handlePostMessage(req, res);
+    });
+  } else {
+    console.error(`Transport not found for session ID: ${sessionId}`);
+    res.status(404).send({ error: "Transport not found" });
+  }
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Notion MCP server running on port ${port}`);
 }); 

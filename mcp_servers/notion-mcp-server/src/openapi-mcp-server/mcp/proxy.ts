@@ -17,7 +17,12 @@ export const asyncLocalStorage = new AsyncLocalStorage<{
 }>();
 
 function getOpenapiMcpHeaders() {
-  return asyncLocalStorage.getStore()!.openapi_mcp_headers;
+  console.log("---- getOpenapiMcpHeaders");
+  const store = asyncLocalStorage.getStore();
+  if (!store) {
+    throw new Error('No context found in AsyncLocalStorage');
+  }
+  return store.openapi_mcp_headers;
 }
 
 type PathItemObject = OpenAPIV3.PathItemObject & {

@@ -1,42 +1,34 @@
-FROM node:20-slim AS builder
+FROM node:22.12-alpine AS builder
 
-# Set working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json from the correct location
-COPY mcp_servers/notion-mcp-server/package*.json ./
-
-# Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
-
-# Copy source code from the correct location
-COPY mcp_servers/notion-mcp-server/ ./
-
-# Build the package
-RUN --mount=type=cache,target=/root/.npm npm run build
-
-# Minimal image for runtime
-FROM node:20-slim
+COPY mcp_servers/notion-mcp-server /app
 
 WORKDIR /app
 
-# Copy necessary files for runtime
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/scripts/notion-openapi.json ./scripts/
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/index.ts ./
+# Install all dependencies
+RUN npm install
 
-# Set environment variables
-ENV PORT=5000
+# Build the project
+RUN npm run build
+
+FROM node:22-alpine AS release
+
+# Copy build artifacts and dependencies
+COPY --from=builder /app/build /app/build
+COPY --from=builder /app/bin /app/bin
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/package-lock.json /app/package-lock.json
+COPY --from=builder /app/src /app/src
+COPY --from=builder /app/scripts /app/scripts
+COPY --from=builder /app/index.ts /app/index.ts
+
 ENV NODE_ENV=production
 
-# Expose the port
 EXPOSE 5000
 
-# Install tsx for running TypeScript files directly
-RUN npm install -g tsx
+WORKDIR /app
 
-# Set entrypoint to run the server with tsx
+# Install dependencies including tsx for running TypeScript directly
+RUN npm install --production && npm install -g tsx
+
+# Run the server using the index.ts at the root level
 CMD ["tsx", "index.ts"]
