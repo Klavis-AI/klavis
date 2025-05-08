@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/github/github-mcp-server/pkg/translations"
 	"github.com/google/go-github/v69/github"
@@ -631,10 +633,10 @@ func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (too
 		}
 }
 
-// ListStargazers creates a tool to list users who have starred a GitHub repository.
+// ListStargazers creates a tool to list users who have starred a GitHub repository. note: we use the graphql api and prompt to get accurate result!
 func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("github_list_stargazers",
-			mcp.WithDescription(t("TOOL_LIST_STARGAZERS_DESCRIPTION", "Get list of users who have starred a GitHub repository")),
+	return mcp.NewTool("github_list_recent_stargazers",
+			mcp.WithDescription(t("TOOL_LIST_RECENT_STARGAZERS_DESCRIPTION", "Get a comprehensive list of users who have recently starred a specified GitHub repository, Ensure that the list includes every user without any omissions.")),
 			mcp.WithString("owner",
 				mcp.Required(),
 				mcp.Description("Repository owner (username or organization)"),
@@ -659,18 +661,62 @@ func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc)
 				return mcp.NewToolResultError(err.Error()), nil
 			}
 
-			opts := &github.ListOptions{
-				Page:    pagination.page,
-				PerPage: pagination.perPage,
-			}
-
 			client, err := getClient(ctx)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
 			}
-			stargazers, resp, err := client.Activity.ListStargazers(ctx, owner, repo, opts)
+
+			// GraphQL query to fetch stargazers sorted by starred date
+			query := `
+				query($owner: String!, $name: String!, $first: Int!) { 
+					repository(owner: $owner, name: $name) { 
+						stargazers(first: $first, orderBy: {field: STARRED_AT, direction: DESC}) { 
+							edges {  
+								node { 
+									login 
+								} 
+							} 
+						} 
+					} 
+				}
+			`
+
+			variables := map[string]interface{}{
+				"owner": owner,
+				"name":  repo,
+				"first": pagination.perPage,
+			}
+
+			req, err := client.NewRequest("POST", "graphql", map[string]interface{}{
+				"query":     query,
+				"variables": variables,
+			})
 			if err != nil {
-				return nil, fmt.Errorf("failed to list stargazers: %w", err)
+				return nil, fmt.Errorf("failed to create GraphQL request: %w", err)
+			}
+
+			type GraphQLResponse struct {
+				Data struct {
+					Repository struct {
+						Stargazers struct {
+							Edges []struct {
+								StarredAt string `json:"starredAt"`
+								Node      struct {
+									Login string `json:"login"`
+								} `json:"node"`
+							} `json:"edges"`
+						} `json:"stargazers"`
+					} `json:"repository"`
+				} `json:"data"`
+				Errors []struct {
+					Message string `json:"message"`
+				} `json:"errors,omitempty"`
+			}
+
+			var response GraphQLResponse
+			resp, err := client.Do(ctx, req, &response)
+			if err != nil {
+				return nil, fmt.Errorf("failed to execute GraphQL request: %w", err)
 			}
 			defer func() { _ = resp.Body.Close() }()
 
@@ -680,6 +726,28 @@ func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc)
 					return nil, fmt.Errorf("failed to read response body: %w", err)
 				}
 				return mcp.NewToolResultError(fmt.Sprintf("failed to list stargazers: %s", string(body))), nil
+			}
+
+			if len(response.Errors) > 0 {
+				errMsgs := make([]string, len(response.Errors))
+				for i, e := range response.Errors {
+					errMsgs[i] = e.Message
+				}
+				return mcp.NewToolResultError(fmt.Sprintf("GraphQL errors: %s", strings.Join(errMsgs, "; "))), nil
+			}
+
+			type Stargazer struct {
+				Login     string    `json:"login"`
+				StarredAt time.Time `json:"starred_at,omitempty"`
+			}
+
+			stargazers := make([]Stargazer, 0, len(response.Data.Repository.Stargazers.Edges))
+			for _, edge := range response.Data.Repository.Stargazers.Edges {
+				starredAt, _ := time.Parse(time.RFC3339, edge.StarredAt)
+				stargazers = append(stargazers, Stargazer{
+					Login:     edge.Node.Login,
+					StarredAt: starredAt,
+				})
 			}
 
 			r, err := json.Marshal(stargazers)
