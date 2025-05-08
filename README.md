@@ -4,7 +4,7 @@
   </picture>
 </div>
 
-<h1 align="center">Production-ready MCP integration for any AI application</h1>
+<h1 align="center">Production-ready MCP integrations for AI applications</h1>
 
 [![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
@@ -14,16 +14,15 @@
 
 ## Introduction
 
-Klavis AI makes it effortless to connect to production-ready MCP servers & clients at scale. Integrate with your AI application in under a minute, and scale to millions of users using our open-source infrastructure, hosted servers, and multi-platform clients!
+Klavis AI makes it effortless to connect to production-ready MCP servers & clients at scale. Integrate MCPs with your AI applications in a minute, and scale to millions of users using our open-source infrastructure, hosted servers, and multi-platform clients!
 
 ## ✨ Key Features
 
-Klavis AI lowers the barrier to using MCPs by providing:
-- **Stable Production-Ready MCP Servers**: 100% connection guarantee with reliable MCP servers on dedicated infrastructure.
-- **Built-In Authentication**: Secure authentication out of the box with built-in OAuth flows and secrets management for both developers and end-users.
-- **High-Quality**: All our MCP Servers come from official sources or are internally evaluated by Klavis and our customers.
-- **MCP Client integration**: We support MCP Client integration, allowing you to interact via Klavis Slack, Discord, or web MCP client and integrate into your workflows seamlessly.
-- **100+ Tool Integrations & Customization**: Support for various tools and customized MCP servers tailored to your needs.
+Klavis AI removes the barrier to using MCPs by providing:
+- **Production-Ready MCP Servers**: All our MCP Servers come from official sources or are internally evaluated by Klavis and our customers.
+- **Built-In Authentications**: Secure authentication out of the box for both developers and end-users.
+- **MCP Client Integrations**: We support MCP Client Integration, allowing you to interact via Klavis Slack, Discord, or web MCP client and integrate into your workflows seamlessly.
+- **100+ Tool Integrations & Customizations**: Support for various tools and customized MCP servers tailored to your needs.
 
 ## 🚀 Quick Start
 
