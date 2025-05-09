@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import express from "express";
+import express, { Request, Response } from 'express';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
 import { Resend } from "resend";
 import { AsyncLocalStorage } from 'async_hooks';
@@ -311,7 +312,7 @@ const getResendMcpServer = () => {
 
       const resend = getResendClient();
       let response: any = null;
-      
+
       if (id) {
         // Lookup by ID
         response = await resend.contacts.get({
@@ -322,17 +323,17 @@ const getResendMcpServer = () => {
         // Based on the provided examples, we need to use different method or params for email lookup
         // Let's try to find the contact by email in the list
         const listResponse = await resend.contacts.list({ audienceId });
-        
+
         if (listResponse.error) {
           throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
         }
-        
+
         const contactData = listResponse.data?.data?.find(contact => contact.email === email);
-        
+
         if (!contactData) {
           throw new Error(`Contact with email ${email} not found`);
         }
-        
+
         // Now get the full contact details by ID
         response = await resend.contacts.get({
           id: contactData.id,
@@ -379,7 +380,7 @@ const getResendMcpServer = () => {
 
       const resend = getResendClient();
       let response: any = null;
-      
+
       // Prepare update data
       const updateData: any = {
         audienceId,
@@ -387,7 +388,7 @@ const getResendMcpServer = () => {
         ...(lastName !== undefined ? { lastName } : {}),
         ...(unsubscribed !== undefined ? { unsubscribed } : {})
       };
-      
+
       if (id) {
         // Update by ID
         updateData.id = id;
@@ -395,17 +396,17 @@ const getResendMcpServer = () => {
       } else if (email) {
         // First check if we need to find the ID for this email
         const listResponse = await resend.contacts.list({ audienceId });
-        
+
         if (listResponse.error) {
           throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
         }
-        
+
         const contactData = listResponse.data?.data?.find(contact => contact.email === email);
-        
+
         if (!contactData) {
           throw new Error(`Contact with email ${email} not found`);
         }
-        
+
         // Now update using the ID
         updateData.id = contactData.id;
         response = await resend.contacts.update(updateData);
@@ -447,7 +448,7 @@ const getResendMcpServer = () => {
 
       const resend = getResendClient();
       let response: any = null;
-      
+
       if (id) {
         // Delete by ID
         response = await resend.contacts.remove({
@@ -457,17 +458,17 @@ const getResendMcpServer = () => {
       } else if (email) {
         // First check if we need to find the ID for this email
         const listResponse = await resend.contacts.list({ audienceId });
-        
+
         if (listResponse.error) {
           throw new Error(`Failed to list contacts: ${JSON.stringify(listResponse.error)}`);
         }
-        
+
         const contactData = listResponse.data?.data?.find(contact => contact.email === email);
-        
+
         if (!contactData) {
           throw new Error(`Contact with email ${email} not found`);
         }
-        
+
         // Now delete using the ID
         response = await resend.contacts.remove({
           id: contactData.id,
@@ -602,7 +603,7 @@ const getResendMcpServer = () => {
     },
     async ({ id, scheduledAt }) => {
       const resend = getResendClient();
-      
+
       const sendOptions: any = {};
       if (scheduledAt) sendOptions.scheduledAt = scheduledAt;
 
@@ -681,6 +682,86 @@ const getResendMcpServer = () => {
 }
 
 const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
+  if (!apiKey) {
+    console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized, Resend API key is missing. Have you set the Resend API key?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+  const resendClient = new Resend(apiKey);
+
+  const server = getResendMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+    await server.connect(transport);
+    asyncLocalStorage.run({ resendClient }, async () => {
+      await transport.handleRequest(req, res, req.body);
+    });
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
+      });
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {

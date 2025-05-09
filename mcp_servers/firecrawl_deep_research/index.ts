@@ -1,6 +1,7 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
     Tool,
     CallToolRequestSchema,
@@ -302,6 +303,93 @@ const getFirecrawlDeepResearchMcpServer = () => {
 }
 
 const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+
+    // Added: Get API key from env or header
+    const apiKey = req.headers['x-auth-token'] as string;
+
+    if (!apiKey && !FIRECRAWL_API_URL) {
+        console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
+        const errorResponse = {
+            jsonrpc: '2.0' as '2.0',
+            error: {
+                code: -32001,
+                message: 'Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?'
+            },
+            id: 0
+        };
+        res.status(401).json(errorResponse);
+        return;
+    }
+
+    // Added: Instantiate client within request context
+    const firecrawlClient = new FirecrawlApp({
+        apiKey: apiKey || '', // Use empty string if only API URL is provided (self-hosted)
+        ...(FIRECRAWL_API_URL ? { apiUrl: FIRECRAWL_API_URL } : {}),
+    });    
+
+    const server = getFirecrawlDeepResearchMcpServer();
+    try {
+        const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: undefined,
+        });
+        await server.connect(transport);
+        asyncLocalStorage.run({ firecrawlClient }, async () => {
+            await transport.handleRequest(req, res, req.body);
+        });
+        res.on('close', () => {
+            console.log('Request closed');
+            transport.close();
+            server.close();
+        });
+    } catch (error) {
+        console.error('Error handling MCP request:', error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                jsonrpc: '2.0',
+                error: {
+                    code: -32603,
+                    message: 'Internal server error',
+                },
+                id: null,
+            });
+        }
+    }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+    console.log('Received GET MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+    console.log('Received DELETE MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
 
 // Changed: Use Map for transports
 const transports = new Map<string, SSEServerTransport>();
