@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import express from "express";
+import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequest,
   CallToolRequestSchema,
@@ -19,13 +20,13 @@ dotenv.config();
 
 // Default fields for Jira reads
 const DEFAULT_READ_JIRA_FIELDS = [
-  "summary", 
-  "status", 
-  "assignee", 
-  "issuetype", 
-  "priority", 
-  "created", 
-  "updated", 
+  "summary",
+  "status",
+  "assignee",
+  "issuetype",
+  "priority",
+  "created",
+  "updated",
   "description",
   "labels"
 ];
@@ -189,7 +190,7 @@ function getJiraClient(): JiraClient {
 async function createJiraClient(authToken: string): Promise<JiraClient> {
   // First, fetch the accessible resources to get the correct baseUrl
   const accessibleResourcesUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
-  
+
   try {
     const response = await fetch(accessibleResourcesUrl, {
       headers: {
@@ -213,7 +214,7 @@ async function createJiraClient(authToken: string): Promise<JiraClient> {
     }
 
     const resources = await response.json() as JiraResource[];
-    
+
     // If no resources are found, throw an error
     if (!resources || resources.length === 0) {
       throw new Error('No accessible Jira resources found for this user');
@@ -233,14 +234,14 @@ async function createJiraClient(authToken: string): Promise<JiraClient> {
         const url = path.startsWith('http')
           ? path
           : `https://api.atlassian.com/ex/jira/${cloudId}${path.startsWith('/') ? path : '/' + path}`;
-        
+
         const headers: Record<string, string> = {
           ...options.headers as Record<string, string>,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
           'Authorization': `Bearer ${authToken}`
         };
-        
+
         const response = await fetch(url, {
           ...options,
           headers,
@@ -763,20 +764,20 @@ const getJiraMcpServer = () => {
             if (!args.jql) {
               throw new Error("Missing required argument: jql");
             }
-            
+
             const searchParams = new URLSearchParams();
             searchParams.append('jql', args.jql);
-            
+
             if (args.limit) {
               searchParams.append('maxResults', String(args.limit));
             } else {
               searchParams.append('maxResults', "10");
             }
-            
+
             if (args.startAt !== undefined) {
               searchParams.append('startAt', String(args.startAt));
             }
-            
+
             if (args.fields) {
               if (args.fields === "*all") {
                 searchParams.append('fields', "*all");
@@ -786,29 +787,29 @@ const getJiraMcpServer = () => {
             } else {
               searchParams.append('fields', DEFAULT_READ_JIRA_FIELDS.join(','));
             }
-            
+
             // Filter by project if specified
             const projectsFilter = args.projects_filter || process.env.JIRA_PROJECTS_FILTER;
             if (projectsFilter && !args.jql.toLowerCase().includes("project =")) {
               const projects = projectsFilter.split(',').map(p => p.trim());
               let projectCondition = "";
-              
+
               if (projects.length === 1) {
                 projectCondition = `project = ${projects[0]}`;
               } else if (projects.length > 1) {
                 projectCondition = `project in (${projects.join(',')})`;
               }
-              
+
               if (projectCondition) {
                 args.jql = `${args.jql} AND ${projectCondition}`;
                 searchParams.set('jql', args.jql);
               }
             }
-            
+
             const response = await jira.fetch<any>(`/rest/api/3/search?${searchParams.toString()}`);
 
             console.log("--- response", JSON.stringify(response, null, 2));
-            
+
             return {
               content: [
                 {
@@ -824,9 +825,9 @@ const getJiraMcpServer = () => {
             if (!args.issue_key) {
               throw new Error("Missing required argument: issue_key");
             }
-            
+
             const searchParams = new URLSearchParams();
-            
+
             if (args.fields) {
               if (args.fields === "*all") {
                 searchParams.append('fields', "*all");
@@ -836,35 +837,35 @@ const getJiraMcpServer = () => {
             } else {
               searchParams.append('fields', DEFAULT_READ_JIRA_FIELDS.join(','));
             }
-            
+
             if (args.expand) {
               searchParams.append('expand', args.expand);
             }
-            
+
             if (args.properties) {
               searchParams.append('properties', args.properties);
             }
-            
+
             if (args.update_history !== undefined) {
               searchParams.append('updateHistory', String(args.update_history));
             }
-            
+
             const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
             const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}${query}`);
-            
+
             // Get comments if comment_limit > 0
             if (args.comment_limit && args.comment_limit > 0) {
               const commentsParams = new URLSearchParams();
               commentsParams.append('maxResults', String(args.comment_limit));
               commentsParams.append('orderBy', 'created');
-              
+
               const commentsResponse = await jira.fetch<any>(
                 `/rest/api/3/issue/${args.issue_key}/comment?${commentsParams.toString()}`
               );
-              
+
               response.comments = commentsResponse.comments;
             }
-            
+
             return {
               content: [
                 {
@@ -877,10 +878,10 @@ const getJiraMcpServer = () => {
 
           case "jira_search_fields": {
             const args = request.params.arguments as unknown as JiraSearchFieldsArgs;
-            
+
             // Get all fields
             const response = await jira.fetch<any>('/rest/api/3/field');
-            
+
             // Filter and sort by keyword if provided
             let filteredFields = response;
             if (args.keyword && args.keyword.trim() !== '') {
@@ -889,15 +890,15 @@ const getJiraMcpServer = () => {
                 const name = (field.name || '').toLowerCase();
                 const id = (field.id || '').toLowerCase();
                 const desc = (field.description || '').toLowerCase();
-                
+
                 return name.includes(keyword) || id.includes(keyword) || desc.includes(keyword);
               });
             }
-            
+
             // Limit results
             const limit = args.limit || 10;
             const limitedFields = filteredFields.slice(0, limit);
-            
+
             return {
               content: [
                 {
@@ -913,7 +914,7 @@ const getJiraMcpServer = () => {
             if (!args.project_key) {
               throw new Error("Missing required argument: project_key");
             }
-            
+
             // Use JQL to search for project issues
             const jql = `project = ${args.project_key}`;
             const searchParams = new URLSearchParams();
@@ -921,9 +922,9 @@ const getJiraMcpServer = () => {
             searchParams.append('maxResults', String(args.limit || 10));
             searchParams.append('startAt', String(args.startAt || 0));
             searchParams.append('fields', DEFAULT_READ_JIRA_FIELDS.join(','));
-            
+
             const response = await jira.fetch<any>(`/rest/api/3/search?${searchParams.toString()}`);
-            
+
             return {
               content: [
                 {
@@ -939,14 +940,14 @@ const getJiraMcpServer = () => {
             if (!args.epic_key) {
               throw new Error("Missing required argument: epic_key");
             }
-            
+
             // First get the Epic to confirm it exists and is of type Epic
             const epicResponse = await jira.fetch<any>(`/rest/api/3/issue/${args.epic_key}?fields=issuetype`);
-            
+
             if (epicResponse.fields.issuetype.name !== 'Epic') {
               throw new Error(`Issue ${args.epic_key} is not an Epic`);
             }
-            
+
             // Use JQL to search for issues in the Epic
             const jql = `"Epic Link" = ${args.epic_key} OR parent = ${args.epic_key}`;
             const searchParams = new URLSearchParams();
@@ -954,9 +955,9 @@ const getJiraMcpServer = () => {
             searchParams.append('maxResults', String(args.limit || 10));
             searchParams.append('startAt', String(args.startAt || 0));
             searchParams.append('fields', DEFAULT_READ_JIRA_FIELDS.join(','));
-            
+
             const response = await jira.fetch<any>(`/rest/api/3/search?${searchParams.toString()}`);
-            
+
             return {
               content: [
                 {
@@ -972,19 +973,19 @@ const getJiraMcpServer = () => {
             if (!args.board_id) {
               throw new Error("Missing required argument: board_id");
             }
-            
+
             const searchParams = new URLSearchParams();
-            
+
             if (args.state) {
               searchParams.append('state', args.state);
             }
-            
+
             searchParams.append('maxResults', String(args.limit || 10));
             searchParams.append('startAt', String(args.startAt || 0));
-            
+
             const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
             const response = await jira.fetch<any>(`/rest/agile/1.0/board/${args.board_id}/sprint${query}`);
-            
+
             return {
               content: [
                 {
@@ -1000,23 +1001,23 @@ const getJiraMcpServer = () => {
             if (!args.board_id || !args.sprint_name || !args.start_date || !args.end_date) {
               throw new Error("Missing required arguments for sprint creation");
             }
-            
+
             const payload = {
               name: args.sprint_name,
               startDate: args.start_date,
               endDate: args.end_date,
               originBoardId: args.board_id,
             };
-            
+
             if (args.goal) {
               Object.assign(payload, { goal: args.goal });
             }
-            
+
             const response = await jira.fetch<any>('/rest/agile/1.0/sprint', {
               method: 'POST',
               body: JSON.stringify(payload),
             });
-            
+
             return {
               content: [
                 {
@@ -1032,9 +1033,9 @@ const getJiraMcpServer = () => {
             if (!args.sprint_id) {
               throw new Error("Missing required argument: sprint_id");
             }
-            
+
             const searchParams = new URLSearchParams();
-            
+
             if (args.fields) {
               if (args.fields === "*all") {
                 searchParams.append('fields', "*all");
@@ -1044,13 +1045,13 @@ const getJiraMcpServer = () => {
             } else {
               searchParams.append('fields', DEFAULT_READ_JIRA_FIELDS.join(','));
             }
-            
+
             searchParams.append('maxResults', String(args.limit || 10));
             searchParams.append('startAt', String(args.startAt || 0));
-            
+
             const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
             const response = await jira.fetch<any>(`/rest/agile/1.0/sprint/${args.sprint_id}/issue${query}`);
-            
+
             return {
               content: [
                 {
@@ -1066,24 +1067,24 @@ const getJiraMcpServer = () => {
             if (!args.sprint_id) {
               throw new Error("Missing required argument: sprint_id");
             }
-            
+
             const payload: any = {};
-            
+
             if (args.sprint_name) payload.name = args.sprint_name;
             if (args.goal) payload.goal = args.goal;
             if (args.start_date) payload.startDate = args.start_date;
             if (args.end_date) payload.endDate = args.end_date;
             if (args.state) payload.state = args.state;
-            
+
             if (Object.keys(payload).length === 0) {
               throw new Error("At least one field must be provided to update");
             }
-            
+
             const response = await jira.fetch<any>(`/rest/agile/1.0/sprint/${args.sprint_id}`, {
               method: 'PUT',
               body: JSON.stringify(payload),
             });
-            
+
             return {
               content: [
                 {
@@ -1099,7 +1100,7 @@ const getJiraMcpServer = () => {
             if (!args.project_key || !args.issue_type || !args.summary) {
               throw new Error("Missing required arguments for issue creation");
             }
-            
+
             // Construct issue creation payload
             const payload: any = {
               fields: {
@@ -1112,7 +1113,7 @@ const getJiraMcpServer = () => {
                 summary: args.summary,
               },
             };
-            
+
             // Add description if provided
             if (args.description) {
               payload.fields.description = {
@@ -1131,7 +1132,7 @@ const getJiraMcpServer = () => {
                 ],
               };
             }
-            
+
             // Add assignee if provided
             if (args.assignee) {
               // Try to determine if it's an account ID, email, or name
@@ -1143,13 +1144,13 @@ const getJiraMcpServer = () => {
                 payload.fields.assignee = { name: args.assignee };
               }
             }
-            
+
             // Add components if provided
             if (args.components) {
               const componentNames = args.components.split(',').map(c => c.trim());
               payload.fields.components = componentNames.map(name => ({ name }));
             }
-            
+
             // Add additional fields if provided
             if (args.additional_fields) {
               try {
@@ -1161,12 +1162,12 @@ const getJiraMcpServer = () => {
                 throw new Error(`Invalid JSON in additional_fields: ${(e as Error).message}`);
               }
             }
-            
+
             const response = await jira.fetch<any>('/rest/api/3/issue', {
               method: 'POST',
               body: JSON.stringify(payload),
             });
-            
+
             return {
               content: [
                 {
@@ -1182,19 +1183,19 @@ const getJiraMcpServer = () => {
             if (!args.issue_key || !args.fields) {
               throw new Error("Missing required arguments: issue_key and fields");
             }
-            
+
             let fieldsObj: any = {};
             try {
               fieldsObj = JSON.parse(args.fields);
             } catch (e) {
               throw new Error(`Invalid JSON in fields: ${(e as Error).message}`);
             }
-            
+
             // Construct issue update payload
             const payload: any = {
               fields: fieldsObj,
             };
-            
+
             // Add additional fields if provided
             if (args.additional_fields) {
               try {
@@ -1206,7 +1207,7 @@ const getJiraMcpServer = () => {
                 throw new Error(`Invalid JSON in additional_fields: ${(e as Error).message}`);
               }
             }
-            
+
             // Format description if provided
             if (payload.fields.description && typeof payload.fields.description === 'string') {
               payload.fields.description = {
@@ -1225,7 +1226,7 @@ const getJiraMcpServer = () => {
                 ],
               };
             }
-            
+
             // Only send request if there are fields to update
             if (Object.keys(payload.fields).length > 0) {
               await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
@@ -1233,16 +1234,16 @@ const getJiraMcpServer = () => {
                 body: JSON.stringify(payload),
               });
             }
-            
+
             // Handle attachments if provided
             if (args.attachments) {
               // TODO: Implement file attachment functionality
               // This would require file reading and multipart form data uploads
             }
-            
+
             // Get updated issue to return in response
             const updatedIssue = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`);
-            
+
             return {
               content: [
                 {
@@ -1258,11 +1259,11 @@ const getJiraMcpServer = () => {
             if (!args.issue_key) {
               throw new Error("Missing required argument: issue_key");
             }
-            
+
             const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
               method: 'DELETE'
             });
-            
+
             // Note: Jira DELETE issue often returns 204 No Content on success.
             // If the response is empty or undefined, return a success message.
             // Otherwise, return the actual response.
@@ -1283,7 +1284,7 @@ const getJiraMcpServer = () => {
             if (!args.issue_key || !args.comment) {
               throw new Error("Missing required arguments: issue_key and comment");
             }
-            
+
             const payload = {
               body: {
                 type: "doc",
@@ -1301,12 +1302,12 @@ const getJiraMcpServer = () => {
                 ],
               },
             };
-            
+
             const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}/comment`, {
               method: 'POST',
               body: JSON.stringify(payload),
             });
-            
+
             return {
               content: [
                 {
@@ -1319,7 +1320,7 @@ const getJiraMcpServer = () => {
 
           case "jira_get_link_types": {
             const response = await jira.fetch<any>('/rest/api/3/issueLinkType');
-            
+
             return {
               content: [
                 {
@@ -1335,11 +1336,11 @@ const getJiraMcpServer = () => {
         }
       } catch (error) {
         console.error("Error executing tool:", error);
-        
+
         if (error instanceof z.ZodError) {
           throw new Error(`Invalid input: ${JSON.stringify(error.errors)}`);
         }
-        
+
         throw error;
       }
     }
@@ -1349,6 +1350,86 @@ const getJiraMcpServer = () => {
 };
 
 const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const authToken = req.headers['x-auth-token'] as string;
+
+  if (!authToken) {
+    console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized. Have you authenticated?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+  const jiraClient = await createJiraClient(authToken);
+  const server = getJiraMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+    await server.connect(transport);
+    asyncLocalStorage.run({ jiraClient }, async () => {
+      await transport.handleRequest(req, res, req.body);
+    });
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
+      });
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
@@ -1378,7 +1459,17 @@ app.post("/messages", async (req, res) => {
 
     if (!authToken) {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-      res.status(401).send({ error: 'API token is missing' });
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized. Have you authenticated?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized. Have you authenticated?" }));
       return;
     }
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import express from "express";
+import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequest,
   CallToolRequestSchema,
@@ -607,10 +608,6 @@ const getSlackMcpServer = () => {
   return server;
 }
 
-const app = express();
-
-const transports = new Map<string, SSEServerTransport>();
-
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
   slack_token: string;
@@ -624,6 +621,88 @@ function getSlackToken() {
   // Fall back to token from request context
   return asyncLocalStorage.getStore()!.slack_token;
 }
+
+const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const slack_token = req.headers['x-auth-token'] as string;
+
+  if (!slack_token) {
+    console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+    const server = getSlackMcpServer();
+    try {
+        const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: undefined,
+        });
+        await server.connect(transport);
+        asyncLocalStorage.run({ slack_token }, async () => {
+            await transport.handleRequest(req, res, req.body);
+        });
+        res.on('close', () => {
+            console.log('Request closed');
+            transport.close();
+            server.close();
+        });
+    } catch (error) {
+        console.error('Error handling MCP request:', error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                jsonrpc: '2.0',
+                error: {
+                    code: -32603,
+                    message: 'Internal server error',
+                },
+                id: null,
+            });
+        }
+    }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+    console.log('Received GET MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+    console.log('Received DELETE MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
+const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
   const transport = new SSEServerTransport(`/messages`, res);

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import express from "express";
+import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -141,7 +142,7 @@ const getWordPressMcpServer = () => {
           if (!params.site) {
             throw new Error('Site is required for getting posts');
           }
-          
+
           const client = getClient();
           const number = params.number || 10;
           const page = params.page || 1;
@@ -178,7 +179,7 @@ const getWordPressMcpServer = () => {
           if (!params.site) {
             throw new Error('Site is required for getting top posts');
           }
-          
+
           const client = getClient();
           const response = await client.get(`/sites/${params.site}/stats/top-posts`);
           const data = await response.json();
@@ -193,7 +194,7 @@ const getWordPressMcpServer = () => {
           if (!params.site) {
             throw new Error('Site identifier is required');
           }
-          
+
           const client = getClient();
           const response = await client.get(`/sites/${params.site}`);
           const data = await response.json();
@@ -208,7 +209,7 @@ const getWordPressMcpServer = () => {
           if (!params.site) {
             throw new Error('Site identifier is required');
           }
-          
+
           const client = getClient();
           const response = await client.get(`/sites/${params.site}/stats`);
           const data = await response.json();
@@ -241,10 +242,6 @@ const getWordPressMcpServer = () => {
 
   return server;
 }
-
-const app = express();
-
-const transports = new Map<string, SSEServerTransport>();
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
@@ -291,6 +288,90 @@ function getClient() {
     }
   };
 }
+
+const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string;
+
+  if (!auth_token) {
+    console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized, WordPress credentials are missing. Have you set the WordPress credentials?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+
+  const server = getWordPressMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+    await server.connect(transport);
+    asyncLocalStorage.run({ auth_token }, async () => {
+      await transport.handleRequest(req, res, req.body);
+    });
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
+      });
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
+
+const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
   const transport = new SSEServerTransport(`/messages`, res);
