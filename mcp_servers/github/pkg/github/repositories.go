@@ -672,6 +672,7 @@ func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc)
 					repository(owner: $owner, name: $name) { 
 						stargazers(first: $first, orderBy: {field: STARRED_AT, direction: DESC}) { 
 							edges {  
+								starredAt
 								node { 
 									login 
 								} 
