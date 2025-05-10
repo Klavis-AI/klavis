@@ -5,15 +5,11 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import dotenv from 'dotenv';
 import { initProxy } from './src/init-server.js';
 import path from 'path';
-import { AsyncLocalStorage } from 'async_hooks';
+import { asyncLocalStorage } from './src/openapi-mcp-server/mcp/proxy.js';
 
 // Load environment variables
 dotenv.config();
 
-// Create AsyncLocalStorage for request context
-const asyncLocalStorage = new AsyncLocalStorage<{
-  openapi_mcp_headers: string;
-}>();
 
 // Get the Notion MCP server
 const getNotionMcpServer = async () => {

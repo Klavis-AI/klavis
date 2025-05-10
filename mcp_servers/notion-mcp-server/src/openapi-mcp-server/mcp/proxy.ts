@@ -17,7 +17,6 @@ export const asyncLocalStorage = new AsyncLocalStorage<{
 }>();
 
 function getOpenapiMcpHeaders() {
-  console.log("---- getOpenapiMcpHeaders");
   const store = asyncLocalStorage.getStore();
   if (!store) {
     throw new Error('No context found in AsyncLocalStorage');
