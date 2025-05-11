@@ -1,6 +1,6 @@
 FROM node:22.12-alpine AS builder
 
-COPY mcp_servers/notion-mcp-server /app
+COPY . /app
 
 WORKDIR /app
 
