@@ -14,6 +14,7 @@
 - [ ] Other (please specify)
 
 ## How has this been tested?
+(Add screenshots or recordings here if applicable.)
 <!-- Describe how you have tested these changes. -->
 
 ## Checklist
