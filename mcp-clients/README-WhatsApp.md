@@ -26,7 +26,7 @@ WHATSAPP_VERIFY_TOKEN=your_custom_verification_token
 WHATSAPP_APP_ID=your_app_id
 WHATSAPP_APP_SECRET=your_app_secret
 CALLBACK_URL=your_webhook_url
-PORT=8082
+PORT=8080
 ```
 
 ## WhatsApp API Setup
@@ -54,7 +54,7 @@ python -m src.mcp_clients.whatsapp_bot
 docker build -t klavis-whatsapp-bot -f Dockerfile.whatsapp .
 
 # Run with environment variables
-docker run -p 8082:8082 --env-file .env klavis-whatsapp-bot
+docker run -p 8080:8080 --env-file .env klavis-whatsapp-bot
 ```
 
 ## Exposing Local Development for Testing
@@ -62,7 +62,7 @@ docker run -p 8082:8082 --env-file .env klavis-whatsapp-bot
 Use ngrok or similar tools to expose your local server:
 
 ```bash
-ngrok http 8082
+ngrok http 8080
 ```
 
 Update the webhook URL in the Meta Developer Dashboard and the `CALLBACK_URL` environment variable with the ngrok URL.

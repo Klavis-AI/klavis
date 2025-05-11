@@ -511,7 +511,7 @@ def main():
         logger.info("uvloop not available, using default event loop")
     
     # Run the FastAPI app
-    port = int(os.environ.get("PORT", 8082))
+    port = int(os.environ.get("PORT", 8080))
     logger.info(f"Starting WhatsApp bot server on port {port}")
     logger.info(f"Using callback URL: {CALLBACK_URL}")
     

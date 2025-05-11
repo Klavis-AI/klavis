@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV RUNNING_IN_DOCKER=true
 
 # Expose the port the app runs on
-EXPOSE 8082
+EXPOSE 8080
 
 # Command to run the WhatsApp bot
 CMD ["uv", "run", "whatsapp_bot"]
