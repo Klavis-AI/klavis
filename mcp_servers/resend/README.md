@@ -26,9 +26,9 @@ There are two primary ways to run this MCP server: using Docker (recommended) or
 This method encapsulates the server and its dependencies in a container.
 
 1.  **Build the Docker Image:**
-    Navigate to the root directory of the `klavis` project (the parent directory of `mcp_servers`) in your terminal and run:
+    Open your terminal in the `mcp_servers/resend` directory and run:
     ```bash
-    docker build -t resend-mcp -f mcp_servers/resend/Dockerfile .
+    docker build -t resend-mcp-server .
     ```
 
 2.  **Run the Docker Container:**

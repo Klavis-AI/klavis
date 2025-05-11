@@ -1,5 +1,5 @@
 {
-  "name": "resend",
+  "name": "@klavis-ai/mcp-server-resend",
   "version": "1.0.0",
   "main": "index.js",
   "keywords": [],
@@ -7,7 +7,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.5.0",
+    "@modelcontextprotocol/sdk": "^1.11.1",
     "@react-email/components": "^0.0.33",
     "@react-email/render": "^1.0.5",
     "dotenv": "^16.3.1",

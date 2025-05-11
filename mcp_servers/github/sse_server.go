@@ -18,6 +18,7 @@ import (
 
 // Define request context key type for safety
 type contextKey string
+
 const tokenContextKey contextKey = "auth_token"
 
 func runSSEServer() error {
@@ -39,7 +40,7 @@ func runSSEServer() error {
 		if envAuthToken != "" {
 			return context.WithValue(ctx, tokenContextKey, envAuthToken)
 		}
-		
+
 		// Otherwise fall back to header token
 		token := r.Header.Get("x-auth-token")
 		if token != "" {
@@ -77,12 +78,12 @@ func runSSEServer() error {
 	}
 
 	// Create servers with context function
-	ghServer := github.NewServer(getClient, "", true, t)
-	sseServer := server.NewSSEServer(ghServer, 
+	ghServer := github.NewServer(getClient, "", false, t)
+	sseServer := server.NewSSEServer(ghServer,
 		server.WithBaseURL(baseURL),
 		server.WithSSEContextFunc(contextFunc),
 	)
-	
+
 	// Start the server with a goroutine
 	serverErr := make(chan error, 1)
 	go func() {
@@ -100,7 +101,7 @@ func runSSEServer() error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		sseServer.Shutdown(shutdownCtx)
-		
+
 		log.Info("Server gracefully stopped")
 	}
 

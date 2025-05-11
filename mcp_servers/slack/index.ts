@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import express from "express";
+import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequest,
   CallToolRequestSchema,
@@ -424,189 +425,188 @@ class SlackClient {
   }
 }
 
-const server = new Server(
-  {
-    name: "slack-mcp-server",
-    version: "0.1.0",
-  },
-  {
-    capabilities: {
-      tools: {},
+const getSlackMcpServer = () => {
+  const server = new Server(
+    {
+      name: "slack-mcp-server",
+      version: "0.1.0",
     },
-  }
-);
-
-server.setRequestHandler(
-  ListToolsRequestSchema,
-  async () => {
-    return {
-      tools: [
-        listChannelsTool,
-        postMessageTool,
-        replyToThreadTool,
-        addReactionTool,
-        getChannelHistoryTool,
-        getThreadRepliesTool,
-        getUsersTool,
-        getUserProfileTool,
-      ],
-    };
-  }
-);
-
-server.setRequestHandler(
-  CallToolRequestSchema,
-  async (request: CallToolRequest) => {
-    try {
-      // Validate the request parameters
-      if (!request.params?.name) {
-        throw new Error("Missing tool name");
-      }
-
-      const slackToken = getSlackToken();
-      if (!slackToken) {
-        throw new Error("No valid Slack token found for this instance");
-      }
-
-      const slackClient = new SlackClient(slackToken);
-
-      // Process the tool call based on the tool name
-      switch (request.params.name) {
-        case "slack_list_channels": {
-          const args = request.params.arguments as unknown as ListChannelsArgs;
-          const response = await slackClient.getChannels(
-            args.limit,
-            args.cursor,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_post_message": {
-          const args = request.params.arguments as unknown as PostMessageArgs;
-          if (!args.channel_id || !args.text) {
-            throw new Error(
-              "Missing required arguments: channel_id and text",
-            );
-          }
-          const response = await slackClient.postMessage(
-            args.channel_id,
-            args.text,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_reply_to_thread": {
-          const args = request.params.arguments as unknown as ReplyToThreadArgs;
-          if (!args.channel_id || !args.thread_ts || !args.text) {
-            throw new Error(
-              "Missing required arguments: channel_id, thread_ts, and text",
-            );
-          }
-          const response = await slackClient.postReply(
-            args.channel_id,
-            args.thread_ts,
-            args.text,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_add_reaction": {
-          const args = request.params.arguments as unknown as AddReactionArgs;
-          if (!args.channel_id || !args.timestamp || !args.reaction) {
-            throw new Error(
-              "Missing required arguments: channel_id, timestamp, and reaction",
-            );
-          }
-          const response = await slackClient.addReaction(
-            args.channel_id,
-            args.timestamp,
-            args.reaction,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_get_channel_history": {
-          const args = request.params.arguments as unknown as GetChannelHistoryArgs;
-          if (!args.channel_id) {
-            throw new Error("Missing required argument: channel_id");
-          }
-          const response = await slackClient.getChannelHistory(
-            args.channel_id,
-            args.limit,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_get_thread_replies": {
-          const args = request.params.arguments as unknown as GetThreadRepliesArgs;
-          if (!args.channel_id || !args.thread_ts) {
-            throw new Error(
-              "Missing required arguments: channel_id and thread_ts",
-            );
-          }
-          const response = await slackClient.getThreadReplies(
-            args.channel_id,
-            args.thread_ts,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_get_users": {
-          const args = request.params.arguments as unknown as GetUsersArgs;
-          const response = await slackClient.getUsers(
-            args.limit,
-            args.cursor,
-          );
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        case "slack_get_user_profile": {
-          const args = request.params.arguments as unknown as GetUserProfileArgs;
-          if (!args.user_id) {
-            throw new Error("Missing required argument: user_id");
-          }
-          const response = await slackClient.getUserProfile(args.user_id);
-          return {
-            content: [{ type: "text", text: JSON.stringify(response) }],
-          };
-        }
-
-        default:
-          throw new Error(`Unknown tool: ${request.params.name}`);
-      }
-    } catch (error) {
-      console.error("Error executing tool:", error);
-
-      if (isSlackError(error)) {
-        throw new Error(formatSlackError(error));
-      }
-
-      if (error instanceof z.ZodError) {
-        throw new Error(`Invalid input: ${JSON.stringify(error.errors)}`);
-      }
-
-      throw error;
+    {
+      capabilities: {
+        tools: {},
+      },
     }
-  }
-);
+  );
+  server.setRequestHandler(
+    ListToolsRequestSchema,
+    async () => {
+      return {
+        tools: [
+          listChannelsTool,
+          postMessageTool,
+          replyToThreadTool,
+          addReactionTool,
+          getChannelHistoryTool,
+          getThreadRepliesTool,
+          getUsersTool,
+          getUserProfileTool,
+        ],
+      };
+    }
+  );
 
-const app = express();
+  server.setRequestHandler(
+    CallToolRequestSchema,
+    async (request: CallToolRequest) => {
+      try {
+        // Validate the request parameters
+        if (!request.params?.name) {
+          throw new Error("Missing tool name");
+        }
 
-const transports = new Map<string, SSEServerTransport>();
+        const slackToken = getSlackToken();
+        if (!slackToken) {
+          throw new Error("No valid Slack token found for this instance");
+        }
+
+        const slackClient = new SlackClient(slackToken);
+
+        // Process the tool call based on the tool name
+        switch (request.params.name) {
+          case "slack_list_channels": {
+            const args = request.params.arguments as unknown as ListChannelsArgs;
+            const response = await slackClient.getChannels(
+              args.limit,
+              args.cursor,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_post_message": {
+            const args = request.params.arguments as unknown as PostMessageArgs;
+            if (!args.channel_id || !args.text) {
+              throw new Error(
+                "Missing required arguments: channel_id and text",
+              );
+            }
+            const response = await slackClient.postMessage(
+              args.channel_id,
+              args.text,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_reply_to_thread": {
+            const args = request.params.arguments as unknown as ReplyToThreadArgs;
+            if (!args.channel_id || !args.thread_ts || !args.text) {
+              throw new Error(
+                "Missing required arguments: channel_id, thread_ts, and text",
+              );
+            }
+            const response = await slackClient.postReply(
+              args.channel_id,
+              args.thread_ts,
+              args.text,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_add_reaction": {
+            const args = request.params.arguments as unknown as AddReactionArgs;
+            if (!args.channel_id || !args.timestamp || !args.reaction) {
+              throw new Error(
+                "Missing required arguments: channel_id, timestamp, and reaction",
+              );
+            }
+            const response = await slackClient.addReaction(
+              args.channel_id,
+              args.timestamp,
+              args.reaction,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_get_channel_history": {
+            const args = request.params.arguments as unknown as GetChannelHistoryArgs;
+            if (!args.channel_id) {
+              throw new Error("Missing required argument: channel_id");
+            }
+            const response = await slackClient.getChannelHistory(
+              args.channel_id,
+              args.limit,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_get_thread_replies": {
+            const args = request.params.arguments as unknown as GetThreadRepliesArgs;
+            if (!args.channel_id || !args.thread_ts) {
+              throw new Error(
+                "Missing required arguments: channel_id and thread_ts",
+              );
+            }
+            const response = await slackClient.getThreadReplies(
+              args.channel_id,
+              args.thread_ts,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_get_users": {
+            const args = request.params.arguments as unknown as GetUsersArgs;
+            const response = await slackClient.getUsers(
+              args.limit,
+              args.cursor,
+            );
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_get_user_profile": {
+            const args = request.params.arguments as unknown as GetUserProfileArgs;
+            if (!args.user_id) {
+              throw new Error("Missing required argument: user_id");
+            }
+            const response = await slackClient.getUserProfile(args.user_id);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          default:
+            throw new Error(`Unknown tool: ${request.params.name}`);
+        }
+      } catch (error) {
+        console.error("Error executing tool:", error);
+
+        if (isSlackError(error)) {
+          throw new Error(formatSlackError(error));
+        }
+
+        if (error instanceof z.ZodError) {
+          throw new Error(`Invalid input: ${JSON.stringify(error.errors)}`);
+        }
+
+        throw error;
+      }
+    }
+  );
+
+  return server;
+}
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
@@ -622,6 +622,88 @@ function getSlackToken() {
   return asyncLocalStorage.getStore()!.slack_token;
 }
 
+const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const slack_token = req.headers['x-auth-token'] as string;
+
+  if (!slack_token) {
+    console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+    const server = getSlackMcpServer();
+    try {
+        const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: undefined,
+        });
+        await server.connect(transport);
+        asyncLocalStorage.run({ slack_token }, async () => {
+            await transport.handleRequest(req, res, req.body);
+        });
+        res.on('close', () => {
+            console.log('Request closed');
+            transport.close();
+            server.close();
+        });
+    } catch (error) {
+        console.error('Error handling MCP request:', error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                jsonrpc: '2.0',
+                error: {
+                    code: -32603,
+                    message: 'Internal server error',
+                },
+                id: null,
+            });
+        }
+    }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+    console.log('Received GET MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+    console.log('Received DELETE MCP request');
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: {
+            code: -32000,
+            message: "Method not allowed."
+        },
+        id: null
+    }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
+const transports = new Map<string, SSEServerTransport>();
+
 app.get("/sse", async (req, res) => {
   const transport = new SSEServerTransport(`/messages`, res);
 
@@ -636,6 +718,7 @@ app.get("/sse", async (req, res) => {
 
   transports.set(transport.sessionId, transport);
 
+  const server = getSlackMcpServer();
   await server.connect(transport);
 
   console.log(`SSE connection established with transport: ${transport.sessionId}`);
@@ -648,6 +731,22 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     const slack_token = req.headers['x-auth-token'] as string;
+
+    if (!slack_token) {
+      console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Slack token is missing. Have you set the Slack token?" }));
+      return;
+    }
 
     asyncLocalStorage.run({ slack_token }, async () => {
       await transport.handlePostMessage(req, res);

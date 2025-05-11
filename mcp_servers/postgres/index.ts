@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import express from "express";
+import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   CallToolRequestSchema,
   ListResourcesRequestSchema,
@@ -15,118 +16,117 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const server = new Server(
-  {
-    name: "klavis-ai/postgres",
-    version: "0.1.0",
-  },
-  {
-    capabilities: {
-      resources: {},
-      tools: {},
-    },
-  },
-);
-
 const SCHEMA_PATH = "schema";
 
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  const client = await getPool().connect();
-  try {
-    const result = await client.query(
-      "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
-    );
-    return {
-      resources: result.rows.map((row) => ({
-        uri: new URL(`${row.table_name}/${SCHEMA_PATH}`, getResourceBaseUrl()).href,
-        mimeType: "application/json",
-        name: `"${row.table_name}" database schema`,
-      })),
-    };
-  } finally {
-    client.release();
-  }
-});
-
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  const resourceUrl = new URL(request.params.uri);
-
-  const pathComponents = resourceUrl.pathname.split("/");
-  const schema = pathComponents.pop();
-  const tableName = pathComponents.pop();
-
-  if (schema !== SCHEMA_PATH) {
-    throw new Error("Invalid resource URI");
-  }
-
-  const client = await getPool().connect();
-  try {
-    const result = await client.query(
-      "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1",
-      [tableName],
-    );
-
-    return {
-      contents: [
-        {
-          uri: request.params.uri,
-          mimeType: "application/json",
-          text: JSON.stringify(result.rows, null, 2),
-        },
-      ],
-    };
-  } finally {
-    client.release();
-  }
-});
-
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: "query",
-        description: "Run a read-only SQL query",
-        inputSchema: {
-          type: "object",
-          properties: {
-            sql: { type: "string" },
-          },
-        },
+const getPostgresMcpServer = () => {
+  const server = new Server(
+    {
+      name: "klavis-ai/postgres",
+      version: "0.1.0",
+    },
+    {
+      capabilities: {
+        resources: {},
+        tools: {},
       },
-    ],
-  };
-});
+    },
+  );
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    const client = await getPool().connect();
+    try {
+      const result = await client.query(
+        "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
+      );
+      return {
+        resources: result.rows.map((row) => ({
+          uri: new URL(`${row.table_name}/${SCHEMA_PATH}`, getResourceBaseUrl()).href,
+          mimeType: "application/json",
+          name: `"${row.table_name}" database schema`,
+        })),
+      };
+    } finally {
+      client.release();
+    }
+  });
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "query") {
-    const sql = request.params.arguments?.sql as string;
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const resourceUrl = new URL(request.params.uri);
+
+    const pathComponents = resourceUrl.pathname.split("/");
+    const schema = pathComponents.pop();
+    const tableName = pathComponents.pop();
+
+    if (schema !== SCHEMA_PATH) {
+      throw new Error("Invalid resource URI");
+    }
 
     const client = await getPool().connect();
     try {
-      await client.query("BEGIN TRANSACTION READ ONLY");
-      const result = await client.query(sql);
-      return {
-        content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
-        isError: false,
-      };
-    } catch (error) {
-      throw error;
-    } finally {
-      client
-        .query("ROLLBACK")
-        .catch((error) =>
-          console.warn("Could not roll back transaction:", error),
-        );
+      const result = await client.query(
+        "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1",
+        [tableName],
+      );
 
+      return {
+        contents: [
+          {
+            uri: request.params.uri,
+            mimeType: "application/json",
+            text: JSON.stringify(result.rows, null, 2),
+          },
+        ],
+      };
+    } finally {
       client.release();
     }
-  }
-  throw new Error(`Unknown tool: ${request.params.name}`);
-});
+  });
 
-const app = express();
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: [
+        {
+          name: "query",
+          description: "Run a read-only SQL query",
+          inputSchema: {
+            type: "object",
+            properties: {
+              sql: { type: "string" },
+            },
+          },
+        },
+      ],
+    };
+  });
 
-const transports = new Map<string, SSEServerTransport>();
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    if (request.params.name === "query") {
+      const sql = request.params.arguments?.sql as string;
+
+      const client = await getPool().connect();
+      try {
+        await client.query("BEGIN TRANSACTION READ ONLY");
+        const result = await client.query(sql);
+        return {
+          content: [{ type: "text", text: JSON.stringify(result.rows, null, 2) }],
+          isError: false,
+        };
+      } catch (error) {
+        throw error;
+      } finally {
+        client
+          .query("ROLLBACK")
+          .catch((error) =>
+            console.warn("Could not roll back transaction:", error),
+          );
+
+        client.release();
+      }
+    }
+    throw new Error(`Unknown tool: ${request.params.name}`);
+  });
+
+  return server;
+}
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
@@ -142,6 +142,97 @@ function getPool() {
   return asyncLocalStorage.getStore()!.pool;
 }
 
+const app = express();
+app.use(express.json());
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const databaseUrl = process.env.DATABASE_URL || req.headers['x-auth-token'] as string;
+
+  if (!databaseUrl) {
+    console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
+    const errorResponse = {
+      jsonrpc: '2.0' as '2.0',
+      error: {
+        code: -32001,
+        message: 'Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?'
+      },
+      id: 0
+    };
+    res.status(401).json(errorResponse);
+    return;
+  }
+
+  const resourceBaseUrl = new URL(databaseUrl);
+  resourceBaseUrl.protocol = "postgres:";
+  resourceBaseUrl.password = "";
+
+  const pool = new pg.Pool({
+    connectionString: databaseUrl,
+  });
+
+
+  const server = getPostgresMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+    await server.connect(transport);
+    asyncLocalStorage.run({ resourceBaseUrl, pool }, async () => {
+      await transport.handleRequest(req, res, req.body);
+    });
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
+      });
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
+const transports = new Map<string, SSEServerTransport>();
+
 app.get("/sse", async (req, res) => {
   const transport = new SSEServerTransport(`/messages`, res);
 
@@ -156,6 +247,7 @@ app.get("/sse", async (req, res) => {
 
   transports.set(transport.sessionId, transport);
 
+  const server = getPostgresMcpServer();
   await server.connect(transport);
 
   console.log(`SSE connection established with transport: ${transport.sessionId}`);
@@ -169,10 +261,20 @@ app.post("/messages", async (req, res) => {
   if (transport) {
     // Use DATABASE_URL from environment if available, otherwise fall back to header
     const databaseUrl = process.env.DATABASE_URL || req.headers['x-auth-token'] as string;
-    
+
     if (!databaseUrl) {
-      console.error('No database URL provided in environment or headers');
-      res.status(400).send({ error: "No database URL provided" });
+      console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
+      const errorResponse = {
+        jsonrpc: '2.0' as '2.0',
+        error: {
+          code: -32001,
+          message: 'Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?'
+        },
+        id: 0
+      };
+      await transport.send(errorResponse);
+      await transport.close();
+      res.status(401).end(JSON.stringify({ error: "Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?" }));
       return;
     }
 

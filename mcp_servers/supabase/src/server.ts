@@ -93,7 +93,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
 
     // Note: tools are intentionally snake_case to align better with most MCP clients
     tools: {
-      list_projects: tool({
+      supabase_list_projects: tool({
         description: 'Lists all Supabase projects for the user.',
         parameters: z.object({}),
         execute: async () => {
@@ -104,7 +104,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      get_project: tool({
+      supabase_get_project: tool({
         description: 'Gets details for a Supabase project.',
         parameters: z.object({
           id: z.string().describe('The project ID'),
@@ -121,7 +121,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      get_cost: tool({
+      supabase_get_cost: tool({
         description:
           'Gets the cost of creating a new project or branch. Never assume organization as costs can be different for each.',
         parameters: z.object({
@@ -151,7 +151,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           }
         },
       }),
-      confirm_cost: tool({
+      supabase_confirm_cost: tool({
         description:
           'Ask the user to confirm their understanding of the cost of creating a new project or branch. Call `get_cost` first. Returns a unique ID for this confirmation which should be passed to `create_project` or `create_branch`.',
         parameters: z.object({
@@ -163,7 +163,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return await hashObject(cost);
         },
       }),
-      create_project: tool({
+      supabase_create_project: tool({
         description:
           'Creates a new Supabase project. Always ask the user which organization to create the project in. The project can take a few minutes to initialize - use `get_project` to check the status.',
         parameters: z.object({
@@ -214,7 +214,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      pause_project: tool({
+      supabase_pause_project: tool({
         description: 'Pauses a Supabase project.',
         parameters: z.object({
           project_id: z.string(),
@@ -234,7 +234,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           assertSuccess(response, 'Failed to pause project');
         },
       }),
-      restore_project: tool({
+      supabase_restore_project: tool({
         description: 'Restores a Supabase project.',
         parameters: z.object({
           project_id: z.string(),
@@ -255,7 +255,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           assertSuccess(response, 'Failed to restore project');
         },
       }),
-      list_organizations: tool({
+      supabase_list_organizations: tool({
         description: 'Lists all organizations that the user is a member of.',
         parameters: z.object({}),
         execute: async () => {
@@ -266,7 +266,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      get_organization: tool({
+      supabase_get_organization: tool({
         description:
           'Gets details for an organization. Includes subscription plan.',
         parameters: z.object({
@@ -289,7 +289,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      list_tables: tool({
+      supabase_list_tables: tool({
         description: 'Lists all tables in a schema.',
         parameters: z.object({
           project_id: z.string(),
@@ -305,7 +305,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return data;
         },
       }),
-      list_extensions: tool({
+      supabase_list_extensions: tool({
         description: 'Lists all extensions in the database.',
         parameters: z.object({
           project_id: z.string(),
@@ -316,7 +316,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return data;
         },
       }),
-      list_migrations: tool({
+      supabase_list_migrations: tool({
         description: 'Lists all migrations in the database.',
         parameters: z.object({
           project_id: z.string(),
@@ -338,7 +338,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      apply_migration: tool({
+      supabase_apply_migration: tool({
         description:
           'Applies a migration to the database. Use this when executing DDL operations.',
         parameters: z.object({
@@ -371,7 +371,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      execute_sql: tool({
+      supabase_execute_sql: tool({
         description:
           'Executes raw SQL in the Postgres database. Use `apply_migration` instead for DDL operations.',
         parameters: z.object({
@@ -382,7 +382,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return await executeSql(project_id, query);
         },
       }),
-      get_logs: tool({
+      supabase_get_logs: tool({
         description:
           'Gets logs for a Supabase project by service type. Use this to help debug problems with your app. This will only return logs within the last minute. If the logs you are looking for are older than 1 minute, re-run your test to reproduce them.',
         parameters: z.object({
@@ -428,7 +428,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
         },
       }),
 
-      get_project_url: tool({
+      supabase_get_project_url: tool({
         description: 'Gets the API URL for a project.',
         parameters: z.object({
           project_id: z.string(),
@@ -437,7 +437,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return `https://${project_id}.supabase.co`;
         },
       }),
-      get_anon_key: tool({
+      supabase_get_anon_key: tool({
         description: 'Gets the anonymous API key for a project.',
         parameters: z.object({
           project_id: z.string(),
@@ -468,7 +468,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return anonKey.api_key;
         },
       }),
-      generate_typescript_types: tool({
+      supabase_generate_typescript_types: tool({
         description: 'Generates TypeScript types for a project.',
         parameters: z.object({
           project_id: z.string(),
@@ -492,7 +492,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
       }),
 
       // Experimental features
-      create_branch: tool({
+      supabase_create_branch: tool({
         description:
           'Creates a development branch on a Supabase project. This will apply all migrations from the main project to a fresh branch database. Note that production data will not carry over. The branch will get its own project_id via the resulting project_ref. Use this ID to execute queries and migrations on the branch.',
         parameters: z.object({
@@ -569,7 +569,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return createBranchResponse.data;
         },
       }),
-      list_branches: tool({
+      supabase_list_branches: tool({
         description:
           'Lists all development branches of a Supabase project. This will return branch details including status which you can use to check when operations like merge/rebase/reset complete.',
         parameters: z.object({
@@ -594,7 +594,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      delete_branch: tool({
+      supabase_delete_branch: tool({
         description: 'Deletes a development branch.',
         parameters: z.object({
           branch_id: z.string(),
@@ -616,7 +616,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      merge_branch: tool({
+      supabase_merge_branch: tool({
         description:
           'Merges migrations and edge functions from a development branch to production.',
         parameters: z.object({
@@ -640,7 +640,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      reset_branch: tool({
+      supabase_reset_branch: tool({
         description:
           'Resets migrations of a development branch. Any untracked data or schema changes will be lost.',
         parameters: z.object({
@@ -672,7 +672,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
           return response.data;
         },
       }),
-      rebase_branch: tool({
+      supabase_rebase_branch: tool({
         description:
           'Rebases a development branch on production. This will effectively run any newer migrations from production onto this branch to help handle migration drift.',
         parameters: z.object({
