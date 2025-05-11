@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements first to leverage Docker cache
-COPY mcp_servers/youtube/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code
-COPY mcp_servers/youtube/server.py .
+COPY server.py .
 
 # Copy the environment file
-COPY mcp_servers/youtube/.env .
+COPY .env .
 
 # Expose the port the server runs on
 EXPOSE 5000
