@@ -1,6 +1,6 @@
 FROM node:22.12-alpine AS builder
 
-COPY mcp_servers/resend /app
+COPY . /app
 
 WORKDIR /app
 
@@ -19,6 +19,8 @@ ENV NODE_ENV=production
 EXPOSE 5000
 
 WORKDIR /app
+
+COPY .env.example .env
 
 RUN npm ci --ignore-scripts --omit-dev
 

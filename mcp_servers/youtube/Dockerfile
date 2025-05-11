@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the server code
 COPY server.py .
 
+COPY .env.example .env
+
 # Expose the port the server runs on
 EXPOSE 5000
 
