@@ -1,13 +1,13 @@
-[tool.poetry]
+[project]
 name = "klavis"
-version = "0.1.0"
+version = "0.0.2"
 description = "Klavis AI (https://www.klavis.ai)"
-authors = ["Klavis AI <connect@klavis.ai>"]
+authors = [
+    {name = "Klavis AI", email = "connect@klavis.ai"}
+]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/Klavis-AI/klavis"
 keywords = ["MCP", "AI", "LLM", "Klavis", "Klavis AI"]
-include = ["klavis/py.typed"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python",
@@ -20,10 +20,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Artificial Intelligence",
 ]
 
-[tool.poetry.urls]
+[project.urls]
 Homepage = "https://www.klavis.ai"
 Documentation = "https://docs.klavis.ai"
 Source = "https://github.com/Klavis-AI/klavis"

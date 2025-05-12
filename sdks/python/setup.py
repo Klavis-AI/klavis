@@ -23,7 +23,7 @@ from pathlib import Path
 # prerequisite: setuptools
 # http://pypi.python.org/pypi/setuptools
 NAME = "klavis"
-VERSION = "0.1.0.4"
+VERSION = "0.0.2"
 PYTHON_REQUIRES = ">= 3.9"
 REQUIRES = [
     "urllib3 >= 2.1.0, < 3.0.0",
