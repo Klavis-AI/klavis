@@ -90,7 +90,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **jira_o_auth_callback**
-> JiraOAuthSuccessResponse jira_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
+> JiraOauthSuccessResponse jira_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
 
 Jira Callback
 
@@ -101,7 +101,7 @@ Handles the callback from Jira OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.jira_o_auth_success_response import JiraOAuthSuccessResponse
+from klavis.models.jira_oauth_success_response import JiraOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -144,7 +144,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**JiraOAuthSuccessResponse**](JiraOAuthSuccessResponse.md)
+[**JiraOauthSuccessResponse**](JiraOauthSuccessResponse.md)
 
 ### Authorization
 
@@ -166,7 +166,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **refresh_jira_token_oauth_jira_refresh_token_post**
-> JiraOAuthSuccessResponse refresh_jira_token_oauth_jira_refresh_token_post(instance_id)
+> JiraOauthSuccessResponse refresh_jira_token_oauth_jira_refresh_token_post(instance_id)
 
 Refresh Jira Token
 
@@ -183,7 +183,7 @@ Returns:
 
 ```python
 import klavis
-from klavis.models.jira_o_auth_success_response import JiraOAuthSuccessResponse
+from klavis.models.jira_oauth_success_response import JiraOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -220,7 +220,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**JiraOAuthSuccessResponse**](JiraOAuthSuccessResponse.md)
+[**JiraOauthSuccessResponse**](JiraOauthSuccessResponse.md)
 
 ### Authorization
 

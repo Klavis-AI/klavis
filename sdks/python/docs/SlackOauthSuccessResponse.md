@@ -1,4 +1,4 @@
-# SlackOAuthSuccessResponse
+# SlackOauthSuccessResponse
 
 
 ## Properties
@@ -11,19 +11,19 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from klavis.models.slack_o_auth_success_response import SlackOAuthSuccessResponse
+from klavis.models.slack_oauth_success_response import SlackOauthSuccessResponse
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of SlackOAuthSuccessResponse from a JSON string
-slack_o_auth_success_response_instance = SlackOAuthSuccessResponse.from_json(json)
+# create an instance of SlackOauthSuccessResponse from a JSON string
+slack_oauth_success_response_instance = SlackOauthSuccessResponse.from_json(json)
 # print the JSON string representation of the object
-print(SlackOAuthSuccessResponse.to_json())
+print(SlackOauthSuccessResponse.to_json())
 
 # convert the object into a dict
-slack_o_auth_success_response_dict = slack_o_auth_success_response_instance.to_dict()
-# create an instance of SlackOAuthSuccessResponse from a dict
-slack_o_auth_success_response_from_dict = SlackOAuthSuccessResponse.from_dict(slack_o_auth_success_response_dict)
+slack_oauth_success_response_dict = slack_oauth_success_response_instance.to_dict()
+# create an instance of SlackOauthSuccessResponse from a dict
+slack_oauth_success_response_from_dict = SlackOauthSuccessResponse.from_dict(slack_oauth_success_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

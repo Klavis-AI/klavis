@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.jira_o_auth_success_response import JiraOAuthSuccessResponse
+from klavis.models.jira_oauth_success_response import JiraOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -217,7 +217,7 @@ class JiraOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> JiraOAuthSuccessResponse:
+    ) -> JiraOauthSuccessResponse:
         """Jira Callback
 
         Handles the callback from Jira OAuth authorization.
@@ -264,8 +264,8 @@ class JiraOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JiraOAuthSuccessResponse",
-            '400': "JiraOAuthErrorResponse",
+            '200': "JiraOauthSuccessResponse",
+            '400': "JiraOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
@@ -374,7 +374,7 @@ class JiraOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> JiraOAuthSuccessResponse:
+    ) -> JiraOauthSuccessResponse:
         """Refresh Jira Token
 
         Refresh an expired Jira access token using the stored refresh token  Parameters: - instance_id: Identifier for the instance requesting token refresh  Returns: - Success response if token was refreshed successfully, error response otherwise
@@ -412,8 +412,8 @@ class JiraOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JiraOAuthSuccessResponse",
-            '400': "JiraOAuthErrorResponse",
+            '200': "JiraOauthSuccessResponse",
+            '400': "JiraOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(

@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.supabase_o_auth_success_response import SupabaseOAuthSuccessResponse
+from klavis.models.supabase_oauth_success_response import SupabaseOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -205,7 +205,7 @@ class SupabaseOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SupabaseOAuthSuccessResponse:
+    ) -> SupabaseOauthSuccessResponse:
         """Refresh Supabase Token
 
         Refresh an expired Supabase access token using the stored refresh token  Parameters: - instance_id: Identifier for the instance requesting token refresh  Returns: - Success response if token was refreshed successfully, error response otherwise
@@ -243,8 +243,8 @@ class SupabaseOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SupabaseOAuthSuccessResponse",
-            '400': "SupabaseOAuthErrorResponse",
+            '200': "SupabaseOauthSuccessResponse",
+            '400': "SupabaseOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
@@ -341,7 +341,7 @@ class SupabaseOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SupabaseOAuthSuccessResponse:
+    ) -> SupabaseOauthSuccessResponse:
         """Supabase Callback
 
         Handles the callback from Supabase OAuth authorization.
@@ -388,8 +388,8 @@ class SupabaseOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SupabaseOAuthSuccessResponse",
-            '400': "SupabaseOAuthErrorResponse",
+            '200': "SupabaseOauthSuccessResponse",
+            '400': "SupabaseOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(

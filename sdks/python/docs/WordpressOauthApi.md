@@ -89,7 +89,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **wordpress_o_auth_callback**
-> WordPressOAuthSuccessResponse wordpress_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
+> WordpressOauthSuccessResponse wordpress_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
 
 Wordpress Callback
 
@@ -100,7 +100,7 @@ Handles the callback from WordPress OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.word_press_o_auth_success_response import WordPressOAuthSuccessResponse
+from klavis.models.wordpress_oauth_success_response import WordpressOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -143,7 +143,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**WordPressOAuthSuccessResponse**](WordPressOAuthSuccessResponse.md)
+[**WordpressOauthSuccessResponse**](WordpressOauthSuccessResponse.md)
 
 ### Authorization
 

@@ -15,7 +15,19 @@
     "templateDir": "openapi-templates/python-sdk-templates",
     "modelNameMappings": {
         "mcp_server__mcp_server__ServerName": "ServerName",
-        "white_labeling__white_labeling__ServerName": "WhiteLabelServerName"
+        "white_labeling__white_labeling__ServerName": "WhiteLabelServerName",
+        "NotionOAuthErrorResponse": "NotionOauthErrorResponse",
+        "NotionOAuthSuccessResponse": "NotionOauthSuccessResponse",
+        "JiraOAuthErrorResponse": "JiraOauthErrorResponse",
+        "JiraOAuthSuccessResponse": "JiraOauthSuccessResponse",
+        "SlackOAuthErrorResponse": "SlackOauthErrorResponse",
+        "SlackOAuthSuccessResponse": "SlackOauthSuccessResponse",
+        "SupabaseOAuthErrorResponse": "SupabaseOauthErrorResponse",
+        "SupabaseOAuthSuccessResponse": "SupabaseOauthSuccessResponse",
+        "WordPressOAuthErrorResponse": "WordpressOauthErrorResponse",
+        "WordPressOAuthSuccessResponse": "WordpressOauthSuccessResponse",
+        "GitHubOAuthErrorResponse": "GithubOauthErrorResponse",
+        "GitHubOAuthSuccessResponse": "GithubOauthSuccessResponse"
     },
     "gitUserId": "Klavis-AI",
     "gitRepoId": "klavis",

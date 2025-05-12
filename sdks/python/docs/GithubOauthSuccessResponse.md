@@ -1,4 +1,4 @@
-# GitHubOAuthSuccessResponse
+# GithubOauthSuccessResponse
 
 
 ## Properties
@@ -12,19 +12,19 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from klavis.models.git_hub_o_auth_success_response import GitHubOAuthSuccessResponse
+from klavis.models.github_oauth_success_response import GithubOauthSuccessResponse
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of GitHubOAuthSuccessResponse from a JSON string
-git_hub_o_auth_success_response_instance = GitHubOAuthSuccessResponse.from_json(json)
+# create an instance of GithubOauthSuccessResponse from a JSON string
+github_oauth_success_response_instance = GithubOauthSuccessResponse.from_json(json)
 # print the JSON string representation of the object
-print(GitHubOAuthSuccessResponse.to_json())
+print(GithubOauthSuccessResponse.to_json())
 
 # convert the object into a dict
-git_hub_o_auth_success_response_dict = git_hub_o_auth_success_response_instance.to_dict()
-# create an instance of GitHubOAuthSuccessResponse from a dict
-git_hub_o_auth_success_response_from_dict = GitHubOAuthSuccessResponse.from_dict(git_hub_o_auth_success_response_dict)
+github_oauth_success_response_dict = github_oauth_success_response_instance.to_dict()
+# create an instance of GithubOauthSuccessResponse from a dict
+github_oauth_success_response_from_dict = GithubOauthSuccessResponse.from_dict(github_oauth_success_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

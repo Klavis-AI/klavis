@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.git_hub_o_auth_success_response import GitHubOAuthSuccessResponse
+from klavis.models.github_oauth_success_response import GithubOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -217,7 +217,7 @@ class GithubOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> GitHubOAuthSuccessResponse:
+    ) -> GithubOauthSuccessResponse:
         """Github Callback
 
         Handles the callback from GitHub OAuth authorization.
@@ -264,8 +264,8 @@ class GithubOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitHubOAuthSuccessResponse",
-            '400': "GitHubOAuthErrorResponse",
+            '200': "GithubOauthSuccessResponse",
+            '400': "GithubOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(

@@ -87,7 +87,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **refresh_supabase_token_oauth_supabase_refresh_token_post**
-> SupabaseOAuthSuccessResponse refresh_supabase_token_oauth_supabase_refresh_token_post(instance_id)
+> SupabaseOauthSuccessResponse refresh_supabase_token_oauth_supabase_refresh_token_post(instance_id)
 
 Refresh Supabase Token
 
@@ -104,7 +104,7 @@ Returns:
 
 ```python
 import klavis
-from klavis.models.supabase_o_auth_success_response import SupabaseOAuthSuccessResponse
+from klavis.models.supabase_oauth_success_response import SupabaseOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -141,7 +141,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SupabaseOAuthSuccessResponse**](SupabaseOAuthSuccessResponse.md)
+[**SupabaseOauthSuccessResponse**](SupabaseOauthSuccessResponse.md)
 
 ### Authorization
 
@@ -163,7 +163,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **supabase_o_auth_callback**
-> SupabaseOAuthSuccessResponse supabase_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
+> SupabaseOauthSuccessResponse supabase_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
 
 Supabase Callback
 
@@ -174,7 +174,7 @@ Handles the callback from Supabase OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.supabase_o_auth_success_response import SupabaseOAuthSuccessResponse
+from klavis.models.supabase_oauth_success_response import SupabaseOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -217,7 +217,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SupabaseOAuthSuccessResponse**](SupabaseOAuthSuccessResponse.md)
+[**SupabaseOauthSuccessResponse**](SupabaseOauthSuccessResponse.md)
 
 ### Authorization
 

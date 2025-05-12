@@ -22,9 +22,9 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SupabaseOAuthErrorResponse(BaseModel):
+class NotionOauthErrorResponse(BaseModel):
     """
-    SupabaseOAuthErrorResponse
+    NotionOauthErrorResponse
     """ # noqa: E501
     error: StrictStr = Field(description="Error message from the OAuth process")
     __properties: ClassVar[List[str]] = ["error"]
@@ -47,7 +47,7 @@ class SupabaseOAuthErrorResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SupabaseOAuthErrorResponse from a JSON string"""
+        """Create an instance of NotionOauthErrorResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,7 +72,7 @@ class SupabaseOAuthErrorResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SupabaseOAuthErrorResponse from a dict"""
+        """Create an instance of NotionOauthErrorResponse from a dict"""
         if obj is None:
             return None
 

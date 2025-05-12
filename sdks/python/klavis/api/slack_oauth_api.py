@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.slack_o_auth_success_response import SlackOAuthSuccessResponse
+from klavis.models.slack_oauth_success_response import SlackOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -216,7 +216,7 @@ class SlackOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SlackOAuthSuccessResponse:
+    ) -> SlackOauthSuccessResponse:
         """Slack Callback
 
         Handles the callback from Slack OAuth authorization.
@@ -260,8 +260,8 @@ class SlackOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SlackOAuthSuccessResponse",
-            '400': "SlackOAuthErrorResponse",
+            '200': "SlackOauthSuccessResponse",
+            '400': "SlackOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(

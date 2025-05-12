@@ -89,7 +89,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **github_o_auth_callback**
-> GitHubOAuthSuccessResponse github_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
+> GithubOauthSuccessResponse github_o_auth_callback(code=code, state=state, error=error, error_description=error_description)
 
 Github Callback
 
@@ -100,7 +100,7 @@ Handles the callback from GitHub OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.git_hub_o_auth_success_response import GitHubOAuthSuccessResponse
+from klavis.models.github_oauth_success_response import GithubOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -143,7 +143,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GitHubOAuthSuccessResponse**](GitHubOAuthSuccessResponse.md)
+[**GithubOauthSuccessResponse**](GithubOauthSuccessResponse.md)
 
 ### Authorization
 

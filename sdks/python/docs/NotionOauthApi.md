@@ -89,7 +89,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **notion_o_auth_callback**
-> NotionOAuthSuccessResponse notion_o_auth_callback(code=code, state=state, error=error)
+> NotionOauthSuccessResponse notion_o_auth_callback(code=code, state=state, error=error)
 
 Notion Callback
 
@@ -100,7 +100,7 @@ Handles the callback from Notion OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.notion_o_auth_success_response import NotionOAuthSuccessResponse
+from klavis.models.notion_oauth_success_response import NotionOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -141,7 +141,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**NotionOAuthSuccessResponse**](NotionOAuthSuccessResponse.md)
+[**NotionOauthSuccessResponse**](NotionOauthSuccessResponse.md)
 
 ### Authorization
 

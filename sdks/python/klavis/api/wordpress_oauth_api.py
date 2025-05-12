@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.word_press_o_auth_success_response import WordPressOAuthSuccessResponse
+from klavis.models.wordpress_oauth_success_response import WordpressOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -217,7 +217,7 @@ class WordpressOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> WordPressOAuthSuccessResponse:
+    ) -> WordpressOauthSuccessResponse:
         """Wordpress Callback
 
         Handles the callback from WordPress OAuth authorization.
@@ -264,8 +264,8 @@ class WordpressOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WordPressOAuthSuccessResponse",
-            '400': "WordPressOAuthErrorResponse",
+            '200': "WordpressOauthSuccessResponse",
+            '400': "WordpressOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(

@@ -89,7 +89,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **slack_o_auth_callback**
-> SlackOAuthSuccessResponse slack_o_auth_callback(code=code, state=state, error=error)
+> SlackOauthSuccessResponse slack_o_auth_callback(code=code, state=state, error=error)
 
 Slack Callback
 
@@ -100,7 +100,7 @@ Handles the callback from Slack OAuth authorization.
 
 ```python
 import klavis
-from klavis.models.slack_o_auth_success_response import SlackOAuthSuccessResponse
+from klavis.models.slack_oauth_success_response import SlackOauthSuccessResponse
 from klavis.rest import ApiException
 from pprint import pprint
 
@@ -141,7 +141,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SlackOAuthSuccessResponse**](SlackOAuthSuccessResponse.md)
+[**SlackOauthSuccessResponse**](SlackOauthSuccessResponse.md)
 
 ### Authorization
 

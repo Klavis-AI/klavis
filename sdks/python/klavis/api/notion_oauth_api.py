@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr
 from typing import Any, Optional
 from typing_extensions import Annotated
-from klavis.models.notion_o_auth_success_response import NotionOAuthSuccessResponse
+from klavis.models.notion_oauth_success_response import NotionOauthSuccessResponse
 
 from klavis.api_client import ApiClient, RequestSerialized
 from klavis.api_response import ApiResponse
@@ -216,7 +216,7 @@ class NotionOauthApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> NotionOAuthSuccessResponse:
+    ) -> NotionOauthSuccessResponse:
         """Notion Callback
 
         Handles the callback from Notion OAuth authorization.
@@ -260,8 +260,8 @@ class NotionOauthApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "NotionOAuthSuccessResponse",
-            '400': "NotionOAuthErrorResponse",
+            '200': "NotionOauthSuccessResponse",
+            '400': "NotionOauthErrorResponse",
             '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
