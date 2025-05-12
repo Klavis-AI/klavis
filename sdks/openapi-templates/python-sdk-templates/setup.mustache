@@ -3,6 +3,7 @@
 {{>partial_header}}
 
 from setuptools import setup, find_packages  # noqa: H301
+from pathlib import Path
 
 # To install the library, run the following
 #
@@ -31,6 +32,9 @@ REQUIRES = [
     "typing-extensions >= 4.7.1",
 ]
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
     name=NAME,
     version=VERSION,
@@ -44,8 +48,6 @@ setup(
     include_package_data=True,
     {{#licenseInfo}}license="{{.}}",
     {{/licenseInfo}}long_description_content_type='text/markdown',
-    long_description="""\
-    {{appDescription}}
-    """,  # noqa: E501
+    long_description=long_description,
     package_data={"{{{packageName}}}": ["py.typed"]},
 )

@@ -14,6 +14,7 @@
 
 
 from setuptools import setup, find_packages  # noqa: H301
+from pathlib import Path
 
 # To install the library, run the following
 #
@@ -22,7 +23,7 @@ from setuptools import setup, find_packages  # noqa: H301
 # prerequisite: setuptools
 # http://pypi.python.org/pypi/setuptools
 NAME = "klavis"
-VERSION = "0.1.0"
+VERSION = "0.1.0.4"
 PYTHON_REQUIRES = ">= 3.9"
 REQUIRES = [
     "urllib3 >= 2.1.0, < 3.0.0",
@@ -30,6 +31,9 @@ REQUIRES = [
     "pydantic >= 2",
     "typing-extensions >= 4.7.1",
 ]
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(
     name=NAME,
@@ -44,8 +48,6 @@ setup(
     include_package_data=True,
     license="MIT",
     long_description_content_type='text/markdown',
-    long_description="""\
-    Klavis AI - Open Source MCP Integrations for AI Applications
-    """,  # noqa: E501
+    long_description=long_description,
     package_data={"klavis": ["py.typed"]},
 )

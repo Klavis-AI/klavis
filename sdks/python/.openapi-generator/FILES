@@ -1,10 +1,8 @@
 .github/workflows/python.yml
 .gitignore
 .gitlab-ci.yml
-.openapi-generator-ignore
 .travis.yml
 LICENSE
-README.md
 docs/CallToolRequest.md
 docs/CallToolResponse.md
 docs/CallToolResult.md
