@@ -8,6 +8,26 @@ readme = "README.md"
 repository = "https://github.com/Klavis-AI/klavis"
 keywords = ["MCP", "AI", "LLM", "Klavis", "Klavis AI"]
 include = ["klavis/py.typed"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Artificial Intelligence",
+]
+
+[tool.poetry.urls]
+Homepage = "https://www.klavis.ai"
+Documentation = "https://docs.klavis.ai"
+Source = "https://github.com/Klavis-AI/klavis"
+PyPI = "https://pypi.org/project/klavis/"
 
 [tool.poetry.dependencies]
 python = "^3.9"
