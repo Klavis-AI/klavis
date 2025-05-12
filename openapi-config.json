@@ -1,18 +1,22 @@
 {
-    "inputSpec": "../klavis-api/api-reference/openapi.json",
+    "inputSpec": "https://api.klavis.ai/openapi.json",
     "generatorName": "python",
     "outputDir": "sdks/python",
     "additionalProperties": {
         "packageName": "klavis",
         "projectName": "klavis",
-        "packageVersion": "0.1.0"
+        "packageVersion": "0.1.0",
+        "infoName": "Klavis AI",
+        "infoEmail": "connect@klavis.ai",
+        "infoUrl": "https://www.klavis.ai",
+        "licenseInfo": "MIT"
     },
     "globalProperties": {
         "modelTests": false,
         "apiTests": false
     },
     "enablePostProcessFile": true,
-    "templateDir": "openapi-templates/python-sdk-templates",
+    "templateDir": "sdks/openapi-templates/python-sdk-templates",
     "modelNameMappings": {
         "mcp_server__mcp_server__ServerName": "ServerName",
         "white_labeling__white_labeling__ServerName": "WhiteLabelServerName",
@@ -31,5 +35,10 @@
     },
     "gitUserId": "Klavis-AI",
     "gitRepoId": "klavis",
-    "apiNameSuffix": null
+    "apiNameSuffix": null,
+    "files": {
+        "LICENSE.mustache": {
+            "destinationFilename": "LICENSE"
+        }
+    }
 }

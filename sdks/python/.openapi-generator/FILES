@@ -3,6 +3,7 @@
 .gitlab-ci.yml
 .openapi-generator-ignore
 .travis.yml
+LICENSE
 README.md
 docs/CallToolRequest.md
 docs/CallToolResponse.md

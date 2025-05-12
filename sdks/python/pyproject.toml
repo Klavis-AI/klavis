@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "klavis"
 version = "0.1.0"
-description = "Klavis API Server"
-authors = ["OpenAPI Generator Community <team@openapitools.org>"]
-license = "NoLicense"
+description = "Klavis AI (https://www.klavis.ai)"
+authors = ["Klavis AI <connect@klavis.ai>"]
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Klavis-AI/klavis"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Klavis API Server"]
+keywords = ["MCP", "AI", "LLM", "Klavis", "Klavis AI"]
 include = ["klavis/py.typed"]
 
 [tool.poetry.dependencies]
