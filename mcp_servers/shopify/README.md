@@ -24,6 +24,63 @@ The server exposes the following Shopify API functions as MCP tools:
 
 Before you begin, ensure you have the following:
 
+## How to Obtain Your Shopify Access Token and Shop Domain
+
+To use the Shopify MCP Server, you need two key pieces of information:
+
+- **Shopify Access Token**: Used to authenticate API requests.
+- **Shop Domain**: The unique domain of your Shopify store (e.g., `your-store.myshopify.com`).
+
+Follow these steps to obtain both:
+
+**1. Log in to Your Shopify Admin**
+
+- Go to your Shopify Admin dashboard at `https://your-store.myshopify.com/admin`.
+
+**2. Create a Custom App (for Private API Access)**
+
+- In the Shopify Admin, click on **Settings** (bottom left).
+- Select **Apps and sales channels**.
+- Click **Develop apps for your store** (you may need to enable app development if it's your first time).
+- Click **Create an app**.
+- Enter a name for your app (e.g., "MCP Integration") and click **Create app**.
+
+**3. Configure API Access and Permissions**
+
+- In your newly created app, go to the **Configuration** tab.
+- Click **Configure** under "Admin API integration".
+- Select the required Admin API permissions based on the features you want to use (e.g., Products, Orders, Customers).
+- Click **Save**.
+
+| Tool                   | Required Access Scopes (Permissions) | 
+| :--------------------- | :----------------------------------- |
+| shopify_list_products  | `read_products`                      |
+| shopify_get_product    | `read_products`                      |
+| shopify_create_product | `write_products`                     |
+| shopify_update_product | `write_products`                     |
+| shopify_list_orders    | `read_orders`                        |
+| shopify_get_order      | `read_orders`                        |
+| shopify_create_order   | `write_orders`                       |
+| shopify_list_customers | `read_customers`                     |
+| shopify_get_customer   | `read_customers`                     |
+
+**4. Install the App**
+
+- Go to the **Install App** tab.
+- Click **Install** to add the app to your store.
+
+**5. Get the Access Token**
+
+- After installing, go to the **API credentials** tab.
+- Under "Access tokens", click **Reveal token once** to view your Admin API access token.
+- **Copy and securely store this token**. You will not be able to view it again.
+
+**6. Find Your Shop Domain**
+
+- Your shop domain is the `.myshopify.com` address you use to access your Shopify Admin (e.g., `your-store.myshopify.com`).
+- You can find it in your browser's address bar when logged into the Shopify Admin.
+
+
 * **Node.js and npm:** Required for local development (check versions with `node -v` and `npm -v`).
 * **Docker:** Required for running the server in a container (Recommended).
 * **Shopify Access Token:** An API access token with the necessary permissions to perform the actions listed in the Features section. You can create a private app in your Shopify Admin to obtain an access token.
@@ -117,7 +174,3 @@ MCP clients can connect to this server via Server-Sent Events (SSE) and interact
 3.  **Authentication:** Each POST request to `/messages` **must** include the Shopify Access Token in the `x-shopify-access-token` header and the Shopify Shop Domain in the `x-shopify-shop-domain` header .
 
 Refer to the [MCP SDK documentation](https://github.com/modelcontextprotocol) for details on client implementation.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file (you might need to add one) for details. 
