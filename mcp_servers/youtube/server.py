@@ -1,20 +1,34 @@
-import os
+import contextlib
 import logging
+import os
 import re
-from typing import Any, Dict, Annotated
+from collections.abc import AsyncIterator
+from typing import Any, Dict
 from urllib.parse import urlparse, parse_qs
+
+import click
+import mcp.types as types
+from mcp.server.lowlevel import Server
+from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
+from pydantic import Field
 from dotenv import load_dotenv
 import aiohttp
-from mcp.server.fastmcp import FastMCP
-from pydantic import Field
+import asyncio
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.proxies import WebshareProxyConfig
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Load environment variables
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("youtube-mcp-server")
-
+# YouTube API constants and configuration
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 if not YOUTUBE_API_KEY:
     raise ValueError("YOUTUBE_API_KEY environment variable is required")
@@ -25,12 +39,6 @@ WEBSHARE_PROXY_PASSWORD = os.getenv("WEBSHARE_PROXY_PASSWORD")
 
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 YOUTUBE_MCP_SERVER_PORT = int(os.getenv("YOUTUBE_MCP_SERVER_PORT", "5000"))
-
-mcp = FastMCP(
-    "Youtube",
-    instructions="Retrieve the transcript or video details for a given YouTube video.",
-    port=YOUTUBE_MCP_SERVER_PORT,
-)
 
 # Initialize YouTube Transcript API with proxy if credentials are available
 if WEBSHARE_PROXY_USERNAME and WEBSHARE_PROXY_PASSWORD:
@@ -131,14 +139,7 @@ async def _make_youtube_request(endpoint: str, params: Dict[str, Any], headers: 
             logger.error(f"An unexpected error occurred during YouTube API request: {e}")
             raise RuntimeError(f"Unexpected error during API call to {url}") from e
 
-async def get_video_details(
-    video_id: Annotated[
-        str,
-        Field(
-            description="The ID of the YouTube video to get details for."
-        ),
-    ]
-) -> Dict[str, Any]:
+async def get_video_details(video_id: str) -> Dict[str, Any]:
     """Get detailed information about a specific YouTube video."""
     logger.info(f"Executing tool: get_video_details with video_id: {video_id}")
     try:
@@ -177,60 +178,196 @@ async def get_video_details(
         logger.exception(f"Error executing tool get_video_details: {e}")
         raise e
 
-@mcp.tool()
-async def get_youtube_video_transcript(
-    url: Annotated[
-        str,
-        Field(
-            description="The URL of the YouTube video to retrieve the transcript/subtitles for. (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
-        ),
-    ],
-) -> Dict[str, Any]:
-    """
-    Retrieve the transcript or video details for a given YouTube video.
-    The 'start' time in the transcript is formatted as MM:SS or HH:MM:SS.
-    """
-    try:
-        video_id = _extract_video_id(url)
-        logger.info(f"Executing tool: get_video_transcript with video_id: {video_id}")
+
+@click.command()
+@click.option("--port", default=YOUTUBE_MCP_SERVER_PORT, help="Port to listen on for HTTP")
+@click.option(
+    "--log-level",
+    default="INFO",
+    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+)
+@click.option(
+    "--json-response",
+    is_flag=True,
+    default=False,
+    help="Enable JSON responses for StreamableHTTP instead of SSE streams",
+)
+def main(
+    port: int,
+    log_level: str,
+    json_response: bool,
+) -> int:
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper()),
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    # Create the MCP server instance
+    app = Server("youtube-mcp-server")
+
+    @app.list_tools()
+    async def list_tools() -> list[types.Tool]:
+        return [
+            types.Tool(
+                name="get_youtube_video_transcript",
+                description="Retrieve the transcript or video details for a given YouTube video. The 'start' time in the transcript is formatted as MM:SS or HH:MM:SS.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["url"],
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL of the YouTube video to retrieve the transcript/subtitles for. (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)",
+                        },
+                    },
+                },
+            )
+        ]
+
+    @app.call_tool()
+    async def call_tool(
+        name: str, arguments: dict
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        ctx = app.request_context
         
-        try:
-            # Use the initialized API with or without proxy
-            raw_transcript = youtube_transcript_api.fetch(video_id).to_raw_data()
+        if name == "get_youtube_video_transcript":
+            url = arguments.get("url")
+            if not url:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: URL parameter is required",
+                    )
+                ]
             
-            # Format the start time for each segment
-            formatted_transcript = [
-                {**segment, 'start': _format_time(segment['start'])} 
-                for segment in raw_transcript
-            ]
+            try:
+                result = await get_youtube_video_transcript(url)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        return [
+            types.TextContent(
+                type="text",
+                text=f"Unknown tool: {name}",
+            )
+        ]
 
+    async def get_youtube_video_transcript(url: str) -> Dict[str, Any]:
+        """
+        Retrieve the transcript or video details for a given YouTube video.
+        The 'start' time in the transcript is formatted as MM:SS or HH:MM:SS.
+        """
+        try:
+            video_id = _extract_video_id(url)
+            logger.info(f"Executing tool: get_video_transcript with video_id: {video_id}")
+            
+            try:
+                # Use the initialized API with or without proxy
+                raw_transcript = youtube_transcript_api.fetch(video_id).to_raw_data()
+                
+                # Format the start time for each segment
+                formatted_transcript = [
+                    {**segment, 'start': _format_time(segment['start'])} 
+                    for segment in raw_transcript
+                ]
+
+                return {
+                    "video_id": video_id,
+                    "transcript": formatted_transcript
+                }
+            except Exception as transcript_error:
+                logger.warning(f"Error fetching transcript: {transcript_error}. Falling back to video details.")
+                # Fall back to get_video_details
+                video_details = await get_video_details(video_id)
+                return {
+                    "video_id": video_id,
+                    "video_details": video_details,
+                }
+        except ValueError as e:
+            logger.exception(f"Invalid YouTube URL: {e}")
             return {
-                "video_id": video_id,
-                "transcript": formatted_transcript
+                "error": f"Invalid YouTube URL: {str(e)}"
             }
-        except Exception as transcript_error:
-            logger.warning(f"Error fetching transcript: {transcript_error}. Falling back to video details.")
-            # Fall back to get_video_details
-            video_details = await get_video_details(video_id)
+        except Exception as e:
+            error_message = str(e)
+            logger.exception(f"Error processing video URL {url}: {error_message}")
             return {
-                "video_id": video_id,
-                "video_details": video_details,
+                "error": f"Failed to process request: {error_message}"
             }
-    except ValueError as e:
-        logger.exception(f"Invalid YouTube URL: {e}")
-        return {
-            "error": f"Invalid YouTube URL: {str(e)}"
-        }
-    except Exception as e:
-        error_message = str(e)
-        logger.exception(f"Error processing video URL {url}: {error_message}")
-        return {
-            "error": f"Failed to process request: {error_message}"
-        }
 
-def main():
-    mcp.run(transport="sse")
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
 
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
+        async with sse.connect_sse(
+            request.scope, request.receive, request._send
+        ) as streams:
+            await app.run(
+                streams[0], streams[1], app.create_initialization_options()
+            )
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        logger.info("Handling StreamableHTTP request")
+        await session_manager.handle_request(scope, receive, send)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
+
+    # Create an ASGI application with routes for both transports
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
+    import uvicorn
+
+    uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+
+    return 0
 
 if __name__ == "__main__":
-    main()
+    main() 

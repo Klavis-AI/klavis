@@ -144,6 +144,7 @@ async def run_session(read_stream, write_stream):
         await client.chat_loop()
 
 
+# example streamable http url: http://localhost:8000/mcp as per the MCP spec
 async def main(url: str, args: list[str]):
     # Use streamable HTTP client
     async with streamablehttp_client(url) as streams:
