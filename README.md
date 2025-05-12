@@ -19,6 +19,7 @@ Klavis AI makes it effortless to connect to production-ready MCP servers & clien
 ## ✨ Key Features
 
 Klavis AI removes the barrier to using MCPs by providing:
+
 - **Production-Ready MCP Servers**: All our MCP Servers come from official sources or are internally evaluated by Klavis and our customers.
 - **Built-In Authentications**: Secure authentication out of the box for both developers and end-users.
 - **MCP Client Integrations**: We support MCP Client Integration, allowing you to interact via Klavis Slack, Discord, or web MCP client and integrate into your workflows seamlessly.
@@ -29,6 +30,7 @@ Klavis AI removes the barrier to using MCPs by providing:
 To run self hosted versions, check out the detailed readme in each MCP server and MCP client below.
 
 ### MCP Servers
+
 - [**Discord**](mcp_servers/discord/README.md): For Discord API integration
 - [**Document Conversion (Pandoc)**](mcp_servers/pandoc/README.md): Convert between various file formats using Pandoc
 - [**Firecrawl**](mcp_servers/firecrawl/README.md): For web crawling and data collection
@@ -38,6 +40,7 @@ To run self hosted versions, check out the detailed readme in each MCP server an
 - [**Postgres**](mcp_servers/postgres/README.md): For PostgreSQL database operations
 - [**Report Generation**](mcp_servers/report_generation/README.md): Create professional web reports from user query
 - [**Resend**](mcp_servers/resend/README.md): For email services
+- [**Shopify**](mcp_servers/shopify/README.md): For Shopify Admin API integration
 - [**Slack**](mcp_servers/slack/README.md): For Slack API integration
 - [**Supabase**](mcp_servers/supabase/README.md): For database operations
 - [**YouTube**](mcp_servers/youtube/README.md): Extract and convert YouTube video information
@@ -45,6 +48,7 @@ To run self hosted versions, check out the detailed readme in each MCP server an
 - And More!
 
 ### MCP Clients
+
 - [**Discord MCP Client Setup Guide**](mcp-clients/README-Discord.md)
 - [**Slack MCP Client Setup Guide**](mcp-clients/README-Slack.md)
 - [**Web Chat MCP Client Setup Guide**](mcp-clients/README-Web.md)
@@ -54,6 +58,7 @@ To run self hosted versions, check out the detailed readme in each MCP server an
 1. **Sign up for Klavis platform and create your [API key](https://www.klavis.ai/home/api-keys)**
 
 2. **Create a new MCP server instance**
+
 ```bash
 curl --request POST \
   --url https://api.klavis.ai/mcp-server/instance/create \
@@ -65,9 +70,11 @@ curl --request POST \
   "platformName": "<PLATFORM_NAME>"
 }'
 ```
+
 > **Note:** It will return an MCP server URL that takes care of everything for you!
 
 3. **Set up auth token or use our in-house OAuth flow (if the MCP Server requests private info)**
+
 ```bash
 curl --request POST \
   --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
@@ -86,4 +93,5 @@ Check out our [documentation](https://docs.klavis.ai) for more details!
 We love contributions! Please check our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit changes. Join our [Discord community](https://discord.gg/p7TuTEcssn) to discuss ideas and get help.
 
 ## 📜 License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
