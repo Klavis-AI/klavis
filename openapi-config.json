@@ -1,0 +1,23 @@
+{
+    "inputSpec": "../klavis-api/api-reference/openapi.json",
+    "generatorName": "python",
+    "outputDir": "sdks/python",
+    "additionalProperties": {
+        "packageName": "klavis",
+        "projectName": "klavis",
+        "packageVersion": "0.1.0"
+    },
+    "globalProperties": {
+        "modelTests": false,
+        "apiTests": false
+    },
+    "enablePostProcessFile": true,
+    "templateDir": "openapi-templates/python-sdk-templates",
+    "modelNameMappings": {
+        "mcp_server__mcp_server__ServerName": "ServerName",
+        "white_labeling__white_labeling__ServerName": "WhiteLabelServerName"
+    },
+    "gitUserId": "Klavis-AI",
+    "gitRepoId": "klavis",
+    "apiNameSuffix": null
+}
