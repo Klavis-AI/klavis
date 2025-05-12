@@ -1,6 +1,6 @@
 [project]
 name = "klavis"
-version = "0.0.2"
+version = "0.0.3"
 description = "Klavis AI (https://www.klavis.ai)"
 authors = [
     {name = "Klavis AI", email = "connect@klavis.ai"}
@@ -25,7 +25,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://www.klavis.ai"
 Documentation = "https://docs.klavis.ai"
-Source = "https://github.com/Klavis-AI/klavis"
+Source = "https://github.com/Klavis-AI/klavis/tree/main/sdks/python"
 PyPI = "https://pypi.org/project/klavis/"
 
 [tool.poetry.dependencies]
