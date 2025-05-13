@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy only the requirements first to leverage Docker cache
 COPY mcp_servers/discord/requirements.txt .
-COPY mcp_servers/discord/.env .
+COPY mcp_servers/discord/.env.example .env
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code
