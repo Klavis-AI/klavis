@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write # Needed to create GitHub releases
+  id-token: write # Needed for trusted publishing to PyPI
 
 jobs:
   deploy:
@@ -37,11 +38,8 @@ jobs:
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
         packages_dir: sdks/python/dist/
-        # Optional: uncomment to publish to TestPyPI first
-        # repository_url: https://test.pypi.org/legacy/
+        # No API token needed with Trusted Publisher
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
