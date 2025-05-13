@@ -1,6 +1,6 @@
 [project]
 name = "klavis"
-version = "0.0.6"
+version = "0.0.7"
 description = "Klavis AI (https://www.klavis.ai)"
 authors = [
     {name = "Klavis AI", email = "connect@klavis.ai"}
