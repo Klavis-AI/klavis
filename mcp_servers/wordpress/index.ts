@@ -290,7 +290,7 @@ function getClient() {
 }
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
