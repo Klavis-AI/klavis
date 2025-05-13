@@ -1,13 +1,31 @@
-[tool.poetry]
+[project]
 name = "{{{packageName}}}"
 version = "{{{packageVersion}}}"
 description = "{{{appName}}}"
-authors = ["{{infoName}}{{^infoName}}OpenAPI Generator Community{{/infoName}} <{{infoEmail}}{{^infoEmail}}team@openapitools.org{{/infoEmail}}>"]
-license = "{{{licenseInfo}}}{{^licenseInfo}}NoLicense{{/licenseInfo}}"
+authors = [
+    {name = "{{infoName}}{{^infoName}}Klavis AI{{/infoName}}", email = "{{infoEmail}}{{^infoEmail}}connect@klavis.ai{{/infoEmail}}"}
+]
+license = "{{{licenseInfo}}}{{^licenseInfo}}MIT{{/licenseInfo}}"
 readme = "README.md"
-repository = "https://{{{gitHost}}}/{{{gitUserId}}}/{{{gitRepoId}}}"
 keywords = ["MCP", "AI", "LLM", "Klavis", "Klavis AI"]
-include = ["{{packageName}}/py.typed"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://www.klavis.ai"
+Documentation = "https://docs.klavis.ai"
+Source = "https://github.com/{{{gitUserId}}}/{{{gitRepoId}}}/tree/main/sdks/python"
 
 [tool.poetry.dependencies]
 python = "^3.9"
