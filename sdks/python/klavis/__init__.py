@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 # import apis into sdk package
 from klavis.api.github_oauth_api import GithubOauthApi
