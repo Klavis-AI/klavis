@@ -1227,22 +1227,27 @@ const getJiraMcpServer = () => {
               };
             }
 
+            console.log("--- payload", payload);
+
+            console.log("--- payload.fields", payload.fields);
+
+            console.log("--- Object.keys(payload.fields).length", Object.keys(payload.fields).length);
+
             // Only send request if there are fields to update
             if (Object.keys(payload.fields).length > 0) {
+              console.log("--- payload.fields", payload.fields);
               await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload),
               });
             }
 
-            // Handle attachments if provided
-            if (args.attachments) {
-              // TODO: Implement file attachment functionality
-              // This would require file reading and multipart form data uploads
-            }
+            console.log("--- args.issue_key", args.issue_key);
 
             // Get updated issue to return in response
             const updatedIssue = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`);
+
+            console.log("--- updatedIssue", updatedIssue);
 
             return {
               content: [
