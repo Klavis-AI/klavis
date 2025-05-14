@@ -252,6 +252,11 @@ async function createJiraClient(authToken: string): Promise<JiraClient> {
           throw new Error(`Jira API error (${response.status}): ${errorText}`);
         }
 
+        // Handle 204 No Content responses
+        if (response.status === 204) {
+          return {} as T;
+        }
+
         return response.json() as Promise<T>;
       },
     };
@@ -1203,7 +1208,6 @@ const getJiraMcpServer = () => {
 
             // Resolve currentUser() for assignee
             if (fieldsObj.assignee) {
-              console.log("--- fieldsObj.assignee", fieldsObj.assignee);
               let assigneeValue = fieldsObj.assignee;
 
               // Check if assignee is provided as a string "currentUser()"
@@ -1215,7 +1219,6 @@ const getJiraMcpServer = () => {
                 )
               ) {
                 try {
-                  console.log("--- resolving currentUser() for assignee");
                   const currentUser = await jira.fetch<any>('/rest/api/3/myself');
                   if (currentUser && currentUser.accountId) {
                     fieldsObj.assignee = { accountId: currentUser.accountId };
@@ -1264,28 +1267,19 @@ const getJiraMcpServer = () => {
               };
             }
 
-            console.log("--- payload", payload);
-
-            console.log("--- payload.fields", payload.fields);
-
-            console.log("--- Object.keys(payload.fields).length", Object.keys(payload.fields).length);
-
             // Only send request if there are fields to update
+            let responseText = "";
             if (Object.keys(payload.fields).length > 0) {
-              console.log("--- payload.fields", payload.fields);
-              console.log("--- JSON.stringify(payload)", JSON.stringify(payload));
-              await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
+              const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload),
               });
-            }
 
-            console.log("--- args.issue_key", args.issue_key);
+              responseText = JSON.stringify(response);
+            }
 
             // Get updated issue to return in response
             const updatedIssue = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`);
-
-            console.log("--- updatedIssue", updatedIssue);
 
             return {
               content: [
