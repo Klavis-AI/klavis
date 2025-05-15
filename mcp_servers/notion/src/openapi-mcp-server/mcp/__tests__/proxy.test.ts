@@ -1,6 +1,6 @@
-import { MCPProxy } from '../proxy'
+import { MCPProxy } from '../proxy.js'
 import { OpenAPIV3 } from 'openapi-types'
-import { HttpClient } from '../../client/http-client'
+import { HttpClient } from '../../client/http-client.js'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 

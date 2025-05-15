@@ -1,6 +1,6 @@
 import { OpenAPIV3 } from 'openapi-types'
 import { describe, it, expect } from 'vitest'
-import { isFileUploadParameter } from '../file-upload'
+import { isFileUploadParameter } from '../file-upload.js'
 
 describe('File Upload Detection', () => {
   it('identifies file upload parameters in request bodies', () => {

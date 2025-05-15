@@ -1,4 +1,4 @@
-import { HttpClient, HttpClientError } from '../http-client'
+import { HttpClient, HttpClientError } from '../http-client.js'
 import { OpenAPIV3 } from 'openapi-types'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import OpenAPIClientAxios from 'openapi-client-axios'

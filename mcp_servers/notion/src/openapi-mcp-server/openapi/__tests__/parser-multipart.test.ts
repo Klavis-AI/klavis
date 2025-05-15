@@ -1,6 +1,6 @@
 import { OpenAPIV3 } from 'openapi-types'
 import { describe, it, expect } from 'vitest'
-import { OpenAPIToMCPConverter } from '../parser'
+import { OpenAPIToMCPConverter } from '../parser.js'
 
 describe('OpenAPI Multipart Form Parser', () => {
   it('converts single file upload endpoint to tool', () => {

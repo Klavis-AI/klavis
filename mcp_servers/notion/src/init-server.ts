@@ -4,7 +4,7 @@ import path from 'node:path'
 import { OpenAPIV3 } from 'openapi-types'
 import OpenAPISchemaValidator from 'openapi-schema-validator'
 
-import { MCPProxy } from './openapi-mcp-server/mcp/proxy'
+import { MCPProxy } from './openapi-mcp-server/mcp/proxy.js'
 
 export class ValidationError extends Error {
   constructor(public errors: any[]) {

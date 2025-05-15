@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { HttpClient } from '../http-client'
+import { HttpClient } from '../http-client.js'
 import { OpenAPIV3 } from 'openapi-types'
 import fs from 'fs'
 import FormData from 'form-data'

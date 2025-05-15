@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { HttpClient } from '../http-client'
+import { HttpClient } from '../http-client.js'
 import type express from 'express'
 //@ts-ignore
 import { createPetstoreServer } from '../../../examples/petstore-server.cjs'

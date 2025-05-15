@@ -6,8 +6,8 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { JSONSchema7 as IJsonSchema } from "json-schema";
-import { OpenAPIToMCPConverter } from "../openapi/parser";
-import { HttpClient, HttpClientError } from "../client/http-client";
+import { OpenAPIToMCPConverter } from "../openapi/parser.js";
+import { HttpClient, HttpClientError } from "../client/http-client.js";
 import { OpenAPIV3 } from "openapi-types";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { AsyncLocalStorage } from "async_hooks";

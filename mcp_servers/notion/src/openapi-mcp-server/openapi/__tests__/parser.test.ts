@@ -1,4 +1,4 @@
-import { OpenAPIToMCPConverter } from '../parser'
+import { OpenAPIToMCPConverter } from '../parser.js'
 import { OpenAPIV3 } from 'openapi-types'
 import { describe, expect, it } from 'vitest'
 import { JSONSchema7 as IJsonSchema } from 'json-schema'
