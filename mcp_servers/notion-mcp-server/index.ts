@@ -54,18 +54,6 @@ app.post("/messages", async (req, res) => {
     
     if (!apiKey) {
       console.error('Error: Notion API key is missing. Provide it via NOTION_API_KEY env var or x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Notion API key is missing. Have you set the Notion API key?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Notion API key is missing. Have you set the Notion API key?" }));
-      return;
     }
 
     // Create headers for Notion API

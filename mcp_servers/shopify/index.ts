@@ -443,16 +443,6 @@ app.post('/mcp', async (req: Request, res: ExpressResponse) => {
 
   if (!accessToken || !shopDomain) {
     console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized, Shopify credentials are missing. Have you set the access token and shop domain?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
   const server = getShopifyMcpServer();
@@ -543,18 +533,6 @@ app.post("/messages", async (req, res) => {
 
     if (!accessToken || !shopDomain) {
       console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Shopify credentials are missing. Have you set the access token and shop domain?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Shopify credentials are missing." }));
-      return;
     }
 
     asyncLocalStorage.run({ 

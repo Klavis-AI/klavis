@@ -120,18 +120,6 @@ app.post("/messages", async (req, res) => {
     const accessToken = envAuthToken || req.headers['x-auth-token'] as string;
     if (!accessToken) {
       console.error('Error: Supabase Access Token is missing. Provide it via x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Supabase Access Token is missing. Have you set the Supabase Access Token?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Supabase Access Token is missing. Have you set the Supabase Access Token?" }));
-      return;
     }
     asyncLocalStorage.run({ managementApiClient: setManagementApiClient(accessToken) }, async () => {
       await transport.handlePostMessage(req, res);

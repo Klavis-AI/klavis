@@ -1361,16 +1361,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   if (!authToken) {
     console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized. Have you authenticated?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
   const jiraClient = await createJiraClient(authToken);
@@ -1459,18 +1449,6 @@ app.post("/messages", async (req, res) => {
 
     if (!authToken) {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized. Have you authenticated?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized. Have you authenticated?" }));
-      return;
     }
 
     const jiraClient = await createJiraClient(authToken);

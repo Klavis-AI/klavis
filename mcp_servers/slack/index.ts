@@ -634,16 +634,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   if (!slack_token) {
     console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
     const server = getSlackMcpServer();
@@ -734,18 +724,6 @@ app.post("/messages", async (req, res) => {
 
     if (!slack_token) {
       console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Slack token is missing. Have you set the Slack token?" }));
-      return;
     }
 
     asyncLocalStorage.run({ slack_token }, async () => {
