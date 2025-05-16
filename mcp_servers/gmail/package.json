@@ -1,0 +1,37 @@
+{
+  "name": "@klavis-ai/gmail-mcp-server",
+  "version": "1.0.0",
+  "description": "Gmail MCP server",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "gmail-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/src/index.js",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "author": "Klavis AI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.1",
+    "googleapis": "^129.0.0",
+    "zod": "^3.22.4",
+    "zod-to-json-schema": "^3.22.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.3.3"
+  }
+}
