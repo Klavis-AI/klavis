@@ -1,0 +1,10 @@
+mcp>=1.8.1
+pydantic
+fastapi
+uvicorn[standard]
+aiohttp
+python-dotenv
+typing-extensions
+click
+starlette
+atlassian-python-api>=3.41.0 
