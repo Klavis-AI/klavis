@@ -19,17 +19,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>
       <Card className={cn(
-        'flex max-w-[80%] items-start gap-3 p-4',
-        isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'
+        'flex max-w-[80%] items-start gap-3 p-4 transition-all',
+        isUser ? 
+          'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm shadow-md' : 
+          'bg-muted rounded-2xl rounded-tl-sm shadow-sm border-muted/20'
       )}>
-        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-background">
+        <div className={cn(
+          "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+          isUser ? "bg-primary-foreground/20" : "bg-background/80"
+        )}>
           {isUser ? (
             <User className="h-4 w-4" />
           ) : (
             <Bot className="h-4 w-4" />
           )}
         </div>
-        <div className="text-sm">{message.content}</div>
+        <div className="text-sm leading-relaxed">{message.content}</div>
       </Card>
     </div>
   )

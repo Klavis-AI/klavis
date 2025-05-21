@@ -19,22 +19,30 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e as unknown as React.FormEvent)
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2">
+    <form onSubmit={handleSubmit} className="flex items-end gap-2 relative">
       <Textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="Type your message here..."
-        className="min-h-20 flex-1 resize-none"
+        className="min-h-20 flex-1 resize-none rounded-xl bg-muted/10 border-muted/20 focus-visible:ring-1 pr-12 transition-all"
         disabled={isLoading}
       />
       <Button 
         type="submit" 
         size="icon" 
         disabled={isLoading || !input.trim()}
-        className="h-10 w-10"
+        className="absolute bottom-3 right-3 h-9 w-9 rounded-full shadow-sm opacity-90 hover:opacity-100 transition-all"
       >
-        <Send className="h-5 w-5" />
+        <Send className="h-4 w-4" />
       </Button>
     </form>
   )
