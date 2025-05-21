@@ -1,25 +1,25 @@
-FROM python:3.12-slim
+FROM node:22.12-alpine AS builder
+
+COPY mcp_servers/confluence /app
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/root/.npm npm install
 
-# Copy requirements file
-COPY mcp_servers/confluence/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN npm run build
 
-# Copy the server code
-COPY mcp_servers/confluence/server.py .
-COPY mcp_servers/confluence/tools /app/tools
+FROM node:22-alpine AS release
 
-# Create a sample .env file
-RUN echo "CONFLUENCE_BASE_URL=https://your-instance.atlassian.net/wiki\nCONFLUENCE_API_TOKEN=your-api-token\nCONFLUENCE_USERNAME=your-email@example.com\nCONFLUENCE_MCP_SERVER_PORT=5001" > .env
+COPY --from=builder /app/build /app/build
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/package-lock.json /app/package-lock.json
 
-# Expose the port the server runs on
-EXPOSE 5001
+ENV NODE_ENV=production
 
-# Command to run the server
-CMD ["python", "server.py"] 
+EXPOSE 5000
+
+WORKDIR /app
+
+RUN npm ci --ignore-scripts --omit-dev
+
+ENTRYPOINT ["node", "build/index.js"] 
