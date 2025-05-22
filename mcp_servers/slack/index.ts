@@ -56,6 +56,16 @@ interface GetUserProfileArgs {
   user_id: string;
 }
 
+interface SearchMessagesArgs {
+  query: string;
+  channel_ids?: string[];
+  sort?: "score" | "timestamp";
+  sort_dir?: "asc" | "desc";
+  count?: number;
+  cursor?: string;
+  highlight?: boolean;
+}
+
 // Tool definitions
 const listChannelsTool: Tool = {
   name: "slack_list_channels",
@@ -213,6 +223,54 @@ const getUserProfileTool: Tool = {
       },
     },
     required: ["user_id"],
+  },
+};
+
+const searchMessagesTool: Tool = {
+  name: "slack_search_messages",
+  description: "Search for messages in the workspace based on a query",
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "The search query string. You can use Slack's search operators like 'in:#channel', 'from:@user', 'before:YYYY-MM-DD', 'after:YYYY-MM-DD', etc.",
+      },
+      channel_ids: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description: "Optional list of channel IDs to search within. If not provided, searches across all accessible channels.",
+      },
+      sort: {
+        type: "string",
+        enum: ["score", "timestamp"],
+        description: "Sort results by relevance (score) or date (timestamp). Default is score.",
+        default: "score",
+      },
+      sort_dir: {
+        type: "string",
+        enum: ["asc", "desc"],
+        description: "Sort direction. Default is desc (newest/most relevant first).",
+        default: "desc",
+      },
+      count: {
+        type: "number",
+        description: "Number of results to return per page (default 20, max 100)",
+        default: 20,
+      },
+      cursor: {
+        type: "string", 
+        description: "Pagination cursor for next page of results",
+      },
+      highlight: {
+        type: "boolean",
+        description: "Whether to include highlighting of matched terms",
+        default: true,
+      },
+    },
+    required: ["query"],
   },
 };
 
@@ -423,6 +481,49 @@ class SlackClient {
 
     return data;
   }
+
+  async searchMessages(args: SearchMessagesArgs): Promise<any> {
+    this.refreshToken();
+    const params = new URLSearchParams({
+      query: args.query,
+      count: args.count ? Math.min(args.count, 100).toString() : "20",
+      highlight: args.highlight ? "1" : "0",
+      team_id: process.env.SLACK_TEAM_ID!,
+    });
+
+    if (args.sort) {
+      params.append("sort", args.sort);
+    }
+
+    if (args.sort_dir) {
+      params.append("sort_dir", args.sort_dir);
+    }
+
+    if (args.cursor) {
+      params.append("cursor", args.cursor);
+    }
+
+    // If channel_ids are provided, construct a channel filter for the query
+    if (args.channel_ids && args.channel_ids.length > 0) {
+      // We need to modify the query to include channel filters
+      // This is better than using the channel parameter which is deprecated
+      const channelsFilter = args.channel_ids.map(id => `in:${id}`).join(" ");
+      params.set("query", `${args.query} ${channelsFilter}`);
+    }
+
+    const response = await fetch(
+      `https://slack.com/api/search.messages?${params}`,
+      { headers: this.botHeaders },
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(`Slack API error: ${data.error}`);
+    }
+
+    return data;
+  }
 }
 
 const getSlackMcpServer = () => {
@@ -450,6 +551,7 @@ const getSlackMcpServer = () => {
           getThreadRepliesTool,
           getUsersTool,
           getUserProfileTool,
+          searchMessagesTool,
         ],
       };
     }
@@ -581,6 +683,17 @@ const getSlackMcpServer = () => {
               throw new Error("Missing required argument: user_id");
             }
             const response = await slackClient.getUserProfile(args.user_id);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
+          case "slack_search_messages": {
+            const args = request.params.arguments as unknown as SearchMessagesArgs;
+            if (!args.query) {
+              throw new Error("Missing required argument: query");
+            }
+            const response = await slackClient.searchMessages(args);
             return {
               content: [{ type: "text", text: JSON.stringify(response) }],
             };
