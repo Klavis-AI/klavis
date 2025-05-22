@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/github/github-mcp-server/pkg/translations"
 	"github.com/google/go-github/v69/github"
@@ -15,7 +17,7 @@ import (
 
 // ListCommits creates a tool to get commits of a branch in a repository.
 func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("list_commits",
+	return mcp.NewTool("github_list_commits",
 			mcp.WithDescription(t("TOOL_LIST_COMMITS_DESCRIPTION", "Get list of commits of a branch in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -85,7 +87,7 @@ func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 
 // CreateOrUpdateFile creates a tool to create or update a file in a GitHub repository.
 func CreateOrUpdateFile(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_or_update_file",
+	return mcp.NewTool("github_create_or_update_file",
 			mcp.WithDescription(t("TOOL_CREATE_OR_UPDATE_FILE_DESCRIPTION", "Create or update a single file in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -190,7 +192,7 @@ func CreateOrUpdateFile(getClient GetClientFn, t translations.TranslationHelperF
 
 // CreateRepository creates a tool to create a new GitHub repository.
 func CreateRepository(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_repository",
+	return mcp.NewTool("github_create_repository",
 			mcp.WithDescription(t("TOOL_CREATE_REPOSITORY_DESCRIPTION", "Create a new GitHub repository in your account")),
 			mcp.WithString("name",
 				mcp.Required(),
@@ -260,7 +262,7 @@ func CreateRepository(getClient GetClientFn, t translations.TranslationHelperFun
 
 // GetFileContents creates a tool to get the contents of a file or directory from a GitHub repository.
 func GetFileContents(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("get_file_contents",
+	return mcp.NewTool("github_get_file_contents",
 			mcp.WithDescription(t("TOOL_GET_FILE_CONTENTS_DESCRIPTION", "Get the contents of a file or directory from a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -333,7 +335,7 @@ func GetFileContents(getClient GetClientFn, t translations.TranslationHelperFunc
 
 // ForkRepository creates a tool to fork a repository.
 func ForkRepository(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("fork_repository",
+	return mcp.NewTool("github_fork_repository",
 			mcp.WithDescription(t("TOOL_FORK_REPOSITORY_DESCRIPTION", "Fork a GitHub repository to your account or specified organization")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -400,7 +402,7 @@ func ForkRepository(getClient GetClientFn, t translations.TranslationHelperFunc)
 
 // CreateBranch creates a tool to create a new branch.
 func CreateBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("create_branch",
+	return mcp.NewTool("github_create_branch",
 			mcp.WithDescription(t("TOOL_CREATE_BRANCH_DESCRIPTION", "Create a new branch in a GitHub repository")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -485,7 +487,7 @@ func CreateBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (
 
 // PushFiles creates a tool to push multiple files in a single commit to a GitHub repository.
 func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
-	return mcp.NewTool("push_files",
+	return mcp.NewTool("github_push_files",
 			mcp.WithDescription(t("TOOL_PUSH_FILES_DESCRIPTION", "Push multiple files to a GitHub repository in a single commit")),
 			mcp.WithString("owner",
 				mcp.Required(),
@@ -623,6 +625,133 @@ func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (too
 			defer func() { _ = resp.Body.Close() }()
 
 			r, err := json.Marshal(updatedRef)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal response: %w", err)
+			}
+
+			return mcp.NewToolResultText(string(r)), nil
+		}
+}
+
+// ListStargazers creates a tool to list users who have starred a GitHub repository. note: we use the graphql api and prompt to get accurate result!
+func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
+	return mcp.NewTool("github_list_recent_stargazers",
+			mcp.WithDescription(t("TOOL_LIST_RECENT_STARGAZERS_DESCRIPTION", "Get a comprehensive list of users who have recently starred a specified GitHub repository, Ensure that the list includes every user without any omissions.")),
+			mcp.WithString("owner",
+				mcp.Required(),
+				mcp.Description("Repository owner (username or organization)"),
+			),
+			mcp.WithString("repo",
+				mcp.Required(),
+				mcp.Description("Repository name"),
+			),
+			WithPagination(),
+		),
+		func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			owner, err := requiredParam[string](request, "owner")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			repo, err := requiredParam[string](request, "repo")
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+			pagination, err := OptionalPaginationParams(request)
+			if err != nil {
+				return mcp.NewToolResultError(err.Error()), nil
+			}
+
+			client, err := getClient(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get GitHub client: %w", err)
+			}
+
+			// GraphQL query to fetch stargazers sorted by starred date
+			query := `
+				query($owner: String!, $name: String!, $first: Int!) { 
+					repository(owner: $owner, name: $name) { 
+						stargazers(first: $first, orderBy: {field: STARRED_AT, direction: DESC}) { 
+							edges {  
+								starredAt
+								node { 
+									login 
+								} 
+							} 
+						} 
+					} 
+				}
+			`
+
+			variables := map[string]interface{}{
+				"owner": owner,
+				"name":  repo,
+				"first": pagination.perPage,
+			}
+
+			req, err := client.NewRequest("POST", "graphql", map[string]interface{}{
+				"query":     query,
+				"variables": variables,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create GraphQL request: %w", err)
+			}
+
+			type GraphQLResponse struct {
+				Data struct {
+					Repository struct {
+						Stargazers struct {
+							Edges []struct {
+								StarredAt string `json:"starredAt"`
+								Node      struct {
+									Login string `json:"login"`
+								} `json:"node"`
+							} `json:"edges"`
+						} `json:"stargazers"`
+					} `json:"repository"`
+				} `json:"data"`
+				Errors []struct {
+					Message string `json:"message"`
+				} `json:"errors,omitempty"`
+			}
+
+			var response GraphQLResponse
+			resp, err := client.Do(ctx, req, &response)
+			if err != nil {
+				return nil, fmt.Errorf("failed to execute GraphQL request: %w", err)
+			}
+			defer func() { _ = resp.Body.Close() }()
+
+			if resp.StatusCode != 200 {
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read response body: %w", err)
+				}
+				return mcp.NewToolResultError(fmt.Sprintf("failed to list stargazers: %s", string(body))), nil
+			}
+
+			if len(response.Errors) > 0 {
+				errMsgs := make([]string, len(response.Errors))
+				for i, e := range response.Errors {
+					errMsgs[i] = e.Message
+				}
+				return mcp.NewToolResultError(fmt.Sprintf("GraphQL errors: %s", strings.Join(errMsgs, "; "))), nil
+			}
+
+			type Stargazer struct {
+				Login     string    `json:"login"`
+				StarredAt time.Time `json:"starred_at,omitempty"`
+			}
+
+			stargazers := make([]Stargazer, 0, len(response.Data.Repository.Stargazers.Edges))
+			for _, edge := range response.Data.Repository.Stargazers.Edges {
+				starredAt, _ := time.Parse(time.RFC3339, edge.StarredAt)
+				stargazers = append(stargazers, Stargazer{
+					Login:     edge.Node.Login,
+					StarredAt: starredAt,
+				})
+			}
+
+			r, err := json.Marshal(stargazers)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}

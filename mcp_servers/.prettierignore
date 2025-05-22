@@ -1,0 +1,19 @@
+# Build outputs
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+
+# Coverage reports
+coverage/
+
+# Generated files
+*.generated.*
+
+# Misc
+.DS_Store
+.env
+.env.*
+*.log

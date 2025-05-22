@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import express from "express";
+import express, { Request, Response } from 'express';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import { z } from "zod";
+import { z } from 'zod';
 import { Resend } from "resend";
 import { AsyncLocalStorage } from "async_hooks";
 import dotenv from "dotenv";
@@ -20,77 +20,63 @@ function getResendClient() {
   return asyncLocalStorage.getStore()!.resendClient;
 }
 
-const getResendMcpServer = () => {
-  const server = new McpServer({
-    name: "resend-email-service",
-    version: "1.0.0",
-  });
+// Create server instance
+const server = new McpServer({
+  name: "resend-email-service",
+  version: "1.0.0",
+});
 
-  server.tool(
-    "send-email",
-    "Send an email using Resend",
-    {
-      to: z.string().email().describe("Recipient email address"),
-      subject: z.string().describe("Email subject line"),
-      text: z.string().describe("Plain text email content"),
-      html: z
-        .string()
-        .optional()
-        .describe(
-          "HTML email content. When provided, the plain text argument MUST be provided as well."
-        ),
-      cc: z
-        .string()
-        .email()
-        .array()
-        .optional()
-        .describe(
-          "Optional array of CC email addresses. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
-        ),
-      bcc: z
-        .string()
-        .email()
-        .array()
-        .optional()
-        .describe(
-          "Optional array of BCC email addresses. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
-        ),
-      scheduledAt: z
-        .string()
-        .optional()
-        .describe(
-          "Optional parameter to schedule the email. This uses natural language. Examples would be 'tomorrow at 10am' or 'in 2 hours' or 'next day at 9am PST' or 'Friday at 3pm ET'."
-        ),
-      // If sender email address is not provided, the tool requires it as an argument
-      from: z
-        .string()
-        .email()
-        .nonempty()
-        .describe(
-          "Sender email address. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
-        ),
-      replyTo: z
-        .string()
-        .email()
-        .array()
-        .optional()
-        .describe(
-          "Optional email addresses for the email readers to reply to. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
-        ),
-    },
-    async ({
-      from,
-      to,
-      subject,
-      text,
-      html,
-      replyTo,
-      scheduledAt,
-      cc,
-      bcc,
-    }) => {
-      const fromEmailAddress = from;
-      const replyToEmailAddresses = replyTo;
+server.tool(
+  "send-email",
+  "Send an email using Resend",
+  {
+    to: z.string().email().describe("Recipient email address"),
+    subject: z.string().describe("Email subject line"),
+    text: z.string().describe("Plain text email content"),
+    html: z
+      .string()
+      .optional()
+      .describe(
+        "HTML email content. When provided, the plain text argument MUST be provided as well."
+      ),
+    cc: z
+      .string()
+      .email()
+      .array()
+      .optional()
+      .describe("Optional array of CC email addresses. You MUST ask the user for this parameter. Under no circumstance provide it yourself"),
+    bcc: z
+      .string()
+      .email()
+      .array()
+      .optional()
+      .describe("Optional array of BCC email addresses. You MUST ask the user for this parameter. Under no circumstance provide it yourself"),
+    scheduledAt: z
+      .string()
+      .optional()
+      .describe(
+        "Optional parameter to schedule the email. This uses natural language. Examples would be 'tomorrow at 10am' or 'in 2 hours' or 'next day at 9am PST' or 'Friday at 3pm ET'."
+      ),
+    // If sender email address is not provided, the tool requires it as an argument
+    from: z
+      .string()
+      .email()
+      .nonempty()
+      .describe(
+        "Sender email address. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
+      ),
+    replyTo: z
+      .string()
+      .email()
+      .array()
+      .optional()
+      .describe(
+        "Optional email addresses for the email readers to reply to. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
+      ),
+  },
+  async ({ from, to, subject, text, html, replyTo, scheduledAt, cc, bcc }) => {
+    const fromEmailAddress = from;
+    const replyToEmailAddresses = replyTo;
 
       // Type check on from, since "from" is optionally included in the arguments schema
       // This should never happen.
@@ -155,21 +141,88 @@ const getResendMcpServer = () => {
         );
       }
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Email sent successfully! ${JSON.stringify(response.data)}`,
-          },
-        ],
-      };
-    }
-  );
-
-  return server;
-};
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Email sent successfully! ${JSON.stringify(response.data)}`,
+        },
+      ],
+    };
+  }
+);
 
 const app = express();
+
+
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
+
+app.post('/mcp', async (req: Request, res: Response) => {
+  const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
+  if (!apiKey) {
+    console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
+  }
+
+  const resendClient = new Resend(apiKey);
+
+  const server = getResendMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+    await server.connect(transport);
+    asyncLocalStorage.run({ resendClient }, async () => {
+      await transport.handleRequest(req, res, req.body);
+    });
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
+      });
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req, res) => {
@@ -201,8 +254,7 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     // Use environment variable for API key if available, otherwise use header
-    const apiKey =
-      process.env.RESEND_API_KEY || (req.headers["x-auth-token"] as string);
+    const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
 
     const resendClient = new Resend(apiKey);
 

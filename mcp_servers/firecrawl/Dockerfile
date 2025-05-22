@@ -6,7 +6,6 @@ WORKDIR /app
 
 # Copy package.json and package-lock.json to install dependencies
 COPY mcp_servers/firecrawl/package.json mcp_servers/firecrawl/package-lock.json ./
-COPY mcp_servers/firecrawl/.env .
 
 # Install dependencies (ignoring scripts to prevent running the prepare script)
 RUN npm install --ignore-scripts
@@ -27,7 +26,6 @@ WORKDIR /app
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/package-lock.json /app/package-lock.json
-COPY --from=builder /app/.env /app/.env
 # Install only production dependencies
 RUN npm ci --omit=dev --ignore-scripts
 

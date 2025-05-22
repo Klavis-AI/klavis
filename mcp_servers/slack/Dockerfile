@@ -1,7 +1,6 @@
 FROM node:22-alpine AS builder
 
 COPY mcp_servers/slack /app
-COPY mcp_servers/tsconfig.json /tsconfig.json
 
 WORKDIR /app
 

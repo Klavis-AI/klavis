@@ -108,10 +108,10 @@ describe('llm tests', () => {
 
     expect(toolCalls).toHaveLength(2);
     expect(toolCalls[0]).toEqual(
-      expect.objectContaining({ toolName: 'list_projects' })
+      expect.objectContaining({ toolName: 'supabase_list_projects' })
     );
     expect(toolCalls[1]).toEqual(
-      expect.objectContaining({ toolName: 'list_tables' })
+      expect.objectContaining({ toolName: 'supabase_list_tables' })
     );
 
     await expect(text).toMatchCriteria(

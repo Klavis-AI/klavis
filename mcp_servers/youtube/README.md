@@ -52,13 +52,12 @@ You can run this server locally using either Docker (recommended) or a Python vi
 ### Using Docker (Recommended)
 
 1.  **Build the Docker Image:**
-    Open your terminal in the root directory of the `klavis` project and run:
+    Open your terminal in the `mcp_servers/youtube` directory and run:
     ```bash
-    docker build -t youtube-mcp-server -f mcp_servers/youtube/Dockerfile .
+    docker build -t youtube-mcp-server .
     ```
     *   `-t youtube-mcp-server`: Assigns a tag (name) to the image.
-    *   `-f mcp_servers/youtube/Dockerfile`: Specifies the path to the Dockerfile.
-    *   `.`: Specifies the build context (the current directory, `klavis`). This is important because the Dockerfile copies files from this context.
+    *   `.`: Specifies the build context (the current directory, `mcp_servers/youtube`).
 
 2.  **Run the Docker Container:**
     ```bash
