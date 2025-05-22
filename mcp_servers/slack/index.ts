@@ -18,6 +18,7 @@ import { AsyncLocalStorage } from "async_hooks";
 interface ListChannelsArgs {
   limit?: number;
   cursor?: string;
+  types?: string;
 }
 
 interface PostMessageArgs {
@@ -69,7 +70,7 @@ interface SearchMessagesArgs {
 // Tool definitions
 const listChannelsTool: Tool = {
   name: "slack_list_channels",
-  description: "List public channels in the workspace with pagination",
+  description: "List channels in the workspace with pagination",
   inputSchema: {
     type: "object",
     properties: {
@@ -82,6 +83,11 @@ const listChannelsTool: Tool = {
       cursor: {
         type: "string",
         description: "Pagination cursor for next page of results",
+      },
+      types: {
+        type: "string",
+        description: "Comma-separated list of channel types to include: public_channel, private_channel, mpim, im (direct messages). Default is public_channel.",
+        default: "public_channel",
       },
     },
   },
@@ -295,10 +301,10 @@ class SlackClient {
   }
 
   // Update existing methods to call refreshToken before making API calls
-  async getChannels(limit: number = 100, cursor?: string): Promise<any> {
+  async getChannels(limit: number = 100, cursor?: string, types: string = "public_channel"): Promise<any> {
     this.refreshToken();
     const params = new URLSearchParams({
-      types: "public_channel",
+      types: types,
       exclude_archived: "true",
       limit: Math.min(limit, 200).toString(),
       team_id: process.env.SLACK_TEAM_ID!,
@@ -580,6 +586,7 @@ const getSlackMcpServer = () => {
             const response = await slackClient.getChannels(
               args.limit,
               args.cursor,
+              args.types,
             );
             return {
               content: [{ type: "text", text: JSON.stringify(response) }],
