@@ -1,5 +1,5 @@
 {
-  "name": "@notionhq/notion-mcp-server",
+  "name": "@klavis-ai/notion-mcp-server",
   "keywords": [
     "notion",
     "api",
@@ -46,15 +46,6 @@
     "typescript": "^5.8.2",
     "vitest": "^3.1.1"
   },
-  "description": "Official MCP server for Notion API",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:makenotion/notion-mcp-server.git"
-  },
-  "author": "@notionhq",
-  "bugs": {
-    "url": "https://github.com/makenotion/notion-mcp-server/issues"
-  },
-  "homepage": "https://github.com/makenotion/notion-mcp-server#readme"
+  "description": "Klavis MCP server for Notion",
+  "main": "index.js"
 }
