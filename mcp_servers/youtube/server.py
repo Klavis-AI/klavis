@@ -39,6 +39,7 @@ WEBSHARE_PROXY_PASSWORD = os.getenv("WEBSHARE_PROXY_PASSWORD")
 
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 YOUTUBE_MCP_SERVER_PORT = int(os.getenv("YOUTUBE_MCP_SERVER_PORT", "5000"))
+TRANSCRIPT_LANGUAGES = [lang.strip() for lang in os.getenv("TRANSCRIPT_LANGUAGE", "en").split(',')]
 
 # Initialize YouTube Transcript API with proxy if credentials are available
 if WEBSHARE_PROXY_USERNAME and WEBSHARE_PROXY_PASSWORD:
@@ -276,8 +277,8 @@ def main(
             
             try:
                 # Use the initialized API with or without proxy
-                raw_transcript = youtube_transcript_api.fetch(video_id).to_raw_data()
-                
+                raw_transcript = youtube_transcript_api.fetch(video_id, languages=TRANSCRIPT_LANGUAGES).to_raw_data()
+
                 # Format the start time for each segment
                 formatted_transcript = [
                     {**segment, 'start': _format_time(segment['start'])} 
