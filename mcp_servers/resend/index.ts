@@ -86,14 +86,6 @@ const getResendMcpServer = () => {
         throw new Error("from argument must be provided.");
       }
 
-      // Similar type check for "reply-to" email addresses.
-      if (
-        typeof replyToEmailAddresses !== "string" &&
-        !Array.isArray(replyToEmailAddresses)
-      ) {
-        throw new Error("replyTo argument must be provided.");
-      }
-
       console.error(`Debug - Sending email with from: ${fromEmailAddress}`);
 
       // Explicitly structure the request with all parameters to ensure they're passed correctly
@@ -102,7 +94,7 @@ const getResendMcpServer = () => {
         subject: string;
         text: string;
         from: string;
-        replyTo: string | string[];
+        replyTo?: string | string[];
         html?: string;
         scheduledAt?: string;
         cc?: string[];
@@ -112,10 +104,13 @@ const getResendMcpServer = () => {
         subject,
         text,
         from: fromEmailAddress,
-        replyTo: replyToEmailAddresses,
       };
 
       // Add optional parameters conditionally
+      if (replyToEmailAddresses) {
+        emailRequest.replyTo = replyToEmailAddresses;
+      }
+
       if (html) {
         emailRequest.html = html;
       }
