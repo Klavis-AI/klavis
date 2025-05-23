@@ -20,8 +20,6 @@ EXPOSE 5000
 
 WORKDIR /app
 
-COPY .env.example .env
-
 RUN npm ci --ignore-scripts --omit-dev
 
 ENTRYPOINT ["node", "build/index.js"] 
