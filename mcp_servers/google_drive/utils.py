@@ -121,7 +121,7 @@ def convert_structural_element(element: dict) -> str:
         return md
 
     elif "table" in element:
-        return doc_to_html.convert_structural_element(element)
+        return convert_structural_element(element)
 
     else:
         raise ValueError(f"Unknown document body element type: {element}")

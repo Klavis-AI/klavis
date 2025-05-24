@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-GOOGLE_DRIVE_MCP_SERVER_PORT = int(os.getenv("GOOGLE_DRIVE_MCP_SERVER_PORT", "5001"))
+GOOGLE_DRIVE_MCP_SERVER_PORT = int(os.getenv("GOOGLE_DRIVE_MCP_SERVER_PORT", "5000"))
 
 # Context variable to store the access token for each request
 auth_token_context: ContextVar[str] = ContextVar('auth_token')
@@ -349,18 +349,27 @@ async def search_and_retrieve_documents(
             pagination_token=pagination_token,
         )
 
-        # For now, return just the document metadata since we don't have the document content retrieval logic
-        # In a full implementation, you would retrieve each document's content here
         documents = []
         for item in response["documents"]:
             document = await get_document_content_by_id(item["id"])
 
-            if return_format == DocumentFormat.MARKDOWN:
-                document = convert_document_to_markdown(document)
-            elif return_format == DocumentFormat.HTML:
-                document = convert_document_to_html(document)
+            # Convert document content to requested format
+            if return_format == DocumentFormat.MARKDOWN.value:
+                document_body = convert_document_to_markdown(document)
+            elif return_format == DocumentFormat.HTML.value:
+                document_body = convert_document_to_html(document)
+            else:
+                # Default to markdown if format is not recognized
+                document_body = convert_document_to_markdown(document)
 
-            documents.append(document)
+            # Extract only the useful fields. Otherwise prompt will be too long.
+            filtered_document = {
+                "title": document.get("title", ""),
+                "body": document_body,
+                "documentId": document.get("documentId", item["id"])
+            }
+
+            documents.append(filtered_document)
 
         return {"documents_count": len(documents), "documents": documents}
     except Exception as e:
