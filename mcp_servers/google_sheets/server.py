@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-GOOGLE_SHEETS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_SHEETS_MCP_SERVER_PORT", "5001"))
+GOOGLE_SHEETS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_SHEETS_MCP_SERVER_PORT", "5000"))
 
 # Context variable to store the access token for each request
 auth_token_context: ContextVar[str] = ContextVar('auth_token')

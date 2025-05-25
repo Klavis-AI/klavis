@@ -17,7 +17,7 @@ COPY mcp_servers/google_sheets/models.py .
 COPY mcp_servers/google_sheets/utils.py .
 
 # Expose the port the server runs on
-EXPOSE 5001
+EXPOSE 5000
 
 # Command to run the server
 CMD ["python", "server.py"] 
