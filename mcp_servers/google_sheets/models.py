@@ -6,9 +6,6 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, field_validator, model_validator
 
-# ---------------------------------------------------------------------------- #
-# Google Sheets Models and Enums
-# ---------------------------------------------------------------------------- #
 class CellErrorType(str, Enum):
     """The type of error in a cell
 

@@ -56,6 +56,12 @@ def get_sheets_service(access_token: str):
     credentials = Credentials(token=access_token)
     return build('sheets', 'v4', credentials=credentials)
 
+# This is used for the list_all_sheets tool
+def get_drive_service(access_token: str):
+    """Create Google Drive service with access token."""
+    credentials = Credentials(token=access_token)
+    return build('drive', 'v3', credentials=credentials)
+
 def get_auth_token() -> str:
     """Get the authentication token from context."""
     try:
@@ -192,6 +198,50 @@ async def write_to_cell_tool(
         logger.exception(f"Error executing tool write_to_cell: {e}")
         raise e
 
+async def list_all_sheets_tool() -> Dict[str, Any]:
+    """List all Google Sheets spreadsheets in the user's Google Drive."""
+    logger.info("Executing tool: list_all_sheets")
+    try:
+        access_token = get_auth_token()
+        service = get_drive_service(access_token)
+        
+        # Search for Google Sheets files (mimeType for Google Sheets)
+        query = "mimeType='application/vnd.google-apps.spreadsheet'"
+        
+        results = service.files().list(
+            q=query,
+            fields="files(id,name,createdTime,modifiedTime,owners,webViewLink)",
+            orderBy="modifiedTime desc"
+        ).execute()
+        
+        files = results.get('files', [])
+        
+        spreadsheets = []
+        for file in files:
+            spreadsheet_info = {
+                "id": file.get('id'),
+                "name": file.get('name'),
+                "createdTime": file.get('createdTime'),
+                "modifiedTime": file.get('modifiedTime'),
+                "webViewLink": file.get('webViewLink'),
+                "owners": [owner.get('displayName', owner.get('emailAddress', 'Unknown')) 
+                          for owner in file.get('owners', [])]
+            }
+            spreadsheets.append(spreadsheet_info)
+        
+        return {
+            "spreadsheets": spreadsheets,
+            "total_count": len(spreadsheets)
+        }
+        
+    except HttpError as e:
+        logger.error(f"Google Drive API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool list_all_sheets: {e}")
+        raise e
+
 @click.command()
 @click.option("--port", default=GOOGLE_SHEETS_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -284,6 +334,14 @@ def main(
                     },
                 },
             ),
+            types.Tool(
+                name="google_sheets_list_all_sheets",
+                description="List all Google Sheets spreadsheets in the user's Google Drive.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -362,6 +420,24 @@ def main(
             
             try:
                 result = await write_to_cell_tool(spreadsheet_id, column, row, value, sheet_name)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "google_sheets_list_all_sheets":
+            try:
+                result = await list_all_sheets_tool()
                 return [
                     types.TextContent(
                         type="text",
