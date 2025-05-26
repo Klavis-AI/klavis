@@ -143,7 +143,7 @@ function getPool() {
 }
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
@@ -154,16 +154,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   if (!databaseUrl) {
     console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
   const resourceBaseUrl = new URL(databaseUrl);
@@ -264,18 +254,6 @@ app.post("/messages", async (req, res) => {
 
     if (!databaseUrl) {
       console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Postgres database URL is missing. Have you set the Postgres database URL?" }));
-      return;
     }
 
     const resourceBaseUrl = new URL(databaseUrl);

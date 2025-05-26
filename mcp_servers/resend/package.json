@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Klavis AI",
+  "license": "MIT",
+  "description": "Klavis MCP server for Resend",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.1",
     "@react-email/components": "^0.0.33",

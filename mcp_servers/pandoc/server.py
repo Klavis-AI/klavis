@@ -1,26 +1,37 @@
-from mcp.server.fastmcp import FastMCP
-import pypandoc
-from google.cloud import storage
-from google.cloud.exceptions import NotFound
+import os
 import logging
-from dotenv import load_dotenv
+import contextlib
 import uuid
 import tempfile
+from collections.abc import AsyncIterator
 from typing import Annotated
-from pydantic import Field
+
+import click
+import pypandoc
 import datetime
 import google.auth
 from google.auth.transport import requests
-import os
+from google.cloud import storage
+from google.cloud.exceptions import NotFound
+from dotenv import load_dotenv
+import mcp.types as types
+from mcp.server.lowlevel import Server
+from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
+from pydantic import Field
 
 load_dotenv()
 
-logger = logging.getLogger(__name__)
-mcp = FastMCP(
-    "Pandoc",
-    instructions="Using pandoc to convert markdown text to pdf, microsoft word and html files.",
-    port=5000,
-)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("pandoc-mcp-server")
+
+# Default port configuration
+PANDOC_MCP_SERVER_PORT = int(os.getenv("PANDOC_MCP_SERVER_PORT", "5000"))
 
 
 def upload_blob_and_get_signed_url(
@@ -78,25 +89,17 @@ def upload_blob_and_get_signed_url(
         return None
 
 
-@mcp.tool()
-async def convert_markdown_to_file(
-    markdown_text: Annotated[
-        str, Field(description="The text in markdown format to convert.")
-    ],
-    output_format: Annotated[
-        str,
-        Field(
-            description="The format to convert the markdown to. Must be one of pdf, docx, doc, html, html5."
-        ),
-    ],
-) -> str:
-    """Convert markdown text to pdf, microsoft word and html files. Returns the url of the converted file.
-    For pdf, it uses pdflatex to generate the pdf file. Therefore, for pdf please DO NOT use emoji in the markdown text.
-
+async def convert_markdown_to_file(markdown_text: str, output_format: str) -> str:
+    """
+    Convert markdown text to pdf, microsoft word and html files.
+    
+    Args:
+        markdown_text: The text in markdown format to convert
+        output_format: The format to convert the markdown to (pdf, docx, doc, html, html5)
+        
     Returns:
         The converted file url.
     """
-
     if output_format not in ["pdf", "docx", "doc", "html", "html5"]:
         return f"Unsupported format. Only pdf, docx, doc, html and html5 are supported."
     with tempfile.NamedTemporaryFile(
@@ -118,8 +121,161 @@ async def convert_markdown_to_file(
     return url
 
 
-def main():
-    mcp.run(transport="sse")
+@click.command()
+@click.option("--port", default=PANDOC_MCP_SERVER_PORT, help="Port to listen on for HTTP")
+@click.option(
+    "--log-level",
+    default="INFO",
+    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+)
+@click.option(
+    "--json-response",
+    is_flag=True,
+    default=False,
+    help="Enable JSON responses for StreamableHTTP instead of SSE streams",
+)
+def main(
+    port: int,
+    log_level: str,
+    json_response: bool,
+) -> int:
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper()),
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    # Create the MCP server instance
+    app = Server(
+        "pandoc-mcp-server",
+        instructions="Using pandoc to convert markdown text to pdf, microsoft word and html files.",
+    )
+
+    @app.list_tools()
+    async def list_tools() -> list[types.Tool]:
+        return [
+            types.Tool(
+                name="convert_markdown_to_file",
+                description="Convert markdown text to pdf, microsoft word and html files. Returns the url of the converted file.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["markdown_text", "output_format"],
+                    "properties": {
+                        "markdown_text": {
+                            "type": "string",
+                            "description": "The text in markdown format to convert."
+                        },
+                        "output_format": {
+                            "type": "string",
+                            "description": "The format to convert the markdown to. Must be one of pdf, docx, doc, html, html5."
+                        }
+                    },
+                },
+            )
+        ]
+
+    @app.call_tool()
+    async def call_tool(
+        name: str, arguments: dict
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        ctx = app.request_context
+        
+        if name == "convert_markdown_to_file":
+            markdown_text = arguments.get("markdown_text")
+            output_format = arguments.get("output_format")
+            
+            if not markdown_text or not output_format:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: Both markdown_text and output_format parameters are required",
+                    )
+                ]
+                
+            try:
+                result = await convert_markdown_to_file(markdown_text, output_format)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        return [
+            types.TextContent(
+                type="text",
+                text=f"Unknown tool: {name}",
+            )
+        ]
+        
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
+        async with sse.connect_sse(
+            request.scope, request.receive, request._send
+        ) as streams:
+            await app.run(
+                streams[0], streams[1], app.create_initialization_options()
+            )
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        logger.info("Handling StreamableHTTP request")
+        await session_manager.handle_request(scope, receive, send)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
+
+    # Create an ASGI application with routes for both transports
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
+    import uvicorn
+
+    uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+
+    return 0
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ import { AsyncLocalStorage } from "async_hooks";
 interface ListChannelsArgs {
   limit?: number;
   cursor?: string;
+  types?: string;
 }
 
 interface PostMessageArgs {
@@ -56,10 +57,20 @@ interface GetUserProfileArgs {
   user_id: string;
 }
 
+interface SearchMessagesArgs {
+  query: string;
+  channel_ids?: string[];
+  sort?: "score" | "timestamp";
+  sort_dir?: "asc" | "desc";
+  count?: number;
+  cursor?: string;
+  highlight?: boolean;
+}
+
 // Tool definitions
 const listChannelsTool: Tool = {
   name: "slack_list_channels",
-  description: "List public channels in the workspace with pagination",
+  description: "List channels in the workspace with pagination",
   inputSchema: {
     type: "object",
     properties: {
@@ -72,6 +83,11 @@ const listChannelsTool: Tool = {
       cursor: {
         type: "string",
         description: "Pagination cursor for next page of results",
+      },
+      types: {
+        type: "string",
+        description: "Comma-separated list of channel types to include: public_channel, private_channel, mpim, im (direct messages). Default is public_channel.",
+        default: "public_channel",
       },
     },
   },
@@ -216,6 +232,54 @@ const getUserProfileTool: Tool = {
   },
 };
 
+const searchMessagesTool: Tool = {
+  name: "slack_search_messages",
+  description: "Search for messages in the workspace based on a query",
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "The search query string. You can use Slack's search operators like 'in:#channel', 'from:@user', 'before:YYYY-MM-DD', 'after:YYYY-MM-DD', etc.",
+      },
+      channel_ids: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        description: "Optional list of channel IDs to search within. If not provided, searches across all accessible channels.",
+      },
+      sort: {
+        type: "string",
+        enum: ["score", "timestamp"],
+        description: "Sort results by relevance (score) or date (timestamp). Default is score.",
+        default: "score",
+      },
+      sort_dir: {
+        type: "string",
+        enum: ["asc", "desc"],
+        description: "Sort direction. Default is desc (newest/most relevant first).",
+        default: "desc",
+      },
+      count: {
+        type: "number",
+        description: "Number of results to return per page (default 20, max 100)",
+        default: 20,
+      },
+      cursor: {
+        type: "string", 
+        description: "Pagination cursor for next page of results",
+      },
+      highlight: {
+        type: "boolean",
+        description: "Whether to include highlighting of matched terms",
+        default: true,
+      },
+    },
+    required: ["query"],
+  },
+};
+
 class SlackClient {
   private botHeaders: { Authorization: string; "Content-Type": string };
 
@@ -237,10 +301,10 @@ class SlackClient {
   }
 
   // Update existing methods to call refreshToken before making API calls
-  async getChannels(limit: number = 100, cursor?: string): Promise<any> {
+  async getChannels(limit: number = 100, cursor?: string, types: string = "public_channel"): Promise<any> {
     this.refreshToken();
     const params = new URLSearchParams({
-      types: "public_channel",
+      types: types,
       exclude_archived: "true",
       limit: Math.min(limit, 200).toString(),
       team_id: process.env.SLACK_TEAM_ID!,
@@ -423,6 +487,49 @@ class SlackClient {
 
     return data;
   }
+
+  async searchMessages(args: SearchMessagesArgs): Promise<any> {
+    this.refreshToken();
+    const params = new URLSearchParams({
+      query: args.query,
+      count: args.count ? Math.min(args.count, 100).toString() : "20",
+      highlight: args.highlight ? "1" : "0",
+      team_id: process.env.SLACK_TEAM_ID!,
+    });
+
+    if (args.sort) {
+      params.append("sort", args.sort);
+    }
+
+    if (args.sort_dir) {
+      params.append("sort_dir", args.sort_dir);
+    }
+
+    if (args.cursor) {
+      params.append("cursor", args.cursor);
+    }
+
+    // If channel_ids are provided, construct a channel filter for the query
+    if (args.channel_ids && args.channel_ids.length > 0) {
+      // We need to modify the query to include channel filters
+      // This is better than using the channel parameter which is deprecated
+      const channelsFilter = args.channel_ids.map(id => `in:${id}`).join(" ");
+      params.set("query", `${args.query} ${channelsFilter}`);
+    }
+
+    const response = await fetch(
+      `https://slack.com/api/search.messages?${params}`,
+      { headers: this.botHeaders },
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(`Slack API error: ${data.error}`);
+    }
+
+    return data;
+  }
 }
 
 const getSlackMcpServer = () => {
@@ -450,6 +557,7 @@ const getSlackMcpServer = () => {
           getThreadRepliesTool,
           getUsersTool,
           getUserProfileTool,
+          searchMessagesTool,
         ],
       };
     }
@@ -478,6 +586,7 @@ const getSlackMcpServer = () => {
             const response = await slackClient.getChannels(
               args.limit,
               args.cursor,
+              args.types,
             );
             return {
               content: [{ type: "text", text: JSON.stringify(response) }],
@@ -586,6 +695,17 @@ const getSlackMcpServer = () => {
             };
           }
 
+          case "slack_search_messages": {
+            const args = request.params.arguments as unknown as SearchMessagesArgs;
+            if (!args.query) {
+              throw new Error("Missing required argument: query");
+            }
+            const response = await slackClient.searchMessages(args);
+            return {
+              content: [{ type: "text", text: JSON.stringify(response) }],
+            };
+          }
+
           default:
             throw new Error(`Unknown tool: ${request.params.name}`);
         }
@@ -623,7 +743,7 @@ function getSlackToken() {
 }
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
@@ -634,16 +754,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   if (!slack_token) {
     console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
     const server = getSlackMcpServer();
@@ -734,18 +844,6 @@ app.post("/messages", async (req, res) => {
 
     if (!slack_token) {
       console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, Slack token is missing. Have you set the Slack token?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, Slack token is missing. Have you set the Slack token?" }));
-      return;
     }
 
     asyncLocalStorage.run({ slack_token }, async () => {

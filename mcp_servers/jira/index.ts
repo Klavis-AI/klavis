@@ -252,6 +252,11 @@ async function createJiraClient(authToken: string): Promise<JiraClient> {
           throw new Error(`Jira API error (${response.status}): ${errorText}`);
         }
 
+        // Handle 204 No Content responses
+        if (response.status === 204) {
+          return {} as T;
+        }
+
         return response.json() as Promise<T>;
       },
     };
@@ -1135,10 +1140,20 @@ const getJiraMcpServer = () => {
 
             // Add assignee if provided
             if (args.assignee) {
-              // Try to determine if it's an account ID, email, or name
-              if (args.assignee.includes('@')) {
+              if (args.assignee.toLowerCase() === 'currentuser()') {
+                try {
+                  const currentUser = await jira.fetch<any>('/rest/api/3/myself');
+                  if (currentUser && currentUser.accountId) {
+                    payload.fields.assignee = { accountId: currentUser.accountId };
+                  } else {
+                    throw new Error("Failed to fetch current user's accountId for assignee.");
+                  }
+                } catch (e) {
+                  throw new Error(`Error resolving currentUser for assignee: ${(e as Error).message}`);
+                }
+              } else if (args.assignee.includes('@')) {
                 payload.fields.assignee = { emailAddress: args.assignee };
-              } else if (args.assignee.startsWith('user:') || args.assignee.length > 20) {
+              } else if (args.assignee.startsWith('user:') || args.assignee.length > 20) { // Heuristic for accountId
                 payload.fields.assignee = { accountId: args.assignee };
               } else {
                 payload.fields.assignee = { name: args.assignee };
@@ -1191,6 +1206,31 @@ const getJiraMcpServer = () => {
               throw new Error(`Invalid JSON in fields: ${(e as Error).message}`);
             }
 
+            // Resolve currentUser() for assignee
+            if (fieldsObj.assignee) {
+              let assigneeValue = fieldsObj.assignee;
+
+              // Check if assignee is provided as a string "currentUser()"
+              // or as an object like { "id": "currentUser()" } or { "name": "currentUser()" }
+              if (
+                (typeof assigneeValue === 'string' && assigneeValue.toLowerCase() === 'currentuser()') ||
+                (typeof assigneeValue === 'object' && assigneeValue !== null &&
+                  (String(assigneeValue.id).toLowerCase() === 'currentuser()' || String(assigneeValue.name).toLowerCase() === 'currentuser()')
+                )
+              ) {
+                try {
+                  const currentUser = await jira.fetch<any>('/rest/api/3/myself');
+                  if (currentUser && currentUser.accountId) {
+                    fieldsObj.assignee = { accountId: currentUser.accountId };
+                  } else {
+                    throw new Error("Failed to fetch current user's accountId.");
+                  }
+                } catch (e) {
+                  throw new Error(`Error resolving currentUser for assignee: ${(e as Error).message}`);
+                }
+              }
+            }
+
             // Construct issue update payload
             const payload: any = {
               fields: fieldsObj,
@@ -1228,17 +1268,14 @@ const getJiraMcpServer = () => {
             }
 
             // Only send request if there are fields to update
+            let responseText = "";
             if (Object.keys(payload.fields).length > 0) {
-              await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
+              const response = await jira.fetch<any>(`/rest/api/3/issue/${args.issue_key}`, {
                 method: 'PUT',
                 body: JSON.stringify(payload),
               });
-            }
 
-            // Handle attachments if provided
-            if (args.attachments) {
-              // TODO: Implement file attachment functionality
-              // This would require file reading and multipart form data uploads
+              responseText = JSON.stringify(response);
             }
 
             // Get updated issue to return in response
@@ -1350,7 +1387,7 @@ const getJiraMcpServer = () => {
 };
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
@@ -1361,16 +1398,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   if (!authToken) {
     console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized. Have you authenticated?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
   const jiraClient = await createJiraClient(authToken);
@@ -1459,18 +1486,6 @@ app.post("/messages", async (req, res) => {
 
     if (!authToken) {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized. Have you authenticated?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized. Have you authenticated?" }));
-      return;
     }
 
     const jiraClient = await createJiraClient(authToken);

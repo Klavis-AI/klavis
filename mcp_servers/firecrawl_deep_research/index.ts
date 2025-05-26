@@ -303,7 +303,7 @@ const getFirecrawlDeepResearchMcpServer = () => {
 }
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
@@ -316,16 +316,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
     if (!apiKey && !FIRECRAWL_API_URL) {
         console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
-        const errorResponse = {
-            jsonrpc: '2.0' as '2.0',
-            error: {
-                code: -32001,
-                message: 'Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?'
-            },
-            id: 0
-        };
-        res.status(401).json(errorResponse);
-        return;
     }
 
     // Added: Instantiate client within request context
@@ -413,18 +403,6 @@ app.post("/messages", async (req, res) => {
 
         if (!apiKey && !FIRECRAWL_API_URL) {
             console.error('Error: Firecrawl API key is missing. Provide it via x-auth-token header.');
-            const errorResponse = {
-                jsonrpc: '2.0' as '2.0',
-                error: {
-                  code: -32001,
-                  message: 'Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?'
-                },
-                id: 0
-             };
-             await transport.send(errorResponse);
-             await transport.close();
-             res.status(401).end(JSON.stringify({ error: "Unauthorized, Firecrawl API key is missing. Have you set the firecrawl API key?" }));
-            return;
         }
 
         const firecrawlClient = new FirecrawlApp({

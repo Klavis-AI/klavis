@@ -99,6 +99,8 @@ class MCPClient:
                 })
                 final_text.append(f"[Tool call result: {result.content[0].text}]")
 
+                logger.info(f"Tool call result: {result.content[0].text}")
+
                 # Get next response from Claude
                 response = self.anthropic.messages.create(
                     model="claude-3-5-sonnet-20241022",

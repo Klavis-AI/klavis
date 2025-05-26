@@ -290,27 +290,17 @@ function getClient() {
 }
 
 const app = express();
-app.use(express.json());
+
 
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string;
+  const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string || '';
 
   if (!auth_token) {
     console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
-    const errorResponse = {
-      jsonrpc: '2.0' as '2.0',
-      error: {
-        code: -32001,
-        message: 'Unauthorized, WordPress credentials are missing. Have you set the WordPress credentials?'
-      },
-      id: 0
-    };
-    res.status(401).json(errorResponse);
-    return;
   }
 
 
@@ -400,22 +390,10 @@ app.post("/messages", async (req, res) => {
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
     // Use WordPress credentials from environment or headers
-    const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string;
+    const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string || '';
 
     if (!auth_token) {
       console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
-      const errorResponse = {
-        jsonrpc: '2.0' as '2.0',
-        error: {
-          code: -32001,
-          message: 'Unauthorized, WordPress credentials are missing. Have you set the WordPress credentials?'
-        },
-        id: 0
-      };
-      await transport.send(errorResponse);
-      await transport.close();
-      res.status(401).end(JSON.stringify({ error: "Unauthorized, WordPress credentials are missing. Have you set the WordPress credentials?" }));
-      return;
     }
 
     asyncLocalStorage.run({
