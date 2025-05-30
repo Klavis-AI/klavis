@@ -92,6 +92,7 @@ func runServer() error {
 	streamableHttpServer := server.NewStreamableHTTPServer(ghServer,
 		server.WithHTTPContextFunc(contextFunc),
 		server.WithStreamableHTTPServer(httpServer),
+		server.WithStateLess(true),
 	)
 
 	// Register handlers on different paths
