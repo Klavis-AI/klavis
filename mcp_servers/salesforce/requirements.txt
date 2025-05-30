@@ -1,0 +1,11 @@
+mcp>=1.8.1
+pydantic
+fastapi
+uvicorn[standard]
+python-dotenv
+typing-extensions
+aiohttp
+graphql-core
+click
+starlette
+requests 
