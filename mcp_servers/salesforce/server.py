@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5001"))
+SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5000"))
 
 # Context variable to store the Salesforce connection for each request
 salesforce_connection_context: ContextVar[Salesforce] = ContextVar('salesforce_connection')
