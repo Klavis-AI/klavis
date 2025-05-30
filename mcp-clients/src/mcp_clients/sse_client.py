@@ -79,6 +79,7 @@ class MCPClient:
                 # Execute tool call
                 result = await self.session.call_tool(tool_name, tool_args)
                 final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+                logger.info(f"calling tool {tool_name} with args {tool_args}")
 
                 messages.append({
                     "role": "assistant",
