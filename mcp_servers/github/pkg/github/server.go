@@ -124,7 +124,8 @@ func GetMe(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mc
 // It returns the value, a boolean indicating if the parameter was present, and an error if the type is wrong.
 func OptionalParamOK[T any](r mcp.CallToolRequest, p string) (value T, ok bool, err error) {
 	// Check if the parameter is present in the request
-	val, exists := r.Params.Arguments[p]
+	args := r.GetArguments()
+	val, exists := args[p]
 	if !exists {
 		// Not present, return zero value, false, no error
 		return
@@ -159,21 +160,22 @@ func requiredParam[T comparable](r mcp.CallToolRequest, p string) (T, error) {
 	var zero T
 
 	// Check if the parameter is present in the request
-	if _, ok := r.Params.Arguments[p]; !ok {
+	args := r.GetArguments()
+	if _, ok := args[p]; !ok {
 		return zero, fmt.Errorf("missing required parameter: %s", p)
 	}
 
 	// Check if the parameter is of the expected type
-	if _, ok := r.Params.Arguments[p].(T); !ok {
+	if _, ok := args[p].(T); !ok {
 		return zero, fmt.Errorf("parameter %s is not of type %T", p, zero)
 	}
 
-	if r.Params.Arguments[p].(T) == zero {
+	if args[p].(T) == zero {
 		return zero, fmt.Errorf("missing required parameter: %s", p)
 
 	}
 
-	return r.Params.Arguments[p].(T), nil
+	return args[p].(T), nil
 }
 
 // RequiredInt is a helper function that can be used to fetch a requested parameter from the request.
@@ -197,16 +199,17 @@ func OptionalParam[T any](r mcp.CallToolRequest, p string) (T, error) {
 	var zero T
 
 	// Check if the parameter is present in the request
-	if _, ok := r.Params.Arguments[p]; !ok {
+	args := r.GetArguments()
+	if _, ok := args[p]; !ok {
 		return zero, nil
 	}
 
 	// Check if the parameter is of the expected type
-	if _, ok := r.Params.Arguments[p].(T); !ok {
-		return zero, fmt.Errorf("parameter %s is not of type %T, is %T", p, zero, r.Params.Arguments[p])
+	if _, ok := args[p].(T); !ok {
+		return zero, fmt.Errorf("parameter %s is not of type %T, is %T", p, zero, args[p])
 	}
 
-	return r.Params.Arguments[p].(T), nil
+	return args[p].(T), nil
 }
 
 // OptionalIntParam is a helper function that can be used to fetch a requested parameter from the request.
@@ -240,11 +243,12 @@ func OptionalIntParamWithDefault(r mcp.CallToolRequest, p string, d int) (int, e
 // 2. If it is present, iterates the elements and checks each is a string
 func OptionalStringArrayParam(r mcp.CallToolRequest, p string) ([]string, error) {
 	// Check if the parameter is present in the request
-	if _, ok := r.Params.Arguments[p]; !ok {
+	args := r.GetArguments()
+	if _, ok := args[p]; !ok {
 		return []string{}, nil
 	}
 
-	switch v := r.Params.Arguments[p].(type) {
+	switch v := args[p].(type) {
 	case nil:
 		return []string{}, nil
 	case []string:
@@ -260,7 +264,7 @@ func OptionalStringArrayParam(r mcp.CallToolRequest, p string) ([]string, error)
 		}
 		return strSlice, nil
 	default:
-		return []string{}, fmt.Errorf("parameter %s could not be coerced to []string, is %T", p, r.Params.Arguments[p])
+		return []string{}, fmt.Errorf("parameter %s could not be coerced to []string, is %T", p, args[p])
 	}
 }
 

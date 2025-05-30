@@ -811,7 +811,7 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 			}
 
 			// Add comments if provided
-			if commentsObj, ok := request.Params.Arguments["comments"].([]interface{}); ok && len(commentsObj) > 0 {
+			if commentsObj, ok := request.GetArguments()["comments"].([]interface{}); ok && len(commentsObj) > 0 {
 				comments := []*github.DraftReviewComment{}
 
 				for _, c := range commentsObj {

@@ -67,7 +67,7 @@ If you prefer not to use Docker, you can run the server directly using Go.
     ```
 5.  **Run the Server:**
     ```bash
-    go run sse_server.go
+    go run server.go
     ```
     The server will load the `GITHUB_AUTH_TOKEN` from the `.env` file in the current directory and start listening on port 5000 (or the port specified in `.env`).
 

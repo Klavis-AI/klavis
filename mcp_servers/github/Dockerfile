@@ -13,7 +13,7 @@ RUN go mod download
 COPY mcp_servers/github/ ./
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o sse_server sse_server.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o server server.go
 
 # Create a minimal production image
 FROM alpine:3.19
@@ -24,10 +24,10 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/sse_server .
+COPY --from=builder /app/server .
 
 # Expose the default port
 EXPOSE 5000
 
 # Run the server
-CMD ["./sse_server"] 
+CMD ["./server"] 
