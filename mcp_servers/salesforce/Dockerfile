@@ -14,8 +14,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the server code
 COPY mcp_servers/salesforce/server.py .
 
-COPY mcp_servers/salesforce/.env.example .env
-
 # Expose the port the server runs on
 EXPOSE 5001
 

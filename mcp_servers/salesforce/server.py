@@ -3,7 +3,7 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 from contextvars import ContextVar
 
 import click
@@ -16,7 +16,8 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
-import aiohttp
+from simple_salesforce import Salesforce
+from simple_salesforce.exceptions import SalesforceError
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -26,206 +27,181 @@ load_dotenv()
 
 SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5001"))
 
-# Context variable to store the auth data for each request
-auth_context: ContextVar[Dict[str, Any]] = ContextVar('auth_context')
+# Context variable to store the Salesforce connection for each request
+salesforce_connection_context: ContextVar[Salesforce] = ContextVar('salesforce_connection')
 
-def get_auth_context() -> Dict[str, Any]:
-    """Get the authentication context from context."""
+def get_salesforce_connection(access_token: str, instance_url: str) -> Salesforce:
+    """Create Salesforce connection with access token."""
+    return Salesforce(instance_url=instance_url, session_id=access_token)
+
+def get_salesforce_conn() -> Salesforce:
+    """Get the Salesforce connection from context."""
     try:
-        return auth_context.get()
+        return salesforce_connection_context.get()
     except LookupError:
-        raise RuntimeError("Authentication context not found in request context")
+        raise RuntimeError("Salesforce connection not found in request context")
 
-async def make_salesforce_graphql_request(instance_url: str, access_token: str, query: str, variables: Optional[Dict] = None, operation_name: Optional[str] = None) -> Dict[str, Any]:
-    """Make a GraphQL request to Salesforce."""
-    graphql_endpoint = f"{instance_url}/services/data/v60.0/graphql"
-    
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/graphql-response+json, application/json'
-    }
-    
-    payload = {"query": query}
-    if variables:
-        payload["variables"] = variables
-    if operation_name:
-        payload["operationName"] = operation_name
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.post(graphql_endpoint, json=payload, headers=headers) as response:
-            if response.status >= 400:
-                error_text = await response.text()
-                raise RuntimeError(f"Salesforce GraphQL API Error ({response.status}): {error_text}")
+async def execute_soql_query(query: str) -> Dict[str, Any]:
+    """Execute a SOQL query on Salesforce."""
+    logger.info(f"Executing tool: execute_soql_query with query: {query}")
+    try:
+        sf = get_salesforce_conn()
+        result = sf.query(query)
+        return dict(result)
+    except SalesforceError as e:
+        logger.error(f"Salesforce API error: {e}")
+        raise RuntimeError(f"Salesforce API Error: {str(e)}")
+    except Exception as e:
+        logger.exception(f"Error executing SOQL query: {e}")
+        raise e
+
+async def execute_tooling_query(query: str) -> Dict[str, Any]:
+    """Execute a query against the Salesforce Tooling API."""
+    logger.info(f"Executing tool: execute_tooling_query with query: {query}")
+    try:
+        sf = get_salesforce_conn()
+        result = sf.toolingexecute(f"query/?q={query}")
+        return dict(result)
+    except SalesforceError as e:
+        logger.error(f"Salesforce Tooling API error: {e}")
+        raise RuntimeError(f"Salesforce Tooling API Error: {str(e)}")
+    except Exception as e:
+        logger.exception(f"Error executing tooling query: {e}")
+        raise e
+
+async def describe_object(object_name: str, detailed: bool = False) -> Dict[str, Any]:
+    """Get detailed metadata about a Salesforce object."""
+    logger.info(f"Executing tool: describe_object with object_name: {object_name}")
+    try:
+        sf = get_salesforce_conn()
+        sobject = getattr(sf, object_name)
+        result = sobject.describe()
+        
+        if detailed and object_name.endswith('__c'):
+            # For custom objects, get additional metadata if requested
+            metadata_result = sf.restful(f"sobjects/{object_name}/describe/")
+            return {
+                "describe": dict(result),
+                "metadata": metadata_result
+            }
+        
+        return dict(result)
+    except SalesforceError as e:
+        logger.error(f"Salesforce API error: {e}")
+        raise RuntimeError(f"Salesforce API Error: {str(e)}")
+    except Exception as e:
+        logger.exception(f"Error describing object: {e}")
+        raise e
+
+async def create_record(object_type: str, record_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a new record in Salesforce for any object type."""
+    logger.info(f"Executing tool: create_record with object_type: {object_type}")
+    try:
+        sf = get_salesforce_conn()
+        
+        # Get the SObject type dynamically
+        sobject = getattr(sf, object_type)
+        
+        # Create the record
+        result = sobject.create(record_data)
+        
+        if result.get('success'):
+            return {
+                "success": True,
+                "id": result.get('id'),
+                "message": f"{object_type} record created successfully",
+                "created_record": {
+                    "id": result.get('id'),
+                    "object_type": object_type,
+                    "data": record_data
+                }
+            }
+        else:
+            return {
+                "success": False,
+                "errors": result.get('errors', []),
+                "message": f"Failed to create {object_type} record"
+            }
             
-            result = await response.json()
-            print(f"----- result: {result}")
-            return result
-
-async def search_records(object_type: str, search_term: str, fields: Optional[List[str]] = None, limit: int = 10) -> Dict[str, Any]:
-    """Search for records using GraphQL query."""
-    logger.info(f"Executing tool: search_records with object_type: {object_type}, search_term: {search_term}")
-    
-    try:
-        auth_data = get_auth_context()
-        instance_url = auth_data.get('instance_url')
-        access_token = auth_data.get('access_token')
-        
-        if not instance_url or not access_token:
-            raise RuntimeError("Missing instance_url or access_token in authentication context")
-        
-        # Default fields if none provided
-        if not fields:
-            fields = ["Id", "Name"] if object_type != "User" else ["Id", "Name", "Email"]
-        
-        fields_str = " ".join(fields)
-        
-        # Build GraphQL query for search
-        query = f"""
-        query SearchRecords($searchTerm: String!, $limit: Int!) {{
-            uiapi {{
-                query {{
-                    {object_type}(
-                        where: {{ Name: {{ like: $searchTerm }} }}
-                        first: $limit
-                    ) {{
-                        edges {{
-                            node {{
-                                {fields_str}
-                            }}
-                        }}
-                        totalCount
-                    }}
-                }}
-            }}
-        }}
-        """
-        
-        variables = {
-            "searchTerm": f"%{search_term}%",
-            "limit": limit
+    except SalesforceError as e:
+        logger.error(f"Salesforce API error: {e}")
+        error_msg = str(e)
+        # Try to extract more meaningful error information
+        if hasattr(e, 'content') and e.content:
+            try:
+                error_content = json.loads(e.content[0]['message']) if isinstance(e.content, list) else e.content
+                if isinstance(error_content, dict) and 'message' in error_content:
+                    error_msg = error_content['message']
+            except:
+                pass
+        return {
+            "success": False,
+            "error": f"Salesforce API Error: {error_msg}",
+            "message": f"Failed to create {object_type} record"
         }
-        
-        result = await make_salesforce_graphql_request(instance_url, access_token, query, variables)
-        return result
-        
-    except Exception as e:
-        logger.exception(f"Error executing tool search_records: {e}")
-        raise e
-
-async def get_record_by_id(object_type: str, record_id: str, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get a specific record by ID using GraphQL."""
-    logger.info(f"Executing tool: get_record_by_id with object_type: {object_type}, record_id: {record_id}")
-    
-    try:
-        auth_data = get_auth_context()
-        instance_url = auth_data.get('instance_url')
-        access_token = auth_data.get('access_token')
-        
-        if not instance_url or not access_token:
-            raise RuntimeError("Missing instance_url or access_token in authentication context")
-        
-        # Default fields if none provided
-        if not fields:
-            if object_type == "Account":
-                fields = ["Id", "Name", "Type", "Industry", "Website", "Phone"]
-            elif object_type == "Contact":
-                fields = ["Id", "FirstName", "LastName", "Email", "Phone", "AccountId"]
-            elif object_type == "Lead":
-                fields = ["Id", "FirstName", "LastName", "Company", "Email", "Phone", "Status"]
-            elif object_type == "Opportunity":
-                fields = ["Id", "Name", "Amount", "StageName", "CloseDate", "AccountId"]
-            else:
-                fields = ["Id", "Name"]
-        
-        fields_str = " ".join(fields)
-        
-        # Build GraphQL query for specific record
-        query = f"""
-        query GetRecord($recordId: ID!) {{
-            uiapi {{
-                query {{
-                    {object_type}(where: {{ Id: {{ eq: $recordId }} }}) {{
-                        edges {{
-                            node {{
-                                {fields_str}
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }}
-        """
-        
-        variables = {"recordId": record_id}
-        
-        result = await make_salesforce_graphql_request(instance_url, access_token, query, variables)
-        return result
-        
-    except Exception as e:
-        logger.exception(f"Error executing tool get_record_by_id: {e}")
-        raise e
-
-async def query_related_records(parent_object_type: str, parent_id: str, relationship_name: str, child_object_type: str, fields: Optional[List[str]] = None, limit: int = 10) -> Dict[str, Any]:
-    """Query related records using GraphQL."""
-    logger.info(f"Executing tool: query_related_records with parent: {parent_object_type}:{parent_id}, relationship: {relationship_name}")
-    
-    try:
-        auth_data = get_auth_context()
-        instance_url = auth_data.get('instance_url')
-        access_token = auth_data.get('access_token')
-        
-        if not instance_url or not access_token:
-            raise RuntimeError("Missing instance_url or access_token in authentication context")
-        
-        # Default fields if none provided
-        if not fields:
-            if child_object_type == "Contact":
-                fields = ["Id", "FirstName", "LastName", "Email", "Phone"]
-            elif child_object_type == "Opportunity":
-                fields = ["Id", "Name", "Amount", "StageName", "CloseDate"]
-            elif child_object_type == "Case":
-                fields = ["Id", "Subject", "Status", "Priority", "CreatedDate"]
-            else:
-                fields = ["Id", "Name"]
-        
-        fields_str = " ".join(fields)
-        
-        # Build GraphQL query for related records
-        query = f"""
-        query GetRelatedRecords($parentId: ID!, $limit: Int!) {{
-            uiapi {{
-                query {{
-                    {parent_object_type}(where: {{ Id: {{ eq: $parentId }} }}) {{
-                        edges {{
-                            node {{
-                                Id
-                                {relationship_name}(first: $limit) {{
-                                    edges {{
-                                        node {{
-                                            {fields_str}
-                                        }}
-                                    }}
-                                    totalCount
-                                }}
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }}
-        """
-        
-        variables = {
-            "parentId": parent_id,
-            "limit": limit
+    except AttributeError as e:
+        logger.error(f"Invalid object type: {object_type}")
+        return {
+            "success": False,
+            "error": f"Invalid object type: {object_type}. Please check the object API name.",
+            "message": f"Object type '{object_type}' not found"
         }
-        
-        result = await make_salesforce_graphql_request(instance_url, access_token, query, variables)
-        return result
-        
     except Exception as e:
-        logger.exception(f"Error executing tool query_related_records: {e}")
+        logger.exception(f"Error creating record: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": f"Failed to create {object_type} record"
+        }
+
+async def retrieve_metadata(metadata_type: str, full_names: list) -> Dict[str, Any]:
+    """Retrieve metadata components from Salesforce."""
+    logger.info(f"Executing tool: retrieve_metadata with type: {metadata_type}")
+    try:
+        sf = get_salesforce_conn()
+        
+        # Valid metadata types
+        valid_types = [
+            'CustomObject', 'Flow', 'FlowDefinition', 'CustomField',
+            'ValidationRule', 'ApexClass', 'ApexTrigger', 'WorkflowRule', 'Layout'
+        ]
+        
+        if metadata_type not in valid_types:
+            raise ValueError(f"Invalid metadata type: {metadata_type}")
+        
+        # Use Tooling API for metadata queries
+        results = []
+        for name in full_names:
+            try:
+                if metadata_type == 'ApexClass':
+                    query = f"SELECT Id, Name, Body FROM ApexClass WHERE Name = '{name}'"
+                elif metadata_type == 'ApexTrigger':
+                    query = f"SELECT Id, Name, Body FROM ApexTrigger WHERE Name = '{name}'"
+                elif metadata_type == 'Flow':
+                    query = f"SELECT Id, MasterLabel, Definition FROM Flow WHERE MasterLabel = '{name}'"
+                else:
+                    # For other types, use general metadata query
+                    query = f"SELECT Id, DeveloperName FROM {metadata_type} WHERE DeveloperName = '{name}'"
+                
+                result = sf.toolingexecute(f"query/?q={query}")
+                results.append({
+                    "name": name,
+                    "type": metadata_type,
+                    "data": dict(result)
+                })
+            except Exception as e:
+                results.append({
+                    "name": name,
+                    "type": metadata_type,
+                    "error": str(e)
+                })
+        
+        return {"results": results}
+    except SalesforceError as e:
+        logger.error(f"Salesforce API error: {e}")
+        raise RuntimeError(f"Salesforce API Error: {str(e)}")
+    except Exception as e:
+        logger.exception(f"Error retrieving metadata: {e}")
         raise e
 
 @click.command()
@@ -259,88 +235,99 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="salesforce_search_records",
-                description="Search for Salesforce records using GraphQL with flexible field selection.",
+                name="salesforce_query",
+                description="Execute a SOQL query on Salesforce",
                 inputSchema={
                     "type": "object",
-                    "required": ["object_type", "search_term"],
+                    "required": ["query"],
                     "properties": {
-                        "object_type": {
+                        "query": {
                             "type": "string",
-                            "description": "The Salesforce object type to search (e.g., Account, Contact, Lead, Opportunity, Case).",
-                        },
-                        "search_term": {
-                            "type": "string",
-                            "description": "The search term to look for in the object's Name field.",
-                        },
-                        "fields": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Optional list of fields to retrieve. Defaults to common fields for each object type.",
-                        },
-                        "limit": {
-                            "type": "integer",
-                            "description": "Maximum number of records to return (default: 10).",
-                            "default": 10,
+                            "description": "SOQL query to execute",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="salesforce_get_record_by_id",
-                description="Retrieve a specific Salesforce record by ID using GraphQL.",
+                name="salesforce_tooling_query",
+                description="Execute a query against the Salesforce Tooling API",
                 inputSchema={
                     "type": "object",
-                    "required": ["object_type", "record_id"],
+                    "required": ["query"],
                     "properties": {
-                        "object_type": {
+                        "query": {
                             "type": "string",
-                            "description": "The Salesforce object type (e.g., Account, Contact, Lead, Opportunity, Case).",
-                        },
-                        "record_id": {
-                            "type": "string",
-                            "description": "The Salesforce record ID (18-character ID).",
-                        },
-                        "fields": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Optional list of fields to retrieve. Defaults to common fields for each object type.",
+                            "description": "Tooling API query to execute",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="salesforce_query_related_records",
-                description="Query related records using GraphQL relationships (e.g., get Contacts for an Account).",
+                name="salesforce_describe_object",
+                description="Get detailed schema and field information for any Salesforce object (standard or custom). Returns field types, relationships, permissions, and object properties.",
                 inputSchema={
                     "type": "object",
-                    "required": ["parent_object_type", "parent_id", "relationship_name", "child_object_type"],
+                    "required": ["object_name"],
                     "properties": {
-                        "parent_object_type": {
+                        "object_name": {
                             "type": "string",
-                            "description": "The parent object type (e.g., Account).",
+                            "description": "API name of the object to describe (e.g., 'Account', 'Contact', 'MyCustomObject__c')",
                         },
-                        "parent_id": {
+                        "detailed": {
+                            "type": "boolean",
+                            "description": "Whether to return additional metadata for custom objects (optional)",
+                            "default": False,
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="salesforce_get_component_source",
+                description="Retrieve the actual source code and definitions of Salesforce components like Apex classes, triggers, flows, and other metadata. This gets the implementation details, not just schema.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["metadata_type", "component_names"],
+                    "properties": {
+                        "metadata_type": {
                             "type": "string",
-                            "description": "The parent record ID.",
+                            "description": "Type of component to retrieve (e.g., 'ApexClass' for classes, 'ApexTrigger' for triggers, 'Flow' for flows)",
+                            "enum": [
+                                "CustomObject",
+                                "Flow",
+                                "FlowDefinition",
+                                "CustomField",
+                                "ValidationRule",
+                                "ApexClass",
+                                "ApexTrigger",
+                                "WorkflowRule",
+                                "Layout"
+                            ],
                         },
-                        "relationship_name": {
-                            "type": "string",
-                            "description": "The relationship name (e.g., Contacts, Opportunities, Cases).",
-                        },
-                        "child_object_type": {
-                            "type": "string",
-                            "description": "The child object type (e.g., Contact, Opportunity, Case).",
-                        },
-                        "fields": {
+                        "component_names": {
                             "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Optional list of fields to retrieve from child records.",
+                            "items": {
+                                "type": "string"
+                            },
+                            "description": "Array of component names to retrieve (e.g., ['AccountTrigger', 'ContactUtils'] for Apex components)",
                         },
-                        "limit": {
-                            "type": "integer",
-                            "description": "Maximum number of related records to return (default: 10).",
-                            "default": 10,
+                    },
+                },
+            ),
+            types.Tool(
+                name="salesforce_create_record",
+                description="Create a new record in Salesforce for any object type (Lead, Contact, Account, Opportunity, Task, Event, Case, Campaign, etc.). This tool handles all standard and custom objects.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["object_type", "record_data"],
+                    "properties": {
+                        "object_type": {
+                            "type": "string",
+                            "description": "API name of the Salesforce object type to create (e.g., 'Lead', 'Contact', 'Account', 'Opportunity', 'Task', 'Event', 'Case', 'Campaign', 'MyCustomObject__c')",
+                        },
+                        "record_data": {
+                            "type": "object",
+                            "description": "Field values for the new record as key-value pairs. Required fields vary by object type. Common examples: Lead needs LastName and Company; Contact needs LastName; Account needs Name; Opportunity needs Name, StageName, and CloseDate.",
+                            "additionalProperties": True,
                         },
                     },
                 },
@@ -351,22 +338,18 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:     
-        if name == "salesforce_search_records":
-            object_type = arguments.get("object_type")
-            search_term = arguments.get("search_term")
-            fields = arguments.get("fields")
-            limit = arguments.get("limit", 10)
-            
-            if not object_type or not search_term:
+        if name == "salesforce_query":
+            query = arguments.get("query")
+            if not query:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: object_type and search_term parameters are required",
+                        text="Error: query parameter is required",
                     )
                 ]
             
             try:
-                result = await search_records(object_type, search_term, fields, limit)
+                result = await execute_soql_query(query)
                 return [
                     types.TextContent(
                         type="text",
@@ -382,21 +365,18 @@ def main(
                     )
                 ]
         
-        elif name == "salesforce_get_record_by_id":
-            object_type = arguments.get("object_type")
-            record_id = arguments.get("record_id")
-            fields = arguments.get("fields")
-            
-            if not object_type or not record_id:
+        elif name == "salesforce_tooling_query":
+            query = arguments.get("query")
+            if not query:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: object_type and record_id parameters are required",
+                        text="Error: query parameter is required",
                     )
                 ]
             
             try:
-                result = await get_record_by_id(object_type, record_id, fields)
+                result = await execute_tooling_query(query)
                 return [
                     types.TextContent(
                         type="text",
@@ -412,24 +392,75 @@ def main(
                     )
                 ]
         
-        elif name == "salesforce_query_related_records":
-            parent_object_type = arguments.get("parent_object_type")
-            parent_id = arguments.get("parent_id")
-            relationship_name = arguments.get("relationship_name")
-            child_object_type = arguments.get("child_object_type")
-            fields = arguments.get("fields")
-            limit = arguments.get("limit", 10)
-            
-            if not all([parent_object_type, parent_id, relationship_name, child_object_type]):
+        elif name == "salesforce_describe_object":
+            object_name = arguments.get("object_name")
+            detailed = arguments.get("detailed", False)
+            if not object_name:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: parent_object_type, parent_id, relationship_name, and child_object_type parameters are required",
+                        text="Error: object_name parameter is required",
                     )
                 ]
             
             try:
-                result = await query_related_records(parent_object_type, parent_id, relationship_name, child_object_type, fields, limit)
+                result = await describe_object(object_name, detailed)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "salesforce_get_component_source":
+            metadata_type = arguments.get("metadata_type")
+            component_names = arguments.get("component_names")
+            if not metadata_type or not component_names:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: metadata_type and component_names parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await retrieve_metadata(metadata_type, component_names)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "salesforce_create_record":
+            object_type = arguments.get("object_type")
+            record_data = arguments.get("record_data")
+            if not object_type or not record_data:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: object_type and record_data parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await create_record(object_type, record_data)
                 return [
                     types.TextContent(
                         type="text",
@@ -458,17 +489,17 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth data from headers
-        instance_url = request.headers.get('x-instance-url')
+        # Extract auth credentials from headers
         access_token = request.headers.get('x-auth-token')
+        instance_url = request.headers.get('x-instance-url')
         
-        if not instance_url or not access_token:
-            logger.error('Error: Salesforce instance URL and access token are required. Provide them via x-instance-url and x-access-token headers.')
-            return Response("Authentication required", status_code=401)
+        if not access_token or not instance_url:
+            logger.error('Error: Salesforce access token and instance URL are required. Provide them via x-auth-token and x-instance-url headers.')
+            return Response("Authentication credentials required", status_code=401)
         
-        # Set the auth context for this request
-        auth_data = {"instance_url": instance_url, "access_token": access_token}
-        token = auth_context.set(auth_data)
+        # Set the Salesforce connection in context for this request
+        sf_conn = get_salesforce_connection(access_token, instance_url)
+        token = salesforce_connection_context.set(sf_conn)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -477,7 +508,7 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            auth_context.reset(token)
+            salesforce_connection_context.reset(token)
         
         return Response()
 
@@ -494,29 +525,29 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth data from headers
+        # Extract auth credentials from headers
         headers = dict(scope.get("headers", []))
-        instance_url = headers.get(b'x-instance-url')
         access_token = headers.get(b'x-auth-token')
+        instance_url = headers.get(b'x-instance-url')
         
-        if instance_url:
-            instance_url = instance_url.decode('utf-8')
         if access_token:
             access_token = access_token.decode('utf-8')
+        if instance_url:
+            instance_url = instance_url.decode('utf-8')
         
-        if not instance_url or not access_token:
-            logger.error('Error: Salesforce instance URL and access token are required. Provide them via x-instance-url and x-access-token headers.')
-            response = Response("Authentication required", status_code=401)
+        if not access_token or not instance_url:
+            logger.error('Error: Salesforce access token and instance URL are required. Provide them via x-auth-token and x-instance-url headers.')
+            response = Response("Authentication credentials required", status_code=401)
             await response(scope, receive, send)
             return
         
-        # Set the auth context for this request
-        auth_data = {"instance_url": instance_url, "access_token": access_token}
-        token = auth_context.set(auth_data)
+        # Set the Salesforce connection in context for this request
+        sf_conn = get_salesforce_connection(access_token, instance_url)
+        token = salesforce_connection_context.set(sf_conn)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            auth_context.reset(token)
+            salesforce_connection_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
