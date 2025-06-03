@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-LINEAR_MCP_SERVER_PORT = int(os.getenv("LINEAR_MCP_SERVER_PORT", "5001"))
+LINEAR_MCP_SERVER_PORT = int(os.getenv("LINEAR_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=LINEAR_MCP_SERVER_PORT, help="Port to listen on for HTTP")
