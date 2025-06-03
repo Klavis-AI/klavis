@@ -26,12 +26,11 @@ logger = logging.getLogger("markitdown-mcp-server")
 MARKITDOWN_MCP_SERVER_PORT = int(os.getenv("MARKITDOWN_MCP_SERVER_PORT", "5000"))
 
 
-async def convert_document_to_markdown(uri: str, auth_token: str) -> str:
+async def convert_document_to_markdown(uri: str) -> str:
     """Convert a resource described by an http:, https: to markdown.
 
     Args:
         uri: The URI of the resource to convert to markdown
-        auth_token: The optional authentication token for the resource
 
     Returns:
         The markdown representation of the resource.
@@ -39,9 +38,7 @@ async def convert_document_to_markdown(uri: str, auth_token: str) -> str:
     if not uri.startswith("http") and not uri.startswith("https"):
         return f"Unsupported uri. Only http:, https: are supported."
 
-    response = requests.get(
-        uri, headers={"Authorization": f"Bearer {auth_token}"} if auth_token else None
-    )
+    response = requests.get(uri)
     if response.status_code == 200:
         # Save the PDF to a temporary file
         with tempfile.NamedTemporaryFile(
@@ -98,10 +95,6 @@ def main(
                             "type": "string",
                             "description": "The URI of the resource to convert to markdown. The resource MUST be one of the supported types: PDF, "
                             "PowerPoint, Word, Excel, HTML, Text-based formats (CSV, JSON, XML), ZIP files (iterates over contents), EPubs."
-                        },
-                        "auth_token": {
-                            "type": "string",
-                            "description": "The optional authentication token for the resource."
                         }
                     },
                 },
@@ -116,7 +109,6 @@ def main(
         
         if name == "convert_document_to_markdown":
             uri = arguments.get("uri")
-            auth_token = arguments.get("auth_token", "")
             
             if not uri:
                 return [
@@ -127,7 +119,7 @@ def main(
                 ]
                 
             try:
-                result = await convert_document_to_markdown(uri, auth_token)
+                result = await convert_document_to_markdown(uri)
                 return [
                     types.TextContent(
                         type="text",
