@@ -100,7 +100,7 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="create_task",
+                name="asana_create_task",
                 description="Create a new task in Asana",
                 inputSchema={
                     "type": "object",
@@ -147,8 +147,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_task",
-                description="Get a task by its ID",
+                name="asana_get_task",
+                description="Get a task by its ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -167,7 +167,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="search_tasks",
+                name="asana_search_tasks",
                 description="Search for tasks in Asana",
                 inputSchema={
                     "type": "object",
@@ -246,7 +246,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="update_task",
+                name="asana_update_task",
                 description="Update a task in Asana",
                 inputSchema={
                     "type": "object",
@@ -284,8 +284,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="mark_task_completed",
-                description="Mark a task as completed",
+                name="asana_mark_task_completed",
+                description="Mark a task as completed in Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -298,8 +298,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_subtasks",
-                description="Get subtasks from a task",
+                name="asana_get_subtasks",
+                description="Get subtasks from a task in Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -322,8 +322,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="attach_file_to_task",
-                description="Attach a file to a task",
+                name="asana_attach_file_to_task",
+                description="Attach a file to a task in Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -356,7 +356,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_projects",
+                name="asana_get_projects",
                 description="Get projects from Asana",
                 inputSchema={
                     "type": "object",
@@ -384,8 +384,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_project",
-                description="Get a project by its ID",
+                name="asana_get_project",
+                description="Get a project by its ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -398,7 +398,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_workspaces",
+                name="asana_get_workspaces",
                 description="Get user's workspaces from Asana",
                 inputSchema={
                     "type": "object",
@@ -418,8 +418,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_workspace",
-                description="Get a workspace by its ID",
+                name="asana_get_workspace",
+                description="Get a workspace by its ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -432,7 +432,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_users",
+                name="asana_get_users",
                 description="Get users from Asana",
                 inputSchema={
                     "type": "object",
@@ -456,8 +456,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_user",
-                description="Get a user by their ID",
+                name="asana_get_user",
+                description="Get a user by their ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -470,7 +470,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_teams",
+                name="asana_get_teams",
                 description="Get teams from Asana",
                 inputSchema={
                     "type": "object",
@@ -494,8 +494,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_team",
-                description="Get a team by its ID",
+                name="asana_get_team",
+                description="Get a team by its ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -508,8 +508,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_user_teams",
-                description="Get teams that the current user is a member of",
+                name="asana_get_user_teams",
+                description="Get teams that the current user is a member of in Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -532,7 +532,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_tags",
+                name="asana_get_tags",
                 description="Get tags from Asana",
                 inputSchema={
                     "type": "object",
@@ -556,8 +556,8 @@ def main(
                 },
             ),
             types.Tool(
-                name="get_tag",
-                description="Get a tag by its ID",
+                name="asana_get_tag",
+                description="Get a tag by its ID from Asana",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -570,7 +570,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="create_tag",
+                name="asana_create_tag",
                 description="Create a tag in Asana",
                 inputSchema={
                     "type": "object",
@@ -607,11 +607,11 @@ def main(
         try:
             access_token = get_auth_token()
             
-            if name == "create_task":
+            if name == "asana_create_task":
                 result = await task_tools.create_task(access_token, **arguments)
-            elif name == "get_task":
+            elif name == "asana_get_task":
                 result = await task_tools.get_task_by_id(access_token, **arguments)
-            elif name == "search_tasks":
+            elif name == "asana_search_tasks":
                 # Convert string enums to proper enum types
                 sort_by = arguments.get("sort_by", "modified_at")
                 sort_order = arguments.get("sort_order", "descending")
@@ -631,37 +631,37 @@ def main(
                 arguments["sort_order"] = sort_order_map.get(sort_order, SortOrder.DESCENDING)
                 
                 result = await task_tools.search_tasks(access_token, **arguments)
-            elif name == "update_task":
+            elif name == "asana_update_task":
                 result = await task_tools.update_task(access_token, **arguments)
-            elif name == "mark_task_completed":
+            elif name == "asana_mark_task_completed":
                 result = await task_tools.mark_task_as_completed(access_token, **arguments)
-            elif name == "get_subtasks":
+            elif name == "asana_get_subtasks":
                 result = await task_tools.get_subtasks_from_a_task(access_token, **arguments)
-            elif name == "attach_file_to_task":
+            elif name == "asana_attach_file_to_task":
                 result = await task_tools.attach_file_to_task(access_token, **arguments)
-            elif name == "get_projects":
+            elif name == "asana_get_projects":
                 result = await project_tools.list_projects(access_token, **arguments)
-            elif name == "get_project":
+            elif name == "asana_get_project":
                 result = await project_tools.get_project_by_id(access_token, **arguments)
-            elif name == "get_workspaces":
+            elif name == "asana_get_workspaces":
                 result = await workspace_tools.list_workspaces(access_token, **arguments)
-            elif name == "get_workspace":
+            elif name == "asana_get_workspace":
                 result = await workspace_tools.get_workspace_by_id(access_token, **arguments)
-            elif name == "get_users":
+            elif name == "asana_get_users":
                 result = await user_tools.list_users(access_token, **arguments)
-            elif name == "get_user":
+            elif name == "asana_get_user":
                 result = await user_tools.get_user_by_id(access_token, **arguments)
-            elif name == "get_teams":
+            elif name == "asana_get_teams":
                 result = await team_tools.list_teams(access_token, **arguments)
-            elif name == "get_team":
+            elif name == "asana_get_team":
                 result = await team_tools.get_team_by_id(access_token, **arguments)
-            elif name == "get_user_teams":
+            elif name == "asana_get_user_teams":
                 result = await team_tools.list_teams_the_current_user_is_a_member_of(access_token, **arguments)
-            elif name == "get_tags":
+            elif name == "asana_get_tags":
                 result = await tag_tools.list_tags(access_token, **arguments)
-            elif name == "get_tag":
+            elif name == "asana_get_tag":
                 result = await tag_tools.get_tag_by_id(access_token, **arguments)
-            elif name == "create_tag":
+            elif name == "asana_create_tag":
                 # Convert string color to enum if provided
                 if "color" in arguments and arguments["color"]:
                     color_map = {
