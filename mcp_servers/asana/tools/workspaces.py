@@ -1,20 +1,23 @@
-from typing import Annotated, Any, Dict
+from typing import Any, Dict
 import logging
 
-from constants import WORKSPACE_OPT_FIELDS
-from models import AsanaClient
-from utils import get_next_page, remove_none_values, AsanaToolExecutionError
+from .constants import WORKSPACE_OPT_FIELDS
+from .base import (
+    get_asana_client,
+    get_next_page,
+    remove_none_values,
+    AsanaToolExecutionError,
+)
 
 logger = logging.getLogger(__name__)
 
 
 async def get_workspace_by_id(
-    access_token: str,
     workspace_id: str,
 ) -> Dict[str, Any]:
     """Get an Asana workspace by its ID"""
     try:
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(f"/workspaces/{workspace_id}")
         return {"workspace": response["data"]}
 
@@ -27,7 +30,6 @@ async def get_workspace_by_id(
 
 
 async def list_workspaces(
-    access_token: str,
     limit: int = 100,
     next_page_token: str | None = None,
 ) -> Dict[str, Any]:
@@ -35,7 +37,7 @@ async def list_workspaces(
     try:
         limit = max(1, min(100, limit))
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             "/workspaces",
             params=remove_none_values({

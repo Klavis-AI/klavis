@@ -1,12 +1,107 @@
 import asyncio
 import json
 from dataclasses import dataclass
-from typing import Optional, cast
+import logging
+from typing import Any, Dict, Optional, cast
+from contextvars import ContextVar
+from functools import wraps
 
 import httpx
 
-from constants import ASANA_API_VERSION, ASANA_BASE_URL, ASANA_MAX_CONCURRENT_REQUESTS
-from utils import clean_asana_response, AsanaToolExecutionError
+from .constants import ASANA_API_VERSION, ASANA_BASE_URL, ASANA_MAX_CONCURRENT_REQUESTS, ASANA_MAX_TIMEOUT_SECONDS
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Context variable to store the access token for each request
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+# Type definitions
+ToolResponse = dict[str, Any]
+
+# Exception classes (moved from utils.py)
+class ToolExecutionError(Exception):
+    def __init__(self, message: str, developer_message: str = ""):
+        super().__init__(message)
+        self.developer_message = developer_message
+
+
+class AsanaToolExecutionError(ToolExecutionError):
+    pass
+
+
+class PaginationTimeoutError(AsanaToolExecutionError):
+    def __init__(self, timeout_seconds: int, tool_name: str):
+        message = f"Pagination timed out after {timeout_seconds} seconds"
+        super().__init__(
+            message=message,
+            developer_message=f"{message} while calling the tool {tool_name}",
+        )
+
+
+class RetryableToolError(Exception):
+    def __init__(self, message: str, additional_prompt_content: str = "", retry_after_ms: int = 1000, developer_message: str = ""):
+        super().__init__(message)
+        self.additional_prompt_content = additional_prompt_content
+        self.retry_after_ms = retry_after_ms
+        self.developer_message = developer_message
+
+
+# Utility functions (moved from utils.py)
+def remove_none_values(data: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in data.items() if v is not None}
+
+
+def get_next_page(response: dict[str, Any]) -> dict[str, Any]:
+    """Extract next page information from response."""
+    next_page = response.get("next_page", {})
+    return {
+        "next_page_token": next_page.get("uri") if next_page else None
+    }
+
+
+# Decorator function (moved from utils.py)
+def clean_asana_response(func):
+    def response_cleaner(data: dict[str, Any]) -> dict[str, Any]:
+        if "gid" in data:
+            data["id"] = data["gid"]
+            del data["gid"]
+
+        for k, v in data.items():
+            if isinstance(v, dict):
+                data[k] = response_cleaner(v)
+            elif isinstance(v, list):
+                data[k] = [
+                    item if not isinstance(item, dict) else response_cleaner(item) for item in v
+                ]
+
+        return data
+
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        response = await func(*args, **kwargs)
+        return response_cleaner(response)
+
+    return wrapper
+
+
+async def get_unique_workspace_id_or_raise_error() -> str:
+    client = get_asana_client()
+    
+    response = await client.get("/workspaces")
+    workspaces = response["data"]
+
+    if len(workspaces) == 1:
+        return workspaces[0]["id"]
+    else:
+        workspaces_info = [{"name": ws["name"], "id": ws["id"]} for ws in workspaces]
+        message = "Multiple workspaces found. Please provide a workspace_id."
+        additional_prompt = f"Available workspaces: {json.dumps(workspaces_info)}"
+        raise RetryableToolError(
+            message=message,
+            developer_message=message,
+            additional_prompt_content=additional_prompt,
+        )
 
 
 @dataclass
@@ -162,3 +257,16 @@ class AsanaClient:
     async def get_current_user(self) -> dict:
         response = await self.get("/users/me")
         return cast(dict, response["data"]) 
+
+
+def get_asana_client() -> AsanaClient:
+    """Create Asana client with access token from context."""
+    access_token = get_auth_token()
+    return AsanaClient(auth_token=access_token)
+
+def get_auth_token() -> str:
+    """Get the authentication token from context."""
+    try:
+        return auth_token_context.get()
+    except LookupError:
+        raise RuntimeError("Authentication token not found in request context") 

@@ -1,9 +1,9 @@
 from typing import Annotated, Any, Dict
 import logging
 
-from constants import PROJECT_OPT_FIELDS
-from models import AsanaClient
-from utils import (
+from .constants import PROJECT_OPT_FIELDS
+from .base import (
+    get_asana_client,
     get_next_page,
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
@@ -14,12 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 async def get_project_by_id(
-    access_token: str,
     project_id: str,
 ) -> Dict[str, Any]:
     """Get a project by its ID"""
     try:
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             f"/projects/{project_id}",
             params={"opt_fields": ",".join(PROJECT_OPT_FIELDS)},
@@ -35,7 +34,6 @@ async def get_project_by_id(
 
 
 async def list_projects(
-    access_token: str,
     team_id: str | None = None,
     workspace_id: str | None = None,
     limit: int = 100,
@@ -49,7 +47,7 @@ async def list_projects(
 
         workspace_id = workspace_id or await get_unique_workspace_id_or_raise_error()
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
 
         response = await client.get(
             "/projects",

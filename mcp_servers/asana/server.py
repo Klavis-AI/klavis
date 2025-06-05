@@ -4,7 +4,6 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
-from contextvars import ContextVar
 
 import click
 import mcp.types as types
@@ -17,9 +16,8 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
-from models import AsanaClient
-from utils import RetryableToolError
-from constants import (
+from tools.base import AsanaToolExecutionError
+from tools.constants import (
     TaskSortBy,
     SortOrder,
     TagColor,
@@ -32,6 +30,7 @@ from tools import workspaces as workspace_tools
 from tools import users as user_tools
 from tools import teams as team_tools
 from tools import tags as tag_tools
+from tools.base import auth_token_context
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -40,34 +39,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 ASANA_MCP_SERVER_PORT = int(os.getenv("ASANA_MCP_SERVER_PORT", "5001"))
-
-# Context variable to store the access token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
-
-def get_asana_client(access_token: str) -> AsanaClient:
-    """Create Asana client with access token."""
-    return AsanaClient(auth_token=access_token)
-
-def get_auth_token() -> str:
-    """Get the authentication token from context."""
-    try:
-        return auth_token_context.get()
-    except LookupError:
-        raise RuntimeError("Authentication token not found in request context")
-
-def get_auth_token_or_empty() -> str:
-    """Get the authentication token from context or return empty string."""
-    try:
-        return auth_token_context.get()
-    except LookupError:
-        return ""
-
-# Context class to mock the context.get_auth_token_or_empty() calls
-class Context:
-    def get_auth_token_or_empty(self) -> str:
-        return get_auth_token_or_empty()
-
-context = Context()
 
 @click.command()
 @click.option("--port", default=ASANA_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -94,7 +65,7 @@ def main(
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    app = Server("asana")
+    app = Server("asana-mcp-server")
 
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
@@ -605,12 +576,10 @@ def main(
         logger.info(f"Calling tool: {name} with arguments: {arguments}")
 
         try:
-            access_token = get_auth_token()
-            
             if name == "asana_create_task":
-                result = await task_tools.create_task(access_token, **arguments)
+                result = await task_tools.create_task(**arguments)
             elif name == "asana_get_task":
-                result = await task_tools.get_task_by_id(access_token, **arguments)
+                result = await task_tools.get_task_by_id(**arguments)
             elif name == "asana_search_tasks":
                 # Convert string enums to proper enum types
                 sort_by = arguments.get("sort_by", "modified_at")
@@ -630,37 +599,37 @@ def main(
                 arguments["sort_by"] = sort_by_map.get(sort_by, TaskSortBy.MODIFIED_AT)
                 arguments["sort_order"] = sort_order_map.get(sort_order, SortOrder.DESCENDING)
                 
-                result = await task_tools.search_tasks(access_token, **arguments)
+                result = await task_tools.search_tasks(**arguments)
             elif name == "asana_update_task":
-                result = await task_tools.update_task(access_token, **arguments)
+                result = await task_tools.update_task(**arguments)
             elif name == "asana_mark_task_completed":
-                result = await task_tools.mark_task_as_completed(access_token, **arguments)
+                result = await task_tools.mark_task_as_completed(**arguments)
             elif name == "asana_get_subtasks":
-                result = await task_tools.get_subtasks_from_a_task(access_token, **arguments)
+                result = await task_tools.get_subtasks_from_a_task(**arguments)
             elif name == "asana_attach_file_to_task":
-                result = await task_tools.attach_file_to_task(access_token, **arguments)
+                result = await task_tools.attach_file_to_task(**arguments)
             elif name == "asana_get_projects":
-                result = await project_tools.list_projects(access_token, **arguments)
+                result = await project_tools.list_projects(**arguments)
             elif name == "asana_get_project":
-                result = await project_tools.get_project_by_id(access_token, **arguments)
+                result = await project_tools.get_project_by_id(**arguments)
             elif name == "asana_get_workspaces":
-                result = await workspace_tools.list_workspaces(access_token, **arguments)
+                result = await workspace_tools.list_workspaces(**arguments)
             elif name == "asana_get_workspace":
-                result = await workspace_tools.get_workspace_by_id(access_token, **arguments)
+                result = await workspace_tools.get_workspace_by_id(**arguments)
             elif name == "asana_get_users":
-                result = await user_tools.list_users(access_token, **arguments)
+                result = await user_tools.list_users(**arguments)
             elif name == "asana_get_user":
-                result = await user_tools.get_user_by_id(access_token, **arguments)
+                result = await user_tools.get_user_by_id(**arguments)
             elif name == "asana_get_teams":
-                result = await team_tools.list_teams(access_token, **arguments)
+                result = await team_tools.list_teams(**arguments)
             elif name == "asana_get_team":
-                result = await team_tools.get_team_by_id(access_token, **arguments)
+                result = await team_tools.get_team_by_id(**arguments)
             elif name == "asana_get_user_teams":
-                result = await team_tools.list_teams_the_current_user_is_a_member_of(access_token, **arguments)
+                result = await team_tools.list_teams_the_current_user_is_a_member_of(**arguments)
             elif name == "asana_get_tags":
-                result = await tag_tools.list_tags(access_token, **arguments)
+                result = await tag_tools.list_tags(**arguments)
             elif name == "asana_get_tag":
-                result = await tag_tools.get_tag_by_id(access_token, **arguments)
+                result = await tag_tools.get_tag_by_id(**arguments)
             elif name == "asana_create_tag":
                 # Convert string color to enum if provided
                 if "color" in arguments and arguments["color"]:
@@ -685,13 +654,13 @@ def main(
                         "light-warm-gray": TagColor.LIGHT_WARM_GRAY,
                     }
                     arguments["color"] = color_map.get(arguments["color"])
-                result = await tag_tools.create_tag(access_token, **arguments)
+                result = await tag_tools.create_tag(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
 
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-        except RetryableToolError as e:
+        except AsanaToolExecutionError as e:
             logger.error(f"Retryable error in {name}: {e}")
             return [
                 types.TextContent(
@@ -713,61 +682,91 @@ def main(
                 )
             ]
 
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+
     async def handle_sse(request):
-        transport = SseServerTransport("/message")
+        logger.info("Handling SSE connection")
+        
+        # Extract auth token from headers
+        auth_token = request.headers.get('x-auth-token')
+        if not auth_token:
+            logger.error('Error: Asana API token is missing. Provide it via x-auth-token header.')
+            return Response("Authentication token required", status_code=401)
+        
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
+        return Response()
 
-        # Parse auth token from Authorization header
-        auth_header = request.headers.get("authorization", "")
-        if auth_header.startswith("Bearer "):
-            auth_token = auth_header[7:]  # Remove "Bearer " prefix
-            auth_token_context.set(auth_token)
-        else:
-            logger.warning("No valid authorization header found")
-
-        async with transport.connect_sse(request) as streams:
-            await app.run(
-                read_stream=streams[0],
-                write_stream=streams[1],
-                initialization_options={},
-            )
-
-        return Response("", status_code=200)
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
 
     async def handle_streamable_http(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
-        session_manager = StreamableHTTPSessionManager(
-            app,
-            json_response=json_response,
-        )
-
-        # Parse auth token from headers
+        logger.info("Handling StreamableHTTP request")
+        
+        # Extract auth token from headers
         headers = dict(scope.get("headers", []))
-        auth_header = headers.get(b"authorization", b"").decode()
-        if auth_header.startswith("Bearer "):
-            auth_token = auth_header[7:]  # Remove "Bearer " prefix
-            auth_token_context.set(auth_token)
-        else:
-            logger.warning("No valid authorization header found")
-
-        await session_manager(scope, receive, send)
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        
+        if not auth_token:
+            logger.error('Error: Asana API token is missing. Provide it via x-auth-token header.')
+            response = Response("Authentication token required", status_code=401)
+            await response(scope, receive, send)
+            return
+        
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
-        logger.info(f"Asana MCP Server starting on port {port}")
-        yield
-        logger.info("Asana MCP Server shutting down")
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
 
-    routes = [
-        Route("/sse", handle_sse, methods=["GET"]),
-        Mount("/", handle_streamable_http),
-    ]
-
+    # Create an ASGI application with routes for both transports
     starlette_app = Starlette(
         debug=True,
-        routes=routes,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
         lifespan=lifespan,
     )
+
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
 
     import uvicorn
 

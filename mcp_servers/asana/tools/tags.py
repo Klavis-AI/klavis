@@ -1,9 +1,9 @@
 from typing import Annotated, Any, Dict
 import logging
 
-from constants import TAG_OPT_FIELDS, TagColor
-from models import AsanaClient
-from utils import (
+from .constants import TAG_OPT_FIELDS, TagColor
+from .base import (
+    get_asana_client,
     get_next_page,
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
@@ -14,12 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 async def get_tag_by_id(
-    access_token: str,
     tag_id: str,
 ) -> Dict[str, Any]:
     """Get an Asana tag by its ID"""
     try:
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(f"/tags/{tag_id}")
         return {"tag": response["data"]}
 
@@ -32,7 +31,6 @@ async def get_tag_by_id(
 
 
 async def create_tag(
-    access_token: str,
     name: str,
     description: str | None = None,
     color: TagColor | None = None,
@@ -52,7 +50,7 @@ async def create_tag(
             "workspace": workspace_id,
         })
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.post("/tags", json_data={"data": data})
         return {"tag": response["data"]}
 
@@ -65,7 +63,6 @@ async def create_tag(
 
 
 async def list_tags(
-    access_token: str,
     workspace_id: str | None = None,
     limit: int = 100,
     next_page_token: str | None = None,
@@ -76,7 +73,7 @@ async def list_tags(
 
         workspace_id = workspace_id or await get_unique_workspace_id_or_raise_error()
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             "/tags",
             params=remove_none_values({

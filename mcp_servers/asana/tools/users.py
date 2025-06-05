@@ -1,9 +1,9 @@
 from typing import Annotated, Any, Dict
 import logging
 
-from constants import USER_OPT_FIELDS
-from models import AsanaClient
-from utils import (
+from .constants import USER_OPT_FIELDS
+from .base import (
+    get_asana_client,
     get_next_page,
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 async def list_users(
-    access_token: str,
     workspace_id: str | None = None,
     limit: int = 100,
     next_page_token: str | None = None,
@@ -26,7 +25,7 @@ async def list_users(
         if not workspace_id:
             workspace_id = await get_unique_workspace_id_or_raise_error()
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             "/users",
             params=remove_none_values({
@@ -52,12 +51,11 @@ async def list_users(
 
 
 async def get_user_by_id(
-    access_token: str,
     user_id: str,
 ) -> Dict[str, Any]:
     """Get a user by ID"""
     try:
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(f"/users/{user_id}", params={"opt_fields": ",".join(USER_OPT_FIELDS)})
         return {"user": response["data"]}
 

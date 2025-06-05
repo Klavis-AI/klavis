@@ -1,9 +1,9 @@
 from typing import Annotated, Any, Dict
 import logging
 
-from constants import TEAM_OPT_FIELDS
-from models import AsanaClient
-from utils import (
+from .constants import TEAM_OPT_FIELDS
+from .base import (
+    get_asana_client,
     get_next_page,
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
@@ -14,12 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 async def get_team_by_id(
-    access_token: str,
     team_id: str,
 ) -> Dict[str, Any]:
     """Get an Asana team by its ID"""
     try:
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             f"/teams/{team_id}",
             params=remove_none_values({"opt_fields": ",".join(TEAM_OPT_FIELDS)}),
@@ -35,7 +34,6 @@ async def get_team_by_id(
 
 
 async def list_teams_the_current_user_is_a_member_of(
-    access_token: str,
     workspace_id: str | None = None,
     limit: int = 100,
     next_page_token: str | None = None,
@@ -46,7 +44,7 @@ async def list_teams_the_current_user_is_a_member_of(
 
         workspace_id = workspace_id or await get_unique_workspace_id_or_raise_error()
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             "/users/me/teams",
             params=remove_none_values({
@@ -72,7 +70,6 @@ async def list_teams_the_current_user_is_a_member_of(
 
 
 async def list_teams(
-    access_token: str,
     workspace_id: str | None = None,
     limit: int = 100,
     next_page_token: str | None = None,
@@ -83,7 +80,7 @@ async def list_teams(
 
         workspace_id = workspace_id or await get_unique_workspace_id_or_raise_error()
 
-        client = AsanaClient(auth_token=access_token)
+        client = get_asana_client()
         response = await client.get(
             f"/workspaces/{workspace_id}/teams",
             params=remove_none_values({
