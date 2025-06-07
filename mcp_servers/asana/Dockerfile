@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code
 COPY mcp_servers/asana/server.py .
+COPY mcp_servers/asana/tools/ ./tools/
 
 # Expose the port the server runs on
 EXPOSE 5000
