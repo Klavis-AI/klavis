@@ -201,60 +201,30 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]]) -> No
     except Exception as e:
         print(f"\n❌ Error: {e}")
 
-
-def initialize_client() -> OpenAI:
-    """Initialize OpenAI client with API key validation."""
-    api_key = os.getenv("OPENAI_API_KEY")
+def main():    
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
-    if not api_key:
-        print("❌ Error: OPENAI_API_KEY environment variable not set!")
-        print("Please set your OpenAI API key:")
-        print("export OPENAI_API_KEY='your-api-key-here'")
-        sys.exit(1)
-    
-    return OpenAI(api_key=api_key)
-
-
-def main():
-    """Main function that runs the chat loop."""
-    print("🚀 OpenAI Streaming Chat with Function Calling")
-    print("=" * 50)
-    print("Available functions: get_weather")
-    print("Type 'quit' or 'exit' to end the conversation")
-    print("=" * 50)
-    
-    # Initialize OpenAI client
-    client = initialize_client()
-    
-    # Initialize conversation with system message
     messages = [
         {
             "role": "system",
-            "content": "You are a helpful assistant with access to weather information. "
-                      "Use the get_weather function when users ask about weather conditions."
+            "content": "You are a helpful assistant."
         }
     ]
     
-    # Main chat loop
     while True:
         try:
-            # Get user input
             user_input = input("\n👤 You: ").strip()
             
-            # Check for exit conditions
             if user_input.lower() in ['quit', 'exit', 'q']:
                 print("\n👋 Goodbye!")
                 break
             
-            # Skip empty input
             if not user_input:
                 continue
             
-            # Add user message to conversation
             messages.append({"role": "user", "content": user_input})
             
-            # Stream response
-            stream_chat_completion(client, messages)
+            stream_chat_completion(openai_client, messages)
             
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
