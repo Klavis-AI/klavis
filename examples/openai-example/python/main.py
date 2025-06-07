@@ -3,7 +3,7 @@ import os
 import sys
 from typing import Dict, Any, List
 from openai import OpenAI
-
+from klavis_api import KlavisAPI
 
 def get_weather(location: str, unit: str = "celsius") -> Dict[str, Any]:
     """
@@ -203,6 +203,15 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]]) -> No
 
 def main():    
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    klavis_client = KlavisAPI(api_key=os.getenv("KLAVIS_API_KEY"))
+    
+    mcp_instance = klavis_client.create_mcp_instance(
+        server_name="Close",  # Close CRM
+        user_id="1234",
+        platform_name="demo",
+    )
+    
+    print(mcp_instance)
     
     messages = [
         {
