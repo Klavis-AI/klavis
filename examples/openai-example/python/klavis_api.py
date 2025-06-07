@@ -2,6 +2,7 @@ import requests
 import webbrowser
 import os
 import logging
+import urllib.parse
 from typing import Dict, Any, Optional, Literal
 from dotenv import load_dotenv
 
@@ -22,8 +23,26 @@ ServerName = Literal[
     "Klavis ReportGen", "Resend", "Discord", "Firecrawl Web Search", "GitHub", 
     "Firecrawl Deep Research", "Jira", "WordPress", "Notion", "Gmail", 
     "Google Drive", "Google Calendar", "Google Sheets", "Google Docs", 
-    "Attio", "Salesforce", "Linear", "Asana"
+    "Attio", "Salesforce", "Linear", "Asana", "Close"
 ]
+
+OAUTH_SERVICE_NAME_TO_URL_PATH: Dict[ServerName, str] = {
+  'Slack': 'slack',
+  'Supabase': 'supabase',
+  'GitHub': 'github',
+  'Google Drive': 'gdrive',
+  'Google Calendar': 'gcalendar',
+  'Google Sheets': 'gsheets',
+  'Google Docs': 'gdocs',
+  'Jira': 'jira',
+  'WordPress': 'wordpress',
+  'Notion': 'notion',
+  'Gmail': 'gmail',
+  'Asana': 'asana',
+  'Linear': 'linear',
+  'Salesforce': 'salesforce',
+  'Close': 'close'
+}
 
 ConnectionType = Literal["SSE", "StreamableHttp"]
 
@@ -98,14 +117,20 @@ class KlavisAPI:
             'instanceId': result['instanceId']
         }
     
-    def redirect_to_oauth(self, instance_id: str) -> None:
+    def redirect_to_oauth(self, instance_id: str, server_name: ServerName) -> None:
         """
         Redirect to OAuth authorization page.
         
         Args:
             instance_id: ID of the MCP server instance
+            server_name: Name of the target MCP server
         """
-        oauth_url = f"{self.base_url}/oauth/github/authorize?instance_id={instance_id}"
+        service_path = OAUTH_SERVICE_NAME_TO_URL_PATH.get(server_name)
+        if not service_path:
+            # do not raise an error, skip it
+            return
+
+        oauth_url = f"{self.base_url}/oauth/{service_path}/authorize?instance_id={instance_id}"
         logger.info(f"Opening OAuth URL: {oauth_url}")
         webbrowser.open(oauth_url)
     
@@ -131,8 +156,8 @@ class KlavisAPI:
             RuntimeError: If the API request fails
         """
         params = {"connection_type": connection_type}
-        result = self._make_request("GET", f"/mcp-server/list-tools/{server_url}", params=params)
-        logger.info(f"Listed tools: {result}")
+        encoded_server_url = urllib.parse.quote(server_url, safe='')
+        result = self._make_request("GET", f"/mcp-server/list-tools/{encoded_server_url}", params=params)
         return result
     
     def call_tool(self, server_url: str, tool_name: str, 
@@ -168,5 +193,5 @@ class KlavisAPI:
         }
         
         result = self._make_request("POST", "/mcp-server/call-tool", json=data)
-        logger.info(f"Called tool '{tool_name}': {result}")
+        logger.info(f"Called tool '{tool_name}'")
         return result

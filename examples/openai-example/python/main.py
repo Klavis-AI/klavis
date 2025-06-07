@@ -1,110 +1,72 @@
 import json
 import os
-import sys
 from typing import Dict, Any, List
 from openai import OpenAI
 from klavis_api import KlavisAPI
 
-def get_weather(location: str, unit: str = "celsius") -> Dict[str, Any]:
-    """
-    Get weather information for a specific location.
-    This is a mock function that returns sample weather data.
-    
-    Args:
-        location: The city or location name
-        unit: Temperature unit (celsius or fahrenheit)
-    
-    Returns:
-        Dictionary containing weather information
-    """
-    # Mock weather data - in real implementation, you'd call a weather API
-    mock_weather = {
-        "location": location,
-        "temperature": 22 if unit == "celsius" else 72,
-        "unit": unit,
-        "condition": "Partly cloudy",
-        "humidity": 65,
-        "wind_speed": 10
-    }
-    
-    print(f"🌤️  Fetching weather for {location}...")
-    return mock_weather
-
-
-def get_available_functions() -> Dict[str, callable]:
-    """Return a dictionary of available functions for function calling."""
-    return {
-        "get_weather": get_weather
-    }
-
-
-def get_function_definitions() -> List[Dict[str, Any]]:
+def get_function_definitions(klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> List[Dict[str, Any]]:
     """Return OpenAI tool definitions for function calling."""
-    return [
-        {
+    if not klavis_client or not mcp_instance:
+        return []
+    
+    tools_info = klavis_client.list_tools(mcp_instance['serverUrl'])
+    if not tools_info.get("success"):
+        return []
+
+    openai_tools = []
+    for tool in tools_info.get("tools", []):
+        openai_tools.append({
             "type": "function",
             "function": {
-                "name": "get_weather",
-                "description": "Get current weather information for a specific location",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "location": {
-                            "type": "string",
-                            "description": "The city and state/country, e.g. San Francisco, CA or London, UK"
-                        },
-                        "unit": {
-                            "type": "string",
-                            "enum": ["celsius", "fahrenheit"],
-                            "description": "Temperature unit"
-                        }
-                    },
-                    "required": ["location"]
-                }
+                "name": tool.get("name"),
+                "description": tool.get("description"),
+                "parameters": tool.get("inputSchema", {})
             }
-        }
-    ]
+        })
+    return openai_tools
 
 
-def handle_function_call(function_name: str, function_args: str) -> str:
+def handle_function_call(function_name: str, function_args: str, klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> str:
     """
     Execute a function call and return the result.
     
     Args:
         function_name: Name of the function to call
         function_args: JSON string of function arguments
+        klavis_client: KlavisAPI client instance
+        mcp_instance: MCP instance dictionary
     
     Returns:
         JSON string of function result
     """
-    available_functions = get_available_functions()
-    
-    if function_name not in available_functions:
-        return json.dumps({"error": f"Function {function_name} not found"})
-    
     try:
         args = json.loads(function_args)
-        function_to_call = available_functions[function_name]
-        result = function_to_call(**args)
+        result = klavis_client.call_tool(
+            server_url=mcp_instance['serverUrl'],
+            tool_name=function_name,
+            tool_args=args
+        )
         return json.dumps(result)
     except Exception as e:
         return json.dumps({"error": str(e)})
 
 
-def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]]) -> None:
+def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> None:
     """
     Stream chat completion from OpenAI with function calling support.
     
     Args:
         client: OpenAI client instance
         messages: List of conversation messages
+        klavis_client: KlavisAPI client instance
+        mcp_instance: MCP instance dictionary
     """
     try:
         # Create streaming completion with function calling
         stream = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            tools=get_function_definitions(),
+            tools=get_function_definitions(klavis_client, mcp_instance),
             tool_choice="auto",
             stream=True,
             temperature=0.7
@@ -149,7 +111,7 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]]) -> No
                             if delta_tool_call.function.arguments:
                                 current_tool_call["function"]["arguments"] += delta_tool_call.function.arguments
         
-        print()  # New line after streaming
+        print()
         
         # Handle tool calls if present
         if is_tool_call and tool_calls:
@@ -160,7 +122,9 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]]) -> No
                     # Execute function call
                     function_result = handle_function_call(
                         tool_call["function"]["name"], 
-                        tool_call["function"]["arguments"]
+                        tool_call["function"]["arguments"],
+                        klavis_client,
+                        mcp_instance
                     )
                     
                     # Add tool call to assistant message
@@ -206,17 +170,16 @@ def main():
     klavis_client = KlavisAPI(api_key=os.getenv("KLAVIS_API_KEY"))
     
     mcp_instance = klavis_client.create_mcp_instance(
-        server_name="Close",  # Close CRM
+        server_name="Close",  # Close CRM as an example
         user_id="1234",
         platform_name="demo",
     )
-    
-    print(mcp_instance)
+    klavis_client.redirect_to_oauth(mcp_instance['instanceId'], "Close")
     
     messages = [
         {
             "role": "system",
-            "content": "You are a helpful assistant."
+            "content": "You are a helpful assistant with access to various Klavis MCP tools"
         }
     ]
     
@@ -233,7 +196,7 @@ def main():
             
             messages.append({"role": "user", "content": user_input})
             
-            stream_chat_completion(openai_client, messages)
+            stream_chat_completion(openai_client, messages, klavis_client, mcp_instance)
             
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
