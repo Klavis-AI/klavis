@@ -13,14 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code
 COPY mcp_servers/asana/server.py .
-COPY mcp_servers/asana/models.py .
-COPY mcp_servers/asana/utils.py .
-COPY mcp_servers/asana/constants.py .
-COPY mcp_servers/asana/exceptions.py .
-COPY mcp_servers/asana/decorators.py .
 
 # Expose the port the server runs on
-EXPOSE 5001
+EXPOSE 5000
 
 # Command to run the server
 CMD ["python", "server.py"] 

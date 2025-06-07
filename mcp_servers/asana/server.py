@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-ASANA_MCP_SERVER_PORT = int(os.getenv("ASANA_MCP_SERVER_PORT", "5001"))
+ASANA_MCP_SERVER_PORT = int(os.getenv("ASANA_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=ASANA_MCP_SERVER_PORT, help="Port to listen on for HTTP")
