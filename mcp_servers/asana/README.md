@@ -29,7 +29,7 @@ A Model Context Protocol (MCP) server for interacting with Asana tasks and proje
 
 Set the following environment variables:
 
-- `ASANA_MCP_SERVER_PORT`: Port for the server (default: 5001)
+- `ASANA_MCP_SERVER_PORT`: Port for the server (default: 5000)
 - `ASANA_MAX_CONCURRENT_REQUESTS`: Max concurrent API requests (default: 3)
 - `ASANA_MAX_TIMEOUT_SECONDS`: Request timeout in seconds (default: 20)
 
@@ -45,13 +45,13 @@ Authorization: Bearer YOUR_ASANA_TOKEN
 
 ### Direct Python
 ```bash
-python server.py --port 5001
+python server.py --port 5000
 ```
 
 ### Docker
 ```bash
 docker build -t asana-mcp-server .
-docker run -p 5001:5001 asana-mcp-server
+docker run -p 5001:5000 asana-mcp-server
 ```
 
 ## API Endpoints
