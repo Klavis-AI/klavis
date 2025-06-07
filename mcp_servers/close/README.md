@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 2. Set up environment variables:
 ```bash
-export CLOSE_MCP_SERVER_PORT=5001
+export CLOSE_MCP_SERVER_PORT=5000
 ```
 
 3. Run the server:
@@ -67,7 +67,7 @@ To get your access token:
 
 ## API Endpoints
 
-The server runs on port 5001 by default and provides the following endpoints:
+The server runs on port 5000 by default and provides the following endpoints:
 
 - `/sse` - Server-Sent Events endpoint for real-time communication
 - `/` - Main HTTP endpoint for tool execution
@@ -116,13 +116,13 @@ docker build -t close-mcp-server -f mcp_servers/close/Dockerfile .
 
 Run the container:
 ```bash
-docker run -p 5001:5001 -e CLOSE_ACCESS_TOKEN=your_access_token close-mcp-server
+docker run -p 5001:5000 -e CLOSE_ACCESS_TOKEN=your_access_token close-mcp-server
 ```
 
 ## Configuration
 
 Environment variables:
-- `CLOSE_MCP_SERVER_PORT` - Port to run the server on (default: 5001)
+- `CLOSE_MCP_SERVER_PORT` - Port to run the server on (default: 5000)
 - `CLOSE_ACCESS_TOKEN` - Your Close CRM access token (can also be passed in Authorization header)
 
 ## Error Handling

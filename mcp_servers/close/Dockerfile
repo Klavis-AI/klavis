@@ -16,7 +16,7 @@ COPY mcp_servers/close/server.py .
 COPY mcp_servers/close/tools/ ./tools/
 
 # Expose the port the server runs on
-EXPOSE 5001
+EXPOSE 5000
 
 # Command to run the server
 CMD ["python", "server.py"] 
