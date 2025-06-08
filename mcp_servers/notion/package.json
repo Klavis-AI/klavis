@@ -40,7 +40,7 @@
     "@types/which": "^3.0.4",
     "@vitest/coverage-v8": "3.1.1",
     "esbuild": "^0.25.2",
-    "multer": "1.4.5-lts.1",
+    "multer": "2.0.1",
     "openai": "^4.91.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
