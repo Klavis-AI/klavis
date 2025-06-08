@@ -12,10 +12,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 KLAVIS_API_BASE_URL = "https://api.klavis.ai"
-KLAVIS_API_KEY = os.getenv('KLAVIS_API_KEY')
-
-if not KLAVIS_API_KEY:
-    raise ValueError("KLAVIS_API_KEY environment variable is required")
 
 # Type definitions for API enums
 ServerName = Literal[
@@ -41,7 +37,8 @@ OAUTH_SERVICE_NAME_TO_URL_PATH: Dict[ServerName, str] = {
   'Asana': 'asana',
   'Linear': 'linear',
   'Salesforce': 'salesforce',
-  'Close': 'close'
+  'Close': 'close',
+  'Attio': 'attio',
 }
 
 ConnectionType = Literal["SSE", "StreamableHttp"]
