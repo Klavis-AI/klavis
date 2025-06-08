@@ -1,5 +1,5 @@
 # Server dependencies
-starlette==0.31.1
+starlette==0.40.0
 uvicorn==0.30.0
 click==8.1.7
 python-dotenv==1.0.1
