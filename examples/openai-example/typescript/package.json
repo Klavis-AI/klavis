@@ -1,0 +1,27 @@
+{
+  "name": "openai-example-typescript",
+  "version": "1.0.0",
+  "description": "TypeScript example for OpenAI function calling with Klavis",
+  "main": "main.js",
+  "scripts": {
+    "start": "ts-node main.ts",
+    "build": "tsc",
+    "debug": "node --inspect-brk -r ts-node/register main.ts",
+    "debug:compiled": "tsc && node --inspect-brk dist/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "open": "^8.4.0",
+    "openai": "^4.52.7",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/readline-sync": "^1.4.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
