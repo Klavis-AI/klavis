@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    format_leads_response,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -32,11 +33,13 @@ async def list_leads(
     
     response = await client.get("/lead/", params=params)
     
-    return {
+    result = {
         "leads": response.get("data", []),
         "has_more": response.get("has_more", False),
         "total_results": response.get("total_results"),
     }
+    
+    return format_leads_response(result)
 
 
 async def get_lead(lead_id: str, fields: Optional[str] = None) -> ToolResponse:
@@ -49,6 +52,12 @@ async def get_lead(lead_id: str, fields: Optional[str] = None) -> ToolResponse:
     })
     
     response = await client.get(f"/lead/{lead_id}/", params=params)
+    
+    # Format opportunities if they exist in the lead
+    if 'opportunities' in response:
+        result = {"leads": [response]}
+        formatted = format_leads_response(result)
+        return formatted["leads"][0]
     
     return response
 
@@ -137,11 +146,13 @@ async def search_leads(
     
     response = await client.get("/lead/", params=params)
     
-    return {
+    result = {
         "leads": response.get("data", []),
         "has_more": response.get("has_more", False),
         "total_results": response.get("total_results"),
     }
+    
+    return format_leads_response(result)
 
 
 async def merge_leads(

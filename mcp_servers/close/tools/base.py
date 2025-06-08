@@ -52,6 +52,53 @@ def remove_none_values(data: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in data.items() if v is not None}
 
 
+def format_currency_from_cents(amount_cents: Optional[int], currency: str = "USD") -> Optional[str]:
+    """Convert cents to formatted currency string."""
+    if amount_cents is None:
+        return None
+    amount_dollars = amount_cents / 100
+    if currency == "USD":
+        return f"${amount_dollars:,.2f}"
+    return f"{amount_dollars:,.2f} {currency}"
+
+
+def format_opportunity_values(opportunity: dict[str, Any]) -> dict[str, Any]:
+    """Format opportunity monetary values from cents to readable currency strings."""
+    formatted_opp = opportunity.copy()
+    
+    # List of fields that contain monetary values in cents
+    money_fields = ['value', 'expected_value', 'annualized_value', 'annualized_expected_value']
+    
+    for field in money_fields:
+        if field in formatted_opp and formatted_opp[field] is not None:
+            # Store original value with _cents suffix for reference
+            formatted_opp[f"{field}_cents"] = formatted_opp[field]
+            # Replace with formatted dollar amount
+            currency = formatted_opp.get('value_currency', 'USD')
+            formatted_opp[field] = format_currency_from_cents(formatted_opp[field], currency)
+    
+    return formatted_opp
+
+
+def format_leads_response(response: dict[str, Any]) -> dict[str, Any]:
+    """Format lead response to convert opportunity values from cents to dollars."""
+    formatted_response = response.copy()
+    
+    if 'leads' in formatted_response:
+        formatted_leads = []
+        for lead in formatted_response['leads']:
+            formatted_lead = lead.copy()
+            if 'opportunities' in formatted_lead:
+                formatted_opportunities = []
+                for opp in formatted_lead['opportunities']:
+                    formatted_opportunities.append(format_opportunity_values(opp))
+                formatted_lead['opportunities'] = formatted_opportunities
+            formatted_leads.append(formatted_lead)
+        formatted_response['leads'] = formatted_leads
+    
+    return formatted_response
+
+
 def get_next_page(response: dict[str, Any]) -> dict[str, Any]:
     """Extract next page information from response."""
     has_more = response.get("has_more", False)
