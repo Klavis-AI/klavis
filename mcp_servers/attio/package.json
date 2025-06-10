@@ -24,7 +24,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.11.1",
+        "@modelcontextprotocol/sdk": "^1.12.1",
         "dotenv": "^16.4.7",
         "p-queue": "^8.0.1",
         "shx": "^0.3.4",

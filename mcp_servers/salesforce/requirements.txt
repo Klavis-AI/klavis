@@ -1,4 +1,4 @@
-mcp>=1.0.0
+mcp>=1.9.3
 starlette>=0.40.0
 uvicorn>=0.32.1
 click>=8.1.7
