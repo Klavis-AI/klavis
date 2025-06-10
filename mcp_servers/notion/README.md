@@ -1,153 +1,116 @@
 # Notion MCP Server
 
-![notion-mcp-sm](https://github.com/user-attachments/assets/6c07003c-8455-4636-b298-d60ffdf46cd8)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project implements an [MCP server](https://spec.modelcontextprotocol.io/) for the [Notion API](https://developers.notion.com/reference/intro). 
+This server implements the Model Context Protocol (MCP) to provide access to various Notion API functionalities as tools for language models or other MCP clients. It allows interacting with Notion workspaces programmatically through a standardized interface.
 
-![mcp-demo](https://github.com/user-attachments/assets/e3ff90a7-7801-48a9-b807-f7dd47f0d3d6)
+## Features
 
-### Installation
+The server exposes the following Notion API functions as MCP tools:
 
-#### 1. Setting up Integration in Notion:
-Go to [https://www.notion.so/profile/integrations](https://www.notion.so/profile/integrations) and create a new **internal** integration or select an existing one.
+*   `notion_search`: Search for pages and databases in the workspace
+*   `notion_create_page`: Create a new page in the workspace
+*   `notion_update_page`: Update an existing page
+*   `notion_get_page`: Get page content and properties
+*   `notion_create_database`: Create a new database
+*   `notion_query_database`: Query database entries
+*   `notion_create_database_item`: Add new items to a database
+*   `notion_update_database_item`: Update database item properties
+*   `notion_add_comment`: Add comments to pages
 
-![Creating a Notion Integration token](docs/images/integrations-creation.png)
+## Prerequisites
 
-While we limit the scope of Notion API's exposed (for example, you will not be able to delete databases via MCP), there is a non-zero risk to workspace data by exposing it to LLMs. Security-conscious users may want to further configure the Integration's _Capabilities_. 
+Before you begin, ensure you have the following:
 
-For example, you can create a read-only integration token by giving only "Read content" access from the "Configuration" tab:
+*   **Node.js and npm:** Required for local development (check versions with `node -v` and `npm -v`).
+*   **Docker:** Required for running the server in a container (Recommended).
+*   **Notion Integration Token:** A Notion integration token with the necessary permissions to perform the actions listed in the Features section. You can create a Notion App and obtain an Internal Integration Token from the "Secrets" tab in your Notion integration settings.
+*   **Connected Pages/Databases:** Ensure relevant pages and databases are connected to your integration.
 
-![Notion Integration Token Capabilities showing Read content checked](docs/images/integrations-capabilities.png)
+## Setup
 
-#### 2. Adding MCP config to your client:
+You can run the server using Docker (recommended) or locally.
 
-##### Using npm:
-Add the following to your `.cursor/mcp.json` or `claude_desktop_config.json` (MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`)
+### Docker (Recommended)
 
-```javascript
-{
-  "mcpServers": {
-    "notionApi": {
-      "command": "npx",
-      "args": ["-y", "@notionhq/notion-mcp-server"],
-      "env": {
-        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ntn_****\", \"Notion-Version\": \"2022-06-28\" }"
-      }
-    }
-  }
-}
-```
+1.  **Create Environment File:**
+    Create a file named `.env` in the `mcp_servers/notion` directory with the following content:
+    ```env
+    # Required: Your Notion Integration Token
+    NOTION_API_KEY=ntn_****
+    
+    # Optional: Notion API Version
+    NOTION_VERSION=2022-06-28
+    ```
+    Replace `ntn_****` with your actual Notion Integration Token.
 
-##### Using Docker:
-You can also run the MCP server using Docker. First, build the Docker image:
+2.  **Build Docker Image:**
+    Navigate to the root `klavis` directory (one level above `mcp_servers`) in your terminal and run the build command:
+    ```bash
+    docker build -t notion-mcp-server -f mcp_servers/notion/Dockerfile .
+    ```
+    *(Make sure the path to the Dockerfile is correct relative to your current directory.)*
 
-```bash
-docker-compose build
-```
+3.  **Run Docker Container:**
+    Run the container, mapping the server's port (5000) to a port on your host machine (e.g., 5000):
+    ```bash
+    # Note: The .env file created in step 1 is copied into the image during the build process specified in the Dockerfile.
+    docker run -p 5000:5000 --name notion-mcp notion-mcp-server 
+    ```
+    The server will start and listen on port 5000 inside the container.
 
-Then, add the following to your `.cursor/mcp.json` or `claude_desktop_config.json`:
+### Local Development
 
-```javascript
-{
-  "mcpServers": {
-    "notionApi": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "-e",
-        "OPENAPI_MCP_HEADERS={\"Authorization\": \"Bearer ntn_****\", \"Notion-Version\": \"2022-06-28\"}",
-        "notion-mcp-server-notion-mcp-server"
-      ]
-    }
-  }
-}
-```
+1.  **Clone Repository:** (If you haven't already)
+    ```bash
+    # git clone <repository-url>
+    # cd <repository-directory>
+    ```
 
-Don't forget to replace `ntn_****` with your integration secret. Find it from your integration configuration tab:
+2.  **Navigate to Directory:**
+    ```bash
+    cd mcp_servers/notion
+    ```
 
-![Copying your Integration token from the Configuration tab in the developer portal](https://github.com/user-attachments/assets/67b44536-5333-49fa-809c-59581bf5370a)
+3.  **Create Environment File:**
+    Create a file named `.env` in this directory as described in Step 1 of the Docker setup:
+    ```env
+    # Required: Your Notion Integration Token
+    NOTION_API_KEY=ntn_****
+    
+    # Optional: Notion API Version
+    NOTION_VERSION=2022-06-28
+    ```
 
-#### 3. Connecting content to integration:
-Ensure relevant pages and databases are connected to your integration.
+4.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
 
-To do this, you'll need to visit that page, and click on the 3 dots, and select "Connect to integration". 
+5.  **Build and Run:**
+    This command compiles the TypeScript code and starts the server:
+    ```bash
+    npm run build
+    npm start
+    ```
+    The server will start and listen on `http://localhost:5000`.
 
-![Adding Integration Token to Notion Connections](docs/images/connections.png)
+## Configuration
 
-### Examples
+*   **`NOTION_API_KEY` (Environment Variable):** This is required for all API calls and must be set in the `.env` file (both for Docker build and local run).
+*   **`NOTION_VERSION` (Environment Variable):** Optional. Sets the Notion API version. Defaults to `2022-06-28`.
+*   **Notion Integration Token (Request Header):** If `NOTION_API_KEY` is not set, the server expects the Notion Integration Token to be provided in the `x-auth-token` HTTP header for every request made to the `/mcp` or `/messages` endpoint. The server uses this token to authenticate with the Notion API for the requested operation.
 
-1. Using the following instruction
-```
-Comment "Hello MCP" on page "Getting started"
-```
+## Usage
 
-AI will correctly plan two API calls, `v1/search` and `v1/comments`, to achieve the task
+MCP clients can connect to this server via Server-Sent Events (SSE) and interact with it:
 
-2. Similarly, the following instruction will result in a new page named "Notion MCP" added to parent page "Development"
-```
-Add a page titled "Notion MCP" to page "Development"
-```
+1.  **Establish SSE Connection:** Clients connect to the `/sse` endpoint (e.g., `http://localhost:5000/sse`).
+2.  **Send Messages:** Clients send MCP requests (like `call_tool`) as JSON payloads via POST requests to the `/messages?sessionId=<session_id>` endpoint.
+3.  **Authentication:** Each POST request to `/messages` **must** include the Notion Integration Token in the `x-auth-token` header.
 
-3. You may also reference content ID directly
-```
-Get the content of page 1a6b35e6e67f802fa7e1d27686f017f2
-```
+Refer to the [MCP SDK documentation](https://github.com/modelcontextprotocol) for details on client implementation.
 
-### Development
+## License
 
-Build
-
-```
-npm run build
-```
-
-Execute
-
-```
-npx -y --prefix /path/to/local/notion-mcp-server @notionhq/notion-mcp-server
-```
-
-Publish
-
-```
-npm publish --access public
-```
-
-## Using the MCP Server
-
-This MCP server follows the Model Context Protocol and implements the standard `/sse` and `/messages` endpoints that are used by MCP clients.
-
-### Endpoints
-
-- **GET /sse** - Establishes an SSE connection that the server uses to send messages to the client.
-- **POST /messages** - Endpoint for clients to send messages to the server.
-  - Required query parameter: `sessionId` - The session ID obtained from the SSE connection.
-  - Optional header: `x-auth-token` - Notion API key (if not provided via environment variables).
-
-### Authentication
-
-The server requires a Notion API key to communicate with the Notion API. This can be provided in two ways:
-
-1. Via the `NOTION_API_KEY` environment variable.
-2. Via the `x-auth-token` header when making requests to the `/messages` endpoint.
-
-### Running the Server
-
-```bash
-# Install dependencies
-npm install
-
-# Start the server
-npm start
-```
-
-The server will listen on port 5000 by default. You can customize this by setting the `PORT` environment variable.
-
-### OpenAPI Specification
-
-The server uses a Notion API OpenAPI specification file located at `scripts/notion-openapi.json`. This specification defines all the endpoints and operations available through the Notion API. If you need to customize or update the API specification, you can:
-
-1. Modify the existing specification file, or
-2. Provide a different specification file path using the `OPENAPI_SPEC_PATH` environment variable.
+This project is licensed under the MIT License.

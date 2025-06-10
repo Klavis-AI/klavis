@@ -20,5 +20,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["test/**/*.ts", "scripts/**/*.ts", "src/**/*.ts"]
+  "include": ["index.ts", "test/**/*.ts", "scripts/**/*.ts", "src/**/*.ts"]
 }

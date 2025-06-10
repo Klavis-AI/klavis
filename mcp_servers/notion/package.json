@@ -10,7 +10,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc -build && node scripts/build-cli.js",
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "dev": "tsx watch scripts/start-server.ts",
     "start": "tsx index.ts"
   },
