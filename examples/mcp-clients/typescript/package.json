@@ -1,0 +1,17 @@
+{
+  "name": "mcp-clients-example",
+  "version": "1.0.0",
+  "description": "Example MCP clients using TypeScript SDK",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/streamable-http.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+} 
