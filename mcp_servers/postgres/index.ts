@@ -128,18 +128,26 @@ const getPostgresMcpServer = () => {
   return server;
 }
 
-// Create AsyncLocalStorage for request context
+// Create AsyncLocalStorage for request context - now only storing databaseUrl
 const asyncLocalStorage = new AsyncLocalStorage<{
-  resourceBaseUrl: URL;
-  pool: pg.Pool;
+  databaseUrl: string;
 }>();
 
+// Create resourceBaseUrl when needed
 function getResourceBaseUrl() {
-  return asyncLocalStorage.getStore()!.resourceBaseUrl;
+  const databaseUrl = asyncLocalStorage.getStore()!.databaseUrl;
+  const resourceBaseUrl = new URL(databaseUrl);
+  resourceBaseUrl.protocol = "postgres:";
+  resourceBaseUrl.password = "";
+  return resourceBaseUrl;
 }
 
+// Create pool when needed
 function getPool() {
-  return asyncLocalStorage.getStore()!.pool;
+  const databaseUrl = asyncLocalStorage.getStore()!.databaseUrl;
+  return new pg.Pool({
+    connectionString: databaseUrl,
+  });
 }
 
 const app = express();
@@ -156,22 +164,13 @@ app.post('/mcp', async (req: Request, res: Response) => {
     console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
   }
 
-  const resourceBaseUrl = new URL(databaseUrl);
-  resourceBaseUrl.protocol = "postgres:";
-  resourceBaseUrl.password = "";
-
-  const pool = new pg.Pool({
-    connectionString: databaseUrl,
-  });
-
-
   const server = getPostgresMcpServer();
   try {
     const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
     await server.connect(transport);
-    asyncLocalStorage.run({ resourceBaseUrl, pool }, async () => {
+    asyncLocalStorage.run({ databaseUrl }, async () => {
       await transport.handleRequest(req, res, req.body);
     });
     res.on('close', () => {
@@ -256,14 +255,7 @@ app.post("/messages", async (req, res) => {
       console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
     }
 
-    const resourceBaseUrl = new URL(databaseUrl);
-    resourceBaseUrl.protocol = "postgres:";
-    resourceBaseUrl.password = "";
-
-    const pool = new pg.Pool({
-      connectionString: databaseUrl,
-    });
-    asyncLocalStorage.run({ resourceBaseUrl, pool }, async () => {
+    asyncLocalStorage.run({ databaseUrl }, async () => {
       await transport.handlePostMessage(req, res);
     });
   } else {
