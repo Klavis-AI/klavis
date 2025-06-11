@@ -174,16 +174,16 @@ interface JiraAddCommentArgs {
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
-  jiraClient: JiraClient;
+  authToken: string;
 }>();
 
 // Helper function to get Jira client from async local storage
-function getJiraClient(): JiraClient {
+async function getJiraClient(): Promise<JiraClient> {
   const store = asyncLocalStorage.getStore();
   if (!store) {
-    throw new Error('Jira client not found in AsyncLocalStorage');
+    throw new Error('Auth token not found in AsyncLocalStorage');
   }
-  return store.jiraClient;
+  return await createJiraClient(store.authToken);
 }
 
 // Create a Jira API client
@@ -758,7 +758,7 @@ const getJiraMcpServer = () => {
           throw new Error("Missing tool name");
         }
 
-        const jira = getJiraClient();
+        const jira = await getJiraClient();
 
         console.log("--- request.params.name", request.params.name);
 
@@ -1400,14 +1400,13 @@ app.post('/mcp', async (req: Request, res: Response) => {
     console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
   }
 
-  const jiraClient = await createJiraClient(authToken);
   const server = getJiraMcpServer();
   try {
     const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
     await server.connect(transport);
-    asyncLocalStorage.run({ jiraClient }, async () => {
+    asyncLocalStorage.run({ authToken }, async () => {
       await transport.handleRequest(req, res, req.body);
     });
     res.on('close', () => {
@@ -1488,9 +1487,7 @@ app.post("/messages", async (req, res) => {
       console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
     }
 
-    const jiraClient = await createJiraClient(authToken);
-
-    asyncLocalStorage.run({ jiraClient }, async () => {
+    asyncLocalStorage.run({ authToken }, async () => {
       await transport!.handlePostMessage(req, res);
     });
   } else {
