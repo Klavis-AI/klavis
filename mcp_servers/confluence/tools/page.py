@@ -196,8 +196,11 @@ async def list_pages(
         "sort": sort_by.to_api_value(),
         "body-format": BodyFormat.STORAGE.to_api_value(),
         "limit": limit,
-        "cursor": pagination_token,
     })
+    
+    # Only add cursor parameter if pagination_token has a value
+    if pagination_token:
+        params["cursor"] = pagination_token
     pages = await client.get("pages", params=params)
     return client.transform_list_pages_response(pages)
 

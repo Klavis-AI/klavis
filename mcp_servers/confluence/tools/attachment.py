@@ -24,8 +24,11 @@ async def get_attachments_for_page(
 
     params = remove_none_values({
         "limit": max(1, min(limit, 250)),
-        "cursor": pagination_token,
     })
+    
+    # Only add cursor parameter if pagination_token has a value
+    if pagination_token:
+        params["cursor"] = pagination_token
     attachments = await client.get(f"pages/{page_id}/attachments", params=params)
     return client.transform_get_attachments_response(attachments)
 
@@ -53,8 +56,11 @@ async def list_attachments(
     params = remove_none_values({
         "sort": sort_order.to_api_value(),
         "limit": max(1, min(limit, 250)),
-        "cursor": pagination_token,
     })
+    
+    # Only add cursor parameter if pagination_token has a value
+    if pagination_token:
+        params["cursor"] = pagination_token
     attachments = await client.get("attachments", params=params)
     return client.transform_get_attachments_response(attachments)
 

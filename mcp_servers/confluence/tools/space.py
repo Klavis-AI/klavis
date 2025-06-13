@@ -28,8 +28,11 @@ async def list_spaces(
 ) -> Annotated[dict, "The spaces"]:
     """List all spaces sorted by name in ascending order."""
     client = ConfluenceClientV2()
-    params = {"limit": max(1, min(limit, 250)), "sort": "name", "cursor": pagination_token}
-    params = remove_none_values(params)
+    params = {"limit": max(1, min(limit, 250)), "sort": "name"}
+    
+    # Only add cursor parameter if pagination_token has a value
+    if pagination_token:
+        params["cursor"] = pagination_token
     spaces = await client.get("spaces", params=params)
     return client.transform_get_spaces_response(spaces)
 

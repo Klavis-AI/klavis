@@ -8,7 +8,7 @@ const KLAVIS_API_BASE_URL = "https://api.klavis.ai";
 export type ServerName = 
     | "Markdown2doc" | "Slack" | "Supabase" | "Postgres" | "YouTube" | "Doc2markdown"
     | "Klavis ReportGen" | "Resend" | "Discord" | "Firecrawl Web Search" | "GitHub"
-    | "Firecrawl Deep Research" | "Jira" | "WordPress" | "Notion" | "Gmail"
+    | "Firecrawl Deep Research" | "Jira" | "Confluence" | "WordPress" | "Notion" | "Gmail"
     | "Google Drive" | "Google Calendar" | "Google Sheets" | "Google Docs"
     | "Attio" | "Salesforce" | "Linear" | "Asana" | "Close";
 
@@ -21,6 +21,7 @@ const OAUTH_SERVICE_NAME_TO_URL_PATH: Record<ServerName, string> = {
     'Google Sheets': 'gsheets',
     'Google Docs': 'gdocs',
     'Jira': 'jira',
+    'Confluence': 'confluence',
     'WordPress': 'wordpress',
     'Notion': 'notion',
     'Gmail': 'gmail',

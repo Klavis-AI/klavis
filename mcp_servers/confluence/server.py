@@ -31,6 +31,10 @@ from tools import (
     get_attachments_for_page, list_attachments, get_attachment,
 )
 
+from enums import (
+    convert_sort_by_to_enum, convert_sort_order_to_enum, convert_update_mode_to_enum
+)
+
 # Import context for auth token
 from client import auth_token_context
 
@@ -381,7 +385,7 @@ def main(
             elif name == "confluence_list_pages":
                 result = await list_pages(
                     space_ids=arguments.get("space_ids"),
-                    sort_by=arguments.get("sort_by"),
+                    sort_by=convert_sort_by_to_enum(arguments.get("sort_by")),
                     limit=arguments.get("limit", 25),
                     pagination_token=arguments.get("pagination_token"),
                 )
@@ -389,7 +393,7 @@ def main(
                 result = await update_page_content(
                     page_identifier=arguments["page_identifier"],
                     content=arguments["content"],
-                    update_mode=arguments.get("update_mode", "append"),
+                    update_mode=convert_update_mode_to_enum(arguments.get("update_mode", "append")),
                 )
             elif name == "confluence_rename_page":
                 result = await rename_page(
@@ -421,7 +425,7 @@ def main(
             # Attachment tools
             elif name == "confluence_list_attachments":
                 result = await list_attachments(
-                    sort_order=arguments.get("sort_order"),
+                    sort_order=convert_sort_order_to_enum(arguments.get("sort_order")),
                     limit=arguments.get("limit", 25),
                     pagination_token=arguments.get("pagination_token"),
                 )
