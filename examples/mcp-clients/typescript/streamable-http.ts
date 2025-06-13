@@ -36,8 +36,8 @@ async function main(): Promise<void> {
     
     // Create MCP instance and get server URL
     const { serverUrl } = await klavisApi.createMcpInstance(
-      "GitHub", // Example server name
-      "1234", // Example user ID
+      "Confluence", // Example server name
+      "12345", // Example user ID
       "demo", // Example platform name
       "StreamableHttp" // Connection type
     );

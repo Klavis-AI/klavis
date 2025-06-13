@@ -1,11 +1,12 @@
 import contextlib
 import logging
 import os
-from collections.abc import AsyncIterator
-from typing import Any, Dict, List, Optional
 import json
+from collections.abc import AsyncIterator
+from typing import Any, Dict
 
 import click
+import mcp.types as types
 from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
@@ -14,12 +15,29 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
-import aiohttp
-import asyncio
 
-# Import the Confluence tools
-from tools import ConfluenceFetcher, ConfluenceConfig, ConfluenceClient
-import mcp.types as types
+from errors import ToolExecutionError, AuthenticationError, TokenExpiredError, InvalidTokenError
+
+# Import tools
+from tools import (
+    # Page tools
+    create_page, get_page, get_pages_by_id, list_pages, rename_page, 
+    update_page_content,
+    # Space tools
+    get_space, get_space_hierarchy, list_spaces,
+    # Search tools
+    search_content,
+    # Attachment tools
+    get_attachments_for_page, list_attachments, get_attachment,
+)
+
+from enums import (
+    convert_sort_by_to_enum, convert_sort_order_to_enum, convert_update_mode_to_enum
+)
+
+# Import context for auth token
+from client import auth_token_context
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -27,24 +45,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
-# Confluence API constants and configuration
-CONFLUENCE_BASE_URL = os.getenv("CONFLUENCE_BASE_URL")
-CONFLUENCE_API_TOKEN = os.getenv("CONFLUENCE_API_TOKEN")
-CONFLUENCE_USERNAME = os.getenv("CONFLUENCE_USERNAME")
-CONFLUENCE_MCP_SERVER_PORT = int(os.getenv("CONFLUENCE_MCP_SERVER_PORT", "5001"))
-
-if not CONFLUENCE_BASE_URL or not (CONFLUENCE_API_TOKEN or CONFLUENCE_USERNAME):
-    raise ValueError("CONFLUENCE_BASE_URL and either CONFLUENCE_API_TOKEN or CONFLUENCE_USERNAME environment variables are required")
-
-# Create the Confluence client instance
-client = ConfluenceClient(
-    base_url=CONFLUENCE_BASE_URL,
-    username=CONFLUENCE_USERNAME,
-    api_token=CONFLUENCE_API_TOKEN
-)
-
-fetcher = ConfluenceFetcher()
-fetcher.client = client
+CONFLUENCE_MCP_SERVER_PORT = int(os.getenv("CONFLUENCE_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=CONFLUENCE_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -68,417 +69,418 @@ def main(
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Create the MCP server instance
     app = Server("confluence-mcp-server")
 
     @app.list_tools()
-    async def list_tools() -> List[types.Tool]:
+    async def list_tools() -> list[types.Tool]:
         return [
+            # Page tools
             types.Tool(
-                name="search_confluence",
-                description="Search for content in Confluence",
+                name="confluence_create_page",
+                description="Create a new page in Confluence",
                 inputSchema={
                     "type": "object",
-                    "required": ["query"],
                     "properties": {
-                        "query": {
+                        "space_identifier": {
                             "type": "string",
-                            "description": "The search query",
+                            "description": "The ID or title of the space to create the page in",
                         },
-                        "space_key": {
+                        "title": {
                             "type": "string",
-                            "description": "Limit search to a specific space",
+                            "description": "The title of the page",
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "The content of the page. Only plain text is supported",
+                        },
+                        "parent_id": {
+                            "type": "string",
+                            "description": "The ID of the parent. If not provided, the page will be created at the root of the space.",
+                        },
+                        "is_private": {
+                            "type": "boolean",
+                            "description": "If true, then only the user who creates this page will be able to see it. Defaults to False",
+                        },
+                        "is_draft": {
+                            "type": "boolean",
+                            "description": "If true, then the page will be created as a draft. Defaults to False",
+                        },
+                    },
+                    "required": ["space_identifier", "title", "content"],
+                },
+            ),
+            types.Tool(
+                name="confluence_get_page",
+                description="Retrieve a SINGLE page's content by its ID or title. For retrieving MULTIPLE pages, use confluence_get_pages_by_id instead",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "page_identifier": {
+                            "type": "string",
+                            "description": "Can be a page's ID or title. Numerical titles are NOT supported.",
+                        },
+                    },
+                    "required": ["page_identifier"],
+                },
+            ),
+            types.Tool(
+                name="confluence_get_pages_by_id",
+                description="Get the content of MULTIPLE pages by their ID in a single efficient request",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "page_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "The IDs of the pages to get. IDs are numeric. Titles of pages are NOT supported. Maximum of 250 page ids supported.",
+                        },
+                    },
+                    "required": ["page_ids"],
+                },
+            ),
+            types.Tool(
+                name="confluence_list_pages",
+                description="Get the content of multiple pages with optional filtering and sorting",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "space_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Restrict the response to only include pages in these spaces. Only space IDs are supported. Titles of spaces are NOT supported. Maximum of 100 space ids supported.",
+                        },
+                        "sort_by": {
+                            "type": "string",
+                            "description": "The order of the pages to sort by. Defaults to created-date-newest-to-oldest",
+                            "enum": ["id-ascending", "id-descending", "title-ascending", "title-descending", 
+                                   "created-date-oldest-to-newest", "created-date-newest-to-oldest",
+                                   "modified-date-oldest-to-newest", "modified-date-newest-to-oldest"],
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of results to return",
-                            "default": 10
-                        }
+                            "description": "The maximum number of pages to return. Defaults to 25. Max is 250",
+                            "minimum": 1,
+                            "maximum": 250,
+                        },
+                        "pagination_token": {
+                            "type": "string",
+                            "description": "The pagination token to use for the next page of results",
+                        },
                     },
                 },
             ),
             types.Tool(
-                name="get_page",
-                description="Get a Confluence page by ID",
+                name="confluence_update_page_content",
+                description="Update a page's content",
                 inputSchema={
                     "type": "object",
-                    "required": ["page_id"],
                     "properties": {
-                        "page_id": {
+                        "page_identifier": {
                             "type": "string",
-                            "description": "The ID of the page to retrieve",
+                            "description": "The ID or title of the page to update. Numerical titles are NOT supported.",
                         },
-                        "expand": {
+                        "content": {
                             "type": "string",
-                            "description": "Properties to expand (comma-separated)"
-                        }
+                            "description": "The content of the page. Only plain text is supported",
+                        },
+                        "update_mode": {
+                            "type": "string",
+                            "description": "The mode of update. Defaults to 'append'.",
+                            "enum": ["prepend", "append", "replace"],
+                        },
                     },
+                    "required": ["page_identifier", "content"],
                 },
             ),
             types.Tool(
-                name="get_spaces",
-                description="Get a list of Confluence spaces",
+                name="confluence_rename_page",
+                description="Rename a page by changing its title",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "page_identifier": {
+                            "type": "string",
+                            "description": "The ID or title of the page to rename. Numerical titles are NOT supported.",
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "The title of the page",
+                        },
+                    },
+                    "required": ["page_identifier", "title"],
+                },
+            ),
+            # Space tools
+            types.Tool(
+                name="confluence_list_spaces",
+                description="List all spaces sorted by name in ascending order",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of spaces to return",
-                            "default": 10
+                            "description": "The maximum number of spaces to return. Defaults to 25. Max is 250",
+                            "minimum": 1,
+                            "maximum": 250,
                         },
-                        "space_type": {
+                        "pagination_token": {
                             "type": "string",
-                            "description": "Type of spaces to return (global, personal)",
-                            "enum": ["global", "personal"]
-                        }
+                            "description": "The pagination token to use for the next page of results",
+                        },
                     },
                 },
             ),
             types.Tool(
-                name="get_page_children",
-                description="Get children of a Confluence page",
+                name="confluence_get_space",
+                description="Get the details of a space by its ID or key",
                 inputSchema={
                     "type": "object",
-                    "required": ["page_id"],
                     "properties": {
-                        "page_id": {
+                        "space_identifier": {
                             "type": "string",
-                            "description": "The ID of the parent page",
+                            "description": "Can be a space's ID or key. Numerical keys are NOT supported",
+                        },
+                    },
+                    "required": ["space_identifier"],
+                },
+            ),
+            types.Tool(
+                name="confluence_get_space_hierarchy",
+                description="Retrieve the full hierarchical structure of a Confluence space as a tree structure",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "space_identifier": {
+                            "type": "string",
+                            "description": "Can be a space's ID or key. Numerical keys are NOT supported",
+                        },
+                    },
+                    "required": ["space_identifier"],
+                },
+            ),
+            # Search tools
+            types.Tool(
+                name="confluence_search_content",
+                description="Search for content in Confluence. The search is performed across all content in the authenticated user's Confluence workspace. All search terms in Confluence are case insensitive.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "must_contain_all": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Words/phrases that content MUST contain (AND logic). Each item can be: single word or multi-word phrase. All items in this list must be present for content to match.",
+                        },
+                        "can_contain_any": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Words/phrases where content can contain ANY of these (OR logic). Content matching ANY item in this list will be included.",
+                        },
+                        "enable_fuzzy": {
+                            "type": "boolean",
+                            "description": "Enable fuzzy matching to find similar terms (e.g. 'roam' will find 'foam'). Defaults to True",
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of children to return",
-                            "default": 10
-                        }
+                            "description": "Maximum number of results to return (1-100). Defaults to 25",
+                            "minimum": 1,
+                            "maximum": 100,
+                        },
+                    },
+                },
+            ),
+            # Attachment tools
+            types.Tool(
+                name="confluence_list_attachments",
+                description="List attachments in a workspace",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "sort_order": {
+                            "type": "string",
+                            "description": "The order of the attachments to sort by. Defaults to created-date-newest-to-oldest",
+                            "enum": ["created-date-oldest-to-newest", "created-date-newest-to-oldest",
+                                   "modified-date-oldest-to-newest", "modified-date-newest-to-oldest"],
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "The maximum number of attachments to return. Defaults to 25. Max is 250",
+                            "minimum": 1,
+                            "maximum": 250,
+                        },
+                        "pagination_token": {
+                            "type": "string",
+                            "description": "The pagination token to use for the next page of results",
+                        },
                     },
                 },
             ),
             types.Tool(
-                name="get_page_comments",
-                description="Get comments on a Confluence page",
+                name="confluence_get_attachments_for_page",
+                description="Get attachments for a page by its ID or title. If a page title is provided, then the first page with an exact matching title will be returned.",
                 inputSchema={
                     "type": "object",
-                    "required": ["page_id"],
                     "properties": {
-                        "page_id": {
+                        "page_identifier": {
                             "type": "string",
-                            "description": "The ID of the page",
+                            "description": "The ID or title of the page to get attachments for",
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of comments to return",
-                            "default": 10
-                        }
+                            "description": "The maximum number of attachments to return. Defaults to 25. Max is 250",
+                            "minimum": 1,
+                            "maximum": 250,
+                        },
+                        "pagination_token": {
+                            "type": "string",
+                            "description": "The pagination token to use for the next page of results",
+                        },
                     },
+                    "required": ["page_identifier"],
                 },
-            )
+            ),
+            types.Tool(
+                name="confluence_get_attachment",
+                description="Get a specific attachment by its ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "attachment_id": {
+                            "type": "string",
+                            "description": "The ID of the attachment to get",
+                        },
+                    },
+                    "required": ["attachment_id"],
+                },
+            ),
         ]
 
     @app.call_tool()
     async def call_tool(
         name: str, arguments: dict
-    ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        ctx = app.request_context
-        
-        if name == "search_confluence":
-            query = arguments.get("query")
-            space_key = arguments.get("space_key")
-            limit = arguments.get("limit", 10)
-            
-            if not query:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: query parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await search_content(query, space_key, limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "get_page":
-            page_id = arguments.get("page_id")
-            expand = arguments.get("expand", "body.storage,version")
-            
-            if not page_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: page_id parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await get_page_content(page_id, expand)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "get_spaces":
-            limit = arguments.get("limit", 10)
-            space_type = arguments.get("space_type")
-            
-            try:
-                result = await get_spaces(limit, space_type)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "get_page_children":
-            page_id = arguments.get("page_id")
-            limit = arguments.get("limit", 10)
-            
-            if not page_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: page_id parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await get_page_children(page_id, limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "get_page_comments":
-            page_id = arguments.get("page_id")
-            limit = arguments.get("limit", 10)
-            
-            if not page_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: page_id parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await get_page_comments(page_id, limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        return [
-            types.TextContent(
-                type="text",
-                text=f"Unknown tool: {name}",
-            )
-        ]
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        logger.info(f"Calling tool: {name} with arguments: {arguments}")
 
-    async def search_content(query: str, space_key: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
-        """Search for content in Confluence."""
         try:
-            logger.info(f"Searching Confluence for: {query}, space_key: {space_key}, limit: {limit}")
-            
-            search_params = {
-                "cql": f"text ~ \"{query}\""
-            }
-            
-            if space_key:
-                search_params["cql"] += f" AND space = \"{space_key}\""
-            
-            search_params["limit"] = limit
-            
-            results = await fetcher.search_content(**search_params)
-            
-            # Format and return results
-            formatted_results = []
-            for item in results.get("results", []):
-                formatted_results.append({
-                    "id": item.get("id"),
-                    "title": item.get("title"),
-                    "type": item.get("type"),
-                    "space": item.get("space", {}).get("key", "") if item.get("space") else "",
-                    "url": item.get("_links", {}).get("webui", "") if item.get("_links") else ""
-                })
-            
-            return {
-                "query": query,
-                "total": results.get("totalSize", 0),
-                "results": formatted_results
-            }
-        except Exception as e:
-            logger.exception(f"Error searching Confluence: {e}")
-            return {"error": str(e)}
+            # Page tools
+            if name == "confluence_create_page":
+                result = await create_page(
+                    space_identifier=arguments["space_identifier"],
+                    title=arguments["title"],
+                    content=arguments["content"],
+                    parent_id=arguments.get("parent_id"),
+                    is_private=arguments.get("is_private", False),
+                    is_draft=arguments.get("is_draft", False),
+                )
+            elif name == "confluence_get_page":
+                result = await get_page(
+                    page_identifier=arguments["page_identifier"],
+                )
+            elif name == "confluence_get_pages_by_id":
+                result = await get_pages_by_id(
+                    page_ids=arguments["page_ids"],
+                )
+            elif name == "confluence_list_pages":
+                result = await list_pages(
+                    space_ids=arguments.get("space_ids"),
+                    sort_by=convert_sort_by_to_enum(arguments.get("sort_by")),
+                    limit=arguments.get("limit", 25),
+                    pagination_token=arguments.get("pagination_token"),
+                )
+            elif name == "confluence_update_page_content":
+                result = await update_page_content(
+                    page_identifier=arguments["page_identifier"],
+                    content=arguments["content"],
+                    update_mode=convert_update_mode_to_enum(arguments.get("update_mode", "append")),
+                )
+            elif name == "confluence_rename_page":
+                result = await rename_page(
+                    page_identifier=arguments["page_identifier"],
+                    title=arguments["title"],
+                )
+            # Space tools
+            elif name == "confluence_list_spaces":
+                result = await list_spaces(
+                    limit=arguments.get("limit", 25),
+                    pagination_token=arguments.get("pagination_token"),
+                )
+            elif name == "confluence_get_space":
+                result = await get_space(
+                    space_identifier=arguments["space_identifier"],
+                )
+            elif name == "confluence_get_space_hierarchy":
+                result = await get_space_hierarchy(
+                    space_identifier=arguments["space_identifier"],
+                )
+            # Search tools
+            elif name == "confluence_search_content":
+                result = await search_content(
+                    must_contain_all=arguments.get("must_contain_all"),
+                    can_contain_any=arguments.get("can_contain_any"),
+                    enable_fuzzy=arguments.get("enable_fuzzy", True),
+                    limit=arguments.get("limit", 25),
+                )
+            # Attachment tools
+            elif name == "confluence_list_attachments":
+                result = await list_attachments(
+                    sort_order=convert_sort_order_to_enum(arguments.get("sort_order")),
+                    limit=arguments.get("limit", 25),
+                    pagination_token=arguments.get("pagination_token"),
+                )
+            elif name == "confluence_get_attachments_for_page":
+                result = await get_attachments_for_page(
+                    page_identifier=arguments["page_identifier"],
+                    limit=arguments.get("limit", 25),
+                    pagination_token=arguments.get("pagination_token"),
+                )
+            elif name == "confluence_get_attachment":
+                result = await get_attachment(
+                    attachment_id=arguments["attachment_id"],
+                )
+            else:
+                raise ValueError(f"Unknown tool: {name}")
 
-    async def get_page_content(page_id: str, expand: str = "body.storage,version") -> Dict[str, Any]:
-        """Get a Confluence page by ID."""
-        try:
-            logger.info(f"Getting Confluence page: {page_id}, expand: {expand}")
-            page = await fetcher.get_page(page_id=page_id, expand=expand)
-            
-            # Format and return page content
-            result = {
-                "id": page.get("id"),
-                "title": page.get("title"),
-                "type": page.get("type"),
-                "version": page.get("version", {}).get("number", 0) if page.get("version") else 0,
-                "space": page.get("space", {}).get("key", "") if page.get("space") else "",
-                "url": page.get("_links", {}).get("webui", "") if page.get("_links") else "",
-                "body": page.get("body", {}).get("storage", {}).get("value", "") if page.get("body") and page.get("body").get("storage") else ""
-            }
-            
-            return result
-        except Exception as e:
-            logger.exception(f"Error getting Confluence page: {e}")
-            return {"error": str(e)}
+            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    async def get_spaces(limit: int = 10, space_type: Optional[str] = None) -> Dict[str, Any]:
-        """Get a list of Confluence spaces."""
-        try:
-            logger.info(f"Getting Confluence spaces, limit: {limit}, type: {space_type}")
-            
-            params = {"limit": limit}
-            if space_type:
-                params["type"] = space_type
-            
-            spaces_result = await fetcher.get_spaces(**params)
-            
-            # Format and return spaces
-            formatted_spaces = []
-            for space in spaces_result.get("results", []):
-                formatted_spaces.append({
-                    "id": space.get("id"),
-                    "key": space.get("key"),
-                    "name": space.get("name"),
-                    "type": space.get("type"),
-                    "url": space.get("_links", {}).get("webui", "") if space.get("_links") else ""
-                })
-            
-            return {
-                "total": spaces_result.get("size", 0),
-                "spaces": formatted_spaces
+        except (AuthenticationError, TokenExpiredError, InvalidTokenError, ToolExecutionError) as e:
+            logger.error(f"Confluence error in {name}: {e}")
+            error_response = {
+                "error": str(e),
+                "developer_message": getattr(e, "developer_message", ""),
             }
+            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2))]
         except Exception as e:
-            logger.exception(f"Error getting Confluence spaces: {e}")
-            return {"error": str(e)}
-
-    async def get_page_children(page_id: str, limit: int = 10) -> Dict[str, Any]:
-        """Get children of a Confluence page."""
-        try:
-            logger.info(f"Getting children of Confluence page: {page_id}, limit: {limit}")
-            
-            children = await fetcher.get_page_children(page_id=page_id, limit=limit)
-            
-            # Format and return children
-            formatted_children = []
-            for child in children.get("results", []):
-                formatted_children.append({
-                    "id": child.get("id"),
-                    "title": child.get("title"),
-                    "type": child.get("type"),
-                    "url": child.get("_links", {}).get("webui", "") if child.get("_links") else ""
-                })
-            
-            return {
-                "parent_id": page_id,
-                "total": children.get("size", 0),
-                "children": formatted_children
+            logger.exception(f"Unexpected error in tool {name}")
+            error_response = {
+                "error": f"Unexpected error: {str(e)}",
+                "developer_message": f"Unexpected error in tool {name}: {type(e).__name__}: {str(e)}",
             }
-        except Exception as e:
-            logger.exception(f"Error getting page children: {e}")
-            return {"error": str(e)}
-
-    async def get_page_comments(page_id: str, limit: int = 10) -> Dict[str, Any]:
-        """Get comments on a Confluence page."""
-        try:
-            logger.info(f"Getting comments for Confluence page: {page_id}, limit: {limit}")
-            
-            comments = await fetcher.get_page_comments(content_id=page_id, limit=limit)
-            
-            # Format and return comments
-            formatted_comments = []
-            for comment in comments.get("results", []):
-                formatted_comments.append({
-                    "id": comment.get("id"),
-                    "title": comment.get("title"),
-                    "created": comment.get("created"),
-                    "author": comment.get("author", {}).get("displayName", "") if comment.get("author") else "",
-                    "body": comment.get("body", {}).get("storage", {}).get("value", "") if comment.get("body") and comment.get("body").get("storage") else ""
-                })
-            
-            return {
-                "page_id": page_id,
-                "total": comments.get("size", 0),
-                "comments": formatted_comments
-            }
-        except Exception as e:
-            logger.exception(f"Error getting page comments: {e}")
-            return {"error": str(e)}
+            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2))]
 
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        async with sse.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await app.run(
-                streams[0], streams[1], app.create_initialization_options()
-            )
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
+        
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
+        
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
         return Response()
 
     # Set up StreamableHTTP transport
@@ -493,7 +495,20 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        await session_manager.handle_request(scope, receive, send)
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        headers = dict(scope.get("headers", []))
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
+        
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
@@ -525,9 +540,17 @@ def main(
 
     import uvicorn
 
-    uvicorn.run(starlette_app, host="0.0.0.0", port=port)
-
-    return 0
+    try:
+        uvicorn.run(
+            starlette_app,
+            host="0.0.0.0",
+            port=port,
+            log_level=log_level.lower(),
+        )
+        return 0
+    except Exception as e:
+        logger.exception(f"Failed to start server: {e}")
+        return 1
 
 if __name__ == "__main__":
-    main()
+    exit(main()) 
