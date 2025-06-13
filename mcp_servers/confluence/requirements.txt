@@ -2,9 +2,9 @@ mcp>=1.9.3
 pydantic
 fastapi
 uvicorn[standard]
-aiohttp
 python-dotenv
 typing-extensions
+httpx
 click
 starlette
-atlassian-python-api>=3.41.0 
+asyncio 
