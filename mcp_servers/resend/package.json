@@ -7,7 +7,7 @@
   "license": "MIT",
   "description": "Klavis MCP server for Resend",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@react-email/components": "^0.0.41",
     "@react-email/render": "^1.0.5",
     "dotenv": "^16.3.1",

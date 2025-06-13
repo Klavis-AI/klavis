@@ -7,7 +7,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2",

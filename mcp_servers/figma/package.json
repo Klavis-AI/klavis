@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.4.7",
     "js-yaml": "^4.1.0",
     "zod": "^3.22.4"

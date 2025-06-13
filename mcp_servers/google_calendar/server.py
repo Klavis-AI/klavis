@@ -774,14 +774,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers
+        # Extract auth token from headers (allow None - will be handled at tool level)
         auth_token = request.headers.get('x-auth-token')
-        if not auth_token:
-            logger.error('Error: Google Calendar access token is missing. Provide it via x-auth-token header.')
-            return Response("Authentication token required", status_code=401)
         
-        # Set the auth token in context for this request
-        token = auth_token_context.set(auth_token)
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -807,20 +804,14 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers
+        # Extract auth token from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
         auth_token = headers.get(b'x-auth-token')
         if auth_token:
             auth_token = auth_token.decode('utf-8')
         
-        if not auth_token:
-            logger.error('Error: Google Calendar access token is missing. Provide it via x-auth-token header.')
-            response = Response("Authentication token required", status_code=401)
-            await response(scope, receive, send)
-            return
-        
-        # Set the auth token in context for this request
-        token = auth_token_context.set(auth_token)
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

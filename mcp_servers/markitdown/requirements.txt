@@ -1,4 +1,4 @@
-mcp>=1.8.1
+mcp>=1.9.3
 markitdown[all]
 pydantic
 fastapi

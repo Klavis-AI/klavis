@@ -1,6 +1,6 @@
 aiohttp>=3.8.0
 python-dotenv>=1.0.0
-mcp>=1.8.1
+mcp>=1.9.3
 httpx>=0.27.0
 fastapi
 uvicorn[standard] 

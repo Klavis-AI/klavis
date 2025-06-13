@@ -22,22 +22,30 @@ import { hashObject } from './util.js';
 import { AsyncLocalStorage } from 'async_hooks';
 
 export const asyncLocalStorage = new AsyncLocalStorage<{
-  managementApiClient: ManagementApiClient;
+  accessToken: string;
 }>();
 
-function getManagementApiClient() {
-  return asyncLocalStorage.getStore()!.managementApiClient;
-}
-
-export function setManagementApiClient(accessToken: string) {
-  const managementApiClient = createManagementApiClient(
+function getManagementApiClient(): ManagementApiClient {
+  const store = asyncLocalStorage.getStore();
+  if (!store) {
+    throw new Error('Access token not found in AsyncLocalStorage');
+  }
+  
+  return createManagementApiClient(
     'https://api.supabase.com',
-    accessToken,
+    store.accessToken,
     {
       'User-Agent': `supabase-mcp/${version}`,
     }
   );
-  return managementApiClient;
+}
+
+export function getAccessToken(): string {
+  const store = asyncLocalStorage.getStore();
+  if (!store) {
+    throw new Error('Access token not found in AsyncLocalStorage');
+  }
+  return store.accessToken;
 }
 
 export type SupabasePlatformOptions = {

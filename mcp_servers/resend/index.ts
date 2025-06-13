@@ -14,11 +14,15 @@ dotenv.config();
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
-  resendClient: Resend;
+  apiKey: string;
 }>();
 
 function getResendClient() {
-  return asyncLocalStorage.getStore()!.resendClient;
+  const store = asyncLocalStorage.getStore();
+  if (!store) {
+    throw new Error('API key not found in AsyncLocalStorage');
+  }
+  return new Resend(store.apiKey);
 }
 
 const getResendMcpServer = () => {
@@ -689,15 +693,13 @@ app.post('/mcp', async (req: Request, res: Response) => {
     console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
   }
 
-  const resendClient = new Resend(apiKey);
-
   const server = getResendMcpServer();
   try {
     const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
     await server.connect(transport);
-    asyncLocalStorage.run({ resendClient }, async () => {
+    asyncLocalStorage.run({ apiKey }, async () => {
       await transport.handleRequest(req, res, req.body);
     });
     res.on('close', () => {
@@ -781,10 +783,8 @@ app.post("/messages", async (req, res) => {
       console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
     }
 
-    const resendClient = new Resend(apiKey);
-
-    asyncLocalStorage.run({ resendClient }, async () => {
-      await transport.handlePostMessage(req, res);
+    asyncLocalStorage.run({ apiKey }, async () => {
+      await transport!.handlePostMessage(req, res);
     });
   } else {
     console.error(`Transport not found for session ID: ${sessionId}`);

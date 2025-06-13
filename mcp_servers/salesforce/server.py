@@ -27,19 +27,26 @@ load_dotenv()
 
 SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5000"))
 
-# Context variable to store the Salesforce connection for each request
-salesforce_connection_context: ContextVar[Salesforce] = ContextVar('salesforce_connection')
+# Context variables to store the access token and instance URL for each request
+access_token_context: ContextVar[str] = ContextVar('access_token')
+instance_url_context: ContextVar[str] = ContextVar('instance_url')
 
 def get_salesforce_connection(access_token: str, instance_url: str) -> Salesforce:
     """Create Salesforce connection with access token."""
     return Salesforce(instance_url=instance_url, session_id=access_token)
 
 def get_salesforce_conn() -> Salesforce:
-    """Get the Salesforce connection from context."""
+    """Get the Salesforce connection from context - created fresh each time."""
     try:
-        return salesforce_connection_context.get()
+        access_token = access_token_context.get()
+        instance_url = instance_url_context.get()
+        
+        if not access_token or not instance_url:
+            raise RuntimeError("Salesforce access token and instance URL are required. Provide them via x-auth-token and x-instance-url headers.")
+        
+        return get_salesforce_connection(access_token, instance_url)
     except LookupError:
-        raise RuntimeError("Salesforce connection not found in request context")
+        raise RuntimeError("Salesforce credentials not found in request context")
 
 async def execute_soql_query(query: str) -> Dict[str, Any]:
     """Execute a SOQL query on Salesforce."""
@@ -489,17 +496,13 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth credentials from headers
+        # Extract auth credentials from headers (allow None - will be handled at tool level)
         access_token = request.headers.get('x-auth-token')
         instance_url = request.headers.get('x-instance-url')
         
-        if not access_token or not instance_url:
-            logger.error('Error: Salesforce access token and instance URL are required. Provide them via x-auth-token and x-instance-url headers.')
-            return Response("Authentication credentials required", status_code=401)
-        
-        # Set the Salesforce connection in context for this request
-        sf_conn = get_salesforce_connection(access_token, instance_url)
-        token = salesforce_connection_context.set(sf_conn)
+        # Set the access token and instance URL in context for this request (can be None)
+        access_token_token = access_token_context.set(access_token or "")
+        instance_url_token = instance_url_context.set(instance_url or "")
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -508,7 +511,8 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            salesforce_connection_context.reset(token)
+            access_token_context.reset(access_token_token)
+            instance_url_context.reset(instance_url_token)
         
         return Response()
 
@@ -525,7 +529,7 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth credentials from headers
+        # Extract auth credentials from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
         access_token = headers.get(b'x-auth-token')
         instance_url = headers.get(b'x-instance-url')
@@ -535,19 +539,14 @@ def main(
         if instance_url:
             instance_url = instance_url.decode('utf-8')
         
-        if not access_token or not instance_url:
-            logger.error('Error: Salesforce access token and instance URL are required. Provide them via x-auth-token and x-instance-url headers.')
-            response = Response("Authentication credentials required", status_code=401)
-            await response(scope, receive, send)
-            return
-        
-        # Set the Salesforce connection in context for this request
-        sf_conn = get_salesforce_connection(access_token, instance_url)
-        token = salesforce_connection_context.set(sf_conn)
+        # Set the access token and instance URL in context for this request (can be None/empty)
+        access_token_token = access_token_context.set(access_token or "")
+        instance_url_token = instance_url_context.set(instance_url or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            salesforce_connection_context.reset(token)
+            access_token_context.reset(access_token_token)
+            instance_url_context.reset(instance_url_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:

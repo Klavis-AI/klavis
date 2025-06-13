@@ -2,7 +2,7 @@
 
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { createSupabaseMcpServer, setManagementApiClient, asyncLocalStorage } from './server.js';
+import { createSupabaseMcpServer, asyncLocalStorage } from './server.js';
 import express from 'express';
 import * as dotenv from 'dotenv';
 
@@ -36,7 +36,7 @@ app.post('/mcp', async (req, res) => {
       sessionIdGenerator: undefined,
     });
     await server.connect(transport);
-    asyncLocalStorage.run({ managementApiClient: setManagementApiClient(accessToken) }, async () => {
+    asyncLocalStorage.run({ accessToken }, async () => {
       await transport.handleRequest(req, res, req.body);
     });
     res.on('close', () => {
@@ -111,7 +111,7 @@ app.post("/messages", async (req, res) => {
     if (!accessToken) {
       console.error('Error: Supabase Access Token is missing. Provide it via x-auth-token header.');
     }
-    asyncLocalStorage.run({ managementApiClient: setManagementApiClient(accessToken) }, async () => {
+    asyncLocalStorage.run({ accessToken }, async () => {
       await transport.handlePostMessage(req, res);
     });
   } else {
@@ -119,7 +119,7 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-const PORT = 5000;
+const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Supabase MCP Server running on port ${PORT}`);
 }); 

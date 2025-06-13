@@ -19,7 +19,7 @@
     "test": "node test-sse.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@types/node": "^22",
     "express": "^4.21.2",
     "@supabase/supabase-js": "^2.49.1",
