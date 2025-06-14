@@ -183,7 +183,7 @@ class AttioClient {
             body: JSON.stringify({
                 data: {
                     values: recordData
-                } 
+                }
             }),
         });
     }
@@ -208,7 +208,9 @@ class AttioClient {
         return this.makeRequest('/objects/companies/records', {
             method: 'POST',
             body: JSON.stringify({
-                data: recordData
+                data: {
+                    values: recordData
+                }
             }),
         });
     }
@@ -242,7 +244,9 @@ class AttioClient {
         return this.makeRequest(`/objects/people/records/${recordId}`, {
             method: 'PATCH',
             body: JSON.stringify({
-                data: recordData
+                data: {
+                    values: recordData
+                }
             }),
         });
     }
@@ -267,7 +271,9 @@ class AttioClient {
         return this.makeRequest(`/objects/companies/records/${recordId}`, {
             method: 'PATCH',
             body: JSON.stringify({
-                data: recordData
+                data: {
+                    values: recordData
+                }
             }),
         });
     }
