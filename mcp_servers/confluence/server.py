@@ -24,7 +24,7 @@ from tools import (
     create_page, get_page, get_pages_by_id, list_pages, rename_page, 
     update_page_content,
     # Space tools
-    get_space, get_space_hierarchy, list_spaces,
+    create_space, get_space, get_space_hierarchy, list_spaces,
     # Search tools
     search_content,
     # Attachment tools
@@ -215,6 +215,32 @@ def main(
             ),
             # Space tools
             types.Tool(
+                name="confluence_create_space",
+                description="Create a new space in Confluence",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the space",
+                        },
+                        "key": {
+                            "type": "string",
+                            "description": "The key of the space. If not provided, one will be generated automatically",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "The description of the space",
+                        },
+                        "is_private": {
+                            "type": "boolean",
+                            "description": "If true, the space will be private to the creator. Defaults to False",
+                        },
+                    },
+                    "required": ["name"],
+                },
+            ),
+            types.Tool(
                 name="confluence_list_spaces",
                 description="List all spaces sorted by name in ascending order",
                 inputSchema={
@@ -401,6 +427,13 @@ def main(
                     title=arguments["title"],
                 )
             # Space tools
+            elif name == "confluence_create_space":
+                result = await create_space(
+                    name=arguments["name"],
+                    key=arguments.get("key"),
+                    description=arguments.get("description"),
+                    is_private=arguments.get("is_private", False),
+                )
             elif name == "confluence_list_spaces":
                 result = await list_spaces(
                     limit=arguments.get("limit", 25),

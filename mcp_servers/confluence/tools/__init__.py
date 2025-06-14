@@ -8,7 +8,7 @@ from .page import (
     update_page_content,
 )
 from .search import search_content
-from .space import get_space, get_space_hierarchy, list_spaces
+from .space import create_space, get_space, get_space_hierarchy, list_spaces
 
 __all__ = [
     # Attachment
@@ -25,6 +25,7 @@ __all__ = [
     # Search
     "search_content",
     # Space
+    "create_space",
     "get_space",
     "get_space_hierarchy",
     "list_spaces",
