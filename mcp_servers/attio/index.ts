@@ -71,7 +71,7 @@ class AttioClient {
 
     async searchCompanies(filters: any = {}, limit: number = 25): Promise<any> {
         if (Object.keys(filters).length === 0) {
-            return this.makeRequest('/objects/people/records/query', {
+            return this.makeRequest('/objects/companies/records/query', {
                 method: 'POST',
                 body: JSON.stringify({
                     limit
@@ -89,7 +89,7 @@ class AttioClient {
 
     async searchDeals(filters: any = {}, limit: number = 25): Promise<any> {
         if (Object.keys(filters).length === 0) {
-            return this.makeRequest('/objects/people/records/query', {
+            return this.makeRequest('/objects/deals/records/query', {
                 method: 'POST',
                 body: JSON.stringify({
                     limit
@@ -159,11 +159,6 @@ class AttioClient {
         phone_numbers?: string[];
         job_title?: string;
         description?: string;
-        primary_location?: {
-            locality?: string;
-            region?: string;
-            country_code?: string;
-        };
     }): Promise<any> {
         const recordData: any = {};
 
@@ -176,7 +171,6 @@ class AttioClient {
         }
         if (data.job_title) { recordData.job_title = data.job_title; }
         if (data.description) { recordData.description = data.description; }
-        if (data.primary_location) { recordData.primary_location = data.primary_location; }
 
         return this.makeRequest('/objects/people/records', {
             method: 'POST',
@@ -192,18 +186,12 @@ class AttioClient {
         name?: string;
         domains?: string[];
         description?: string;
-        primary_location?: {
-            locality?: string;
-            region?: string;
-            country_code?: string;
-        };
     }): Promise<any> {
         const recordData: any = {};
 
         if (data.name) recordData.name = data.name;
         if (data.domains) recordData.domains = data.domains;
         if (data.description) recordData.description = data.description;
-        if (data.primary_location) recordData.primary_location = data.primary_location;
 
         return this.makeRequest('/objects/companies/records', {
             method: 'POST',
@@ -222,11 +210,6 @@ class AttioClient {
         job_title?: string;
         description?: string;
         company_id?: string;
-        primary_location?: {
-            locality?: string;
-            region?: string;
-            country_code?: string;
-        };
     }): Promise<any> {
         const recordData: any = {};
 
@@ -239,7 +222,6 @@ class AttioClient {
         }
         if (data.job_title) { recordData.job_title = data.job_title; }
         if (data.description) { recordData.description = data.description; }
-        if (data.primary_location) { recordData.primary_location = data.primary_location; }
 
         return this.makeRequest(`/objects/people/records/${recordId}`, {
             method: 'PATCH',
@@ -255,18 +237,12 @@ class AttioClient {
         name?: string;
         domains?: string[];
         description?: string;
-        primary_location?: {
-            locality?: string;
-            region?: string;
-            country_code?: string;
-        };
     }): Promise<any> {
         const recordData: any = {};
 
         if (data.name) recordData.name = data.name;
         if (data.domains) recordData.domains = data.domains;
         if (data.description) recordData.description = data.description;
-        if (data.primary_location) recordData.primary_location = data.primary_location;
 
         return this.makeRequest(`/objects/companies/records/${recordId}`, {
             method: 'PATCH',
@@ -447,15 +423,6 @@ const CREATE_PERSON_TOOL: Tool = {
                 type: 'string',
                 description: 'Description or notes about the person',
             },
-            primary_location: {
-                type: 'object',
-                properties: {
-                    locality: { type: 'string', description: 'City or locality' },
-                    region: { type: 'string', description: 'State or region' },
-                    country_code: { type: 'string', description: 'ISO country code (e.g., "US", "GB")' },
-                },
-                description: 'Primary location of the person',
-            },
         },
     },
 };
@@ -478,15 +445,6 @@ const CREATE_COMPANY_TOOL: Tool = {
             description: {
                 type: 'string',
                 description: 'Description of the company',
-            },
-            primary_location: {
-                type: 'object',
-                properties: {
-                    locality: { type: 'string', description: 'City or locality' },
-                    region: { type: 'string', description: 'State or region' },
-                    country_code: { type: 'string', description: 'ISO country code (e.g., "US", "GB")' },
-                },
-                description: 'Primary location of the company',
             },
         },
     },
@@ -524,15 +482,6 @@ const UPDATE_PERSON_TOOL: Tool = {
                 type: 'string',
                 description: 'Description or notes about the person',
             },
-            primary_location: {
-                type: 'object',
-                properties: {
-                    locality: { type: 'string', description: 'City or locality' },
-                    region: { type: 'string', description: 'State or region' },
-                    country_code: { type: 'string', description: 'ISO country code (e.g., "US", "GB")' },
-                },
-                description: 'Primary location of the person',
-            },
         },
         required: ['record_id'],
     },
@@ -560,15 +509,6 @@ const UPDATE_COMPANY_TOOL: Tool = {
             description: {
                 type: 'string',
                 description: 'Description of the company',
-            },
-            primary_location: {
-                type: 'object',
-                properties: {
-                    locality: { type: 'string', description: 'City or locality' },
-                    region: { type: 'string', description: 'State or region' },
-                    country_code: { type: 'string', description: 'ISO country code (e.g., "US", "GB")' },
-                },
-                description: 'Primary location of the company',
             },
         },
         required: ['record_id'],
@@ -789,7 +729,6 @@ const getAttioMcpServer = () => {
                         phone_numbers: (args as any)?.phone_numbers,
                         job_title: (args as any)?.job_title,
                         description: (args as any)?.description,
-                        primary_location: (args as any)?.primary_location,
                     });
 
                     return {
@@ -809,7 +748,6 @@ const getAttioMcpServer = () => {
                         name: (args as any)?.name,
                         domains: (args as any)?.domains,
                         description: (args as any)?.description,
-                        primary_location: (args as any)?.primary_location,
                     });
 
                     return {
@@ -831,7 +769,6 @@ const getAttioMcpServer = () => {
                         phone_numbers: (args as any)?.phone_numbers,
                         job_title: (args as any)?.job_title,
                         description: (args as any)?.description,
-                        primary_location: (args as any)?.primary_location,
                     });
 
                     return {
@@ -851,7 +788,6 @@ const getAttioMcpServer = () => {
                         name: (args as any)?.name,
                         domains: (args as any)?.domains,
                         description: (args as any)?.description,
-                        primary_location: (args as any)?.primary_location,
                     });
 
                     return {
