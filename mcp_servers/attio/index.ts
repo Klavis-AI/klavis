@@ -52,6 +52,14 @@ class AttioClient {
     }
 
     async searchPeople(filters: any = {}, limit: number = 25): Promise<any> {
+        if (Object.keys(filters).length === 0) {
+            return this.makeRequest('/objects/people/records/query', {
+                method: 'POST',
+                body: JSON.stringify({
+                    limit
+                }),
+            });
+        }
         return this.makeRequest('/objects/people/records/query', {
             method: 'POST',
             body: JSON.stringify({
@@ -62,6 +70,14 @@ class AttioClient {
     }
 
     async searchCompanies(filters: any = {}, limit: number = 25): Promise<any> {
+        if (Object.keys(filters).length === 0) {
+            return this.makeRequest('/objects/companies/records/query', {
+                method: 'POST',
+                body: JSON.stringify({
+                    limit
+                }),
+            });
+        }
         return this.makeRequest('/objects/companies/records/query', {
             method: 'POST',
             body: JSON.stringify({
@@ -72,6 +88,14 @@ class AttioClient {
     }
 
     async searchDeals(filters: any = {}, limit: number = 25): Promise<any> {
+        if (Object.keys(filters).length === 0) {
+            return this.makeRequest('/objects/deals/records/query', {
+                method: 'POST',
+                body: JSON.stringify({
+                    limit
+                }),
+            });
+        }
         return this.makeRequest('/objects/deals/records/query', {
             method: 'POST',
             body: JSON.stringify({
@@ -128,6 +152,107 @@ class AttioClient {
             }),
         });
     }
+
+    async createPerson(data: {
+        name?: string;
+        email_addresses?: string[];
+        phone_numbers?: string[];
+        job_title?: string;
+        description?: string;
+    }): Promise<any> {
+        const recordData: any = {};
+
+        if (data.name) { recordData.name = data.name; }
+        if (data.email_addresses) { recordData.email_addresses = data.email_addresses; }
+        if (data.phone_numbers) {
+            for (const phoneNumber of data.phone_numbers) {
+                recordData.phone_numbers.push({ original_phone_number: phoneNumber });
+            }
+        }
+        if (data.job_title) { recordData.job_title = data.job_title; }
+        if (data.description) { recordData.description = data.description; }
+
+        return this.makeRequest('/objects/people/records', {
+            method: 'POST',
+            body: JSON.stringify({
+                data: {
+                    values: recordData
+                }
+            }),
+        });
+    }
+
+    async createCompany(data: {
+        name?: string;
+        domains?: string[];
+        description?: string;
+    }): Promise<any> {
+        const recordData: any = {};
+
+        if (data.name) recordData.name = data.name;
+        if (data.domains) recordData.domains = data.domains;
+        if (data.description) recordData.description = data.description;
+
+        return this.makeRequest('/objects/companies/records', {
+            method: 'POST',
+            body: JSON.stringify({
+                data: {
+                    values: recordData
+                }
+            }),
+        });
+    }
+
+    async updatePerson(recordId: string, data: {
+        name?: string;
+        email_addresses?: string[];
+        phone_numbers?: string[];
+        job_title?: string;
+        description?: string;
+        company_id?: string;
+    }): Promise<any> {
+        const recordData: any = {};
+
+        if (data.name) { recordData.name = data.name; }
+        if (data.email_addresses) { recordData.email_addresses = data.email_addresses; }
+        if (data.phone_numbers) {
+            for (const phoneNumber of data.phone_numbers) {
+                recordData.phone_numbers.push({ original_phone_number: phoneNumber });
+            }
+        }
+        if (data.job_title) { recordData.job_title = data.job_title; }
+        if (data.description) { recordData.description = data.description; }
+
+        return this.makeRequest(`/objects/people/records/${recordId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                data: {
+                    values: recordData
+                }
+            }),
+        });
+    }
+
+    async updateCompany(recordId: string, data: {
+        name?: string;
+        domains?: string[];
+        description?: string;
+    }): Promise<any> {
+        const recordData: any = {};
+
+        if (data.name) recordData.name = data.name;
+        if (data.domains) recordData.domains = data.domains;
+        if (data.description) recordData.description = data.description;
+
+        return this.makeRequest(`/objects/companies/records/${recordId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                data: {
+                    values: recordData
+                }
+            }),
+        });
+    }
 }
 
 // Getter function for the client
@@ -142,7 +267,7 @@ function getAttioClient() {
 // Tool definitions
 const SEARCH_PEOPLE_TOOL: Tool = {
     name: 'attio_search_people',
-    description: 'Search for people in your Attio workspace with advanced filtering options.',
+    description: 'Search for people in your Attio workspace with advanced filtering options. If no parameter other than limit is provided, it will search all people.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -165,7 +290,7 @@ const SEARCH_PEOPLE_TOOL: Tool = {
 
 const SEARCH_COMPANIES_TOOL: Tool = {
     name: 'attio_search_companies',
-    description: 'Search for companies in your Attio workspace with filtering and sorting.',
+    description: 'Search for companies in your Attio workspace with filtering and sorting. If no parameter other than limit is provided, it will search all companies.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -188,7 +313,7 @@ const SEARCH_COMPANIES_TOOL: Tool = {
 
 const SEARCH_DEALS_TOOL: Tool = {
     name: 'attio_search_deals',
-    description: 'Search for deals in your Attio workspace with stage and value filtering.',
+    description: 'Search for deals in your Attio workspace with stage and value filtering. If no parameter other than limit is provided, it will search all deals.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -270,6 +395,126 @@ const CREATE_NOTE_TOOL: Tool = {
     },
 };
 
+const CREATE_PERSON_TOOL: Tool = {
+    name: 'attio_create_person',
+    description: 'Create a new person record in your Attio workspace.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            name: {
+                type: 'string',
+                description: 'Full name of the person',
+            },
+            email_addresses: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of email addresses for the person',
+            },
+            phone_numbers: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of phone numbers for the person',
+            },
+            job_title: {
+                type: 'string',
+                description: 'Job title of the person',
+            },
+            description: {
+                type: 'string',
+                description: 'Description or notes about the person',
+            },
+        },
+    },
+};
+
+const CREATE_COMPANY_TOOL: Tool = {
+    name: 'attio_create_company',
+    description: 'Create a new company record in your Attio workspace.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            name: {
+                type: 'string',
+                description: 'Name of the company',
+            },
+            domains: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of domain names associated with the company',
+            },
+            description: {
+                type: 'string',
+                description: 'Description of the company',
+            },
+        },
+    },
+};
+
+const UPDATE_PERSON_TOOL: Tool = {
+    name: 'attio_update_person',
+    description: 'Update an existing person record in your Attio workspace.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            record_id: {
+                type: 'string',
+                description: 'ID of the person record to update',
+            },
+            name: {
+                type: 'string',
+                description: 'Full name of the person',
+            },
+            email_addresses: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of email addresses for the person',
+            },
+            phone_numbers: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of phone numbers for the person',
+            },
+            job_title: {
+                type: 'string',
+                description: 'Job title of the person',
+            },
+            description: {
+                type: 'string',
+                description: 'Description or notes about the person',
+            },
+        },
+        required: ['record_id'],
+    },
+};
+
+const UPDATE_COMPANY_TOOL: Tool = {
+    name: 'attio_update_company',
+    description: 'Update an existing company record in your Attio workspace.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            record_id: {
+                type: 'string',
+                description: 'ID of the company record to update',
+            },
+            name: {
+                type: 'string',
+                description: 'Name of the company',
+            },
+            domains: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of domain names associated with the company',
+            },
+            description: {
+                type: 'string',
+                description: 'Description of the company',
+            },
+        },
+        required: ['record_id'],
+    },
+};
+
 // Utility functions
 function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency', data: any): void {
     try {
@@ -302,6 +547,10 @@ const getAttioMcpServer = () => {
                 SEARCH_DEALS_TOOL,
                 SEARCH_NOTES_TOOL,
                 CREATE_NOTE_TOOL,
+                CREATE_PERSON_TOOL,
+                CREATE_COMPANY_TOOL,
+                UPDATE_PERSON_TOOL,
+                UPDATE_COMPANY_TOOL,
             ],
         };
     });
@@ -459,6 +708,86 @@ const getAttioMcpServer = () => {
                         title: (args as any)?.title,
                         content: (args as any)?.content,
                         format: (args as any)?.format || 'plaintext'
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: JSON.stringify(result, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case 'attio_create_person': {
+                    const client = getAttioClient();
+
+                    const result = await client.createPerson({
+                        name: (args as any)?.name,
+                        email_addresses: (args as any)?.email_addresses,
+                        phone_numbers: (args as any)?.phone_numbers,
+                        job_title: (args as any)?.job_title,
+                        description: (args as any)?.description,
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: JSON.stringify(result, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case 'attio_create_company': {
+                    const client = getAttioClient();
+
+                    const result = await client.createCompany({
+                        name: (args as any)?.name,
+                        domains: (args as any)?.domains,
+                        description: (args as any)?.description,
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: JSON.stringify(result, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case 'attio_update_person': {
+                    const client = getAttioClient();
+
+                    const result = await client.updatePerson((args as any)?.record_id, {
+                        name: (args as any)?.name,
+                        email_addresses: (args as any)?.email_addresses,
+                        phone_numbers: (args as any)?.phone_numbers,
+                        job_title: (args as any)?.job_title,
+                        description: (args as any)?.description,
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: JSON.stringify(result, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case 'attio_update_company': {
+                    const client = getAttioClient();
+
+                    const result = await client.updateCompany((args as any)?.record_id, {
+                        name: (args as any)?.name,
+                        domains: (args as any)?.domains,
+                        description: (args as any)?.description,
                     });
 
                     return {
