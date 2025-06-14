@@ -61,8 +61,6 @@ class ConfluenceClient:
                 resp.raise_for_status()
                 resp_json = resp.json()
                 
-                print(f"--- resp_json: {resp_json}")
-
                 if len(resp_json) == 0:
                     raise ToolExecutionError(
                         message="No workspaces found for the authenticated user.",
@@ -118,9 +116,7 @@ class ConfluenceClient:
 
     async def request(self, method: str, path: str, **kwargs: Any) -> Any:
         cloud_id = await self._ensure_cloud_id()
-        
-        print(f"--- cloud_id: {cloud_id}")
-        
+                
         headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
