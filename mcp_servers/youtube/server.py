@@ -25,7 +25,6 @@ from youtube_transcript_api.proxies import WebshareProxyConfig
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 # YouTube API constants and configuration

@@ -26,7 +26,6 @@ from utils import convert_document_to_html, convert_document_to_markdown
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 GOOGLE_DRIVE_MCP_SERVER_PORT = int(os.getenv("GOOGLE_DRIVE_MCP_SERVER_PORT", "5000"))

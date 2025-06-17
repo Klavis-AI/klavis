@@ -35,7 +35,6 @@ from utils import (
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 GOOGLE_SHEETS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_SHEETS_MCP_SERVER_PORT", "5000"))
