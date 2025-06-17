@@ -87,7 +87,7 @@ wheels = [
 
 [[package]]
 name = "anthropic"
-version = "0.49.0"
+version = "0.54.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -98,9 +98,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/e3/a88c8494ce4d1a88252b9e053607e885f9b14d0a32273d47b727cbee4228/anthropic-0.49.0.tar.gz", hash = "sha256:c09e885b0f674b9119b4f296d8508907f6cff0009bc20d5cf6b35936c40b4398", size = 210016 }
+sdist = { url = "https://files.pythonhosted.org/packages/89/28/80cb9bb6e7ce77d404145b51da4257455805c17f0a6be528ff3286e3882f/anthropic-0.54.0.tar.gz", hash = "sha256:5e6f997d97ce8e70eac603c3ec2e7f23addeff953fbbb76b19430562bb6ba815", size = 312376 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/74/5d90ad14d55fbe3f9c474fdcb6e34b4bed99e3be8efac98734a5ddce88c1/anthropic-0.49.0-py3-none-any.whl", hash = "sha256:bbc17ad4e7094988d2fa86b87753ded8dce12498f4b85fe5810f208f454a8375", size = 243368 },
+    { url = "https://files.pythonhosted.org/packages/de/b9/6ffb48e82c5e97b03cecee872d134a6b6666c2767b2d32ed709f3a60a8fe/anthropic-0.54.0-py3-none-any.whl", hash = "sha256:c1062a0a905daeec17ca9c06c401e4b3f24cb0495841d29d752568a1d4018d56", size = 288774 },
 ]
 
 [[package]]
@@ -844,7 +844,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic", specifier = ">=0.49.0" },
+    { name = "anthropic", specifier = ">=0.54.0" },
     { name = "anyio", specifier = ">=4.9.0" },
     { name = "discord-py", specifier = ">=2.3.0" },
     { name = "fastapi", specifier = ">=0.115.12" },
