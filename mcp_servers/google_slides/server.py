@@ -22,7 +22,6 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
-# Load environment variables
 load_dotenv()
 
 # Configure logging

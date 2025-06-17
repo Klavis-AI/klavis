@@ -24,7 +24,6 @@ from pydantic import AnyUrl
 
 from tools import get_stripe_tools
 
-# Load environment variables
 load_dotenv()
 
 # Configure logging

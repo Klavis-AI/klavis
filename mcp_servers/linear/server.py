@@ -17,7 +17,6 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
-# Import all tools from the tools package
 from tools import (
     auth_token_context,
     get_teams,
@@ -29,7 +28,6 @@ from tools import (
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 LINEAR_MCP_SERVER_PORT = int(os.getenv("LINEAR_MCP_SERVER_PORT", "5000"))

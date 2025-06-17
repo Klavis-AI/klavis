@@ -22,7 +22,6 @@ from simple_salesforce.exceptions import SalesforceError
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5000"))

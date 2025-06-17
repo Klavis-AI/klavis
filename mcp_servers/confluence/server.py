@@ -42,7 +42,6 @@ from client import auth_token_context
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 CONFLUENCE_MCP_SERVER_PORT = int(os.getenv("CONFLUENCE_MCP_SERVER_PORT", "5000"))

@@ -22,7 +22,6 @@ from pydantic import Field
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
 # Configuration
