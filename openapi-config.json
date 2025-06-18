@@ -5,7 +5,7 @@
     "additionalProperties": {
         "packageName": "klavis",
         "projectName": "klavis",
-        "packageVersion": "0.1.2",
+        "packageVersion": "0.1.4",
         "infoName": "Klavis AI",
         "infoEmail": "connect@klavis.ai",
         "infoUrl": "https://www.klavis.ai",
