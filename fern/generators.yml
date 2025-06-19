@@ -14,7 +14,7 @@ groups:
           package-name: klavis
           token: ${PYPI_TOKEN}
         github:
-          repository: klavis/sdks/python
+          repository: Klavis-AI/python-sdk
         config:
           client_class_name: Klavis
           pydantic_config:
@@ -29,7 +29,7 @@ groups:
           package-name: klavis
           token: ${NPM_TOKEN} 
         github:
-          repository: klavis/sdks/typescript
+          repository: Klavis-AI/typescript-sdk
         config:
           namespaceExport: Klavis
           allowCustomFetcher: true
