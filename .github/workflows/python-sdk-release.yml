@@ -1,0 +1,26 @@
+name: Publish Python SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the Python SDK that you would like to release"
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Fern CLI
+        run: npm install -g fern-api
+
+      - name: Release Python SDK
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          fern generate --group python-sdk --version ${{ inputs.version }} --log-level debug

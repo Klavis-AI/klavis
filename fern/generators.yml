@@ -1,16 +1,20 @@
 # yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json
+
 api:
   specs:
     - openapi: ../sdks/openapi.json
-default-group: local
+
 groups:
   python-sdk:
     generators:
       - name: fernapi/fern-python-sdk
         version: 4.22.0
         output:
-          location: local-file-system
-          path: ../sdks/python
+          location: pypi
+          package-name: klavis
+          token: ${PYPI_TOKEN}
+        github:
+          repository: klavis/sdks/python
         config:
           client_class_name: Klavis
           pydantic_config:
@@ -19,10 +23,13 @@ groups:
   ts-sdk:
     generators:
       - name: fernapi/fern-typescript-node-sdk
-        version: 1.7.2
+        version: 1.7.0
         output:
-          location: local-file-system
-          path: ../sdks/typescript
+          location: npm
+          package-name: klavis
+          token: ${NPM_TOKEN} 
+        github:
+          repository: klavis/sdks/typescript
         config:
           namespaceExport: Klavis
           allowCustomFetcher: true
