@@ -83,7 +83,7 @@
       "post": {
         "tags": ["mcp-server"],
         "summary": "Create a Server Instance",
-        "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.",
+        "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
         "operationId": "createServerInstance",
         "requestBody": {
           "content": {
@@ -4138,6 +4138,11 @@
             "type": "string",
             "title": "Instanceid",
             "description": "The unique identifier for this specific server connection instance."
+          },
+          "oauthUrl": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Oauthurl",
+            "description": "The OAuth authorization URL for the specified server, if OAuth is configured."
           }
         },
         "type": "object",
