@@ -20,6 +20,9 @@ groups:
           client_class_name: Klavis
           pydantic_config:
             enum_type: python_enums
+        metadata:
+          package-description: "Open Source MCP Integration for AI applications"
+          license: MIT
         smart-casing: true
   ts-sdk:
     generators:

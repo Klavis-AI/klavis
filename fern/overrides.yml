@@ -6,3 +6,17 @@ components:
           name: GITHUB 
         "YouTube":
           name: YOUTUBE
+
+paths:
+  "/mcp-server/call-tool":
+    post:
+      operationId: call_tools
+      x-fern-method-name: call_tools
+  "/mcp-server/list-tools":
+    post:
+      operationId: list_tools
+      x-fern-method-name: list_tools
+  "/mcp-server/tools/{server_name}":
+    get:
+      operationId: get_tools
+      x-fern-method-name: get_tools
