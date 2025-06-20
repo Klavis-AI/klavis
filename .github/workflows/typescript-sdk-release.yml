@@ -1,10 +1,10 @@
-name: Publish Python SDK
+name: Publish TypeScript SDK
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "The version of the Python SDK that you would like to release"
+        description: "The version of the TypeScript SDK that you would like to release"
         required: true
         type: string
 
@@ -20,18 +20,18 @@ jobs:
       - name: Install Fern CLI
         run: npm install -g fern-api
 
-      - name: Release Python SDK
+      - name: Release TypeScript SDK
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          fern generate --group python-sdk --version ${{ inputs.version }} --log-level debug
+          fern generate --group ts-sdk --version ${{ inputs.version }} --log-level debug
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: python-v${{ inputs.version }}
-          name: Python SDK v${{ inputs.version }}
+          tag_name: ts-v${{ inputs.version }}
+          name: TypeScript SDK v${{ inputs.version }}
           # The body will be auto-generated based on commits since the last tag
           generate_release_notes: true
           # This will create the tag if it doesn't exist
