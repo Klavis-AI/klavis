@@ -3841,19 +3841,6 @@
           }
         }
       }
-    },
-    "/redirect": {
-      "get": {
-        "summary": "Redirect To Jira Callback",
-        "description": "Simple redirect endpoint that forwards to the Jira OAuth callback URL\nwhile preserving all original query parameters",
-        "operationId": "redirect_to_jira_callback_redirect_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -4991,7 +4978,8 @@
       "HTTPBearer": {
         "type": "http",
         "description": "Your Klavis AI API key.",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "x-fern-bearer": { "name": "api_key" }
       }
     }
   }
