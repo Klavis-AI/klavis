@@ -2,7 +2,7 @@
 
 api:
   specs:
-    - openapi: ../sdks/openapi.json
+    - openapi: ../fern/openapi.json
 
 groups:
   python-sdk:
