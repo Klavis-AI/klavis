@@ -11,6 +11,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,3 +26,15 @@ jobs:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           fern generate --group python-sdk --version ${{ inputs.version }} --log-level debug
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          # The body will be auto-generated based on commits since the last tag
+          generate_release_notes: true
+          # This will create the tag if it doesn't exist
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
