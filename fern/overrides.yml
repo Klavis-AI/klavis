@@ -1,0 +1,8 @@
+components:
+  securitySchemes:
+    HTTPBearer:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Your Klavis AI API key."
+      x-fern-name: api_key 
