@@ -33,8 +33,6 @@ Klavis AI is open source MCP integrations for AI Applications. Our API provides 
 
 ### Installation
 
-Choose your preferred language:
-
 **Python**
 ```bash
 pip install klavis
@@ -235,64 +233,65 @@ const finalResponse = await openaiClient.chat.completions.create({
 console.log(finalResponse.choices[0].message.content);
 ```
 
-## 📚 Examples & Tutorials
+## 📚 AI Platform Integration Tutorials
 
-- **[Python Examples](examples/openai/python/)** - Complete Python integration examples
-- **[TypeScript Examples](examples/openai/typescript/)** - Full TypeScript demos
-- **[MCP Client Examples](examples/mcp-clients/)** - Advanced MCP client usage
+- **[AI Platform Integrations Overview](https://docs.klavis.ai/documentation/integrations/overview)** - Learn how to integrate with leading AI platforms
+- **[Together AI Integration](https://docs.klavis.ai/documentation/integrations/together-ai)** - Build AI agents with Together AI's high-performance LLMs
+- **[OpenAI Integration](https://docs.klavis.ai/documentation/integrations/open-ai)** - Create fast and efficient AI agents with OpenAI and Klavis MCP Servers
+- And More!
 
 ## 🛠️ Available MCP Servers
 
 ### CRM & Sales
-- **[Salesforce](mcp_servers/salesforce/)** - CRM and sales automation
-- **[Close](mcp_servers/close/)** - Sales CRM platform
-- **[Asana](mcp_servers/asana/)** - Team collaboration and project management
-- **[Attio](mcp_servers/attio/)** - Modern CRM platform
-- **[ClickUp](mcp_servers/clickup/)** - All-in-one workspace
-- **[Motion](mcp_servers/motion/)** - AI-powered task management
+- **[Salesforce](https://docs.klavis.ai/documentation/mcp-server/salesforce)** - CRM and sales automation
+- **[Close](https://docs.klavis.ai/documentation/mcp-server/close)** - Sales CRM platform
+- **[Asana](https://docs.klavis.ai/documentation/mcp-server/asana)** - Team collaboration and project management
+- **[Attio](https://docs.klavis.ai/documentation/mcp-server/attio)** - Modern CRM platform
+- **[ClickUp](https://docs.klavis.ai/documentation/mcp-server/clickup)** - All-in-one workspace
+- **[Motion](https://docs.klavis.ai/documentation/mcp-server/motion)** - AI-powered task management
 
 ### Google Workspace
-- **[Gmail](mcp_servers/gmail/)** - Email management with OAuth
-- **[Google Calendar](mcp_servers/google_calendar/)** - Calendar management
-- **[Google Sheets](mcp_servers/google_sheets/)** - Spreadsheet automation
-- **[Google Docs](mcp_servers/google_docs/)** - Document creation and editing
-- **[Google Drive](mcp_servers/google_drive/)** - File storage and management
-- **[Google Slides](mcp_servers/google_slides/)** - Presentation management
+- **[Gmail](https://docs.klavis.ai/documentation/mcp-server/gmail)** - Email management with OAuth
+- **[Google Calendar](https://docs.klavis.ai/documentation/mcp-server/google-calendar)** - Calendar management
+- **[Google Sheets](https://docs.klavis.ai/documentation/mcp-server/google-sheets)** - Spreadsheet automation
+- **[Google Docs](https://docs.klavis.ai/documentation/mcp-server/google-docs)** - Document creation and editing
+- **[Google Drive](https://docs.klavis.ai/documentation/mcp-server/google-drive)** - File storage and management
+- **[Google Slides](https://docs.klavis.ai/documentation/mcp-server/google-slides)** - Presentation management
 
 ### Development & Productivity
-- **[GitHub](mcp_servers/github/)** - Repository operations and automation
-- **[Jira](mcp_servers/jira/)** - Project management and sprint tracking
-- **[Linear](mcp_servers/linear/)** - Issue tracking and project management
-- **[Notion](mcp_servers/notion/)** - Workspace and documentation management
-- **[Confluence](mcp_servers/confluence/)** - Team documentation and knowledge base
-- **[Figma](mcp_servers/figma/)** - Design collaboration platform
+- **[GitHub](https://docs.klavis.ai/documentation/mcp-server/github)** - Repository operations and automation
+- **[Jira](https://docs.klavis.ai/documentation/mcp-server/jira)** - Project management and sprint tracking
+- **[Linear](https://docs.klavis.ai/documentation/mcp-server/linear)** - Issue tracking and project management
+- **[Notion](https://docs.klavis.ai/documentation/mcp-server/notion)** - Workspace and documentation management
+- **[Confluence](https://docs.klavis.ai/documentation/mcp-server/confluence)** - Team documentation and knowledge base
+- **[Figma](https://docs.klavis.ai/documentation/mcp-server/figma)** - Design collaboration platform
 
 ### Communication & Collaboration
-- **[Discord](mcp_servers/discord/)** - Discord API integration
-- **[Slack](mcp_servers/slack/)** - Slack workspace automation  
-- **[Resend](mcp_servers/resend/)** - Transactional email service
+- **[Discord](https://docs.klavis.ai/documentation/mcp-server/discord)** - Discord API integration
+- **[Slack](https://docs.klavis.ai/documentation/mcp-server/slack)** - Slack workspace automation  
+- **[Resend](https://docs.klavis.ai/documentation/mcp-server/resend)** - Transactional email service
 
 ### Data & Analytics
-- **[Postgres](mcp_servers/postgres/)** - Database operations and queries
-- **[Supabase](mcp_servers/supabase/)** - Backend-as-a-Service platform
-- **[Gong](mcp_servers/gong/)** - Revenue intelligence platform
+- **[Postgres](https://docs.klavis.ai/documentation/mcp-server/postgres)** - Database operations and queries
+- **[Supabase](https://docs.klavis.ai/documentation/mcp-server/supabase)** - Backend-as-a-Service platform
+- **[Gong](https://docs.klavis.ai/documentation/mcp-server/gong)** - Revenue intelligence platform
 
 ### Content & Media
-- **[YouTube](mcp_servers/youtube/)** - Video information and transcripts
-- **[Firecrawl](mcp_servers/firecrawl/)** - Web scraping and data extraction
-- **[Firecrawl Deep Research](mcp_servers/firecrawl_deep_research/)** - Advanced web research
-- **[Markitdown](mcp_servers/markitdown/)** - Document format conversion
-- **[Pandoc](mcp_servers/pandoc/)** - Universal document converter
-- **[Report Generation](mcp_servers/report_generation/)** - Professional web reports
-- **[WordPress](mcp_servers/wordpress/)** - Content management system
+- **[YouTube](https://docs.klavis.ai/documentation/mcp-server/youtube)** - Video information and transcripts
+- **[Firecrawl](https://docs.klavis.ai/documentation/mcp-server/firecrawl)** - Web scraping and data extraction
+- **[Firecrawl Deep Research](https://docs.klavis.ai/documentation/mcp-server/firecrawl-deep-research)** - Advanced web research
+- **[Markitdown](https://docs.klavis.ai/documentation/mcp-server/markitdown)** - Document format conversion
+- **[Pandoc](https://docs.klavis.ai/documentation/mcp-server/pandoc)** - Universal document converter
+- **[Report Generation](https://docs.klavis.ai/documentation/mcp-server/report-generation)** - Professional web reports
+- **[WordPress](https://docs.klavis.ai/documentation/mcp-server/wordpress)** - Content management system
 
 ### Payments & Infrastructure
-- **[Stripe](mcp_servers/stripe/)** - Payment processing
-- **[Shopify](mcp_servers/shopify/)** - E-commerce platform integration
-- **[Cloudflare](mcp_servers/cloudflare/)** - CDN and security services
-- **[Perplexity](mcp_servers/perplexity/)** - AI-powered search
+- **[Stripe](https://docs.klavis.ai/documentation/mcp-server/stripe)** - Payment processing
+- **[Shopify](https://docs.klavis.ai/documentation/mcp-server/shopify)** - E-commerce platform integration
+- **[Cloudflare](https://docs.klavis.ai/documentation/mcp-server/cloudflare)** - CDN and security services
+- **[Perplexity](https://docs.klavis.ai/documentation/mcp-server/perplexity)** - AI-powered search
 
-[**View All Servers →**](mcp_servers/)
+[**View All Servers →**](https://docs.klavis.ai/documentation/mcp-server)
 
 ## 🔧 Authentication & Multi-Tool Workflows
 
@@ -307,9 +306,11 @@ server = klavis_client.mcp_server.create_server_instance(
     user_id="user123",
     platform_name="MyApp"
 )
-# OAuth URL is provided in server.oauth_url
+# Option 1 - OAuth URL is provided in server.oauth_url, redirect user to OAuth URL for authentication
+import webbrowser
+webbrowser.open(server.oauth_url)
 
-# For API key services
+# Option 2 - or for API key services
 klavis_client.mcp_server.set_auth_token(
     instance_id=server.instance_id,
     auth_token="your-service-api-key"
@@ -330,11 +331,45 @@ all_tools = []
 all_tools.extend(klavis_client.mcp_server.list_tools(github_server.server_url).tools)
 all_tools.extend(klavis_client.mcp_server.list_tools(slack_server.server_url).tools)
 
-response = openai_client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": "Create a GitHub issue and notify the team on Slack"}],
-    tools=all_tools
-)
+# Initialize conversation
+messages = [{"role": "user", "content": "Create a GitHub issue and notify the team on Slack"}]
+
+# Loop to let LLM work with multiple tools
+max_iterations = 5
+for iteration in range(max_iterations):
+    response = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=messages,
+        tools=all_tools
+    )
+    
+    messages.append(response.choices[0].message)
+    
+    # Check if LLM wants to use tools
+    if response.choices[0].message.tool_calls:
+        for tool_call in response.choices[0].message.tool_calls:
+            # Determine which server to use based on tool name
+            server_url = github_server.server_url if "github" in tool_call.function.name else slack_server.server_url
+            
+            # Execute tool
+            result = klavis_client.mcp_server.call_tools(
+                server_url=server_url,
+                tool_name=tool_call.function.name,
+                tool_args=json.loads(tool_call.function.arguments),
+                connection_type=ConnectionType.STREAMABLE_HTTP
+            )
+            
+            # Add tool result to conversation
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
+    else:
+        # LLM finished the task
+        print(f"Task completed in {iteration + 1} iterations")
+        print(response.choices[0].message.content)
+        break
 ```
 
 ## 🏠 Self-Hosting
@@ -347,9 +382,9 @@ git clone https://github.com/klavis-ai/klavis.git
 cd klavis
 
 # Run a specific MCP server
-cd mcp_servers/discord
-docker build -t klavis-discord .
-docker run -p 8000:8000 klavis-discord
+cd mcp_servers/github
+docker build -t klavis-github .
+docker run -p 8000:8000 klavis-github
 ```
 
 ### MCP Clients
