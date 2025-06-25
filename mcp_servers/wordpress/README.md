@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is a Model Context Protocol (MCP) server designed to provide access to WordPress sites via the WordPress REST API. It enables Large Language Models (LLMs) and other compatible clients to interact with WordPress sites, allowing them to create, retrieve, and update posts.
+This is a Model Context Protocol (MCP) server designed to provide access to WordPress sites. It enables Large Language Models (LLMs) and other compatible clients to interact with WordPress sites, allowing them to create, retrieve, and update posts.
 
 ## License
 
