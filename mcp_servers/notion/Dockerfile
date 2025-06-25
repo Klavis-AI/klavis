@@ -1,13 +1,18 @@
 FROM node:22.12-alpine AS builder
 
-COPY . /app
-
+# Set the working directory inside the container
 WORKDIR /app
 
-# Install all dependencies
-RUN npm install
+# Copy package.json and package-lock.json to install dependencies
+COPY mcp_servers/notion/package.json mcp_servers/notion/package-lock.json ./
 
-# Build the project
+# Install dependencies (ignoring scripts to prevent running the prepare script)
+RUN npm install --ignore-scripts
+
+# Copy the rest of the application source code
+COPY mcp_servers/notion .
+
+# Build the application using TypeScript
 RUN npm run build
 
 FROM node:22-alpine AS release
