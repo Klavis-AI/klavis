@@ -1,11 +1,18 @@
 FROM node:22.12-alpine AS builder
 
-COPY . /app
-
+# Set the working directory inside the container
 WORKDIR /app
 
-RUN --mount=type=cache,target=/root/.npm npm install
+# Copy package.json and package-lock.json to install dependencies
+COPY mcp_servers/resend/package.json mcp_servers/resend/package-lock.json ./
 
+# Install dependencies (ignoring scripts to prevent running the prepare script)
+RUN npm install --ignore-scripts
+
+# Copy the rest of the application source code
+COPY mcp_servers/resend .
+
+# Build the application using TypeScript
 RUN npm run build
 
 FROM node:22-alpine AS release
