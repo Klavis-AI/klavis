@@ -7,7 +7,7 @@
 
 ## 📖 Overview
 
-Discord MCP Server is a Model Context Protocol (MCP) implementation that bridges language models and other applications with Discord's API. It provides a standardized interface for executing Discord operations through various tools defined by the MCP standard.
+Discord MCP Server is a Model Context Protocol (MCP) implementation that bridges language models and other applications with Discord's API. It provides a standardized interface for executing Discord operations through various tools defined by the MCP standard. It currently only supports the bot mode.
 
 ## 🚀 Features
 
