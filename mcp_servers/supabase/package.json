@@ -1,15 +1,15 @@
 {
-  "name": "@supabase/mcp-server-supabase",
+  "name": "@klavis-ai/mcp-server-supabase",
   "version": "0.3.5",
   "description": "MCP server for interacting with Supabase",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/mcp.cjs",
+  "types": "dist/mcp.d.ts",
   "sideEffects": false,
   "scripts": {
     "build": "tsup --clean",
-    "start": "node dist/sse.cjs",
+    "start": "node dist/mcp.cjs",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:e2e": "vitest --project e2e",
@@ -20,13 +20,13 @@
     "dist/**/*"
   ],
   "bin": {
-    "supabase": "./dist/sse.js"
+    "supabase-mcp": "./dist/mcp.js"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.cjs"
+      "import": "./dist/mcp.js",
+      "types": "./dist/mcp.d.ts",
+      "default": "./dist/mcp.cjs"
     }
   },
   "dependencies": {

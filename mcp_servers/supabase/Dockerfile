@@ -29,4 +29,4 @@ WORKDIR /app
 
 RUN npm ci --ignore-scripts --omit-dev
 
-ENTRYPOINT ["node", "dist/sse.cjs"] 
+ENTRYPOINT ["node", "dist/mcp.cjs"] 

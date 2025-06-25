@@ -119,7 +119,7 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-const PORT = 5001;
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Supabase MCP Server running on port ${PORT}`);
 }); 
