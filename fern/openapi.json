@@ -3932,8 +3932,8 @@
           },
           "connectionType": {
             "$ref": "#/components/schemas/ConnectionType",
-            "description": "The connection type to use for the MCP server. Default is SSE.",
-            "default": "SSE"
+            "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
+            "default": "StreamableHttp"
           }
         },
         "type": "object",
@@ -4106,8 +4106,8 @@
           },
           "connectionType": {
             "$ref": "#/components/schemas/ConnectionType",
-            "description": "The connection type to use for the MCP server. Default is SSE.",
-            "default": "SSE"
+            "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
+            "default": "StreamableHttp"
           }
         },
         "type": "object",
@@ -4609,8 +4609,8 @@
           },
           "connectionType": {
             "$ref": "#/components/schemas/ConnectionType",
-            "description": "The connection type to use for the MCP server. Default is SSE.",
-            "default": "SSE"
+            "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
+            "default": "StreamableHttp"
           },
           "format": {
             "$ref": "#/components/schemas/ToolFormat",
