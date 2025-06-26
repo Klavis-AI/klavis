@@ -5,9 +5,9 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_cases(account_id: Optional[str] = None, status: Optional[str] = None, priority: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get cases, optionally filtered by account, status, or priority."""
-    logger.info(f"Executing tool: get_cases with account_id: {account_id}, status: {status}, priority: {priority}, limit: {limit}")
+async def get_cases(account_id: Optional[str] = None, status: Optional[str] = None, priority: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, subject_contains: Optional[str] = None, case_type: Optional[str] = None) -> Dict[str, Any]:
+    """Get cases with flexible filtering options."""
+    logger.info(f"Executing tool: get_cases with account_id: {account_id}, status: {status}, priority: {priority}, limit: {limit}, subject_contains: {subject_contains}, case_type: {case_type}")
     try:
         sf = get_salesforce_conn()
         
@@ -27,6 +27,18 @@ async def get_cases(account_id: Optional[str] = None, status: Optional[str] = No
             where_clauses.append(f"Status = '{status}'")
         if priority:
             where_clauses.append(f"Priority = '{priority}'")
+        if subject_contains:
+            # Case-insensitive subject search
+            subject_variations = [
+                subject_contains.lower(),
+                subject_contains.upper(),
+                subject_contains.capitalize(),
+                subject_contains
+            ]
+            subject_like_conditions = " OR ".join([f"Subject LIKE '%{variation}%'" for variation in set(subject_variations)])
+            where_clauses.append(f"({subject_like_conditions})")
+        if case_type:
+            where_clauses.append(f"Type = '{case_type}'")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Case{where_clause} ORDER BY CreatedDate DESC LIMIT {limit}"

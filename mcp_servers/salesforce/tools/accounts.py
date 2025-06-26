@@ -5,9 +5,9 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_accounts(limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get accounts with optional field selection."""
-    logger.info(f"Executing tool: get_accounts with limit: {limit}")
+async def get_accounts(limit: int = 50, fields: Optional[List[str]] = None, name_contains: Optional[str] = None, industry: Optional[str] = None, account_type: Optional[str] = None) -> Dict[str, Any]:
+    """Get accounts with flexible filtering options."""
+    logger.info(f"Executing tool: get_accounts with limit: {limit}, name_contains: {name_contains}, industry: {industry}, account_type: {account_type}")
     try:
         sf = get_salesforce_conn()
         
@@ -18,7 +18,27 @@ async def get_accounts(limit: int = 50, fields: Optional[List[str]] = None) -> D
                      'CreatedDate', 'LastModifiedDate']
         
         field_list = ', '.join(fields)
-        query = f"SELECT {field_list} FROM Account ORDER BY Name LIMIT {limit}"
+        
+        # Build query with optional filters
+        where_clauses = []
+        if name_contains:
+            # Case-insensitive search by trying multiple case variations
+            name_variations = [
+                name_contains.lower(),
+                name_contains.upper(),
+                name_contains.capitalize(),
+                name_contains
+            ]
+            name_like_conditions = " OR ".join([f"Name LIKE '%{variation}%'" for variation in set(name_variations)])
+            where_clauses.append(f"({name_like_conditions})")
+            
+        if industry:
+            where_clauses.append(f"Industry = '{industry}'")
+        if account_type:
+            where_clauses.append(f"Type = '{account_type}'")
+        
+        where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        query = f"SELECT {field_list} FROM Account{where_clause} ORDER BY Name LIMIT {limit}"
         
         result = sf.query(query)
         return dict(result)
