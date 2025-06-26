@@ -64,4 +64,23 @@ def format_success_response(record_id: str, operation: str, object_type: str, da
     }
     if data:
         response["data"] = data
-    return response 
+    return response
+
+def create_case_insensitive_like_conditions(search_term: str, *field_names: str) -> str:
+    """Create case-insensitive LIKE conditions for multiple fields."""
+    if not search_term or not field_names:
+        return ""
+    
+    variations = [
+        search_term.lower(),
+        search_term.upper(),
+        search_term.capitalize(),
+        search_term
+    ]
+    
+    all_conditions = []
+    for field_name in field_names:
+        field_conditions = [f"{field_name} LIKE '%{variation}%'" for variation in set(variations)]
+        all_conditions.extend(field_conditions)
+    
+    return " OR ".join(all_conditions) 

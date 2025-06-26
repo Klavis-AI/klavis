@@ -5,9 +5,9 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get contacts, optionally filtered by account."""
-    logger.info(f"Executing tool: get_contacts with account_id: {account_id}, limit: {limit}")
+async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, name_contains: Optional[str] = None, email_contains: Optional[str] = None, title_contains: Optional[str] = None) -> Dict[str, Any]:
+    """Get contacts with flexible filtering options."""
+    logger.info(f"Executing tool: get_contacts with account_id: {account_id}, limit: {limit}, name_contains: {name_contains}, email_contains: {email_contains}, title_contains: {title_contains}")
     try:
         sf = get_salesforce_conn()
         
@@ -18,10 +18,47 @@ async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields
         
         field_list = ', '.join(fields)
         
+        # Build query with optional filters
+        where_clauses = []
         if account_id:
-            query = f"SELECT {field_list} FROM Contact WHERE AccountId = '{account_id}' ORDER BY LastName, FirstName LIMIT {limit}"
-        else:
-            query = f"SELECT {field_list} FROM Contact ORDER BY LastName, FirstName LIMIT {limit}"
+            where_clauses.append(f"AccountId = '{account_id}'")
+        if name_contains:
+            # Case-insensitive search for first or last name
+            name_variations = [
+                name_contains.lower(),
+                name_contains.upper(),
+                name_contains.capitalize(),
+                name_contains
+            ]
+            name_like_conditions = []
+            for variation in set(name_variations):
+                name_like_conditions.extend([
+                    f"FirstName LIKE '%{variation}%'",
+                    f"LastName LIKE '%{variation}%'"
+                ])
+            where_clauses.append(f"({' OR '.join(name_like_conditions)})")
+        if email_contains:
+            # Case-insensitive email search
+            email_variations = [
+                email_contains.lower(),
+                email_contains.upper(),
+                email_contains
+            ]
+            email_like_conditions = " OR ".join([f"Email LIKE '%{variation}%'" for variation in set(email_variations)])
+            where_clauses.append(f"({email_like_conditions})")
+        if title_contains:
+            # Case-insensitive title search
+            title_variations = [
+                title_contains.lower(),
+                title_contains.upper(),
+                title_contains.capitalize(),
+                title_contains
+            ]
+            title_like_conditions = " OR ".join([f"Title LIKE '%{variation}%'" for variation in set(title_variations)])
+            where_clauses.append(f"({title_like_conditions})")
+        
+        where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        query = f"SELECT {field_list} FROM Contact{where_clause} ORDER BY LastName, FirstName LIMIT {limit}"
         
         result = sf.query(query)
         return dict(result)

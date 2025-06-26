@@ -5,9 +5,16 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_opportunities(account_id: Optional[str] = None, stage: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get opportunities, optionally filtered by account or stage."""
-    logger.info(f"Executing tool: get_opportunities with account_id: {account_id}, stage: {stage}, limit: {limit}")
+async def get_opportunities(
+    account_id: Optional[str] = None, 
+    stage: Optional[str] = None, 
+    name_contains: Optional[str] = None,
+    account_name_contains: Optional[str] = None,
+    limit: int = 50, 
+    fields: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """Get opportunities, optionally filtered by account, stage, name, or account name."""
+    logger.info(f"Executing tool: get_opportunities with account_id: {account_id}, stage: {stage}, name_contains: {name_contains}, account_name_contains: {account_name_contains}, limit: {limit}")
     try:
         sf = get_salesforce_conn()
         
@@ -25,6 +32,29 @@ async def get_opportunities(account_id: Optional[str] = None, stage: Optional[st
             where_clauses.append(f"AccountId = '{account_id}'")
         if stage:
             where_clauses.append(f"StageName = '{stage}'")
+        if name_contains:
+            # Case-insensitive search by trying multiple case variations
+            name_variations = [
+                name_contains.lower(),
+                name_contains.upper(), 
+                name_contains.capitalize(),
+                name_contains
+            ]
+            # Create OR conditions for different case variations
+            name_like_conditions = " OR ".join([f"Name LIKE '%{variation}%'" for variation in set(name_variations)])
+            where_clauses.append(f"({name_like_conditions})")
+            
+        if account_name_contains:
+            # Case-insensitive search by trying multiple case variations
+            account_variations = [
+                account_name_contains.lower(),
+                account_name_contains.upper(),
+                account_name_contains.capitalize(), 
+                account_name_contains
+            ]
+            # Create OR conditions for different case variations
+            account_like_conditions = " OR ".join([f"Account.Name LIKE '%{variation}%'" for variation in set(account_variations)])
+            where_clauses.append(f"({account_like_conditions})")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Opportunity{where_clause} ORDER BY CloseDate ASC LIMIT {limit}"

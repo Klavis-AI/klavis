@@ -5,9 +5,9 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_leads(status: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get leads, optionally filtered by status."""
-    logger.info(f"Executing tool: get_leads with status: {status}, limit: {limit}")
+async def get_leads(status: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, name_contains: Optional[str] = None, company_contains: Optional[str] = None, email_contains: Optional[str] = None, industry: Optional[str] = None) -> Dict[str, Any]:
+    """Get leads with flexible filtering options."""
+    logger.info(f"Executing tool: get_leads with status: {status}, limit: {limit}, name_contains: {name_contains}, company_contains: {company_contains}, email_contains: {email_contains}, industry: {industry}")
     try:
         sf = get_salesforce_conn()
         
@@ -19,10 +19,49 @@ async def get_leads(status: Optional[str] = None, limit: int = 50, fields: Optio
         
         field_list = ', '.join(fields)
         
+        # Build query with optional filters
+        where_clauses = []
         if status:
-            query = f"SELECT {field_list} FROM Lead WHERE Status = '{status}' ORDER BY CreatedDate DESC LIMIT {limit}"
-        else:
-            query = f"SELECT {field_list} FROM Lead ORDER BY CreatedDate DESC LIMIT {limit}"
+            where_clauses.append(f"Status = '{status}'")
+        if name_contains:
+            # Case-insensitive search for first or last name
+            name_variations = [
+                name_contains.lower(),
+                name_contains.upper(),
+                name_contains.capitalize(),
+                name_contains
+            ]
+            name_like_conditions = []
+            for variation in set(name_variations):
+                name_like_conditions.extend([
+                    f"FirstName LIKE '%{variation}%'",
+                    f"LastName LIKE '%{variation}%'"
+                ])
+            where_clauses.append(f"({' OR '.join(name_like_conditions)})")
+        if company_contains:
+            # Case-insensitive company search
+            company_variations = [
+                company_contains.lower(),
+                company_contains.upper(),
+                company_contains.capitalize(),
+                company_contains
+            ]
+            company_like_conditions = " OR ".join([f"Company LIKE '%{variation}%'" for variation in set(company_variations)])
+            where_clauses.append(f"({company_like_conditions})")
+        if email_contains:
+            # Case-insensitive email search
+            email_variations = [
+                email_contains.lower(),
+                email_contains.upper(),
+                email_contains
+            ]
+            email_like_conditions = " OR ".join([f"Email LIKE '%{variation}%'" for variation in set(email_variations)])
+            where_clauses.append(f"({email_like_conditions})")
+        if industry:
+            where_clauses.append(f"Industry = '{industry}'")
+        
+        where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        query = f"SELECT {field_list} FROM Lead{where_clause} ORDER BY CreatedDate DESC LIMIT {limit}"
         
         result = sf.query(query)
         return dict(result)

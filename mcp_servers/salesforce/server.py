@@ -65,12 +65,15 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Account Tools
             types.Tool(
                 name="salesforce_get_accounts",
-                description="Get accounts with optional field selection and filtering.",
+                description="Get accounts with flexible filtering options including name search, industry, and type.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "limit": {"type": "integer", "description": "Maximum number of accounts to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
+                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
+                        "name_contains": {"type": "string", "description": "Filter accounts by name containing this text (case-insensitive)"},
+                        "industry": {"type": "string", "description": "Filter accounts by industry"},
+                        "account_type": {"type": "string", "description": "Filter accounts by type"}
                     }
                 }
             ),
@@ -124,13 +127,16 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Contact Tools
             types.Tool(
                 name="salesforce_get_contacts",
-                description="Get contacts, optionally filtered by account.",
+                description="Get contacts with flexible filtering options including name, email, and title search.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "account_id": {"type": "string", "description": "Filter contacts by account ID"},
                         "limit": {"type": "integer", "description": "Maximum number of contacts to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
+                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
+                        "name_contains": {"type": "string", "description": "Filter contacts by first or last name containing this text (case-insensitive)"},
+                        "email_contains": {"type": "string", "description": "Filter contacts by email containing this text (case-insensitive)"},
+                        "title_contains": {"type": "string", "description": "Filter contacts by title containing this text (case-insensitive)"}
                     }
                 }
             ),
@@ -184,12 +190,14 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Opportunity Tools  
             types.Tool(
                 name="salesforce_get_opportunities",
-                description="Get opportunities, optionally filtered by account or stage.",
+                description="Get opportunities, optionally filtered by account, stage, name, or account name.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "account_id": {"type": "string", "description": "Filter opportunities by account ID"},
                         "stage": {"type": "string", "description": "Filter opportunities by stage"},
+                        "name_contains": {"type": "string", "description": "Filter opportunities by name containing this text"},
+                        "account_name_contains": {"type": "string", "description": "Filter opportunities by account name containing this text"},
                         "limit": {"type": "integer", "description": "Maximum number of opportunities to return (default: 50)", "default": 50},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
@@ -245,13 +253,17 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Lead Tools
             types.Tool(
                 name="salesforce_get_leads",
-                description="Get leads, optionally filtered by status.",
+                description="Get leads with flexible filtering options including name, company, email, and industry search.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "status": {"type": "string", "description": "Filter leads by status"},
                         "limit": {"type": "integer", "description": "Maximum number of leads to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
+                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
+                        "name_contains": {"type": "string", "description": "Filter leads by first or last name containing this text (case-insensitive)"},
+                        "company_contains": {"type": "string", "description": "Filter leads by company name containing this text (case-insensitive)"},
+                        "email_contains": {"type": "string", "description": "Filter leads by email containing this text (case-insensitive)"},
+                        "industry": {"type": "string", "description": "Filter leads by industry"}
                     }
                 }
             ),
@@ -317,7 +329,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Case Tools
             types.Tool(
                 name="salesforce_get_cases",
-                description="Get cases, optionally filtered by account, status, or priority.",
+                description="Get cases with flexible filtering options including subject search, account, status, priority, and type.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -325,7 +337,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "status": {"type": "string", "description": "Filter cases by status"},
                         "priority": {"type": "string", "description": "Filter cases by priority"},
                         "limit": {"type": "integer", "description": "Maximum number of cases to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
+                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
+                        "subject_contains": {"type": "string", "description": "Filter cases by subject containing this text (case-insensitive)"},
+                        "case_type": {"type": "string", "description": "Filter cases by type"}
                     }
                 }
             ),
@@ -654,7 +668,13 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         try:
             # Account tools
             if name == "salesforce_get_accounts":
-                result = await get_accounts(arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_accounts(
+                    limit=arguments.get("limit", 50), 
+                    fields=arguments.get("fields"),
+                    name_contains=arguments.get("name_contains"),
+                    industry=arguments.get("industry"),
+                    account_type=arguments.get("account_type")
+                )
             elif name == "salesforce_get_account_by_id":
                 result = await get_account_by_id(arguments["account_id"], arguments.get("fields"))
             elif name == "salesforce_create_account":
@@ -666,7 +686,14 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             
             # Contact tools
             elif name == "salesforce_get_contacts":
-                result = await get_contacts(arguments.get("account_id"), arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_contacts(
+                    account_id=arguments.get("account_id"), 
+                    limit=arguments.get("limit", 50), 
+                    fields=arguments.get("fields"),
+                    name_contains=arguments.get("name_contains"),
+                    email_contains=arguments.get("email_contains"),
+                    title_contains=arguments.get("title_contains")
+                )
             elif name == "salesforce_get_contact_by_id":
                 result = await get_contact_by_id(arguments["contact_id"], arguments.get("fields"))
             elif name == "salesforce_create_contact":
@@ -678,7 +705,14 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             
             # Opportunity tools
             elif name == "salesforce_get_opportunities":
-                result = await get_opportunities(arguments.get("account_id"), arguments.get("stage"), arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_opportunities(
+                    arguments.get("account_id"), 
+                    arguments.get("stage"), 
+                    arguments.get("name_contains"),
+                    arguments.get("account_name_contains"),
+                    arguments.get("limit", 50), 
+                    arguments.get("fields")
+                )
             elif name == "salesforce_get_opportunity_by_id":
                 result = await get_opportunity_by_id(arguments["opportunity_id"], arguments.get("fields"))
             elif name == "salesforce_create_opportunity":
@@ -690,7 +724,15 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             
             # Lead tools
             elif name == "salesforce_get_leads":
-                result = await get_leads(arguments.get("status"), arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_leads(
+                    status=arguments.get("status"), 
+                    limit=arguments.get("limit", 50), 
+                    fields=arguments.get("fields"),
+                    name_contains=arguments.get("name_contains"),
+                    company_contains=arguments.get("company_contains"),
+                    email_contains=arguments.get("email_contains"),
+                    industry=arguments.get("industry")
+                )
             elif name == "salesforce_get_lead_by_id":
                 result = await get_lead_by_id(arguments["lead_id"], arguments.get("fields"))
             elif name == "salesforce_create_lead":
@@ -704,7 +746,15 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             
             # Case tools
             elif name == "salesforce_get_cases":
-                result = await get_cases(arguments.get("account_id"), arguments.get("status"), arguments.get("priority"), arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_cases(
+                    account_id=arguments.get("account_id"), 
+                    status=arguments.get("status"), 
+                    priority=arguments.get("priority"), 
+                    limit=arguments.get("limit", 50), 
+                    fields=arguments.get("fields"),
+                    subject_contains=arguments.get("subject_contains"),
+                    case_type=arguments.get("case_type")
+                )
             elif name == "salesforce_get_case_by_id":
                 result = await get_case_by_id(arguments["case_id"], arguments.get("fields"))
             elif name == "salesforce_create_case":
