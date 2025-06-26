@@ -1,0 +1,4 @@
+crewai>=0.130.0
+crewai-tools[mcp]>=0.48.0
+klavis>=1.0.1
+openai>=1.91.0
