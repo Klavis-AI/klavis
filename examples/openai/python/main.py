@@ -1,78 +1,40 @@
 import json
 import os
+import webbrowser
 from typing import Dict, Any, List
 from openai import OpenAI
-from klavis_api import KlavisAPI
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
 
-def get_function_definitions(klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> List[Dict[str, Any]]:
-    """Return OpenAI tool definitions for function calling."""
-    if not klavis_client or not mcp_instance:
-        return []
-    
-    tools_info = klavis_client.list_tools(mcp_instance['serverUrl'])
-    if not tools_info.get("success"):
-        return []
-
-    openai_tools = []
-    for tool in tools_info.get("tools", []):
-        openai_tools.append({
-            "type": "function",
-            "function": {
-                "name": tool.get("name"),
-                "description": tool.get("description"),
-                "parameters": tool.get("inputSchema", {})
-            }
-        })
-    return openai_tools
-
-
-def handle_function_call(function_name: str, function_args: str, klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> str:
-    """
-    Execute a function call and return the result.
-    
-    Args:
-        function_name: Name of the function to call
-        function_args: JSON string of function arguments
-        klavis_client: KlavisAPI client instance
-        mcp_instance: MCP instance dictionary
-    
-    Returns:
-        JSON string of function result
-    """
-    try:
-        args = json.loads(function_args)
-        result = klavis_client.call_tool(
-            server_url=mcp_instance['serverUrl'],
-            tool_name=function_name,
-            tool_args=args
-        )
-        return json.dumps(result)
-    except Exception as e:
-        return json.dumps({"error": str(e)})
-
-
-def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_client: KlavisAPI, mcp_instance: Dict[str, str]) -> None:
+def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_client: Klavis, server_url: str) -> None:
     """
     Stream chat completion from OpenAI with function calling support.
     
     Args:
         client: OpenAI client instance
         messages: List of conversation messages
-        klavis_client: KlavisAPI client instance
-        mcp_instance: MCP instance dictionary
+        klavis_client: Klavis client instance
+        server_url: MCP server URL
     """
     try:
+            
+        tools_info = klavis_client.mcp_server.list_tools(
+            server_url=server_url,
+            format=ToolFormat.OPENAI,
+        )
+        
         # Create streaming completion with function calling
         stream = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            tools=get_function_definitions(klavis_client, mcp_instance),
+            tools=tools_info.tools,
             tool_choice="auto",
             stream=True,
             temperature=0.7
         )
         
-        current_message = {"role": "assistant", "content": ""}
+        # Add assistant message to messages list that we'll modify in place
+        messages.append({"role": "assistant", "content": ""})
         tool_calls = []
         current_tool_call = None
         is_tool_call = False
@@ -84,7 +46,7 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
                 # Regular content streaming
                 content = chunk.choices[0].delta.content
                 print(content, end="", flush=True)
-                current_message["content"] += content
+                messages[-1]["content"] += content
                 
             elif chunk.choices[0].delta.tool_calls:
                 # Tool call streaming
@@ -111,7 +73,6 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
                             if delta_tool_call.function.arguments:
                                 current_tool_call["function"]["arguments"] += delta_tool_call.function.arguments
         
-        print()
         
         # Handle tool calls if present
         if is_tool_call and tool_calls:
@@ -120,25 +81,21 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
                     print(f"\n🔧 Calling function: {tool_call['function']['name']}")
                     
                     # Execute function call
-                    function_result = handle_function_call(
-                        tool_call["function"]["name"], 
-                        tool_call["function"]["arguments"],
-                        klavis_client,
-                        mcp_instance
+                    function_result = klavis_client.mcp_server.call_tools(
+                        server_url=server_url,
+                        tool_name=tool_call["function"]["name"],
+                        tool_args=json.loads(tool_call["function"]["arguments"]),
                     )
                     
-                    # Add tool call to assistant message
-                    current_message["tool_calls"] = tool_calls
-                    current_message["content"] = current_message["content"] or None
-                    
-                    # Add assistant message with tool calls
-                    messages.append(current_message)
+                    # Add tool call to the assistant message already in messages
+                    messages[-1]["tool_calls"] = tool_calls
+                    messages[-1]["content"] = messages[-1]["content"] or None
                     
                     # Add tool result message
                     messages.append({
                         "role": "tool",
                         "tool_call_id": tool_call["id"],
-                        "content": function_result
+                        "content": str(function_result)
                     })
             
             # Get final response with tool results
@@ -149,16 +106,12 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
                 stream=True
             )
             
-            final_message = {"role": "assistant", "content": ""}
+            messages.append({"role": "assistant", "content": ""})
             for chunk in final_stream:
                 if chunk.choices[0].delta.content:
                     content = chunk.choices[0].delta.content
                     print(content, end="", flush=True)
-                    final_message["content"] += content
-            
-            messages.append(final_message)
-        else:
-            messages.append(current_message)
+                    messages[-1]["content"] += content
             
         print()  # Final new line
         
@@ -167,14 +120,21 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
 
 def main():    
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    klavis_client = KlavisAPI(api_key=os.getenv("KLAVIS_API_KEY"))
+    klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
     
-    mcp_instance = klavis_client.create_mcp_instance(
-        server_name="Close",  # Close CRM as an example
+    # Create MCP server instance
+    mcp_instance = klavis_client.mcp_server.create_server_instance(
+        server_name=McpServerName.YOUTUBE,  # Close CRM as an example
         user_id="1234",
-        platform_name="demo",
+        platform_name="Klavis",
     )
-    klavis_client.redirect_to_oauth(mcp_instance['instanceId'], "Close")
+    
+    # Open OAuth authorization if needed
+    if hasattr(mcp_instance, 'oauth_url') and mcp_instance.oauth_url:
+        webbrowser.open(mcp_instance.oauth_url)
+        print(f"🔐 Opening OAuth authorization for Close CRM: {mcp_instance.oauth_url}")
+        print("Please complete the OAuth authorization in your browser before continuing...")
+        input("Press Enter after completing OAuth authorization...")
     
     messages = [
         {
@@ -196,7 +156,7 @@ def main():
             
             messages.append({"role": "user", "content": user_input})
             
-            stream_chat_completion(openai_client, messages, klavis_client, mcp_instance)
+            stream_chat_completion(openai_client, messages, klavis_client, mcp_instance.server_url)
             
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
