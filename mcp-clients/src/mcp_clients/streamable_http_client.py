@@ -39,15 +39,15 @@ class MCPClient:
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
+        self.messages = []  # Store conversation history
 
     async def process_query(self, query: str) -> str:
         """Process a query using Claude and available tools"""
-        messages = [
-            {
-                "role": "user",
-                "content": query
-            }
-        ]
+        # Add user message to conversation history
+        self.messages.append({
+            "role": "user",
+            "content": query
+        })
 
         response = await self.session.list_tools()
         available_tools = [{
@@ -56,11 +56,11 @@ class MCPClient:
             "input_schema": tool.inputSchema
         } for tool in response.tools]
 
-        # Initial Claude API call
+        # Initial Claude API call with full conversation history
         response = self.anthropic.messages.create(
             model="claude-3-5-sonnet-20241022",
             max_tokens=1000,
-            messages=messages,
+            messages=self.messages,
             tools=available_tools
         )
 
@@ -78,7 +78,8 @@ class MCPClient:
                 result = await self.session.call_tool(tool_name, tool_args)
                 final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
 
-                messages.append({
+                # Add assistant message with tool use to history
+                self.messages.append({
                     "role": "assistant",
                     "content": [{
                         "type": "tool_use",
@@ -87,7 +88,9 @@ class MCPClient:
                         "id": content.id
                     }]
                 })
-                messages.append({
+                
+                # Add tool result to history
+                self.messages.append({
                     "role": "user",
                     "content": [{
                         "type": "tool_result",
@@ -97,21 +100,28 @@ class MCPClient:
                 })
                 final_text.append(f"[Tool call result: {result.content[0].text}]")
 
-                # Get next response from Claude
+                # Get next response from Claude with full history
                 response = self.anthropic.messages.create(
                     model="claude-3-5-sonnet-20241022",
                     max_tokens=1000,
-                    messages=messages,
+                    messages=self.messages,
                 )
 
                 final_text.append(response.content[0].text)
+
+        # Add final assistant response to history
+        if response.content and response.content[0].type == 'text':
+            self.messages.append({
+                "role": "assistant",
+                "content": response.content[0].text
+            })
 
         return "\n".join(final_text)
 
     async def chat_loop(self):
         """Run an interactive chat loop"""
         print("\nMCP Client Started!")
-        print("Type your queries or 'quit' to exit.")
+        print("Type your queries, 'clear' to clear history, or 'quit' to exit.")
 
         while True:
             try:
@@ -119,6 +129,10 @@ class MCPClient:
 
                 if query.lower() == 'quit':
                     break
+                elif query.lower() == 'clear':
+                    self.messages = []
+                    print("Message history cleared.")
+                    continue
 
                 response = await self.process_query(query)
                 print("\n" + response)
