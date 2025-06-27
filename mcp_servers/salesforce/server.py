@@ -190,10 +190,16 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 description="Update an existing opportunity.",
                 inputSchema={
                     "type": "object",
-                    "required": ["opportunity_id", "opportunity_data"],
+                    "required": ["opportunity_id"],
                     "properties": {
                         "opportunity_id": {"type": "string", "description": "The ID of the opportunity to update"},
-                        "opportunity_data": {"type": "object", "description": "Updated opportunity data"}
+                        "closed_date": {"type": "string", "description": "The date the opportunity was closed"},
+                        "stage": {"type": "string", "description": "The stage the opportunity is in"},
+                        "amount": {"type": "number", "description": "The amount of the opportunity"},
+                        "next_step": {"type": "string", "description": "The next step for the opportunity"},
+                        "description": {"type": "string", "description": "The description of the opportunity"},
+                        "owner_id": {"type": "string", "description": "The ID of the owner of the opportunity"},
+                        "account_id": {"type": "string", "description": "The ID of the account associated with the opportunity"},
                     }
                 }
             ),
@@ -449,7 +455,16 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             elif name == "salesforce_create_opportunity":
                 result = await create_opportunity(arguments["opportunity_data"])
             elif name == "salesforce_update_opportunity":
-                result = await update_opportunity(arguments["opportunity_id"], arguments["opportunity_data"])
+                result = await update_opportunity(
+                    opportunity_id=arguments["opportunity_id"],
+                    closed_date=arguments.get("closed_date"),
+                    stage=arguments.get("stage"),
+                    amount=arguments.get("amount"),
+                    next_step=arguments.get("next_step"),
+                    description=arguments.get("description"),
+                    owner_id=arguments.get("owner_id"),
+                    account_id=arguments.get("account_id")
+                )
             elif name == "salesforce_delete_opportunity":
                 result = await delete_opportunity(arguments["opportunity_id"])
             
