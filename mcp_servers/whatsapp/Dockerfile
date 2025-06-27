@@ -1,35 +1,32 @@
-# Use Node.js 18 Alpine image
-FROM node:18-alpine
+FROM node:22.12-alpine AS builder
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package.json and package-lock.json to install dependencies
+COPY mcp_servers/whatsapp/package.json mcp_servers/whatsapp/package-lock.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (ignoring scripts to prevent running the prepare script)
+RUN npm install --ignore-scripts
 
-# Copy source code
-COPY . .
+# Copy the rest of the application source code
+COPY mcp_servers/whatsapp .
 
-# Build the application
+# Build the application using TypeScript
 RUN npm run build
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S whatsapp -u 1001
+FROM node:22-alpine AS release
 
-# Change ownership of app directory
-RUN chown -R whatsapp:nodejs /app
-USER whatsapp
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/package-lock.json /app/package-lock.json
 
-# Expose port
+ENV NODE_ENV=production
+
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+WORKDIR /app
 
-# Start the application
-CMD ["npm", "start"] 
+RUN npm ci --ignore-scripts --omit-dev
+
+ENTRYPOINT ["node", "dist/index.js"] 
