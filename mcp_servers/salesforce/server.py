@@ -20,24 +20,19 @@ from dotenv import load_dotenv
 from tools import (
     access_token_context, instance_url_context,
     # Accounts
-    get_accounts, get_account_by_id, create_account, update_account, delete_account,
+    get_accounts, create_account, update_account, delete_account,
     # Contacts
-    get_contacts, get_contact_by_id, create_contact, update_contact, delete_contact,
+    get_contacts, create_contact, update_contact, delete_contact,
     # Opportunities
-    get_opportunities, get_opportunity_by_id, create_opportunity, update_opportunity, delete_opportunity,
+    get_opportunities, create_opportunity, update_opportunity, delete_opportunity,
     # Leads
-    get_leads, get_lead_by_id, create_lead, update_lead, delete_lead, convert_lead,
+    get_leads, create_lead, update_lead, delete_lead, convert_lead,
     # Cases
-    get_cases, get_case_by_id, create_case, update_case, delete_case,
+    get_cases, create_case, update_case, delete_case,
     # Campaigns
-    get_campaigns, get_campaign_by_id, create_campaign, update_campaign, delete_campaign,
-    # Activities
-    get_tasks, get_task_by_id, create_task, update_task, delete_task,
-    get_events, get_event_by_id, create_event, update_event, delete_event,
-    # Reports
-    get_reports, run_report, get_report_by_id,
+    get_campaigns, create_campaign, update_campaign, delete_campaign,
     # Metadata & Queries
-    describe_object, get_component_source, execute_soql_query, execute_tooling_query
+    describe_object, execute_soql_query
 )
 
 # Configure logging
@@ -74,18 +69,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "name_contains": {"type": "string", "description": "Filter accounts by name containing this text (case-insensitive)"},
                         "industry": {"type": "string", "description": "Filter accounts by industry"},
                         "account_type": {"type": "string", "description": "Filter accounts by type"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_account_by_id",
-                description="Get a specific account by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["account_id"],
-                    "properties": {
-                        "account_id": {"type": "string", "description": "The ID of the account to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
                 }
             ),
@@ -141,18 +124,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="salesforce_get_contact_by_id",
-                description="Get a specific contact by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["contact_id"],
-                    "properties": {
-                        "contact_id": {"type": "string", "description": "The ID of the contact to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
                 name="salesforce_create_contact",
                 description="Create a new contact in Salesforce.",
                 inputSchema={
@@ -199,18 +170,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "name_contains": {"type": "string", "description": "Filter opportunities by name containing this text"},
                         "account_name_contains": {"type": "string", "description": "Filter opportunities by account name containing this text"},
                         "limit": {"type": "integer", "description": "Maximum number of opportunities to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_opportunity_by_id",
-                description="Get a specific opportunity by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["opportunity_id"],
-                    "properties": {
-                        "opportunity_id": {"type": "string", "description": "The ID of the opportunity to retrieve"},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
                 }
@@ -264,18 +223,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "company_contains": {"type": "string", "description": "Filter leads by company name containing this text (case-insensitive)"},
                         "email_contains": {"type": "string", "description": "Filter leads by email containing this text (case-insensitive)"},
                         "industry": {"type": "string", "description": "Filter leads by industry"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_lead_by_id",
-                description="Get a specific lead by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["lead_id"],
-                    "properties": {
-                        "lead_id": {"type": "string", "description": "The ID of the lead to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
                 }
             ),
@@ -344,18 +291,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="salesforce_get_case_by_id",
-                description="Get a specific case by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["case_id"],
-                    "properties": {
-                        "case_id": {"type": "string", "description": "The ID of the case to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
                 name="salesforce_create_case",
                 description="Create a new case in Salesforce.",
                 inputSchema={
@@ -405,18 +340,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="salesforce_get_campaign_by_id",
-                description="Get a specific campaign by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["campaign_id"],
-                    "properties": {
-                        "campaign_id": {"type": "string", "description": "The ID of the campaign to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
                 name="salesforce_create_campaign",
                 description="Create a new campaign in Salesforce.",
                 inputSchema={
@@ -451,165 +374,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             
-            # Task Tools
-            types.Tool(
-                name="salesforce_get_tasks",
-                description="Get tasks, optionally filtered by assignee or status.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "assigned_to": {"type": "string", "description": "Filter tasks by assignee ID"},
-                        "status": {"type": "string", "description": "Filter tasks by status"},
-                        "limit": {"type": "integer", "description": "Maximum number of tasks to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_task_by_id",
-                description="Get a specific task by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["task_id"],
-                    "properties": {
-                        "task_id": {"type": "string", "description": "The ID of the task to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_create_task",
-                description="Create a new task in Salesforce.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["task_data"],
-                    "properties": {
-                        "task_data": {"type": "object", "description": "Task data including Subject (required)"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_update_task",
-                description="Update an existing task.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["task_id", "task_data"],
-                    "properties": {
-                        "task_id": {"type": "string", "description": "The ID of the task to update"},
-                        "task_data": {"type": "object", "description": "Updated task data"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_delete_task",
-                description="Delete a task.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["task_id"],
-                    "properties": {
-                        "task_id": {"type": "string", "description": "The ID of the task to delete"}
-                    }
-                }
-            ),
-            
-            # Event Tools
-            types.Tool(
-                name="salesforce_get_events",
-                description="Get events, optionally filtered by assignee.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "assigned_to": {"type": "string", "description": "Filter events by assignee ID"},
-                        "limit": {"type": "integer", "description": "Maximum number of events to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_event_by_id",
-                description="Get a specific event by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["event_id"],
-                    "properties": {
-                        "event_id": {"type": "string", "description": "The ID of the event to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_create_event",
-                description="Create a new event in Salesforce.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["event_data"],
-                    "properties": {
-                        "event_data": {"type": "object", "description": "Event data including Subject, StartDateTime, and EndDateTime (required)"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_update_event",
-                description="Update an existing event.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["event_id", "event_data"],
-                    "properties": {
-                        "event_id": {"type": "string", "description": "The ID of the event to update"},
-                        "event_data": {"type": "object", "description": "Updated event data"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_delete_event",
-                description="Delete an event.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["event_id"],
-                    "properties": {
-                        "event_id": {"type": "string", "description": "The ID of the event to delete"}
-                    }
-                }
-            ),
-            
-            # Report Tools
-            types.Tool(
-                name="salesforce_get_reports",
-                description="Get reports, optionally filtered by folder.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "folder_id": {"type": "string", "description": "Filter reports by folder ID"},
-                        "limit": {"type": "integer", "description": "Maximum number of reports to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_report_by_id",
-                description="Get a specific report by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["report_id"],
-                    "properties": {
-                        "report_id": {"type": "string", "description": "The ID of the report to retrieve"},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_run_report",
-                description="Run a report and get its results.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["report_id"],
-                    "properties": {
-                        "report_id": {"type": "string", "description": "The ID of the report to run"},
-                        "include_details": {"type": "boolean", "description": "Whether to include detailed results", "default": True}
-                    }
-                }
-            ),
-            
             # Query and Metadata Tools
             types.Tool(
                 name="salesforce_query",
@@ -623,17 +387,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="salesforce_tooling_query",
-                description="Execute a query against the Salesforce Tooling API",
-                inputSchema={
-                    "type": "object",
-                    "required": ["query"],
-                    "properties": {
-                        "query": {"type": "string", "description": "Tooling API query to execute"}
-                    }
-                }
-            ),
-            types.Tool(
                 name="salesforce_describe_object",
                 description="Get detailed schema and field information for any Salesforce object.",
                 inputSchema={
@@ -642,22 +395,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "object_name": {"type": "string", "description": "API name of the object to describe"},
                         "detailed": {"type": "boolean", "description": "Whether to return additional metadata for custom objects", "default": False}
-                    }
-                }
-            ),
-            types.Tool(
-                name="salesforce_get_component_source",
-                description="Retrieve the source code and definitions of Salesforce components.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["metadata_type", "component_names"],
-                    "properties": {
-                        "metadata_type": {
-                            "type": "string",
-                            "description": "Type of component to retrieve",
-                            "enum": ["CustomObject", "Flow", "FlowDefinition", "CustomField", "ValidationRule", "ApexClass", "ApexTrigger", "WorkflowRule", "Layout"]
-                        },
-                        "component_names": {"type": "array", "items": {"type": "string"}, "description": "Array of component names to retrieve"}
                     }
                 }
             ),
@@ -675,8 +412,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     industry=arguments.get("industry"),
                     account_type=arguments.get("account_type")
                 )
-            elif name == "salesforce_get_account_by_id":
-                result = await get_account_by_id(arguments["account_id"], arguments.get("fields"))
             elif name == "salesforce_create_account":
                 result = await create_account(arguments["account_data"])
             elif name == "salesforce_update_account":
@@ -694,8 +429,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     email_contains=arguments.get("email_contains"),
                     title_contains=arguments.get("title_contains")
                 )
-            elif name == "salesforce_get_contact_by_id":
-                result = await get_contact_by_id(arguments["contact_id"], arguments.get("fields"))
             elif name == "salesforce_create_contact":
                 result = await create_contact(arguments["contact_data"])
             elif name == "salesforce_update_contact":
@@ -713,8 +446,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     arguments.get("limit", 50), 
                     arguments.get("fields")
                 )
-            elif name == "salesforce_get_opportunity_by_id":
-                result = await get_opportunity_by_id(arguments["opportunity_id"], arguments.get("fields"))
             elif name == "salesforce_create_opportunity":
                 result = await create_opportunity(arguments["opportunity_data"])
             elif name == "salesforce_update_opportunity":
@@ -733,8 +464,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     email_contains=arguments.get("email_contains"),
                     industry=arguments.get("industry")
                 )
-            elif name == "salesforce_get_lead_by_id":
-                result = await get_lead_by_id(arguments["lead_id"], arguments.get("fields"))
             elif name == "salesforce_create_lead":
                 result = await create_lead(arguments["lead_data"])
             elif name == "salesforce_update_lead":
@@ -755,8 +484,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     subject_contains=arguments.get("subject_contains"),
                     case_type=arguments.get("case_type")
                 )
-            elif name == "salesforce_get_case_by_id":
-                result = await get_case_by_id(arguments["case_id"], arguments.get("fields"))
             elif name == "salesforce_create_case":
                 result = await create_case(arguments["case_data"])
             elif name == "salesforce_update_case":
@@ -767,56 +494,20 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Campaign tools
             elif name == "salesforce_get_campaigns":
                 result = await get_campaigns(arguments.get("status"), arguments.get("type_filter"), arguments.get("limit", 50), arguments.get("fields"))
-            elif name == "salesforce_get_campaign_by_id":
-                result = await get_campaign_by_id(arguments["campaign_id"], arguments.get("fields"))
             elif name == "salesforce_create_campaign":
                 result = await create_campaign(arguments["campaign_data"])
             elif name == "salesforce_update_campaign":
                 result = await update_campaign(arguments["campaign_id"], arguments["campaign_data"])
             elif name == "salesforce_delete_campaign":
                 result = await delete_campaign(arguments["campaign_id"])
-            
-            # Task tools
-            elif name == "salesforce_get_tasks":
-                result = await get_tasks(arguments.get("assigned_to"), arguments.get("status"), arguments.get("limit", 50), arguments.get("fields"))
-            elif name == "salesforce_get_task_by_id":
-                result = await get_task_by_id(arguments["task_id"], arguments.get("fields"))
-            elif name == "salesforce_create_task":
-                result = await create_task(arguments["task_data"])
-            elif name == "salesforce_update_task":
-                result = await update_task(arguments["task_id"], arguments["task_data"])
-            elif name == "salesforce_delete_task":
-                result = await delete_task(arguments["task_id"])
-            
-            # Event tools
-            elif name == "salesforce_get_events":
-                result = await get_events(arguments.get("assigned_to"), arguments.get("limit", 50), arguments.get("fields"))
-            elif name == "salesforce_get_event_by_id":
-                result = await get_event_by_id(arguments["event_id"], arguments.get("fields"))
-            elif name == "salesforce_create_event":
-                result = await create_event(arguments["event_data"])
-            elif name == "salesforce_update_event":
-                result = await update_event(arguments["event_id"], arguments["event_data"])
-            elif name == "salesforce_delete_event":
-                result = await delete_event(arguments["event_id"])
-            
-            # Report tools
-            elif name == "salesforce_get_reports":
-                result = await get_reports(arguments.get("folder_id"), arguments.get("limit", 50), arguments.get("fields"))
-            elif name == "salesforce_get_report_by_id":
-                result = await get_report_by_id(arguments["report_id"], arguments.get("fields"))
-            elif name == "salesforce_run_report":
-                result = await run_report(arguments["report_id"], arguments.get("include_details", True))
+
+
             
             # Query and metadata tools  
             elif name == "salesforce_query":
                 result = await execute_soql_query(arguments["query"])
-            elif name == "salesforce_tooling_query":
-                result = await execute_tooling_query(arguments["query"])
             elif name == "salesforce_describe_object":
                 result = await describe_object(arguments["object_name"], arguments.get("detailed", False))
-            elif name == "salesforce_get_component_source":
-                result = await get_component_source(arguments["metadata_type"], arguments["component_names"])
             
             else:
                 return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
