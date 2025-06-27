@@ -62,8 +62,7 @@ klavis_client = Klavis(api_key="your-klavis-key")
 youtube_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
     user_id="user123", # Change to user id in your platform
-    platform_name="MyApp", # change to your platform
-    connection_type=ConnectionType.STREAMABLE_HTTP,
+    platform_name="MyApp" # change to your platform
 )
 
 print(f"Server created: {youtube_server.server_url}")
@@ -79,8 +78,7 @@ const klavisClient = new KlavisClient({ apiKey: 'your-klavis-key' });
 const gmailServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
     userId: "user123",
-    platformName: "MyApp",
-    connectionType: Klavis.ConnectionType.StreamableHttp
+    platformName: "MyApp"
 });
 
 // Gmail needs OAuth flow
@@ -107,14 +105,12 @@ klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
 youtube_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
     user_id="user123",
-    platform_name="MyApp",
-    connection_type=ConnectionType.STREAMABLE_HTTP,
+    platform_name="MyApp"
 )
 
 # Get available tools in OpenAI format
 tools = klavis_client.mcp_server.list_tools(
     server_url=youtube_server.server_url,
-    connection_type=ConnectionType.STREAMABLE_HTTP,
     format=ToolFormat.OPENAI,
 )
 
@@ -137,7 +133,6 @@ if response.choices[0].message.tool_calls:
             server_url=youtube_server.server_url,
             tool_name=tool_call.function.name,
             tool_args=json.loads(tool_call.function.arguments),
-            connection_type=ConnectionType.STREAMABLE_HTTP
         )
         
         # Add tool result to conversation
@@ -186,7 +181,6 @@ if (gmailServer.oauthUrl) {
 
 const tools = await klavisClient.mcpServer.listTools({
     serverUrl: gmailServer.serverUrl,
-    connectionType: Klavis.ConnectionType.StreamableHttp,
     format: Klavis.ToolFormat.Openai
 });
 
@@ -211,8 +205,7 @@ if (response.choices[0].message.tool_calls) {
         const result = await klavisClient.mcpServer.callTools({
             serverUrl: gmailServer.serverUrl,
             toolName: toolCall.function.name,
-            toolArgs: JSON.parse(toolCall.function.arguments),
-            connectionType: Klavis.ConnectionType.StreamableHttp
+            toolArgs: JSON.parse(toolCall.function.arguments)
         });
         
         // Add tool result to conversation
@@ -355,8 +348,7 @@ for iteration in range(max_iterations):
             result = klavis_client.mcp_server.call_tools(
                 server_url=server_url,
                 tool_name=tool_call.function.name,
-                tool_args=json.loads(tool_call.function.arguments),
-                connection_type=ConnectionType.STREAMABLE_HTTP
+                tool_args=json.loads(tool_call.function.arguments)
             )
             
             # Add tool result to conversation
