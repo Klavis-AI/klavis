@@ -121,11 +121,44 @@ async def create_opportunity(opportunity_data: Dict[str, Any]) -> Dict[str, Any]
     except Exception as e:
         return handle_salesforce_error(e, "create", "Opportunity")
 
-async def update_opportunity(opportunity_id: str, opportunity_data: Dict[str, Any]) -> Dict[str, Any]:
+async def update_opportunity(
+    opportunity_id: str,
+    closed_date: Optional[str] = None,
+    stage: Optional[str] = None,
+    amount: Optional[float] = None,
+    next_step: Optional[str] = None,
+    description: Optional[str] = None,
+    owner_id: Optional[str] = None,
+    account_id: Optional[str] = None
+) -> Dict[str, Any]:
     """Update an existing opportunity."""
     logger.info(f"Executing tool: update_opportunity with opportunity_id: {opportunity_id}")
     try:
         sf = get_salesforce_conn()
+        
+        # Build update data from provided parameters
+        opportunity_data = {}
+        if closed_date is not None:
+            opportunity_data['CloseDate'] = closed_date
+        if stage is not None:
+            opportunity_data['StageName'] = stage
+        if amount is not None:
+            opportunity_data['Amount'] = amount
+        if next_step is not None:
+            opportunity_data['NextStep'] = next_step
+        if description is not None:
+            opportunity_data['Description'] = description
+        if owner_id is not None:
+            opportunity_data['OwnerId'] = owner_id
+        if account_id is not None:
+            opportunity_data['AccountId'] = account_id
+        
+        # Only update if there's data to update
+        if not opportunity_data:
+            return {
+                "success": False,
+                "message": "No fields provided to update"
+            }
         
         result = sf.Opportunity.update(opportunity_id, opportunity_data)
         

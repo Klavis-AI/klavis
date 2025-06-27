@@ -9,6 +9,7 @@ python streamable_http_client.py <url> <args>
 """
 
 import argparse
+import json
 import logging
 from contextlib import AsyncExitStack
 from functools import partial
@@ -20,7 +21,7 @@ from dotenv import load_dotenv
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-from anthropic import Anthropic
+from openai import OpenAI
 
 load_dotenv()  # load environment variables from .env
 
@@ -38,11 +39,11 @@ class MCPClient:
         # Initialize session and client objects
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
-        self.anthropic = Anthropic()
+        self.openai = OpenAI()
         self.messages = []  # Store conversation history
 
     async def process_query(self, query: str) -> str:
-        """Process a query using Claude and available tools"""
+        """Process a query using OpenAI and available tools"""
         # Add user message to conversation history
         self.messages.append({
             "role": "user",
@@ -51,14 +52,17 @@ class MCPClient:
 
         response = await self.session.list_tools()
         available_tools = [{
-            "name": tool.name,
-            "description": tool.description,
-            "input_schema": tool.inputSchema
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.inputSchema
+            }
         } for tool in response.tools]
 
-        # Initial Claude API call with full conversation history
-        response = self.anthropic.messages.create(
-            model="claude-3-5-sonnet-20241022",
+        # Initial OpenAI API call with full conversation history
+        response = self.openai.chat.completions.create(
+            model="gpt-4o",
             max_tokens=1000,
             messages=self.messages,
             tools=available_tools
@@ -67,12 +71,14 @@ class MCPClient:
         # Process response and handle tool calls
         final_text = []
 
-        for content in response.content:
-            if content.type == 'text':
-                final_text.append(content.text)
-            elif content.type == 'tool_use':
-                tool_name = content.name
-                tool_args = content.input
+        message = response.choices[0].message
+        if message.content:
+            final_text.append(message.content)
+
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)  # Parse JSON string to dict
 
                 # Execute tool call
                 result = await self.session.call_tool(tool_name, tool_args)
@@ -81,39 +87,39 @@ class MCPClient:
                 # Add assistant message with tool use to history
                 self.messages.append({
                     "role": "assistant",
-                    "content": [{
-                        "type": "tool_use",
-                        "name": tool_name,
-                        "input": tool_args,
-                        "id": content.id
+                    "content": message.content,
+                    "tool_calls": [{
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_name,
+                            "arguments": tool_call.function.arguments
+                        }
                     }]
                 })
                 
                 # Add tool result to history
                 self.messages.append({
-                    "role": "user",
-                    "content": [{
-                        "type": "tool_result",
-                        "tool_use_id": content.id,
-                        "content": str(result.content[0].text)
-                    }]
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": str(result.content[0].text)
                 })
                 final_text.append(f"[Tool call result: {result.content[0].text}]")
 
-                # Get next response from Claude with full history
-                response = self.anthropic.messages.create(
-                    model="claude-3-5-sonnet-20241022",
+                # Get next response from OpenAI with full history
+                response = self.openai.chat.completions.create(
+                    model="gpt-4o",
                     max_tokens=1000,
                     messages=self.messages,
                 )
 
-                final_text.append(response.content[0].text)
+                final_text.append(response.choices[0].message.content)
 
         # Add final assistant response to history
-        if response.content and response.content[0].type == 'text':
+        if response.choices[0].message.content:
             self.messages.append({
                 "role": "assistant",
-                "content": response.content[0].text
+                "content": response.choices[0].message.content
             })
 
         return "\n".join(final_text)
