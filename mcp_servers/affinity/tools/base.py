@@ -30,7 +30,7 @@ async def make_http_request(
     if not api_key:
         raise RuntimeError("No API key provided. Please set the x-auth-token header.")
     
-    # Affinity uses HTTP Basic Auth with API key as password
+    # Affinity uses HTTP Basic Auth with API key
     auth = httpx.BasicAuth("", api_key)
     
     headers = {

@@ -76,7 +76,7 @@ def main(
             ),
             types.Tool(
                 name="affinity_get_list_by_id",
-                description="Get a specific list by its ID.",
+                description="Get a specific Affinity list by its ID.",
                 inputSchema={
                     "type": "object",
                     "required": ["list_id"],
@@ -93,16 +93,23 @@ def main(
                 description="Create a new list in Affinity.",
                 inputSchema={
                     "type": "object",
-                    "required": ["name"],
+                    "required": ["name", "type", "is_public"],
                     "properties": {
                         "name": {
                             "type": "string",
                             "description": "The name of the list.",
                         },
-                        "list_type": {
+                        "type": {
                             "type": "integer",
-                            "description": "The type of the list (0=Person list, 1=Organization list, 2=Opportunity list).",
-                            "default": 0,
+                            "description": "The type of the list (0=Person list, 1=Organization list, 8=Opportunity list).",
+                        },
+                        "is_public": {
+                            "type": "boolean",
+                            "description": "Set to true to make the list publicly accessible to all users in your Affinity account. Set to false to make the list private to the list's owner and additional users.",
+                        },
+                        "owner_id": {
+                            "type": "integer",
+                            "description": "The unique ID of the internal person who should own the list. Defaults to the owner of the API key being used.",
                         },
                     },
                 },
@@ -175,73 +182,80 @@ def main(
             # List Entries
             types.Tool(
                 name="affinity_get_list_entries",
-                description="Get list entries for a specific list.",
+                description="Get list entries for a specific Affinity list. Returns all entries if no page_size specified, or paginated results if page_size is provided.",
                 inputSchema={
                     "type": "object",
                     "required": ["list_id"],
                     "properties": {
                         "list_id": {
                             "type": "integer",
-                            "description": "The ID of the list to get entries for.",
+                            "description": "The unique ID of the list whose list entries are to be retrieved.",
                         },
                         "page_size": {
                             "type": "integer",
-                            "description": "Number of entries to return per page (default: 10).",
-                            "default": 10,
+                            "description": "How many results to return per page. If not specified, returns all results.",
                         },
                         "page_token": {
                             "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
+                            "description": "The next_page_token from the previous response required to retrieve the next page of results.",
                         },
                     },
                 },
             ),
             types.Tool(
                 name="affinity_get_list_entry_by_id",
-                description="Get a specific list entry by its ID.",
+                description="Get a specific Affinity list entry by its ID.",
                 inputSchema={
                     "type": "object",
-                    "required": ["list_entry_id"],
+                    "required": ["list_id", "list_entry_id"],
                     "properties": {
+                        "list_id": {
+                            "type": "integer",
+                            "description": "The unique ID of the list that contains the specified list entry.",
+                        },
                         "list_entry_id": {
                             "type": "integer",
-                            "description": "The ID of the list entry to retrieve.",
+                            "description": "The unique ID of the list entry object to be retrieved.",
                         },
                     },
                 },
             ),
             types.Tool(
                 name="affinity_create_list_entry",
-                description="Create a new list entry.",
+                description="Create a new Affinity list entry. Note: Opportunities cannot be created using this endpoint - use the opportunities endpoint instead.",
                 inputSchema={
                     "type": "object",
                     "required": ["list_id", "entity_id"],
                     "properties": {
                         "list_id": {
                             "type": "integer",
-                            "description": "The ID of the list to add the entry to.",
+                            "description": "The unique ID of the list to add the entry to.",
                         },
                         "entity_id": {
                             "type": "integer",
-                            "description": "The ID of the entity (person, organization, or opportunity) to add to the list.",
+                            "description": "The unique ID of the person or organization to add to this list. Opportunities cannot be created using this endpoint.",
                         },
                         "creator_id": {
                             "type": "integer",
-                            "description": "The ID of the user creating the list entry.",
+                            "description": "The ID of a Person resource who should be recorded as adding the entry to the list. Must be a person who can access Affinity. Defaults to the owner of the API key if not provided.",
                         },
                     },
                 },
             ),
             types.Tool(
                 name="affinity_delete_list_entry",
-                description="Delete a specific list entry.",
+                description="Delete a specific Affinity list entry. This will also delete all field values associated with the list entry.",
                 inputSchema={
                     "type": "object",
-                    "required": ["list_entry_id"],
+                    "required": ["list_id", "list_entry_id"],
                     "properties": {
+                        "list_id": {
+                            "type": "integer",
+                            "description": "The unique ID of the list that contains the specified list entry.",
+                        },
                         "list_entry_id": {
                             "type": "integer",
-                            "description": "The ID of the list entry to delete.",
+                            "description": "The unique ID of the list entry object to be deleted.",
                         },
                     },
                 },
@@ -756,6 +770,9 @@ def main(
         
         elif name == "affinity_create_list":
             name_param = arguments.get("name")
+            type_param = arguments.get("type")
+            is_public = arguments.get("is_public")
+            
             if not name_param:
                 return [
                     types.TextContent(
@@ -764,10 +781,26 @@ def main(
                     )
                 ]
             
-            list_type = arguments.get("list_type", 0)
+            if type_param is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: type parameter is required",
+                    )
+                ]
+            
+            if is_public is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: is_public parameter is required",
+                    )
+                ]
+            
+            owner_id = arguments.get("owner_id")
             
             try:
-                result = await create_list(name_param, list_type)
+                result = await create_list(name_param, type_param, is_public, owner_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -874,7 +907,7 @@ def main(
                     )
                 ]
             
-            page_size = arguments.get("page_size", 10)
+            page_size = arguments.get("page_size")  # Optional parameter, None if not provided
             page_token = arguments.get("page_token")
             
             try:
@@ -895,16 +928,17 @@ def main(
                 ]
         
         elif name == "affinity_get_list_entry_by_id":
+            list_id = arguments.get("list_id")
             list_entry_id = arguments.get("list_entry_id")
-            if not list_entry_id:
+            if not list_id or not list_entry_id:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: list_entry_id parameter is required",
+                        text="Error: list_id and list_entry_id parameters are required",
                     )
                 ]
             try:
-                result = await get_list_entry_by_id(list_entry_id)
+                result = await get_list_entry_by_id(list_id, list_entry_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -951,16 +985,17 @@ def main(
                 ]
         
         elif name == "affinity_delete_list_entry":
+            list_id = arguments.get("list_id")
             list_entry_id = arguments.get("list_entry_id")
-            if not list_entry_id:
+            if not list_id or not list_entry_id:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: list_entry_id parameter is required",
+                        text="Error: list_id and list_entry_id parameters are required",
                     )
                 ]
             try:
-                result = await delete_list_entry(list_entry_id)
+                result = await delete_list_entry(list_id, list_entry_id)
                 return [
                     types.TextContent(
                         type="text",

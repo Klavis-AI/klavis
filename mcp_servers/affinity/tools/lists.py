@@ -23,14 +23,19 @@ async def get_list_by_id(list_id: int) -> Dict[str, Any]:
         logger.exception(f"Error executing tool get_list_by_id: {e}")
         raise e
 
-async def create_list(name: str, list_type: int = 0) -> Dict[str, Any]:
+async def create_list(name: str, list_type: int, is_public: bool, owner_id: Optional[int] = None) -> Dict[str, Any]:
     """Create a new list."""
-    logger.info(f"Executing tool: create_list with name: {name}")
+    logger.info(f"Executing tool: create_list with name: {name}, type: {list_type}, is_public: {is_public}")
     try:
         data = {
             "name": name,
-            "type": list_type
+            "type": list_type,
+            "is_public": is_public
         }
+        
+        if owner_id is not None:
+            data["owner_id"] = owner_id
+        
         return await make_http_request("POST", "/lists", data=data)
     except Exception as e:
         logger.exception(f"Error executing tool create_list: {e}")
