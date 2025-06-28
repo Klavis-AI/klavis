@@ -1,60 +1,49 @@
-# Affinity MCP Server Tools
-# This package contains all the tool implementations organized by object type
-
-from .lists import get_lists, get_list_by_id, create_list
-from .list_entries import get_list_entries, get_list_entry_by_id, create_list_entry, delete_list_entry
-from .persons import search_persons, get_person_by_id, create_person, update_person, delete_person
-from .organizations import search_organizations, get_organization_by_id, create_organization, update_organization, delete_organization
-from .opportunities import search_opportunities, get_opportunity_by_id, create_opportunity, update_opportunity, delete_opportunity
-from .notes import get_notes, get_note_by_id, create_note, update_note, delete_note
-from .field_values import get_field_values, create_field_value, update_field_value, delete_field_value
+from .auth import get_current_user
+from .lists import (
+    get_all_list_entries_on_a_list,
+    get_metadata_on_all_lists,
+    get_metadata_on_a_single_list,
+    get_metadata_on_a_single_list_fields,
+    get_a_single_list_entry_on_a_list
+)
+from .persons import get_all_persons, get_single_person, get_person_fields_metadata, get_person_lists, get_person_list_entries
+from .companies import get_all_companies, get_single_company, get_company_fields_metadata, get_company_lists, get_company_list_entries
+from .opportunities import get_all_opportunities, get_single_opportunity
+from .notes import get_all_notes, get_specific_note
 from .base import auth_token_context
 
 __all__ = [
-    # Lists
-    "get_lists",
-    "get_list_by_id",
-    "create_list",
+    # Auth
+    "get_current_user",
     
-    # List Entries
-    "get_list_entries",
-    "get_list_entry_by_id",
-    "create_list_entry",
-    "delete_list_entry",
+    # Lists
+    "get_all_list_entries_on_a_list",
+    "get_metadata_on_all_lists", 
+    "get_metadata_on_a_single_list",
+    "get_metadata_on_a_single_list_fields",
+    "get_a_single_list_entry_on_a_list",
     
     # Persons
-    "search_persons",
-    "get_person_by_id",
-    "create_person",
-    "update_person",
-    "delete_person",
+    "get_all_persons",
+    "get_single_person",
+    "get_person_fields_metadata",
+    "get_person_lists",
+    "get_person_list_entries",
     
-    # Organizations
-    "search_organizations",
-    "get_organization_by_id",
-    "create_organization",
-    "update_organization",
-    "delete_organization",
+    # Companies
+    "get_all_companies",
+    "get_single_company",
+    "get_company_fields_metadata",
+    "get_company_lists",
+    "get_company_list_entries",
     
     # Opportunities
-    "search_opportunities",
-    "get_opportunity_by_id",
-    "create_opportunity",
-    "update_opportunity",
-    "delete_opportunity",
+    "get_all_opportunities",
+    "get_single_opportunity",
     
     # Notes
-    "get_notes",
-    "get_note_by_id",
-    "create_note",
-    "update_note",
-    "delete_note",
-    
-    # Field Values
-    "get_field_values",
-    "create_field_value",
-    "update_field_value",
-    "delete_field_value",
+    "get_all_notes",
+    "get_specific_note",
     
     # Base
     "auth_token_context",
