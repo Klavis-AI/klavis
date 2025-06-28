@@ -286,6 +286,33 @@ console.log(finalResponse.choices[0].message.content);
 
 [**View All Servers →**](https://docs.klavis.ai/documentation/mcp-server)
 
+## 🗺️ Roadmap
+
+We're constantly expanding our MCP server ecosystem. Here are the upcoming integrations planned for release:
+
+### CRM & Sales
+- **Airtable** - No-code database platform
+- **HubSpot** - Inbound marketing and sales platform
+- **Greenhouse** - Applicant tracking system
+- **Monday.com** - Work management platform
+- **Zendesk** - Customer service platform
+
+### Microsoft Ecosystem
+- **Microsoft Teams** - Team collaboration and communication
+- **Microsoft Outlook** - Email and calendar management  
+- **OneDrive** - Cloud storage and file sharing
+
+### Professional Networks & Communication
+- **LinkedIn** - Professional networking platform
+
+### File Storage & Productivity
+- **Dropbox** - Cloud file storage and synchronization
+
+### Scheduling & Calendar
+- **Cal.com** - Open-source scheduling platform
+
+*Want to see a specific integration? [Let us know](https://discord.gg/p7TuTEcssn) or [contribute](CONTRIBUTING.md) to help build it!*
+
 ## 🔧 Authentication & Multi-Tool Workflows
 
 ### Authentication
