@@ -19,13 +19,12 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
-    get_lists, get_list_by_id, create_list,
-    get_list_entries, get_list_entry_by_id, create_list_entry, delete_list_entry,
-    search_persons, get_person_by_id, create_person, update_person, delete_person,
-    search_organizations, get_organization_by_id, create_organization, update_organization, delete_organization,
-    search_opportunities, get_opportunity_by_id, create_opportunity, update_opportunity, delete_opportunity,
-    get_notes, get_note_by_id, create_note, update_note, delete_note,
-    get_field_values, create_field_value, update_field_value, delete_field_value
+    get_current_user,
+    get_all_list_entries_on_a_list, get_metadata_on_all_lists, get_metadata_on_a_single_list, get_metadata_on_a_single_list_fields, get_a_single_list_entry_on_a_list,
+    get_all_persons, get_single_person, get_person_fields_metadata, get_person_lists, get_person_list_entries,
+    get_all_companies, get_single_company, get_company_fields_metadata, get_company_lists, get_company_list_entries,
+    get_all_opportunities, get_single_opportunity,
+    get_all_notes, get_specific_note
 )
 
 # Configure logging
@@ -65,81 +64,165 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
-            # Lists
+            # Authentication
             types.Tool(
-                name="affinity_get_lists",
-                description="Get all lists in the Affinity workspace.",
+                name="affinity_get_current_user",
+                description="Get current user information from Affinity.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
                 },
             ),
+            # Lists
             types.Tool(
-                name="affinity_get_list_by_id",
-                description="Get a specific Affinity list by its ID.",
+                name="affinity_get_all_list_entries_on_a_list",
+                description="Get all List Entries on a List.",
                 inputSchema={
                     "type": "object",
                     "required": ["list_id"],
                     "properties": {
                         "list_id": {
                             "type": "integer",
-                            "description": "The ID of the list to retrieve.",
+                            "description": "The ID of the list.",
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
+                        },
+                        "field_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field IDs for field data.",
+                        },
+                        "field_types": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, list, relationship-intelligence).",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_create_list",
-                description="Create a new list in Affinity.",
+                name="affinity_get_metadata_on_all_lists",
+                description="Get metadata on all Lists.",
                 inputSchema={
                     "type": "object",
-                    "required": ["name", "type", "is_public"],
                     "properties": {
-                        "name": {
+                        "cursor": {
                             "type": "string",
-                            "description": "The name of the list.",
+                            "description": "Cursor for pagination.",
                         },
-                        "type": {
+                        "limit": {
                             "type": "integer",
-                            "description": "The type of the list (0=Person list, 1=Organization list, 8=Opportunity list).",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
-                        "is_public": {
-                            "type": "boolean",
-                            "description": "Set to true to make the list publicly accessible to all users in your Affinity account. Set to false to make the list private to the list's owner and additional users.",
-                        },
-                        "owner_id": {
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_metadata_on_a_single_list",
+                description="Get metadata on a single List.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["list_id"],
+                    "properties": {
+                        "list_id": {
                             "type": "integer",
-                            "description": "The unique ID of the internal person who should own the list. Defaults to the owner of the API key being used.",
+                            "description": "The ID of the list.",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_metadata_on_a_single_list_fields",
+                description="Get metadata on a single List's Fields.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["list_id"],
+                    "properties": {
+                        "list_id": {
+                            "type": "integer",
+                            "description": "The ID of the list.",
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_a_single_list_entry_on_a_list",
+                description="Get a single List Entry on a List.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["list_id", "list_entry_id"],
+                    "properties": {
+                        "list_id": {
+                            "type": "integer",
+                            "description": "The ID of the list.",
+                        },
+                        "list_entry_id": {
+                            "type": "integer",
+                            "description": "The ID of the list entry.",
+                        },
+                        "field_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field IDs for field data.",
+                        },
+                        "field_types": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, list, relationship-intelligence).",
                         },
                     },
                 },
             ),
             # Persons
             types.Tool(
-                name="affinity_search_persons",
-                description="Search for persons in Affinity.",
+                name="affinity_get_all_persons",
+                description="Get all Persons in Affinity.",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "term": {
+                        "cursor": {
                             "type": "string",
-                            "description": "Search term to find persons by name or email.",
+                            "description": "Cursor for pagination.",
                         },
-                        "page_size": {
+                        "limit": {
                             "type": "integer",
-                            "description": "Number of persons to return per page (default: 10).",
-                            "default": 10,
+                            "description": "Number of items per page (1-100, default 100).",
                         },
-                        "page_token": {
-                            "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "Person IDs to filter by.",
+                        },
+                        "field_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field IDs for field data.",
+                        },
+                        "field_types": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, relationship-intelligence).",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_get_person_by_id",
-                description="Get a specific person by their ID.",
+                name="affinity_get_single_person",
+                description="Get a single Person by ID.",
                 inputSchema={
                     "type": "object",
                     "required": ["person_id"],
@@ -148,291 +231,224 @@ def main(
                             "type": "integer",
                             "description": "The ID of the person to retrieve.",
                         },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_create_person",
-                description="Create a new person in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["first_name", "last_name"],
-                    "properties": {
-                        "first_name": {
-                            "type": "string",
-                            "description": "The first name of the person.",
-                        },
-                        "last_name": {
-                            "type": "string",
-                            "description": "The last name of the person.",
-                        },
-                        "emails": {
+                        "field_ids": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "Array of email addresses for the person.",
+                            "description": "Field IDs for field data.",
                         },
-                        "organization_ids": {
+                        "field_types": {
                             "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of organization IDs to associate with the person.",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, relationship-intelligence).",
                         },
                     },
                 },
             ),
-            # List Entries
             types.Tool(
-                name="affinity_get_list_entries",
-                description="Get list entries for a specific Affinity list. Returns all entries if no page_size specified, or paginated results if page_size is provided.",
+                name="affinity_get_person_fields_metadata",
+                description="Get metadata on Person Fields.",
                 inputSchema={
                     "type": "object",
-                    "required": ["list_id"],
                     "properties": {
-                        "list_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list whose list entries are to be retrieved.",
-                        },
-                        "page_size": {
-                            "type": "integer",
-                            "description": "How many results to return per page. If not specified, returns all results.",
-                        },
-                        "page_token": {
+                        "cursor": {
                             "type": "string",
-                            "description": "The next_page_token from the previous response required to retrieve the next page of results.",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_get_list_entry_by_id",
-                description="Get a specific Affinity list entry by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["list_id", "list_entry_id"],
-                    "properties": {
-                        "list_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list that contains the specified list entry.",
-                        },
-                        "list_entry_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list entry object to be retrieved.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_create_list_entry",
-                description="Create a new Affinity list entry. Note: Opportunities cannot be created using this endpoint - use the opportunities endpoint instead.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["list_id", "entity_id"],
-                    "properties": {
-                        "list_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list to add the entry to.",
-                        },
-                        "entity_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the person or organization to add to this list. Opportunities cannot be created using this endpoint.",
-                        },
-                        "creator_id": {
-                            "type": "integer",
-                            "description": "The ID of a Person resource who should be recorded as adding the entry to the list. Must be a person who can access Affinity. Defaults to the owner of the API key if not provided.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_delete_list_entry",
-                description="Delete a specific Affinity list entry. This will also delete all field values associated with the list entry.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["list_id", "list_entry_id"],
-                    "properties": {
-                        "list_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list that contains the specified list entry.",
-                        },
-                        "list_entry_id": {
-                            "type": "integer",
-                            "description": "The unique ID of the list entry object to be deleted.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_update_person",
-                description="Update an existing person in Affinity.",
+                name="affinity_get_person_lists",
+                description="Get a Person's Lists.",
                 inputSchema={
                     "type": "object",
                     "required": ["person_id"],
                     "properties": {
                         "person_id": {
                             "type": "integer",
-                            "description": "The ID of the person to update.",
+                            "description": "The ID of the person.",
                         },
-                        "first_name": {
+                        "cursor": {
                             "type": "string",
-                            "description": "The new first name of the person.",
+                            "description": "Cursor for pagination.",
                         },
-                        "last_name": {
-                            "type": "string",
-                            "description": "The new last name of the person.",
-                        },
-                        "emails": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Array of email addresses for the person.",
-                        },
-                        "organization_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of organization IDs to associate with the person.",
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_delete_person",
-                description="Delete a person from Affinity.",
+                name="affinity_get_person_list_entries",
+                description="Get a Person's List Entries.",
                 inputSchema={
                     "type": "object",
                     "required": ["person_id"],
                     "properties": {
                         "person_id": {
                             "type": "integer",
-                            "description": "The ID of the person to delete.",
+                            "description": "The ID of the person.",
                         },
-                    },
-                },
-            ),
-            # Organizations
-            types.Tool(
-                name="affinity_search_organizations",
-                description="Search for organizations in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "term": {
+                        "cursor": {
                             "type": "string",
-                            "description": "Search term to find organizations by name or domain.",
+                            "description": "Cursor for pagination.",
                         },
-                        "page_size": {
+                        "limit": {
                             "type": "integer",
-                            "description": "Number of organizations to return per page (default: 10).",
-                            "default": 10,
-                        },
-                        "page_token": {
-                            "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
                     },
                 },
             ),
+            # Companies
             types.Tool(
-                name="affinity_get_organization_by_id",
-                description="Get a specific organization by their ID.",
+                name="affinity_get_all_companies",
+                description="Get all Companies in Affinity with basic information and field data.",
                 inputSchema={
                     "type": "object",
-                    "required": ["organization_id"],
                     "properties": {
-                        "organization_id": {
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
                             "type": "integer",
-                            "description": "The ID of the organization to retrieve.",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_create_organization",
-                description="Create a new organization in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["name"],
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "The name of the organization.",
-                        },
-                        "domain": {
-                            "type": "string",
-                            "description": "The domain of the organization.",
-                        },
-                        "person_ids": {
+                        "ids": {
                             "type": "array",
                             "items": {"type": "integer"},
-                            "description": "Array of person IDs to associate with the organization.",
+                            "description": "Company IDs to filter by.",
                         },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_update_organization",
-                description="Update an existing organization in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["organization_id"],
-                    "properties": {
-                        "organization_id": {
-                            "type": "integer",
-                            "description": "The ID of the organization to update.",
-                        },
-                        "name": {
-                            "type": "string",
-                            "description": "The new name of the organization.",
-                        },
-                        "domain": {
-                            "type": "string",
-                            "description": "The new domain of the organization.",
-                        },
-                        "person_ids": {
+                        "field_ids": {
                             "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of person IDs to associate with the organization.",
+                            "items": {"type": "string"},
+                            "description": "Field IDs for field data.",
+                        },
+                        "field_types": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, relationship-intelligence).",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_delete_organization",
-                description="Delete an organization from Affinity.",
+                name="affinity_get_single_company",
+                description="Get a single Company by ID with basic information and field data.",
                 inputSchema={
                     "type": "object",
-                    "required": ["organization_id"],
+                    "required": ["company_id"],
                     "properties": {
-                        "organization_id": {
+                        "company_id": {
                             "type": "integer",
-                            "description": "The ID of the organization to delete.",
+                            "description": "The ID of the company to retrieve.",
+                        },
+                        "field_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field IDs for field data.",
+                        },
+                        "field_types": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Field types (enriched, global, relationship-intelligence).",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_company_fields_metadata",
+                description="Get metadata on Company Fields.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_company_lists",
+                description="Get all Lists that contain the specified Company.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["company_id"],
+                    "properties": {
+                        "company_id": {
+                            "type": "integer",
+                            "description": "The ID of the company.",
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_get_company_list_entries",
+                description="Get List Entries for a Company across all Lists with field data.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["company_id"],
+                    "properties": {
+                        "company_id": {
+                            "type": "integer",
+                            "description": "The ID of the company.",
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Cursor for pagination.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items per page (1-100, default 100).",
                         },
                     },
                 },
             ),
             # Opportunities
             types.Tool(
-                name="affinity_search_opportunities",
-                description="Search for opportunities in Affinity.",
+                name="affinity_get_all_opportunities",
+                description="Get all Opportunities in Affinity.",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "term": {
+                        "cursor": {
                             "type": "string",
-                            "description": "Search term to find opportunities by name.",
+                            "description": "Cursor for pagination.",
                         },
-                        "page_size": {
+                        "limit": {
                             "type": "integer",
-                            "description": "Number of opportunities to return per page (default: 10).",
-                            "default": 10,
+                            "description": "Number of items per page (1-100, default 100).",
                         },
-                        "page_token": {
-                            "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "Opportunity IDs to filter by.",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_get_opportunity_by_id",
-                description="Get a specific opportunity by their ID.",
+                name="affinity_get_single_opportunity",
+                description="Get a single Opportunity by ID.",
                 inputSchema={
                     "type": "object",
                     "required": ["opportunity_id"],
@@ -444,274 +460,46 @@ def main(
                     },
                 },
             ),
-            types.Tool(
-                name="affinity_create_opportunity",
-                description="Create a new opportunity in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["name"],
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "The name of the opportunity.",
-                        },
-                        "person_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of person IDs to associate with the opportunity.",
-                        },
-                        "organization_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of organization IDs to associate with the opportunity.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_update_opportunity",
-                description="Update an existing opportunity in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["opportunity_id"],
-                    "properties": {
-                        "opportunity_id": {
-                            "type": "integer",
-                            "description": "The ID of the opportunity to update.",
-                        },
-                        "name": {
-                            "type": "string",
-                            "description": "The new name of the opportunity.",
-                        },
-                        "person_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of person IDs to associate with the opportunity.",
-                        },
-                        "organization_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of organization IDs to associate with the opportunity.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_delete_opportunity",
-                description="Delete an opportunity from Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["opportunity_id"],
-                    "properties": {
-                        "opportunity_id": {
-                            "type": "integer",
-                            "description": "The ID of the opportunity to delete.",
-                        },
-                    },
-                },
-            ),
             # Notes
             types.Tool(
-                name="affinity_get_notes",
-                description="Get notes, optionally filtered by person, organization, or opportunity.",
+                name="affinity_get_all_notes",
+                description="Get all Notes in Affinity.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "person_id": {
                             "type": "integer",
-                            "description": "Optional person ID to filter notes by person.",
+                            "description": "Filter by person ID",
                         },
                         "organization_id": {
                             "type": "integer",
-                            "description": "Optional organization ID to filter notes by organization.",
+                            "description": "Filter by organization ID",
                         },
                         "opportunity_id": {
                             "type": "integer",
-                            "description": "Optional opportunity ID to filter notes by opportunity.",
+                            "description": "Filter by opportunity ID",
                         },
                         "page_size": {
                             "type": "integer",
-                            "description": "Number of notes to return per page (default: 10).",
-                            "default": 10,
+                            "description": "Number of items per page",
                         },
                         "page_token": {
                             "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
+                            "description": "Token for pagination",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="affinity_get_note_by_id",
-                description="Get a specific note by its ID.",
+                name="affinity_get_specific_note",
+                description="Get a specific note by ID.",
                 inputSchema={
                     "type": "object",
                     "required": ["note_id"],
                     "properties": {
                         "note_id": {
                             "type": "integer",
-                            "description": "The ID of the note to retrieve.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_create_note",
-                description="Create a new note in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["content"],
-                    "properties": {
-                        "content": {
-                            "type": "string",
-                            "description": "The content of the note.",
-                        },
-                        "person_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of person IDs to associate with the note.",
-                        },
-                        "organization_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of organization IDs to associate with the note.",
-                        },
-                        "opportunity_ids": {
-                            "type": "array",
-                            "items": {"type": "integer"},
-                            "description": "Array of opportunity IDs to associate with the note.",
-                        },
-                        "parent_id": {
-                            "type": "integer",
-                            "description": "The ID of the parent note (for threaded notes).",
-                        },
-                        "type": {
-                            "type": "integer",
-                            "description": "The type of the note (0=Text, 1=HTML).",
-                            "default": 0,
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_update_note",
-                description="Update an existing note in Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["note_id", "content"],
-                    "properties": {
-                        "note_id": {
-                            "type": "integer",
-                            "description": "The ID of the note to update.",
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "The new content of the note.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_delete_note",
-                description="Delete a note from Affinity.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["note_id"],
-                    "properties": {
-                        "note_id": {
-                            "type": "integer",
-                            "description": "The ID of the note to delete.",
-                        },
-                    },
-                },
-            ),
-            # Field Values
-            types.Tool(
-                name="affinity_get_field_values",
-                description="Get field values for a specific entity.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "person_id": {
-                            "type": "integer",
-                            "description": "Optional person ID to get field values for.",
-                        },
-                        "organization_id": {
-                            "type": "integer",
-                            "description": "Optional organization ID to get field values for.",
-                        },
-                        "opportunity_id": {
-                            "type": "integer",
-                            "description": "Optional opportunity ID to get field values for.",
-                        },
-                        "list_entry_id": {
-                            "type": "integer",
-                            "description": "Optional list entry ID to get field values for.",
-                        },
-                        "page_size": {
-                            "type": "integer",
-                            "description": "Number of field values to return per page (default: 10).",
-                            "default": 10,
-                        },
-                        "page_token": {
-                            "type": "string",
-                            "description": "Token for pagination to get the next page of results.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_create_field_value",
-                description="Create a new field value.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["field_id", "entity_id", "value"],
-                    "properties": {
-                        "field_id": {
-                            "type": "integer",
-                            "description": "The ID of the field.",
-                        },
-                        "entity_id": {
-                            "type": "integer",
-                            "description": "The ID of the entity (person, organization, or opportunity).",
-                        },
-                        "value": {
-                            "description": "The value to set for the field.",
-                        },
-                        "list_entry_id": {
-                            "type": "integer",
-                            "description": "Optional list entry ID if this is a list-specific field value.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_update_field_value",
-                description="Update an existing field value.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["field_value_id", "value"],
-                    "properties": {
-                        "field_value_id": {
-                            "type": "integer",
-                            "description": "The ID of the field value to update.",
-                        },
-                        "value": {
-                            "description": "The new value for the field.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_delete_field_value",
-                description="Delete a field value.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["field_value_id"],
-                    "properties": {
-                        "field_value_id": {
-                            "type": "integer",
-                            "description": "The ID of the field value to delete.",
+                            "description": "Note ID",
                         },
                     },
                 },
@@ -723,10 +511,10 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
-        # Lists
-        if name == "affinity_get_lists":
+        # Auth
+        if name == "affinity_get_current_user":
             try:
-                result = await get_lists()
+                result = await get_current_user()
                 return [
                     types.TextContent(
                         type="text",
@@ -742,7 +530,8 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_get_list_by_id":
+        # Lists
+        elif name == "affinity_get_all_list_entries_on_a_list":
             list_id = arguments.get("list_id")
             if not list_id:
                 return [
@@ -751,8 +540,14 @@ def main(
                         text="Error: list_id parameter is required",
                     )
                 ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
+            
             try:
-                result = await get_list_by_id(list_id)
+                result = await get_all_list_entries_on_a_list(list_id, cursor, limit, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -768,39 +563,100 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_create_list":
-            name_param = arguments.get("name")
-            type_param = arguments.get("type")
-            is_public = arguments.get("is_public")
-            
-            if not name_param:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: name parameter is required",
-                    )
-                ]
-            
-            if type_param is None:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: type parameter is required",
-                    )
-                ]
-            
-            if is_public is None:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: is_public parameter is required",
-                    )
-                ]
-            
-            owner_id = arguments.get("owner_id")
+        elif name == "affinity_get_metadata_on_all_lists":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
             
             try:
-                result = await create_list(name_param, type_param, is_public, owner_id)
+                result = await get_metadata_on_all_lists(cursor, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_get_metadata_on_a_single_list":
+            list_id = arguments.get("list_id")
+            if not list_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: list_id parameter is required",
+                    )
+                ]
+            
+            try:
+                result = await get_metadata_on_a_single_list(list_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_get_metadata_on_a_single_list_fields":
+            list_id = arguments.get("list_id")
+            if not list_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: list_id parameter is required",
+                    )
+                ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            
+            try:
+                result = await get_metadata_on_a_single_list_fields(list_id, cursor, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_get_a_single_list_entry_on_a_list":
+            list_id = arguments.get("list_id")
+            list_entry_id = arguments.get("list_entry_id")
+            if not list_id or not list_entry_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: list_id and list_entry_id parameters are required",
+                    )
+                ]
+            
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
+            
+            try:
+                result = await get_a_single_list_entry_on_a_list(list_id, list_entry_id, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -817,13 +673,15 @@ def main(
                 ]
         
         # Persons
-        elif name == "affinity_search_persons":
-            term = arguments.get("term")
-            page_size = arguments.get("page_size", 10)
-            page_token = arguments.get("page_token")
+        elif name == "affinity_get_all_persons":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            ids = arguments.get("ids")
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
             
             try:
-                result = await search_persons(term, page_size, page_token)
+                result = await get_all_persons(cursor, limit, ids, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -839,179 +697,7 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_get_person_by_id":
-            person_id = arguments.get("person_id")
-            if not person_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: person_id parameter is required",
-                    )
-                ]
-            try:
-                result = await get_person_by_id(person_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_create_person":
-            first_name = arguments.get("first_name")
-            last_name = arguments.get("last_name")
-            if not first_name or not last_name:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: first_name and last_name parameters are required",
-                    )
-                ]
-            
-            emails = arguments.get("emails")
-            organization_ids = arguments.get("organization_ids")
-            
-            try:
-                result = await create_person(first_name, last_name, emails, organization_ids)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # List Entries
-        elif name == "affinity_get_list_entries":
-            list_id = arguments.get("list_id")
-            if not list_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: list_id parameter is required",
-                    )
-                ]
-            
-            page_size = arguments.get("page_size")  # Optional parameter, None if not provided
-            page_token = arguments.get("page_token")
-            
-            try:
-                result = await get_list_entries(list_id, page_size, page_token)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_get_list_entry_by_id":
-            list_id = arguments.get("list_id")
-            list_entry_id = arguments.get("list_entry_id")
-            if not list_id or not list_entry_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: list_id and list_entry_id parameters are required",
-                    )
-                ]
-            try:
-                result = await get_list_entry_by_id(list_id, list_entry_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_create_list_entry":
-            list_id = arguments.get("list_id")
-            entity_id = arguments.get("entity_id")
-            if not list_id or not entity_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: list_id and entity_id parameters are required",
-                    )
-                ]
-            
-            creator_id = arguments.get("creator_id")
-            
-            try:
-                result = await create_list_entry(list_id, entity_id, creator_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_delete_list_entry":
-            list_id = arguments.get("list_id")
-            list_entry_id = arguments.get("list_entry_id")
-            if not list_id or not list_entry_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: list_id and list_entry_id parameters are required",
-                    )
-                ]
-            try:
-                result = await delete_list_entry(list_id, list_entry_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_update_person":
+        elif name == "affinity_get_single_person":
             person_id = arguments.get("person_id")
             if not person_id:
                 return [
@@ -1021,13 +707,11 @@ def main(
                     )
                 ]
             
-            first_name = arguments.get("first_name")
-            last_name = arguments.get("last_name")
-            emails = arguments.get("emails")
-            organization_ids = arguments.get("organization_ids")
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
             
             try:
-                result = await update_person(person_id, first_name, last_name, emails, organization_ids)
+                result = await get_single_person(person_id, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -1043,7 +727,28 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_delete_person":
+        elif name == "affinity_get_person_fields_metadata":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            
+            try:
+                result = await get_person_fields_metadata(cursor, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_get_person_lists":
             person_id = arguments.get("person_id")
             if not person_id:
                 return [
@@ -1052,8 +757,12 @@ def main(
                         text="Error: person_id parameter is required",
                     )
                 ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            
             try:
-                result = await delete_person(person_id)
+                result = await get_person_lists(person_id, cursor, limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -1069,14 +778,21 @@ def main(
                     )
                 ]
         
-        # Organizations
-        elif name == "affinity_search_organizations":
-            term = arguments.get("term")
-            page_size = arguments.get("page_size", 10)
-            page_token = arguments.get("page_token")
+        elif name == "affinity_get_person_list_entries":
+            person_id = arguments.get("person_id")
+            if not person_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: person_id parameter is required",
+                    )
+                ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
             
             try:
-                result = await search_organizations(term, page_size, page_token)
+                result = await get_person_list_entries(person_id, cursor, limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -1092,17 +808,16 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_get_organization_by_id":
-            organization_id = arguments.get("organization_id")
-            if not organization_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: organization_id parameter is required",
-                    )
-                ]
+        # Companies
+        elif name == "affinity_get_all_companies":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            ids = arguments.get("ids")
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
+            
             try:
-                result = await get_organization_by_id(organization_id)
+                result = await get_all_companies(cursor, limit, ids, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -1118,21 +833,21 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_create_organization":
-            name_param = arguments.get("name")
-            if not name_param:
+        elif name == "affinity_get_single_company":
+            company_id = arguments.get("company_id")
+            if not company_id:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: name parameter is required",
+                        text="Error: company_id parameter is required",
                     )
                 ]
             
-            domain = arguments.get("domain")
-            person_ids = arguments.get("person_ids")
+            field_ids = arguments.get("field_ids")
+            field_types = arguments.get("field_types")
             
             try:
-                result = await create_organization(name_param, domain, person_ids)
+                result = await get_single_company(company_id, field_ids, field_types)
                 return [
                     types.TextContent(
                         type="text",
@@ -1148,22 +863,12 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_update_organization":
-            organization_id = arguments.get("organization_id")
-            if not organization_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: organization_id parameter is required",
-                    )
-                ]
-            
-            name_param = arguments.get("name")
-            domain = arguments.get("domain")
-            person_ids = arguments.get("person_ids")
+        elif name == "affinity_get_company_fields_metadata":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
             
             try:
-                result = await update_organization(organization_id, name_param, domain, person_ids)
+                result = await get_company_fields_metadata(cursor, limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -1179,17 +884,21 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_delete_organization":
-            organization_id = arguments.get("organization_id")
-            if not organization_id:
+        elif name == "affinity_get_company_lists":
+            company_id = arguments.get("company_id")
+            if not company_id:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: organization_id parameter is required",
+                        text="Error: company_id parameter is required",
                     )
                 ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            
             try:
-                result = await delete_organization(organization_id)
+                result = await get_company_lists(company_id, cursor, limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -1204,15 +913,46 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
+        
+        elif name == "affinity_get_company_list_entries":
+            company_id = arguments.get("company_id")
+            if not company_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: company_id parameter is required",
+                    )
+                ]
+            
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            
+            try:
+                result = await get_company_list_entries(company_id, cursor, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         
         # Opportunities
-        elif name == "affinity_search_opportunities":
-            term = arguments.get("term")
-            page_size = arguments.get("page_size", 10)
-            page_token = arguments.get("page_token")
+        elif name == "affinity_get_all_opportunities":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            ids = arguments.get("ids")
             
             try:
-                result = await search_opportunities(term, page_size, page_token)
+                result = await get_all_opportunities(cursor, limit, ids)
                 return [
                     types.TextContent(
                         type="text",
@@ -1228,7 +968,7 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_get_opportunity_by_id":
+        elif name == "affinity_get_single_opportunity":
             opportunity_id = arguments.get("opportunity_id")
             if not opportunity_id:
                 return [
@@ -1238,94 +978,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_opportunity_by_id(opportunity_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_create_opportunity":
-            name_param = arguments.get("name")
-            if not name_param:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: name parameter is required",
-                    )
-                ]
-            
-            person_ids = arguments.get("person_ids")
-            organization_ids = arguments.get("organization_ids")
-            
-            try:
-                result = await create_opportunity(name_param, person_ids, organization_ids)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_update_opportunity":
-            opportunity_id = arguments.get("opportunity_id")
-            if not opportunity_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: opportunity_id parameter is required",
-                    )
-                ]
-            
-            name_param = arguments.get("name")
-            person_ids = arguments.get("person_ids")
-            organization_ids = arguments.get("organization_ids")
-            
-            try:
-                result = await update_opportunity(opportunity_id, name_param, person_ids, organization_ids)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_delete_opportunity":
-            opportunity_id = arguments.get("opportunity_id")
-            if not opportunity_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: opportunity_id parameter is required",
-                    )
-                ]
-            try:
-                result = await delete_opportunity(opportunity_id)
+                result = await get_single_opportunity(opportunity_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -1342,15 +995,15 @@ def main(
                 ]
         
         # Notes
-        elif name == "affinity_get_notes":
+        elif name == "affinity_get_all_notes":
             person_id = arguments.get("person_id")
             organization_id = arguments.get("organization_id")
             opportunity_id = arguments.get("opportunity_id")
-            page_size = arguments.get("page_size", 10)
+            page_size = arguments.get("page_size")
             page_token = arguments.get("page_token")
             
             try:
-                result = await get_notes(person_id, organization_id, opportunity_id, page_size, page_token)
+                result = await get_all_notes(person_id, organization_id, opportunity_id, page_size, page_token)
                 return [
                     types.TextContent(
                         type="text",
@@ -1366,7 +1019,7 @@ def main(
                     )
                 ]
         
-        elif name == "affinity_get_note_by_id":
+        elif name == "affinity_get_specific_note":
             note_id = arguments.get("note_id")
             if not note_id:
                 return [
@@ -1376,7 +1029,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_note_by_id(note_id)
+                result = await get_specific_note(note_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -1391,202 +1044,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
-        elif name == "affinity_create_note":
-            content = arguments.get("content")
-            if not content:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: content parameter is required",
-                    )
-                ]
-            
-            person_ids = arguments.get("person_ids")
-            organization_ids = arguments.get("organization_ids")
-            opportunity_ids = arguments.get("opportunity_ids")
-            parent_id = arguments.get("parent_id")
-            note_type = arguments.get("type", 0)
-            
-            try:
-                result = await create_note(content, person_ids, organization_ids, opportunity_ids, parent_id, note_type)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_update_note":
-            note_id = arguments.get("note_id")
-            content = arguments.get("content")
-            if not note_id or not content:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: note_id and content parameters are required",
-                    )
-                ]
-            try:
-                result = await update_note(note_id, content)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_delete_note":
-            note_id = arguments.get("note_id")
-            if not note_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: note_id parameter is required",
-                    )
-                ]
-            try:
-                result = await delete_note(note_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Field Values
-        elif name == "affinity_get_field_values":
-            person_id = arguments.get("person_id")
-            organization_id = arguments.get("organization_id")
-            opportunity_id = arguments.get("opportunity_id")
-            list_entry_id = arguments.get("list_entry_id")
-            page_size = arguments.get("page_size", 10)
-            page_token = arguments.get("page_token")
-            
-            try:
-                result = await get_field_values(person_id, organization_id, opportunity_id, list_entry_id, page_size, page_token)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_create_field_value":
-            field_id = arguments.get("field_id")
-            entity_id = arguments.get("entity_id")
-            value = arguments.get("value")
-            if not field_id or not entity_id or value is None:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: field_id, entity_id, and value parameters are required",
-                    )
-                ]
-            
-            list_entry_id = arguments.get("list_entry_id")
-            
-            try:
-                result = await create_field_value(field_id, entity_id, value, list_entry_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_update_field_value":
-            field_value_id = arguments.get("field_value_id")
-            value = arguments.get("value")
-            if not field_value_id or value is None:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: field_value_id and value parameters are required",
-                    )
-                ]
-            try:
-                result = await update_field_value(field_value_id, value)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_delete_field_value":
-            field_value_id = arguments.get("field_value_id")
-            if not field_value_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: field_value_id parameter is required",
-                    )
-                ]
-            try:
-                result = await delete_field_value(field_value_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
+
         
         else:
             return [

@@ -5,23 +5,23 @@ from .base import make_v2_request
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_all_persons(
+async def get_all_companies(
     cursor: Optional[str] = None,
     limit: Optional[int] = None,
     ids: Optional[List[int]] = None,
     field_ids: Optional[List[str]] = None,
     field_types: Optional[List[str]] = None
 ) -> Dict[str, Any]:
-    """Get all Persons in Affinity.
+    """Get all Companies in Affinity with basic information and field data.
     
     Args:
         cursor: Cursor for pagination
         limit: Number of items per page (1-100, default 100)
-        ids: Person IDs to filter by
+        ids: Company IDs to filter by
         field_ids: Field IDs for field data
         field_types: Field types (enriched, global, relationship-intelligence)
     """
-    logger.info("Executing tool: get_all_persons")
+    logger.info("Executing tool: get_all_companies")
     try:
         params = {}
         if cursor:
@@ -35,24 +35,24 @@ async def get_all_persons(
         if field_types:
             params["fieldTypes"] = field_types
             
-        return await make_v2_request("GET", "/persons", params=params)
+        return await make_v2_request("GET", "/companies", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool get_all_persons: {e}")
+        logger.exception(f"Error executing tool get_all_companies: {e}")
         raise e
 
-async def get_single_person(
-    person_id: int,
+async def get_single_company(
+    company_id: int,
     field_ids: Optional[List[str]] = None,
     field_types: Optional[List[str]] = None
 ) -> Dict[str, Any]:
-    """Get a single Person by ID.
+    """Get a single Company by ID with basic information and field data.
     
     Args:
-        person_id: Person ID
+        company_id: Company ID
         field_ids: Field IDs for field data
         field_types: Field types (enriched, global, relationship-intelligence)
     """
-    logger.info(f"Executing tool: get_single_person with person_id: {person_id}")
+    logger.info(f"Executing tool: get_single_company with company_id: {company_id}")
     try:
         params = {}
         if field_ids:
@@ -60,22 +60,22 @@ async def get_single_person(
         if field_types:
             params["fieldTypes"] = field_types
             
-        return await make_v2_request("GET", f"/persons/{person_id}", params=params)
+        return await make_v2_request("GET", f"/companies/{company_id}", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool get_single_person: {e}")
+        logger.exception(f"Error executing tool get_single_company: {e}")
         raise e
 
-async def get_person_fields_metadata(
+async def get_company_fields_metadata(
     cursor: Optional[str] = None,
     limit: Optional[int] = None
 ) -> Dict[str, Any]:
-    """Get metadata on Person Fields.
+    """Get metadata on Company Fields.
     
     Args:
         cursor: Cursor for pagination
         limit: Number of items per page (1-100, default 100)
     """
-    logger.info("Executing tool: get_person_fields_metadata")
+    logger.info("Executing tool: get_company_fields_metadata")
     try:
         params = {}
         if cursor:
@@ -83,24 +83,24 @@ async def get_person_fields_metadata(
         if limit:
             params["limit"] = limit
             
-        return await make_v2_request("GET", "/persons/fields", params=params)
+        return await make_v2_request("GET", "/companies/fields", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool get_person_fields_metadata: {e}")
+        logger.exception(f"Error executing tool get_company_fields_metadata: {e}")
         raise e
 
-async def get_person_lists(
-    person_id: int,
+async def get_company_lists(
+    company_id: int,
     cursor: Optional[str] = None,
     limit: Optional[int] = None
 ) -> Dict[str, Any]:
-    """Get a Person's Lists.
+    """Get all Lists that contain the specified Company.
     
     Args:
-        person_id: Person ID
+        company_id: Company ID
         cursor: Cursor for pagination
         limit: Number of items per page (1-100, default 100)
     """
-    logger.info(f"Executing tool: get_person_lists with person_id: {person_id}")
+    logger.info(f"Executing tool: get_company_lists with company_id: {company_id}")
     try:
         params = {}
         if cursor:
@@ -108,24 +108,24 @@ async def get_person_lists(
         if limit:
             params["limit"] = limit
             
-        return await make_v2_request("GET", f"/persons/{person_id}/lists", params=params)
+        return await make_v2_request("GET", f"/companies/{company_id}/lists", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool get_person_lists: {e}")
+        logger.exception(f"Error executing tool get_company_lists: {e}")
         raise e
 
-async def get_person_list_entries(
-    person_id: int,
+async def get_company_list_entries(
+    company_id: int,
     cursor: Optional[str] = None,
     limit: Optional[int] = None
 ) -> Dict[str, Any]:
-    """Get a Person's List Entries.
+    """Get List Entries for a Company across all Lists with field data.
     
     Args:
-        person_id: Person ID
+        company_id: Company ID
         cursor: Cursor for pagination
         limit: Number of items per page (1-100, default 100)
     """
-    logger.info(f"Executing tool: get_person_list_entries with person_id: {person_id}")
+    logger.info(f"Executing tool: get_company_list_entries with company_id: {company_id}")
     try:
         params = {}
         if cursor:
@@ -133,7 +133,7 @@ async def get_person_list_entries(
         if limit:
             params["limit"] = limit
             
-        return await make_v2_request("GET", f"/persons/{person_id}/list-entries", params=params)
+        return await make_v2_request("GET", f"/companies/{company_id}/list-entries", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool get_person_list_entries: {e}")
+        logger.exception(f"Error executing tool get_company_list_entries: {e}")
         raise e 
