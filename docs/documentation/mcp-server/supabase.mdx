@@ -1,0 +1,340 @@
+---
+title: 'Supabase'
+description: 'Learn how to use Klavis to connect your AI application to Supabase MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Supabase MCP Server
+
+Use the following endpoint to create a new remote Supabase MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Supabase MCP server instance
+supabase_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.SUPABASE,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Supabase MCP server instance
+const supabaseServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Supabase,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Supabase",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Supabase\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Supabase\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://supabase-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/supabase/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check> **serverUrl** specifies the endpoint of the Supabase MCP server, which you can connect and use this MCP Server with your Supabase databases and services.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance.</Note>
+
+### 2. Supabase OAuth Flow (Recommended)
+
+If you want to enable your MCP server to access your private Supabase infomation:
+
+#### Option 1: Supabase OAuth Flow
+
+To enable your MCP server to access your private Supabase information through OAuth:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(supabase_server.oauth_url)
+```
+
+```javascript TypeScript
+// Redirect user to authorize
+window.location.href = supabaseServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/supabase/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class SupabaseOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/supabase/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+#### Option 2: Set Auth Token
+
+Instead of OAuth, you can also set your [Supabase personal access token](https://supabase.com/dashboard/account/tokens) by calling our endpoint below:
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<string>",
+  "authToken": "<string>"
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the Supabase personal access token for your instance
+response = klavis_client.mcp_server.set_instance_auth_token(
+    instance_id="<YOUR_INSTANCE_ID>",
+    auth_token="<YOUR_SUPABASE_ACCESS_TOKEN>",
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the Supabase personal access token for your instance
+const response = await klavisClient.mcpServer.setInstanceAuthToken({
+    instanceId: "<YOUR_INSTANCE_ID>",
+    authToken: "<YOUR_SUPABASE_ACCESS_TOKEN>"
+});
+
+console.log(response);
+```
+
+
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	
+	payload := map[string]string{
+		"instanceId": "<string>",
+		"authToken": "<string>",
+	}
+	
+	jsonPayload, _ := json.Marshal(payload)
+	
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Authorization", "Bearer <token>")
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	
+	fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<string>\",\"authToken\":\"<string>\"}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .header("Authorization", "Bearer <token>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Watch the Example
+<iframe
+  width="725"
+  height="450"
+  src="https://www.youtube.com/embed/K7NnYbEhmyM"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+></iframe>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                         | Description                                                                 |
+|-----------------------------------|-----------------------------------------------------------------------------|
+| supabase_list_projects             | Lists all Supabase projects for the user                                    |
+| supabase_get_project               | Gets details for a Supabase project                                         |
+| supabase_get_cost                  | Gets the cost of creating a new project or branch                           |
+| supabase_confirm_cost              | Ask the user to confirm their understanding of the cost                     |
+| supabase_create_project            | Creates a new Supabase project                                              |
+| supabase_pause_project             | Pauses a Supabase project                                                   |
+| supabase_restore_project           | Restores a Supabase project                                                 |
+| supabase_list_organizations        | Lists all organizations that the user is a member of                        |
+| supabase_get_organization          | Gets details for an organization including subscription plan                |
+| supabase_list_tables               | Lists all tables in a schema                                                |
+| supabase_list_extensions           | Lists all extensions in the database                                        |
+| supabase_list_migrations           | Lists all migrations in the database                                        |
+| supabase_apply_migration           | Applies a migration to the database                                         |
+| supabase_execute_sql               | Executes raw SQL in the Postgres database                                   |
+| supabase_get_logs                  | Gets logs for a Supabase project by service type                            |
+| supabase_get_project_url           | Gets the API URL for a project                                              |
+| supabase_get_anon_key              | Gets the anonymous API key for a project                                    |
+| supabase_generate_typescript_types | Generates TypeScript types for a project                                    |
+| supabase_create_branch             | Creates a development branch on a Supabase project                          |
+| supabase_list_branches             | Lists all development branches of a Supabase project                        |
+| supabase_delete_branch             | Deletes a development branch                                                |
+| supabase_merge_branch              | Merges migrations and edge functions from a development branch to production|
+| supabase_reset_branch              | Resets migrations of a development branch                                   |
+| supabase_rebase_branch             | Rebases a development branch on production                                  |
+</Accordion>

@@ -1,0 +1,224 @@
+---
+title: 'Salesforce'
+description: 'Learn how to use Klavis to connect your AI application to Salesforce MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Salesforce MCP Server
+
+Use the following endpoint to create a new remote Salesforce MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Salesforce MCP server instance
+salesforce_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.SALESFORCE,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Salesforce MCP server instance
+const salesforceServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Salesforce,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Salesforce",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Salesforce\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Salesforce\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://salesforce-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/salesforce/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+
+<Check> **serverUrl** specifies the endpoint of the Salesforce MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Salesforce information.</Note>
+
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(salesforce_server.oauth_url)
+```
+
+```javascript TypeScript
+// Redirect user to authorize
+window.location.href = salesforceServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/salesforce/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class SalesforceOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/salesforce/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl. Check the API reference for more details.
+</Tip>
+
+### Watch the Example
+<iframe
+  width="725"
+  height="450"
+  src="https://www.youtube.com/embed/iJTe0tJFpKA"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+></iframe>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                    | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| salesforce_get_accounts             | Get accounts with flexible filtering options including name search, industry, and type. |
+| salesforce_create_account           | Create a new account in Salesforce.                                     |
+| salesforce_update_account           | Update an existing account.                                              |
+| salesforce_delete_account           | Delete an account.                                                       |
+| salesforce_get_contacts             | Get contacts with flexible filtering options including name, email, and title search. |
+| salesforce_create_contact           | Create a new contact in Salesforce.                                     |
+| salesforce_update_contact           | Update an existing contact.                                              |
+| salesforce_delete_contact           | Delete a contact.                                                        |
+| salesforce_get_opportunities        | Get opportunities, optionally filtered by account, stage, name, or account name. |
+| salesforce_create_opportunity       | Create a new opportunity in Salesforce.                                 |
+| salesforce_update_opportunity       | Update an existing opportunity.                                          |
+| salesforce_delete_opportunity       | Delete an opportunity.                                                   |
+| salesforce_get_leads                | Get leads with flexible filtering options including name, company, email, and industry search. |
+| salesforce_create_lead              | Create a new lead in Salesforce.                                        |
+| salesforce_update_lead              | Update an existing lead.                                                 |
+| salesforce_delete_lead              | Delete a lead.                                                           |
+| salesforce_convert_lead             | Convert a lead to account, contact, and optionally opportunity.         |
+| salesforce_get_cases                | Get cases with flexible filtering options including subject search, account, status, priority, and type. |
+| salesforce_create_case              | Create a new case in Salesforce.                                        |
+| salesforce_update_case              | Update an existing case.                                                 |
+| salesforce_delete_case              | Delete a case.                                                           |
+| salesforce_get_campaigns            | Get campaigns, optionally filtered by status or type.                   |
+| salesforce_create_campaign          | Create a new campaign in Salesforce.                                    |
+| salesforce_update_campaign          | Update an existing campaign.                                             |
+| salesforce_delete_campaign          | Delete a campaign.                                                       |
+| salesforce_query                    | Execute a SOQL query on Salesforce                                      |
+| salesforce_describe_object          | Get detailed schema and field information for any Salesforce object.   |
+</Accordion> 

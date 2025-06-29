@@ -1,0 +1,236 @@
+---
+title: "Python"
+description: "Get started with Klavis AI Python SDK for MCP integrations"
+---
+## Installation
+
+```bash
+pip install klavis
+```
+
+## Get Your API Key
+
+Sign up at [klavis.ai](https://klavis.ai) and create your API key.
+
+## Quick Start
+
+```python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="your-klavis-key")
+
+# Create a YouTube MCP server instance
+youtube_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="user123", # Change to user id in your platform
+    platform_name="MyApp", # change to your platform
+)
+
+print(f"Server created: {youtube_server.server_url}")
+```
+
+## Integration with MCP Client
+
+If you already have an MCP client implementation in your codebase:
+
+```python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="your-klavis-key")
+
+# Create a YouTube MCP server instance
+youtube_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="user123",
+    platform_name="MyApp",
+)
+
+print(f"Server created: {youtube_server.server_url}")
+```
+
+## Function Calling with OpenAI
+
+Integrate directly with OpenAI using function calling:
+
+```python
+import json
+from openai import OpenAI
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType, ToolFormat
+
+OPENAI_MODEL = "gpt-4o-mini"
+
+openai_client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
+klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+
+# Create server instance
+youtube_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="user123",
+    platform_name="MyApp",
+)
+
+# Get available tools in OpenAI format
+tools = klavis_client.mcp_server.list_tools(
+    server_url=youtube_server.server_url,
+    format=ToolFormat.OPENAI,
+)
+
+# Initial conversation
+messages = [{"role": "user", "content": "Summarize this video: https://youtube.com/watch?v=..."}]
+
+# First OpenAI call with function calling
+response = openai_client.chat.completions.create(
+    model=OPENAI_MODEL,
+    messages=messages,
+    tools=tools.tools
+)
+
+messages.append(response.choices[0].message)
+
+# Handle tool calls
+if response.choices[0].message.tool_calls:
+    for tool_call in response.choices[0].message.tool_calls:
+        result = klavis_client.mcp_server.call_tools(
+            server_url=youtube_server.server_url,
+            tool_name=tool_call.function.name,
+            tool_args=json.loads(tool_call.function.arguments),
+        )
+        
+        # Add tool result to conversation
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": str(result)
+        })
+
+# Second OpenAI call to process tool results and generate final response
+final_response = openai_client.chat.completions.create(
+    model=OPENAI_MODEL,
+    messages=messages
+)
+
+print(final_response.choices[0].message.content)
+```
+
+## Authentication
+
+### OAuth Services
+
+For OAuth services like Gmail, Google Drive, etc.:
+
+```python
+# Create server instance for OAuth service
+server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="user123",
+    platform_name="MyApp"
+)
+
+# OAuth URL is provided in server.oauth_url
+import webbrowser
+webbrowser.open(server.oauth_url)
+```
+
+### API Key Services
+
+For services that require API keys:
+
+```python
+# Set authentication token for API key services
+klavis_client.mcp_server.set_auth_token(
+    instance_id=server.instance_id,
+    auth_token="your-service-api-key"
+)
+```
+
+## Multi-Tool Workflows
+
+Combine multiple MCP servers for complex workflows:
+
+```python
+# Create multiple servers
+github_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GITHUB,
+    user_id="user123",
+    platform_name="MyApp"
+)
+
+slack_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.SLACK,
+    user_id="user123", 
+    platform_name="MyApp"
+)
+
+# Use tools from both servers in a single AI conversation
+all_tools = []
+all_tools.extend(klavis_client.mcp_server.list_tools(github_server.server_url).tools)
+all_tools.extend(klavis_client.mcp_server.list_tools(slack_server.server_url).tools)
+
+# Initialize conversation
+messages = [{"role": "user", "content": "Create a GitHub issue and notify the team on Slack"}]
+
+# Loop to let LLM work with multiple tools
+max_iterations = 5
+for iteration in range(max_iterations):
+    response = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=messages,
+        tools=all_tools
+    )
+    
+    messages.append(response.choices[0].message)
+    
+    # Check if LLM wants to use tools
+    if response.choices[0].message.tool_calls:
+        for tool_call in response.choices[0].message.tool_calls:
+            # Determine which server to use based on tool name
+            server_url = github_server.server_url if "github" in tool_call.function.name else slack_server.server_url
+            
+            # Execute tool
+            result = klavis_client.mcp_server.call_tools(
+                server_url=server_url,
+                tool_name=tool_call.function.name,
+                tool_args=json.loads(tool_call.function.arguments),
+            )
+            
+            # Add tool result to conversation
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
+    else:
+        # LLM finished the task
+        print(f"Task completed in {iteration + 1} iterations")
+        print(response.choices[0].message.content)
+        break
+```
+
+## Error Handling
+
+```python
+from klavis.exceptions import KlavisError
+
+try:
+    server = klavis_client.mcp_server.create_server_instance(
+        server_name=McpServerName.YOUTUBE,
+        user_id="user123",
+        platform_name="MyApp"
+    )
+except KlavisError as e:
+    print(f"Error creating server: {e}")
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Reference" icon="api" href="/api-reference/introduction">
+    Complete API documentation
+  </Card>
+  <Card title="MCP Servers" icon="server" href="/documentation/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+</CardGroup> 

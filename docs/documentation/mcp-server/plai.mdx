@@ -1,0 +1,249 @@
+---
+title: 'Plai'
+description: 'Learn how to use Klavis to connect your AI application to Plai MCP Server'
+---
+
+<Warning>The SSE protocol will be deprecated soon. Please use streamable-http as the connectionType moving forward.</Warning>
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Plai MCP Server
+
+Use the following endpoint to create a new remote Plai MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Plai MCP server instance
+plai_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.PLAI,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+    connection_type=ConnectionType.STREAMABLE_HTTP,
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Plai MCP server instance
+const plaiServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Plai,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+    connectionType: Klavis.ConnectionType.StreamableHttp
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Plai",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+  "connectionType": "streamable-http"
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Plai\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Plai\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "serverUrl": "https://plai-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check> **serverUrl** specifies the endpoint of the Plai MCP server, which allows you to create and manage Facebook, Instagram, and LinkedIn ad campaigns.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance.</Note>
+
+### 2. Configure Plai API Key
+
+To use the Plai MCP Server, you need to configure it with your Plai API key.
+
+#### Setting up Plai API Key
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authToken": "<YOUR_PLAI_API_KEY>"
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the Plai API key for your instance
+response = klavis_client.mcp_server.set_instance_auth_token(
+    instance_id="<YOUR_INSTANCE_ID>",
+    auth_token="<YOUR_PLAI_API_KEY>",
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the Plai API key for your instance
+const response = await klavisClient.mcpServer.setInstanceAuthToken({
+    instanceId: "<YOUR_INSTANCE_ID>",
+    authToken: "<YOUR_PLAI_API_KEY>"
+});
+
+console.log(response);
+```
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	
+	payload := map[string]string{
+		"instanceId": "<YOUR_INSTANCE_ID>",
+		"authToken": "<YOUR_PLAI_API_KEY>",
+	}
+	
+	jsonPayload, _ := json.Marshal(payload)
+	
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	
+	fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authToken\":\"<YOUR_PLAI_API_KEY>\"}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                      | Description                                                              |
+|--------------------------------|--------------------------------------------------------------------------|
+| plai_create_user_profile       | Create a new user profile on the Plai platform. This allows onboarding new users into the system. |
+| plai_get_user_profile          | Retrieve the current user profile using their email address. |
+| plai_create_link               | Generate a link that allows users to connect their Ad accounts (Facebook/Instagram or LinkedIn). |
+| plai_create_leads_dynamic      | Create a dynamic Facebook Lead Ad campaign. Lead generation ads collect contact information directly from users on Meta platforms. |
+| plai_get_campaign_insights     | Fetch campaign insights for a specific campaign with performance metrics. |
+| plai_update_campaign_status    | Update the status of a campaign (pause, activate, or delete). |
+| plai_check_leadform_tos        | Check whether the user has accepted the Terms of Service for their connected Facebook page. |
+| plai_create_leadform           | Create a lead form for Facebook Lead Ads with predefined questions (EMAIL and FULL_NAME). |
+| plai_get_leadform_list         | Get a list of all lead forms for the user. |
+| plai_search_targeting_locations| Search for advertising target locations based on search query. This helps in identifying relevant locations to improve the accuracy and effectiveness of ad targeting. |
+</Accordion> 

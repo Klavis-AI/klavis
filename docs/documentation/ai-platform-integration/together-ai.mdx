@@ -1,0 +1,415 @@
+---
+title: "Together AI"
+description: "Learn how to build AI agents that integrate Together AI's powerful LLMs with Klavis MCP Servers"
+---
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="Together AI API Key" icon="key" href="https://together.ai/">
+    Get your API key from Together AI
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install together klavis
+```
+
+```bash TypeScript
+npm install together-ai klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+# Set environment variables
+os.environ["TOGETHER_API_KEY"] = "your-together-api-key-here"  # Replace with your actual Together API key
+os.environ["KLAVIS_API_KEY"] = "your-klavis-api-key-here"      # Replace with your actual Klavis API key
+```
+
+```typescript TypeScript
+// Set environment variables in your .env file
+process.env.TOGETHER_API_KEY = "your-together-api-key-here";  // Replace with your actual Together API key
+process.env.KLAVIS_API_KEY = "your-klavis-api-key-here";      // Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+## Basic Setup
+
+<CodeGroup>
+
+```python Python
+import os
+import json
+from together import Together
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType, ToolFormat
+
+# Initialize clients
+together_client = Together(api_key=os.getenv("TOGETHER_API_KEY"))
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+```
+
+```typescript TypeScript
+import Together from 'together-ai';
+import { KlavisClient, Klavis } from 'klavis';
+
+// Initialize clients
+const togetherClient = new Together({ apiKey: process.env.TOGETHER_API_KEY });
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+```
+
+</CodeGroup>
+
+## AI Agent with MCP Integration
+
+Now we'll create an intelligent agent that uses Together AI's powerful LLMs with Klavis MCP servers. This agent will:
+
+1. **Discover Tools**: Automatically find available tools from MCP servers
+2. **Function Calling**: Use Together AI's function calling capabilities
+3. **Tool Execution**: Execute tools through Klavis API
+4. **Smart Responses**: Generate intelligent responses based on tool results
+
+<CodeGroup>
+
+```python Python
+class Agent:
+    def __init__(self, together_client, klavis_client, mcp_server_url, model="meta-llama/Llama-3.3-70B-Instruct-Turbo"):
+        self.together = together_client
+        self.klavis = klavis_client
+        self.mcp_server_url = mcp_server_url
+        self.model = model
+        print(f"🤖 Agent initialized with Together AI model: {self.model}")
+    
+    def process_request(self, user_message):
+        # 1. Get available tools
+        mcp_tools = self.klavis.mcp_server.list_tools(
+            server_url=self.mcp_server_url,
+    
+            format=ToolFormat.OPENAI,
+        )
+        
+        # 2. Call LLM with tools
+        messages = [
+            {"role": "system", "content": "You are a helpful AI assistant with access to various tools."},
+            {"role": "user", "content": user_message}
+        ]
+        
+        response = self.together.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            tools=mcp_tools.tools
+        )
+        
+        assistant_message = response.choices[0].message
+        messages.append(assistant_message)
+        
+        # 3. If LLM wants to use tools
+        if assistant_message.tool_calls:
+            
+            # Execute each tool call
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+                
+                print(f"🛠️ Calling tool: {tool_name} with args: {tool_args}")
+                # Call tool via Klavis SDK
+                tool_result = self.klavis.mcp_server.call_tools(
+                    server_url=self.mcp_server_url,
+                    tool_name=tool_name,
+                    tool_args=tool_args,
+                )
+                
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": str(tool_result)
+                })
+            
+            # 4. Get final response from LLM
+            final_response = self.together.chat.completions.create(
+                model=self.model,
+                messages=messages
+            )
+            return final_response.choices[0].message.content
+        
+        # If no tools needed, return the assistant message directly
+        return assistant_message.content
+```
+
+```typescript TypeScript
+class Agent {
+    private together: Together;
+    private klavis: KlavisClient;
+    private mcpServerUrl: string;
+    private model: string;
+
+    constructor(togetherClient: Together, klavisClient: KlavisClient, mcpServerUrl: string, model: string = "meta-llama/Llama-3.3-70B-Instruct-Turbo") {
+        this.together = togetherClient;
+        this.klavis = klavisClient;
+        this.mcpServerUrl = mcpServerUrl;
+        this.model = model;
+        console.log(`🤖 Agent initialized with Together AI model: ${this.model}`);
+    }
+
+    async processRequest(userMessage: string) {
+        // 1. Get available tools
+        const mcpTools = await this.klavis.mcpServer.listTools({
+            serverUrl: this.mcpServerUrl,
+            format: Klavis.ToolFormat.Openai,
+        });
+
+        // 2. Call LLM with tools
+        const messages = [
+            { role: "system", content: "You are a helpful AI assistant with access to various tools." },
+            { role: "user", content: userMessage }
+        ];
+
+        const response = await this.together.chat.completions.create({
+            model: this.model,
+            messages: messages,
+            tools: mcpTools.tools
+        });
+
+        const assistantMessage = response.choices[0].message;
+        messages.push(assistantMessage);
+
+        // 3. If LLM wants to use tools
+        if (assistantMessage.tool_calls) {
+            // Execute each tool call
+            for (const toolCall of assistantMessage.tool_calls) {
+                const toolName = toolCall.function.name;
+                const toolArgs = JSON.parse(toolCall.function.arguments);
+
+                console.log(`🛠️ Calling tool: ${toolName} with args:`, toolArgs);
+                // Call tool via Klavis SDK
+                const toolResult = await this.klavis.mcpServer.callTools({
+                    serverUrl: this.mcpServerUrl,
+                    toolName: toolName,
+                    toolArgs: toolArgs,
+                });
+
+                messages.push({
+                    role: "tool",
+                    tool_call_id: toolCall.id,
+                    content: JSON.stringify(toolResult)
+                });
+            }
+
+            // 4. Get final response from LLM
+            const finalResponse = await this.together.chat.completions.create({
+                model: this.model,
+                messages: messages
+            });
+            return finalResponse.choices[0].message.content;
+        }
+
+        // If no tools needed, return the assistant message directly
+        return assistantMessage.content;
+    }
+}
+```
+
+</CodeGroup>
+
+## Use Case Examples
+
+### Example 1: Summarize YouTube Video
+
+<Steps>
+  <Step title="Initialize Clients">
+    Set up Together AI and Klavis API clients
+  </Step>
+  <Step title="Create MCP Instance">
+    Create a YouTube MCP server instance
+  </Step>
+  <Step title="Process Request">
+    Use the agent to analyze and summarize a YouTube video
+  </Step>
+</Steps>
+
+<CodeGroup>
+
+```python Python
+# Example YouTube video URL - replace with any video you'd like to analyze
+YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=TG6QOa2JJJQ"
+
+# 1. Create YouTube MCP server instance
+youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# 2. Create an agent with YouTube MCP server
+agent = Agent(
+    together_client=together_client, 
+    klavis_client=klavis_client, 
+    mcp_server_url=youtube_mcp_instance.server_url,
+    model="meta-llama/Llama-3.3-70B-Instruct-Turbo"
+)
+
+# 3. Process the request
+response = agent.process_request(
+    f"Please analyze this YouTube video and provide a comprehensive summary with timestamps: {YOUTUBE_VIDEO_URL}"
+)
+
+print(response)
+```
+
+```typescript TypeScript
+// Example YouTube video URL - replace with any video you'd like to analyze
+const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=TG6QOa2JJJQ";
+
+// 1. Create YouTube MCP server instance
+const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Youtube,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+// 2. Create an agent with YouTube MCP server
+const agent = new Agent(
+    togetherClient, 
+    klavisClient, 
+    youtubeMcpInstance.serverUrl,
+    "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+);
+
+// 3. Process the request
+const response = await agent.processRequest(
+    `Please analyze this YouTube video and provide a comprehensive summary with timestamps: ${YOUTUBE_VIDEO_URL}`
+);
+
+console.log(response);
+```
+
+</CodeGroup>
+
+### Example 2: Send Email via Gmail
+
+<Note>
+Gmail integration requires OAuth authentication, so you'll need to authorize the application in your browser.
+</Note>
+
+<CodeGroup>
+
+```python Python
+import webbrowser
+
+# Create Gmail MCP server instance
+gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# Redirect to Gmail OAuth page for authorization
+webbrowser.open(gmail_mcp_instance.oauth_url)
+print(f"🔐 Opening OAuth authorization for Gmail")
+print(f"If you are not redirected automatically, please open this URL: {gmail_mcp_instance.oauth_url}")
+
+# Email configuration
+EMAIL_RECIPIENT = "recipient@example.com"  # Replace with the recipient's email
+EMAIL_SUBJECT = "Greetings from Together AI + Klavis Integration"
+EMAIL_BODY = "This is a test email sent using the Together AI and Klavis AI integration. The email was sent automatically by your AI agent!"
+
+# After OAuth authorization is complete, create the Gmail agent
+gmail_agent = Agent(
+    together_client=together_client,
+    klavis_client=klavis_client,
+    mcp_server_url=gmail_mcp_instance.server_url,
+    model="Qwen/Qwen2.5-72B-Instruct-Turbo"
+)
+
+# Send the email
+response = gmail_agent.process_request(
+    f"Please send an email to {EMAIL_RECIPIENT} with the subject '{EMAIL_SUBJECT}' and the following body: '{EMAIL_BODY}'"
+)
+
+print(response)
+```
+
+```typescript TypeScript
+// Create Gmail MCP server instance
+const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gmail,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+// Redirect to Gmail OAuth page for authorization
+console.log("🔐 Opening OAuth authorization for Gmail");
+console.log(`If you are not redirected automatically, please open this URL: ${gmailMcpInstance.oauthUrl}`);
+// In a web environment, you might redirect the user
+window.open(gmailMcpInstance.oauthUrl);
+
+// Email configuration
+const EMAIL_RECIPIENT = "recipient@example.com";  // Replace with the recipient's email
+const EMAIL_SUBJECT = "Greetings from Together AI + Klavis Integration";
+const EMAIL_BODY = "This is a test email sent using the Together AI and Klavis AI integration. The email was sent automatically by your AI agent!";
+
+// After OAuth authorization is complete, create the Gmail agent
+const gmailAgent = new Agent(
+    togetherClient,
+    klavisClient,
+    gmailMcpInstance.serverUrl,
+    "Qwen/Qwen2.5-72B-Instruct-Turbo"
+);
+
+// Send the email
+const response = await gmailAgent.processRequest(
+    `Please send an email to ${EMAIL_RECIPIENT} with the subject '${EMAIL_SUBJECT}' and the following body: '${EMAIL_BODY}'`
+);
+
+console.log(response);
+```
+
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore More MCP Servers" icon="server">
+    Try other available servers like Slack, Notion, CRM etc.
+  </Card>
+  <Card title="Experiment with Different Models" icon="code">
+    Test various Together AI models for different use cases.
+  </Card>
+  <Card title="Build Multi-Server Workflows" icon="laptop">
+    Create sophisticated agents that combine multiple services
+  </Card>
+  <Card title="Production Deployment" icon="rocket">
+    Scale these patterns for production applications
+  </Card>
+</CardGroup>
+
+## Useful Resources
+
+- [Together AI Documentation](https://docs.together.ai/)
+- [Klavis AI Documentation](https://docs.klavis.ai/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+- [Together AI Models](https://docs.together.ai/docs/inference-models)
+- [Klavis MCP Servers](/documentation/mcp-server)
+
+**Happy building with Together AI and Klavis!** 🚀 

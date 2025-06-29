@@ -1,0 +1,84 @@
+---
+title: 'OAuth & White Labeling'
+description: 'White Labeling allows you to integrate our OAuth flows with your own branding and custom OAuth applications'
+---
+
+
+
+## Overview
+
+## What is OAuth?
+
+OAuth (Open Authorization) is an open standard protocol that allows third-party applications to access resources on behalf of users without exposing their credentials. Klavis AI implements OAuth 2.0 to securely connect with services like GitHub, Slack, Gmail, Notion, and more.
+
+## What is White Labeling?
+
+White labeling allows you to customize the authentication experience with your own branding. When enabled, users will see your application name, logo, and other brand elements during the OAuth flow instead of Klavis AI's.
+
+## OAuth Flow ( w/ white labeling)
+
+![OAuth with white labeling](/images/white-labeling.png)
+
+
+## Implementation
+
+### Setting Up White Labeling
+
+To set up white labeling for your OAuth integrations:
+
+<Steps>
+  <Step title="Register Your Application">
+    Register your application with the third-party service (GitHub, Slack, etc.) to obtain your client ID and client secret.
+  </Step>
+  <Step title="Configure White Labeling in Klavis AI">
+    Go to the Klavis AI white label configuration page:
+    
+    [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+    
+    <Frame>
+      <img src="/images/create_white_label_ui.png" alt="White Label Configuration UI" />
+    </Frame>
+    
+    <Tip>
+      Make sure to add the callback url to your app's OAuth allow list.
+    </Tip>
+  </Step>
+  <Step title="Implement OAuth Authorization">
+    Redirect users to the Klavis AI OAuth authorization endpoint with your client ID:
+    
+    ```javascript
+    // Example: Initiating GitHub OAuth with white labeling
+    const authUrl = `https://api.klavis.ai/oauth/github/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+    window.location.href = authUrl;
+    ```
+    <Tip>
+    You can also specify scope and redirect_url in the authUrl, check the api reference for more details.
+    </Tip>
+  </Step>
+  <Step title="(Optional) Add Your Own Callback URL">
+    For simplicity, you can use the default callback URL: https://api.klavis.ai/oauth/{server_name}/callback,
+as shown in the previous step. This is the endpoint where we handle user credentials for authentication.
+
+However, some OAuth consent screens (such as GitHub's) display the callback URL to the user. If this URL doesn't match your application's domain, it can appear untrustworthy.
+
+To address this, you can use a callback URL under your own domain and set up a redirect—either via DNS or within your application—that forwards requests to:
+https://api.klavis.ai/oauth/{server_name}/callback. Below is an example using FastAPI to simply redirect from your Github oauth application to Klavis oauth service in python - 
+
+```python
+@app.get("/github/redirect")
+async def redirect_to_jira_callback(request: Request):
+    target_url = "https://api.klavis.ai/oauth/github/callback"
+    
+    query_params = request.query_params
+    if query_params:
+        query_string = str(query_params)
+        target_url = f"{target_url}?{query_string}"
+        
+    return RedirectResponse(url=target_url)
+```
+
+  </Step>
+
+</Steps>
+
+For technical assistance with OAuth implementation or white labeling, please join our Discord community.

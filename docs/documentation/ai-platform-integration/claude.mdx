@@ -1,0 +1,367 @@
+---
+title: "Claude"
+description: "Learn how to build AI agents that integrate Anthropic's Claude with Klavis MCP Servers for enhanced functionality"
+---
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/klavis-ai/klavis/blob/main/examples/claude/Use_Klavis_with_Claude.ipynb)
+
+# Claude + Klavis AI Integration
+
+This tutorial demonstrates how to use Anthropic's Claude with tool use (function calling) with Klavis MCP (Model Context Protocol) servers.
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="Anthropic API Key" icon="key" href="https://console.anthropic.com/">
+    Get your API key from Anthropic Console
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install anthropic klavis
+```
+
+```bash TypeScript
+npm install @anthropic-ai/sdk klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+import json
+from anthropic import Anthropic
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType, ToolFormat
+
+# Set environment variables
+os.environ["ANTHROPIC_API_KEY"] = "YOUR_ANTHROPIC_API_KEY"  # Replace with your actual Anthropic API key
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+```
+
+```typescript TypeScript
+import Anthropic from '@anthropic-ai/sdk';
+import { KlavisClient, Klavis } from 'klavis';
+
+// Set environment variables
+process.env.ANTHROPIC_API_KEY = "YOUR_ANTHROPIC_API_KEY";  // Replace with your actual Anthropic API key
+process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";  // Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+## Case Study 1: Claude + YouTube MCP Server
+
+### Step 1 - Create YouTube MCP Server using Klavis
+
+<CodeGroup>
+
+```python Python
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, and the instance id is {youtube_mcp_instance.instance_id}")
+```
+
+```typescript TypeScript
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Youtube,
+    userId: "1234",
+    platformName: "Klavis"
+});
+
+// console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}, and the instance id is ${youtubeMcpInstance.instanceId}`);
+```
+
+</CodeGroup>
+
+### Step 2 - Create general method to use MCP Server with Claude
+
+<CodeGroup>
+
+```python Python
+def claude_with_mcp_server(mcp_server_url: str, user_query: str):
+    claude_client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    messages = [
+        {"role": "user", "content": f"{user_query}"}
+    ]
+    
+    mcp_server_tools = klavis_client.mcp_server.list_tools(
+        server_url=mcp_server_url,
+        format=ToolFormat.ANTHROPIC,
+    )
+    
+    response = claude_client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=4000,
+        system="You are a helpful assistant. Use the available tools to answer the user's question.",
+        messages=messages,
+        tools=mcp_server_tools.tools
+    )
+    
+    messages.append({"role": "assistant", "content": response.content})
+
+    if response.stop_reason == "tool_use":
+        tool_results = []
+        
+        for content_block in response.content:
+            if content_block.type == "tool_use":
+                function_name = content_block.name
+                function_args = content_block.input
+                
+                print(f"🔧 Calling: {function_name}, with args: {function_args}")
+                
+                result = klavis_client.mcp_server.call_tools(
+                    server_url=mcp_server_url,
+                    tool_name=function_name,
+                    tool_args=function_args,
+                )
+                
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": content_block.id,
+                    "content": str(result)
+                })
+        
+        messages.append({"role": "user", "content": tool_results})
+            
+        final_response = claude_client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=4000,
+            system="You are a helpful assistant. Use the available tools to answer the user's question.",
+            messages=messages,
+            tools=mcp_server_tools.tools
+        )
+        
+        return final_response.content[0].text
+    else:
+        return response.content[0].text
+```
+
+```typescript TypeScript
+async function claudeWithMcpServer(mcpServerUrl: string, userQuery: string) {
+    const claudeClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    const messages = [
+        { role: "user", content: userQuery }
+    ];
+    
+    const mcpServerTools = await klavisClient.mcpServer.listTools({
+        serverUrl: mcpServerUrl,
+        format: Klavis.ToolFormat.Anthropic,
+    });
+    
+    const response = await claudeClient.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 4000,
+        system: "You are a helpful assistant. Use the available tools to answer the user's question.",
+        messages: messages,
+        tools: mcpServerTools.tools
+    });
+    
+    messages.push({ role: "assistant", content: response.content });
+
+    if (response.stop_reason === "tool_use") {
+        const toolResults = [];
+        
+        for (const contentBlock of response.content) {
+            if (contentBlock.type === "tool_use") {
+                const functionName = contentBlock.name;
+                const functionArgs = contentBlock.input;
+                
+                console.log(`🔧 Calling: ${functionName}, with args:`, functionArgs);
+                
+                const result = await klavisClient.mcpServer.callTools({
+                    serverUrl: mcpServerUrl,
+                    toolName: functionName,
+                    toolArgs: functionArgs
+                });
+                
+                toolResults.push({
+                    type: "tool_result",
+                    tool_use_id: contentBlock.id,
+                    content: JSON.stringify(result)
+                });
+            }
+        }
+        
+        messages.push({ role: "user", content: toolResults });
+            
+        const finalResponse = await claudeClient.messages.create({
+            model: "claude-3-5-sonnet-20241022",
+            max_tokens: 4000,
+            system: "You are a helpful assistant. Use the available tools to answer the user's question.",
+            messages: messages,
+            tools: mcpServerTools.tools
+        });
+        
+        return finalResponse.content[0].text;
+    } else {
+        return response.content[0].text;
+    }
+}
+```
+
+</CodeGroup>
+
+### Step 3 - Summarize your favorite video!
+
+<CodeGroup>
+
+```python Python
+YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # pick a video you like!
+
+result = claude_with_mcp_server(
+    mcp_server_url=youtube_mcp_instance.server_url, 
+    user_query=f"Summarize this YouTube video with timestamps: {YOUTUBE_VIDEO_URL}"
+)
+
+print(result)
+```
+
+```typescript TypeScript
+const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ";  // pick a video you like!
+
+const result = await claudeWithMcpServer(
+    youtubeMcpInstance.serverUrl, 
+    `Summarize this YouTube video with timestamps: ${YOUTUBE_VIDEO_URL}`
+);
+
+console.log(result);
+```
+
+</CodeGroup>
+
+✅ Great! You've successfully created an AI agent that uses Claude's tool use with Klavis MCP servers to summarize YouTube videos!
+
+## Case Study 2: Claude + Gmail MCP Server (OAuth needed)
+
+<CodeGroup>
+
+```python Python
+import webbrowser
+
+gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+webbrowser.open(gmail_mcp_server.oauth_url)
+
+print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: {gmail_mcp_server.oauth_url}")
+```
+
+```typescript TypeScript
+const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gmail,
+    userId: "1234",
+    platformName: "Klavis"
+});
+
+// In a web environment, you might redirect the user
+window.open(gmailMcpServer.oauthUrl);
+
+console.log(`🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: ${gmailMcpServer.oauthUrl}`);
+```
+
+</CodeGroup>
+
+<Note>
+After completing the OAuth authorization, you can send emails using the agent.
+</Note>
+
+<CodeGroup>
+
+```python Python
+EMAIL_RECIPIENT = "zihaolin@klavis.ai" # Replace with your email
+EMAIL_SUBJECT = "Test Claude + Gmail MCP Server"
+EMAIL_BODY = "Hello World from Claude!"
+
+result = claude_with_mcp_server(
+    mcp_server_url=gmail_mcp_server.server_url, 
+    user_query=f"Please send an email to {EMAIL_RECIPIENT} with subject {EMAIL_SUBJECT} and body {EMAIL_BODY}"
+)
+
+print(result)
+```
+
+```typescript TypeScript
+const EMAIL_RECIPIENT = "zihaolin@klavis.ai"; // Replace with your email
+const EMAIL_SUBJECT = "Test Claude + Gmail MCP Server";
+const EMAIL_BODY = "Hello World from Claude!";
+
+const result = await claudeWithMcpServer(
+    gmailMcpServer.serverUrl, 
+    `Please send an email to ${EMAIL_RECIPIENT} with subject ${EMAIL_SUBJECT} and body ${EMAIL_BODY}`
+);
+
+console.log(result);
+```
+
+</CodeGroup>
+
+## Summary
+
+This tutorial demonstrated how to integrate Anthropic's Claude with tool use capabilities with Klavis MCP servers to create powerful AI applications. We covered two practical examples:
+
+**🎥 YouTube Integration**: Built an AI assistant that can automatically summarize YouTube videos by extracting transcripts and providing detailed, timestamped summaries.
+
+**📧 Gmail Integration**: Created an AI-powered email assistant that can send emails through Gmail with OAuth authentication.
+
+### Key Takeaways:
+- **Easy Setup**: Klavis MCP servers can be created with just a few lines of code
+- **Claude Compatible**: All tools are formatted for seamless Claude tool use
+- **Versatile**: Support for both simple APIs (YouTube) and OAuth-authenticated services (Gmail)
+- **Scalable**: The same pattern can be applied to any of the MCP servers available in Klavis
+- **Advanced Reasoning**: Claude's superior reasoning capabilities make it excellent for complex analysis tasks
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore More MCP Servers" icon="server">
+    Try other available servers like Slack, Notion, GitHub, etc.
+  </Card>
+  <Card title="Advanced Workflows" icon="workflow">
+    Build multi-step workflows combining multiple MCP servers
+  </Card>
+  <Card title="Production Deployment" icon="rocket">
+    Scale these patterns for production applications
+  </Card>
+  <Card title="Custom Integrations" icon="code">
+    Build custom MCP servers for your specific needs
+  </Card>
+</CardGroup>
+
+## Useful Resources
+
+- [Anthropic Documentation](https://docs.anthropic.com/)
+- [Claude API Reference](https://docs.anthropic.com/claude/reference/)
+- [Klavis AI Documentation](https://docs.klavis.ai/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+- [Klavis MCP Servers](/documentation/mcp-server)
+
+**Happy building!** 🚀 

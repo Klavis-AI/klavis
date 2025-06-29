@@ -1,0 +1,560 @@
+---
+title: "CrewAI"
+description: "Build powerful AI agent crews that integrate CrewAI with Klavis MCP Servers for multi-agent workflows"
+---
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
+    Get your API key from OpenAI Platform (or your preferred LLM provider)
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install crewai 'crewai-tools[mcp]' klavis openai
+```
+
+```bash TypeScript
+npm install crewai crewai-tools klavis openai
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+# Set environment variables
+os.environ["OPENAI_API_KEY"] = "your-openai-api-key-here"  # Replace with your actual OpenAI API key
+os.environ["KLAVIS_API_KEY"] = "your-klavis-api-key-here"   # Replace with your actual Klavis API key
+```
+
+```typescript TypeScript
+// Set environment variables in your .env file
+process.env.OPENAI_API_KEY = "your-openai-api-key-here";  // Replace with your actual OpenAI API key
+process.env.KLAVIS_API_KEY = "your-klavis-api-key-here";   // Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+## CrewAI with MCP Integration
+
+CrewAI allows you to create specialized AI agent crews where each agent can have access to different MCP tools. This enables sophisticated multi-agent workflows that can:
+
+1. **Create MCP Instances**: Set up connections to external services
+2. **Specialized Agents**: Each agent focuses on specific tasks with relevant tools
+3. **Collaborative Workflows**: Agents work together in sequential or parallel processes
+4. **Tool Discovery**: Automatically discover available tools from MCP servers
+5. **Smart Coordination**: CrewAI manages task dependencies and agent collaboration
+
+## Use Case Examples
+
+### Example 1: YouTube Research Crew
+
+Create a specialized agent that can research and analyze YouTube videos.
+
+<Steps>
+  <Step title="Initialize Integration">
+    Set up CrewAI + Klavis integration
+  </Step>
+  <Step title="Create YouTube Server">
+    Create a YouTube MCP server instance
+  </Step>
+  <Step title="Build Analyze Agent">
+    Create an agent specialized in video content analysis
+  </Step>
+  <Step title="Execute Analysis">
+    Run the crew to analyze a YouTube video
+  </Step>
+</Steps>
+
+<CodeGroup>
+
+```python Python
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import MCPServerAdapter
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+# Initialize clients
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+# Create YouTube MCP server
+youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}")
+
+# Configure MCP server parameters for CrewAI
+server_params = {
+    "url": youtube_mcp_instance.server_url,
+    "transport": "streamable-http"
+}
+
+YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"
+
+try:
+    with MCPServerAdapter(server_params) as mcp_tools:
+        print(f"✅ Available tools: {[tool.name for tool in mcp_tools]}")
+        
+        # Create a YouTube Analysis Agent
+        youtube_agent = Agent(
+            role="YouTube Content Analyst",
+            goal="Research and analyze YouTube videos to extract comprehensive insights",
+            backstory="You are an expert at analyzing video content and creating professional summaries.",
+            tools=mcp_tools,
+            reasoning=True,
+            verbose=False
+        )
+        
+        # Define Task
+        analysis_task = Task(
+            description=f"Research the YouTube video at {YOUTUBE_VIDEO_URL}. Extract the video transcript, analyze the content, and create a comprehensive summary with key points, timestamps, and main takeaways.",
+            expected_output="Complete video analysis with transcript, structured summary, key insights, timestamps, and main takeaways",
+            agent=youtube_agent,
+            markdown=True
+        )
+        
+        # Create and execute the crew
+        youtube_crew = Crew(
+            agents=[youtube_agent],
+            tasks=[analysis_task],
+            verbose=False,
+            process=Process.sequential
+        )
+        
+        result = youtube_crew.kickoff()
+        print(result)
+        
+except Exception as e:
+    print(f"❌ Error connecting to YouTube MCP server: {e}")
+```
+
+```typescript TypeScript
+import { CrewAI, Agent, Task, Crew } from 'crewai';
+import { MCPServerAdapter } from 'crewai-tools';
+import { KlavisClient, Klavis } from 'klavis';
+
+// Initialize clients
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+// Create YouTube MCP server
+const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Youtube,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}`);
+
+// Configure MCP server parameters for CrewAI
+const serverParams = {
+    url: youtubeMcpInstance.serverUrl,
+    transport: "streamable-http"
+};
+
+const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ";
+
+try {
+    const mcpTools = new MCPServerAdapter(serverParams);
+    console.log(`✅ Available tools connected`);
+    
+    // Create a YouTube Analysis Agent
+    const youtubeAgent = new Agent({
+        role: "YouTube Content Analyst",
+        goal: "Research and analyze YouTube videos to extract comprehensive insights",
+        backstory: "You are an expert at analyzing video content and creating professional summaries.",
+        tools: mcpTools,
+        reasoning: true,
+        verbose: false
+    });
+    
+    // Define Task
+    const analysisTask = new Task({
+        description: `Research the YouTube video at ${YOUTUBE_VIDEO_URL}. Extract the video transcript, analyze the content, and create a comprehensive summary with key points, timestamps, and main takeaways.`,
+        expectedOutput: "Complete video analysis with transcript, structured summary, key insights, timestamps, and main takeaways",
+        agent: youtubeAgent,
+        markdown: true
+    });
+    
+    // Create and execute the crew
+    const youtubeCrew = new Crew({
+        agents: [youtubeAgent],
+        tasks: [analysisTask],
+        verbose: false,
+        process: CrewAI.Process.Sequential
+    });
+    
+    const result = await youtubeCrew.kickoff();
+    console.log(result);
+    
+} catch (error) {
+    console.error(`❌ Error connecting to YouTube MCP server: ${error}`);
+}
+```
+
+</CodeGroup>
+
+### Example 2: Multi-Service Research & Communication Crew
+
+Create a two-agent crew that researches content and communicates findings via email.
+
+<Note>
+Gmail integration requires OAuth authentication, so you'll need to authorize the application in your browser.
+</Note>
+
+<Steps>
+  <Step title="Create Multiple Servers">
+    Set up both YouTube and Gmail MCP servers
+  </Step>
+  <Step title="OAuth Authorization">
+    Complete OAuth flow for Gmail access
+  </Step>
+  <Step title="Configure Multi-Agent Crew">
+    Set up research agent and communication agent
+  </Step>
+  <Step title="Execute Workflow">
+    Run the sequential workflow
+  </Step>
+</Steps>
+
+<CodeGroup>
+
+```python Python
+import webbrowser
+
+# Create YouTube and Gmail MCP servers
+youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# Handle OAuth for Gmail
+webbrowser.open(gmail_mcp_instance.oauth_url)
+print(f"🔐 Opening OAuth authorization for Gmail...")
+print(f"📱 If not redirected automatically, open: {gmail_mcp_instance.oauth_url}")
+
+VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"
+RECIPIENT_EMAIL = "your-email@example.com"
+
+# Configure multiple MCP servers
+multiple_server_params = [
+    {
+        "url": youtube_mcp_instance.server_url,
+        "transport": "streamable-http"
+    },
+    {
+        "url": gmail_mcp_instance.server_url,
+        "transport": "streamable-http"
+    }
+]
+
+try:
+    with MCPServerAdapter(multiple_server_params) as all_mcp_tools:
+        print(f"✅ Available tools from all MCP servers: {[tool.name for tool in all_mcp_tools]}")
+        
+        # Create YouTube Research Agent
+        youtube_research_agent = Agent(
+            role="YouTube Content Analyst",
+            goal="Research and analyze YouTube videos to extract comprehensive insights",
+            backstory="You are an expert at analyzing video content and extracting key insights.",
+            tools=all_mcp_tools,
+            reasoning=False,
+            verbose=False,
+        )
+        
+        # Create Email Communication Agent
+        email_agent = Agent(
+            role="Email Communications Specialist",
+            goal="Draft and send professional email communications based on research findings",
+            backstory="You are skilled at crafting professional emails with clear, impactful messaging.",
+            tools=all_mcp_tools,
+            reasoning=True,
+            verbose=False,
+        )
+        
+        # Define workflow tasks
+        youtube_research_task = Task(
+            description=f"Research the YouTube video at {VIDEO_URL}. Extract transcript, analyze the content for key insights about AI and software development, and create a comprehensive analysis report with key takeaways and recommendations.",
+            expected_output="Complete video analysis report with transcript, key insights, recommendations, and strategic takeaways",
+            agent=youtube_research_agent
+        )
+        
+        send_email_task = Task(
+            description=f"Based on the youtube analysis, draft and send a professional email to {RECIPIENT_EMAIL} with the subject 'YouTube Video AI Analysis'. Include content of the youtube video in the email.",
+            expected_output="Confirmation that a professional email has been sent with the research insights",
+            agent=email_agent,
+            context=[youtube_research_task]
+        )
+        
+        # Create and execute the crew
+        multi_service_crew = Crew(
+            agents=[youtube_research_agent, email_agent],
+            tasks=[youtube_research_task, send_email_task],
+            verbose=False,
+            process=Process.sequential
+        )
+        
+        result = multi_service_crew.kickoff()
+        print(result)
+        
+except Exception as e:
+    print(f"❌ Error with multi-service MCP integration: {e}")
+```
+
+```typescript TypeScript
+// Create YouTube and Gmail MCP servers
+const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Youtube,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gmail,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+// Handle OAuth for Gmail
+console.log(f"🔐 Opening OAuth authorization for Gmail...");
+console.log(f"📱 Please open: {gmailMcpInstance.oauthUrl}");
+
+const VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ";
+const RECIPIENT_EMAIL = "your-email@example.com";
+
+// Configure multiple MCP servers
+const multipleServerParams = [
+    {
+        url: youtubeMcpInstance.serverUrl,
+        transport: "streamable-http"
+    },
+    {
+        url: gmailMcpInstance.serverUrl,
+        transport: "streamable-http"
+    }
+];
+
+try {
+    const allMcpTools = new MCPServerAdapter(multipleServerParams);
+    console.log(`✅ Available tools from all MCP servers connected`);
+    
+    // Create YouTube Research Agent
+    const youtubeResearchAgent = new Agent({
+        role: "YouTube Content Analyst",
+        goal: "Research and analyze YouTube videos to extract comprehensive insights",
+        backstory: "You are an expert at analyzing video content and extracting key insights.",
+        tools: allMcpTools,
+        reasoning: false,
+        verbose: false,
+    });
+    
+    // Create Email Communication Agent
+    const emailAgent = new Agent({
+        role: "Email Communications Specialist",
+        goal: "Draft and send professional email communications based on research findings",
+        backstory: "You are skilled at crafting professional emails with clear, impactful messaging.",
+        tools: allMcpTools,
+        reasoning: true,
+        verbose: false,
+    });
+    
+    // Define workflow tasks
+    const youtubeResearchTask = new Task({
+        description: `Research the YouTube video at ${VIDEO_URL}. Extract transcript, analyze the content for key insights about AI and software development, and create a comprehensive analysis report with key takeaways and recommendations.`,
+        expectedOutput: "Complete video analysis report with transcript, key insights, recommendations, and strategic takeaways",
+        agent: youtubeResearchAgent
+    });
+    
+    const sendEmailTask = new Task({
+        description: `Based on the youtube analysis, draft and send a professional email to ${RECIPIENT_EMAIL} with the subject 'YouTube Video AI Analysis'. Include content of the youtube video in the email.`,
+        expectedOutput: "Confirmation that a professional email has been sent with the research insights",
+        agent: emailAgent,
+        context: [youtubeResearchTask]
+    });
+    
+    // Create and execute the crew
+    const multiServiceCrew = new Crew({
+        agents: [youtubeResearchAgent, emailAgent],
+        tasks: [youtubeResearchTask, sendEmailTask],
+        verbose: false,
+        process: CrewAI.Process.Sequential
+    });
+    
+    const result = await multiServiceCrew.kickoff();
+    console.log(result);
+    
+} catch (error) {
+    console.error(`❌ Error with multi-service MCP integration: ${error}`);
+}
+```
+
+</CodeGroup>
+
+## Security Best Practices
+
+When using CrewAI with Klavis MCP servers, follow these security guidelines:
+
+<CodeGroup>
+
+```python Python
+def create_secure_crew():
+    """Demonstrates secure MCP server integration with CrewAI"""
+    
+    # 1. Use environment variables for sensitive data
+    api_key = os.getenv("KLAVIS_API_KEY")
+    if not api_key:
+        raise ValueError("KLAVIS_API_KEY environment variable is required")
+    
+    # 2. Validate server URLs (use HTTPS in production)
+    server_params = [{
+        "url": server_instance.server_url,
+        "transport": "streamable-http"
+    }]
+    
+    # 3. Always use context managers for proper resource cleanup
+    try:
+        with MCPServerAdapter(server_params) as mcp_tools:
+            # 4. Validate available tools before use
+            if not mcp_tools:
+                raise ValueError("No tools available from MCP server")
+            
+            print(f"✅ Securely connected with {len(mcp_tools)} tools")
+            
+            # 5. Create agents with limited scope
+            agent = Agent(
+                role="Data Analyst",
+                goal="Analyze data within defined parameters",
+                backstory="You operate within strict security guidelines.",
+                tools=mcp_tools,
+                reasoning=False,  # Disable for production
+                verbose=False     # Disable verbose logging in production
+            )
+            
+            return agent
+            
+    except Exception as e:
+        print(f"🔒 Security check failed: {e}")
+        return None
+
+# Example usage
+secure_agent = create_secure_crew()
+if secure_agent:
+    print("✅ Secure crew created successfully")
+```
+
+```typescript TypeScript
+function createSecureCrew() {
+    // 1. Use environment variables for sensitive data
+    const apiKey = process.env.KLAVIS_API_KEY;
+    if (!apiKey) {
+        throw new Error("KLAVIS_API_KEY environment variable is required");
+    }
+    
+    // 2. Validate server URLs (use HTTPS in production)
+    const serverParams = [{
+        url: serverInstance.serverUrl,
+        transport: "streamable-http"
+    }];
+    
+    // 3. Always handle errors properly
+    try {
+        // 4. Validate available tools before use
+        const mcpTools = new MCPServerAdapter(serverParams);
+        if (!mcpTools) {
+            throw new Error("No tools available from MCP server");
+        }
+        
+        console.log(`✅ Securely connected with tools`);
+        
+        // 5. Create agents with limited scope
+        const agent = new Agent({
+            role: "Data Analyst",
+            goal: "Analyze data within defined parameters",
+            backstory: "You operate within strict security guidelines.",
+            tools: mcpTools,
+            reasoning: false,  // Disable for production
+            verbose: false     // Disable verbose logging in production
+        });
+        
+        return agent;
+        
+    } catch (error) {
+        console.error(`🔒 Security check failed: ${error}`);
+        return null;
+    }
+}
+
+// Example usage
+const secureAgent = createSecureCrew();
+if (secureAgent) {
+    console.log("✅ Secure crew created successfully");
+}
+```
+
+</CodeGroup>
+
+## Available MCP Servers
+
+CrewAI works with all Klavis MCP servers. Here are some popular options:
+
+<CardGroup cols={3}>
+  <Card title="Communication" icon="envelope">
+    Gmail, Slack, Discord, Outlook
+  </Card>
+  <Card title="Content & Media" icon="video">
+    YouTube, Notion, Google Docs, WordPress
+  </Card>
+  <Card title="Development" icon="code">
+    GitHub, Jira, Linear, Confluence
+  </Card>
+  <Card title="Data & Analytics" icon="chart-bar">
+    Google Sheets, Supabase, PostgreSQL
+  </Card>
+  <Card title="Business Tools" icon="briefcase">
+    Salesforce, HubSpot, Asana, ClickUp
+  </Card>
+  <Card title="Cloud Storage" icon="cloud">
+    Google Drive, Dropbox, OneDrive
+  </Card>
+</CardGroup>
+
+## Summary
+
+CrewAI + Klavis integration enables you to build sophisticated multi-agent AI systems with real-world capabilities. Key benefits include:
+
+
+### 🚀 **CrewAI + Klavis Benefits:**
+
+- **Seamless Integration**: MCPServerAdapter makes MCP connection effortless
+- **Agent Specialization**: Each agent can focus on specific domains
+- **Scalable Architecture**: Easy to add more agents and MCP servers
+- **Professional AI Teams**: Create sophisticated multi-agent systems
+- **Real-World Impact**: Connect AI to actual business tools and services
+
+**Ready to build your first AI crew?** Start with a simple YouTube research agent and expand from there! 🚀👥 

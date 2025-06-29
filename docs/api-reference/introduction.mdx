@@ -1,0 +1,44 @@
+---
+title: "Introduction"
+description: "Klavis provides API for developers to integrate MCP to your AI application."
+---
+
+## Base URL
+
+The Klavis API is built on REST principles. We enforce HTTPS in every request to improve data security, integrity, and privacy. The API does not support HTTP.
+
+All requests contain the following base URL:
+
+```bash
+https://api.klavis.ai
+```
+
+## Authentication
+
+To authenticate you need to add an Authorization header with the contents of the header being Bearer key_123456789 where key_123456789 is your API Key.
+
+```bash
+Authorization: Bearer key_123456789
+```
+
+## Response codes
+
+Klavis uses standard HTTP codes to indicate the success or failure of your requests.
+
+In general, 2xx HTTP codes correspond to success, 4xx codes are for user-related failures, and 5xx codes are for infrastructure issues.
+
+| Status | Description                             |
+| ------ | --------------------------------------- |
+| 200    | Successful request.                     |
+| 400    | Check that the parameters were correct. |
+| 401    | The API key used was missing.           |
+| 403    | The API key used was invalid.           |
+| 404    | The resource was not found.             |
+| 429    | The rate limit was exceeded.            |
+| 5xx    | Indicates an error with Klavis servers. |
+
+Check Error Codes for a comprehensive breakdown of all possible API errors.
+
+## Rate limit
+
+The default maximum rate limit is 2 requests per second. This number can be increased for trusted senders by request. After that, you'll hit the rate limit and receive a 429 response error code.

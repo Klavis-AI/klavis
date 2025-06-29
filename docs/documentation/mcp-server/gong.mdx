@@ -1,0 +1,350 @@
+---
+title: 'Gong'
+description: 'Learn how to use Klavis to connect your AI application to Gong MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Gong MCP Server
+
+Use the following endpoint to create a new remote Gong MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Gong MCP server instance
+gong_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GONG,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Gong MCP server instance
+const gongServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gong,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Gong",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+```python Python
+import requests
+
+url = "https://api.klavis.ai/mcp-server/instance/create"
+
+payload = {
+    "serverName": "Gong",
+    "userId": "<YOUR_USER_ID>",
+    "platformName": "<YOUR_PLATFORM_NAME>"
+}
+headers = {
+    "Authorization": "Bearer <YOUR_API_KEY>",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(response.text)
+```
+
+```javascript JavaScript
+const options = {
+  method: 'POST',
+  headers: {Authorization: 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json'},
+  body: '{"serverName":"Gong","userId":"<YOUR_USER_ID>","platformName":"<YOUR_PLATFORM_NAME>"}'
+};
+
+fetch('https://api.klavis.ai/mcp-server/instance/create', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+```
+
+```php PHP
+<?php
+
+$curl = curl_init();
+
+curl_setopt_array($curl, [
+  CURLOPT_URL => "https://api.klavis.ai/mcp-server/instance/create",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => "",
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 30,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => "POST",
+  CURLOPT_POSTFIELDS => "{\n  \"serverName\": \"Gong\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}",
+  CURLOPT_HTTPHEADER => [
+    "Authorization: Bearer <YOUR_API_KEY>",
+    "Content-Type: application/json"
+  ],
+]);
+
+$response = curl_exec($curl);
+$err = curl_error($curl);
+
+curl_close($curl);
+
+if ($err) {
+  echo "cURL Error #:" . $err;
+} else {
+  echo $response;
+}
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Gong\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Gong\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "serverUrl": "https://gong-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+
+<Check> **serverUrl** specifies the endpoint of the Gong MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Gong information.</Note>
+
+
+### 2. Configure Gong API Key
+
+To use the Gong MCP Server, you need to configure it with your Gong API key.
+
+#### Setting up Gong API Key
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authToken": "<YOUR_GONG_API_KEY>"
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the Gong API key for your instance
+response = klavis_client.mcp_server.set_instance_auth_token(
+    instance_id="<YOUR_INSTANCE_ID>",
+    auth_token="<YOUR_GONG_API_KEY>",
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the Gong API key for your instance
+const response = await klavisClient.mcpServer.setInstanceAuthToken({
+    instanceId: "<YOUR_INSTANCE_ID>",
+    authToken: "<YOUR_GONG_API_KEY>"
+});
+
+console.log(response);
+```
+
+```javascript JavaScript
+const options = {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer <YOUR_KLAVIS_API_KEY>',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    instanceId: '<YOUR_INSTANCE_ID>',
+    authToken: '<YOUR_GONG_API_KEY>'
+  })
+};
+
+fetch('https://api.klavis.ai/mcp-server/instance/set-auth-token', options)
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(err => console.error(err));
+```
+
+```php PHP
+<?php
+$url = 'https://api.klavis.ai/mcp-server/instance/set-auth-token';
+$data = array(
+    'instanceId' => '<YOUR_INSTANCE_ID>',
+    'authToken' => '<YOUR_GONG_API_KEY>'
+);
+
+$options = array(
+    'http' => array(
+        'header'  => "Content-type: application/json\r\nAuthorization: Bearer <YOUR_KLAVIS_API_KEY>\r\n",
+        'method'  => 'POST',
+        'content' => json_encode($data)
+    )
+);
+
+$context  = stream_context_create($options);
+$result = file_get_contents($url, false, $context);
+
+echo $result;
+?>
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	
+	payload := map[string]string{
+		"instanceId": "<YOUR_INSTANCE_ID>",
+		"authToken": "<YOUR_GONG_API_KEY>",
+	}
+	
+	jsonPayload, _ := json.Marshal(payload)
+	
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	
+	fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authToken\":\"<YOUR_GONG_API_KEY>\"}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                    | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| gong_get_transcripts_by_user        | Get call transcripts associated with a user by email address including all participants on the call and their companies |
+| gong_get_extensive_data             | Lists detailed call data for specific call IDs                          |
+| gong_get_call_transcripts           | Retrieve transcripts of specific calls                                   |
+| gong_list_calls                     | List calls within a date range                                          |
+| gong_add_new_call                   | Add a new call record to Gong                                           |
+</Accordion> 
