@@ -1,0 +1,238 @@
+---
+title: 'Firecrawl Deep Research'
+description: 'Learn how to use Klavis to connect your AI application to Firecrawl Deep Research MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Firecrawl Deep Research MCP Server
+
+Use the following endpoint to create a new remote Firecrawl Deep Research MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Firecrawl Deep Research MCP server instance
+firecrawl_deep_research_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.FIRECRAWL_DEEP_RESEARCH,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Firecrawl Deep Research MCP server instance
+const firecrawlDeepResearchServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.FirecrawlDeepResearch,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Firecrawl Deep Research",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Firecrawl Deep Research\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Firecrawl Deep Research\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "serverUrl": "https://firecrawl-deepresearch-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>**serverUrl** specifies the endpoint of the Firecrawl Deep Research MCP server, which you can connect and use this MCP Server to perform comprehensive research on any topic.</Check>
+<Note>**instanceId** is used for authentication and identification of your server instance.</Note>
+
+### 2. Configure Firecrawl API Key
+
+To use the Firecrawl Deep Research MCP Server, you need to configure it with your Firecrawl API key.
+
+#### Setting up Firecrawl API Key
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authToken": "<YOUR_FIRECRAWL_API_KEY>"
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the Firecrawl API key for your instance
+response = klavis_client.mcp_server.set_instance_auth_token(
+    instance_id="<YOUR_INSTANCE_ID>",
+    auth_token="<YOUR_FIRECRAWL_API_KEY>",
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the Firecrawl API key for your instance
+const response = await klavisClient.mcpServer.setInstanceAuthToken({
+    instanceId: "<YOUR_INSTANCE_ID>",
+    authToken: "<YOUR_FIRECRAWL_API_KEY>"
+});
+
+console.log(response);
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	
+	payload := map[string]string{
+		"instanceId": "<YOUR_INSTANCE_ID>",
+		"authToken": "<YOUR_FIRECRAWL_API_KEY>",
+	}
+	
+	jsonPayload, _ := json.Marshal(payload)
+	
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	
+	fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authToken\":\"<YOUR_FIRECRAWL_API_KEY>\"}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                | Description                                                              |
+|--------------------------|--------------------------------------------------------------------------|
+| firecrawl_deep_research  | Conduct deep research on a query using web crawling, search, and AI analysis |
+</Accordion>

@@ -1,0 +1,94 @@
+---
+title: "Overview"
+description: "Integrate Klavis MCP Servers with leading AI platforms to build powerful AI agents"
+---
+
+import OpenaiCard from '/snippets/ai-platform-card/openai-card.mdx';
+import ClaudeCard from '/snippets/ai-platform-card/claude-card.mdx';
+import GeminiCard from '/snippets/ai-platform-card/gemini-card.mdx';
+import LlamaindexCard from '/snippets/ai-platform-card/llamaindex-card.mdx';
+import TogetherAiCard from '/snippets/ai-platform-card/together-ai-card.mdx';
+import FireworksAiCard from '/snippets/ai-platform-card/fireworks-ai-card.mdx';
+import CrewAiCard from '/snippets/ai-platform-card/crewai-card.mdx';
+import LangChainCard from '/snippets/ai-platform-card/langchain-card.mdx';
+
+# AI Platform Integrations
+
+Klavis AI seamlessly integrates with leading AI platforms, enabling you to build sophisticated AI agents that can interact with external services and APIs via MCP.
+
+## Available Integrations
+<CardGroup cols={3}>
+  <ClaudeCard />
+  <CrewAiCard />
+  <FireworksAiCard />
+  <GeminiCard />
+  <LangChainCard />
+  <LlamaindexCard />
+  <OpenaiCard />
+  <TogetherAiCard />
+</CardGroup>
+
+## How It Works
+
+The integration pattern is consistent across all AI platforms:
+
+1. **Setup**: Configure your AI platform API key and Klavis API key
+2. **MCP Instance**: Create MCP server instances for the services you need (YouTube, Gmail, Slack, etc.)
+3. **Agent Creation**: Build an AI agent that discovers available tools from MCP servers
+4. **Function Calling**: The AI platform's LLM decides which tools to use based on user requests
+5. **Tool Execution**: Tools are executed through Klavis API to remote MCP Servers and results are returned to the LLM
+6. **Smart Response**: The LLM generates intelligent responses based on tool results
+
+## Common Use Cases
+
+<CardGroup cols={3}>
+  <Card title="Content Analysis" icon="chart-line">
+    Summarize YouTube videos, analyze documents, extract insights from web content
+  </Card>
+  <Card title="Communication" icon="envelope">
+    Send emails, post to Slack, create calendar events, manage contacts
+  </Card>
+  <Card title="Data Management" icon="database">
+    Query databases, update spreadsheets, sync information across platforms
+  </Card>
+  <Card title="Project Management" icon="list">
+    Create tickets in Jira, update Notion pages, manage Asana tasks
+  </Card>
+  <Card title="Research & Development" icon="microscope">
+    Web search, document analysis, code generation, API integrations
+  </Card>
+  <Card title="Business Automation" icon="wrench">
+    CRM updates, sales workflows, customer support, reporting
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+<Steps>
+  <Step title="Choose Your AI Platform">
+    Select the AI platform that best fits your needs from our available integrations
+  </Step>
+  <Step title="Get API Keys">
+    Obtain API keys from both your chosen AI platform and Klavis AI
+  </Step>
+  <Step title="Follow the Guide">
+    Use our step-by-step integration guides to build your first AI agent
+  </Step>
+  <Step title="Expand Capabilities">
+    Add more MCP servers to give your agent access to additional tools and services
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <OpenaiCard />
+  <TogetherAiCard />
+  <FireworksAiCard />
+  <ClaudeCard />
+  <GeminiCard />
+  <LlamaindexCard />
+  <CrewAiCard />
+</CardGroup>
+
+Ready to build intelligent AI agents? Choose your preferred AI platform and start building! 

@@ -1,0 +1,209 @@
+---
+title: 'Asana'
+description: 'Learn how to use Klavis to connect your AI application to Asana MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create an Asana MCP Server
+
+Use the following endpoint to create a new remote Asana MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create an Asana MCP server instance
+asana_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.ASANA,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create an Asana MCP server instance
+const asanaServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Asana,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Asana",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Asana\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Asana\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://asana-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/asana/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+
+<Check> **serverUrl** specifies the endpoint of the Asana MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Asana information.</Note>
+
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(asana_server.oauth_url)
+```
+
+```javascript TypeScript
+// The OAuth URL is provided in the server response
+console.log('OAuth URL:', asanaServer.oauthUrl);
+
+// Redirect user to authorize
+window.location.href = asanaServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/asana/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class AsanaOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/asana/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                    | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| asana_create_task                   | Create a new task in Asana with title, description, assignee, and due date |
+| asana_get_task                      | Get detailed information about a specific task by its ID from Asana      |
+| asana_search_tasks                  | Search for tasks in Asana with filtering options by project, assignee, completion status, and keywords |
+| asana_update_task                   | Update an existing task in Asana including title, description, assignee, due date, and other properties |
+| asana_mark_task_completed           | Mark a specific task as completed in Asana                               |
+| asana_get_subtasks                  | Retrieve all subtasks associated with a parent task in Asana             |
+| asana_attach_file_to_task           | Attach a file or document to a specific task in Asana                    |
+| asana_get_projects                  | Get a list of all projects accessible to the user in Asana              |
+| asana_get_project                   | Get detailed information about a specific project by its ID from Asana   |
+| asana_get_workspaces                | Get all workspaces that the current user has access to in Asana         |
+| asana_get_workspace                 | Get detailed information about a specific workspace by its ID from Asana |
+| asana_get_users                     | Get a list of users in the current workspace or organization in Asana    |
+| asana_get_user                      | Get detailed information about a specific user by their ID from Asana    |
+| asana_get_teams                     | Get all teams in the current workspace or organization in Asana          |
+| asana_get_team                      | Get detailed information about a specific team by its ID from Asana      |
+| asana_get_user_teams                | Get all teams that the current user is a member of in Asana             |
+| asana_get_tags                      | Get all tags available in the current workspace in Asana                |
+| asana_get_tag                       | Get detailed information about a specific tag by its ID from Asana       |
+| asana_create_tag                    | Create a new tag in Asana workspace for organizing and categorizing tasks |
+</Accordion> 

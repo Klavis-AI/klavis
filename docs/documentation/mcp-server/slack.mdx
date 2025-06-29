@@ -1,0 +1,201 @@
+---
+title: 'Slack'
+description: 'Learn how to use Klavis to connect your AI application to Slack MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Slack MCP Server
+
+Use the following endpoint to create a new remote Slack MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Slack MCP server instance
+slack_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.SLACK,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Slack MCP server instance
+const slackServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Slack,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Slack",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Slack\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Slack\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://slack-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/slack/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>**serverUrl** specifies the endpoint of the Slack MCP server, which allows you to interact with Slack workspaces and channels.</Check>
+<Note>**instanceId** is used to get an authentication token. After you complete the OAuth flow, this token allows the MCP server to access Slack on your behalf.</Note>
+
+### 2. Slack OAuth Flow
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(slack_server.oauth_url)
+```
+
+```javascript TypeScript
+// Redirect user to authorize
+window.location.href = slackServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/slack/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class SlackOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/slack/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+### Watch the Example
+<iframe
+  width="725"
+  height="450"
+  src="https://www.youtube.com/embed/K7NnYbEhmyM"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+></iframe>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name              | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| slack_list_channels    | List channels in the workspace with pagination                       |
+| slack_post_message     | Post a new message to a Slack channel                                       |
+| slack_reply_to_thread  | Reply to a specific message thread in Slack                                 |
+| slack_add_reaction     | Add a reaction emoji to a message                                           |
+| slack_get_channel_history | Get recent messages from a channel                                       |
+| slack_get_thread_replies | Get all replies in a message thread                                       |
+| slack_get_users        | Get a list of all users in the workspace with their basic profile information |
+| slack_get_user_profile | Get detailed profile information for a specific user                        |
+| slack_search_messages  | Search for messages in channels or across the workspace                     |
+</Accordion> 

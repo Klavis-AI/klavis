@@ -1,0 +1,370 @@
+---
+title: "Gemini"
+description: "Learn how to build AI agents that integrate Google's Gemini with Klavis MCP Servers for multimodal AI capabilities"
+---
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/klavis-ai/klavis/blob/main/examples/gemini/Use_Klavis_with_Gemini.ipynb)
+
+# Gemini + Klavis AI Integration
+
+This tutorial demonstrates how to use Google's Gemini with function calling with Klavis MCP (Model Context Protocol) servers.
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="Google AI API Key" icon="key" href="https://ai.google.dev/">
+    Get your API key from Google AI Studio
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install google-genai klavis
+```
+
+```bash TypeScript
+npm install @google/genai klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+from google import genai
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType, ToolFormat
+
+# Set environment variables
+os.environ["GOOGLE_API_KEY"] = "YOUR_GOOGLE_API_KEY"  # Replace with your actual Google AI API key
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+
+# Configure Gemini client
+client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+```
+
+```typescript TypeScript
+import { GoogleGenAI } from '@google/genai';
+import { KlavisClient, Klavis } from 'klavis';
+
+// Set environment variables
+process.env.GOOGLE_AI_API_KEY = "YOUR_GOOGLE_API_KEY";  // Replace with your actual Google AI API key
+process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";  // Replace with your actual Klavis API key
+
+// Configure Gemini
+const genai = new GoogleGenAI({ apiKey: process.env.GOOGLE_AI_API_KEY! });
+```
+
+</CodeGroup>
+
+## Case Study 1: Gemini + YouTube MCP Server
+
+### Step 1 - Create YouTube MCP Server using Klavis
+
+<CodeGroup>
+
+```python Python
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.YOUTUBE,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, and the instance id is {youtube_mcp_instance.instance_id}")
+```
+
+```typescript TypeScript
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Youtube,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+// console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}, and the instance id is ${youtubeMcpInstance.instanceId}`);
+```
+
+</CodeGroup>
+
+### Step 2 - Create general method to use MCP Server with Gemini
+
+<CodeGroup>
+
+```python Python
+def gemini_with_mcp_server(mcp_server_url: str, user_query: str):
+    # Get tools from MCP server
+    mcp_server_tools = klavis_client.mcp_server.list_tools(
+        server_url=mcp_server_url,
+        format=ToolFormat.GEMINI,
+    )
+
+    # Send initial message with tools
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=user_query,
+        config=genai.types.GenerateContentConfig(
+            tools=mcp_server_tools.tools,
+        ),
+    )
+
+    # Check if function call is requested
+    if response.function_calls:
+        function_call = response.function_calls[0]
+        function_name = function_call.name
+        function_args = dict(function_call.args)
+
+        print(f"🔧 Calling: {function_name}, with args: {function_args}")
+
+        # Call the MCP server tool
+        result = klavis_client.mcp_server.call_tools(
+            server_url=mcp_server_url,
+            tool_name=function_name,
+            tool_args=function_args,
+        )
+
+        function_response = genai.types.Part.from_function_response(
+                    name=function_call.name,
+                    response={"result": result.result.content[0]["text"]},
+                )
+        function_response_content = genai.types.Content(
+            role='tool', parts=[function_response]
+        )
+
+        # Send function response back to model
+        final_response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                user_query,
+                response.candidates[0].content,
+                function_response_content,
+            ],
+            config=genai.types.GenerateContentConfig(
+                tools=mcp_server_tools.tools,
+            ),
+        )
+        return final_response.text
+    else:
+        return response.text
+```
+
+```typescript TypeScript
+async function geminiWithMcpServer(mcpServerUrl: string, userQuery: string) {
+    // Get tools from MCP server
+    const mcpServerTools = await klavisClient.mcpServer.listTools({
+        serverUrl: mcpServerUrl,
+        format: Klavis.ToolFormat.Gemini,
+    });
+    
+    // Send initial message with tools
+    const response = await genai.models.generateContent({
+        model: "gemini-2.0-flash-001",
+        contents: userQuery,
+        config: {
+            tools: mcpServerTools.tools,
+        },
+    });
+    
+    // Check if function call is requested
+    if (response.functionCalls && response.functionCalls.length > 0) {
+        const functionCall = response.functionCalls[0];
+        const functionName = functionCall.name;
+        const functionArgs = functionCall.args;
+        
+        console.log(`🔧 Calling: ${functionName}, with args:`, functionArgs);
+        
+        // Call the MCP server tool
+        const result = await klavisClient.mcpServer.callTools({
+            serverUrl: mcpServerUrl,
+            toolName: functionName,
+            toolArgs: functionArgs,
+        });
+        
+        // Send function response back to model
+        const finalResponse = await genai.models.generateContent({
+            model: "gemini-2.0-flash-001",
+            contents: [
+                userQuery,
+                {
+                    functionCall: {
+                        name: functionName,
+                        args: functionArgs
+                    }
+                },
+                {
+                    functionResponse: {
+                        name: functionName,
+                        response: { result: result.result.content[0]['text'] }
+                    }
+                }
+            ],
+            config: {
+                tools: mcpServerTools.tools,
+            },
+        });
+        
+        return finalResponse.text;
+    } else {
+        return response.text;
+    }
+}
+```
+
+</CodeGroup>
+
+### Step 3 - Summarize your favorite video!
+
+<CodeGroup>
+
+```python Python
+YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # pick a video you like!
+
+result = gemini_with_mcp_server(
+    mcp_server_url=youtube_mcp_instance.server_url, 
+    user_query=f"Summarize this YouTube video with timestamps: {YOUTUBE_VIDEO_URL}"
+)
+
+print(result)
+```
+
+```typescript TypeScript
+const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ";  // pick a video you like!
+
+const result = await geminiWithMcpServer(
+    youtubeMcpInstance.serverUrl, 
+    `Summarize this YouTube video with timestamps: ${YOUTUBE_VIDEO_URL}`
+);
+
+console.log(result);
+```
+
+</CodeGroup>
+
+✅ Great! You've successfully created an AI agent that uses Gemini's function calling with Klavis MCP servers to summarize YouTube videos!
+
+## Case Study 2: Gemini + Gmail MCP Server (OAuth needed)
+
+<CodeGroup>
+
+```python Python
+import webbrowser
+
+# Create Gmail MCP server instance
+gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="1234",
+    platform_name="Klavis",
+)
+
+# Redirect to Gmail OAuth page for authorization
+webbrowser.open(gmail_mcp_server.oauth_url)
+
+print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: {gmail_mcp_server.oauth_url}")
+```
+
+```typescript TypeScript
+// Create Gmail MCP server instance
+const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gmail,
+    userId: "1234",
+    platformName: "Klavis",
+});
+
+// Redirect to Gmail OAuth page for authorization
+console.log(`🔐 Opening OAuth authorization for Gmail: ${gmailMcpServer.oauthUrl}`);
+// In a web environment, you might redirect the user
+window.open(gmailMcpServer.oauthUrl);
+```
+
+</CodeGroup>
+
+<Note>
+After completing the OAuth authorization, you can send emails using the agent.
+</Note>
+
+<CodeGroup>
+
+```python Python
+EMAIL_RECIPIENT = "zihaolin@klavis.ai" # Replace with your email
+EMAIL_SUBJECT = "Test Gemini + Gmail MCP Server"
+EMAIL_BODY = "Hello World from Gemini!"
+
+result = gemini_with_mcp_server(
+    mcp_server_url=gmail_mcp_server.server_url, 
+    user_query=f"Please send an email to {EMAIL_RECIPIENT} with subject {EMAIL_SUBJECT} and body {EMAIL_BODY}"
+)
+
+print(result)
+```
+
+```typescript TypeScript
+const EMAIL_RECIPIENT = "zihaolin@klavis.ai"; // Replace with your email
+const EMAIL_SUBJECT = "Test Gemini + Gmail MCP Server";
+const EMAIL_BODY = "Hello World from Gemini!";
+
+const result = await geminiWithMcpServer(
+    gmailMcpServer.serverUrl, 
+    `Please send an email to ${EMAIL_RECIPIENT} with subject ${EMAIL_SUBJECT} and body ${EMAIL_BODY}`
+);
+
+console.log(result);
+```
+
+</CodeGroup>
+
+## Summary
+
+This tutorial demonstrated how to integrate Google's Gemini with function calling capabilities with Klavis MCP servers to create powerful AI applications. We covered two practical examples:
+
+**🎥 YouTube Integration**: Built an AI assistant that can automatically summarize YouTube videos by extracting transcripts and providing detailed, timestamped summaries.
+
+**📧 Gmail Integration**: Created an AI-powered email assistant that can send emails through Gmail with OAuth authentication.
+
+### Key Takeaways:
+- **Easy Setup**: Klavis MCP servers can be created with just a few lines of code
+- **Gemini Compatible**: All tools are formatted for seamless Gemini function calling
+- **Versatile**: Support for both simple APIs (YouTube) and OAuth-authenticated services (Gmail)
+- **Scalable**: The same pattern can be applied to any of the MCP servers available in Klavis
+- **Multimodal Ready**: Gemini's multimodal capabilities can be leveraged for more complex use cases
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore More MCP Servers" icon="server">
+    Try other available servers like Slack, Notion, GitHub, etc.
+  </Card>
+  <Card title="Multimodal Workflows" icon="image">
+    Build workflows that combine text, images, and other media
+  </Card>
+  <Card title="Production Deployment" icon="rocket">
+    Scale these patterns for production applications
+  </Card>
+  <Card title="Custom Integrations" icon="code">
+    Build custom MCP servers for your specific needs
+  </Card>
+</CardGroup>
+
+## Useful Resources
+
+- [Google AI Documentation](https://ai.google.dev/)
+- [Gemini API Reference](https://ai.google.dev/api)
+- [Klavis AI Documentation](https://docs.klavis.ai/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+- [Klavis MCP Servers](/documentation/mcp-server)
+
+**Happy building!** 🚀 
