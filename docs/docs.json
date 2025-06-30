@@ -55,6 +55,7 @@
           {
             "group": "MCP Server Quickstart",
             "pages": [
+              "documentation/mcp-server/affinity",
               "documentation/mcp-server/asana",
               "documentation/mcp-server/attio",
               "documentation/mcp-server/calendly",
