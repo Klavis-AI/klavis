@@ -15,7 +15,13 @@ from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
-from tools import create_table, get_bases_info, get_tables_info, update_table
+from tools import (
+    create_table,
+    get_bases_info,
+    get_tables_info,
+    list_records,
+    update_table,
+)
 
 load_dotenv()
 
@@ -105,6 +111,18 @@ def main(
                     "required": ["base_id", "table_id"],
                 },
             ),
+            types.Tool(
+                name="airtable_list_records",
+                description="Get all records from a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "table_id": {"type": "string"},
+                    },
+                    "required": ["base_id", "table_id"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -147,6 +165,14 @@ def main(
                 arguments["name"],
                 arguments["description"],
             )
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_list_records":
+            result = await list_records(arguments["base_id"], arguments["table_id"])
             return [
                 types.TextContent(
                     type="text",
