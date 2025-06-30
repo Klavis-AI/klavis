@@ -1,0 +1,8 @@
+mcp>=1.9.3
+pydantic
+typing-extensions
+aiohttp
+click
+python-dotenv
+starlette
+uvicorn[standard]
