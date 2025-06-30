@@ -3,19 +3,22 @@ import json
 import logging
 import os
 from collections.abc import AsyncIterator
+from typing import Any, Dict
+from contextvars import ContextVar
 
 import click
 import mcp.types as types
-import uvicorn
 from dotenv import load_dotenv
-from mcp.server import Server
+from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
+
 from tools import (
+    auth_token_context,
     create_field,
     create_records,
     create_table,
@@ -32,7 +35,7 @@ from tools import (
 load_dotenv()
 
 # Configure logging
-logger = logging.getLogger("airtable-mcp-server")
+logger = logging.getLogger(__name__)
 
 AIRTABLE_MCP_SERVER_PORT = int(os.getenv("AIRTABLE_MCP_SERVER_PORT", "5000"))
 
@@ -633,15 +636,34 @@ def main(
                     )
                 ]
 
+        return [
+            types.TextContent(
+                type="text",
+                text=f"Unknown tool: {name}",
+            )
+        ]
+
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        async with sse.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await app.run(streams[0], streams[1], app.create_initialization_options())
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
+        
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
         return Response()
 
     # Set up StreamableHTTP transport
@@ -656,7 +678,19 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        await session_manager.handle_request(scope, receive, send)
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        headers = dict(scope.get("headers", []))
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
@@ -685,9 +719,11 @@ def main(
     logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
     logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
 
+    import uvicorn
+
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+
     return 0
 
-
 if __name__ == "__main__":
-    main()
+    main() 

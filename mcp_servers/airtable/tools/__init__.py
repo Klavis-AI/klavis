@@ -11,6 +11,7 @@ from .records import (
     update_records,
 )
 from .tables import create_table, get_tables_info, update_table
+from .base import auth_token_context
 
 __all__ = [
     # Bases
@@ -28,4 +29,6 @@ __all__ = [
     "create_records",
     "update_records",
     "delete_records",
+    # Base
+    "auth_token_context",
 ]

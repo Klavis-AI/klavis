@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Optional
+from contextvars import ContextVar
 
 import aiohttp
 from dotenv import load_dotenv
@@ -17,17 +18,32 @@ class AirtableValidationError(Exception):
 
 load_dotenv()
 
-AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
-if not AIRTABLE_PERSONAL_ACCESS_TOKEN:
-    raise ValueError("AIRTABLE_PERSONAL_ACCESS_TOKEN environment variable is required")
-
 AIRTABLE_API_BASE = "https://api.airtable.com/v0"
 
+# Context variable to store the access token for each request
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+def get_auth_token() -> str:
+    """Get the authentication token from context."""
+    try:
+        token = auth_token_context.get()
+        if not token:
+            # Fallback to environment variable if no token in context
+            token = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
+            if not token:
+                raise RuntimeError("No authentication token available")
+        return token
+    except LookupError:
+        token = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
+        if not token:
+            raise RuntimeError("Authentication token not found in request context or environment")
+        return token
 
 def _get_airtable_headers() -> dict:
     """Get the standard headers for Airtable API requests."""
+    auth_token = get_auth_token()
     return {
-        "Authorization": f"Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}",
+        "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json",
     }
 
