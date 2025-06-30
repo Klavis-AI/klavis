@@ -1,4 +1,5 @@
 import contextlib
+import json
 import logging
 import os
 from collections.abc import AsyncIterator
@@ -14,7 +15,7 @@ from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
-from tools import get_bases_info
+from tools import get_bases_info, get_tables_info
 
 load_dotenv()
 
@@ -64,7 +65,18 @@ def main(
                     "properties": {},
                     "required": [],
                 },
-            )
+            ),
+            types.Tool(
+                name="airtable_list_tables_info",
+                description="Get information about all tables in a base",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                    },
+                    "required": ["base_id"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -76,7 +88,15 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=str(result),
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_list_tables_info":
+            result = await get_tables_info(arguments["base_id"])
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
                 )
             ]
 
