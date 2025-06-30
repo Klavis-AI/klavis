@@ -18,6 +18,7 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     create_records,
     create_table,
+    delete_records,
     get_bases_info,
     get_record,
     get_tables_info,
@@ -153,6 +154,19 @@ def main(
                     "required": ["base_id", "table_id", "records"],
                 },
             ),
+            types.Tool(
+                name="airtable_delete_records",
+                description="Delete multiple records from a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "table_id": {"type": "string"},
+                        "record_ids": {"type": "array", "items": {"type": "string"}},
+                    },
+                    "required": ["base_id", "table_id", "record_ids"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -226,6 +240,18 @@ def main(
                 arguments["records"],
                 arguments["typecast"],
                 arguments["return_fields_by_field_id"],
+            )
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_delete_records":
+            result = await delete_records(
+                arguments["base_id"],
+                arguments["table_id"],
+                arguments["record_ids"],
             )
             return [
                 types.TextContent(

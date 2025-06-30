@@ -81,3 +81,34 @@ async def create_records(
     except Exception as e:
         logger.exception(f"Error executing tool create_records: {e}")
         raise e
+
+
+async def delete_records(
+    base_id: str,
+    table_id: str,
+    record_ids: list[str],
+) -> Dict[str, Any]:
+    """Delete multiple records from a table.
+
+    Args:
+        base_id: ID of the base containing the table
+        table_id: ID or name of the table to delete records from
+        record_ids: List of record IDs to delete
+
+    Returns:
+        Dict containing the deletion results
+    """
+    endpoint = f"{base_id}/{table_id}"
+
+    # Build query params string with multiple record IDs
+    records_params = "&".join([f"records[]={record_id}" for record_id in record_ids])
+    endpoint = f"{endpoint}?{records_params}"
+
+    try:
+        logger.info(
+            f"Executing tool: delete_records for table {table_id} in base {base_id}"
+        )
+        return await make_airtable_request("DELETE", endpoint)
+    except Exception as e:
+        logger.exception(f"Error executing tool delete_records: {e}")
+        raise e
