@@ -174,91 +174,163 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         if name == "airtable_list_bases_info":
-            result = await get_bases_info()
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
-                )
-            ]
+            try:
+                result = await get_bases_info()
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_list_tables_info":
-            result = await get_tables_info(arguments["base_id"])
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
-                )
-            ]
+            try:
+                result = await get_tables_info(arguments["base_id"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_create_table":
-            result = await create_table(
-                arguments["base_id"],
-                arguments["name"],
-                arguments["description"],
-                arguments["fields"],
-            )
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
+            try:
+                result = await create_table(
+                    arguments["base_id"],
+                    arguments["name"],
+                    arguments["description"],
+                    arguments["fields"],
                 )
-            ]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_update_table":
-            result = await update_table(
-                arguments["base_id"],
-                arguments["table_id"],
-                arguments["name"],
-                arguments["description"],
-            )
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
+            try:
+                result = await update_table(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["name"],
+                    arguments["description"],
                 )
-            ]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_list_records":
-            result = await list_records(arguments["base_id"], arguments["table_id"])
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
-                )
-            ]
+            try:
+                result = await list_records(arguments["base_id"], arguments["table_id"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_get_record":
-            result = await get_record(
-                arguments["base_id"], arguments["table_id"], arguments["record_id"]
-            )
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
+            try:
+                result = await get_record(
+                    arguments["base_id"], arguments["table_id"], arguments["record_id"]
                 )
-            ]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_create_records":
-            result = await create_records(
-                arguments["base_id"],
-                arguments["table_id"],
-                arguments["records"],
-                arguments["typecast"],
-                arguments["return_fields_by_field_id"],
-            )
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
+            try:
+                result = await create_records(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["records"],
+                    arguments["typecast"],
+                    arguments["return_fields_by_field_id"],
                 )
-            ]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         elif name == "airtable_delete_records":
-            result = await delete_records(
-                arguments["base_id"],
-                arguments["table_id"],
-                arguments["record_ids"],
-            )
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2),
+            try:
+                result = await delete_records(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["record_ids"],
                 )
-            ]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
 
     # Set up SSE transport
     sse = SseServerTransport("/messages/")

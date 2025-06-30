@@ -4,7 +4,7 @@ from typing import Any, Dict
 from .base import make_airtable_request
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("airtable_tools")
 
 
 async def list_records(base_id: str, table_id: str) -> Dict[str, Any]:
@@ -15,15 +15,8 @@ async def list_records(base_id: str, table_id: str) -> Dict[str, Any]:
         table_id: ID or name of the table to get records from
     """
     endpoint = f"{base_id}/{table_id}"
-
-    try:
-        logger.info(
-            f"Executing tool: list_records for table {table_id} in base {base_id}"
-        )
-        return await make_airtable_request("GET", endpoint)
-    except Exception as e:
-        logger.exception(f"Error executing tool list_records: {e}")
-        raise e
+    logger.info(f"Executing tool: list_records for table {table_id} in base {base_id}")
+    return await make_airtable_request("GET", endpoint)
 
 
 async def get_record(base_id: str, table_id: str, record_id: str) -> Dict[str, Any]:
@@ -35,15 +28,10 @@ async def get_record(base_id: str, table_id: str, record_id: str) -> Dict[str, A
         record_id: ID of the record to retrieve
     """
     endpoint = f"{base_id}/{table_id}/{record_id}"
-
-    try:
-        logger.info(
-            f"Executing tool: get_record for record {record_id} in table {table_id}, base {base_id}"
-        )
-        return await make_airtable_request("GET", endpoint)
-    except Exception as e:
-        logger.exception(f"Error executing tool get_record: {e}")
-        raise e
+    logger.info(
+        f"Executing tool: get_record for record {record_id} in table {table_id}, base {base_id}"
+    )
+    return await make_airtable_request("GET", endpoint)
 
 
 async def create_records(
@@ -73,14 +61,10 @@ async def create_records(
         "records": records,
     }
 
-    try:
-        logger.info(
-            f"Executing tool: create_records for table {table_id} in base {base_id}"
-        )
-        return await make_airtable_request("POST", endpoint, json_data=payload)
-    except Exception as e:
-        logger.exception(f"Error executing tool create_records: {e}")
-        raise e
+    logger.info(
+        f"Executing tool: create_records for table {table_id} in base {base_id}"
+    )
+    return await make_airtable_request("POST", endpoint, json_data=payload)
 
 
 async def delete_records(
@@ -104,11 +88,7 @@ async def delete_records(
     records_params = "&".join([f"records[]={record_id}" for record_id in record_ids])
     endpoint = f"{endpoint}?{records_params}"
 
-    try:
-        logger.info(
-            f"Executing tool: delete_records for table {table_id} in base {base_id}"
-        )
-        return await make_airtable_request("DELETE", endpoint)
-    except Exception as e:
-        logger.exception(f"Error executing tool delete_records: {e}")
-        raise e
+    logger.info(
+        f"Executing tool: delete_records for table {table_id} in base {base_id}"
+    )
+    return await make_airtable_request("DELETE", endpoint)
