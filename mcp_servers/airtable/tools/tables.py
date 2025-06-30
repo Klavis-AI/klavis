@@ -17,19 +17,18 @@ async def get_tables_info(base_id: str) -> Dict[str, Any]:
 async def create_table(
     base_id: str,
     name: str,
+    fields: list[dict],
     description: str | None = None,
-    fields: list[dict] = None,
 ) -> Dict[str, Any]:
     """Create a new table in a base."""
     endpoint = f"meta/bases/{base_id}/tables"
 
     payload = {
         "name": name,
+        "fields": fields,
     }
     if description:
         payload["description"] = description
-    if fields:
-        payload["fields"] = fields
 
     logger.info(f"Executing tool: create_table for base_id: {base_id}")
     return await make_airtable_request("POST", endpoint, json_data=payload)

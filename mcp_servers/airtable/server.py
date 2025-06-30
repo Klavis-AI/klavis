@@ -405,7 +405,7 @@ def main(
                 ]
         elif name == "airtable_list_tables_info":
             try:
-                result = await get_tables_info(arguments["base_id"])
+                result = await get_tables_info(base_id=arguments.get("base_id"))
                 return [
                     types.TextContent(
                         type="text",
@@ -423,10 +423,10 @@ def main(
         elif name == "airtable_create_table":
             try:
                 result = await create_table(
-                    arguments["base_id"],
-                    arguments["name"],
-                    arguments["description"],
-                    arguments["fields"],
+                    base_id=arguments.get("base_id"),
+                    name=arguments.get("name"),
+                    description=arguments.get("description"),
+                    fields=arguments.get("fields"),
                 )
                 return [
                     types.TextContent(
@@ -445,10 +445,10 @@ def main(
         elif name == "airtable_update_table":
             try:
                 result = await update_table(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["name"],
-                    arguments["description"],
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    name=arguments.get("name"),
+                    description=arguments.get("description"),
                 )
                 return [
                     types.TextContent(
@@ -467,12 +467,12 @@ def main(
         elif name == "airtable_create_field":
             try:
                 result = await create_field(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["name"],
-                    arguments["type"],
-                    arguments.get("description"),
-                    arguments.get("options"),
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    name=arguments.get("name"),
+                    type=arguments.get("type"),
+                    description=arguments.get("description"),
+                    options=arguments.get("options"),
                 )
                 return [
                     types.TextContent(
@@ -491,11 +491,11 @@ def main(
         elif name == "airtable_update_field":
             try:
                 result = await update_field(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["field_id"],
-                    arguments.get("name"),
-                    arguments.get("description"),
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    field_id=arguments.get("field_id"),
+                    name=arguments.get("name"),
+                    description=arguments.get("description"),
                 )
                 return [
                     types.TextContent(
@@ -514,14 +514,16 @@ def main(
         elif name == "airtable_list_records":
             try:
                 result = await list_records(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments.get("fields"),
-                    arguments.get("filter_by_formula"),
-                    arguments.get("max_records"),
-                    arguments.get("page_size"),
-                    arguments.get("sort"),
-                    arguments.get("return_fields_by_field_id"),
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    fields=arguments.get("fields"),
+                    filter_by_formula=arguments.get("filter_by_formula"),
+                    max_records=arguments.get("max_records"),
+                    page_size=arguments.get("page_size"),
+                    sort=arguments.get("sort"),
+                    return_fields_by_field_id=arguments.get(
+                        "return_fields_by_field_id"
+                    ),
                 )
                 return [
                     types.TextContent(
@@ -540,7 +542,9 @@ def main(
         elif name == "airtable_get_record":
             try:
                 result = await get_record(
-                    arguments["base_id"], arguments["table_id"], arguments["record_id"]
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    record_id=arguments.get("record_id"),
                 )
                 return [
                     types.TextContent(
@@ -559,11 +563,13 @@ def main(
         elif name == "airtable_create_records":
             try:
                 result = await create_records(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["records"],
-                    arguments["typecast"],
-                    arguments["return_fields_by_field_id"],
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    records=arguments.get("records"),
+                    typecast=arguments.get("typecast"),
+                    return_fields_by_field_id=arguments.get(
+                        "return_fields_by_field_id"
+                    ),
                 )
                 return [
                     types.TextContent(
@@ -582,12 +588,14 @@ def main(
         elif name == "airtable_update_records":
             try:
                 result = await update_records(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["records"],
-                    arguments.get("typecast"),
-                    arguments.get("return_fields_by_field_id"),
-                    arguments.get("perform_upsert"),
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    records=arguments.get("records"),
+                    typecast=arguments.get("typecast"),
+                    return_fields_by_field_id=arguments.get(
+                        "return_fields_by_field_id"
+                    ),
+                    perform_upsert=arguments.get("perform_upsert"),
                 )
                 return [
                     types.TextContent(
@@ -606,9 +614,9 @@ def main(
         elif name == "airtable_delete_records":
             try:
                 result = await delete_records(
-                    arguments["base_id"],
-                    arguments["table_id"],
-                    arguments["record_ids"],
+                    base_id=arguments.get("base_id"),
+                    table_id=arguments.get("table_id"),
+                    record_ids=arguments.get("record_ids"),
                 )
                 return [
                     types.TextContent(

@@ -8,6 +8,13 @@ from dotenv import load_dotenv
 # Configure logging
 logger = logging.getLogger(__name__)
 
+
+class AirtableValidationError(Exception):
+    """Custom exception for Airtable 422 validation errors."""
+
+    pass
+
+
 load_dotenv()
 
 AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv("AIRTABLE_PERSONAL_ACCESS_TOKEN")
@@ -37,6 +44,13 @@ async def make_airtable_request(
     async with aiohttp.ClientSession(headers=headers) as session:
         try:
             async with session.request(method, url, json=json_data) as response:
+                # Handle 422 validation errors specially
+                if response.status == 422:
+                    error_text = await response.text()
+                    logger.error(f"Airtable API 422 Error: {error_text}")
+                    raise AirtableValidationError(
+                        "Invalid Request body: You may have missed a required field or provided an invalid field. Please check the Airtable Field model for the correct field types and options."
+                    )
                 response.raise_for_status()  # Raise exception for non-2xx status codes
                 if expect_empty_response:
                     # For requests like DELETE or PUT roles/reactions where success is 204 No Content
@@ -63,6 +77,9 @@ async def make_airtable_request(
                             f"Received non-JSON response for {method} {endpoint}: {text_content[:100]}..."
                         )
                         return {"raw_content": text_content}
+        except AirtableValidationError as e:
+            # Re-raise 422 validation errors with their specific message
+            raise e
         except aiohttp.ClientResponseError as e:
             logger.error(
                 f"Airtable API request failed: {e.status} {e.message} for {method} {url}"
