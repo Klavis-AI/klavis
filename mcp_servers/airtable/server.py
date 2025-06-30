@@ -16,6 +16,7 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from tools import (
+    create_records,
     create_table,
     get_bases_info,
     get_record,
@@ -137,6 +138,21 @@ def main(
                     "required": ["base_id", "table_id", "record_id"],
                 },
             ),
+            types.Tool(
+                name="airtable_create_records",
+                description="Create multiple records in a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "table_id": {"type": "string"},
+                        "records": {"type": "array", "items": {"type": "object"}},
+                        "typecast": {"type": "boolean"},
+                        "return_fields_by_field_id": {"type": "boolean"},
+                    },
+                    "required": ["base_id", "table_id", "records"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -196,6 +212,20 @@ def main(
         elif name == "airtable_get_record":
             result = await get_record(
                 arguments["base_id"], arguments["table_id"], arguments["record_id"]
+            )
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_create_records":
+            result = await create_records(
+                arguments["base_id"],
+                arguments["table_id"],
+                arguments["records"],
+                arguments["typecast"],
+                arguments["return_fields_by_field_id"],
             )
             return [
                 types.TextContent(

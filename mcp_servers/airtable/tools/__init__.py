@@ -2,7 +2,7 @@
 # This package contains all the tool implementations organized by object type
 
 from .bases import get_bases_info
-from .records import get_record, list_records
+from .records import create_records, get_record, list_records
 from .tables import create_table, get_tables_info, update_table
 
 __all__ = [
@@ -15,4 +15,5 @@ __all__ = [
     # Records
     "list_records",
     "get_record",
+    "create_records",
 ]

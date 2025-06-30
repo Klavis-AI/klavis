@@ -44,3 +44,40 @@ async def get_record(base_id: str, table_id: str, record_id: str) -> Dict[str, A
     except Exception as e:
         logger.exception(f"Error executing tool get_record: {e}")
         raise e
+
+
+async def create_records(
+    base_id: str,
+    table_id: str,
+    records: list[Dict[str, Any]],
+    typecast: bool | None = None,
+    return_fields_by_field_id: bool | None = None,
+) -> Dict[str, Any]:
+    """Create one or multiple records in a table.
+
+    Args:
+        base_id: ID of the base containing the table
+        table_id: ID or name of the table to create records in
+        records: List of record objects containing fields to create multiple records
+        typecast: Whether to automatically convert string values to appropriate types
+        return_fields_by_field_id: Whether to return fields keyed by field ID instead of name
+
+    Note:
+        Either fields or records must be provided, but not both.
+    """
+    endpoint = f"{base_id}/{table_id}"
+
+    payload = {
+        "typecast": typecast,
+        "returnFieldsByFieldId": return_fields_by_field_id,
+        "records": records,
+    }
+
+    try:
+        logger.info(
+            f"Executing tool: create_records for table {table_id} in base {base_id}"
+        )
+        return await make_airtable_request("POST", endpoint, json_data=payload)
+    except Exception as e:
+        logger.exception(f"Error executing tool create_records: {e}")
+        raise e
