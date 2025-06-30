@@ -268,9 +268,18 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "table_id": {"type": "string"},
-                        "record_id": {"type": "string"},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID or name of the table containing the record",
+                        },
+                        "record_id": {
+                            "type": "string",
+                            "description": "ID of the record to retrieve",
+                        },
                     },
                     "required": ["base_id", "table_id", "record_id"],
                 },
@@ -281,11 +290,27 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "table_id": {"type": "string"},
-                        "records": {"type": "array", "items": {"type": "object"}},
-                        "typecast": {"type": "boolean"},
-                        "return_fields_by_field_id": {"type": "boolean"},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table to create records in",
+                        },
+                        "records": {
+                            "type": "array",
+                            "items": {"type": "object"},
+                            "description": "Array of record objects to create",
+                        },
+                        "typecast": {
+                            "type": "boolean",
+                            "description": "Whether to automatically convert string values to appropriate types",
+                        },
+                        "return_fields_by_field_id": {
+                            "type": "boolean",
+                            "description": "Whether to return fields keyed by field ID instead of name",
+                        },
                     },
                     "required": ["base_id", "table_id", "records"],
                 },
@@ -338,9 +363,19 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "table_id": {"type": "string"},
-                        "record_ids": {"type": "array", "items": {"type": "string"}},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table containing the records",
+                        },
+                        "record_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Array of record IDs to delete",
+                        },
                     },
                     "required": ["base_id", "table_id", "record_ids"],
                 },

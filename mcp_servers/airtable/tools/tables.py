@@ -20,15 +20,7 @@ async def create_table(
     description: str | None = None,
     fields: list[dict] = None,
 ) -> Dict[str, Any]:
-    """Create a new table in a base.
-
-    Args:
-        base_id: ID of the base to create the table in
-        name: Name of the new table
-        description: Optional description of the table
-        fields: List of field configurations. Each field should have at least 'name' and 'type'.
-               Can include additional properties like 'description' and 'options'.
-    """
+    """Create a new table in a base."""
     endpoint = f"meta/bases/{base_id}/tables"
 
     payload = {
@@ -49,14 +41,7 @@ async def update_table(
     name: str | None = None,
     description: str | None = None,
 ) -> Dict[str, Any]:
-    """Update an existing table in a base.
-
-    Args:
-        base_id: ID of the base containing the table
-        table_id: ID or name of the table to update
-        name: Optional new name for the table
-        description: Optional new description for the table
-    """
+    """Update an existing table in a base."""
     endpoint = f"meta/bases/{base_id}/tables/{table_id}"
 
     payload = {}
