@@ -24,6 +24,7 @@ from tools import (
     get_record,
     get_tables_info,
     list_records,
+    update_field,
     update_records,
     update_table,
 )
@@ -148,6 +149,36 @@ def main(
                         },
                     },
                     "required": ["base_id", "table_id", "name", "type"],
+                },
+            ),
+            types.Tool(
+                name="airtable_update_field",
+                description="Update an existing field in a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table containing the field",
+                        },
+                        "field_id": {
+                            "type": "string",
+                            "description": "ID of the field to update",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Optional new name for the field",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional new description for the field",
+                        },
+                    },
+                    "required": ["base_id", "table_id", "field_id"],
                 },
             ),
             types.Tool(
@@ -338,6 +369,29 @@ def main(
                     arguments["type"],
                     arguments.get("description"),
                     arguments.get("options"),
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "airtable_update_field":
+            try:
+                result = await update_field(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["field_id"],
+                    arguments.get("name"),
+                    arguments.get("description"),
                 )
                 return [
                     types.TextContent(
