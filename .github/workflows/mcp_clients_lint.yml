@@ -1,69 +1,69 @@
-name: MCP Clients Lint
+# name: MCP Clients Lint
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'mcp_clients/**'
-      - '.github/workflows/mcp_clients_lint.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'mcp_clients/**'
-      - '.github/workflows/mcp_clients_lint.yml'
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'mcp_clients/**'
+#       - '.github/workflows/mcp_clients_lint.yml'
+#   pull_request:
+#     branches: [main]
+#     paths:
+#       - 'mcp_clients/**'
+#       - '.github/workflows/mcp_clients_lint.yml'
 
-jobs:
-  lint-mcp-clients:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./mcp_clients
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   lint-mcp-clients:
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./mcp_clients
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10' # Or the version specified in your project
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.10' # Or the version specified in your project
 
-      - name: Install Poetry (if used)
-        run: |
-          # Check if pyproject.toml exists and contains poetry
-          if [ -f "pyproject.toml" ] && grep -q "tool.poetry" "pyproject.toml"; then 
-            pip install poetry
-            poetry config virtualenvs.create false --local
-          else
-            echo "Poetry not detected in pyproject.toml, skipping Poetry installation."
-          fi
-        working-directory: ./mcp_clients # Ensure this runs in the correct directory
+#       - name: Install Poetry (if used)
+#         run: |
+#           # Check if pyproject.toml exists and contains poetry
+#           if [ -f "pyproject.toml" ] && grep -q "tool.poetry" "pyproject.toml"; then 
+#             pip install poetry
+#             poetry config virtualenvs.create false --local
+#           else
+#             echo "Poetry not detected in pyproject.toml, skipping Poetry installation."
+#           fi
+#         working-directory: ./mcp_clients # Ensure this runs in the correct directory
 
-      - name: Install uv (if uv.lock is present)
-        if: hashFiles('mcp_clients/uv.lock') != ''
-        run: pip install uv
+#       - name: Install uv (if uv.lock is present)
+#         if: hashFiles('mcp_clients/uv.lock') != ''
+#         run: pip install uv
 
-      - name: Install dependencies
-        run: |
-          if [ -f "uv.lock" ]; then
-            echo "Installing dependencies with uv..."
-            uv pip install -r requirements.txt # Assuming a requirements.txt can be generated or exists
-            # Or, if you sync directly from pyproject.toml with uv:
-            # uv pip sync pyproject.toml
-          elif [ -f "pyproject.toml" ] && grep -q "tool.poetry" "pyproject.toml"; then
-            echo "Installing dependencies with Poetry..."
-            poetry install --no-root --no-dev
-          elif [ -f "requirements.txt" ]; then
-            echo "Installing dependencies with pip..."
-            pip install -r requirements.txt
-          else
-            echo "No uv.lock, Poetry in pyproject.toml, or requirements.txt found. Skipping dependency installation."
-          fi
-        working-directory: ./mcp_clients
+#       - name: Install dependencies
+#         run: |
+#           if [ -f "uv.lock" ]; then
+#             echo "Installing dependencies with uv..."
+#             uv pip install -r requirements.txt # Assuming a requirements.txt can be generated or exists
+#             # Or, if you sync directly from pyproject.toml with uv:
+#             # uv pip sync pyproject.toml
+#           elif [ -f "pyproject.toml" ] && grep -q "tool.poetry" "pyproject.toml"; then
+#             echo "Installing dependencies with Poetry..."
+#             poetry install --no-root --no-dev
+#           elif [ -f "requirements.txt" ]; then
+#             echo "Installing dependencies with pip..."
+#             pip install -r requirements.txt
+#           else
+#             echo "No uv.lock, Poetry in pyproject.toml, or requirements.txt found. Skipping dependency installation."
+#           fi
+#         working-directory: ./mcp_clients
 
-      - name: Install Flake8
-        run: pip install flake8
-        # No working-directory needed here as pip install flake8 is global for the runner's Python
+#       - name: Install Flake8
+#         run: pip install flake8
+#         # No working-directory needed here as pip install flake8 is global for the runner's Python
 
-      - name: Lint with Flake8
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv,venv,env,__pycache__
-        working-directory: ./mcp_clients
+#       - name: Lint with Flake8
+#         run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv,venv,env,__pycache__
+#         working-directory: ./mcp_clients

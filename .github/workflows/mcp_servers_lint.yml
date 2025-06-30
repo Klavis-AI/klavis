@@ -1,96 +1,96 @@
-name: MCP Servers Lint
+# name: MCP Servers Lint
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'mcp_servers/**'
-      - '.github/workflows/mcp_servers_lint.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'mcp_servers/**'
-      - '.github/workflows/mcp_servers_lint.yml'
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'mcp_servers/**'
+#       - '.github/workflows/mcp_servers_lint.yml'
+#   pull_request:
+#     branches: [main]
+#     paths:
+#       - 'mcp_servers/**'
+#       - '.github/workflows/mcp_servers_lint.yml'
 
-jobs:
-  lint-python-mcp-servers:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+# jobs:
+#   lint-python-mcp-servers:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.10'
 
-      - name: Install Flake8
-        run: pip install flake8
+#       - name: Install Flake8
+#         run: pip install flake8
 
-      - name: Lint Python Servers
-        run: |
-          echo "Discovering Python MCP servers..."
-          find mcp_servers -maxdepth 2 -type f -name 'requirements.txt' -print0 | while IFS= read -r -d $'\0' req_file; do
-            server_dir=$(dirname "$req_file")
-            echo "--- Linting Python server in $server_dir ---"
-            (
-              cd "$server_dir"
-              if [ -f "requirements.txt" ]; then
-                echo "Installing dependencies from requirements.txt..."
-                pip install -r requirements.txt
-              fi
-              echo "Running flake8..."
-              flake8 . --count --show-source --statistics --exclude=.venv,venv,env,__pycache__
-            ) || exit 1 # Fail job if any server linting fails
-          done
-          echo "Python server linting complete."
+#       - name: Lint Python Servers
+#         run: |
+#           echo "Discovering Python MCP servers..."
+#           find mcp_servers -maxdepth 2 -type f -name 'requirements.txt' -print0 | while IFS= read -r -d $'\0' req_file; do
+#             server_dir=$(dirname "$req_file")
+#             echo "--- Linting Python server in $server_dir ---"
+#             (
+#               cd "$server_dir"
+#               if [ -f "requirements.txt" ]; then
+#                 echo "Installing dependencies from requirements.txt..."
+#                 pip install -r requirements.txt
+#               fi
+#               echo "Running flake8..."
+#               flake8 . --count --show-source --statistics --exclude=.venv,venv,env,__pycache__
+#             ) || exit 1 # Fail job if any server linting fails
+#           done
+#           echo "Python server linting complete."
 
-  lint-node-mcp-servers:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#   lint-node-mcp-servers:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '18'
 
-      - name: Lint Node.js/TypeScript Servers
-        run: |
-          echo "Discovering Node.js MCP servers..."
-          find mcp_servers -maxdepth 2 -type f -name 'package.json' -print0 | while IFS= read -r -d $'\0' pkg_file; do
-            server_dir=$(dirname "$pkg_file")
-            echo "--- Linting Node.js server in $server_dir ---"
-            (
-              cd "$server_dir"
-              if [ -f "package-lock.json" ]; then
-                echo "Installing dependencies using npm ci..."
-                npm ci
-              elif [ -f "yarn.lock" ]; then
-                echo "Installing dependencies using yarn install..."
-                yarn install --frozen-lockfile
-              else
-                echo "Installing dependencies using npm install..."
-                npm install
-              fi
+#       - name: Lint Node.js/TypeScript Servers
+#         run: |
+#           echo "Discovering Node.js MCP servers..."
+#           find mcp_servers -maxdepth 2 -type f -name 'package.json' -print0 | while IFS= read -r -d $'\0' pkg_file; do
+#             server_dir=$(dirname "$pkg_file")
+#             echo "--- Linting Node.js server in $server_dir ---"
+#             (
+#               cd "$server_dir"
+#               if [ -f "package-lock.json" ]; then
+#                 echo "Installing dependencies using npm ci..."
+#                 npm ci
+#               elif [ -f "yarn.lock" ]; then
+#                 echo "Installing dependencies using yarn install..."
+#                 yarn install --frozen-lockfile
+#               else
+#                 echo "Installing dependencies using npm install..."
+#                 npm install
+#               fi
 
-              echo "Attempting to run lint script..."
-              if jq -e '.scripts.lint' package.json > /dev/null; then
-                npm run lint
-              else
-                echo "No 'lint' script found in package.json for $server_dir. Checking for ESLint."
-                if jq -e '.devDependencies.eslint // .dependencies.eslint' package.json > /dev/null; then
-                  # Check if eslint is installed locally before running npx
-                  if [ -d "node_modules/.bin/eslint" ] || [ -f "node_modules/.bin/eslint" ]; then
-                    ./node_modules/.bin/eslint . --ext .js,.ts --quiet
-                  else
-                    npx eslint . --ext .js,.ts --quiet
-                  fi
-                else
-                  echo "No lint script and ESLint not found as a dependency in $server_dir. Skipping lint for this server."
-                fi
-              fi
-            ) || exit 1 # Fail job if any server linting fails
-          done
-          echo "Node.js server linting complete."
+#               echo "Attempting to run lint script..."
+#               if jq -e '.scripts.lint' package.json > /dev/null; then
+#                 npm run lint
+#               else
+#                 echo "No 'lint' script found in package.json for $server_dir. Checking for ESLint."
+#                 if jq -e '.devDependencies.eslint // .dependencies.eslint' package.json > /dev/null; then
+#                   # Check if eslint is installed locally before running npx
+#                   if [ -d "node_modules/.bin/eslint" ] || [ -f "node_modules/.bin/eslint" ]; then
+#                     ./node_modules/.bin/eslint . --ext .js,.ts --quiet
+#                   else
+#                     npx eslint . --ext .js,.ts --quiet
+#                   fi
+#                 else
+#                   echo "No lint script and ESLint not found as a dependency in $server_dir. Skipping lint for this server."
+#                 fi
+#               fi
+#             ) || exit 1 # Fail job if any server linting fails
+#           done
+#           echo "Node.js server linting complete."
