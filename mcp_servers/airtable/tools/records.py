@@ -7,14 +7,80 @@ from .base import make_airtable_request
 logger = logging.getLogger("airtable_tools")
 
 
-async def list_records(base_id: str, table_id: str) -> Dict[str, Any]:
-    """Get all records from a table.
+async def list_records(
+    base_id: str,
+    table_id: str,
+    fields: list[str] | None = None,
+    filter_by_formula: str | None = None,
+    max_records: int | None = None,
+    page_size: int | None = None,
+    sort: list[Dict[str, str]] | None = None,
+    return_fields_by_field_id: bool | None = None,
+) -> Dict[str, Any]:
+    """Get all records from a table with optional filtering and formatting.
 
     Args:
         base_id: ID of the base containing the table
         table_id: ID or name of the table to get records from
+        fields: List of field names to include in results (only these fields will be returned)
+        filter_by_formula: Formula to filter records (e.g., "{Status} = 'Active'")
+        max_records: Maximum number of records to return (default: all records, max: 100)
+        page_size: Number of records to return per page (1-100, default: 100)
+        sort: List of sort objects with 'field' and 'direction' keys
+        return_fields_by_field_id: Return fields keyed by field ID instead of name
+
+    Returns:
+        Dict containing records and pagination info
+
+    Example sort parameter:
+        [{"field": "Name", "direction": "asc"}, {"field": "Created", "direction": "desc"}]
     """
     endpoint = f"{base_id}/{table_id}"
+
+    # Build query parameters
+    params = {}
+
+    if fields:
+        for field in fields:
+            params["fields[]"] = field
+
+    if filter_by_formula:
+        params["filterByFormula"] = filter_by_formula
+
+    if max_records is not None:
+        params["maxRecords"] = max_records
+
+    if page_size is not None:
+        params["pageSize"] = page_size
+
+    if sort:
+        for i, sort_item in enumerate(sort):
+            if "field" in sort_item:
+                params[f"sort[{i}][field]"] = sort_item["field"]
+            if "direction" in sort_item:
+                params[f"sort[{i}][direction]"] = sort_item["direction"]
+
+    if return_fields_by_field_id is not None:
+        params["returnFieldsByFieldId"] = str(return_fields_by_field_id).lower()
+
+    # Add query parameters to endpoint if any exist
+    if params:
+        # Convert params to query string
+        query_parts = []
+        for key, value in params.items():
+            if key == "fields[]":
+                # Handle multiple fields specially
+                continue
+            query_parts.append(f"{key}={value}")
+
+        # Handle fields separately to allow multiple values
+        if fields:
+            for field in fields:
+                query_parts.append(f"fields[]={field}")
+
+        if query_parts:
+            endpoint = f"{endpoint}?{'&'.join(query_parts)}"
+
     logger.info(f"Executing tool: list_records for table {table_id} in base {base_id}")
     return await make_airtable_request("GET", endpoint)
 

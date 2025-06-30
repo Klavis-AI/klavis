@@ -84,7 +84,10 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base to get tables from",
+                        },
                     },
                     "required": ["base_id"],
                 },
@@ -95,10 +98,23 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
-                        "fields": {"type": "array", "items": {"type": "object"}},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base to create the table in",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the new table",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional description of the table",
+                        },
+                        "fields": {
+                            "type": "array",
+                            "items": {"type": "object"},
+                            "description": "Array of field objects to create in the table",
+                        },
                     },
                     "required": ["base_id", "name", "fields"],
                 },
@@ -109,10 +125,22 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "table_id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table to update",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Optional new name for the table",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional new description for the table",
+                        },
                     },
                     "required": ["base_id", "table_id"],
                 },
@@ -183,12 +211,53 @@ def main(
             ),
             types.Tool(
                 name="airtable_list_records",
-                description="Get all records from a table",
+                description="Get all records from a table with optional filtering and formatting",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "base_id": {"type": "string"},
-                        "table_id": {"type": "string"},
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID or name of the table to get records from",
+                        },
+                        "fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of field names to include in results (only these fields will be returned)",
+                        },
+                        "filter_by_formula": {
+                            "type": "string",
+                            "description": "Formula to filter records (e.g., \"{Status} = 'Active'\")",
+                        },
+                        "max_records": {
+                            "type": "integer",
+                            "description": "Maximum number of records to return (default: all records, max: 100)",
+                        },
+                        "page_size": {
+                            "type": "integer",
+                            "description": "Number of records to return per page (1-100, default: 100)",
+                        },
+                        "sort": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "field": {"type": "string"},
+                                    "direction": {
+                                        "type": "string",
+                                        "enum": ["asc", "desc"],
+                                    },
+                                },
+                            },
+                            "description": "List of sort objects with 'field' and 'direction' keys",
+                        },
+                        "return_fields_by_field_id": {
+                            "type": "boolean",
+                            "description": "Return fields keyed by field ID instead of name",
+                        },
                     },
                     "required": ["base_id", "table_id"],
                 },
@@ -409,7 +478,16 @@ def main(
                 ]
         elif name == "airtable_list_records":
             try:
-                result = await list_records(arguments["base_id"], arguments["table_id"])
+                result = await list_records(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments.get("fields"),
+                    arguments.get("filter_by_formula"),
+                    arguments.get("max_records"),
+                    arguments.get("page_size"),
+                    arguments.get("sort"),
+                    arguments.get("return_fields_by_field_id"),
+                )
                 return [
                     types.TextContent(
                         type="text",
