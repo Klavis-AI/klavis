@@ -24,6 +24,7 @@ from tools import (
     get_record,
     get_tables_info,
     list_records,
+    update_records,
     update_table,
 )
 
@@ -185,6 +186,48 @@ def main(
                         "records": {"type": "array", "items": {"type": "object"}},
                         "typecast": {"type": "boolean"},
                         "return_fields_by_field_id": {"type": "boolean"},
+                    },
+                    "required": ["base_id", "table_id", "records"],
+                },
+            ),
+            types.Tool(
+                name="airtable_update_records",
+                description="Update multiple records in a table with optional upsert functionality",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table containing the records",
+                        },
+                        "records": {
+                            "type": "array",
+                            "items": {"type": "object"},
+                            "description": "Array of record objects. For regular updates: include 'id' and 'fields'. For upserts: include only 'fields'",
+                        },
+                        "typecast": {
+                            "type": "boolean",
+                            "description": "Whether to automatically convert string values to appropriate types",
+                        },
+                        "return_fields_by_field_id": {
+                            "type": "boolean",
+                            "description": "Whether to return fields keyed by field ID instead of name",
+                        },
+                        "perform_upsert": {
+                            "type": "object",
+                            "description": "Upsert configuration with fieldsToMergeOn array for matching existing records",
+                            "properties": {
+                                "fieldsToMergeOn": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": "Array of field names to use for matching existing records",
+                                }
+                            },
+                        },
                     },
                     "required": ["base_id", "table_id", "records"],
                 },
@@ -354,6 +397,30 @@ def main(
                     arguments["records"],
                     arguments["typecast"],
                     arguments["return_fields_by_field_id"],
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "airtable_update_records":
+            try:
+                result = await update_records(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["records"],
+                    arguments.get("typecast"),
+                    arguments.get("return_fields_by_field_id"),
+                    arguments.get("perform_upsert"),
                 )
                 return [
                     types.TextContent(

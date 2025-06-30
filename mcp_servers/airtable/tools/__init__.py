@@ -3,7 +3,13 @@
 
 from .bases import get_bases_info
 from .fields import create_field
-from .records import create_records, delete_records, get_record, list_records
+from .records import (
+    create_records,
+    delete_records,
+    get_record,
+    list_records,
+    update_records,
+)
 from .tables import create_table, get_tables_info, update_table
 
 __all__ = [
@@ -19,5 +25,6 @@ __all__ = [
     "list_records",
     "get_record",
     "create_records",
+    "update_records",
     "delete_records",
 ]

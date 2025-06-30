@@ -67,6 +67,46 @@ async def create_records(
     return await make_airtable_request("POST", endpoint, json_data=payload)
 
 
+async def update_records(
+    base_id: str,
+    table_id: str,
+    records: list[Dict[str, Any]],
+    typecast: bool | None = None,
+    return_fields_by_field_id: bool | None = None,
+    perform_upsert: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Update one or multiple records in a table, with optional upsert functionality.
+
+    Args:
+        base_id: ID of the base containing the table
+        table_id: ID or name of the table to update records in
+        records: List of record objects. For regular updates, each record must include an "id" field.
+                For upserts, records should contain fields to match against.
+        typecast: Whether to automatically convert string values to appropriate types
+        return_fields_by_field_id: Whether to return fields keyed by field ID instead of name
+        perform_upsert: Optional upsert configuration with "fieldsToMergeOn" array
+    """
+    endpoint = f"{base_id}/{table_id}"
+
+    payload = {
+        "records": records,
+    }
+
+    if typecast is not None:
+        payload["typecast"] = typecast
+
+    if return_fields_by_field_id is not None:
+        payload["returnFieldsByFieldId"] = return_fields_by_field_id
+
+    if perform_upsert is not None:
+        payload["performUpsert"] = perform_upsert
+
+    logger.info(
+        f"Executing tool: update_records for table {table_id} in base {base_id}"
+    )
+    return await make_airtable_request("PATCH", endpoint, json_data=payload)
+
+
 async def delete_records(
     base_id: str,
     table_id: str,
