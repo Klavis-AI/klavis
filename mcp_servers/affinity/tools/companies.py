@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, List
-from .base import make_v2_request
+from .base import make_v2_request, make_http_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -136,4 +136,46 @@ async def get_company_list_entries(
         return await make_v2_request("GET", f"/companies/{company_id}/list-entries", params=params)
     except Exception as e:
         logger.exception(f"Error executing tool get_company_list_entries: {e}")
+        raise e
+
+async def search_organizations(
+    term: Optional[str] = None,
+    with_interaction_dates: Optional[bool] = None,
+    with_interaction_persons: Optional[bool] = None,
+    with_opportunities: Optional[bool] = None,
+    page_size: Optional[int] = None,
+    page_token: Optional[str] = None
+) -> Dict[str, Any]:
+    """Search for organizations / companies in Affinity.
+    
+    Searches your team's data and fetches all the organizations that meet the search criteria.
+    The search term can be part of an organization name or domain.
+    
+    Args:
+        term: A string used to search all the organizations in your team's data
+        with_interaction_dates: When true, interaction dates will be present on the returned resources
+        with_interaction_persons: When true, persons for each interaction will be returned
+        with_opportunities: When true, opportunity IDs will be returned for each organization
+        page_size: How many results to return per page (Default is 500)
+        page_token: Token from previous response required to retrieve the next page of results
+    """
+    logger.info("Executing tool: search_organizations")
+    try:
+        params = {}
+        if term:
+            params["term"] = term
+        if with_interaction_dates is not None:
+            params["with_interaction_dates"] = with_interaction_dates
+        if with_interaction_persons is not None:
+            params["with_interaction_persons"] = with_interaction_persons
+        if with_opportunities is not None:
+            params["with_opportunities"] = with_opportunities
+        if page_size:
+            params["page_size"] = page_size
+        if page_token:
+            params["page_token"] = page_token
+            
+        return await make_http_request("GET", "/organizations", params=params)
+    except Exception as e:
+        logger.exception(f"Error executing tool search_organizations: {e}")
         raise e 

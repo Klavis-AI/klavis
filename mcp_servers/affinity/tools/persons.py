@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, List
-from .base import make_v2_request
+from .base import make_v2_request, make_http_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -136,4 +136,50 @@ async def get_person_list_entries(
         return await make_v2_request("GET", f"/persons/{person_id}/list-entries", params=params)
     except Exception as e:
         logger.exception(f"Error executing tool get_person_list_entries: {e}")
+        raise e
+
+async def search_persons(
+    term: Optional[str] = None,
+    with_interaction_dates: Optional[bool] = None,
+    with_interaction_persons: Optional[bool] = None,
+    with_opportunities: Optional[bool] = None,
+    with_current_organizations: Optional[bool] = None,
+    page_size: Optional[int] = None,
+    page_token: Optional[str] = None
+) -> Dict[str, Any]:
+    """Search for persons in Affinity.
+    
+    Searches your team's data and fetches all the persons that meet the search criteria.
+    The search term can be part of an email address, a first name or a last name.
+    
+    Args:
+        term: A string used to search all the persons in your team's address book
+        with_interaction_dates: When true, interaction dates will be present on the returned resources
+        with_interaction_persons: When true, persons for each interaction will be returned
+        with_opportunities: When true, opportunity IDs will be returned for each person
+        with_current_organizations: When true, current organization IDs will be returned
+        page_size: How many results to return per page (Default is 500)
+        page_token: Token from previous response required to retrieve the next page of results
+    """
+    logger.info("Executing tool: search_persons")
+    try:
+        params = {}
+        if term:
+            params["term"] = term
+        if with_interaction_dates is not None:
+            params["with_interaction_dates"] = with_interaction_dates
+        if with_interaction_persons is not None:
+            params["with_interaction_persons"] = with_interaction_persons
+        if with_opportunities is not None:
+            params["with_opportunities"] = with_opportunities
+        if with_current_organizations is not None:
+            params["with_current_organizations"] = with_current_organizations
+        if page_size:
+            params["page_size"] = page_size
+        if page_token:
+            params["page_token"] = page_token
+            
+        return await make_http_request("GET", "/persons", params=params)
+    except Exception as e:
+        logger.exception(f"Error executing tool search_persons: {e}")
         raise e 

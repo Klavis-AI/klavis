@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, List
-from .base import make_v2_request
+from .base import make_v2_request, make_http_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -49,6 +49,36 @@ async def get_single_opportunity(opportunity_id: int) -> Dict[str, Any]:
         return await make_v2_request("GET", f"/opportunities/{opportunity_id}")
     except Exception as e:
         logger.exception(f"Error executing tool get_single_opportunity: {e}")
+        raise e
+
+async def search_opportunities(
+    term: Optional[str] = None,
+    page_size: Optional[int] = None,
+    page_token: Optional[str] = None
+) -> Dict[str, Any]:
+    """Search for opportunities in Affinity.
+    
+    Searches your team's data and fetches all the opportunities that meet the search criteria.
+    The search term can be part of an opportunity name.
+    
+    Args:
+        term: A string used to search all the opportunities in your team's data
+        page_size: How many results to return per page (Default is 500)
+        page_token: Token from previous response required to retrieve the next page of results
+    """
+    logger.info("Executing tool: search_opportunities")
+    try:
+        params = {}
+        if term:
+            params["term"] = term
+        if page_size:
+            params["page_size"] = page_size
+        if page_token:
+            params["page_token"] = page_token
+            
+        return await make_http_request("GET", "/opportunities", params=params)
+    except Exception as e:
+        logger.exception(f"Error executing tool search_opportunities: {e}")
         raise e
 
  
