@@ -18,6 +18,7 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     create_table,
     get_bases_info,
+    get_record,
     get_tables_info,
     list_records,
     update_table,
@@ -26,7 +27,7 @@ from tools import (
 load_dotenv()
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("airtable-mcp-server")
 
 AIRTABLE_MCP_SERVER_PORT = int(os.getenv("AIRTABLE_MCP_SERVER_PORT", "5000"))
 
@@ -123,6 +124,19 @@ def main(
                     "required": ["base_id", "table_id"],
                 },
             ),
+            types.Tool(
+                name="airtable_get_record",
+                description="Get a single record from a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "table_id": {"type": "string"},
+                        "record_id": {"type": "string"},
+                    },
+                    "required": ["base_id", "table_id", "record_id"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -173,6 +187,16 @@ def main(
             ]
         elif name == "airtable_list_records":
             result = await list_records(arguments["base_id"], arguments["table_id"])
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_get_record":
+            result = await get_record(
+                arguments["base_id"], arguments["table_id"], arguments["record_id"]
+            )
             return [
                 types.TextContent(
                     type="text",
