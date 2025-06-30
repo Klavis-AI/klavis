@@ -16,6 +16,7 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from tools import (
+    create_field,
     create_records,
     create_table,
     delete_records,
@@ -112,6 +113,40 @@ def main(
                         "description": {"type": "string"},
                     },
                     "required": ["base_id", "table_id"],
+                },
+            ),
+            types.Tool(
+                name="airtable_create_field",
+                description="Create a new field in a table",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {
+                            "type": "string",
+                            "description": "ID of the base containing the table",
+                        },
+                        "table_id": {
+                            "type": "string",
+                            "description": "ID of the table to create the field in",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the new field",
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of the field (e.g., 'singleLineText', 'number', 'singleSelect', etc.)",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional description of the field",
+                        },
+                        "options": {
+                            "type": "object",
+                            "description": "Optional field configuration options specific to the field type",
+                        },
+                    },
+                    "required": ["base_id", "table_id", "name", "type"],
                 },
             ),
             types.Tool(
@@ -236,6 +271,30 @@ def main(
                     arguments["table_id"],
                     arguments["name"],
                     arguments["description"],
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "airtable_create_field":
+            try:
+                result = await create_field(
+                    arguments["base_id"],
+                    arguments["table_id"],
+                    arguments["name"],
+                    arguments["type"],
+                    arguments.get("description"),
+                    arguments.get("options"),
                 )
                 return [
                     types.TextContent(
