@@ -15,7 +15,7 @@ from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
-from tools import get_bases_info, get_tables_info
+from tools import create_table, get_bases_info, get_tables_info
 
 load_dotenv()
 
@@ -77,6 +77,20 @@ def main(
                     "required": ["base_id"],
                 },
             ),
+            types.Tool(
+                name="airtable_create_table",
+                description="Create a new table in a base",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                        "fields": {"type": "array", "items": {"type": "object"}},
+                    },
+                    "required": ["base_id", "name", "fields"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -93,6 +107,19 @@ def main(
             ]
         elif name == "airtable_list_tables_info":
             result = await get_tables_info(arguments["base_id"])
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_create_table":
+            result = await create_table(
+                arguments["base_id"],
+                arguments["name"],
+                arguments["description"],
+                arguments["fields"],
+            )
             return [
                 types.TextContent(
                     type="text",
