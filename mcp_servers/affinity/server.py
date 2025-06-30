@@ -21,9 +21,9 @@ from tools import (
     auth_token_context,
     get_current_user,
     get_all_list_entries_on_a_list, get_metadata_on_all_lists, get_metadata_on_a_single_list, get_metadata_on_a_single_list_fields, get_a_single_list_entry_on_a_list,
-    get_all_persons, get_single_person, get_person_fields_metadata, get_person_lists, get_person_list_entries,
-    get_all_companies, get_single_company, get_company_fields_metadata, get_company_lists, get_company_list_entries,
-    get_all_opportunities, get_single_opportunity,
+    get_all_persons, get_single_person, get_person_fields_metadata, get_person_lists, get_person_list_entries, search_persons,
+    get_all_companies, get_single_company, get_company_fields_metadata, get_company_lists, get_company_list_entries, search_organizations,
+    get_all_opportunities, get_single_opportunity, search_opportunities,
     get_all_notes, get_specific_note
 )
 
@@ -456,6 +456,98 @@ def main(
                         "opportunity_id": {
                             "type": "integer",
                             "description": "The ID of the opportunity to retrieve.",
+                        },
+                    },
+                },
+            ),
+            # Search Tools
+            types.Tool(
+                name="affinity_search_persons",
+                description="Search for persons in Affinity. Search term can be part of an email address, first name, or last name.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "term": {
+                            "type": "string",
+                            "description": "Search term for finding persons (email, first name, or last name).",
+                        },
+                        "with_interaction_dates": {
+                            "type": "boolean",
+                            "description": "Include interaction dates in the response.",
+                        },
+                        "with_interaction_persons": {
+                            "type": "boolean",
+                            "description": "Include persons for each interaction.",
+                        },
+                        "with_opportunities": {
+                            "type": "boolean",
+                            "description": "Include opportunity IDs for each person.",
+                        },
+                        "with_current_organizations": {
+                            "type": "boolean",
+                            "description": "Include current organization IDs for each person.",
+                        },
+                        "page_size": {
+                            "type": "integer",
+                            "description": "Number of results per page (default 500).",
+                        },
+                        "page_token": {
+                            "type": "string",
+                            "description": "Token for pagination to get next page of results.",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_search_organizations",
+                description="Search for organizations / companies in Affinity. Search term can be part of organization name or domain.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "term": {
+                            "type": "string",
+                            "description": "Search term for finding organizations / companies (name or domain).",
+                        },
+                        "with_interaction_dates": {
+                            "type": "boolean",
+                            "description": "Include interaction dates in the response.",
+                        },
+                        "with_interaction_persons": {
+                            "type": "boolean",
+                            "description": "Include persons for each interaction.",
+                        },
+                        "with_opportunities": {
+                            "type": "boolean",
+                            "description": "Include opportunity IDs for each organization.",
+                        },
+                        "page_size": {
+                            "type": "integer",
+                            "description": "Number of results per page (default 500).",
+                        },
+                        "page_token": {
+                            "type": "string",
+                            "description": "Token for pagination to get next page of results.",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="affinity_search_opportunities",
+                description="Search for opportunities in Affinity. Search term can be part of opportunity name.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "term": {
+                            "type": "string",
+                            "description": "Search term for finding opportunities (name).",
+                        },
+                        "page_size": {
+                            "type": "integer",
+                            "description": "Number of results per page (default 500).",
+                        },
+                        "page_token": {
+                            "type": "string",
+                            "description": "Token for pagination to get next page of results.",
                         },
                     },
                 },
@@ -979,6 +1071,80 @@ def main(
                 ]
             try:
                 result = await get_single_opportunity(opportunity_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Search Tools
+        elif name == "affinity_search_persons":
+            term = arguments.get("term")
+            with_interaction_dates = arguments.get("with_interaction_dates")
+            with_interaction_persons = arguments.get("with_interaction_persons")
+            with_opportunities = arguments.get("with_opportunities")
+            with_current_organizations = arguments.get("with_current_organizations")
+            page_size = arguments.get("page_size")
+            page_token = arguments.get("page_token")
+            
+            try:
+                result = await search_persons(term, with_interaction_dates, with_interaction_persons, with_opportunities, with_current_organizations, page_size, page_token)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_search_organizations":
+            term = arguments.get("term")
+            with_interaction_dates = arguments.get("with_interaction_dates")
+            with_interaction_persons = arguments.get("with_interaction_persons")
+            with_opportunities = arguments.get("with_opportunities")
+            page_size = arguments.get("page_size")
+            page_token = arguments.get("page_token")
+            
+            try:
+                result = await search_organizations(term, with_interaction_dates, with_interaction_persons, with_opportunities, page_size, page_token)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "affinity_search_opportunities":
+            term = arguments.get("term")
+            page_size = arguments.get("page_size")
+            page_token = arguments.get("page_token")
+            
+            try:
+                result = await search_opportunities(term, page_size, page_token)
                 return [
                     types.TextContent(
                         type="text",
