@@ -49,3 +49,35 @@ async def create_table(
     except Exception as e:
         logger.exception(f"Error executing tool create_table: {e}")
         raise e
+
+
+async def update_table(
+    base_id: str,
+    table_id: str,
+    name: str | None = None,
+    description: str | None = None,
+) -> Dict[str, Any]:
+    """Update an existing table in a base.
+
+    Args:
+        base_id: ID of the base containing the table
+        table_id: ID or name of the table to update
+        name: Optional new name for the table
+        description: Optional new description for the table
+    """
+    endpoint = f"meta/bases/{base_id}/tables/{table_id}"
+
+    payload = {}
+    if name:
+        payload["name"] = name
+    if description:
+        payload["description"] = description
+
+    try:
+        logger.info(
+            f"Executing tool: update_table for table {table_id} in base {base_id}"
+        )
+        return await make_airtable_request("PATCH", endpoint, json_data=payload)
+    except Exception as e:
+        logger.exception(f"Error executing tool update_table: {e}")
+        raise e

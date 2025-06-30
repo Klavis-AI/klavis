@@ -15,7 +15,7 @@ from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
-from tools import create_table, get_bases_info, get_tables_info
+from tools import create_table, get_bases_info, get_tables_info, update_table
 
 load_dotenv()
 
@@ -91,6 +91,20 @@ def main(
                     "required": ["base_id", "name", "fields"],
                 },
             ),
+            types.Tool(
+                name="airtable_update_table",
+                description="Update an existing table in a base",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "base_id": {"type": "string"},
+                        "table_id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                    },
+                    "required": ["base_id", "table_id"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -119,6 +133,19 @@ def main(
                 arguments["name"],
                 arguments["description"],
                 arguments["fields"],
+            )
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2),
+                )
+            ]
+        elif name == "airtable_update_table":
+            result = await update_table(
+                arguments["base_id"],
+                arguments["table_id"],
+                arguments["name"],
+                arguments["description"],
             )
             return [
                 types.TextContent(
