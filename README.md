@@ -311,6 +311,9 @@ We're constantly expanding our MCP server ecosystem. Here are the upcoming integ
 ### Scheduling & Calendar
 - **Cal.com** - Open-source scheduling platform
 
+### Documentation & Updates
+- **/docs** - Enhanced documentation and guides
+
 *Want to see a specific integration? [Let us know](https://discord.gg/p7TuTEcssn) or [contribute](CONTRIBUTING.md) to help build it!*
 
 ## 🔧 Authentication & Multi-Tool Workflows
