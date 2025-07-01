@@ -235,64 +235,15 @@ console.log(finalResponse.choices[0].message.content);
 
 ## 🛠️ Available MCP Servers
 
-### CRM & Sales
-- **[Salesforce](https://docs.klavis.ai/documentation/mcp-server/salesforce)** - CRM and sales automation
-- **[Close](https://docs.klavis.ai/documentation/mcp-server/close)** - Sales CRM platform
-- **[Asana](https://docs.klavis.ai/documentation/mcp-server/asana)** - Team collaboration and project management
-- **[Attio](https://docs.klavis.ai/documentation/mcp-server/attio)** - Modern CRM platform
-- **[ClickUp](https://docs.klavis.ai/documentation/mcp-server/clickup)** - All-in-one workspace
-- **[Motion](https://docs.klavis.ai/documentation/mcp-server/motion)** - AI-powered task management
-
-### Google Workspace
-- **[Gmail](https://docs.klavis.ai/documentation/mcp-server/gmail)** - Email management with OAuth
-- **[Google Calendar](https://docs.klavis.ai/documentation/mcp-server/google-calendar)** - Calendar management
-- **[Google Sheets](https://docs.klavis.ai/documentation/mcp-server/google-sheets)** - Spreadsheet automation
-- **[Google Docs](https://docs.klavis.ai/documentation/mcp-server/google-docs)** - Document creation and editing
-- **[Google Drive](https://docs.klavis.ai/documentation/mcp-server/google-drive)** - File storage and management
-- **[Google Slides](https://docs.klavis.ai/documentation/mcp-server/google-slides)** - Presentation management
-
-### Development & Productivity
-- **[GitHub](https://docs.klavis.ai/documentation/mcp-server/github)** - Repository operations and automation
-- **[Jira](https://docs.klavis.ai/documentation/mcp-server/jira)** - Project management and sprint tracking
-- **[Linear](https://docs.klavis.ai/documentation/mcp-server/linear)** - Issue tracking and project management
-- **[Notion](https://docs.klavis.ai/documentation/mcp-server/notion)** - Workspace and documentation management
-- **[Confluence](https://docs.klavis.ai/documentation/mcp-server/confluence)** - Team documentation and knowledge base
-- **[Figma](https://docs.klavis.ai/documentation/mcp-server/figma)** - Design collaboration platform
-
-### Communication & Collaboration
-- **[Discord](https://docs.klavis.ai/documentation/mcp-server/discord)** - Discord API integration
-- **[Slack](https://docs.klavis.ai/documentation/mcp-server/slack)** - Slack workspace automation  
-- **[Resend](https://docs.klavis.ai/documentation/mcp-server/resend)** - Transactional email service
-
-### Data & Analytics
-- **[Postgres](https://docs.klavis.ai/documentation/mcp-server/postgres)** - Database operations and queries
-- **[Supabase](https://docs.klavis.ai/documentation/mcp-server/supabase)** - Backend-as-a-Service platform
-- **[Gong](https://docs.klavis.ai/documentation/mcp-server/gong)** - Revenue intelligence platform
-
-### Content & Media
-- **[YouTube](https://docs.klavis.ai/documentation/mcp-server/youtube)** - Video information and transcripts
-- **[Firecrawl](https://docs.klavis.ai/documentation/mcp-server/firecrawl)** - Web scraping and data extraction
-- **[Firecrawl Deep Research](https://docs.klavis.ai/documentation/mcp-server/firecrawl-deep-research)** - Advanced web research
-- **[Markitdown](https://docs.klavis.ai/documentation/mcp-server/markitdown)** - Document format conversion
-- **[Pandoc](https://docs.klavis.ai/documentation/mcp-server/pandoc)** - Universal document converter
-- **[Report Generation](https://docs.klavis.ai/documentation/mcp-server/report-generation)** - Professional web reports
-- **[WordPress](https://docs.klavis.ai/documentation/mcp-server/wordpress)** - Content management system
-
-### Payments & Infrastructure
-- **[Stripe](https://docs.klavis.ai/documentation/mcp-server/stripe)** - Payment processing
-- **[Shopify](https://docs.klavis.ai/documentation/mcp-server/shopify)** - E-commerce platform integration
-- **[Cloudflare](https://docs.klavis.ai/documentation/mcp-server/cloudflare)** - CDN and security services
-- **[Perplexity](https://docs.klavis.ai/documentation/mcp-server/perplexity)** - AI-powered search
-
-[**View All Servers →**](https://docs.klavis.ai/documentation/mcp-server)
+[**View All Servers →**](https://docs.klavis.ai/documentation/introduction#mcp-server-quickstart)
 
 ## 🗺️ Roadmap
 
 We're constantly expanding our MCP server ecosystem. Here are the upcoming integrations planned for release:
+### AI platform Integration
+Add more [examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) for integrating popular AI platforms and LLMs with the Klavis AI SDK
 
 ### CRM & Sales
-- **Airtable** - No-code database platform
-- **HubSpot** - Inbound marketing and sales platform
 - **Greenhouse** - Applicant tracking system
 - **Monday.com** - Work management platform
 - **Zendesk** - Customer service platform
@@ -310,6 +261,9 @@ We're constantly expanding our MCP server ecosystem. Here are the upcoming integ
 
 ### Scheduling & Calendar
 - **Cal.com** - Open-source scheduling platform
+
+### Testing & Quality Assurance
+- Add Unit Tests, integration test for each MCP Servers
 
 ### Documentation & Updates
 - **/docs** - Enhanced documentation and guides
