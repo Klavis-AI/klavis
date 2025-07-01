@@ -1,0 +1,201 @@
+---
+title: 'Airtable'
+description: 'Learn how to use Klavis to connect your AI application to Airtable MCP Server'
+---
+
+
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create an Airtable MCP Server
+
+Use the following endpoint to create a new remote Airtable MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create an Airtable MCP server instance
+airtable_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.AIRTABLE,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create an Airtable MCP server instance
+const airtableServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Airtable,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Airtable",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Airtable\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Airtable\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://airtable-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/airtable/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+
+<Check> **serverUrl** specifies the endpoint of the Airtable MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Airtable information.</Note>
+
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(airtable_server.oauth_url)
+```
+
+```javascript TypeScript
+// The OAuth URL is provided in the server response
+console.log('OAuth URL:', airtableServer.oauthUrl);
+
+// Redirect user to authorize
+window.location.href = airtableServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/airtable/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class AirtableOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/airtable/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                    | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| airtable_list_bases_info               | Get information about all bases                                          |
+| airtable_list_tables_info              | Get information about all tables in a base                               |
+| airtable_create_table                  | Create a new table in a base                                             |
+| airtable_update_table                  | Update an existing table in a base                                       |
+| airtable_create_field                  | Create a new field in a table                                            |
+| airtable_update_field                  | Update an existing field in a table                                      |
+| airtable_list_records                  | Get all records from a table with optional filtering and formatting      |
+| airtable_get_record                    | Get a single record from a table                                         |
+| airtable_create_records                | Create multiple records in a table                                       |
+| airtable_update_records                | Update multiple records in a table with optional upsert functionality    |
+| airtable_delete_records                | Delete multiple records from a table                                     |
+</Accordion> 
