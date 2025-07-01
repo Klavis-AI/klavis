@@ -3841,10 +3841,244 @@
           }
         }
       }
+    },
+    "/oauth/airtable/authorize": {
+      "get": {
+        "tags": ["airtable-oauth"],
+        "summary": "Authorize Airtable",
+        "description": "Start Airtable OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeAirtable",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/airtable/callback": {
+      "get": {
+        "tags": ["airtable-oauth"],
+        "summary": "Airtable Callback",
+        "description": "Handles the callback from Airtable OAuth authorization.",
+        "operationId": "airtableOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Authorization code returned by Airtable",
+              "title": "Code"
+            },
+            "description": "Authorization code returned by Airtable"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "State parameter containing encoded authorization data",
+              "title": "State"
+            },
+            "description": "State parameter containing encoded authorization data"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error code returned by Airtable, if any",
+              "title": "Error"
+            },
+            "description": "Error code returned by Airtable, if any"
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Detailed error description from Airtable, if any",
+              "title": "Error Description"
+            },
+            "description": "Detailed error description from Airtable, if any"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AirtableOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/airtable/refresh_token": {
+      "post": {
+        "tags": ["airtable-oauth"],
+        "summary": "Refresh Airtable Token",
+        "description": "Refresh an expired Airtable access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
+        "operationId": "refresh_airtable_token_oauth_airtable_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting token refresh",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting token refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AirtableOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AirtableOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AirtableOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          }
+        },
+        "type": "object",
+        "required": ["error"],
+        "title": "AirtableOAuthErrorResponse"
+      },
+      "AirtableOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": ["status", "message"],
+        "title": "AirtableOAuthSuccessResponse"
+      },
       "AsanaOAuthErrorResponse": {
         "properties": {
           "error": {
@@ -4680,6 +4914,7 @@
         "type": "string",
         "enum": [
           "Affinity",
+          "Airtable",
           "Asana",
           "Attio",
           "ClickUp",
@@ -4746,6 +4981,7 @@
       "OAuthServerName": {
         "type": "string",
         "enum": [
+          "Airtable",
           "Asana",
           "Attio",
           "ClickUp",

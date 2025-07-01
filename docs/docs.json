@@ -56,6 +56,7 @@
             "group": "MCP Server Quickstart",
             "pages": [
               "documentation/mcp-server/affinity",
+              "documentation/mcp-server/airtable",
               "documentation/mcp-server/asana",
               "documentation/mcp-server/attio",
               "documentation/mcp-server/calendly",
@@ -212,6 +213,10 @@
                 "pages": [
                   "api-reference/google-sheets-oauth/authorize-google-sheets"
                 ]
+              },
+              {
+                "group": "Airtable OAuth",
+                "pages": ["api-reference/airtable-oauth/authorize-airtable"]
               },
               {
                 "group": "Asana OAuth",
