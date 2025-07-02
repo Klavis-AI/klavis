@@ -30,6 +30,11 @@ export const getBoardItemsByNameQuery = gql`
         items {
           id
           name
+          column_values {
+            id
+            value
+            type
+          }
         }
       }
     }

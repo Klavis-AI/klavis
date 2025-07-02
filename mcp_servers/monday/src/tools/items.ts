@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { client } from './base';
-import { createItemQuery } from './queries.graphql';
+import { createItemQuery, getBoardItemsByNameQuery } from './queries.graphql';
 
 export const createItemToolSchema = z.object({
   boardId: z.string().describe('The id of the board to create the item in'),
@@ -20,6 +20,11 @@ export const createItemToolSchema = z.object({
     ),
 });
 
+export const getBoardItemsByNameToolSchema = z.object({
+  boardId: z.string().describe('The id of the board to get the items from'),
+  term: z.string().describe('The term to search for in the items'),
+});
+
 export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
   const { boardId, name, groupId, columnValues } = args;
   const item = await client.request(createItemQuery, {
@@ -31,5 +36,17 @@ export const createItem = async (args: z.infer<typeof createItemToolSchema>) => 
   return {
     type: 'text' as const,
     text: JSON.stringify(item, null, 2),
+  };
+};
+
+export const getBoardItemsByName = async (args: z.infer<typeof getBoardItemsByNameToolSchema>) => {
+  const { boardId, term } = args;
+  const items = await client.request(getBoardItemsByNameQuery, {
+    boardId: boardId.toString(),
+    term,
+  });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(items, null, 2),
   };
 };

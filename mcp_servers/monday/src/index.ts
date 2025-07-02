@@ -13,7 +13,12 @@ import {
   deleteColumn,
   deleteColumnToolSchema,
 } from './tools/columns';
-import { createItem, createItemToolSchema } from './tools/items';
+import {
+  createItem,
+  createItemToolSchema,
+  getBoardItemsByName,
+  getBoardItemsByNameToolSchema,
+} from './tools/items';
 
 const server = new FastMCP({
   name: 'monday',
@@ -66,6 +71,13 @@ server.addTool({
   description: 'Create a new item in a monday.com board',
   parameters: createItemToolSchema,
   execute: async (args) => await createItem(args),
+});
+
+server.addTool({
+  name: 'monday_get_board_items_by_name',
+  description: 'Get items by name from a monday.com board',
+  parameters: getBoardItemsByNameToolSchema,
+  execute: async (args) => await getBoardItemsByName(args),
 });
 
 server.start({
