@@ -2,7 +2,7 @@
 
 api:
   specs:
-    - openapi: ../fern/openapi.json
+    - openapi: ../docs/api-reference/openapi.json
       overrides: overrides.yml
 
 groups:
