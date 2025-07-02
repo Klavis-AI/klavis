@@ -4038,6 +4038,203 @@
           }
         }
       }
+    },
+    "/oauth/hubspot/authorize": {
+      "get": {
+        "tags": ["hubspot-oauth"],
+        "summary": "Authorize Hubspot",
+        "description": "Start HubSpot OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeHubspot",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/hubspot/callback": {
+      "get": {
+        "tags": ["hubspot-oauth"],
+        "summary": "Hubspot Callback",
+        "description": "Handles the callback from HubSpot OAuth authorization.",
+        "operationId": "hubspotOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Authorization code returned by HubSpot",
+              "title": "Code"
+            },
+            "description": "Authorization code returned by HubSpot"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "State parameter containing encoded authorization data",
+              "title": "State"
+            },
+            "description": "State parameter containing encoded authorization data"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error code returned by HubSpot, if any",
+              "title": "Error"
+            },
+            "description": "Error code returned by HubSpot, if any"
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Detailed error description from HubSpot, if any",
+              "title": "Error Description"
+            },
+            "description": "Detailed error description from HubSpot, if any"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubSpotOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/hubspot/refresh_token": {
+      "post": {
+        "tags": ["hubspot-oauth"],
+        "summary": "Refresh Hubspot Token",
+        "description": "Refresh an expired HubSpot access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
+        "operationId": "refresh_hubspot_token_oauth_hubspot_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting token refresh",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting token refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubSpotOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubSpotOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4767,6 +4964,43 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HubSpotOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          }
+        },
+        "type": "object",
+        "required": ["error"],
+        "title": "HubSpotOAuthErrorResponse"
+      },
+      "HubSpotOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": ["status", "message"],
+        "title": "HubSpotOAuthSuccessResponse"
+      },
       "JiraOAuthErrorResponse": {
         "properties": {
           "error": {
@@ -4931,6 +5165,7 @@
           "Google Docs",
           "Google Drive",
           "Google Sheets",
+          "HubSpot",
           "Jira",
           "Klavis ReportGen",
           "Linear",
@@ -4993,6 +5228,7 @@
           "Google Docs",
           "Google Drive",
           "Google Sheets",
+          "HubSpot",
           "Jira",
           "Linear",
           "Notion",
