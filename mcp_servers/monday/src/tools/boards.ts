@@ -1,7 +1,7 @@
 import { BoardKind } from '@mondaydotcomorg/api';
 import { z } from 'zod';
 import { client } from './base';
-import { createBoardQuery, getBoardSchemaQuery } from './queries.graphql';
+import { createBoardQuery, getBoardSchemaQuery, getBoardsQuery } from './queries.graphql';
 
 export const getBoardSchemaToolSchema = z.object({
   boardId: z.string().describe('The ID of the board to get the schema for'),
@@ -17,6 +17,13 @@ export const createBoardToolSchema = z.object({
   workspaceId: z.string().optional().describe('The ID of the workspace to create the board in'),
 });
 
+export const getBoards = async () => {
+  const boards = await client.request(getBoardsQuery);
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(boards),
+  };
+};
 export const getBoardSchema = async (args: z.infer<typeof getBoardSchemaToolSchema>) => {
   const { boardId } = args;
   const board = await client.request(getBoardSchemaQuery, { boardId });

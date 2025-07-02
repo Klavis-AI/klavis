@@ -8,6 +8,17 @@ export const deleteItemQuery = gql`
   }
 `;
 
+export const getBoardsQuery = gql`
+  query getBoards {
+    boards {
+      id
+      name
+      description
+      workspace_id
+    }
+  }
+`;
+
 export const getBoardItemsByNameQuery = gql`
   query GetBoardItemsByName($boardId: ID!, $term: CompareValue!) {
     boards(ids: [$boardId]) {
