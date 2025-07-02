@@ -1,3 +1,7 @@
+from .base import (
+    auth_token_context,
+)
+
 from .properties import (
     hubspot_list_properties,
     hubspot_search_by_property,
@@ -37,6 +41,9 @@ from .tickets import (
 )
 
 __all__ = [
+    # Base
+    "auth_token_context",
+
     # Properties
     "hubspot_list_properties",
     "hubspot_search_by_property",

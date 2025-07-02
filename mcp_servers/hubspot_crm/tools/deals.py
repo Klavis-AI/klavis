@@ -1,18 +1,10 @@
 import logging
-from hubspot import HubSpot
 import json
-from hubspot.crm.contacts import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-
-
-
-
-client = HubSpot(access_token="<access_token>")
-
-
+from hubspot.crm.deals import SimplePublicObjectInputForCreate, SimplePublicObjectInput
+from .base import get_hubspot_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
-
 
 async def get_HubSpot_deals(limit: int = 10):
     """
@@ -24,6 +16,10 @@ async def get_HubSpot_deals(limit: int = 10):
     Returns:
     - List of deal records
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching up to {limit} deals...")
         result = client.crm.deals.basic_api.get_page(limit=limit)
@@ -32,7 +28,6 @@ async def get_HubSpot_deals(limit: int = 10):
     except Exception as e:
         logger.error(f"Error fetching deals: {e}")
         return None
-
 
 async def get_HubSpot_deal_by_id(deal_id: str):
     """
@@ -44,6 +39,10 @@ async def get_HubSpot_deal_by_id(deal_id: str):
     Returns:
     - Deal object
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching deal ID: {deal_id}...")
         result = client.crm.deals.basic_api.get_by_id(deal_id)
@@ -52,7 +51,6 @@ async def get_HubSpot_deal_by_id(deal_id: str):
     except Exception as e:
         logger.error(f"Error fetching deal by ID: {e}")
         return None
-
 
 async def hubspot_create_deal(properties: str):
     """
@@ -64,6 +62,10 @@ async def hubspot_create_deal(properties: str):
     Returns:
     - Newly created deal
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info("Creating a new deal...")
         props = json.loads(properties)
@@ -74,7 +76,6 @@ async def hubspot_create_deal(properties: str):
     except Exception as e:
         logger.error(f"Error creating deal: {e}")
         return f"Error occurred: {e}"
-
 
 async def hubspot_update_deal_by_id(deal_id: str, updates: str):
     """
@@ -87,6 +88,10 @@ async def hubspot_update_deal_by_id(deal_id: str, updates: str):
     Returns:
     - "Done" on success, error message otherwise
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Updating deal ID: {deal_id}...")
         data = SimplePublicObjectInput(properties=json.loads(updates))
@@ -96,7 +101,6 @@ async def hubspot_update_deal_by_id(deal_id: str, updates: str):
     except Exception as e:
         logger.error(f"Update failed for deal ID {deal_id}: {e}")
         return f"Error occurred: {e}"
-
 
 async def hubspot_delete_deal_by_id(deal_id: str):
     """
@@ -108,6 +112,10 @@ async def hubspot_delete_deal_by_id(deal_id: str):
     Returns:
     - None
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Deleting deal ID: {deal_id}...")
         client.crm.deals.basic_api.archive(deal_id)

@@ -1,23 +1,10 @@
 import logging
-from hubspot import HubSpot
 import json
 from hubspot.crm.contacts import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-
-
-
-client = HubSpot(access_token="<access_token>")
-
-
+from .base import get_hubspot_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
-
-
-
-
-
-
-
 
 async def get_HubSpot_contacts(limit: int = 10):
     """
@@ -29,6 +16,10 @@ async def get_HubSpot_contacts(limit: int = 10):
     Returns:
     - Paginated contacts response
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching up to {limit} contacts from HubSpot")
         result = client.crm.contacts.basic_api.get_page(limit=limit)
@@ -37,7 +28,6 @@ async def get_HubSpot_contacts(limit: int = 10):
     except Exception as e:
         logger.error(f"Error fetching contacts: {e}")
         raise e
-
 
 async def get_HubSpot_contact_by_id(contact_id: str):
     """
@@ -49,6 +39,10 @@ async def get_HubSpot_contact_by_id(contact_id: str):
     Returns:
     - Contact object
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching contact with ID: {contact_id}")
         result = client.crm.contacts.basic_api.get_by_id(contact_id)
@@ -57,7 +51,6 @@ async def get_HubSpot_contact_by_id(contact_id: str):
     except Exception as e:
         logger.error(f"Error fetching contact by ID: {e}")
         raise e
-
 
 async def hubspot_delete_contant_by_id(contact_id: str) -> str:
     """
@@ -69,6 +62,10 @@ async def hubspot_delete_contant_by_id(contact_id: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Deleting contact with ID: {contact_id}")
         client.crm.contacts.basic_api.archive(contact_id)
@@ -77,7 +74,6 @@ async def hubspot_delete_contant_by_id(contact_id: str) -> str:
     except Exception as e:
         logger.error(f"Error deleting contact: {e}")
         raise e
-
 
 async def hubspot_create_contact(properties: str) -> str:
     """
@@ -89,6 +85,10 @@ async def hubspot_create_contact(properties: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         properties = json.loads(properties)
         logger.info(f"Creating contact with properties: {properties}")
@@ -99,7 +99,6 @@ async def hubspot_create_contact(properties: str) -> str:
     except Exception as e:
         logger.error(f"Error creating contact: {e}")
         raise e
-
 
 async def hubspot_update_contact_by_id(contact_id: str, updates: str) -> str:
     """
@@ -112,6 +111,10 @@ async def hubspot_update_contact_by_id(contact_id: str, updates: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         updates = json.loads(updates)
         logger.info(f"Updating contact ID: {contact_id} with updates: {updates}")

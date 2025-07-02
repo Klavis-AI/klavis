@@ -1,18 +1,10 @@
 import logging
-from hubspot import HubSpot
-from hubspot.crm.companies import SimplePublicObjectInputForCreate
-from hubspot.crm.companies import SimplePublicObjectInput
 import json
-
-
-
-client = HubSpot(access_token="<access_token>")
-
-
+from hubspot.crm.companies import SimplePublicObjectInputForCreate, SimplePublicObjectInput
+from .base import get_hubspot_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
-
 
 async def hubspot_create_companies(properties: str) -> str:
     """
@@ -24,6 +16,10 @@ async def hubspot_create_companies(properties: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info("Creating company...")
         properties = json.loads(properties)
@@ -35,7 +31,6 @@ async def hubspot_create_companies(properties: str) -> str:
         logger.error(f"Error creating company: {e}")
         return f"Error occurred: {e}"
 
-
 async def get_HubSpot_companies(limit: int = 10):
     """
     Fetch a list of companies from HubSpot.
@@ -46,6 +41,10 @@ async def get_HubSpot_companies(limit: int = 10):
     Returns:
     - Paginated companies response
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching up to {limit} companies...")
         result = client.crm.companies.basic_api.get_page(limit=limit)
@@ -54,7 +53,6 @@ async def get_HubSpot_companies(limit: int = 10):
     except Exception as e:
         logger.error(f"Error fetching companies: {e}")
         return None
-
 
 async def get_HubSpot_companies_by_id(company_id: str):
     """
@@ -66,6 +64,10 @@ async def get_HubSpot_companies_by_id(company_id: str):
     Returns:
     - Company object
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching company with ID: {company_id}...")
         result = client.crm.companies.basic_api.get_by_id(company_id)
@@ -74,7 +76,6 @@ async def get_HubSpot_companies_by_id(company_id: str):
     except Exception as e:
         logger.error(f"Error fetching company by ID: {e}")
         return None
-
 
 async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
     """
@@ -87,6 +88,10 @@ async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Updating company ID: {company_id}...")
         updates = json.loads(updates)
@@ -98,7 +103,6 @@ async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
         logger.error(f"Update failed: {e}")
         return f"Error occurred: {e}"
 
-
 async def hubspot_delete_company_by_id(company_id: str) -> str:
     """
     Delete a company by ID.
@@ -109,6 +113,10 @@ async def hubspot_delete_company_by_id(company_id: str) -> str:
     Returns:
     - Status message
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Deleting company ID: {company_id}...")
         client.crm.companies.basic_api.archive(company_id)

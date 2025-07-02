@@ -1,17 +1,10 @@
 import logging
-from hubspot import HubSpot
 import json
-from hubspot.crm.contacts import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-
-
-
-client = HubSpot(access_token="<access_token>")
-
-
+from hubspot.crm.tickets import SimplePublicObjectInputForCreate, SimplePublicObjectInput
+from .base import get_hubspot_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
-
 
 async def get_HubSpot_tickets(limit: int = 10):
     """
@@ -23,6 +16,10 @@ async def get_HubSpot_tickets(limit: int = 10):
     Returns:
     - List of ticket records
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching up to {limit} tickets...")
         result = client.crm.tickets.basic_api.get_page(limit=limit)
@@ -31,7 +28,6 @@ async def get_HubSpot_tickets(limit: int = 10):
     except Exception as e:
         logger.error(f"Error fetching tickets: {e}")
         return None
-
 
 async def get_HubSpot_ticket_by_id(ticket_id: str):
     """
@@ -43,6 +39,10 @@ async def get_HubSpot_ticket_by_id(ticket_id: str):
     Returns:
     - Ticket object
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Fetching ticket ID: {ticket_id}...")
         result = client.crm.tickets.basic_api.get_by_id(ticket_id)
@@ -51,7 +51,6 @@ async def get_HubSpot_ticket_by_id(ticket_id: str):
     except Exception as e:
         logger.error(f"Error fetching ticket by ID: {e}")
         return None
-
 
 async def hubspot_create_ticket(properties: str):
     """
@@ -63,6 +62,10 @@ async def hubspot_create_ticket(properties: str):
     Returns:
     - Newly created ticket
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info("Creating new ticket...")
         props = json.loads(properties)
@@ -73,7 +76,6 @@ async def hubspot_create_ticket(properties: str):
     except Exception as e:
         logger.error(f"Error creating ticket: {e}")
         return f"Error occurred: {e}"
-
 
 async def hubspot_update_ticket_by_id(ticket_id: str, updates: str):
     """
@@ -86,6 +88,10 @@ async def hubspot_update_ticket_by_id(ticket_id: str, updates: str):
     Returns:
     - "Done" on success, error message otherwise
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Updating ticket ID: {ticket_id}...")
         data = SimplePublicObjectInput(properties=json.loads(updates))
@@ -95,7 +101,6 @@ async def hubspot_update_ticket_by_id(ticket_id: str, updates: str):
     except Exception as e:
         logger.error(f"Update failed for ticket ID {ticket_id}: {e}")
         return f"Error occurred: {e}"
-
 
 async def hubspot_delete_ticket_by_id(ticket_id: str):
     """
@@ -107,6 +112,10 @@ async def hubspot_delete_ticket_by_id(ticket_id: str):
     Returns:
     - None
     """
+    client = get_hubspot_client()
+    if not client:
+        raise ValueError("HubSpot client not available. Please check authentication.")
+    
     try:
         logger.info(f"Deleting ticket ID: {ticket_id}...")
         client.crm.tickets.basic_api.archive(ticket_id)

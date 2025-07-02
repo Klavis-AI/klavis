@@ -1,7 +1,10 @@
 import contextlib
+import logging
 import os
-from contextvars import ContextVar
+import json
 from collections.abc import AsyncIterator
+from typing import Any, Dict
+
 import click
 import mcp.types as types
 from mcp.server.lowlevel import Server
@@ -12,36 +15,31 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
-import json
-from hubspot import HubSpot
-import logging
+
 from tools import (
-    # properties
+    auth_token_context,
+    # Properties
     hubspot_list_properties,
     hubspot_search_by_property,
     hubspot_create_property,
-
     # Contacts
     get_HubSpot_contacts,
     get_HubSpot_contact_by_id,
     hubspot_create_contact,
     hubspot_update_contact_by_id,
     hubspot_delete_contant_by_id,
-
     # Companies
     get_HubSpot_companies,
     get_HubSpot_companies_by_id,
     hubspot_create_companies,
     hubspot_update_company_by_id,
     hubspot_delete_company_by_id,
-
     # Deals
     get_HubSpot_deals,
     get_HubSpot_deal_by_id,
     hubspot_create_deal,
     hubspot_update_deal_by_id,
     hubspot_delete_deal_by_id,
-
     # Tickets
     get_HubSpot_tickets,
     get_HubSpot_ticket_by_id,
@@ -50,29 +48,12 @@ from tools import (
     hubspot_delete_ticket_by_id,
 )
 
-
+# Configure logging
 logger = logging.getLogger(__name__)
-
-client = HubSpot(access_token="<access_token>")
 
 load_dotenv()
 
 HUBSPOT_MCP_SERVER_PORT = int(os.getenv("HUBSPOT_MCP_SERVER_PORT", "5000"))
-
-# Context variable to store the access token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
-
-
-class RetryableToolError(Exception):
-    def __init__(self, message: str, additional_prompt_content: str = "", retry_after_ms: int = 1000,
-                 developer_message: str = ""):
-        super().__init__(message)
-        self.additional_prompt_content = additional_prompt_content
-        self.retry_after_ms = retry_after_ms
-        self.developer_message = developer_message
-
-
-
 
 @click.command()
 @click.option("--port", default=HUBSPOT_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -88,9 +69,9 @@ class RetryableToolError(Exception):
     help="Enable JSON responses for StreamableHTTP instead of SSE streams",
 )
 def main(
-        port: int,
-        log_level: str,
-        json_response: bool,
+    port: int,
+    log_level: str,
+    json_response: bool,
 ) -> int:
     # Configure logging
     logging.basicConfig(
@@ -98,6 +79,7 @@ def main(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Create the MCP server instance
     app = Server("hubspot-mcp-server")
 
     @app.list_tools()
@@ -532,179 +514,601 @@ def main(
                     },
                     "required": ["ticket_id"]
                 }
-            )
+            ),
         ]
 
     @app.call_tool()
     async def call_tool(
-            name: str, arguments: dict
+        name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        try:
-            if name == "hubspot_list_properties":
+        
+        # Properties
+        if name == "hubspot_list_properties":
+            try:
                 object_type = arguments.get("object_type")
                 result = await hubspot_list_properties(object_type)
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-
-            elif name == "hubspot_search_by_property":
-                object_type = arguments.get("object_type")
-                property_name = arguments.get("property_name")
-                operator = arguments.get("operator")
-                value = arguments.get("value")
-                properties = arguments.get("properties", [])
-                limit = arguments.get("limit", 10)
-
-                if not all([object_type, property_name, operator, value, properties]):
-                    return [types.TextContent(
+                return [
+                    types.TextContent(
                         type="text",
-                        text="Missing required parameters. Required: object_type, property_name, operator, value, properties."
-                    )]
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_search_by_property":
+            object_type = arguments.get("object_type")
+            property_name = arguments.get("property_name")
+            operator = arguments.get("operator")
+            value = arguments.get("value")
+            properties = arguments.get("properties", [])
+            limit = arguments.get("limit", 10)
 
+            if not all([object_type, property_name, operator, value, properties]):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Missing required parameters. Required: object_type, property_name, operator, value, properties.",
+                    )
+                ]
+
+            try:
                 result = await hubspot_search_by_property(
                     object_type, property_name, operator, value, properties, limit
                 )
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-
-
-            elif name == "get_HubSpot_contacts":
-                limit = arguments.get("limit", 10)
-                result = await get_HubSpot_contacts(limit)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "get_HubSpot_contact_by_id":
-                contact_id = arguments["contact_id"]
-                result = await get_HubSpot_contact_by_id(contact_id)
-                return [types.TextContent(type="text", text=str(result))]
-
-
-            elif name == "hubspot_create_property":
-
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_property":
+            try:
                 result = await hubspot_create_property(
                     name=arguments["name"],
                     label=arguments["label"],
                     description=arguments["description"],
                     object_type=arguments["object_type"]
                 )
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_delete_contant_by_id":
-                contact_id = arguments["contact_id"]
-                result = await hubspot_delete_contant_by_id(contact_id)
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_create_contact":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Contacts
+        elif name == "get_HubSpot_contacts":
+            try:
+                limit = arguments.get("limit", 10)
+                result = await get_HubSpot_contacts(limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "get_HubSpot_contact_by_id":
+            contact_id = arguments.get("contact_id")
+            if not contact_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id parameter is required",
+                    )
+                ]
+            try:
+                result = await get_HubSpot_contact_by_id(contact_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_contact":
+            try:
                 result = await hubspot_create_contact(arguments["properties"])
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_update_contact_by_id":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_update_contact_by_id":
+            contact_id = arguments.get("contact_id")
+            updates = arguments.get("updates")
+            if not contact_id or not updates:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id and updates parameters are required",
+                    )
+                ]
+            try:
                 result = await hubspot_update_contact_by_id(
-                    contact_id=arguments["contact_id"],
-                    updates=arguments["updates"]
+                    contact_id=contact_id,
+                    updates=updates
                 )
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_create_companies":
-                result = await hubspot_create_companies(arguments["properties"])
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "get_HubSpot_companies":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_contant_by_id":
+            contact_id = arguments.get("contact_id")
+            if not contact_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_contant_by_id(contact_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Companies
+        elif name == "get_HubSpot_companies":
+            try:
                 limit = arguments.get("limit", 10)
                 result = await get_HubSpot_companies(limit)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "get_HubSpot_companies_by_id":
-                company_id = arguments["company_id"]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "get_HubSpot_companies_by_id":
+            company_id = arguments.get("company_id")
+            if not company_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: company_id parameter is required",
+                    )
+                ]
+            try:
                 result = await get_HubSpot_companies_by_id(company_id)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "hubspot_update_company_by_id":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_companies":
+            try:
+                result = await hubspot_create_companies(arguments["properties"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_update_company_by_id":
+            company_id = arguments.get("company_id")
+            updates = arguments.get("updates")
+            if not company_id or not updates:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: company_id and updates parameters are required",
+                    )
+                ]
+            try:
                 result = await hubspot_update_company_by_id(
-                    company_id=arguments["company_id"],
-                    updates=arguments["updates"]
+                    company_id=company_id,
+                    updates=updates
                 )
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_delete_company_by_id":
-                result = await hubspot_delete_company_by_id(arguments["company_id"])
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "get_HubSpot_deals":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_company_by_id":
+            company_id = arguments.get("company_id")
+            if not company_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: company_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_company_by_id(company_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Deals
+        elif name == "get_HubSpot_deals":
+            try:
                 limit = arguments.get("limit", 10)
                 result = await get_HubSpot_deals(limit)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "get_HubSpot_deal_by_id":
-                deal_id = arguments["deal_id"]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "get_HubSpot_deal_by_id":
+            deal_id = arguments.get("deal_id")
+            if not deal_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: deal_id parameter is required",
+                    )
+                ]
+            try:
                 result = await get_HubSpot_deal_by_id(deal_id)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "hubspot_create_deal":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_deal":
+            try:
                 result = await hubspot_create_deal(arguments["properties"])
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "hubspot_update_deal_by_id":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_update_deal_by_id":
+            deal_id = arguments.get("deal_id")
+            updates = arguments.get("updates")
+            if not deal_id or not updates:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: deal_id and updates parameters are required",
+                    )
+                ]
+            try:
                 result = await hubspot_update_deal_by_id(
-                    deal_id=arguments["deal_id"],
-                    updates=arguments["updates"]
+                    deal_id=deal_id,
+                    updates=updates
                 )
-                return [types.TextContent(type="text", text=result)]
-
-            elif name == "hubspot_delete_deal_by_id":
-                result = await hubspot_delete_deal_by_id(arguments["deal_id"])
-                return [types.TextContent(type="text", text="Deleted")]
-
-            elif name == "get_HubSpot_tickets":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_deal_by_id":
+            deal_id = arguments.get("deal_id")
+            if not deal_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: deal_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_deal_by_id(deal_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Deleted",
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Tickets
+        elif name == "get_HubSpot_tickets":
+            try:
                 limit = arguments.get("limit", 10)
                 result = await get_HubSpot_tickets(limit)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "get_HubSpot_ticket_by_id":
-                ticket_id = arguments["ticket_id"]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "get_HubSpot_ticket_by_id":
+            ticket_id = arguments.get("ticket_id")
+            if not ticket_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: ticket_id parameter is required",
+                    )
+                ]
+            try:
                 result = await get_HubSpot_ticket_by_id(ticket_id)
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "hubspot_create_ticket":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_ticket":
+            try:
                 result = await hubspot_create_ticket(arguments["properties"])
-                return [types.TextContent(type="text", text=str(result))]
-
-            elif name == "hubspot_update_ticket_by_id":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_update_ticket_by_id":
+            ticket_id = arguments.get("ticket_id")
+            updates = arguments.get("updates")
+            if not ticket_id or not updates:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: ticket_id and updates parameters are required",
+                    )
+                ]
+            try:
                 result = await hubspot_update_ticket_by_id(
-                    ticket_id=arguments["ticket_id"],
-                    updates=arguments["updates"]
+                    ticket_id=ticket_id,
+                    updates=updates
                 )
-                return [types.TextContent(type="text", text=result)]
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_ticket_by_id":
+            ticket_id = arguments.get("ticket_id")
+            if not ticket_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: ticket_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_ticket_by_id(ticket_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Deleted",
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        else:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Unknown tool: {name}",
+                )
+            ]
 
-            elif name == "hubspot_delete_ticket_by_id":
-                result = await hubspot_delete_ticket_by_id(arguments["ticket_id"])
-                return [types.TextContent(type="text", text="Deleted")]
-
-            return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
-
-        except Exception as e:
-            logger.exception(f"Error executing tool {name}: {e}")
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
-
-            # Set up SSE transport
-
+    # Set up SSE transport
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-
+        
         # Extract auth token from headers (allow None - will be handled at tool level)
         auth_token = request.headers.get('x-auth-token')
-
+        
         # Set the auth token in context for this request (can be None)
         token = auth_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
-                    request.scope, request.receive, request._send
+                request.scope, request.receive, request._send
             ) as streams:
                 await app.run(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
             auth_token_context.reset(token)
-
+        
         return Response()
 
     # Set up StreamableHTTP transport
@@ -716,16 +1120,16 @@ def main(
     )
 
     async def handle_streamable_http(
-            scope: Scope, receive: Receive, send: Send
+        scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-
+        
         # Extract auth token from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
         auth_token = headers.get(b'x-auth-token')
         if auth_token:
             auth_token = auth_token.decode('utf-8')
-
+        
         # Set the auth token in context for this request (can be None/empty)
         token = auth_token_context.set(auth_token or "")
         try:
@@ -750,7 +1154,7 @@ def main(
             # SSE routes
             Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Mount("/messages/", app=sse.handle_post_message),
-
+            
             # StreamableHTTP route
             Mount("/mcp", app=handle_streamable_http),
         ],
@@ -766,7 +1170,6 @@ def main(
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
 
     return 0
-
 
 if __name__ == "__main__":
     main()
