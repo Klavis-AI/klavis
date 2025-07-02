@@ -23,26 +23,26 @@ from tools import (
     hubspot_search_by_property,
     hubspot_create_property,
     # Contacts
-    get_HubSpot_contacts,
-    get_HubSpot_contact_by_id,
+    hubspot_get_contacts,
+    hubspot_get_contact_by_id,
     hubspot_create_contact,
     hubspot_update_contact_by_id,
-    hubspot_delete_contant_by_id,
+    hubspot_delete_contact_by_id,
     # Companies
-    get_HubSpot_companies,
-    get_HubSpot_companies_by_id,
+    hubspot_get_companies,
+    hubspot_get_company_by_id,
     hubspot_create_companies,
     hubspot_update_company_by_id,
     hubspot_delete_company_by_id,
     # Deals
-    get_HubSpot_deals,
-    get_HubSpot_deal_by_id,
+    hubspot_get_deals,
+    hubspot_get_deal_by_id,
     hubspot_create_deal,
     hubspot_update_deal_by_id,
     hubspot_delete_deal_by_id,
     # Tickets
-    get_HubSpot_tickets,
-    get_HubSpot_ticket_by_id,
+    hubspot_get_tickets,
+    hubspot_get_ticket_by_id,
     hubspot_create_ticket,
     hubspot_update_ticket_by_id,
     hubspot_delete_ticket_by_id,
@@ -190,7 +190,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_contacts",
+                name="hubspot_get_contacts",
                 description="Fetch a list of contacts from HubSpot.",
                 inputSchema={
                     "type": "object",
@@ -205,7 +205,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_contact_by_id",
+                name="hubspot_get_contact_by_id",
                 description="Get a specific contact by HubSpot contact ID.",
                 inputSchema={
                     "type": "object",
@@ -245,7 +245,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="hubspot_delete_contant_by_id",
+                name="hubspot_delete_contact_by_id",
                 description="Delete a contact from HubSpot by contact ID.",
                 inputSchema={
                     "type": "object",
@@ -305,7 +305,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_companies",
+                name="hubspot_get_companies",
                 description="Fetch a list of companies from HubSpot.",
                 inputSchema={
                     "type": "object",
@@ -320,7 +320,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_companies_by_id",
+                name="hubspot_get_company_by_id",
                 description="Get a company from HubSpot by company ID.",
                 inputSchema={
                     "type": "object",
@@ -366,7 +366,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_deals",
+                name="hubspot_get_deals",
                 description="Fetch a list of deals from HubSpot.",
                 inputSchema={
                     "type": "object",
@@ -381,7 +381,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_deal_by_id",
+                name="hubspot_get_deal_by_id",
                 description="Fetch a deal by its ID.",
                 inputSchema={
                     "type": "object",
@@ -441,7 +441,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_tickets",
+                name="hubspot_get_tickets",
                 description="Fetch a list of tickets from HubSpot.",
                 inputSchema={
                     "type": "object",
@@ -456,7 +456,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="get_HubSpot_ticket_by_id",
+                name="hubspot_get_ticket_by_id",
                 description="Fetch a ticket by its ID.",
                 inputSchema={
                     "type": "object",
@@ -601,10 +601,10 @@ def main(
                 ]
         
         # Contacts
-        elif name == "get_HubSpot_contacts":
+        elif name == "hubspot_get_contacts":
             try:
                 limit = arguments.get("limit", 10)
-                result = await get_HubSpot_contacts(limit)
+                result = await hubspot_get_contacts(limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -620,7 +620,7 @@ def main(
                     )
                 ]
         
-        elif name == "get_HubSpot_contact_by_id":
+        elif name == "hubspot_get_contact_by_id":
             contact_id = arguments.get("contact_id")
             if not contact_id:
                 return [
@@ -630,7 +630,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_HubSpot_contact_by_id(contact_id)
+                result = await hubspot_get_contact_by_id(contact_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -694,7 +694,7 @@ def main(
                     )
                 ]
         
-        elif name == "hubspot_delete_contant_by_id":
+        elif name == "hubspot_delete_contact_by_id":
             contact_id = arguments.get("contact_id")
             if not contact_id:
                 return [
@@ -704,7 +704,7 @@ def main(
                     )
                 ]
             try:
-                result = await hubspot_delete_contant_by_id(contact_id)
+                result = await hubspot_delete_contact_by_id(contact_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -721,10 +721,10 @@ def main(
                 ]
         
         # Companies
-        elif name == "get_HubSpot_companies":
+        elif name == "hubspot_get_companies":
             try:
                 limit = arguments.get("limit", 10)
-                result = await get_HubSpot_companies(limit)
+                result = await hubspot_get_companies(limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -740,7 +740,7 @@ def main(
                     )
                 ]
         
-        elif name == "get_HubSpot_companies_by_id":
+        elif name == "hubspot_get_company_by_id":
             company_id = arguments.get("company_id")
             if not company_id:
                 return [
@@ -750,7 +750,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_HubSpot_companies_by_id(company_id)
+                result = await hubspot_get_company_by_id(company_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -841,10 +841,10 @@ def main(
                 ]
         
         # Deals
-        elif name == "get_HubSpot_deals":
+        elif name == "hubspot_get_deals":
             try:
                 limit = arguments.get("limit", 10)
-                result = await get_HubSpot_deals(limit)
+                result = await hubspot_get_deals(limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -860,7 +860,7 @@ def main(
                     )
                 ]
         
-        elif name == "get_HubSpot_deal_by_id":
+        elif name == "hubspot_get_deal_by_id":
             deal_id = arguments.get("deal_id")
             if not deal_id:
                 return [
@@ -870,7 +870,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_HubSpot_deal_by_id(deal_id)
+                result = await hubspot_get_deal_by_id(deal_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -961,10 +961,10 @@ def main(
                 ]
         
         # Tickets
-        elif name == "get_HubSpot_tickets":
+        elif name == "hubspot_get_tickets":
             try:
                 limit = arguments.get("limit", 10)
-                result = await get_HubSpot_tickets(limit)
+                result = await hubspot_get_tickets(limit)
                 return [
                     types.TextContent(
                         type="text",
@@ -980,7 +980,7 @@ def main(
                     )
                 ]
         
-        elif name == "get_HubSpot_ticket_by_id":
+        elif name == "hubspot_get_ticket_by_id":
             ticket_id = arguments.get("ticket_id")
             if not ticket_id:
                 return [
@@ -990,7 +990,7 @@ def main(
                     )
                 ]
             try:
-                result = await get_HubSpot_ticket_by_id(ticket_id)
+                result = await hubspot_get_ticket_by_id(ticket_id)
                 return [
                     types.TextContent(
                         type="text",

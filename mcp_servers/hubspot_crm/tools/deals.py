@@ -6,7 +6,7 @@ from .base import get_hubspot_client
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_HubSpot_deals(limit: int = 10):
+async def hubspot_get_deals(limit: int = 10):
     """
     Fetch a list of deals from HubSpot.
 
@@ -29,7 +29,7 @@ async def get_HubSpot_deals(limit: int = 10):
         logger.error(f"Error fetching deals: {e}")
         return None
 
-async def get_HubSpot_deal_by_id(deal_id: str):
+async def hubspot_get_deal_by_id(deal_id: str):
     """
     Fetch a deal by its ID.
 

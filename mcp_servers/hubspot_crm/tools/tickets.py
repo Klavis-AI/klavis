@@ -6,7 +6,7 @@ from .base import get_hubspot_client
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_HubSpot_tickets(limit: int = 10):
+async def hubspot_get_tickets(limit: int = 10):
     """
     Fetch a list of tickets from HubSpot.
 
@@ -29,7 +29,7 @@ async def get_HubSpot_tickets(limit: int = 10):
         logger.error(f"Error fetching tickets: {e}")
         return None
 
-async def get_HubSpot_ticket_by_id(ticket_id: str):
+async def hubspot_get_ticket_by_id(ticket_id: str):
     """
     Fetch a ticket by its ID.
 

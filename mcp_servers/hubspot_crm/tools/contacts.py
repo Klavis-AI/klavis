@@ -6,7 +6,7 @@ from .base import get_hubspot_client
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_HubSpot_contacts(limit: int = 10):
+async def hubspot_get_contacts(limit: int = 10):
     """
     Fetch a list of contacts from HubSpot.
 
@@ -29,7 +29,7 @@ async def get_HubSpot_contacts(limit: int = 10):
         logger.error(f"Error fetching contacts: {e}")
         raise e
 
-async def get_HubSpot_contact_by_id(contact_id: str):
+async def hubspot_get_contact_by_id(contact_id: str):
     """
     Get a specific contact by ID.
 
@@ -52,7 +52,7 @@ async def get_HubSpot_contact_by_id(contact_id: str):
         logger.error(f"Error fetching contact by ID: {e}")
         raise e
 
-async def hubspot_delete_contant_by_id(contact_id: str) -> str:
+async def hubspot_delete_contact_by_id(contact_id: str) -> str:
     """
     Delete a contact by ID.
 

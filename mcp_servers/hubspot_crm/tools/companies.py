@@ -31,7 +31,7 @@ async def hubspot_create_companies(properties: str) -> str:
         logger.error(f"Error creating company: {e}")
         return f"Error occurred: {e}"
 
-async def get_HubSpot_companies(limit: int = 10):
+async def hubspot_get_companies(limit: int = 10):
     """
     Fetch a list of companies from HubSpot.
 
@@ -54,7 +54,7 @@ async def get_HubSpot_companies(limit: int = 10):
         logger.error(f"Error fetching companies: {e}")
         return None
 
-async def get_HubSpot_companies_by_id(company_id: str):
+async def hubspot_get_company_by_id(company_id: str):
     """
     Get a company by ID.
 
