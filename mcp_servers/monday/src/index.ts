@@ -16,6 +16,8 @@ import {
 import {
   createItem,
   createItemToolSchema,
+  createUpdate,
+  createUpdateToolSchema,
   getBoardItemsByName,
   getBoardItemsByNameToolSchema,
 } from './tools/items';
@@ -78,6 +80,13 @@ server.addTool({
   description: 'Get items by name from a monday.com board',
   parameters: getBoardItemsByNameToolSchema,
   execute: async (args) => await getBoardItemsByName(args),
+});
+
+server.addTool({
+  name: 'monday_create_update',
+  description: 'Create a new update for an item in a monday.com board',
+  parameters: createUpdateToolSchema,
+  execute: async (args) => await createUpdate(args),
 });
 
 server.start({

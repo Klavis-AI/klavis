@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { client } from './base';
-import { createItemQuery, getBoardItemsByNameQuery } from './queries.graphql';
+import { createItemQuery, createUpdateQuery, getBoardItemsByNameQuery } from './queries.graphql';
 
 export const createItemToolSchema = z.object({
   boardId: z.string().describe('The id of the board to create the item in'),
@@ -23,6 +23,11 @@ export const createItemToolSchema = z.object({
 export const getBoardItemsByNameToolSchema = z.object({
   boardId: z.string().describe('The id of the board to get the items from'),
   term: z.string().describe('The term to search for in the items'),
+});
+
+export const createUpdateToolSchema = z.object({
+  itemId: z.number().describe('The id of the item to which the update will be added'),
+  body: z.string().describe("The update to be created, must be relevant to the user's request"),
 });
 
 export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
@@ -48,5 +53,17 @@ export const getBoardItemsByName = async (args: z.infer<typeof getBoardItemsByNa
   return {
     type: 'text' as const,
     text: JSON.stringify(items, null, 2),
+  };
+};
+
+export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>) => {
+  const { itemId, body } = args;
+  const update = await client.request(createUpdateQuery, {
+    itemId,
+    body,
+  });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(update, null, 2),
   };
 };
