@@ -1,7 +1,7 @@
 import { ColumnType } from '@mondaydotcomorg/api';
 import { z } from 'zod';
 import { client } from './base';
-import { createColumnQuery } from './queries.graphql';
+import { createColumnQuery, deleteColumnQuery } from './queries.graphql';
 
 export const createColumnToolSchema = z.object({
   boardId: z.string().describe('The id of the board to create the column in'),
@@ -14,6 +14,11 @@ export const createColumnToolSchema = z.object({
     .describe(
       "The default values for the new column (relevant only for column type 'status' or 'dropdown') when possible make the values relevant to the user's request",
     ),
+});
+
+export const deleteColumnToolSchema = z.object({
+  boardId: z.string().describe('The id of the board to delete the column from'),
+  columnId: z.string().describe('The id of the column to delete'),
 });
 
 export const createColumn = async (args: z.infer<typeof createColumnToolSchema>) => {
@@ -38,6 +43,18 @@ export const createColumn = async (args: z.infer<typeof createColumnToolSchema>)
     columnTitle,
     columnDescription,
     columnSettings: columnSettingsString,
+  });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(column, null, 2),
+  };
+};
+
+export const deleteColumn = async (args: z.infer<typeof deleteColumnToolSchema>) => {
+  const { boardId, columnId } = args;
+  const column = await client.request(deleteColumnQuery, {
+    boardId: boardId.toString(),
+    columnId: columnId.toString(),
   });
   return {
     type: 'text' as const,

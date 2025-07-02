@@ -7,7 +7,12 @@ import {
   getBoardSchema,
   getBoardSchemaToolSchema,
 } from './tools/boards';
-import { createColumn, createColumnToolSchema } from './tools/columns';
+import {
+  createColumn,
+  createColumnToolSchema,
+  deleteColumn,
+  deleteColumnToolSchema,
+} from './tools/columns';
 
 const server = new FastMCP({
   name: 'monday',
@@ -46,6 +51,13 @@ server.addTool({
   description: 'Create a new column in a monday.com board',
   parameters: createColumnToolSchema,
   execute: async (args) => await createColumn(args),
+});
+
+server.addTool({
+  name: 'monday_delete_column',
+  description: 'Delete a column from a monday.com board',
+  parameters: deleteColumnToolSchema,
+  execute: async (args) => await deleteColumn(args),
 });
 
 server.start({
