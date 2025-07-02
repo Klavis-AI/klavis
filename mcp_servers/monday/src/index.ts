@@ -7,6 +7,7 @@ import {
   getBoardSchema,
   getBoardSchemaToolSchema,
 } from './tools/boards';
+import { createColumn, createColumnToolSchema } from './tools/columns';
 
 const server = new FastMCP({
   name: 'monday',
@@ -38,6 +39,13 @@ server.addTool({
   name: 'monday_get_boards',
   description: 'Get all the monday.com boards',
   execute: async () => await getBoards(),
+});
+
+server.addTool({
+  name: 'monday_create_column',
+  description: 'Create a new column in a monday.com board',
+  parameters: createColumnToolSchema,
+  execute: async (args) => await createColumn(args),
 });
 
 server.start({
