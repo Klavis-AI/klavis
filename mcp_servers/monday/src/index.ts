@@ -1,6 +1,11 @@
 import { FastMCP } from 'fastmcp';
 import { getUsersByName, getUsersToolSchema } from './tools';
-import { getBoardSchema, getBoardSchemaToolSchema } from './tools/boards';
+import {
+  createBoard,
+  createBoardToolSchema,
+  getBoardSchema,
+  getBoardSchemaToolSchema,
+} from './tools/boards';
 
 const server = new FastMCP({
   name: 'monday',
@@ -19,6 +24,13 @@ server.addTool({
   description: 'Get board schema (columns and groups) by board id',
   parameters: getBoardSchemaToolSchema,
   execute: async (args) => await getBoardSchema(args),
+});
+
+server.addTool({
+  name: 'monday_create_board',
+  description: 'Create a new monday.com board with specified columns and groups',
+  parameters: createBoardToolSchema,
+  execute: async (args) => await createBoard(args),
 });
 
 server.start({
