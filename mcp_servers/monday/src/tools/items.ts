@@ -6,6 +6,7 @@ import {
   createUpdateQuery,
   deleteItemQuery,
   getBoardItemsByNameQuery,
+  moveItemToGroupQuery,
 } from './queries.graphql';
 
 export const createItemToolSchema = z.object({
@@ -28,7 +29,7 @@ export const createItemToolSchema = z.object({
 
 export const getBoardItemsByNameToolSchema = z.object({
   boardId: z.string().describe('The id of the board to get the items from'),
-  term: z.string().describe('The term to search for in the items'),
+  term: z.string().min(1).describe('The term to search for in the items'),
 });
 
 export const createUpdateToolSchema = z.object({
@@ -49,6 +50,12 @@ export const changeItemColumnValuesToolSchema = z.object({
       `A string containing the new column values for the item following this structure: {\\"column_id\\": \\"value\\",... you can change multiple columns at once, note that for status column you must use nested value with 'label' as a key and for date column use 'date' as key} - example: "{\\"text_column_id\\":\\"New text\\", \\"status_column_id\\":{\\"label\\":\\"Done\\"}, \\"date_column_id\\":{\\"date\\":\\"2023-05-25\\"}, \\"phone_id\\":\\"123-456-7890\\", \\"email_id\\":\\"test@example.com\\", {\\"boolean_column_id\\":{\\"checked\\":true}}"`,
     ),
 });
+
+export const moveItemToGroupToolSchema = z.object({
+  itemId: z.string().describe('The id of the item to move'),
+  groupId: z.string().describe('The id of the group to which the item will be moved'),
+});
+
 export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
   const { boardId, name, groupId, columnValues } = args;
   const item = await client.request(createItemQuery, {
@@ -104,6 +111,18 @@ export const changeItemColumnValues = async (
     boardId: boardId.toString(),
     itemId: itemId.toString(),
     columnValues,
+  });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(item, null, 2),
+  };
+};
+
+export const moveItemToGroup = async (args: z.infer<typeof moveItemToGroupToolSchema>) => {
+  const { itemId, groupId } = args;
+  const item = await client.request(moveItemToGroupQuery, {
+    itemId: itemId.toString(),
+    groupId: groupId.toString(),
   });
   return {
     type: 'text' as const,

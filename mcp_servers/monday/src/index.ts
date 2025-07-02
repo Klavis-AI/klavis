@@ -24,6 +24,8 @@ import {
   deleteItemToolSchema,
   getBoardItemsByName,
   getBoardItemsByNameToolSchema,
+  moveItemToGroup,
+  moveItemToGroupToolSchema,
 } from './tools/items';
 
 const server = new FastMCP({
@@ -105,6 +107,13 @@ server.addTool({
   description: 'Change the column values of an item in a monday.com board',
   parameters: changeItemColumnValuesToolSchema,
   execute: async (args) => await changeItemColumnValues(args),
+});
+
+server.addTool({
+  name: 'monday_move_item_to_group',
+  description: 'Move an item to a group in a monday.com board',
+  parameters: moveItemToGroupToolSchema,
+  execute: async (args) => await moveItemToGroup(args),
 });
 
 server.start({
