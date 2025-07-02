@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
+    CallToolRequestSchema,
+    ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { AsyncLocalStorage } from 'async_hooks';
+import express, { Request, Response } from 'express';
 
 const getWordPressMcpServer = () => {
   const server = new Server(
@@ -124,7 +124,7 @@ const getWordPressMcpServer = () => {
             throw new Error('Site, title, and content are required for creating a post');
           }
 
-          const client = getClient();
+          const client = createClient();
           const response = await client.post(`/sites/${params.site}/posts/new`, {
             title: params.title,
             content: params.content,
@@ -143,7 +143,7 @@ const getWordPressMcpServer = () => {
             throw new Error('Site is required for getting posts');
           }
 
-          const client = getClient();
+          const client = createClient();
           const number = params.number || 10;
           const page = params.page || 1;
           const response = await client.get(`/sites/${params.site}/posts/?number=${number}&page=${page}`);
@@ -165,7 +165,7 @@ const getWordPressMcpServer = () => {
           if (params.content) updateData.content = params.content;
           if (params.status) updateData.status = params.status;
 
-          const client = getClient();
+          const client = createClient();
           const response = await client.post(`/sites/${params.site}/posts/${params.postId}`, updateData);
           const data = await response.json();
 
@@ -180,7 +180,7 @@ const getWordPressMcpServer = () => {
             throw new Error('Site is required for getting top posts');
           }
 
-          const client = getClient();
+          const client = createClient();
           const response = await client.get(`/sites/${params.site}/stats/top-posts`);
           const data = await response.json();
 
@@ -195,7 +195,7 @@ const getWordPressMcpServer = () => {
             throw new Error('Site identifier is required');
           }
 
-          const client = getClient();
+          const client = createClient();
           const response = await client.get(`/sites/${params.site}`);
           const data = await response.json();
 
@@ -210,7 +210,7 @@ const getWordPressMcpServer = () => {
             throw new Error('Site identifier is required');
           }
 
-          const client = getClient();
+          const client = createClient();
           const response = await client.get(`/sites/${params.site}/stats`);
           const data = await response.json();
 
@@ -221,7 +221,7 @@ const getWordPressMcpServer = () => {
         }
 
         case 'wordpress_get_user_sites': {
-          const client = getClient();
+          const client = createClient();
           const response = await client.get('/me/sites');
           const data = await response.json();
 
@@ -248,7 +248,7 @@ const asyncLocalStorage = new AsyncLocalStorage<{
   auth_token: string;
 }>();
 
-function getClient() {
+function createClient() {
   const store = asyncLocalStorage.getStore()!;
   const auth_token = store.auth_token;
 

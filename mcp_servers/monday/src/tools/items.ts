@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { client } from './base';
+import { createClient } from './base';
 import {
   changeItemColumnValuesQuery,
   createItemQuery,
@@ -56,9 +56,9 @@ export const moveItemToGroupToolSchema = z.object({
   groupId: z.string().describe('The id of the group to which the item will be moved'),
 });
 
-export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
+export const createItem = async (args: z.infer<typeof createItemToolSchema>, token: string) => {
   const { boardId, name, groupId, columnValues } = args;
-  const item = await client.request(createItemQuery, {
+  const item = await createClient(token).request(createItemQuery, {
     boardId: boardId.toString(),
     itemName: name,
     groupId: groupId?.toString(),
@@ -70,9 +70,12 @@ export const createItem = async (args: z.infer<typeof createItemToolSchema>) => 
   };
 };
 
-export const getBoardItemsByName = async (args: z.infer<typeof getBoardItemsByNameToolSchema>) => {
+export const getBoardItemsByName = async (
+  args: z.infer<typeof getBoardItemsByNameToolSchema>,
+  token: string,
+) => {
   const { boardId, term } = args;
-  const items = await client.request(getBoardItemsByNameQuery, {
+  const items = await createClient(token).request(getBoardItemsByNameQuery, {
     boardId: boardId.toString(),
     term,
   });
@@ -82,9 +85,9 @@ export const getBoardItemsByName = async (args: z.infer<typeof getBoardItemsByNa
   };
 };
 
-export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>) => {
+export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>, token: string) => {
   const { itemId, body } = args;
-  const update = await client.request(createUpdateQuery, {
+  const update = await createClient(token).request(createUpdateQuery, {
     itemId,
     body,
   });
@@ -94,9 +97,9 @@ export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>)
   };
 };
 
-export const deleteItem = async (args: z.infer<typeof deleteItemToolSchema>) => {
+export const deleteItem = async (args: z.infer<typeof deleteItemToolSchema>, token: string) => {
   const { itemId } = args;
-  const item = await client.request(deleteItemQuery, { id: itemId.toString() });
+  const item = await createClient(token).request(deleteItemQuery, { id: itemId.toString() });
   return {
     type: 'text' as const,
     text: JSON.stringify(item, null, 2),
@@ -105,9 +108,10 @@ export const deleteItem = async (args: z.infer<typeof deleteItemToolSchema>) => 
 
 export const changeItemColumnValues = async (
   args: z.infer<typeof changeItemColumnValuesToolSchema>,
+  token: string,
 ) => {
   const { boardId, itemId, columnValues } = args;
-  const item = await client.request(changeItemColumnValuesQuery, {
+  const item = await createClient(token).request(changeItemColumnValuesQuery, {
     boardId: boardId.toString(),
     itemId: itemId.toString(),
     columnValues,
@@ -118,9 +122,12 @@ export const changeItemColumnValues = async (
   };
 };
 
-export const moveItemToGroup = async (args: z.infer<typeof moveItemToGroupToolSchema>) => {
+export const moveItemToGroup = async (
+  args: z.infer<typeof moveItemToGroupToolSchema>,
+  token: string,
+) => {
   const { itemId, groupId } = args;
-  const item = await client.request(moveItemToGroupQuery, {
+  const item = await createClient(token).request(moveItemToGroupQuery, {
     itemId: itemId.toString(),
     groupId: groupId.toString(),
   });

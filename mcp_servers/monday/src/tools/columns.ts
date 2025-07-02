@@ -1,6 +1,6 @@
 import { ColumnType } from '@mondaydotcomorg/api';
 import { z } from 'zod';
-import { client } from './base';
+import { createClient } from './base';
 import { createColumnQuery, deleteColumnQuery } from './queries.graphql';
 
 export const createColumnToolSchema = z.object({
@@ -21,7 +21,7 @@ export const deleteColumnToolSchema = z.object({
   columnId: z.string().describe('The id of the column to delete'),
 });
 
-export const createColumn = async (args: z.infer<typeof createColumnToolSchema>) => {
+export const createColumn = async (args: z.infer<typeof createColumnToolSchema>, token: string) => {
   const { boardId, columnType, columnTitle, columnDescription, columnSettings } = args;
   let columnSettingsString: string | undefined;
   if (columnSettings && columnType === ColumnType.Status) {
@@ -37,7 +37,7 @@ export const createColumn = async (args: z.infer<typeof createColumnToolSchema>)
       },
     });
   }
-  const column = await client.request(createColumnQuery, {
+  const column = await createClient(token).request(createColumnQuery, {
     boardId: boardId.toString(),
     columnType,
     columnTitle,
@@ -50,9 +50,9 @@ export const createColumn = async (args: z.infer<typeof createColumnToolSchema>)
   };
 };
 
-export const deleteColumn = async (args: z.infer<typeof deleteColumnToolSchema>) => {
+export const deleteColumn = async (args: z.infer<typeof deleteColumnToolSchema>, token: string) => {
   const { boardId, columnId } = args;
-  const column = await client.request(deleteColumnQuery, {
+  const column = await createClient(token).request(deleteColumnQuery, {
     boardId: boardId.toString(),
     columnId: columnId.toString(),
   });

@@ -1,6 +1,6 @@
 import { BoardKind } from '@mondaydotcomorg/api';
 import { z } from 'zod';
-import { client } from './base';
+import { createClient } from './base';
 import { createBoardQuery, getBoardSchemaQuery, getBoardsQuery } from './queries.graphql';
 
 export const getBoardSchemaToolSchema = z.object({
@@ -17,25 +17,28 @@ export const createBoardToolSchema = z.object({
   workspaceId: z.string().optional().describe('The ID of the workspace to create the board in'),
 });
 
-export const getBoards = async () => {
-  const boards = await client.request(getBoardsQuery);
+export const getBoards = async (token: string) => {
+  const boards = await createClient(token).request(getBoardsQuery);
   return {
     type: 'text' as const,
     text: JSON.stringify(boards),
   };
 };
-export const getBoardSchema = async (args: z.infer<typeof getBoardSchemaToolSchema>) => {
+export const getBoardSchema = async (
+  args: z.infer<typeof getBoardSchemaToolSchema>,
+  token: string,
+) => {
   const { boardId } = args;
-  const board = await client.request(getBoardSchemaQuery, { boardId });
+  const board = await createClient(token).request(getBoardSchemaQuery, { boardId });
   return {
     type: 'text' as const,
     text: JSON.stringify(board),
   };
 };
 
-export const createBoard = async (args: z.infer<typeof createBoardToolSchema>) => {
+export const createBoard = async (args: z.infer<typeof createBoardToolSchema>, token: string) => {
   const { boardName, boardKind, boardDescription, workspaceId } = args;
-  const board = await client.request(createBoardQuery, {
+  const board = await createClient(token).request(createBoardQuery, {
     boardName,
     boardKind,
     boardDescription,
