@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { client } from './base';
-import { createItemQuery, createUpdateQuery, getBoardItemsByNameQuery } from './queries.graphql';
+import {
+  createItemQuery,
+  createUpdateQuery,
+  deleteItemQuery,
+  getBoardItemsByNameQuery,
+} from './queries.graphql';
 
 export const createItemToolSchema = z.object({
   boardId: z.string().describe('The id of the board to create the item in'),
@@ -26,8 +31,12 @@ export const getBoardItemsByNameToolSchema = z.object({
 });
 
 export const createUpdateToolSchema = z.object({
-  itemId: z.number().describe('The id of the item to which the update will be added'),
+  itemId: z.string().describe('The id of the item to which the update will be added'),
   body: z.string().describe("The update to be created, must be relevant to the user's request"),
+});
+
+export const deleteItemToolSchema = z.object({
+  itemId: z.string().describe('The id of the item to delete'),
 });
 
 export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
@@ -65,5 +74,14 @@ export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>)
   return {
     type: 'text' as const,
     text: JSON.stringify(update, null, 2),
+  };
+};
+
+export const deleteItem = async (args: z.infer<typeof deleteItemToolSchema>) => {
+  const { itemId } = args;
+  const item = await client.request(deleteItemQuery, { id: itemId.toString() });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(item, null, 2),
   };
 };

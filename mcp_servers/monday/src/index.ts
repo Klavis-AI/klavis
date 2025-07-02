@@ -18,6 +18,8 @@ import {
   createItemToolSchema,
   createUpdate,
   createUpdateToolSchema,
+  deleteItem,
+  deleteItemToolSchema,
   getBoardItemsByName,
   getBoardItemsByNameToolSchema,
 } from './tools/items';
@@ -87,6 +89,13 @@ server.addTool({
   description: 'Create a new update for an item in a monday.com board',
   parameters: createUpdateToolSchema,
   execute: async (args) => await createUpdate(args),
+});
+
+server.addTool({
+  name: 'monday_delete_item',
+  description: 'Delete an item from a monday.com board',
+  parameters: deleteItemToolSchema,
+  execute: async (args) => await deleteItem(args),
 });
 
 server.start({
