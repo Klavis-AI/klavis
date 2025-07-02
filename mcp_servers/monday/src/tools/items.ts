@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { client } from './base';
 import {
+  changeItemColumnValuesQuery,
   createItemQuery,
   createUpdateQuery,
   deleteItemQuery,
@@ -21,7 +22,7 @@ export const createItemToolSchema = z.object({
   columnValues: z
     .string()
     .describe(
-      'A string containing the new column values for the item following this structure: {\\"column_id\\": \\"value\\",... you can change multiple columns at once, note that for status column you must use nested value with "label" as a key and for date column use "date" as key} - example: "{\\"text_column_id\\":\\"New text\\", \\"status_column_id\\":{\\"label\\":\\"Done\\"}, \\"date_column_id\\":{\\"date\\":\\"2023-05-25\\"},\\"dropdown_id\\":\\"value\\", \\"phone_id\\":\\"123-456-7890\\", \\"email_id\\":\\"test@example.com\\"}"',
+      'A string containing the new column values for the item following this structure: {\\"column_id\\": \\"value\\",... you can change multiple columns at once, note that for status column you must use nested value with "label" as a key and for date column use "date" as key} - example: "{\\"text_column_id\\":\\"New text\\", \\"status_column_id\\":{\\"label\\":\\"Done\\"}, \\"date_column_id\\":{\\"date\\":\\"2023-05-25\\"},\\"dropdown_id\\":\\"value\\", \\"phone_id\\":\\"123-456-7890\\", \\"email_id\\":\\"test@example.com\\", {\\"boolean_column_id\\":{\\"checked\\":true}}',
     ),
 });
 
@@ -39,6 +40,15 @@ export const deleteItemToolSchema = z.object({
   itemId: z.string().describe('The id of the item to delete'),
 });
 
+export const changeItemColumnValuesToolSchema = z.object({
+  boardId: z.string().describe('The id of the board to change the column values of'),
+  itemId: z.string().describe('The id of the item to change the column values of'),
+  columnValues: z
+    .string()
+    .describe(
+      `A string containing the new column values for the item following this structure: {\\"column_id\\": \\"value\\",... you can change multiple columns at once, note that for status column you must use nested value with 'label' as a key and for date column use 'date' as key} - example: "{\\"text_column_id\\":\\"New text\\", \\"status_column_id\\":{\\"label\\":\\"Done\\"}, \\"date_column_id\\":{\\"date\\":\\"2023-05-25\\"}, \\"phone_id\\":\\"123-456-7890\\", \\"email_id\\":\\"test@example.com\\", {\\"boolean_column_id\\":{\\"checked\\":true}}"`,
+    ),
+});
 export const createItem = async (args: z.infer<typeof createItemToolSchema>) => {
   const { boardId, name, groupId, columnValues } = args;
   const item = await client.request(createItemQuery, {
@@ -80,6 +90,21 @@ export const createUpdate = async (args: z.infer<typeof createUpdateToolSchema>)
 export const deleteItem = async (args: z.infer<typeof deleteItemToolSchema>) => {
   const { itemId } = args;
   const item = await client.request(deleteItemQuery, { id: itemId.toString() });
+  return {
+    type: 'text' as const,
+    text: JSON.stringify(item, null, 2),
+  };
+};
+
+export const changeItemColumnValues = async (
+  args: z.infer<typeof changeItemColumnValuesToolSchema>,
+) => {
+  const { boardId, itemId, columnValues } = args;
+  const item = await client.request(changeItemColumnValuesQuery, {
+    boardId: boardId.toString(),
+    itemId: itemId.toString(),
+    columnValues,
+  });
   return {
     type: 'text' as const,
     text: JSON.stringify(item, null, 2),

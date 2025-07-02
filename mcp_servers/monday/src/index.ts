@@ -14,6 +14,8 @@ import {
   deleteColumnToolSchema,
 } from './tools/columns';
 import {
+  changeItemColumnValues,
+  changeItemColumnValuesToolSchema,
   createItem,
   createItemToolSchema,
   createUpdate,
@@ -96,6 +98,13 @@ server.addTool({
   description: 'Delete an item from a monday.com board',
   parameters: deleteItemToolSchema,
   execute: async (args) => await deleteItem(args),
+});
+
+server.addTool({
+  name: 'monday_change_item_column_values',
+  description: 'Change the column values of an item in a monday.com board',
+  parameters: changeItemColumnValuesToolSchema,
+  execute: async (args) => await changeItemColumnValues(args),
 });
 
 server.start({
