@@ -69,6 +69,7 @@ export const getBoardSchemaQuery = gql`
         id
         type
         title
+        settings_str
       }
     }
   }

@@ -13,6 +13,7 @@ import {
   deleteColumn,
   deleteColumnToolSchema,
 } from './tools/columns';
+import { createItem, createItemToolSchema } from './tools/items';
 
 const server = new FastMCP({
   name: 'monday',
@@ -58,6 +59,13 @@ server.addTool({
   description: 'Delete a column from a monday.com board',
   parameters: deleteColumnToolSchema,
   execute: async (args) => await deleteColumn(args),
+});
+
+server.addTool({
+  name: 'monday_create_item',
+  description: 'Create a new item in a monday.com board',
+  parameters: createItemToolSchema,
+  execute: async (args) => await createItem(args),
 });
 
 server.start({
