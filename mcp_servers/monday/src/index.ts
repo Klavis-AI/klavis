@@ -35,11 +35,13 @@ const server = new FastMCP({
   name: 'monday',
   version: '1.0.0',
   authenticate: async (request) => {
-    const token = request.headers['x-auth-token'] || process.env.MONDAY_API_TOKEN;
+    const token = process.env.MONDAY_API_KEY || (request.headers['x-auth-token'] as string);
     if (!token) {
-      throw new Error('No authentication token provided');
+      throw new Error(
+        'Error: Monday API token is missing. Provide it via MONDAY_API_KEY env var or x-auth-token header.',
+      );
     }
-    return { token: token as string };
+    return { token };
   },
 });
 

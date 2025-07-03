@@ -46,7 +46,7 @@ cp .env.example .env
 
 Set the following environment variable:
 
-- `MONDAY_API_TOKEN`: Your Monday.com API token
+- `MONDAY_API_KEY`: Your Monday.com API token
 
 You can obtain your Monday.com API token from your Monday.com account settings under "Developers" → "My Access Tokens".
 
@@ -127,7 +127,7 @@ The server requires a Monday.com API token which can be obtained from:
 1. Log into your Monday.com account
 2. Go to Avatar (top right) → Admin → API
 3. Generate a new API token
-4. Set the token as the `MONDAY_API_TOKEN` environment variable
+4. Set the token as the `MONDAY_API_KEY` environment variable
 
 ## License
 
