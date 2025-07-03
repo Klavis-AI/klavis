@@ -44,7 +44,7 @@ class AffinityV1Client:
         # V1 endpoints don't have /v1 prefix
         url = f"{AFFINITY_API_ENDPOINT}{endpoint}"
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             if method.upper() == "GET":
                 response = await client.get(url, auth=auth, headers=headers, params=params)
             elif method.upper() == "POST":
@@ -63,6 +63,51 @@ class AffinityV1Client:
                 return {"success": True}
             
             return response.json()
+    
+    @staticmethod
+    async def download_file(
+        endpoint: str,
+        params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Download a file from Affinity V1 API, handling binary content."""
+        api_key = get_auth_token()
+        
+        if not api_key:
+            raise RuntimeError("No API key provided. Please set the x-auth-token header.")
+        
+        # V1 uses HTTP Basic Auth with API key
+        auth = httpx.BasicAuth("", api_key)
+        
+        headers = {
+            "Accept": "*/*"  # Accept any content type for file downloads
+        }
+        
+        # V1 endpoints don't have /v1 prefix
+        url = f"{AFFINITY_API_ENDPOINT}{endpoint}"
+        
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.get(url, auth=auth, headers=headers, params=params)
+            response.raise_for_status()
+            
+            # Check content type to determine how to handle the response
+            content_type = response.headers.get("content-type", "").lower()
+            
+            if "application/json" in content_type:
+                # JSON response - return as usual
+                return response.json()
+            else:
+                # Binary/file content - return metadata and content info
+                import base64
+                
+                # For binary content, we'll return metadata and encoded content
+                return {
+                    "content_type": content_type,
+                    "content_length": len(response.content),
+                    "filename": response.headers.get("content-disposition", ""),
+                    "content_base64": base64.b64encode(response.content).decode('utf-8'),
+                    "success": True,
+                    "message": "File downloaded successfully"
+                }
 
 class AffinityV2Client:
     """Client for Affinity API V2 using Bearer Authentication."""
@@ -88,7 +133,7 @@ class AffinityV2Client:
         
         url = f"{AFFINITY_API_ENDPOINT}/v2{endpoint}"
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             if method.upper() == "GET":
                 response = await client.get(url, headers=headers, params=params)
             elif method.upper() == "POST":
