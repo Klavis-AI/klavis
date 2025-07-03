@@ -12,6 +12,14 @@ from .opportunities import get_all_opportunities, get_single_opportunity, search
 from .notes import get_all_notes, get_specific_note
 from .base import auth_token_context
 
+# Import file functions
+from .files import (
+    get_all_entity_files,
+    get_entity_file,
+    download_entity_file,
+    search_entity_files_by_name,
+)
+
 __all__ = [
     # Auth
     "get_current_user",
@@ -48,6 +56,12 @@ __all__ = [
     "get_all_notes",
     "get_specific_note",
     
+    # Files
+    "get_all_entity_files",
+    "get_entity_file",
+    "download_entity_file",
+    "search_entity_files_by_name",
+        
     # Base
     "auth_token_context",
 ] 
