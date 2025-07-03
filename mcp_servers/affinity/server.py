@@ -24,8 +24,7 @@ from tools import (
     get_all_persons, get_single_person, get_person_fields_metadata, get_person_lists, get_person_list_entries, search_persons,
     get_all_companies, get_single_company, get_company_fields_metadata, get_company_lists, get_company_list_entries, search_organizations,
     get_all_opportunities, get_single_opportunity, search_opportunities,
-    get_all_notes, get_specific_note,
-    get_all_entity_files, get_entity_file, download_entity_file, search_entity_files_by_name
+    get_all_notes, get_specific_note
 )
 
 # Configure logging
@@ -597,91 +596,6 @@ def main(
                     },
                 },
             ),
-            # Files
-            types.Tool(
-                name="affinity_get_all_entity_files",
-                description="Get all Entity Files in Affinity. Can filter by person, organization, or opportunity.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "person_id": {
-                            "type": "integer",
-                            "description": "Filter by person ID.",
-                        },
-                        "organization_id": {
-                            "type": "integer",
-                            "description": "Filter by organization ID.",
-                        },
-                        "opportunity_id": {
-                            "type": "integer",
-                            "description": "Filter by opportunity ID.",
-                        },
-                        "page_size": {
-                            "type": "integer",
-                            "description": "Number of items per page.",
-                        },
-                        "page_token": {
-                            "type": "string",
-                            "description": "Token for pagination.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_get_entity_file",
-                description="Get a specific Entity File by ID with metadata and download information.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["file_id"],
-                    "properties": {
-                        "file_id": {
-                            "type": "integer",
-                            "description": "The ID of the file to retrieve.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_download_entity_file",
-                description="Download the content of a specific Entity File. Use this to access the actual file data.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["file_id"],
-                    "properties": {
-                        "file_id": {
-                            "type": "integer",
-                            "description": "The ID of the file to download.",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="affinity_search_entity_files_by_name",
-                description="Search for Entity Files by filename pattern. Useful for finding specific types of documents.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["filename_pattern"],
-                    "properties": {
-                        "filename_pattern": {
-                            "type": "string",
-                            "description": "Pattern to search for in filenames (case-insensitive).",
-                        },
-                        "person_id": {
-                            "type": "integer",
-                            "description": "Filter by person ID.",
-                        },
-                        "organization_id": {
-                            "type": "integer",
-                            "description": "Filter by organization ID.",
-                        },
-                        "opportunity_id": {
-                            "type": "integer",
-                            "description": "Filter by opportunity ID.",
-                        },
-                    },
-                },
-            ),
-
         ]
 
     @app.call_tool()
@@ -1297,113 +1211,6 @@ def main(
                     )
                 ]
 
-        # Files
-        elif name == "affinity_get_all_entity_files":
-            person_id = arguments.get("person_id")
-            organization_id = arguments.get("organization_id")
-            opportunity_id = arguments.get("opportunity_id")
-            page_size = arguments.get("page_size")
-            page_token = arguments.get("page_token")
-            
-            try:
-                result = await get_all_entity_files(person_id, organization_id, opportunity_id, page_size, page_token)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_get_entity_file":
-            file_id = arguments.get("file_id")
-            if not file_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: file_id parameter is required",
-                    )
-                ]
-            try:
-                result = await get_entity_file(file_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_download_entity_file":
-            file_id = arguments.get("file_id")
-            if not file_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: file_id parameter is required",
-                    )
-                ]
-            try:
-                result = await download_entity_file(file_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "affinity_search_entity_files_by_name":
-            filename_pattern = arguments.get("filename_pattern")
-            if not filename_pattern:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: filename_pattern parameter is required",
-                    )
-                ]
-            
-            person_id = arguments.get("person_id")
-            organization_id = arguments.get("organization_id")
-            opportunity_id = arguments.get("opportunity_id")
-            
-            try:
-                result = await search_entity_files_by_name(filename_pattern, person_id, organization_id, opportunity_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
         
         else:
             return [
