@@ -1,0 +1,207 @@
+---
+title: "Monday.com"
+description: "Learn how to use Klavis to connect your AI application to Monday.com MCP Server"
+---
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Monday.com MCP Server
+
+Use the following endpoint to create a new remote Monday.com MCP server instance:
+
+#### Request
+
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ConnectionType
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Monday.com MCP server instance
+
+monday_server = klavis_client.mcp_server.create_server_instance(
+server_name=McpServerName.MONDAY,
+user_id="<YOUR_USER_ID>",
+platform_name="<YOUR_PLATFORM_NAME>",
+)
+
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Monday.com MCP server instance
+const mondayServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Monday,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Monday",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+
+</CodeGroup>
+
+#### Response
+
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://monday-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/monday/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>
+  **serverUrl** specifies the endpoint of the Monday.com MCP server, which you can
+  connect with the MCP client of your application.
+</Check>
+<Note>
+  **instanceId** is used for authentication and identification of your server instance.
+  After you complete the next steps, this token allows the MCP server to access user's
+  private Monday.com information.
+</Note>
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(monday_server.oauth_url)
+
+```
+
+```javascript TypeScript
+// The OAuth URL is provided in the server response
+console.log('OAuth URL:', mondayServer.oauthUrl);
+
+// Redirect user to authorize
+window.location.href = mondayServer.oauthUrl;
+```
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/monday/authorize"
+
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class MondayOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/monday/authorize?instance_id=" +
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+
+        System.out.println("Redirect to: " + authUrl);
+
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+</CodeGroup>
+
+<Tip>
+  You can also specify scope and redirect_url in the authUrl, and we also
+  support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+  | Tool Name                                | Description                                                               |
+  |------------------------------------------|---------------------------------------------------------------------------|
+  | monday_get_users_by_name                 | Retrieve user information by name or partial name                          |
+  | monday_get_boards                        | Get all Monday.com boards accessible to the authenticated user             |
+  | monday_create_board                      | Create a new Monday.com board with specified configuration                 |
+  | monday_get_board_schema                  | Get board schema (columns and groups) by board ID                          |
+  | monday_create_column                     | Create a new column in a Monday.com board                                  |
+  | monday_delete_column                     | Delete a column from a Monday.com board                                    |
+  | monday_create_item                       | Create a new item in a Monday.com board                                    |
+  | monday_get_board_items_by_name           | Get items by name from a Monday.com board                                  |
+  | monday_delete_item                       | Delete an item from a Monday.com board                                     |
+  | monday_change_item_column_values         | Change the column values of an item in a Monday.com board                  |
+  | monday_move_item_to_group                | Move an item to a different group within a Monday.com board                |
+  | monday_create_update                     | Create a new update (comment) for an item in a Monday.com board            |
+</Accordion>
