@@ -334,6 +334,49 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
+    "/mcp-server/instance/get-auth/{instance_id}": {
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get Authentication Metadata",
+        "description": "Retrieves the auth metadata for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication metadata.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthMetadata",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The ID of the connection instance to get auth metadata for.",
+              "title": "Instance Id"
+            },
+            "description": "The ID of the connection instance to get auth metadata for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthMetadataResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp-server/oauth-url": {
       "post": {
         "tags": ["mcp-server"],
@@ -4782,6 +4825,31 @@
         "type": "object",
         "required": ["message"],
         "title": "GSheetsOAuthSuccessResponse"
+      },
+      "GetAuthMetadataResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether the request was successful"
+          },
+          "authData": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Authdata",
+            "description": "Complete authentication metadata including access token, refresh token, scope, expiration, and platform-specific data"
+          },
+          "error": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Error",
+            "description": "Error message if the request failed"
+          }
+        },
+        "type": "object",
+        "required": ["success"],
+        "title": "GetAuthMetadataResponse"
       },
       "GetInstanceResponse": {
         "properties": {
