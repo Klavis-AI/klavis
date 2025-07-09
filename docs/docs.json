@@ -145,13 +145,6 @@
             "pages": ["api-reference/user/get-server-instances"]
           },
           {
-            "group": "Basic Auth",
-            "pages": [
-              "api-reference/mcp-server/set-auth-token",
-              "api-reference/mcp-server/delete-auth-data-for-a-server-instance"
-            ]
-          },
-          {
             "group": "White Labeling",
             "pages": [
               "api-reference/white-labeling/create",
@@ -159,9 +152,12 @@
             ]
           },
           {
-            "group": "OAuth",
+            "group": "Auth / OAuth",
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
+              "api-reference/mcp-server/set-auth-token",
+              "api-reference/mcp-server/get-auth-metadata",
+              "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
                 "group": "GitHub OAuth",
                 "pages": ["api-reference/github-oauth/authorize-github"]
