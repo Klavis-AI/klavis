@@ -1,0 +1,26 @@
+{
+  "name": "gemini-example-typescript",
+  "version": "1.0.0",
+  "description": "TypeScript example for Google GenAI with Klavis",
+  "main": "main.js",
+  "scripts": {
+    "start": "ts-node main.ts",
+    "demo": "ts-node demo.ts",
+    "build": "tsc",
+    "debug": "node --inspect-brk -r ts-node/register main.ts",
+    "debug:compiled": "tsc && node --inspect-brk dist/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.8.0",
+    "dotenv": "^16.4.5",
+    "klavis": "^0.3.1",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+} 

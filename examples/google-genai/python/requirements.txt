@@ -1,0 +1,3 @@
+google-genai>=1.24.0
+klavis>=1.2.1
+python-dotenv>=1.1.1
