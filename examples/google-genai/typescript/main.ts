@@ -109,7 +109,7 @@ async function main() {
                 let hasFunctionCalls = false;
                 const functionCallResults: any[] = [];
 
-                // Check if response has functionCalls property (newer API format)
+                // Check if response has functionCalls property
                 if (response.functionCalls && response.functionCalls.length > 0) {
                     hasFunctionCalls = true;
                     for (const functionCall of response.functionCalls) {
