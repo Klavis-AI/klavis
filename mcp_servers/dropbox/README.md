@@ -39,19 +39,63 @@ A Model Context Protocol (MCP) server for Dropbox integration, providing compreh
 - **Get Temporary Link**: Generate temporary download links
 - **Get Preview**: Get file previews for supported formats
 
-### As HTTP Server
+## Quick Start
 
-1. Start the server:
+### 1. Setup Environment Variables
+
+Copy the example environment file and configure your Dropbox credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your Dropbox app credentials:
+
+```bash
+# Dropbox API Configuration
+DROPBOX_APP_KEY=your_app_key_here
+DROPBOX_APP_SECRET=your_app_secret_here
+DROPBOX_ACCESS_TOKEN=your_access_token_here
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the Server
+
 ```bash
 npm start
 ```
 
-2. Make requests with your access token:
+The server will validate your Dropbox connection on startup and display your account information.
+
+### 4. Use as HTTP Server
+
+Make requests with your access token (either from environment or header):
+
 ```bash
 curl -X POST http://localhost:5000/mcp \
   -H "Content-Type: application/json" \
   -H "x-auth-token: YOUR_DROPBOX_ACCESS_TOKEN" \
   -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}'
+```
+
+### 5. Use as MCP Server
+
+Add to your MCP client configuration:
+
+```json
+{
+  "servers": {
+    "dropbox": {
+      "command": "node",
+      "args": ["path/to/dropbox/mcp/server/dist/index.js"]
+    }
+  }
+}
 ```
 
 ## Available Tools
@@ -290,11 +334,82 @@ Add member to shared folder
 }
 ```
 
-## Authentication
+## Authentication & Setup
 
-OAuth 2.0 flow
+### Obtaining Dropbox Credentials
 
-Pass the token via the `x-auth-token` header in HTTP requests or set it as an environment variable when using as an MCP server.
+To use this MCP server, you need to create a Dropbox app and obtain API credentials:
+
+#### 1. Create a Dropbox App
+
+1. Go to the [Dropbox Developer Console](https://www.dropbox.com/developers/apps)
+2. Click "Create app"
+3. Choose "Scoped access" as the API
+4. Choose "Full Dropbox" or "App folder" depending on your needs
+5. Give your app a name
+6. Click "Create app"
+
+#### 2. Get Your App Key and App Secret
+
+1. In your app's settings page, find the "App key" and "App secret"
+2. Copy these values for your `.env` file
+
+#### 3. Generate an Access Token
+
+**Option A: Generate via Developer Console (Quick)**
+1. In your app's settings, scroll to "OAuth 2" section
+2. Click "Generate" under "Generated access token"
+3. Copy the generated token
+
+**Option B: OAuth Flow (Production)**
+1. Implement the OAuth 2.0 flow in your application
+2. Use the authorization URL format:
+   ```
+   https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&redirect_uri=YOUR_REDIRECT_URI
+   ```
+3. Exchange the authorization code for an access token:
+   ```bash
+   curl -X POST https://api.dropboxapi.com/oauth2/token \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "code=AUTHORIZATION_CODE&grant_type=authorization_code&client_id=YOUR_APP_KEY&client_secret=YOUR_APP_SECRET&redirect_uri=YOUR_REDIRECT_URI"
+   ```
+
+#### 4. Set Permissions
+
+In your app settings, under "Permissions", ensure you have the necessary scopes enabled:
+- `files.metadata.write` - For file operations
+- `files.content.write` - For uploading/downloading files
+- `sharing.write` - For sharing operations
+- `account_info.read` - For account information
+
+### Environment Configuration
+
+Create a `.env` file in the server directory:
+
+```bash
+# Required: Dropbox API Configuration
+DROPBOX_APP_KEY=your_app_key_here
+DROPBOX_APP_SECRET=your_app_secret_here
+DROPBOX_ACCESS_TOKEN=your_access_token_here
+
+# Optional: Server Configuration
+PORT=5000
+```
+
+### Token Authentication
+
+The server supports multiple ways to provide the access token:
+
+1. **Environment Variable**: Set `DROPBOX_ACCESS_TOKEN` in `.env`
+2. **HTTP Header**: Pass `x-auth-token` header in HTTP requests
+3. **Runtime Configuration**: The server will use environment token as fallback
+
+### Security Notes
+
+- Keep your App Secret secure and never expose it in client-side code
+- Access tokens should be stored securely
+- Consider implementing token refresh for production applications
+- Use HTTPS in production environments
 
 ## Error Handling
 
@@ -303,3 +418,42 @@ The server provides detailed error messages for common issues:
 - File not found errors
 - Permission denied errors
 - Rate limiting responses
+
+## Troubleshooting
+
+### Common Issues
+
+#### 401 Authentication Error
+If you get a "Response failed with a 401 code" error:
+
+1. **Check Token Expiration**: Access tokens generated via the Developer Console have a limited lifespan (typically 4 hours)
+2. **Regenerate Token**: Go to your [Dropbox Developer Console](https://www.dropbox.com/developers/apps), find your app, and generate a new access token
+3. **Update .env File**: Replace the `DROPBOX_ACCESS_TOKEN` value in your `.env` file
+4. **Restart Server**: After updating the token, restart the server
+
+#### Token Generation Steps
+1. Visit [Dropbox Developer Console](https://www.dropbox.com/developers/apps)
+2. Click on your app name
+3. Scroll to "OAuth 2" section
+4. Click "Generate" under "Generated access token"
+5. Copy the new token to your `.env` file
+
+#### Environment Variables Not Loading
+- Ensure `.env` file is in the same directory as your server
+- Check that `dotenv` is properly installed and imported
+- Verify there are no syntax errors in your `.env` file
+
+#### Permission Errors
+- Check that your app has the necessary scopes enabled in the Developer Console
+- Ensure your account has the required permissions for the operations you're trying to perform
+
+### Testing the Connection
+
+You can test your Dropbox connection with a simple curl command:
+
+```bash
+curl -X POST https://api.dropboxapi.com/2/users/get_current_account \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```

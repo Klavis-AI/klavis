@@ -166,6 +166,31 @@ const AddFolderMemberSchema = z.object({
     custom_message: z.string().optional().describe("Custom message to include in the invitation"),
 });
 
+// File Requests Schemas
+const CreateFileRequestSchema = z.object({
+    title: z.string().describe("The title of the file request"),
+    destination: z.string().describe("The path of the folder where uploaded files will be sent"),
+    description: z.string().optional().describe("Description of the file request"),
+});
+
+const GetFileRequestSchema = z.object({
+    id: z.string().describe("The ID of the file request"),
+});
+
+const ListFileRequestsSchema = z.object({});
+
+const DeleteFileRequestSchema = z.object({
+    ids: z.array(z.string()).describe("List of file request IDs to delete"),
+});
+
+const UpdateFileRequestSchema = z.object({
+    id: z.string().describe("The ID of the file request to update"),
+    title: z.string().optional().describe("New title for the file request"),
+    destination: z.string().optional().describe("New destination path for the file request"),
+    description: z.string().optional().describe("New description for the file request"),
+    open: z.boolean().optional().describe("Whether to open (true) or close (false) the file request"),
+});
+
 // Get Dropbox MCP Server
 const getDropboxMcpServer = () => {
     // Server implementation
@@ -295,6 +320,31 @@ const getDropboxMcpServer = () => {
                 name: "add_folder_member",
                 description: "Adds a member to a shared folder",
                 inputSchema: zodToJsonSchema(AddFolderMemberSchema),
+            },
+            {
+                name: "create_file_request",
+                description: "Creates a file request",
+                inputSchema: zodToJsonSchema(CreateFileRequestSchema),
+            },
+            {
+                name: "get_file_request",
+                description: "Gets a file request by ID",
+                inputSchema: zodToJsonSchema(GetFileRequestSchema),
+            },
+            {
+                name: "list_file_requests",
+                description: "Lists all file requests",
+                inputSchema: zodToJsonSchema(ListFileRequestsSchema),
+            },
+            {
+                name: "delete_file_request",
+                description: "Deletes file requests",
+                inputSchema: zodToJsonSchema(DeleteFileRequestSchema),
+            },
+            {
+                name: "update_file_request",
+                description: "Updates a file request (title, destination, description, open/close status)",
+                inputSchema: zodToJsonSchema(UpdateFileRequestSchema),
             },
         ],
     }));
@@ -814,6 +864,235 @@ const getDropboxMcpServer = () => {
                     };
                 }
 
+                case "create_file_request": {
+                    const validatedArgs = CreateFileRequestSchema.parse(args);
+                    
+                    try {
+                        const response = await dropbox.fileRequestsCreate({
+                            title: validatedArgs.title,
+                            destination: validatedArgs.destination,
+                            description: validatedArgs.description,
+                        });
+
+                        const fileRequest = response.result;
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `File request created successfully!\nID: ${fileRequest.id}\nTitle: ${fileRequest.title}\nURL: ${fileRequest.url}\nDestination: ${fileRequest.destination}${fileRequest.description ? `\nDescription: ${fileRequest.description}` : ''}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to create file request: "${validatedArgs.title}"\n`;
+                        
+                        if (error.status === 403) {
+                            errorMessage += `\nError 403: Permission denied - You may not have permission to create file requests or access the destination folder.`;
+                        } else if (error.status === 404) {
+                            errorMessage += `\nError 404: Destination folder not found - The path "${validatedArgs.destination}" doesn't exist.`;
+                        } else if (error.status === 400) {
+                            errorMessage += `\nError 400: Bad request - Please check the title and destination path format.`;
+                        } else {
+                            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+                        
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
+                }
+
+                case "get_file_request": {
+                    const validatedArgs = GetFileRequestSchema.parse(args);
+                    
+                    try {
+                        const response = await dropbox.fileRequestsGet({
+                            id: validatedArgs.id,
+                        });
+
+                        const fileRequest = response.result;
+                        let info = `ID: ${fileRequest.id}\nTitle: ${fileRequest.title}\nDestination: ${fileRequest.destination}\nFile Count: ${fileRequest.file_count}\nURL: ${fileRequest.url}`;
+                        
+                        if (fileRequest.deadline) {
+                            info += `\nDeadline: ${fileRequest.deadline.deadline}`;
+                        }
+                        if (fileRequest.description) {
+                            info += `\nDescription: ${fileRequest.description}`;
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: info,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to get file request: ${validatedArgs.id}\n`;
+                        
+                        if (error.status === 404) {
+                            errorMessage += `\nError 404: File request not found - The ID "${validatedArgs.id}" doesn't exist or may have been deleted.`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\nError 403: Permission denied - You don't have permission to view this file request.`;
+                        } else {
+                            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+                        
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
+                }
+
+                case "list_file_requests": {
+                    try {
+                        ListFileRequestsSchema.parse(args);
+                        const response = await dropbox.fileRequestsList();
+
+                        const fileRequests = response.result.file_requests.map((request: any) => 
+                            `ID: ${request.id} - Title: ${request.title} - Destination: ${request.destination} - File Count: ${request.file_count} - Status: ${request.is_open ? 'Open' : 'Closed'}`
+                        );
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `File requests:\n\n${fileRequests.join('\n') || 'No file requests found'}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to list file requests\n`;
+                        
+                        if (error.status === 403) {
+                            errorMessage += `\nError 403: Permission denied - You don't have permission to list file requests.`;
+                        } else if (error.status === 401) {
+                            errorMessage += `\nError 401: Unauthorized - Your access token may have expired or be invalid.`;
+                        } else {
+                            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+                        
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
+                }
+
+                case "delete_file_request": {
+                    const validatedArgs = DeleteFileRequestSchema.parse(args);
+                    
+                    try {
+                        const response = await dropbox.fileRequestsDelete({
+                            ids: validatedArgs.ids,
+                        });
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `File request(s) deleted successfully: ${validatedArgs.ids.join(', ')}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to delete file request(s): ${validatedArgs.ids.join(', ')}\n`;
+                        
+                        if (error.status === 409) {
+                            errorMessage += `\nError 409: Conflict - This usually means:\n` +
+                                         `• The file request must be closed before it can be deleted\n` +
+                                         `• The file request may have active uploads\n` +
+                                         `• You may not have permission to delete this file request\n` +
+                                         `\nTip: Try closing the file request first, then delete it.`;
+                        } else if (error.status === 404) {
+                            errorMessage += `\nError 404: File request not found - The ID may be invalid or already deleted.`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\nError 403: Permission denied - You don't have permission to delete this file request.`;
+                        } else {
+                            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+                        
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
+                }
+
+                case "update_file_request": {
+                    const validatedArgs = UpdateFileRequestSchema.parse(args);
+                    
+                    try {
+                        const response = await dropbox.fileRequestsUpdate({
+                            id: validatedArgs.id,
+                            title: validatedArgs.title,
+                            destination: validatedArgs.destination,
+                            description: validatedArgs.description,
+                            open: validatedArgs.open,
+                        });
+
+                        const request = response.result;
+                        let statusMessage = `File request updated successfully:\n`;
+                        statusMessage += `ID: ${request.id}\n`;
+                        statusMessage += `Title: ${request.title}\n`;
+                        statusMessage += `Destination: ${request.destination}\n`;
+                        if (request.description) {
+                            statusMessage += `Description: ${request.description}\n`;
+                        }
+                        statusMessage += `Status: ${request.is_open ? 'Open' : 'Closed'}\n`;
+                        statusMessage += `File Count: ${request.file_count}`;
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: statusMessage,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to update file request: ${validatedArgs.id}\n`;
+                        
+                        if (error.status === 404) {
+                            errorMessage += `\nError 404: File request not found - The ID may be invalid.`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\nError 403: Permission denied - You don't have permission to update this file request.`;
+                        } else if (error.status === 400) {
+                            errorMessage += `\nError 400: Bad request - Check that the destination path exists and parameters are valid.`;
+                        } else {
+                            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+                        
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
+                }
+
                 default:
                     throw new Error(`Unknown tool: ${name}`);
             }
@@ -873,7 +1152,6 @@ async function handleMcpRequest(req: Request, res: Response) {
             await transport.handleRequest(req, res, req.body);
         });
         res.on('close', () => {
-            console.log('Request closed');
             transport.close();
             server.close();
         });
@@ -893,7 +1171,6 @@ async function handleMcpRequest(req: Request, res: Response) {
 }
 
 app.get('/mcp', async (req: Request, res: Response) => {
-    console.log('Received GET MCP request');
     res.writeHead(405).end(JSON.stringify({
         jsonrpc: "2.0",
         error: {
@@ -905,7 +1182,6 @@ app.get('/mcp', async (req: Request, res: Response) => {
 });
 
 app.delete('/mcp', async (req: Request, res: Response) => {
-    console.log('Received DELETE MCP request');
     res.writeHead(405).end(JSON.stringify({
         jsonrpc: "2.0",
         error: {
@@ -940,7 +1216,6 @@ async function handleSseRequest(req: Request, res: Response) {
 
     // Set up cleanup when connection closes
     res.on('close', async () => {
-        console.log(`SSE connection closed for transport: ${transport.sessionId}`);
         try {
             transports.delete(transport.sessionId);
         } finally {
