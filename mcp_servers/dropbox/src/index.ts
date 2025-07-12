@@ -18,16 +18,16 @@ import { Dropbox } from 'dropbox';
 function patchFetchResponse() {
     const originalFetch = global.fetch;
     if (originalFetch) {
-        global.fetch = async function(...args: Parameters<typeof fetch>) {
+        global.fetch = async function (...args: Parameters<typeof fetch>) {
             const response = await originalFetch.apply(this, args);
-            
+
             // Add buffer() method if it doesn't exist (for compatibility with Dropbox SDK)
             if (!('buffer' in response) && typeof response.arrayBuffer === 'function') {
-                (response as any).buffer = function() {
+                (response as any).buffer = function () {
                     return this.arrayBuffer().then((data: ArrayBuffer) => Buffer.from(data));
                 };
             }
-            
+
             return response;
         };
     }
@@ -44,6 +44,81 @@ const asyncLocalStorage = new AsyncLocalStorage<{
 // Helper function to get Dropbox client from context
 function getDropboxClient() {
     return asyncLocalStorage.getStore()!.dropboxClient;
+}
+
+/**
+ * Formats Dropbox API errors with detailed information for better debugging
+ * @param error The error object from Dropbox API
+ * @param operation The operation that failed (e.g., "upload file", "share folder")
+ * @param resource The resource being operated on (e.g., file path, folder name)
+ * @returns Formatted error message with detailed information
+ */
+function formatDropboxError(error: any, operation: string, resource?: string): string {
+    let errorMessage = `Failed to ${operation}`;
+    if (resource) {
+        errorMessage += `: "${resource}"`;
+    }
+    errorMessage += `\n`;
+
+    // Add detailed API error information
+    errorMessage += `\n🔍 Detailed Error Information:\n`;
+    errorMessage += `• HTTP Status: ${error.status || 'Unknown'}\n`;
+    errorMessage += `• Error Summary: ${error.error_summary || 'Not provided'}\n`;
+    errorMessage += `• Error Message: ${error.message || 'Not provided'}\n`;
+
+    // Add the full error object for debugging if available
+    if (error.error) {
+        errorMessage += `• API Error Details: ${JSON.stringify(error.error, null, 2)}\n`;
+    }
+
+    return errorMessage;
+}
+
+/**
+ * Adds common HTTP status code explanations to error messages
+ * @param errorMessage The base error message
+ * @param error The error object
+ * @param context Additional context for specific status codes
+ * @returns Enhanced error message with status-specific guidance
+ */
+function addCommonErrorGuidance(errorMessage: string, error: any, context?: {
+    resource?: string;
+    operation?: string;
+    requiresAuth?: boolean;
+    requiresOwnership?: boolean;
+}): string {
+    const status = error.status;
+    const resource = context?.resource || 'resource';
+
+    if (status === 400) {
+        errorMessage += `\n❌ Error 400: Bad request - Invalid parameters or malformed request.\n\n💡 Common causes:\n• Invalid path format (must start with '/')\n• Invalid parameter values\n• Malformed request data\n• Resource doesn't exist or isn't accessible`;
+    } else if (status === 401) {
+        errorMessage += `\n❌ Error 401: Unauthorized - Your access token may be invalid or expired.\n\n💡 Check:\n• Access token is valid and not expired\n• Token has the required permissions`;
+        if (context?.requiresAuth) {
+            errorMessage += `\n• Token has the specific scope needed for this operation`;
+        }
+        errorMessage += `\n• You're authenticated with the correct Dropbox account`;
+    } else if (status === 403) {
+        errorMessage += `\n❌ Error 403: Permission denied - You don't have permission for this operation.\n\n💡 This could mean:\n• You don't own the ${resource}\n• Your access token lacks required permissions`;
+        if (context?.requiresOwnership) {
+            errorMessage += `\n• Only the owner can perform this operation`;
+        }
+        errorMessage += `\n• The ${resource} has restricted access settings`;
+    } else if (status === 404) {
+        errorMessage += `\n❌ Error 404: Not found - The ${resource} doesn't exist.\n\n💡 Make sure:\n• The path is correct and starts with '/'\n• The ${resource} exists in your Dropbox\n• You have access to the ${resource}\n• The ${resource} hasn't been moved or deleted`;
+    } else if (status === 409) {
+        errorMessage += `\n❌ Error 409: Conflict - Operation failed due to a conflict.\n\n💡 Common causes:\n• Resource already exists\n• Concurrent modifications\n• Operation conflicts with current state\n• Name or path conflicts`;
+    } else if (status === 429) {
+        errorMessage += `\n❌ Error 429: Too many requests - You're hitting rate limits.\n\n💡 Tips:\n• Wait a moment before trying again\n• Reduce the frequency of requests\n• Consider batching operations if available`;
+    } else if (status === 507) {
+        errorMessage += `\n❌ Error 507: Insufficient storage - Operation would exceed storage limits.`;
+    } else if (status && status >= 500) {
+        errorMessage += `\n❌ Error ${status}: Server error - Dropbox is experiencing issues.\n\n💡 Try:\n• Waiting a moment and trying again\n• The issue is likely temporary`;
+    } else if (status) {
+        errorMessage += `\n❌ Error ${status}: ${error.message || error.error_summary || 'Unknown error'}`;
+    }
+
+    return errorMessage;
 }
 
 // Schema definitions
@@ -163,7 +238,7 @@ const GetPreviewSchema = z.object({
 });
 
 const AddFileMemberSchema = z.object({
-    file: z.string().describe("Path of the file to add member to"),
+    file: z.string().describe("File ID (format: 'id:...') or path of the file to add member to. Note: Dropbox API requires file ID, but path will be automatically converted."),
     members: z.array(z.object({
         email: z.string().describe("Email address of the member"),
         access_level: z.enum(['viewer', 'editor']).optional().default('viewer').describe("Access level for the member"),
@@ -722,35 +797,88 @@ const getDropboxMcpServer = () => {
 
                 case "create_folder": {
                     const validatedArgs = CreateFolderSchema.parse(args);
-                    const response = await dropbox.filesCreateFolderV2({
-                        path: validatedArgs.path,
-                        autorename: validatedArgs.autorename,
-                    });
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Folder created successfully: ${response.result.metadata.path_display}`,
-                            },
-                        ],
-                    };
+                    try {
+                        const response = await dropbox.filesCreateFolderV2({
+                            path: validatedArgs.path,
+                            autorename: validatedArgs.autorename,
+                        });
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `✅ Folder created successfully: ${response.result.metadata.path_display}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = formatDropboxError(error, "create folder", validatedArgs.path);
+
+                        // Add specific guidance for create_folder operation
+                        if (error.status === 409) {
+                            errorMessage += `\n❌ Folder already exists - A folder with this name already exists.\n\n💡 Try:\n• Use a different folder name\n• Set 'autorename' to true to automatically rename\n• Check existing folders with 'list_folder'`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\n❌ Permission denied - You don't have permission to create folders here.\n\n💡 This could mean:\n• You don't have write access to the parent directory\n• The path is in a restricted area\n• Your access token lacks file creation permissions`;
+                        } else {
+                            // Use common error guidance for other status codes
+                            errorMessage = addCommonErrorGuidance(errorMessage, error, {
+                                resource: "folder",
+                                operation: "create folder"
+                            });
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "delete_file": {
                     const validatedArgs = DeleteFileSchema.parse(args);
-                    const response = await dropbox.filesDeleteV2({
-                        path: validatedArgs.path,
-                    });
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `File/folder deleted successfully: ${response.result.metadata.path_display}`,
-                            },
-                        ],
-                    };
+                    try {
+                        const response = await dropbox.filesDeleteV2({
+                            path: validatedArgs.path,
+                        });
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `✅ File/folder deleted successfully: ${response.result.metadata.path_display}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = formatDropboxError(error, "delete file/folder", validatedArgs.path);
+
+                        // Add specific guidance for delete operation
+                        if (error.status === 409) {
+                            errorMessage += `\n❌ Cannot delete - File or folder cannot be deleted.\n\n💡 Common causes:\n• File is currently in use or locked\n• Folder is not empty and requires recursive deletion\n• Shared folder with active members\n• File is being synced or uploaded\n\n💡 Try:\n• Wait a moment and try again\n• For shared folders, remove members first\n• Check if file is locked or in use`;
+                        } else {
+                            // Use common error guidance for other status codes
+                            errorMessage = addCommonErrorGuidance(errorMessage, error, {
+                                resource: "file/folder",
+                                operation: "delete",
+                                requiresOwnership: true
+                            });
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "move_file": {
@@ -909,19 +1037,46 @@ const getDropboxMcpServer = () => {
 
                 case "share_file": {
                     const validatedArgs = ShareFileSchema.parse(args);
-                    const response = await dropbox.sharingCreateSharedLinkWithSettings({
-                        path: validatedArgs.path,
-                        settings: validatedArgs.settings as any,
-                    });
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Shared link created: ${response.result.url}`,
-                            },
-                        ],
-                    };
+                    try {
+                        const response = await dropbox.sharingCreateSharedLinkWithSettings({
+                            path: validatedArgs.path,
+                            settings: validatedArgs.settings as any,
+                        });
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `✅ Shared link created successfully!\n\n🔗 URL: ${response.result.url}\n📁 Path: ${response.result.path_lower}\n👀 Visibility: ${response.result.link_permissions?.resolved_visibility?.['.tag'] || 'Unknown'}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = formatDropboxError(error, "create shared link", validatedArgs.path);
+
+                        // Add specific guidance for share_file operation
+                        if (error.status === 409) {
+                            errorMessage += `\n❌ Shared link already exists or conflicts with settings.\n\n💡 Common causes:\n• A shared link already exists for this file\n• Link settings conflict with existing link\n• Sharing settings don't allow public links\n\n💡 Try:\n• Use 'get_shared_links' to check existing links\n• Update existing link settings instead\n• Use different link visibility settings`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\n❌ Cannot create shared link - File sharing restrictions.\n\n💡 This could mean:\n• File is in a team folder with link sharing disabled\n• Your account doesn't allow public link sharing\n• File type restrictions prevent sharing\n• Admin policies restrict link creation`;
+                        } else {
+                            // Use common error guidance for other status codes
+                            errorMessage = addCommonErrorGuidance(errorMessage, error, {
+                                resource: "file",
+                                operation: "create shared link"
+                            });
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "get_shared_links": {
@@ -950,7 +1105,7 @@ const getDropboxMcpServer = () => {
 
                     // Convert content to buffer based on provided content type
                     let fileContent: Buffer;
-                    
+
                     if (validatedArgs.text_content) {
                         // Handle plain text content
                         fileContent = Buffer.from(validatedArgs.text_content, 'utf8');
@@ -1380,46 +1535,167 @@ const getDropboxMcpServer = () => {
 
                 case "get_preview": {
                     const validatedArgs = GetPreviewSchema.parse(args);
-                    const response = await dropbox.filesGetPreview({
-                        path: validatedArgs.path,
-                    });
 
-                    // Convert preview buffer to base64 for safe transmission
-                    const previewBuffer = (response.result as any).fileBinary as Buffer;
-                    const base64Preview = previewBuffer ? previewBuffer.toString('base64') : 'No preview available';
+                    try {
+                        const response = await dropbox.filesGetPreview({
+                            path: validatedArgs.path,
+                        });
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Preview (base64): ${base64Preview}`,
-                            },
-                        ],
-                    };
+                        // Convert preview buffer to base64 for safe transmission
+                        const previewBuffer = (response.result as any).fileBinary as Buffer;
+                        const base64Preview = previewBuffer ? previewBuffer.toString('base64') : 'No preview available';
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `Preview (base64): ${base64Preview}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to get preview for: "${validatedArgs.path}"\n`;
+
+                        // Add detailed API error information
+                        errorMessage += `\n🔍 Detailed Error Information:\n`;
+                        errorMessage += `• HTTP Status: ${error.status || 'Unknown'}\n`;
+                        errorMessage += `• Error Summary: ${error.error_summary || 'Not provided'}\n`;
+                        errorMessage += `• Error Message: ${error.message || 'Not provided'}\n`;
+
+                        if (error.error) {
+                            errorMessage += `• API Error Details: ${JSON.stringify(error.error, null, 2)}\n`;
+                        }
+
+                        // Check for specific Dropbox API errors
+                        if (error.error_summary && error.error_summary.includes('unsupported_extension')) {
+                            errorMessage += `\n❌ Unsupported file extension - This file type doesn't support preview generation.\n\n📋 Supported file types:\n\n📄 PDF Preview:\n• .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides\n• .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf\n\n🌐 HTML Preview:\n• .csv, .ods, .xls, .xlsm, .gsheet, .xlsx\n\n💡 Try:\n• Converting your file to a supported format\n• Using 'download_file' to get the file content instead\n• Using 'get_thumbnail' for image files`;
+                        } else if (error.error_summary && error.error_summary.includes('unsupported_content')) {
+                            errorMessage += `\n❌ Unsupported file content - The file content is not supported for preview generation.\n\n💡 This could mean:\n• File is corrupted or empty\n• File format is not recognized\n• File content doesn't match the extension\n\n💡 Try:\n• Checking if the file can be opened normally\n• Re-saving the file in the original application\n• Using 'download_file' to get the raw file content`;
+                        } else if (error.error_summary && error.error_summary.includes('in_progress')) {
+                            errorMessage += `\n⏳ Preview generation in progress - The preview is still being generated.\n\n💡 This is normal for:\n• Large files\n• Newly uploaded files\n• Complex documents\n\n💡 Try:\n• Waiting a few moments and trying again\n• The preview will be ready shortly`;
+                        } else if (error.status === 409) {
+                            errorMessage += `\n❌ Error 409: Conflict - Preview generation failed due to a conflict.\n\n💡 Common causes:\n• File is currently being modified\n• File is locked or in use\n• Temporary server conflict\n\n💡 Try:\n• Waiting a moment and trying again\n• Using get_file_info to check file status`;
+                        } else if (error.status === 404) {
+                            errorMessage += `\n❌ Error 404: File not found - The path "${validatedArgs.path}" doesn't exist.\n\n💡 Make sure:\n• The file path is correct and starts with '/'\n• The file exists in your Dropbox\n• You have access to the file`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\n❌ Error 403: Permission denied - You don't have permission to preview this file.\n\n💡 This could mean:\n• The file is in a shared space you don't have access to\n• Your access token may have insufficient scope (needs 'files.content.read')`;
+                        } else if (error.status === 400) {
+                            errorMessage += `\n❌ Error 400: Invalid request - Check the file path format.\n\n💡 Requirements:\n• Path must start with '/' (e.g., '/Documents/file.pdf')\n• File must exist and be accessible\n• File extension must be supported for preview`;
+                        } else if (error.status === 401) {
+                            errorMessage += `\n❌ Error 401: Unauthorized - Your access token may be invalid or expired.\n\n💡 Check:\n• Access token is valid and not expired\n• Token has 'files.content.read' permission\n• You're authenticated with the correct Dropbox account`;
+                        } else if (error.status === 429) {
+                            errorMessage += `\n❌ Error 429: Too many requests - You're hitting rate limits.\n\n💡 Tips:\n• Wait a moment before trying again\n• Reduce the frequency of preview requests\n• Consider generating previews in smaller batches`;
+                        } else {
+                            errorMessage += `\n❌ Error ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "add_file_member": {
                     const validatedArgs = AddFileMemberSchema.parse(args);
-                    const members = validatedArgs.members.map(member => ({
-                        member: { ".tag": "email", email: member.email },
-                        access_level: { ".tag": member.access_level }
-                    }));
 
-                    const response = await dropbox.sharingAddFileMember({
-                        file: validatedArgs.file,
-                        members: members as any,
-                        quiet: validatedArgs.quiet,
-                        custom_message: validatedArgs.custom_message,
-                    });
+                    try {
+                        // First, get the file ID if a path was provided
+                        let fileId = validatedArgs.file;
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Member(s) added to file: ${validatedArgs.file}`,
-                            },
-                        ],
-                    };
+                        // If the file parameter doesn't start with "id:", treat it as a path and get the file ID
+                        if (!fileId.startsWith('id:')) {
+                            try {
+                                const fileInfo = await dropbox.filesGetMetadata({
+                                    path: fileId,
+                                });
+                                fileId = (fileInfo.result as any).id;
+                                if (!fileId) {
+                                    return {
+                                        content: [
+                                            {
+                                                type: "text",
+                                                text: `❌ Failed to get file ID for path: "${validatedArgs.file}"\n\nThe file exists but no ID was returned. This may be due to file type or permission limitations.`,
+                                            },
+                                        ],
+                                    };
+                                }
+                            } catch (pathError: any) {
+                                return {
+                                    content: [
+                                        {
+                                            type: "text",
+                                            text: `❌ Failed to resolve file path to ID: "${validatedArgs.file}"\n\nError: ${pathError.status} - ${pathError.message || pathError.error_summary || 'Unknown error'}\n\n💡 Make sure:\n• The file path is correct and starts with '/'\n• The file exists in your Dropbox\n• You have access to the file`,
+                                        },
+                                    ],
+                                };
+                            }
+                        }
+
+                        const members = validatedArgs.members.map(member => ({
+                            ".tag": "email",
+                            email: member.email
+                        }));
+
+                        const response = await dropbox.sharingAddFileMember({
+                            file: fileId,
+                            members: members as any,
+                            access_level: { ".tag": validatedArgs.members[0].access_level },
+                            quiet: validatedArgs.quiet,
+                            custom_message: validatedArgs.custom_message,
+                        });
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `✅ Member(s) added to file successfully!\n\n📄 File: ${validatedArgs.file}\n📧 Members added: ${validatedArgs.members.map(m => `${m.email} (${m.access_level})`).join(', ')}\n🔑 File ID: ${fileId}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = `Failed to add member(s) to file: "${validatedArgs.file}"\n`;
+
+                        // Add detailed error information from Dropbox API
+                        errorMessage += `\n🔍 Detailed Error Information:\n`;
+                        errorMessage += `• HTTP Status: ${error.status || 'Unknown'}\n`;
+                        errorMessage += `• Error Summary: ${error.error_summary || 'Not provided'}\n`;
+                        errorMessage += `• Error Message: ${error.message || 'Not provided'}\n`;
+
+                        // Add the full error object for debugging
+                        if (error.error) {
+                            errorMessage += `• API Error Details: ${JSON.stringify(error.error, null, 2)}\n`;
+                        }
+
+                        if (error.status === 400) {
+                            errorMessage += `\n❌ Error 400: Bad request - Invalid parameters or file not shareable.\n\n💡 Common causes:\n• File ID is invalid or malformed\n• File doesn't exist or isn't accessible\n• Invalid email address format\n• File is not shareable (e.g., system files)\n• File must be owned by you to add members\n\n💡 Try:\n• Verify the file exists and you own it\n• Check email address format\n• Ensure the file supports member sharing`;
+                        } else if (error.status === 404) {
+                            errorMessage += `\n❌ Error 404: File not found - The file "${validatedArgs.file}" doesn't exist.\n\n💡 Make sure:\n• The file path/ID is correct\n• The file exists in your Dropbox\n• You have access to the file\n• The file hasn't been moved or deleted`;
+                        } else if (error.status === 403) {
+                            errorMessage += `\n❌ Error 403: Permission denied - You don't have permission to add members to this file.\n\n💡 This could mean:\n• You're not the owner of the file\n• The file is in a shared folder with restricted permissions\n• Your access token lacks sharing permissions\n• The file sharing settings don't allow member additions`;
+                        } else if (error.status === 409) {
+                            errorMessage += `\n❌ Error 409: Conflict - Member addition failed due to a conflict.\n\n💡 Common causes:\n• Member is already added to this file\n• Email address is associated with the file owner\n• Concurrent member modifications\n• File sharing limit reached\n\n💡 Try:\n• Check if the member is already added with 'list_file_members'\n• Use a different email address\n• Try again in a moment`;
+                        } else if (error.status === 401) {
+                            errorMessage += `\n❌ Error 401: Unauthorized - Your access token may be invalid or expired.\n\n💡 Check:\n• Access token is valid and not expired\n• Token has 'sharing.write' permission\n• You're authenticated with the correct Dropbox account`;
+                        } else if (error.status === 429) {
+                            errorMessage += `\n❌ Error 429: Too many requests - You're hitting rate limits.\n\n💡 Tips:\n• Wait a moment before trying again\n• Reduce the frequency of sharing requests\n• Add members in smaller batches`;
+                        } else {
+                            errorMessage += `\n❌ Error ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}\n\n💡 General tips:\n• Make sure the file is owned by you\n• Verify email addresses are valid\n• Check file permissions and ownership\n• Ensure the file supports member sharing`;
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "list_file_members": {
@@ -1463,25 +1739,53 @@ const getDropboxMcpServer = () => {
 
                 case "share_folder": {
                     const validatedArgs = ShareFolderSchema.parse(args);
-                    const response = await dropbox.sharingShareFolder({
-                        path: validatedArgs.path,
-                        member_policy: { ".tag": validatedArgs.member_policy } as any,
-                        acl_update_policy: { ".tag": validatedArgs.acl_update_policy } as any,
-                        shared_link_policy: { ".tag": validatedArgs.shared_link_policy } as any,
-                        force_async: validatedArgs.force_async,
-                    });
 
-                    const result = response.result as any;
-                    const sharedFolderId = result.shared_folder_id || result.async_job_id || 'Unknown';
+                    try {
+                        const response = await dropbox.sharingShareFolder({
+                            path: validatedArgs.path,
+                            member_policy: { ".tag": validatedArgs.member_policy } as any,
+                            acl_update_policy: { ".tag": validatedArgs.acl_update_policy } as any,
+                            shared_link_policy: { ".tag": validatedArgs.shared_link_policy } as any,
+                            force_async: validatedArgs.force_async,
+                        });
 
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Folder shared: ${validatedArgs.path}\nShared Folder ID: ${sharedFolderId}`,
-                            },
-                        ],
-                    };
+                        const result = response.result as any;
+                        const sharedFolderId = result.shared_folder_id || result.async_job_id || 'Unknown';
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `✅ Folder shared successfully!\n\n📁 Folder: ${validatedArgs.path}\n🔑 Shared Folder ID: ${sharedFolderId}\n👥 Member Policy: ${validatedArgs.member_policy}\n🔐 ACL Update Policy: ${validatedArgs.acl_update_policy}\n🔗 Shared Link Policy: ${validatedArgs.shared_link_policy}`,
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        let errorMessage = formatDropboxError(error, "share folder", validatedArgs.path);
+
+                        // Add specific guidance for share_folder operation
+                        if (error.status === 409) {
+                            errorMessage += `\n❌ Folder sharing conflict - This folder is already shared or conflicts with existing sharing.\n\n💡 Common causes:\n• Folder is already shared (check with 'get_file_info')\n• Parent folder is already shared (can't share subfolder)\n• Folder contains shared subfolders\n• Another sharing operation is in progress\n• Folder name conflicts with existing shared folder\n\n💡 Try:\n• Check if folder is already shared: use 'get_file_info' to see sharing status\n• Wait a moment and try again if operation is in progress\n• Use 'list_folder_members' if folder is already shared\n• Unshare the folder first, then reshare with new settings`;
+                        } else if (error.status === 400) {
+                            errorMessage += `\n❌ Invalid folder path or sharing parameters.\n\n💡 Check:\n• Folder path format (must start with '/' and be a valid folder)\n• Member policy: 'team' or 'anyone'\n• ACL update policy: 'owner' or 'editors'\n• Shared link policy: 'members' or 'anyone'\n• Path points to a folder, not a file`;
+                        } else {
+                            // Use common error guidance for other status codes
+                            errorMessage = addCommonErrorGuidance(errorMessage, error, {
+                                resource: "folder",
+                                operation: "share folder",
+                                requiresOwnership: true
+                            });
+                        }
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: errorMessage,
+                                },
+                            ],
+                        };
+                    }
                 }
 
                 case "list_folder_members": {
