@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/src/index.js",
+    "start:modular": "node build/src/index-modular.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
