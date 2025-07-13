@@ -27,13 +27,13 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const failed = entries.filter((entry: any) => entry['.tag'] === 'failure').length;
 
                     let resultMessage = `Batch delete completed:\n`;
-                    resultMessage += `✅ Successful: ${successful}\n`;
-                    resultMessage += `❌ Failed: ${failed}`;
+                    resultMessage += `Successful: ${successful}\n`;
+                    resultMessage += `Failed: ${failed}`;
 
                     if (failed > 0) {
                         const failureDetails = entries
                             .filter((entry: any) => entry['.tag'] === 'failure')
-                            .map((entry: any) => `  • ${entry.failure?.reason || 'Unknown error'}`)
+                            .map((entry: any) => `  - ${entry.failure?.reason || 'Unknown error'}`)
                             .join('\n');
                         resultMessage += `\n\nFailure details:\n${failureDetails}`;
                     }
@@ -51,7 +51,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `Batch delete started (async operation)\nJob ID: ${result.async_job_id}\n\n⏳ The operation is processing in the background.\n💡 Use 'check_batch_job_status' with this Job ID to monitor progress and get final results.`,
+                                text: `Batch delete started (async operation)\nJob ID: ${result.async_job_id}\n\nThe operation is processing in the background.\nUse 'check_batch_job_status' with this Job ID to monitor progress and get final results.`,
                             },
                         ],
                     };
@@ -108,13 +108,13 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const failed = entries.filter((entry: any) => entry['.tag'] === 'failure').length;
 
                     let resultMessage = `Batch move completed:\n`;
-                    resultMessage += `✅ Successful: ${successful}\n`;
-                    resultMessage += `❌ Failed: ${failed}`;
+                    resultMessage += `Successful: ${successful}\n`;
+                    resultMessage += `Failed: ${failed}`;
 
                     if (failed > 0) {
                         const failureDetails = entries
                             .filter((entry: any) => entry['.tag'] === 'failure')
-                            .map((entry: any) => `  • ${entry.failure?.reason || 'Unknown error'}`)
+                            .map((entry: any) => `  - ${entry.failure?.reason || 'Unknown error'}`)
                             .join('\n');
                         resultMessage += `\n\nFailure details:\n${failureDetails}`;
                     }
@@ -189,13 +189,13 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const failed = entries.filter((entry: any) => entry['.tag'] === 'failure').length;
 
                     let resultMessage = `Batch copy completed:\n`;
-                    resultMessage += `✅ Successful: ${successful}\n`;
-                    resultMessage += `❌ Failed: ${failed}`;
+                    resultMessage += `Successful: ${successful}\n`;
+                    resultMessage += `Failed: ${failed}`;
 
                     if (failed > 0) {
                         const failureDetails = entries
                             .filter((entry: any) => entry['.tag'] === 'failure')
-                            .map((entry: any) => `  • ${entry.failure?.reason || 'Unknown error'}`)
+                            .map((entry: any) => `  - ${entry.failure?.reason || 'Unknown error'}`)
                             .join('\n');
                         resultMessage += `\n\nFailure details:\n${failureDetails}`;
                     }
@@ -213,7 +213,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `Batch copy started (async operation)\nJob ID: ${result.async_job_id}\n\n⏳ The operation is processing in the background.\n💡 Next Steps:\n1. Use 'check_batch_job_status' tool with this Job ID\n2. Monitor progress until completion\n3. The tool will show final results (✅ successful / ❌ failed counts)\n\nTip: Large batches or many files typically trigger async processing.`,
+                                text: `Batch copy started (async operation)\nJob ID: ${result.async_job_id}\n\nThe operation is processing in the background.\nNext Steps:\n1. Use 'check_batch_job_status' tool with this Job ID\n2. Monitor progress until completion\n3. The tool will show final results (successful / failed counts)\n\nTip: Large batches or many files typically trigger async processing.`,
                             },
                         ],
                     };
@@ -233,11 +233,11 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                 if (error.status === 403) {
                     errorMessage += `\nError 403: Permission denied - You may not have permission to copy some of these files/folders.`;
                 } else if (error.status === 400) {
-                    errorMessage += `\nError 400: Bad request - Check that all source and destination paths are valid.\n\n💡 Batch Copy Parameter Guide:\n• Use simple entries: [{"from_path": "/source", "to_path": "/dest"}]\n• Set top-level 'autorename: true' to auto-rename conflicts\n• Don't include per-entry options like 'allow_shared_folder'\n• Ensure all paths start with '/' and files/folders exist`;
+                    errorMessage += `\nError 400: Bad request - Check that all source and destination paths are valid.\n\nBatch Copy Parameter Guide:\n- Use simple entries: [{"from_path": "/source", "to_path": "/dest"}]\n- Set top-level 'autorename: true' to auto-rename conflicts\n- Don't include per-entry options like 'allow_shared_folder'\n- Ensure all paths start with '/' and files/folders exist`;
                 } else if (error.status === 409) {
-                    errorMessage += `\nError 409: Conflict - Some destination paths may already exist or there are path conflicts.\n\n💡 Tips:\n• Set top-level 'autorename: true' to automatically rename conflicting files\n• Check for duplicate destination paths in your batch\n• Verify destination folders exist`;
+                    errorMessage += `\nError 409: Conflict - Some destination paths may already exist or there are path conflicts.\n\nTips:\n- Set top-level 'autorename: true' to automatically rename conflicting files\n- Check for duplicate destination paths in your batch\n- Verify destination folders exist`;
                 } else if (error.status === 429) {
-                    errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\n💡 Tips:\n• Try with fewer files (batches of 100-500)\n• Wait a few seconds between requests\n• Consider using smaller batch sizes\n• Batch operations are more efficient than individual calls`;
+                    errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\nTips:\n- Try with fewer files (batches of 100-500)\n- Wait a few seconds between requests\n- Consider using smaller batch sizes\n- Batch operations are more efficient than individual calls`;
                 } else {
                     errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
                 }
@@ -305,8 +305,8 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
 
                     let resultMessage = `Batch ${operationType} operation completed!\n`;
                     resultMessage += `Job ID: ${validatedArgs.async_job_id}\n`;
-                    resultMessage += `✅ Successful: ${successful}\n`;
-                    resultMessage += `❌ Failed: ${failed}`;
+                    resultMessage += `Successful: ${successful}\n`;
+                    resultMessage += `Failed: ${failed}`;
 
                     if (failed > 0) {
                         const failureDetails = entries
@@ -381,9 +381,9 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const successful = entries.filter((entry: any) => entry['.tag'] === 'success').length;
                     const failed = entries.length - successful;
 
-                    let resultMessage = `🔒 File locking batch operation completed!\n\n`;
-                    resultMessage += `✅ Successfully locked: ${successful} file(s)\n`;
-                    resultMessage += `❌ Failed to lock: ${failed} file(s)`;
+                    let resultMessage = `File locking batch operation completed!\n\n`;
+                    resultMessage += `Successfully locked: ${successful} file(s)\n`;
+                    resultMessage += `Failed to lock: ${failed} file(s)`;
 
                     if (failed > 0) {
                         const failureDetails = entries
@@ -408,9 +408,9 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const successful = entries.filter((entry: any) => entry['.tag'] === 'success').length;
                     const failed = entries.length - successful;
 
-                    let resultMessage = `🔒 File locking batch operation completed!\n\n`;
-                    resultMessage += `✅ Successfully locked: ${successful} file(s)\n`;
-                    resultMessage += `❌ Failed to lock: ${failed} file(s)`;
+                    let resultMessage = `File locking batch operation completed!\n\n`;
+                    resultMessage += `Successfully locked: ${successful} file(s)\n`;
+                    resultMessage += `Failed to lock: ${failed} file(s)`;
 
                     if (failed > 0) {
                         const failureDetails = entries
@@ -434,7 +434,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `🔄 File locking batch operation started (large batch detected)\n\n🆔 Job ID: ${jobId}\n\n💡 Use 'check_batch_job_status' with this job ID to monitor progress.`,
+                                text: `File locking batch operation started (large batch detected)\n\nJob ID: ${jobId}\n\nUse 'check_batch_job_status' with this job ID to monitor progress.`,
                             },
                         ],
                     };
@@ -443,7 +443,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `⚠️ Unknown response from file locking operation: ${result['.tag'] || 'undefined'}\nFull response: ${JSON.stringify(result, null, 2)}`,
+                                text: `Unknown response from file locking operation: ${result['.tag'] || 'undefined'}\nFull response: ${JSON.stringify(result, null, 2)}`,
                             },
                         ],
                     };
@@ -452,7 +452,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                 let errorMessage = `Failed to lock files\n`;
 
                 if (error.status === 403) {
-                    errorMessage += `\nError 403: Permission denied - You don't have permission to lock these files.\n\n💡 File locking may require:\n• Edit permissions on the files\n• Files to be in shared folders you manage\n• Dropbox Business account features`;
+                    errorMessage += `\nError 403: Permission denied - You don't have permission to lock these files.\n\nFile locking may require:\n- Edit permissions on the files\n- Files to be in shared folders you manage\n- Dropbox Business account features`;
                 } else if (error.status === 404) {
                     errorMessage += `\nError 404: One or more files not found - Check that all file paths exist.`;
                 } else if (error.status === 400) {
@@ -490,9 +490,9 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const successful = entries.filter((entry: any) => entry['.tag'] === 'success').length;
                     const failed = entries.length - successful;
 
-                    let resultMessage = `🔓 File unlocking batch operation completed!\n\n`;
-                    resultMessage += `✅ Successfully unlocked: ${successful} file(s)\n`;
-                    resultMessage += `❌ Failed to unlock: ${failed} file(s)`;
+                    let resultMessage = `File unlocking batch operation completed!\n\n`;
+                    resultMessage += `Successfully unlocked: ${successful} file(s)\n`;
+                    resultMessage += `Failed to unlock: ${failed} file(s)`;
 
                     if (failed > 0) {
                         const failureDetails = entries
@@ -517,9 +517,9 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                     const successful = entries.filter((entry: any) => entry['.tag'] === 'success').length;
                     const failed = entries.length - successful;
 
-                    let resultMessage = `🔓 File unlocking batch operation completed!\n\n`;
-                    resultMessage += `✅ Successfully unlocked: ${successful} file(s)\n`;
-                    resultMessage += `❌ Failed to unlock: ${failed} file(s)`;
+                    let resultMessage = `File unlocking batch operation completed!\n\n`;
+                    resultMessage += `Successfully unlocked: ${successful} file(s)\n`;
+                    resultMessage += `Failed to unlock: ${failed} file(s)`;
 
                     if (failed > 0) {
                         const failureDetails = entries
@@ -543,7 +543,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `🔄 File unlocking batch operation started (large batch detected)\n\n🆔 Job ID: ${jobId}\n\n💡 Use 'check_batch_job_status' with this job ID to monitor progress.`,
+                                text: `File unlocking batch operation started (large batch detected)\n\nJob ID: ${jobId}\n\nUse 'check_batch_job_status' with this job ID to monitor progress.`,
                             },
                         ],
                     };
@@ -552,7 +552,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                         content: [
                             {
                                 type: "text",
-                                text: `⚠️ Unknown response from file unlocking operation: ${result['.tag'] || 'undefined'}\nFull response: ${JSON.stringify(result, null, 2)}`,
+                                text: `Unknown response from file unlocking operation: ${result['.tag'] || 'undefined'}\nFull response: ${JSON.stringify(result, null, 2)}`,
                             },
                         ],
                     };
@@ -561,7 +561,7 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
                 let errorMessage = `Failed to unlock files\n`;
 
                 if (error.status === 403) {
-                    errorMessage += `\nError 403: Permission denied - You don't have permission to unlock these files.\n\n💡 You can only unlock:\n• Files you previously locked\n• Files in shared folders you manage\n• Files you have edit permissions for`;
+                    errorMessage += `\nError 403: Permission denied - You don't have permission to unlock these files.\n\nYou can only unlock:\n- Files you previously locked\n- Files in shared folders you manage\n- Files you have edit permissions for`;
                 } else if (error.status === 404) {
                     errorMessage += `\nError 404: One or more files not found - Check that all file paths exist.`;
                 } else if (error.status === 400) {

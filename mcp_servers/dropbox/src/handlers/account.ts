@@ -88,36 +88,36 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                 let errorMessage = `Failed to get preview for: "${validatedArgs.path}"\n`;
 
                 // Add detailed API error information
-                errorMessage += `\n🔍 Detailed Error Information:\n`;
-                errorMessage += `• HTTP Status: ${error.status || 'Unknown'}\n`;
-                errorMessage += `• Error Summary: ${error.error_summary || 'Not provided'}\n`;
-                errorMessage += `• Error Message: ${error.message || 'Not provided'}\n`;
+                errorMessage += `\nDetailed Error Information:\n`;
+                errorMessage += `- HTTP Status: ${error.status || 'Unknown'}\n`;
+                errorMessage += `- Error Summary: ${error.error_summary || 'Not provided'}\n`;
+                errorMessage += `- Error Message: ${error.message || 'Not provided'}\n`;
 
                 if (error.error) {
-                    errorMessage += `• API Error Details: ${JSON.stringify(error.error, null, 2)}\n`;
+                    errorMessage += `- API Error Details: ${JSON.stringify(error.error, null, 2)}\n`;
                 }
 
                 // Check for specific Dropbox API errors
                 if (error.error_summary && error.error_summary.includes('unsupported_extension')) {
-                    errorMessage += `\n❌ Unsupported file extension - This file type doesn't support preview generation.\n\n📋 Supported file types:\n\n📄 PDF Preview:\n• .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides\n• .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf\n\n🌐 HTML Preview:\n• .csv, .ods, .xls, .xlsm, .gsheet, .xlsx\n\n💡 Try:\n• Converting your file to a supported format\n• Using 'download_file' to get the file content instead\n• Using 'get_thumbnail' for image files`;
+                    errorMessage += `\nUnsupported file extension - This file type doesn't support preview generation.\n\nSupported file types:\n\nPDF Preview:\n- .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides\n- .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf\n\nHTML Preview:\n- .csv, .ods, .xls, .xlsm, .gsheet, .xlsx\n\nTry:\n- Converting your file to a supported format\n- Using 'download_file' to get the file content instead\n- Using 'get_thumbnail' for image files`;
                 } else if (error.error_summary && error.error_summary.includes('unsupported_content')) {
-                    errorMessage += `\n❌ Unsupported file content - The file content is not supported for preview generation.\n\n💡 This could mean:\n• File is corrupted or empty\n• File format is not recognized\n• File content doesn't match the extension\n\n💡 Try:\n• Checking if the file can be opened normally\n• Re-saving the file in the original application\n• Using 'download_file' to get the raw file content`;
+                    errorMessage += `\nUnsupported file content - The file content is not supported for preview generation.\n\nThis could mean:\n- File is corrupted or empty\n- File format is not recognized\n- File content doesn't match the extension\n\nTry:\n- Checking if the file can be opened normally\n- Re-saving the file in the original application\n- Using 'download_file' to get the raw file content`;
                 } else if (error.error_summary && error.error_summary.includes('in_progress')) {
-                    errorMessage += `\n⏳ Preview generation in progress - The preview is still being generated.\n\n💡 This is normal for:\n• Large files\n• Newly uploaded files\n• Complex documents\n\n💡 Try:\n• Waiting a few moments and trying again\n• The preview will be ready shortly`;
+                    errorMessage += `\nPreview generation in progress - The preview is still being generated.\n\nThis is normal for:\n- Large files\n- Newly uploaded files\n- Complex documents\n\nTry:\n- Waiting a few moments and trying again\n- The preview will be ready shortly`;
                 } else if (error.status === 409) {
-                    errorMessage += `\n❌ Error 409: Conflict - Preview generation failed due to a conflict.\n\n💡 Common causes:\n• File is currently being modified\n• File is locked or in use\n• Temporary server conflict\n\n💡 Try:\n• Waiting a moment and trying again\n• Using get_file_info to check file status`;
+                    errorMessage += `\nError 409: Conflict - Preview generation failed due to a conflict.\n\nCommon causes:\n- File is currently being modified\n- File is locked or in use\n- Temporary server conflict\n\nTry:\n- Waiting a moment and trying again\n- Using get_file_info to check file status`;
                 } else if (error.status === 404) {
-                    errorMessage += `\n❌ Error 404: File not found - The path "${validatedArgs.path}" doesn't exist.\n\n💡 Make sure:\n• The file path is correct and starts with '/'\n• The file exists in your Dropbox\n• You have access to the file`;
+                    errorMessage += `\nError 404: File not found - The path "${validatedArgs.path}" doesn't exist.\n\nMake sure:\n- The file path is correct and starts with '/'\n- The file exists in your Dropbox\n- You have access to the file`;
                 } else if (error.status === 403) {
-                    errorMessage += `\n❌ Error 403: Permission denied - You don't have permission to preview this file.\n\n💡 This could mean:\n• The file is in a shared space you don't have access to\n• Your access token may have insufficient scope (needs 'files.content.read')`;
+                    errorMessage += `\nError 403: Permission denied - You don't have permission to preview this file.\n\nThis could mean:\n- The file is in a shared space you don't have access to\n- Your access token may have insufficient scope (needs 'files.content.read')`;
                 } else if (error.status === 400) {
-                    errorMessage += `\n❌ Error 400: Invalid request - Check the file path format.\n\n💡 Requirements:\n• Path must start with '/' (e.g., '/Documents/file.pdf')\n• File must exist and be accessible\n• File extension must be supported for preview`;
+                    errorMessage += `\nError 400: Invalid request - Check the file path format.\n\nRequirements:\n- Path must start with '/' (e.g., '/Documents/file.pdf')\n- File must exist and be accessible\n- File extension must be supported for preview`;
                 } else if (error.status === 401) {
-                    errorMessage += `\n❌ Error 401: Unauthorized - Your access token may be invalid or expired.\n\n💡 Check:\n• Access token is valid and not expired\n• Token has 'files.content.read' permission\n• You're authenticated with the correct Dropbox account`;
+                    errorMessage += `\nError 401: Unauthorized - Your access token may be invalid or expired.\n\nCheck:\n- Access token is valid and not expired\n- Token has 'files.content.read' permission\n- You're authenticated with the correct Dropbox account`;
                 } else if (error.status === 429) {
-                    errorMessage += `\n❌ Error 429: Too many requests - You're hitting rate limits.\n\n💡 Tips:\n• Wait a moment before trying again\n• Reduce the frequency of preview requests\n• Consider generating previews in smaller batches`;
+                    errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\nTips:\n- Wait a moment before trying again\n- Reduce the frequency of preview requests\n- Consider generating previews in smaller batches`;
                 } else {
-                    errorMessage += `\n❌ Error ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
+                    errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
                 }
 
                 return {
@@ -146,7 +146,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `✅ URL content saved successfully!\n\n📄 File: ${metadata.name}\n📁 Path: ${metadata.path_display}\n📏 Size: ${metadata.size} bytes\n🕒 Modified: ${metadata.client_modified}\n\n🌐 Source URL: ${validatedArgs.url}`,
+                                text: `URL content saved successfully!\n\nFile: ${metadata.name}\nPath: ${metadata.path_display}\nSize: ${metadata.size} bytes\nModified: ${metadata.client_modified}\n\nSource URL: ${validatedArgs.url}`,
                             },
                         ],
                     };
@@ -156,7 +156,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `🔄 URL download started (large file detected)\n\n📄 Target: ${validatedArgs.path}\n🌐 Source: ${validatedArgs.url}\n🆔 Job ID: ${jobId}\n\n💡 Use 'save_url_check_job_status' with this job ID to monitor progress.`,
+                                text: `URL download started (large file detected)\n\nTarget: ${validatedArgs.path}\nSource: ${validatedArgs.url}\nJob ID: ${jobId}\n\nUse 'save_url_check_job_status' with this job ID to monitor progress.`,
                             },
                         ],
                     };
@@ -165,7 +165,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `⚠️ Unexpected response from save URL operation\n\nTarget: ${validatedArgs.path}\nSource: ${validatedArgs.url}\nResponse: ${JSON.stringify(response.result, null, 2)}`,
+                                text: `Unexpected response from save URL operation\n\nTarget: ${validatedArgs.path}\nSource: ${validatedArgs.url}\nResponse: ${JSON.stringify(response.result, null, 2)}`,
                             },
                         ],
                     };
@@ -174,15 +174,15 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                 let errorMessage = `Failed to save URL content to: "${validatedArgs.path}"\nSource URL: ${validatedArgs.url}\n`;
 
                 if (error.status === 400) {
-                    errorMessage += `\nError 400: Invalid request - Check the URL and file path.\n\n💡 Common issues:\n• Invalid URL format\n• URL is not accessible\n• File path format is incorrect (should start with '/')\n• File name contains invalid characters`;
+                    errorMessage += `\nError 400: Invalid request - Check the URL and file path.\n\nCommon issues:\n- Invalid URL format\n- URL is not accessible\n- File path format is incorrect (should start with '/')\n- File name contains invalid characters`;
                 } else if (error.status === 403) {
-                    errorMessage += `\nError 403: Permission denied\n\n💡 This could mean:\n• You don't have permission to write to this folder\n• Your access token needs 'files.content.write' scope\n• The URL content is blocked by content policy`;
+                    errorMessage += `\nError 403: Permission denied\n\nThis could mean:\n- You don't have permission to write to this folder\n- Your access token needs 'files.content.write' scope\n- The URL content is blocked by content policy`;
                 } else if (error.status === 409) {
-                    errorMessage += `\nError 409: Conflict - File already exists at this path.\n\n💡 Try:\n• Using a different file name\n• Enabling autorename in your upload settings\n• Deleting the existing file first`;
+                    errorMessage += `\nError 409: Conflict - File already exists at this path.\n\nTry:\n- Using a different file name\n- Enabling autorename in your upload settings\n- Deleting the existing file first`;
                 } else if (error.status === 507) {
-                    errorMessage += `\nError 507: Insufficient storage - Your Dropbox is full.\n\n💡 To fix this:\n• Delete some files to free up space\n• Upgrade your Dropbox plan for more storage`;
+                    errorMessage += `\nError 507: Insufficient storage - Your Dropbox is full.\n\nTo fix this:\n- Delete some files to free up space\n- Upgrade your Dropbox plan for more storage`;
                 } else if (error.status === 415) {
-                    errorMessage += `\nError 415: Unsupported media type - The URL content type is not supported.\n\n💡 Dropbox may not support:\n• Certain file types\n• Very large files\n• Streaming content`;
+                    errorMessage += `\nError 415: Unsupported media type - The URL content type is not supported.\n\nDropbox may not support:\n- Certain file types\n- Very large files\n- Streaming content`;
                 } else {
                     errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
                 }
@@ -217,7 +217,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `✅ URL download completed successfully!\n\n📄 File: ${fileName}\n📁 Path: ${filePath}\n📏 Size: ${fileSize} bytes\n🕒 Modified: ${modified}\n\n🆔 Job ID: ${validatedArgs.async_job_id}`,
+                                text: `URL download completed successfully!\n\nFile: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes\nModified: ${modified}\n\nJob ID: ${validatedArgs.async_job_id}`,
                             },
                         ],
                     };
@@ -226,7 +226,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `🔄 URL download is still in progress...\n\n🆔 Job ID: ${validatedArgs.async_job_id}\n\n💡 Please wait and check again in a few moments.`,
+                                text: `URL download is still in progress...\n\nJob ID: ${validatedArgs.async_job_id}\n\nPlease wait and check again in a few moments.`,
                             },
                         ],
                     };
@@ -236,7 +236,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `❌ URL download failed\n\n🆔 Job ID: ${validatedArgs.async_job_id}\n🚫 Reason: ${failureReason}\n\n💡 Common failure reasons:\n• URL became inaccessible\n• Network timeout\n• File size too large\n• Content type not supported`,
+                                text: `URL download failed\n\nJob ID: ${validatedArgs.async_job_id}\nReason: ${failureReason}\n\nCommon failure reasons:\n- URL became inaccessible\n- Network timeout\n- File size too large\n- Content type not supported`,
                             },
                         ],
                     };
@@ -245,7 +245,7 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
                         content: [
                             {
                                 type: "text",
-                                text: `⚠️ Unknown job status: ${response.result['.tag']}\n\n🆔 Job ID: ${validatedArgs.async_job_id}`,
+                                text: `Unknown job status: ${response.result['.tag']}\n\nJob ID: ${validatedArgs.async_job_id}`,
                             },
                         ],
                     };

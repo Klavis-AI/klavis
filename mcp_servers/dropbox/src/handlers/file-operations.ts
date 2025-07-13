@@ -31,7 +31,7 @@ export async function handleUploadFile(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `❌ Invalid base64 content provided. Please ensure the base64_content is properly encoded.`,
+                        text: `Invalid base64 content provided. Please ensure the base64_content is properly encoded.`,
                     },
                 ],
             };
@@ -42,7 +42,7 @@ export async function handleUploadFile(args: any) {
             content: [
                 {
                     type: "text",
-                    text: `❌ No content provided. Please specify either text_content or base64_content.`,
+                    text: `No content provided. Please specify either text_content or base64_content.`,
                 },
             ],
         };
@@ -63,7 +63,7 @@ export async function handleUploadFile(args: any) {
         content: [
             {
                 type: "text",
-                text: `✅ File uploaded successfully!\n\n📄 File: ${response.result.path_display}\n📏 Size: ${response.result.size} bytes\n📝 Content type: ${contentType}\n📊 Input length: ${contentLength} characters`,
+                text: `File uploaded successfully!\n\nFile: ${response.result.path_display}\nSize: ${response.result.size} bytes\nContent type: ${contentType}\nInput length: ${contentLength} characters`,
             },
         ],
     };
@@ -129,7 +129,7 @@ export async function handleDownloadFile(args: any) {
                     content: [
                         {
                             type: "text",
-                            text: `📄 Downloaded file: ${fileName}\n📍 Path: ${filePath}\n📏 Size: ${fileSize} bytes\n\n📋 File content (text):\n\n${textContent}`,
+                            text: `Downloaded file: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes\n\nFile content (text):\n\n${textContent}`,
                         },
                     ],
                 };
@@ -140,7 +140,7 @@ export async function handleDownloadFile(args: any) {
                     content: [
                         {
                             type: "text",
-                            text: `📄 Downloaded file: ${fileName}\n📍 Path: ${filePath}\n📏 Size: ${fileSize} bytes\n\n📊 File content (base64):\n\n${base64Content}`,
+                            text: `Downloaded file: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes\n\nFile content (base64):\n\n${base64Content}`,
                         },
                     ],
                 };
@@ -150,7 +150,7 @@ export async function handleDownloadFile(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `❌ Failed to extract file content from download response. Metadata:\n📄 File: ${fileName}\n📍 Path: ${filePath}\n📏 Size: ${fileSize} bytes`,
+                        text: `Failed to extract file content from download response. Metadata:\nFile: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes`,
                     },
                 ],
             };
@@ -159,11 +159,11 @@ export async function handleDownloadFile(args: any) {
         let errorMessage = `Failed to download file: "${validatedArgs.path}"\n`;
 
         if (error.status === 404) {
-            errorMessage += `\nError 404: File not found.\n\n💡 Make sure:\n• The file path is correct\n• The file exists\n• You have access to the file`;
+            errorMessage += `\nError 404: File not found.\n\nMake sure:\n- The file path is correct\n- The file exists\n- You have access to the file`;
         } else if (error.status === 403) {
-            errorMessage += `\nError 403: Permission denied.\n\n💡 You may not have download access to this file`;
+            errorMessage += `\nError 403: Permission denied.\n\nYou may not have download access to this file`;
         } else if (error.status === 409) {
-            errorMessage += `\nError 409: This path points to a folder, not a file.\n\n💡 Use a file path, not a folder path`;
+            errorMessage += `\nError 409: This path points to a folder, not a file.\n\nUse a file path, not a folder path`;
         } else {
             errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
         }
@@ -203,7 +203,7 @@ export async function handleGetThumbnail(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `🖼️ Thumbnail generated for: ${validatedArgs.path}\n📏 Format: ${validatedArgs.format}\n📐 Size: ${validatedArgs.size}\n📊 Thumbnail size: ${thumbnailBuffer.length} bytes\n\n🖼️ Thumbnail (base64):\n\n${base64Thumbnail}`,
+                        text: `Thumbnail generated for: ${validatedArgs.path}\nFormat: ${validatedArgs.format}\nSize: ${validatedArgs.size}\nThumbnail size: ${thumbnailBuffer.length} bytes\n\nThumbnail (base64):\n\n${base64Thumbnail}`,
                     },
                 ],
             };
@@ -212,7 +212,7 @@ export async function handleGetThumbnail(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `❌ Failed to generate thumbnail for: ${validatedArgs.path}\nNo thumbnail data received from Dropbox.`,
+                        text: `Failed to generate thumbnail for: ${validatedArgs.path}\nNo thumbnail data received from Dropbox.`,
                     },
                 ],
             };
@@ -221,11 +221,11 @@ export async function handleGetThumbnail(args: any) {
         let errorMessage = `Failed to get thumbnail for: "${validatedArgs.path}"\n`;
 
         if (error.status === 404) {
-            errorMessage += `\nError 404: File not found.\n\n💡 Make sure the file exists and the path is correct`;
+            errorMessage += `\nError 404: File not found.\n\nMake sure the file exists and the path is correct`;
         } else if (error.status === 415) {
-            errorMessage += `\nError 415: Unsupported file type.\n\n💡 Thumbnails are only available for:\n• Images (JPEG, PNG, GIF, BMP, TIFF)\n• Videos (MP4, MOV, AVI, etc.)\n• Documents (PDF, DOC, DOCX, etc.)`;
+            errorMessage += `\nError 415: Unsupported file type.\n\nThumbnails are only available for:\n- Images (JPEG, PNG, GIF, BMP, TIFF)\n- Videos (MP4, MOV, AVI, etc.)\n- Documents (PDF, DOC, DOCX, etc.)`;
         } else if (error.status === 403) {
-            errorMessage += `\nError 403: Permission denied.\n\n💡 You may not have access to this file`;
+            errorMessage += `\nError 403: Permission denied.\n\nYou may not have access to this file`;
         } else {
             errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
         }
@@ -263,7 +263,7 @@ export async function handleGetPreview(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `📋 Preview generated for: ${validatedArgs.path}\n📏 Preview size: ${previewBuffer.length} bytes\n\n📄 Preview (base64):\n\n${base64Preview}`,
+                        text: `Preview generated for: ${validatedArgs.path}\nPreview size: ${previewBuffer.length} bytes\n\nPreview (base64):\n\n${base64Preview}`,
                     },
                 ],
             };
@@ -272,7 +272,7 @@ export async function handleGetPreview(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `❌ Failed to generate preview for: ${validatedArgs.path}\nNo preview data received from Dropbox.`,
+                        text: `Failed to generate preview for: ${validatedArgs.path}\nNo preview data received from Dropbox.`,
                     },
                 ],
             };
@@ -281,11 +281,11 @@ export async function handleGetPreview(args: any) {
         let errorMessage = `Failed to get preview for: "${validatedArgs.path}"\n`;
 
         if (error.status === 404) {
-            errorMessage += `\nError 404: File not found.\n\n💡 Make sure the file exists and the path is correct`;
+            errorMessage += `\nError 404: File not found.\n\nMake sure the file exists and the path is correct`;
         } else if (error.status === 415) {
-            errorMessage += `\nError 415: Unsupported file type.\n\n💡 Previews are only available for:\n• Documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX)\n• Text files\n• Images`;
+            errorMessage += `\nError 415: Unsupported file type.\n\nPreviews are only available for:\n- Documents (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX)\n- Text files\n- Images`;
         } else if (error.status === 403) {
-            errorMessage += `\nError 403: Permission denied.\n\n💡 You may not have access to this file`;
+            errorMessage += `\nError 403: Permission denied.\n\nYou may not have access to this file`;
         } else {
             errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
         }
@@ -378,7 +378,7 @@ export async function handleSaveUrl(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `✅ URL saved successfully!\n\n📄 File: ${result.path_display || validatedArgs.path}\n🔗 Source URL: ${validatedArgs.url}\n📏 Size: ${result.size || 'Unknown'} bytes`,
+                        text: `URL saved successfully!\n\nFile: ${result.path_display || validatedArgs.path}\nSource URL: ${validatedArgs.url}\nSize: ${result.size || 'Unknown'} bytes`,
                     },
                 ],
             };
@@ -387,7 +387,7 @@ export async function handleSaveUrl(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `⏳ URL save started (async operation)\nJob ID: ${response.result.async_job_id}\n\n🔗 Source URL: ${validatedArgs.url}\n📄 Destination: ${validatedArgs.path}\n\n💡 Use 'save_url_check_job_status' with this Job ID to check progress.`,
+                        text: `URL save started (async operation)\nJob ID: ${response.result.async_job_id}\n\nSource URL: ${validatedArgs.url}\nDestination: ${validatedArgs.path}\n\nUse 'save_url_check_job_status' with this Job ID to check progress.`,
                     },
                 ],
             };
@@ -405,11 +405,11 @@ export async function handleSaveUrl(args: any) {
         let errorMessage = `Failed to save URL: "${validatedArgs.url}" to "${validatedArgs.path}"\n`;
 
         if (error.status === 400) {
-            errorMessage += `\nError 400: Invalid URL or path.\n\n💡 Check:\n• URL is valid and accessible\n• Destination path is valid (starts with '/')\n• URL points to a downloadable file`;
+            errorMessage += `\nError 400: Invalid URL or path.\n\nCheck:\n- URL is valid and accessible\n- Destination path is valid (starts with '/')\n- URL points to a downloadable file`;
         } else if (error.status === 403) {
-            errorMessage += `\nError 403: Permission denied.\n\n💡 You may not have write access to the destination folder`;
+            errorMessage += `\nError 403: Permission denied.\n\nYou may not have write access to the destination folder`;
         } else if (error.status === 409) {
-            errorMessage += `\nError 409: File already exists at the destination path.\n\n💡 Try:\n• Using a different filename\n• The URL content may have already been saved`;
+            errorMessage += `\nError 409: File already exists at the destination path.\n\nTry:\n- Using a different filename\n- The URL content may have already been saved`;
         } else {
             errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
         }
@@ -441,7 +441,7 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `⏳ URL save operation is still in progress.\nJob ID: ${validatedArgs.async_job_id}\nStatus: Processing...`,
+                        text: `URL save operation is still in progress.\nJob ID: ${validatedArgs.async_job_id}\nStatus: Processing...`,
                     },
                 ],
             };
@@ -451,7 +451,7 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `✅ URL save completed!\nJob ID: ${validatedArgs.async_job_id}\n📄 File: ${completeResult.path_display}\n📏 Size: ${completeResult.size} bytes`,
+                        text: `URL save completed!\nJob ID: ${validatedArgs.async_job_id}\nFile: ${completeResult.path_display}\nSize: ${completeResult.size} bytes`,
                     },
                 ],
             };
@@ -461,7 +461,7 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
                 content: [
                     {
                         type: "text",
-                        text: `❌ URL save failed.\nJob ID: ${validatedArgs.async_job_id}\nError: ${failedResult.reason || 'Unknown error'}`,
+                        text: `URL save failed.\nJob ID: ${validatedArgs.async_job_id}\nError: ${failedResult.reason || 'Unknown error'}`,
                     },
                 ],
             };
@@ -479,9 +479,9 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
         let errorMessage = `Failed to check save URL job status for ID: ${validatedArgs.async_job_id}\n`;
 
         if (error.status === 400) {
-            errorMessage += `\nError 400: Invalid job ID.\n\n💡 The job ID may be malformed or expired`;
+            errorMessage += `\nError 400: Invalid job ID.\n\nThe job ID may be malformed or expired`;
         } else if (error.status === 404) {
-            errorMessage += `\nError 404: Job not found.\n\n💡 The job ID may be invalid or the job may have been cleaned up`;
+            errorMessage += `\nError 404: Job not found.\n\nThe job ID may be invalid or the job may have been cleaned up`;
         } else {
             errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}`;
         }

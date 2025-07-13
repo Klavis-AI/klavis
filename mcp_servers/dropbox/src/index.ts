@@ -32,6 +32,19 @@ import {
 // Apply the fetch polyfill immediately
 patchFetchResponse();
 
+/**
+ * Create Dropbox client with access token
+ * TODO: Implement OAuth flow instead of using direct access tokens
+ * Reference: https://github.com/dropbox/dropbox-sdk-js/tree/main?tab=readme-ov-file#examples
+ * Current implementation expects pre-generated access tokens
+ */
+function createDropboxClient(accessToken: string): Dropbox {
+    return new Dropbox({
+        fetch: fetch,
+        accessToken
+    });
+}
+
 // Get Dropbox MCP Server
 const getDropboxMcpServer = () => {
     // Server implementation
@@ -142,10 +155,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         }
 
         // Initialize Dropbox client with the access token
-        const dropboxClient = new Dropbox({
-            fetch: fetch,
-            accessToken
-        });
+        const dropboxClient = createDropboxClient(accessToken);
 
         const server = getDropboxMcpServer();
         try {
@@ -253,10 +263,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         transport = sessionId ? transports.get(sessionId) : undefined;
         if (transport) {
             // Initialize Dropbox client with the access token
-            const dropboxClient = new Dropbox({
-                fetch: fetch,
-                accessToken
-            });
+            const dropboxClient = createDropboxClient(accessToken);
 
             asyncLocalStorage.run({ dropboxClient }, async () => {
                 await transport!.handlePostMessage(req, res);

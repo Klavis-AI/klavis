@@ -229,11 +229,13 @@ Upload a file
 ```typescript
 {
   path: string, // Upload path (e.g., "/folder/filename.txt")
-  content: string, // File content as string or base64
+  text_content: string (optional), // File content as plain text
+  base64_content: string (optional), // File content as base64 encoded data
   mode: "add" | "overwrite" | "update" (optional, default: "add"),
   autorename: boolean (optional, default: false),
   mute: boolean (optional, default: false)
 }
+// Note: Either text_content or base64_content must be provided, but not both
 ```
 
 ### download_file
@@ -356,6 +358,273 @@ Add member to shared folder
   }],
   quiet: boolean (optional, default: false),
   custom_message: string (optional)
+}
+```
+
+### list_folder_continue
+Continue listing folder contents using cursor
+```typescript
+{
+  cursor: string // Cursor from previous list_folder operation
+}
+```
+
+### list_shared_folders
+List all shared folders
+```typescript
+{
+  cursor: string (optional), // Pagination cursor
+  limit: number (optional, default: 100)
+}
+```
+
+### unshare_file
+Remove all members from a file
+```typescript
+{
+  file: string // File ID or path
+}
+```
+
+### unshare_folder
+Unshare a folder (owner only)
+```typescript
+{
+  shared_folder_id: string, // Shared folder ID
+  leave_a_copy: boolean (optional, default: false)
+}
+```
+
+### create_file_request
+Create a file request for others to upload files
+```typescript
+{
+  title: string, // Request title
+  destination: string, // Upload destination path
+  description: string (optional)
+}
+```
+
+### get_file_request
+Get file request details
+```typescript
+{
+  id: string // File request ID
+}
+```
+
+### list_file_requests
+List all file requests
+```typescript
+{} // No parameters required
+```
+
+### delete_file_request
+Delete file requests
+```typescript
+{
+  ids: string[] // Array of file request IDs to delete
+}
+```
+
+### update_file_request
+Update file request settings
+```typescript
+{
+  id: string, // File request ID
+  title: string (optional), // New title
+  destination: string (optional), // New destination
+  description: string (optional), // New description
+  open: boolean (optional) // Open/close the request
+}
+```
+
+### batch_delete
+Delete multiple files/folders efficiently
+```typescript
+{
+  entries: [{
+    path: string // File/folder path to delete
+  }] // Up to 1000 entries
+}
+```
+
+### batch_move
+Move multiple files/folders efficiently
+```typescript
+{
+  entries: [{
+    from_path: string, // Current path
+    to_path: string // New path
+  }], // Up to 1000 entries
+  autorename: boolean (optional, default: false),
+  allow_ownership_transfer: boolean (optional, default: false)
+}
+```
+
+### batch_copy
+Copy multiple files/folders efficiently
+```typescript
+{
+  entries: [{
+    from_path: string, // Source path
+    to_path: string // Destination path
+  }], // Up to 1000 entries
+  autorename: boolean (optional, default: false)
+}
+```
+
+### check_batch_job_status
+Check status of batch operations
+```typescript
+{
+  async_job_id: string // Job ID from batch operation
+}
+```
+
+### get_thumbnail
+Get file thumbnail
+```typescript
+{
+  path: string, // File path
+  format: "jpeg" | "png" (optional, default: "jpeg"),
+  size: "w32h32" | "w64h64" | "w128h128" | "w256h256" | "w480h320" | "w640h480" | "w960h640" | "w1024h768" | "w2048h1536" (optional, default: "w256h256")
+}
+```
+
+### add_file_properties
+Add custom properties to a file
+```typescript
+{
+  path: string, // File path
+  property_groups: [{
+    template_id: string, // Property template ID
+    fields: [{
+      name: string, // Property field name
+      value: string // Property field value
+    }]
+  }]
+}
+```
+
+### overwrite_file_properties
+Overwrite all custom properties on a file
+```typescript
+{
+  path: string, // File path
+  property_groups: [{
+    template_id: string, // Property template ID
+    fields: [{
+      name: string, // Property field name
+      value: string // Property field value
+    }]
+  }]
+}
+```
+
+### update_file_properties
+Update specific custom properties on a file
+```typescript
+{
+  path: string, // File path
+  update_property_groups: [{
+    template_id: string, // Property template ID
+    add_or_update_fields: [{
+      name: string, // Property field name
+      value: string // Property field value
+    }] (optional),
+    remove_fields: string[] (optional) // Field names to remove
+  }]
+}
+```
+
+### remove_file_properties
+Remove custom properties from a file
+```typescript
+{
+  path: string, // File path
+  property_template_ids: string[] // Template IDs to remove
+}
+```
+
+### search_file_properties
+Search files by custom properties
+```typescript
+{
+  queries: [{
+    query: string, // Search query
+    mode: "field_name" | "field_value", // Search mode
+    logical_operator: "or_operator" (optional)
+  }],
+  template_filter: "filter_none" | "filter_some" (optional, default: "filter_none")
+}
+```
+
+### list_property_templates
+List available property templates
+```typescript
+{} // No parameters required
+```
+
+### get_property_template
+Get property template details
+```typescript
+{
+  template_id: string // Template ID
+}
+```
+
+### save_url
+Save content from URL to Dropbox
+```typescript
+{
+  path: string, // Save path
+  url: string // URL to download and save
+}
+```
+
+### save_url_check_job_status
+Check status of URL save operation
+```typescript
+{
+  async_job_id: string // Job ID from save_url operation
+}
+```
+
+### lock_file_batch
+Lock files to prevent editing
+```typescript
+{
+  entries: [{
+    path: string // File path to lock
+  }] // Up to 1000 entries
+}
+```
+
+### unlock_file_batch
+Unlock previously locked files
+```typescript
+{
+  entries: [{
+    path: string // File path to unlock
+  }] // Up to 1000 entries
+}
+```
+
+### list_received_files
+List files shared with you by others
+```typescript
+{
+  cursor: string (optional), // Pagination cursor
+  limit: number (optional, default: 100)
+}
+```
+
+### check_job_status
+Check status of asynchronous operations
+```typescript
+{
+  async_job_id: string // Job ID from async operation
 }
 ```
 

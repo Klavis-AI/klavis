@@ -33,17 +33,17 @@ export async function handleFileRequestOperation(request: CallToolRequest): Prom
                 let errorMessage = `Failed to create file request: "${validatedArgs.title}"\n`;
 
                 if (error.status === 403) {
-                    errorMessage += `\nError 403: Permission denied - You may not have permission to create file requests or access the destination folder.\n\n💡 This could mean:\n• Your account type doesn't support file requests\n• You don't have write access to the destination folder\n• File requests are disabled for your account`;
+                    errorMessage += `\nError 403: Permission denied - You may not have permission to create file requests or access the destination folder.\n\nThis could mean:\n- Your account type doesn't support file requests\n- You don't have write access to the destination folder\n- File requests are disabled for your account`;
                 } else if (error.status === 404) {
-                    errorMessage += `\nError 404: Destination folder not found - The path "${validatedArgs.destination}" doesn't exist.\n\n💡 Make sure:\n• The destination folder exists in your Dropbox\n• The path is correct and starts with '/'\n• You have access to the destination folder`;
+                    errorMessage += `\nError 404: Destination folder not found - The path "${validatedArgs.destination}" doesn't exist.\n\nMake sure:\n- The destination folder exists in your Dropbox\n- The path is correct and starts with '/'\n- You have access to the destination folder`;
                 } else if (error.status === 400) {
-                    errorMessage += `\nError 400: Bad request - Please check the title and destination path format.\n\n💡 Requirements:\n• Title must be non-empty and unique\n• Destination must be a valid folder path\n• Title should be descriptive and not too long`;
+                    errorMessage += `\nError 400: Bad request - Please check the title and destination path format.\n\nRequirements:\n- Title must be non-empty and unique\n- Destination must be a valid folder path\n- Title should be descriptive and not too long`;
                 } else if (error.status === 409) {
-                    errorMessage += `\nError 409: Conflict - A file request with this title may already exist.\n\n💡 Try:\n• Using a different, unique title\n• Checking existing file requests with 'list_file_requests'\n• Updating an existing file request instead of creating a new one`;
+                    errorMessage += `\nError 409: Conflict - A file request with this title may already exist.\n\nTry:\n- Using a different, unique title\n- Checking existing file requests with 'list_file_requests'\n- Updating an existing file request instead of creating a new one`;
                 } else if (error.status === 429) {
-                    errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\n💡 Try:\n• Waiting a moment before creating another file request\n• You may have reached the maximum number of active file requests`;
+                    errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\nTry:\n- Waiting a moment before creating another file request\n- You may have reached the maximum number of active file requests`;
                 } else {
-                    errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}\n\n💡 Common issues:\n• Check your internet connection\n• Verify your account has file request permissions\n• Ensure the destination folder exists and is accessible`;
+                    errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}\n\nCommon issues:\n- Check your internet connection\n- Verify your account has file request permissions\n- Ensure the destination folder exists and is accessible`;
                 }
 
                 return {
@@ -165,9 +165,9 @@ export async function handleFileRequestOperation(request: CallToolRequest): Prom
 
                 if (error.status === 409) {
                     errorMessage += `\nError 409: Conflict - This is usually means:\n` +
-                        `• The file request must be closed before it can be deleted\n` +
-                        `• The file request may have active uploads\n` +
-                        `• You may not have permission to delete this file request\n` +
+                        `- The file request must be closed before it can be deleted\n` +
+                        `- The file request may have active uploads\n` +
+                        `- You may not have permission to delete this file request\n` +
                         `\nTip: Try closing the file request first, then delete it.`;
                 } else if (error.status === 404) {
                     errorMessage += `\nError 404: File request not found - The ID may be invalid or already deleted.`;
