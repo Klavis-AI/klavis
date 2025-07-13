@@ -89,7 +89,7 @@ export const toolDefinitions = [
     },
     {
         name: "get_preview",
-        description: "Gets a preview of a file",
+        description: "Gets a preview of a file. PDF previews are generated for files with the following extensions: .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides, .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf. HTML previews are generated for files with the following extensions: .csv, .ods, .xls, .xlsm, .gsheet, .xlsx. Other formats will return an unsupported extension error.",
         inputSchema: zodToJsonSchema(schemas.GetPreviewSchema),
     },
     {

@@ -39,6 +39,31 @@ A Model Context Protocol (MCP) server for Dropbox integration, providing compreh
 - **Get Temporary Link**: Generate temporary download links
 - **Get Preview**: Get file previews for supported formats
 
+## Prerequisites
+
+### Dropbox App Permissions
+
+Before using this MCP server, you need to create a Dropbox app at [https://www.dropbox.com/developers/apps](https://www.dropbox.com/developers/apps) with the following permissions:
+
+#### Account Info
+- **account_info.read** - View basic information about your Dropbox account such as your username, email, and country
+
+#### Files and Folders
+- **files.metadata.write** - View and edit information about your Dropbox files and folders
+- **files.metadata.read** - View information about your Dropbox files and folders
+- **files.content.write** - Edit content of your Dropbox files and folders
+- **files.content.read** - View content of your Dropbox files and folders
+
+#### Collaboration
+- **sharing.write** - View and manage your Dropbox sharing settings and collaborators
+- **sharing.read** - View your Dropbox sharing settings and collaborators
+- **file_requests.write** - View and manage your Dropbox file requests
+- **file_requests.read** - View your Dropbox file requests
+- **contacts.write** - View and manage your manually added Dropbox contacts
+- **contacts.read** - View your manually added Dropbox contacts
+
+> **Note**: These permissions are required for the server to provide full functionality. Some features may not work if certain permissions are not granted.
+
 ## Quick Start
 
 ### 1. Setup Environment Variables
