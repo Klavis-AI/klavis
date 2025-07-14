@@ -46,6 +46,8 @@ from tools import (
     hubspot_create_ticket,
     hubspot_update_ticket_by_id,
     hubspot_delete_ticket_by_id,
+    # Notes
+    hubspot_create_note,
 )
 
 # Configure logging
@@ -513,6 +515,48 @@ def main(
                         }
                     },
                     "required": ["ticket_id"]
+                }
+            ),
+            types.Tool(
+                name="hubspot_create_note",
+                description="Create a new note in HubSpot with optional associations to contacts, companies, deals, or tickets.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "note_body": {
+                            "type": "string",
+                            "description": "The content of the note."
+                        },
+                        "contact_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of contact IDs to associate with the note."
+                        },
+                        "company_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of company IDs to associate with the note."
+                        },
+                        "deal_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of deal IDs to associate with the note."
+                        },
+                        "ticket_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of ticket IDs to associate with the note."
+                        },
+                        "owner_id": {
+                            "type": "string",
+                            "description": "HubSpot user ID of the note owner."
+                        },
+                        "timestamp": {
+                            "type": "string",
+                            "description": "ISO 8601 timestamp or milliseconds since epoch for when the note was created (defaults to current time if not provided)."
+                        }
+                    },
+                    "required": ["note_body"]
                 }
             ),
         ]
@@ -1069,6 +1113,40 @@ def main(
                     types.TextContent(
                         type="text",
                         text="Deleted",
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_note":
+            note_body = arguments.get("note_body")
+            if not note_body:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: note_body parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_create_note(
+                    note_body=note_body,
+                    contact_ids=arguments.get("contact_ids"),
+                    company_ids=arguments.get("company_ids"),
+                    deal_ids=arguments.get("deal_ids"),
+                    ticket_ids=arguments.get("ticket_ids"),
+                    owner_id=arguments.get("owner_id"),
+                    timestamp=arguments.get("timestamp")
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
                     )
                 ]
             except Exception as e:
