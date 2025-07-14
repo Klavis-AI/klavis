@@ -40,6 +40,10 @@ from .tickets import (
     hubspot_delete_ticket_by_id,
 )
 
+from .notes import (
+    hubspot_create_note,
+)
+
 __all__ = [
     # Base
     "auth_token_context",
@@ -76,4 +80,7 @@ __all__ = [
     "hubspot_create_ticket",
     "hubspot_update_ticket_by_id",
     "hubspot_delete_ticket_by_id",
+    
+    # Notes
+    "hubspot_create_note",
 ]
