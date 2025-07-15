@@ -3,8 +3,7 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict, List
-import asyncio
+from typing import List
 
 import click
 import mcp.types as types
@@ -17,7 +16,7 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
-from tools import (
+from mcp_servers.outook_mail.tools import (
     auth_token_context,
 
     # attachments
