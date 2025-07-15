@@ -16,10 +16,9 @@
     "lib": ["ES2022", "DOM"]
   },
   "include": [
-    "index.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
   ]
 } 
