@@ -1,6 +1,8 @@
 # Outlook Mail Tools API
 
 This module provides a comprehensive interface for interacting with Microsoft Outlook's mail features through the Microsoft Graph API. It supports attachments, folder management, message rules, search folders, and core message operations.
+Docs - https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0
+
 
 ## Scope
 
