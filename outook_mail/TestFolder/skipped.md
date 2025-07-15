@@ -1,5 +1,6 @@
 # Skipped These
 Skipped these because i didnt see any value in this:
+How to get ID and Secret - https://www.youtube.com/watch?v=IVtGHvq-puA
 
 ```
 https://learn.microsoft.com/en-us/graph/api/message-get?view=graph-rest-1.0&tabs=http
