@@ -46,11 +46,54 @@ To set up white labeling for your OAuth integrations:
   <Step title="Implement OAuth Authorization">
     Redirect users to the Klavis AI OAuth authorization endpoint with your client ID:
     
-    ```javascript
+    <CodeGroup>
+    
+    ```javascript without SDK
     // Example: Initiating GitHub OAuth with white labeling
     const authUrl = `https://api.klavis.ai/oauth/github/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
     window.location.href = authUrl;
     ```
+    
+    ```typescript TypeScript SDK
+    import { Klavis } from "@klavis/sdk";
+    
+    const klavis = new Klavis({
+      apiKey: "YOUR_API_KEY"
+    });
+    
+    // Example: Initiating GitHub OAuth with white labeling
+    const oauthUrl = await klavis.mcpServer.getOAuthUrl({
+      serverName: Klavis.McpServerName.Github,
+      instanceId: instanceId,
+      clientId: yourClientId,
+      // redirectUri: YOUR_REDIRECT_URI,
+      // scope: "YOUR_SCOPES", 
+    });
+    
+    window.location.href = oauthUrl;
+    ```
+    
+    ```python Python SDK
+    import webbrowser
+    from klavis import Klavis
+    
+    klavis = Klavis(api_key="YOUR_API_KEY")
+    
+    # Example: Initiating GitHub OAuth with white labeling
+    oauth_url = klavis.mcp_server.get_oauth_url(
+        server_name="github",
+        instance_id=instance_id,
+        client_id=your_client_id,
+        # redirect_uri="YOUR_REDIRECT_URI",
+        # scope="YOUR_SCOPES"
+    )
+    
+    # Open OAuth URL in user's default browser
+    webbrowser.open(oauth_url)
+    ```
+    
+    </CodeGroup>
+    
     <Tip>
     You can also specify scope and redirect_url in the authUrl, check the api reference for more details.
     </Tip>
