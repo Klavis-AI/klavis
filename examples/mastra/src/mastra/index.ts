@@ -30,11 +30,6 @@ export const createGmailMcpAgent = async (userId: string = 'test-user', platform
     servers: {
       gmail: {
         url: new URL(instance.serverUrl),
-        requestInit: {
-          headers: {
-            Authorization: `Bearer ${process.env.KLAVIS_API_KEY!}`,
-          },
-        },
       },
     },
   });
@@ -43,10 +38,9 @@ export const createGmailMcpAgent = async (userId: string = 'test-user', platform
   const tools = await mcpClient.getTools();
 
   // Create agent
-  const instructions = `You are a Gmail agent with access to Gmail tools: read, send, search emails, and manage labels.`;
   return new Agent({
     name: 'Gmail MCP Agent',
-    instructions,
+    instructions: `You are a Gmail agent with access to Gmail tools: read, send, search emails, and manage labels.`,
     model: openai('gpt-4o-mini'),
     tools,
   });
