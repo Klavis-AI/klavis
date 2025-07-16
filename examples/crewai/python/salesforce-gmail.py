@@ -8,7 +8,7 @@ import webbrowser
 from crewai import Agent, Task, Crew, Process
 from crewai_tools import MCPServerAdapter
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 
 def multi_server_crew():
@@ -21,7 +21,6 @@ def multi_server_crew():
             server_name=McpServerName.SALESFORCE,
             user_id="1234",
             platform_name="Klavis",
-            connection_type=ConnectionType.STREAMABLE_HTTP,
         )
         webbrowser.open(salesforce_mcp_instance.oauth_url)
         
@@ -32,7 +31,6 @@ def multi_server_crew():
             server_name=McpServerName.GMAIL,
             user_id="1234",
             platform_name="Klavis",
-            connection_type=ConnectionType.STREAMABLE_HTTP,
         )
         webbrowser.open(gmail_mcp_instance.oauth_url)
 

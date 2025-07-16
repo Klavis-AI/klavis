@@ -25,7 +25,7 @@ Use the following endpoint to create a new remote Plai MCP server instance:
 <CodeGroup>
 ```python Python
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
@@ -34,7 +34,6 @@ plai_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.PLAI,
     user_id="<YOUR_USER_ID>",
     platform_name="<YOUR_PLATFORM_NAME>",
-    connection_type=ConnectionType.STREAMABLE_HTTP,
 )
 ```
 
@@ -48,7 +47,6 @@ const plaiServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Plai,
     userId: "<YOUR_USER_ID>",
     platformName: "<YOUR_PLATFORM_NAME>",
-    connectionType: Klavis.ConnectionType.StreamableHttp
 });
 ```
 
@@ -61,7 +59,6 @@ curl --request POST \
   "serverName": "Plai",
   "userId": "<YOUR_USER_ID>",
   "platformName": "<YOUR_PLATFORM_NAME>",
-  "connectionType": "streamable-http"
 }'
 ```
 

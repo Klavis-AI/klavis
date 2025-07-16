@@ -60,7 +60,7 @@ process.env.KLAVIS_API_KEY = "your-klavis-api-key-here";   // Replace with your 
 import os
 import asyncio
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
@@ -100,7 +100,6 @@ youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
     user_id="1234",
     platform_name="klavis",
-    connection_type=ConnectionType.STREAMABLE_HTTP,
 )
 
 youtube_mcp_server_url = youtube_mcp_instance.server_url
@@ -224,7 +223,6 @@ youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
     user_id="1234",
     platform_name="klavis",
-    connection_type=ConnectionType.STREAMABLE_HTTP,
 )
 
 # Create Gmail MCP server with OAuth authorization
@@ -232,7 +230,6 @@ gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
     user_id="1234",
     platform_name="klavis",
-    connection_type=ConnectionType.STREAMABLE_HTTP,
 )
 
 print("✅ Created YouTube and Gmail MCP instances")

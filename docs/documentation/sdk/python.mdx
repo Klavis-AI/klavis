@@ -16,7 +16,7 @@ Sign up at [klavis.ai](https://klavis.ai) and create your API key.
 
 ```python
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 klavis_client = Klavis(api_key="your-klavis-key")
 
@@ -36,7 +36,7 @@ If you already have an MCP client implementation in your codebase:
 
 ```python
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 klavis_client = Klavis(api_key="your-klavis-key")
 
@@ -58,7 +58,7 @@ Integrate directly with OpenAI using function calling:
 import json
 from openai import OpenAI
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType, ToolFormat
+from klavis.types import McpServerName, ToolFormat
 
 OPENAI_MODEL = "gpt-4o-mini"
 

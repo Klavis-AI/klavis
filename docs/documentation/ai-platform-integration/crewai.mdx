@@ -89,7 +89,7 @@ Create a specialized agent that can research and analyze YouTube videos.
 from crewai import Agent, Task, Crew, Process
 from crewai_tools import MCPServerAdapter
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 # Initialize clients
 klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))

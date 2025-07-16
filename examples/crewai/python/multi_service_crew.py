@@ -8,7 +8,7 @@ import webbrowser
 from crewai import Agent, Task, Crew, Process
 from crewai_tools import MCPServerAdapter
 from klavis import Klavis
-from klavis.types import McpServerName, ConnectionType
+from klavis.types import McpServerName
 
 VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # Change to your desired video
 RECIPIENT_EMAIL = "zihaolin@klavis.ai"  # Replace with your email
@@ -24,7 +24,6 @@ def main():
             server_name=McpServerName.YOUTUBE,
             user_id="1234",
             platform_name="Klavis",
-            connection_type=ConnectionType.STREAMABLE_HTTP,
         )
         print(f"✅ YouTube MCP server created: {youtube_mcp_instance.server_url}")
         
@@ -33,7 +32,6 @@ def main():
             server_name=McpServerName.GMAIL,
             user_id="1234",
             platform_name="Klavis",
-            connection_type=ConnectionType.STREAMABLE_HTTP,
         )
         webbrowser.open(gmail_mcp_instance.oauth_url)
         
