@@ -1,0 +1,139 @@
+---
+title: "Mastra"
+description: "Learn how to build AI agents that integrate Mastra framework with Klavis MCP Servers for enhanced functionality"
+---
+
+# Mastra + Klavis AI Integration
+
+This tutorial demonstrates how to use Mastra, an open-source TypeScript framework for building AI agents, with Klavis MCP (Model Context Protocol) servers.
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
+    Get your API key from OpenAI Platform
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+You can find the complete example code in Klavis GitHub repository:
+
+**[📁 Checkout the code here](https://github.com/Klavis-AI/klavis/tree/main/examples/mastra)**
+
+## Setup Environment Variables
+
+Create a `.env` file in your project root:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+KLAVIS_API_KEY=your_klavis_api_key_here
+```
+
+## Project Structure
+
+```
+mastra-klavis-example/
+├── src/
+│   └── mastra/
+│       └── index.ts
+├── package.json
+└── tsconfig.json
+```
+
+## Code Example
+
+```typescript
+import { Mastra } from '@mastra/core/mastra';
+import { Agent } from '@mastra/core/agent';
+import { openai } from '@ai-sdk/openai';
+import { MCPClient } from '@mastra/mcp';
+import { KlavisClient, Klavis } from 'klavis';
+import open from 'open';
+
+/**
+ * Creates a Gmail MCP Agent with tools from a Klavis-hosted server
+ */
+export const createGmailMcpAgent = async (userId: string = 'test-user', platformName: string = 'test-platform'): Promise<Agent> => {
+  const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+
+  // Create a new Gmail MCP server instance
+  const instance = await klavis.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Gmail,
+    userId,
+    platformName,
+  });
+
+  // Redirect user to authorize
+  const response = await klavis.mcpServer.getOAuthUrl({
+    serverName: Klavis.McpServerName.Gmail,
+    instanceId: instance.instanceId,
+  });
+  open(response.oauthUrl);
+
+  // Initialize the MCP client
+  const mcpClient = new MCPClient({
+    servers: {
+      gmail: {
+        url: new URL(instance.serverUrl),
+      },
+    },
+  });
+
+  // Get tools from the server
+  const tools = await mcpClient.getTools();
+
+  // Create agent
+  return new Agent({
+    name: 'Gmail MCP Agent',
+    instructions: `You are a Gmail agent with access to Gmail tools: read, send, search emails, and manage labels.`,
+    model: openai('gpt-4o-mini'),
+    tools,
+  });
+};
+
+const agent = await createGmailMcpAgent();
+
+export const mastra = new Mastra({
+  agents: { agent },
+});
+```
+
+## Running the Agent
+
+```bash
+npm install
+npm run dev
+```
+
+## Video Tutorial
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/watch?v=PkOVdIYD3u8"
+  title="Mastra + Klavis AI Integration Tutorial"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowfullscreen
+></iframe>
+
+## Summary
+
+This implementation demonstrates a clean and focused approach to integrating Mastra with Klavis MCP servers for Gmail functionality. The agent can handle Gmail operations like reading, sending, searching emails, and managing labels through the MCP protocol.
+
+
+
+## Useful Resources
+
+- [Mastra Documentation](https://mastra.ai/docs)
+- [Mastra GitHub Repository](https://github.com/mastra-ai/mastra)
+- [Klavis AI Documentation](https://docs.klavis.ai/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+**Happy building with Mastra and Klavis!** 🚀 

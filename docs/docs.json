@@ -48,6 +48,7 @@
               "documentation/ai-platform-integration/gemini",
               "documentation/ai-platform-integration/langchain",
               "documentation/ai-platform-integration/llamaindex",
+              "documentation/ai-platform-integration/mastra",
               "documentation/ai-platform-integration/openai",
               "documentation/ai-platform-integration/together-ai"
             ]
