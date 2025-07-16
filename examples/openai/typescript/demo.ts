@@ -38,7 +38,6 @@ async function openaiWithMcpServer(mcpServerUrl: string, userQuery: string): Pro
     // Get tools from MCP server
     const mcpServerTools = await klavisClient.mcpServer.listTools({
         serverUrl: mcpServerUrl,
-        connectionType: Klavis.ConnectionType.StreamableHttp,
         format: Klavis.ToolFormat.Openai
     });
     
@@ -65,7 +64,6 @@ async function openaiWithMcpServer(mcpServerUrl: string, userQuery: string): Pro
                 serverUrl: mcpServerUrl,
                 toolName: functionName,
                 toolArgs: functionArgs,
-                connectionType: Klavis.ConnectionType.StreamableHttp
             });
             
             messages.push({
@@ -97,7 +95,6 @@ async function demoGmailIntegration() {
         serverName: Klavis.McpServerName.Gmail,
         userId: "1234", 
         platformName: "Klavis",
-        connectionType: Klavis.ConnectionType.StreamableHttp
     });
 
     // Step 2: Handle OAuth authentication
