@@ -149,42 +149,42 @@ const getGmailMcpServer = () => {
     server.setRequestHandler(ListToolsRequestSchema, async () => ({
         tools: [
             {
-                name: "send_email",
+                name: "gmail_send_email",
                 description: "Sends a new email",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
             },
             {
-                name: "draft_email",
+                name: "gmail_draft_email",
                 description: "Draft a new email",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
             },
             {
-                name: "read_email",
+                name: "gmail_read_email",
                 description: "Retrieves the content of a specific email",
                 inputSchema: zodToJsonSchema(ReadEmailSchema),
             },
             {
-                name: "search_emails",
+                name: "gmail_search_emails",
                 description: "Searches for emails using Gmail search syntax",
                 inputSchema: zodToJsonSchema(SearchEmailsSchema),
             },
             {
-                name: "modify_email",
+                name: "gmail_modify_email",
                 description: "Modifies email labels (move to different folders)",
                 inputSchema: zodToJsonSchema(ModifyEmailSchema),
             },
             {
-                name: "delete_email",
+                name: "gmail_delete_email",
                 description: "Permanently deletes an email",
                 inputSchema: zodToJsonSchema(DeleteEmailSchema),
             },
             {
-                name: "batch_modify_emails",
+                name: "gmail_batch_modify_emails",
                 description: "Modifies labels for multiple emails in batches",
                 inputSchema: zodToJsonSchema(BatchModifyEmailsSchema),
             },
             {
-                name: "batch_delete_emails",
+                name: "gmail_batch_delete_emails",
                 description: "Permanently deletes multiple emails in batches",
                 inputSchema: zodToJsonSchema(BatchDeleteEmailsSchema),
             },
@@ -282,14 +282,14 @@ const getGmailMcpServer = () => {
 
         try {
             switch (name) {
-                case "send_email":
-                case "draft_email": {
+                case "gmail_send_email":
+                case "gmail_draft_email": {
                     const validatedArgs = SendEmailSchema.parse(args);
-                    const action = name === "send_email" ? "send" : "draft";
+                    const action = name === "gmail_send_email" ? "send" : "draft";
                     return await handleEmailAction(action, validatedArgs);
                 }
 
-                case "read_email": {
+                case "gmail_read_email": {
                     const validatedArgs = ReadEmailSchema.parse(args);
                     const response = await gmail.users.messages.get({
                         userId: 'me',
@@ -354,7 +354,7 @@ const getGmailMcpServer = () => {
                     };
                 }
 
-                case "search_emails": {
+                case "gmail_search_emails": {
                     const validatedArgs = SearchEmailsSchema.parse(args);
                     const response = await gmail.users.messages.list({
                         userId: 'me',
@@ -393,7 +393,7 @@ const getGmailMcpServer = () => {
                     };
                 }
 
-                case "modify_email": {
+                case "gmail_modify_email": {
                     const validatedArgs = ModifyEmailSchema.parse(args);
 
                     // Prepare request body
@@ -423,7 +423,7 @@ const getGmailMcpServer = () => {
                     };
                 }
 
-                case "delete_email": {
+                case "gmail_delete_email": {
                     const validatedArgs = DeleteEmailSchema.parse(args);
                     await gmail.users.messages.delete({
                         userId: 'me',
@@ -440,7 +440,7 @@ const getGmailMcpServer = () => {
                     };
                 }
 
-                case "batch_modify_emails": {
+                case "gmail_batch_modify_emails": {
                     const validatedArgs = BatchModifyEmailsSchema.parse(args);
                     const messageIds = validatedArgs.messageIds;
                     const batchSize = validatedArgs.batchSize || 50;
@@ -498,7 +498,7 @@ const getGmailMcpServer = () => {
                     };
                 }
 
-                case "batch_delete_emails": {
+                case "gmail_batch_delete_emails": {
                     const validatedArgs = BatchDeleteEmailsSchema.parse(args);
                     const messageIds = validatedArgs.messageIds;
                     const batchSize = validatedArgs.batchSize || 50;
