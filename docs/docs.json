@@ -253,7 +253,7 @@
           },
           {
             "group": "Developer",
-            "pages": ["knowledge-base/developer/cursor"]
+            "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
           }
         ]
       }

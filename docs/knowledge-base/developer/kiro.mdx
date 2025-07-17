@@ -1,16 +1,16 @@
 ---
-title: "Cursor"
-description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercharge your AI coding experience"
+title: "Kiro"
+description: "Connect Klavis MCP Servers with Kiro in minutes and supercharge your AI workflow experience"
 ---
 <img
   className="block dark:hidden"
-  src="/images/knowledge-base/cursor/Cursor.png"
-  alt="Cursor IDE with Klavis MCP Servers"
+  src="/images/knowledge-base/kiro/Kiro.png"
+  alt="Kiro with Klavis MCP Servers"
 />
 <img
   className="hidden dark:block"
-  src="/images/knowledge-base/cursor/Cursor.png"
-  alt="Cursor IDE with Klavis MCP Servers"
+  src="/images/knowledge-base/kiro/Kiro.png"
+  alt="Kiro with Klavis MCP Servers"
 />
 
 ## Quick Setup Guide
@@ -20,7 +20,7 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
     Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
     
     <img
-      src="/images/knowledge-base/cursor/step1.png"
+      src="/images/knowledge-base/kiro/step1.png"
       alt="Klavis home page"
     />    
     Click the **"Create"** button next to your chosen server.
@@ -28,18 +28,13 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
 
   <Step title="Complete Authentication">
     <img
-      src="/images/knowledge-base/cursor/step2.png"
+      src="/images/knowledge-base/kiro/step2.png"
       alt="Klavis MCP Servers page"
     />
     
     <img
-      src="/images/knowledge-base/cursor/step3.png"
-      alt="Available MCP Servers"
-    />
-    
-    <img
-      src="/images/knowledge-base/cursor/step4.JPG"
-      alt="OAuth authentication flow"
+      src="/images/knowledge-base/kiro/step3.png"
+      alt="OAuth Completed"
     />
     
     <Accordion title="🔐 OAuth Services (Most Common)">
@@ -57,48 +52,37 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
     </Accordion>
   </Step>
 
-
-
-  <Step title="Configure Cursor IDE">
-    Copy Your Server URL, open Cursor IDE settings:
-    - **macOS**: `Cmd + ,` or **Cursor > Settings**
-    - **Windows/Linux**: `Ctrl + ,` or **File > Preferences > Settings**
+  <Step title="Configure Kiro">
+    Copy Your Server URL and configure Kiro with your MCP server settings.
     
-    Paste Your Server URL to **mcp.json** file like the screenshot below
-
-
     <img
-      src="/images/knowledge-base/cursor/step5.JPG"
+      src="/images/knowledge-base/kiro/step4.png"
       alt="Server URL generated"
     />
     <img
-      src="/images/knowledge-base/cursor/step6.JPG"
-      alt="Cursor IDE Settings"
+      src="/images/knowledge-base/kiro/step5.png"
+      alt="Kiro Configuration"
     />
-
-  </Step>
-
-  <Step title="Verify Tools Loading">
-     
     <img
-      src="/images/knowledge-base/cursor/step7.JPG"
-      alt="MCP Configuration in Cursor"
+      src="/images/knowledge-base/kiro/step6.png"
+      alt="Kiro mcp.json file"
     />
-    
-    <Note>
-      📋 **Reopen Cursor Settings** to apply the new configuration
+
+     <Note>
+      📋 **Verify Tools Loading** - tools will automatically reload
     </Note>
-    
+
   </Step>
 
-  <Step title="Start Using in Cursor Chat">
+  <Step title="Start Using in Kiro">
+    
+    Open Kiro and start using natural language to interact with your connected services:
+    
     <img
-      src="/images/knowledge-base/cursor/step8.JPG"
-      alt="Using MCP Server in Cursor Chat"
+      src="/images/knowledge-base/kiro/step7.png"
+      alt="Kiro mcp.json file"
     />
-    
-    Open Cursor Chat (`Cmd/Ctrl + L`) and start using natural language:
-    
+
     <CodeGroup>
     ```text GitHub
     "Create a new issue titled 'Add dark mode' with priority label"
@@ -118,12 +102,12 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
     </CodeGroup>
     
     <Tip>
-      🎯 Cursor Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Kiro automatically detects when to use your MCP server tools based on context - no need to specify tool names!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Cursor IDE.
+    You're all set! Your MCP server is now integrated with Kiro.
   </Step>
 </Steps>
 
@@ -134,8 +118,8 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
     - Double-check your Server URL for typos
     - Ensure stable internet connection
     - Verify authentication in Klavis dashboard
-    - Check Cursor IDE logs for error messages
-    - Try completely restarting Cursor IDE
+    - Check Kiro logs for error messages
+    - Try completely restarting Kiro
   </Accordion>
   
   <Accordion title="🔐 Authentication Issues">
@@ -148,7 +132,7 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
   <Accordion title="⚡ Performance Issues">
     - Limit the number of active MCP servers
     - Check your internet connection speed
-    - Restart Cursor IDE periodically
+    - Restart Kiro periodically
     - Contact support if issues persist
   </Accordion>
 </AccordionGroup>
@@ -164,4 +148,4 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
   </Card>
 </CardGroup>
 
----
+--- 
