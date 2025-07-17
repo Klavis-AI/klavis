@@ -240,27 +240,19 @@ console.log(finalResponse.choices[0].message.content);
 ## 🗺️ Roadmap
 
 We're constantly expanding our MCP server ecosystem. Here are the upcoming integrations planned for release:
-### AI platform Integration
-Add more [examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) for integrating popular AI platforms and LLMs with the Klavis AI SDK
 
-### CRM & Sales
-- **Greenhouse** - Applicant tracking system
-- **Monday.com** - Work management platform
-- **Zendesk** - Customer service platform
-
-### Microsoft Ecosystem
+### 🚀 High Priority Integrations
 - **Microsoft Teams** - Team collaboration and communication
 - **Microsoft Outlook** - Email and calendar management  
 - **OneDrive** - Cloud storage and file sharing
-
-### Professional Networks & Communication
 - **LinkedIn** - Professional networking platform
-
-### File Storage & Productivity
 - **Dropbox** - Cloud file storage and synchronization
+- **Canva** - Design and visual content creation platform
+- **Figma** - Collaborative design and prototyping tool
+- **Stripe** - Payment processing and financial services
 
-### Scheduling & Calendar
-- **Cal.com** - Open-source scheduling platform
+### AI platform Integration
+Add more [examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) for integrating popular AI platforms and LLMs with the Klavis AI SDK
 
 ### Testing & Quality Assurance
 - Add Unit Tests, integration test for each MCP Servers
