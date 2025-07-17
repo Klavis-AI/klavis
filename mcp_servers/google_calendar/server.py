@@ -337,6 +337,91 @@ async def update_event(
         logger.exception(f"Error executing tool update_event: {e}")
         raise e
 
+async def add_attendees_to_event(
+    event_id: str,
+    attendee_emails: list[str],
+    calendar_id: str = "primary",
+    send_updates: str = "all",
+) -> str:
+    """Add attendees to an existing event in Google Calendar."""
+    logger.info(f"Executing tool: add_attendees_to_event with event_id: {event_id}")
+    try:
+        access_token = get_auth_token()
+        service = get_calendar_service(access_token)
+
+        # Get the existing event
+        try:
+            event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+        except HttpError:
+            valid_events_with_id = (
+                service.events()
+                .list(
+                    calendarId=calendar_id,
+                    timeMin=(datetime.now() - timedelta(days=2)).isoformat(),
+                    timeMax=(datetime.now() + timedelta(days=365)).isoformat(),
+                    maxResults=50,
+                    singleEvents=True,
+                    orderBy="startTime",
+                )
+                .execute()
+            )
+            raise RuntimeError(f"Event with ID {event_id} not found. Available events: {valid_events_with_id}")
+
+        # Get existing attendee emails (case-insensitive)
+        existing_emails = {
+            attendee.get("email", "").lower() for attendee in event.get("attendees", [])
+        }
+
+        # Filter out emails that are already attendees
+        new_attendees = [
+            {"email": email}
+            for email in attendee_emails
+            if email.lower() not in existing_emails
+        ]
+
+        if not new_attendees:
+            existing_attendee_list = [attendee.get("email", "") for attendee in event.get("attendees", [])]
+            return (
+                f"No new attendees were added to event '{event_id}' because all specified emails "
+                f"are already attendees. Current attendees: {existing_attendee_list}"
+            )
+
+        # Add new attendees to the event
+        event["attendees"] = event.get("attendees", []) + new_attendees
+
+        # Update the event
+        updated_event = (
+            service.events()
+            .update(
+                calendarId=calendar_id,
+                eventId=event_id,
+                sendUpdates=send_updates,
+                body=event,
+            )
+            .execute()
+        )
+
+        added_emails = [attendee["email"] for attendee in new_attendees]
+        notification_message = ""
+        if send_updates == "all":
+            notification_message = "Notifications were sent to all attendees."
+        elif send_updates == "externalOnly":
+            notification_message = "Notifications were sent to external attendees only."
+        elif send_updates == "none":
+            notification_message = "No notifications were sent to attendees."
+
+        return (
+            f"Successfully added {len(new_attendees)} new attendees to event '{event_id}': {', '.join(added_emails)}. "
+            f"{notification_message} View updated event at {updated_event['htmlLink']}"
+        )
+    except HttpError as e:
+        logger.error(f"Google Calendar API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Calendar API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool add_attendees_to_event: {e}")
+        raise e
+
 async def delete_event(
     event_id: str,
     calendar_id: str = "primary",
@@ -586,6 +671,36 @@ def main(
                     },
                 },
             ),
+            types.Tool(
+                name="google_calendar_add_attendees_to_event",
+                description="Add attendees to an existing event in Google Calendar.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["event_id", "attendee_emails"],
+                    "properties": {
+                        "event_id": {
+                            "type": "string",
+                            "description": "The ID of the event to add attendees to",
+                        },
+                        "attendee_emails": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+                        },
+                        "calendar_id": {
+                            "type": "string",
+                            "description": "The ID of the calendar containing the event",
+                            "default": "primary",
+                        },
+                        "send_updates": {
+                            "type": "string",
+                            "description": "Specifies which attendees to notify about the addition",
+                            "enum": ["all", "externalOnly", "none"],
+                            "default": "all",
+                        },
+                    },
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -745,6 +860,46 @@ def main(
                 send_updates = arguments.get("send_updates", "all")
                 
                 result = await delete_event(event_id, calendar_id, send_updates)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "google_calendar_add_attendees_to_event":
+            try:
+                event_id = arguments.get("event_id")
+                attendee_emails = arguments.get("attendee_emails")
+                
+                if not event_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error: event_id parameter is required",
+                        )
+                    ]
+                
+                if not attendee_emails:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error: attendee_emails parameter is required",
+                        )
+                    ]
+                
+                calendar_id = arguments.get("calendar_id", "primary")
+                send_updates = arguments.get("send_updates", "all")
+                
+                result = await add_attendees_to_event(event_id, attendee_emails, calendar_id, send_updates)
                 return [
                     types.TextContent(
                         type="text",
