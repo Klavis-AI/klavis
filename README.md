@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/klavis-ai-klavis-badge.png)](https://mseep.ai/app/klavis-ai-klavis)
+
 <div align="center">
   <picture>
     <img src="https://raw.githubusercontent.com/klavis-ai/klavis/main/static/klavis-ai.png" width="80">
