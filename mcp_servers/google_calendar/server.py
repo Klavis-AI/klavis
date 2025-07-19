@@ -132,7 +132,7 @@ async def create_event(
     description: str | None = None,
     location: str | None = None,
     visibility: str = "default",
-    attendee_emails: list[str] | None = None,
+    attendees: list[str] | None = None,
 ) -> Dict[str, Any]:
     """Create a new event/meeting/sync/meetup in the specified calendar."""
     logger.info(f"Executing tool: create_event with summary: {summary}")
@@ -157,8 +157,8 @@ async def create_event(
             "visibility": visibility,
         }
 
-        if attendee_emails:
-            event["attendees"] = [{"email": email} for email in attendee_emails]
+        if attendees:
+            event["attendees"] = [{"email": email} for email in attendees]
 
         created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
         return {"event": created_event}
@@ -244,8 +244,8 @@ async def update_event(
     updated_description: str | None = None,
     updated_location: str | None = None,
     updated_visibility: str | None = None,
-    attendee_emails_to_add: list[str] | None = None,
-    attendee_emails_to_remove: list[str] | None = None,
+    attendees_to_add: list[str] | None = None,
+    attendees_to_remove: list[str] | None = None,
     send_updates: str = "all",
 ) -> str:
     """Update an existing event in the specified calendar with the provided details."""
@@ -296,21 +296,21 @@ async def update_event(
 
         event.update({k: v for k, v in update_fields.items() if v is not None})
 
-        if attendee_emails_to_remove:
+        if attendees_to_remove:
             event["attendees"] = [
                 attendee
                 for attendee in event.get("attendees", [])
                 if attendee.get("email", "").lower()
-                not in [email.lower() for email in attendee_emails_to_remove]
+                not in [email.lower() for email in attendees_to_remove]
             ]
 
-        if attendee_emails_to_add:
+        if attendees_to_add:
             existing_emails = {
                 attendee.get("email", "").lower() for attendee in event.get("attendees", [])
             }
             new_attendees = [
                 {"email": email}
-                for email in attendee_emails_to_add
+                for email in attendees_to_add
                 if email.lower() not in existing_emails
             ]
             event["attendees"] = event.get("attendees", []) + new_attendees
@@ -339,7 +339,7 @@ async def update_event(
 
 async def add_attendees_to_event(
     event_id: str,
-    attendee_emails: list[str],
+    attendees: list[str],
     calendar_id: str = "primary",
     send_updates: str = "all",
 ) -> str:
@@ -375,7 +375,7 @@ async def add_attendees_to_event(
         # Filter out emails that are already attendees
         new_attendees = [
             {"email": email}
-            for email in attendee_emails
+            for email in attendees
             if email.lower() not in existing_emails
         ]
 
@@ -555,7 +555,7 @@ def main(
                             "enum": ["default", "public", "private"],
                             "default": "default",
                         },
-                        "attendee_emails": {
+                        "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
@@ -627,12 +627,12 @@ def main(
                             "description": "The visibility of the event",
                             "enum": ["default", "public", "private"],
                         },
-                        "attendee_emails_to_add": {
+                        "attendees_to_add": {
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
                         },
-                        "attendee_emails_to_remove": {
+                        "attendees_to_remove": {
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
@@ -676,13 +676,13 @@ def main(
                 description="Add attendees to an existing event in Google Calendar.",
                 inputSchema={
                     "type": "object",
-                    "required": ["event_id", "attendee_emails"],
+                    "required": ["event_id", "attendees"],
                     "properties": {
                         "event_id": {
                             "type": "string",
                             "description": "The ID of the event to add attendees to",
                         },
-                        "attendee_emails": {
+                        "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
@@ -748,11 +748,11 @@ def main(
                 description = arguments.get("description")
                 location = arguments.get("location")
                 visibility = arguments.get("visibility", "default")
-                attendee_emails = arguments.get("attendee_emails")
+                attendees = arguments.get("attendees")
                 
                 result = await create_event(
                     summary, start_datetime, end_datetime, calendar_id,
-                    description, location, visibility, attendee_emails
+                    description, location, visibility, attendees
                 )
                 return [
                     types.TextContent(
@@ -819,14 +819,14 @@ def main(
                 updated_description = arguments.get("updated_description")
                 updated_location = arguments.get("updated_location")
                 updated_visibility = arguments.get("updated_visibility")
-                attendee_emails_to_add = arguments.get("attendee_emails_to_add")
-                attendee_emails_to_remove = arguments.get("attendee_emails_to_remove")
+                attendees_to_add = arguments.get("attendees_to_add")
+                attendees_to_remove = arguments.get("attendees_to_remove")
                 send_updates = arguments.get("send_updates", "all")
                 
                 result = await update_event(
                     event_id, updated_start_datetime, updated_end_datetime,
                     updated_summary, updated_description, updated_location,
-                    updated_visibility, attendee_emails_to_add, attendee_emails_to_remove,
+                    updated_visibility, attendees_to_add, attendees_to_remove,
                     send_updates
                 )
                 return [
@@ -878,7 +878,7 @@ def main(
         elif name == "google_calendar_add_attendees_to_event":
             try:
                 event_id = arguments.get("event_id")
-                attendee_emails = arguments.get("attendee_emails")
+                attendees = arguments.get("attendees")
                 
                 if not event_id:
                     return [
@@ -888,18 +888,18 @@ def main(
                         )
                     ]
                 
-                if not attendee_emails:
+                if not attendees:
                     return [
                         types.TextContent(
                             type="text",
-                            text="Error: attendee_emails parameter is required",
+                            text="Error: attendees parameter is required",
                         )
                     ]
                 
                 calendar_id = arguments.get("calendar_id", "primary")
                 send_updates = arguments.get("send_updates", "all")
                 
-                result = await add_attendees_to_event(event_id, attendee_emails, calendar_id, send_updates)
+                result = await add_attendees_to_event(event_id, attendees, calendar_id, send_updates)
                 return [
                     types.TextContent(
                         type="text",
