@@ -1,23 +1,16 @@
 import { z } from "zod";
 
 export const UploadFileSchema = z.object({
-    path: z.string().describe("Path where the file should be uploaded (e.g., '/folder/filename.txt')"),
-    text_content: z.string().optional().describe("File content as plain text (for text files)"),
-    base64_content: z.string().optional().describe("File content as base64 encoded data (for binary files or when content is already base64 encoded)"),
+    dropbox_path: z.string().describe("Path where the file should be uploaded in Dropbox (e.g., '/folder/filename.txt')"),
+    local_file_uri: z.string().describe("Local file URI in the format 'file:///absolute/path/to/file' pointing to the file to upload"),
     mode: z.enum(['add', 'overwrite', 'update']).optional().default('add').describe("Upload mode"),
     autorename: z.boolean().optional().default(false).describe("Automatically rename file if it already exists"),
     mute: z.boolean().optional().default(false).describe("Suppress notifications"),
 }).refine(
-    (data) => !!(data.text_content || data.base64_content),
+    (data) => data.local_file_uri.startsWith('file://'),
     {
-        message: "Either text_content or base64_content must be provided",
-        path: ["content"],
-    }
-).refine(
-    (data) => !(data.text_content && data.base64_content),
-    {
-        message: "Only one of text_content or base64_content should be provided, not both",
-        path: ["content"],
+        message: "local_file_uri must start with 'file://' protocol",
+        path: ["local_file_uri"],
     }
 );
 

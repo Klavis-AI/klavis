@@ -54,7 +54,7 @@ export const toolDefinitions = [
     },
     {
         name: "upload_file",
-        description: "Uploads a file to Dropbox",
+        description: "Uploads a local file to Dropbox using file:// URI. Reads the file directly from the local filesystem and uploads it as binary data.",
         inputSchema: zodToJsonSchema(schemas.UploadFileSchema),
     },
     {
@@ -89,7 +89,7 @@ export const toolDefinitions = [
     },
     {
         name: "get_preview",
-        description: "Gets a preview of a file. PDF previews are generated for files with the following extensions: .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides, .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf. HTML previews are generated for files with the following extensions: .csv, .ods, .xls, .xlsm, .gsheet, .xlsx. Other formats will return an unsupported extension error.",
+        description: "Gets a preview of a file. Returns image content type for image files, text content for HTML previews, and base64 data for PDF/document previews. PDF previews are generated for files with the following extensions: .ai, .doc, .docm, .docx, .eps, .gdoc, .gslides, .odp, .odt, .pps, .ppsm, .ppsx, .ppt, .pptm, .pptx, .rtf. HTML previews are generated for files with the following extensions: .csv, .ods, .xls, .xlsm, .gsheet, .xlsx.",
         inputSchema: zodToJsonSchema(schemas.GetPreviewSchema),
     },
     {
@@ -184,7 +184,7 @@ export const toolDefinitions = [
     },
     {
         name: "get_thumbnail",
-        description: "Gets a thumbnail image for a file",
+        description: "Gets a thumbnail image for a file and returns it as binary image data with proper MIME type. The response contains the actual image that can be displayed directly by compatible clients.",
         inputSchema: zodToJsonSchema(schemas.GetThumbnailSchema),
     },
     {

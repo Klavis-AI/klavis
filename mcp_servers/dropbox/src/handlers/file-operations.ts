@@ -10,63 +10,149 @@ import {
     SaveUrlSchema,
     SaveUrlCheckJobStatusSchema
 } from '../schemas/index.js';
-import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, CallToolResult, ImageContent, } from "@modelcontextprotocol/sdk/types.js";
+import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { stat } from 'fs/promises';
+import { lookup } from 'mime-types';
+
+/**
+ * Creates an ImageContent object for MCP responses
+ */
+function createImageContent(base64Data: string, mimeType: string): ImageContent {
+    return {
+        type: "image" as const,
+        data: base64Data,
+        mimeType: mimeType,
+    };
+}
+
+/**
+ * Detects file type and MIME type based on file extension using mime-types library
+ */
+export function detectFileType(fileName: string): { mimeType: string; contentType: 'image' | 'text' | 'binary' } {
+    // Use mime-types library to get MIME type from filename
+    const mimeType = lookup(fileName) || 'application/octet-stream';
+
+    // Determine content type category based on MIME type
+    if (mimeType.startsWith('image/')) {
+        return { mimeType, contentType: 'image' };
+    }
+
+    if (mimeType.startsWith('text/') ||
+        ['application/json', 'application/xml', 'application/javascript', 'application/typescript'].includes(mimeType)) {
+        return { mimeType, contentType: 'text' };
+    }
+
+    // Everything else is binary
+    return { mimeType, contentType: 'binary' };
+}
 
 export async function handleUploadFile(args: any) {
     const validatedArgs = UploadFileSchema.parse(args);
     const dropbox = getDropboxClient();
 
-    // Convert content to buffer based on provided content type
-    let fileContent: Buffer;
-
-    if (validatedArgs.text_content) {
-        // Handle plain text content
-        fileContent = Buffer.from(validatedArgs.text_content, 'utf8');
-    } else if (validatedArgs.base64_content) {
-        // Handle base64 encoded content
+    try {
+        // Parse the file:// URI to get the local file path
+        let localFilePath: string;
         try {
-            fileContent = Buffer.from(validatedArgs.base64_content, 'base64');
+            localFilePath = fileURLToPath(validatedArgs.local_file_uri);
         } catch (error) {
             return {
                 content: [
                     {
                         type: "text",
-                        text: `Invalid base64 content provided. Please ensure the base64_content is properly encoded.`,
+                        text: `Invalid file URI: ${validatedArgs.local_file_uri}\nPlease use a valid file:// URI format (e.g., 'file:///absolute/path/to/file')`,
                     },
                 ],
             };
         }
-    } else {
-        // This should not happen due to schema validation, but just in case
+
+        // Check if file exists and get file stats
+        let fileStats;
+        try {
+            fileStats = await stat(localFilePath);
+        } catch (error) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `File not found: ${localFilePath}\nPlease ensure the file exists and the path is correct.`,
+                    },
+                ],
+            };
+        }
+
+        // Check if it's a regular file (not a directory)
+        if (!fileStats.isFile()) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Path is not a file: ${localFilePath}\nPlease provide a path to a regular file, not a directory.`,
+                    },
+                ],
+            };
+        }
+
+        // Read the file as binary data
+        let fileContent: Buffer;
+        try {
+            fileContent = await readFile(localFilePath);
+        } catch (error) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Failed to read file: ${localFilePath}\nError: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
+            };
+        }
+
+        // Upload to Dropbox
+        const response = await dropbox.filesUpload({
+            path: validatedArgs.dropbox_path,
+            contents: fileContent,
+            mode: validatedArgs.mode as any,
+            autorename: validatedArgs.autorename,
+            mute: validatedArgs.mute,
+        });
+
         return {
             content: [
                 {
                     type: "text",
-                    text: `No content provided. Please specify either text_content or base64_content.`,
+                    text: `File uploaded successfully!\n\nLocal file: ${localFilePath}\nDropbox path: ${response.result.path_display}\nFile size: ${response.result.size} bytes (${(response.result.size / 1024).toFixed(2)} KB)\nLocal file size: ${fileStats.size} bytes\nUpload mode: ${validatedArgs.mode}\nAutorename: ${validatedArgs.autorename}`,
+                },
+            ],
+        };
+    } catch (error: any) {
+        let errorMessage = `Failed to upload file from ${validatedArgs.local_file_uri} to ${validatedArgs.dropbox_path}\n`;
+
+        if (error.status === 400) {
+            errorMessage += `\nError 400: Bad request - Check the Dropbox path format.\n\nPath requirements:\n- Must start with '/' (e.g., '/Documents/file.txt')\n- Use forward slashes (/) not backslashes (\\)\n- Avoid special characters that aren't URL-safe\n- Include the filename in the path`;
+        } else if (error.status === 401) {
+            errorMessage += `\nError 401: Unauthorized - Your access token may be invalid or expired.\n\nCheck:\n- Access token is valid and not expired\n- Token has 'files.content.write' permission\n- You're authenticated with the correct Dropbox account`;
+        } else if (error.status === 403) {
+            errorMessage += `\nError 403: Permission denied - You don't have permission to upload to this location.\n\nThis could mean:\n- The destination folder is read-only\n- You don't have write access to the folder\n- The folder is in a shared space with restricted permissions`;
+        } else if (error.status === 409) {
+            errorMessage += `\nError 409: Conflict - A file with this name already exists.\n\nOptions:\n- Set autorename=true to automatically rename the file\n- Use mode='overwrite' to replace the existing file\n- Choose a different filename`;
+        } else if (error.status === 429) {
+            errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\nTry:\n- Waiting a moment before retrying\n- Reducing the frequency of uploads\n- Uploading smaller files or fewer files at once`;
+        } else {
+            errorMessage += `\nError ${error.status || 'Unknown'}: ${error.message || error.error_summary || 'Unknown error'}\n\nGeneral troubleshooting:\n- Check your internet connection\n- Verify the Dropbox path is valid\n- Ensure the local file is accessible\n- Confirm proper authentication`;
+        }
+
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: errorMessage,
                 },
             ],
         };
     }
-
-    const response = await dropbox.filesUpload({
-        path: validatedArgs.path,
-        contents: fileContent,
-        mode: validatedArgs.mode as any,
-        autorename: validatedArgs.autorename,
-        mute: validatedArgs.mute,
-    });
-
-    const contentType = validatedArgs.text_content ? 'text' : 'base64';
-    const contentLength = validatedArgs.text_content ? validatedArgs.text_content.length : validatedArgs.base64_content!.length;
-
-    return {
-        content: [
-            {
-                type: "text",
-                text: `File uploaded successfully!\n\nFile: ${response.result.path_display}\nSize: ${response.result.size} bytes\nContent type: ${contentType}\nInput length: ${contentLength} characters`,
-            },
-        ],
-    };
 }
 
 export async function handleDownloadFile(args: any) {
@@ -108,43 +194,19 @@ export async function handleDownloadFile(args: any) {
         }
 
         if (fileBuffer) {
-            // Try to detect if it's text content
-            let isTextContent = false;
-            let textContent = '';
 
-            try {
-                textContent = fileBuffer.toString('utf8');
-                // Simple heuristic: if it contains mostly printable characters, treat as text
-                const printableRatio = textContent.split('').filter(char => 
-                    /[\x20-\x7E\s]/.test(char)
-                ).length / textContent.length;
-                
-                isTextContent = printableRatio > 0.9 && textContent.length > 0;
-            } catch (e) {
-                isTextContent = false;
-            }
+            // Return a resource URI instead of file content
+            const resourceUri = `dropbox://${validatedArgs.path}`;
 
-            if (isTextContent && textContent.length < 10000) { // Limit text display to 10KB
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Downloaded file: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes\n\nFile content (text):\n\n${textContent}`,
-                        },
-                    ],
-                };
-            } else {
-                // For binary files or large text files, provide base64
-                const base64Content = fileBuffer.toString('base64');
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Downloaded file: ${fileName}\nPath: ${filePath}\nSize: ${fileSize} bytes\n\nFile content (base64):\n\n${base64Content}`,
-                        },
-                    ],
-                };
-            }
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Use resources/read to access the file content at: ${resourceUri}`,
+                    },
+                ],
+            };
+
         } else {
             return {
                 content: [
@@ -191,21 +253,20 @@ export async function handleGetThumbnail(args: any) {
         });
 
         const result = response.result as any;
-        
+
         if (result.fileBinary) {
-            const thumbnailBuffer = Buffer.isBuffer(result.fileBinary) 
-                ? result.fileBinary 
+            const thumbnailBuffer = Buffer.isBuffer(result.fileBinary)
+                ? result.fileBinary
                 : Buffer.from(result.fileBinary);
-            
+
             const base64Thumbnail = thumbnailBuffer.toString('base64');
-            
+            const mimeType = `image/${validatedArgs.format}`;
+
+            // Create image content using the helper function
+            const imageContent = createImageContent(base64Thumbnail, mimeType);
+
             return {
-                content: [
-                    {
-                        type: "text",
-                        text: `Thumbnail generated for: ${validatedArgs.path}\nFormat: ${validatedArgs.format}\nSize: ${validatedArgs.size}\nThumbnail size: ${thumbnailBuffer.length} bytes\n\nThumbnail (base64):\n\n${base64Thumbnail}`,
-                    },
-                ],
+                content: [imageContent],
             };
         } else {
             return {
@@ -251,22 +312,81 @@ export async function handleGetPreview(args: any) {
         });
 
         const result = response.result as any;
-        
+
         if (result.fileBinary) {
-            const previewBuffer = Buffer.isBuffer(result.fileBinary) 
-                ? result.fileBinary 
+            const previewBuffer = Buffer.isBuffer(result.fileBinary)
+                ? result.fileBinary
                 : Buffer.from(result.fileBinary);
-            
+
+            // Detect content type using our helper function
+            const { mimeType, contentType } = detectFileType(validatedArgs.path);
             const base64Preview = previewBuffer.toString('base64');
-            
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `Preview generated for: ${validatedArgs.path}\nPreview size: ${previewBuffer.length} bytes\n\nPreview (base64):\n\n${base64Preview}`,
-                    },
-                ],
-            };
+
+            // Return different content types based on the preview format
+            if (contentType === 'image') {
+                // For image files, return as image content
+                const imageContent = createImageContent(base64Preview, mimeType);
+                return {
+                    content: [imageContent],
+                };
+            } else if (contentType === 'text') {
+                // For text-based previews (HTML, CSV, etc.), try to decode as text
+                try {
+                    const textContent = previewBuffer.toString('utf8');
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Preview generated for: ${validatedArgs.path}\nContent-Type: ${mimeType}\nPreview size: ${previewBuffer.length} bytes\n\nPreview content:\n\n${textContent}`,
+                            },
+                        ],
+                    };
+                } catch (e) {
+                    // Fallback to base64 if text decoding fails
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Preview generated for: ${validatedArgs.path}\nContent-Type: ${mimeType}\nPreview size: ${previewBuffer.length} bytes\n\nPreview content (base64):\n\n${base64Preview}`,
+                            },
+                        ],
+                    };
+                }
+            } else {
+                // For binary content like PDFs, check if the preview is actually an image
+                // Dropbox often returns image previews for PDF and Office documents
+                const isImagePreview = previewBuffer.length > 0 && (
+                    previewBuffer.subarray(0, 4).toString('hex') === '89504e47' || // PNG
+                    previewBuffer.subarray(0, 3).toString('hex') === 'ffd8ff' ||   // JPEG
+                    previewBuffer.subarray(0, 6).toString() === 'GIF87a' ||         // GIF87a
+                    previewBuffer.subarray(0, 6).toString() === 'GIF89a'            // GIF89a
+                );
+
+                if (isImagePreview) {
+                    // Detect the actual image format from the preview data
+                    let imageFormat = 'png';
+                    if (previewBuffer.subarray(0, 3).toString('hex') === 'ffd8ff') {
+                        imageFormat = 'jpeg';
+                    } else if (previewBuffer.subarray(0, 6).toString().startsWith('GIF')) {
+                        imageFormat = 'gif';
+                    }
+
+                    const imageContent = createImageContent(base64Preview, `image/${imageFormat}`);
+                    return {
+                        content: [imageContent],
+                    };
+                } else {
+                    // For non-image binary previews, return as base64 text
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `Preview generated for: ${validatedArgs.path}\nContent-Type: ${mimeType}\nPreview size: ${previewBuffer.length} bytes\n\nPreview content (base64):\n\n${base64Preview}`,
+                            },
+                        ],
+                    };
+                }
+            }
         } else {
             return {
                 content: [
@@ -494,6 +614,66 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
                 },
             ],
         };
+    }
+}
+
+export async function handleReadResource(uri: string) {
+    if (!uri.startsWith('dropbox://')) {
+        throw new Error('Invalid resource URI. Must start with dropbox://');
+    }
+
+    const filePath = uri.replace('dropbox://', '');
+    
+    try {
+        const dropboxClient = getDropboxClient();
+        const response = await dropboxClient.filesDownload({
+            path: filePath.startsWith('/') ? filePath : `/${filePath}`,
+        });
+
+        const result = response.result as any;
+        let fileBuffer: Buffer | undefined;
+
+        // Extract file content
+        if (result.fileBinary) {
+            if (Buffer.isBuffer(result.fileBinary)) {
+                fileBuffer = result.fileBinary;
+            } else {
+                fileBuffer = Buffer.from(result.fileBinary);
+            }
+        }
+
+        if (fileBuffer) {
+            const fileName = result.name || 'Unknown file';
+            const { mimeType } = detectFileType(fileName);
+            
+            if (mimeType.startsWith('text/')) {
+                // Return text content directly
+                return {
+                    contents: [
+                        {
+                            uri: uri,
+                            mimeType: mimeType,
+                            text: fileBuffer.toString('utf8'),
+                        },
+                    ],
+                };
+            } else {
+                // Return binary content as base64
+                return {
+                    contents: [
+                        {
+                            uri: uri,
+                            mimeType: mimeType,
+                            blob: fileBuffer.toString('base64'),
+                        },
+                    ],
+                };
+            }
+        }
+
+        throw new Error('Failed to extract file content');
+    } catch (error: any) {
+        throw new Error(`Failed to read resource: ${error.message}`);
     }
 }
 

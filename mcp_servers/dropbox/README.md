@@ -12,7 +12,7 @@ A Model Context Protocol (MCP) server for Dropbox integration, providing compreh
 - **Copy File/Folder**: Create copies of files and folders
 
 ### File Content Operations
-- **Upload File**: Upload files with content as string or base64
+- **Upload File**: Upload local files directly using `file://` URIs for efficient binary transfer
 - **Download File**: Download files with base64 encoded content
 - **Get File Info**: Retrieve detailed metadata about files and folders
 
@@ -225,17 +225,16 @@ List shared links
 ```
 
 ### upload_file
-Upload a file
+Upload a local file to Dropbox
 ```typescript
 {
-  path: string, // Upload path (e.g., "/folder/filename.txt")
-  text_content: string (optional), // File content as plain text
-  base64_content: string (optional), // File content as base64 encoded data
+  dropbox_path: string, // Upload path in Dropbox (e.g., "/folder/filename.txt")
+  local_file_uri: string, // Local file URI (e.g., "file:///home/user/documents/file.txt")
   mode: "add" | "overwrite" | "update" (optional, default: "add"),
   autorename: boolean (optional, default: false),
   mute: boolean (optional, default: false)
 }
-// Note: Either text_content or base64_content must be provided, but not both
+// Note: local_file_uri must use the file:// protocol and point to an existing local file
 ```
 
 ### download_file
@@ -751,3 +750,21 @@ curl -X POST https://api.dropboxapi.com/2/users/get_current_account \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
+
+## Implementation Notes
+
+### File Upload with file:// URIs
+
+This implementation follows the [MCP Resource concept](https://modelcontextprotocol.io/docs/concepts/resources) by using `file://` URIs for local file uploads. This approach provides several benefits:
+
+- **Direct Binary Transfer**: Files are read directly from the local filesystem as binary data
+- **No Encoding Overhead**: Eliminates the need for base64 encoding/decoding
+- **Memory Efficient**: Streams file content without loading entire files into memory as text
+- **Type Preservation**: Maintains original file type and binary integrity
+- **Filesystem Integration**: Natural integration with local file operations
+
+The `upload_file` tool now requires:
+- `dropbox_path`: Destination path in Dropbox
+- `local_file_uri`: Local file URI using `file://` protocol (e.g., `file:///home/user/document.pdf`)
+
+This design allows MCP clients to handle file selection and URI construction while the server focuses on the actual upload implementation.
