@@ -1,7 +1,5 @@
 from .auth import get_profile_info
 from .posts import create_post, get_user_posts
-from .network import get_network_updates
-from .search import search_people
 from .companies import get_company_info
 from .base import linkedin_token_context
 
@@ -12,12 +10,6 @@ __all__ = [
     # Posts
     "create_post",
     "get_user_posts",
-    
-    # Network
-    "get_network_updates",
-    
-    # Search
-    "search_people",
     
     # Companies
     "get_company_info",
