@@ -36,11 +36,8 @@ def _get_linkedin_headers() -> Dict[str, str]:
     }
 
 def _get_ssl_context():
-    """Create SSL context that doesn't verify certificates (for development/testing)."""
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-    return ssl_context
+    """Create secure SSL context."""
+    return ssl.create_default_context()
 
 async def make_linkedin_request(
     method: str, 
