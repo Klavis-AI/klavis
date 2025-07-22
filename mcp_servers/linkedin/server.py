@@ -19,8 +19,7 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     linkedin_token_context,
     get_profile_info,
-    create_text_post,
-    create_article_post,
+    create_post,
     get_user_posts,
     get_network_updates,
     search_people,
@@ -84,8 +83,8 @@ def main(
                 }
             ),
             types.Tool(
-                name="linkedin_create_text_post",
-                description="Create a text post on LinkedIn.",
+                name="linkedin_create_post",
+                description="Create a post on LinkedIn with optional title for article-style posts.",
                 inputSchema={
                     "type": "object",
                     "required": ["text"],
@@ -94,28 +93,9 @@ def main(
                             "type": "string",
                             "description": "The text content of the post."
                         },
-                        "visibility": {
-                            "type": "string",
-                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
-                            "default": "PUBLIC"
-                        }
-                    }
-                }
-            ),
-            types.Tool(
-                name="linkedin_create_article_post",
-                description="Create an article post on LinkedIn.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["title", "text"],
-                    "properties": {
                         "title": {
                             "type": "string",
-                            "description": "The title of the article."
-                        },
-                        "text": {
-                            "type": "string",
-                            "description": "The content/body of the article."
+                            "description": "Optional title for article-style posts. When provided, creates an article format."
                         },
                         "visibility": {
                             "type": "string",
@@ -197,27 +177,9 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
-        if name == "linkedin_get_profile_info":
-            person_id = arguments.get("person_id")
-            try:
-                result = await get_profile_info(person_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "linkedin_create_text_post":
+        if name == "linkedin_create_post":
             text = arguments.get("text")
+            title = arguments.get("title")
             visibility = arguments.get("visibility", "PUBLIC")
             if not text:
                 return [
@@ -227,7 +189,7 @@ def main(
                     )
                 ]
             try:
-                result = await create_text_post(text, visibility)
+                result = await create_post(text, title, visibility)
                 return [
                     types.TextContent(
                         type="text",
@@ -243,19 +205,10 @@ def main(
                     )
                 ]
         
-        elif name == "linkedin_create_article_post":
-            title = arguments.get("title")
-            text = arguments.get("text")
-            visibility = arguments.get("visibility", "PUBLIC")
-            if not title or not text:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: title and text parameters are required",
-                    )
-                ]
+        elif name == "linkedin_get_profile_info":
+            person_id = arguments.get("person_id")
             try:
-                result = await create_article_post(title, text, visibility)
+                result = await get_profile_info(person_id)
                 return [
                     types.TextContent(
                         type="text",
