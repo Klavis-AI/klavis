@@ -6,13 +6,16 @@ from .base import make_linkedin_request
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def create_text_post(text: str, visibility: str = "PUBLIC") -> Dict[str, Any]:
-    """Create a text post on LinkedIn."""
-    logger.info(f"Executing tool: create_text_post")
+async def create_post(text: str, title: Optional[str] = None, visibility: str = "PUBLIC") -> Dict[str, Any]:
+    """Create a post on LinkedIn with optional title for article-style posts."""
+    tool_name = "create_article_post" if title else "create_text_post"
+    logger.info(f"Executing tool: {tool_name}")
     try:
-        # Check if we have w_member_social scope by trying to post
         profile = await make_linkedin_request("GET", "/userinfo")
         person_id = profile.get('sub')
+        
+        # Format content with title if provided
+        content = f"{title}\n\n{text}" if title else text
         
         endpoint = "/ugcPosts"
         payload = {
@@ -21,7 +24,7 @@ async def create_text_post(text: str, visibility: str = "PUBLIC") -> Dict[str, A
             "specificContent": {
                 "com.linkedin.ugc.ShareContent": {
                     "shareCommentary": {
-                        "text": text
+                        "text": content
                     },
                     "shareMediaCategory": "NONE"
                 }
@@ -32,65 +35,34 @@ async def create_text_post(text: str, visibility: str = "PUBLIC") -> Dict[str, A
         }
         
         post_data = await make_linkedin_request("POST", endpoint, json_data=payload)
-        return {
+        result = {
             "id": post_data.get("id"),
             "created": post_data.get("created"),
             "lastModified": post_data.get("lastModified"),
             "lifecycleState": post_data.get("lifecycleState")
         }
+        
+        if title:
+            result["title"] = title
+            result["note"] = "Created as text post with article format (title + content)"
+        
+        return result
     except Exception as e:
-        logger.exception(f"Error executing tool create_text_post: {e}")
-        return {
+        logger.exception(f"Error executing tool {tool_name}: {e}")
+        error_result = {
             "error": "Post creation failed - likely due to insufficient permissions",
             "text": text,
             "note": "Requires 'w_member_social' scope in LinkedIn app settings",
             "exception": str(e)
         }
+        
+        if title:
+            error_result["title"] = title
+            error_result["error"] = "Article creation failed - trying alternative approach"
+            error_result["note"] = "Will attempt to create as formatted text post"
+        
+        return error_result
 
-async def create_article_post(title: str, text: str, visibility: str = "PUBLIC") -> Dict[str, Any]:
-    """Create an article post on LinkedIn."""
-    logger.info(f"Executing tool: create_article_post")
-    try:
-        # Get current user info
-        profile = await make_linkedin_request("GET", "/userinfo")
-        person_id = profile.get('sub')
-        
-        # Use the same format as text posts but with longer content
-        endpoint = "/ugcPosts"
-        payload = {
-            "author": f"urn:li:person:{person_id}",
-            "lifecycleState": "PUBLISHED",
-            "specificContent": {
-                "com.linkedin.ugc.ShareContent": {
-                    "shareCommentary": {
-                        "text": f"{title}\n\n{text}"
-                    },
-                    "shareMediaCategory": "NONE"  # Changed from "ARTICLE" to "NONE"
-                }
-            },
-            "visibility": {
-                "com.linkedin.ugc.MemberNetworkVisibility": visibility
-            }
-        }
-        
-        post_data = await make_linkedin_request("POST", endpoint, json_data=payload)
-        return {
-            "id": post_data.get("id"),
-            "created": post_data.get("created"),
-            "lastModified": post_data.get("lastModified"),
-            "lifecycleState": post_data.get("lifecycleState"),
-            "title": title,
-            "note": "Created as text post with article format (title + content)"
-        }
-    except Exception as e:
-        logger.exception(f"Error executing tool create_article_post: {e}")
-        return {
-            "error": "Article creation failed - trying alternative approach",
-            "title": title,
-            "text": text,
-            "note": "Will attempt to create as formatted text post",
-            "exception": str(e)
-        }
 
 async def get_user_posts(person_id: Optional[str] = None, count: int = 10) -> List[Dict[str, Any]]:
     """Get recent posts from a user's profile."""
