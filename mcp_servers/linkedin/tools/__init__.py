@@ -1,5 +1,5 @@
 from .auth import get_profile_info
-from .posts import create_text_post, create_article_post, get_user_posts
+from .posts import create_post, get_user_posts
 from .network import get_network_updates
 from .search import search_people
 from .companies import get_company_info
@@ -10,8 +10,7 @@ __all__ = [
     "get_profile_info",
     
     # Posts
-    "create_text_post",
-    "create_article_post", 
+    "create_post",
     "get_user_posts",
     
     # Network
