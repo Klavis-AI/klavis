@@ -16,8 +16,7 @@ This server provides the following capabilities through MCP tools:
 | Tool | Description |
 |------|-------------|
 | `get_profile_info` | Retrieve LinkedIn profile information (current user or specified person) |
-| `create_text_post` | Create a text post on LinkedIn with customizable visibility |
-| `create_article_post` | Create an article post with title and content |
+| `create_post` | Create a text/article post on LinkedIn with customizable visibility |
 | `get_user_posts` | Retrieve recent posts from a user's profile |
 | `get_network_updates` | Get network updates from LinkedIn feed |
 | `search_people` | Search for people on LinkedIn |
@@ -137,39 +136,27 @@ payload = {
 }
 ```
 
-### Creating a Text Post
+#### Basic Text Post
 
 ```python
 payload = {
-    "tool_name": "linkedin_create_text_post",
+    "tool_name": "linkedin_create_post",
     "tool_args": {
         "text": "Excited to share my latest project!",
-        "visibility": "PUBLIC"
+        "visibility": "PUBLIC"  # Optional: defaults to "PUBLIC"
     }
 }
 ```
 
-### Creating an Article Post
+#### Article-Style Post (with title)
 
 ```python
 payload = {
-    "tool_name": "linkedin_create_article_post",
+    "tool_name": "linkedin_create_post",
     "tool_args": {
         "title": "The Future of AI",
         "text": "In this article, I explore the latest trends in artificial intelligence...",
         "visibility": "PUBLIC"
-    }
-}
-```
-
-### Searching for People
-
-```python
-payload = {
-    "tool_name": "linkedin_search_people",
-    "tool_args": {
-        "keywords": "software engineer",
-        "count": 10
     }
 }
 ```
