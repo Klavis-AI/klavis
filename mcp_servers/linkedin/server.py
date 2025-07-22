@@ -21,8 +21,6 @@ from tools import (
     get_profile_info,
     create_post,
     get_user_posts,
-    get_network_updates,
-    search_people,
     get_company_info,
 )
 
@@ -124,39 +122,6 @@ def main(
                 }
             ),
             types.Tool(
-                name="linkedin_get_network_updates",
-                description="Get network updates from LinkedIn feed (default 20, max 50).",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "count": {
-                            "type": "integer",
-                            "description": "The number of updates to retrieve (1-50).",
-                            "default": 20
-                        }
-                    }
-                }
-            ),
-            types.Tool(
-                name="linkedin_search_people",
-                description="Search for people on LinkedIn.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["keywords"],
-                    "properties": {
-                        "keywords": {
-                            "type": "string",
-                            "description": "Keywords to search for in people's profiles."
-                        },
-                        "count": {
-                            "type": "integer",
-                            "description": "The number of results to return (1-50).",
-                            "default": 10
-                        }
-                    }
-                }
-            ),
-            types.Tool(
                 name="linkedin_get_company_info",
                 description="Get information about a LinkedIn company.",
                 inputSchema={
@@ -244,51 +209,6 @@ def main(
                     )
                 ]
         
-        elif name == "linkedin_get_network_updates":
-            count = arguments.get("count", 20)
-            try:
-                result = await get_network_updates(count)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "linkedin_search_people":
-            keywords = arguments.get("keywords")
-            count = arguments.get("count", 10)
-            if not keywords:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: keywords parameter is required",
-                    )
-                ]
-            try:
-                result = await search_people(keywords, count)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
         
         elif name == "linkedin_get_company_info":
             company_id = arguments.get("company_id")
