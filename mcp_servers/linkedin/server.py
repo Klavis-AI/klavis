@@ -30,11 +30,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("linkedin-mcp-server")
 
-# LinkedIn API constants and configuration
-LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN")
-if not LINKEDIN_ACCESS_TOKEN:
-    raise ValueError("LINKEDIN_ACCESS_TOKEN environment variable is required")
-
+LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN") or "" # for local use
 LINKEDIN_MCP_SERVER_PORT = int(os.getenv("LINKEDIN_MCP_SERVER_PORT", "5000"))
 
 @click.command()
