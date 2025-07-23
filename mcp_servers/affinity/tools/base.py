@@ -62,7 +62,17 @@ class AffinityV1Client:
             if response.status_code == 204 or not response.content:
                 return {"success": True}
             
-            return response.json()
+            try:
+                json_response = response.json()
+                # Handle null/undefined responses
+                if json_response is None:
+                    return {"data": None, "message": "API returned null response"}
+                return json_response
+            except ValueError as e:
+                # Handle cases where response content exists but isn't valid JSON
+                logger.error(f"Failed to parse JSON response: {e}")
+                logger.error(f"Response content: {response.content}")
+                return {"error": "Invalid JSON response", "content": response.text}
 
 class AffinityV2Client:
     """Client for Affinity API V2 using Bearer Authentication."""
@@ -108,7 +118,17 @@ class AffinityV2Client:
             if response.status_code == 204 or not response.content:
                 return {"success": True}
             
-            return response.json()
+            try:
+                json_response = response.json()
+                # Handle null/undefined responses
+                if json_response is None:
+                    return {"data": None, "message": "API returned null response"}
+                return json_response
+            except ValueError as e:
+                # Handle cases where response content exists but isn't valid JSON
+                logger.error(f"Failed to parse JSON response: {e}")
+                logger.error(f"Response content: {response.content}")
+                return {"error": "Invalid JSON response", "content": response.text}
 
 async def make_http_request(
     method: str, 
