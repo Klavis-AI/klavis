@@ -258,6 +258,10 @@
           {
             "group": "Developer",
             "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
+          },
+          {
+            "group": "OAuth",
+            "pages": ["knowledge-base/oauth/linkedin"]
           }
         ]
       }
