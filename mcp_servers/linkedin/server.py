@@ -276,16 +276,16 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract LinkedIn access token from headers (fallback to environment)
+        # Extract auth token from headers (fallback to environment)
         headers = dict(scope.get("headers", []))
-        linkedin_token = headers.get(b'x-linkedin-token')
-        if linkedin_token:
-            linkedin_token = linkedin_token.decode('utf-8')
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
         else:
-            linkedin_token = LINKEDIN_ACCESS_TOKEN
+            auth_token = LINKEDIN_ACCESS_TOKEN
         
         # Set the LinkedIn token in context for this request
-        token = linkedin_token_context.set(linkedin_token or "")
+        token = linkedin_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
