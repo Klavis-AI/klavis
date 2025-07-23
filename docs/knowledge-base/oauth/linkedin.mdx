@@ -1,0 +1,87 @@
+---
+title: "Setting Up LinkedIn OAuth App"
+description: "Complete guide to creating and configuring a LinkedIn OAuth application"
+---
+
+This guide walks you through the process of setting up a LinkedIn OAuth application for authentication and API access.
+
+## Prerequisites
+
+- A LinkedIn personal account
+- A LinkedIn company page (required for app creation)
+
+## Step 1: Create a LinkedIn Developer Account
+
+1. **Go to LinkedIn Developer Portal**: Visit [https://developer.linkedin.com/](https://developer.linkedin.com/)
+2. **Sign in**: Use your LinkedIn personal account to sign in
+3. **Accept Developer Agreement**: Review and accept LinkedIn's Developer Terms
+
+## Step 2: Create a New Application
+
+1. Click **"Create App"** on the developer portal
+2. Fill out the application form:
+   - **App name**: Choose a descriptive name for your application
+   - **LinkedIn Page**: Associate with your company's LinkedIn page (required)
+   - **App logo**: Upload a logo (recommended 100x100px PNG)
+   - **Legal agreement**: Check the box to agree to LinkedIn's API Terms of Use
+
+<Note>
+Make sure you have admin access to the LinkedIn company page you're associating with your app.
+</Note>
+
+## Step 3: Configure OAuth Settings
+
+1. Go to the **"Auth"** tab in your application dashboard
+2. **Add Redirect URLs**:
+   - For development: `http://localhost:8000/oauth/linkedin/callback`
+   - For production: `https://yourdomain.com/oauth/linkedin/callback`
+3. Click **"Add redirect URL"** for each URL you need
+
+<Warning>
+Redirect URLs must match exactly what you configure in your application. LinkedIn is strict about URL matching.
+</Warning>
+
+## Step 4: Request Product Access
+
+1. Navigate to the **"Products"** tab
+2. Request **"Sign In with LinkedIn using OpenID Connect"**:
+   - Click **"Request access"**
+   - Fill out the use case form explaining how you'll use LinkedIn authentication
+   - Submit for review (usually approved within 24-48 hours)
+
+<Tip>
+Be specific about your use case when requesting product access. LinkedIn reviews these requests to ensure compliance with their API policies.
+</Tip>
+
+## Step 5: Get Your Credentials
+
+Once your application is approved:
+
+1. Go to the **"Auth"** tab
+2. Copy your **Client ID** and **Client Secret**
+3. Store these securely in your application's environment variables:
+   ```bash
+   LINKEDIN_CLIENT_ID=your_client_id_here
+   LINKEDIN_CLIENT_SECRET=your_client_secret_here
+   ```
+
+## Next Steps
+
+After setting up your LinkedIn OAuth app:
+
+1. **Test your OAuth flow** in development environment
+2. **Implement proper error handling** for OAuth failures
+3. **Review LinkedIn's rate limits** and API usage policies
+4. **Monitor your app's usage** through the developer portal
+
+## Common Issues
+
+- **Redirect URI mismatch**: Ensure your redirect URLs exactly match what's configured in LinkedIn
+- **Product access pending**: Some LinkedIn products require manual approval which can take 1-2 business days
+- **Company page access**: You must be an admin of the LinkedIn company page to create apps
+
+## Resources
+
+- [LinkedIn OAuth Documentation](https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow)
+- [LinkedIn API Terms of Use](https://legal.linkedin.com/api-terms-of-use)
+- [LinkedIn Developer Support](https://developer.linkedin.com/support) 
