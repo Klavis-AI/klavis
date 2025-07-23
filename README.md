@@ -19,7 +19,7 @@
 
 ## What is Klavis AI?
 
-Klavis AI is open source MCP integrations for AI Applications. Our API provides hosted, secure MCP servers, eliminating auth management and client-side code.
+Klavis AI is open source MCP integrations for AI Applications. Our API provides hosted, high quality, secure MCP servers, eliminating auth management and client-side code.
 ## ✨ Key Features
 
 - **🚀 Instant Integration**: Get started in minutes with our Python and TypeScript SDKs, or simply REST API
@@ -238,29 +238,11 @@ console.log(finalResponse.choices[0].message.content);
 [**View All Servers →**](https://docs.klavis.ai/documentation/introduction#mcp-server-quickstart)
 
 ## 🗺️ Roadmap
-
-We're constantly expanding our MCP server ecosystem. Here are the upcoming integrations planned for release:
-
-### 🚀 High Priority Integrations
-- **Microsoft Teams** - Team collaboration and communication
-- **Microsoft Outlook** - Email and calendar management  
-- **OneDrive** - Cloud storage and file sharing
-- **LinkedIn** - Professional networking platform
-- **Dropbox** - Cloud file storage and synchronization
-- **Canva** - Design and visual content creation platform
-- **Figma** - Collaborative design and prototyping tool
-- **Stripe** - Payment processing and financial services
-
-### AI platform Integration
-Add more [examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) for integrating popular AI platforms and LLMs with the Klavis AI SDK
-
-### Testing & Quality Assurance
-- Add Unit Tests, integration test for each MCP Servers
-
-### Documentation & Updates
-- **/docs** - Enhanced documentation and guides
-
-*Want to see a specific integration? [Let us know](https://discord.gg/p7TuTEcssn) or [contribute](CONTRIBUTING.md) to help build it!*
+- more high quality MCP Servers (oneDrive, Canva, Figma ...)
+- More AI platform integrations ([examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) )
+- Event-driven / Webhook 
+- Unit Tests, integration test
+- /docs improvement
 
 ## 🔧 Authentication & Multi-Tool Workflows
 
@@ -286,60 +268,6 @@ klavis_client.mcp_server.set_auth_token(
 )
 ```
 
-### Multi-Tool Workflows
-
-Combine multiple MCP servers for complex workflows:
-
-```python
-# Create multiple servers
-github_server = klavis_client.mcp_server.create_server_instance(...)
-slack_server = klavis_client.mcp_server.create_server_instance(...)
-
-# Use tools from both servers in a single AI conversation
-all_tools = []
-all_tools.extend(klavis_client.mcp_server.list_tools(github_server.server_url).tools)
-all_tools.extend(klavis_client.mcp_server.list_tools(slack_server.server_url).tools)
-
-# Initialize conversation
-messages = [{"role": "user", "content": "Create a GitHub issue and notify the team on Slack"}]
-
-# Loop to let LLM work with multiple tools
-max_iterations = 5
-for iteration in range(max_iterations):
-    response = openai_client.chat.completions.create(
-        model="gpt-4",
-        messages=messages,
-        tools=all_tools
-    )
-    
-    messages.append(response.choices[0].message)
-    
-    # Check if LLM wants to use tools
-    if response.choices[0].message.tool_calls:
-        for tool_call in response.choices[0].message.tool_calls:
-            # Determine which server to use based on tool name
-            server_url = github_server.server_url if "github" in tool_call.function.name else slack_server.server_url
-            
-            # Execute tool
-            result = klavis_client.mcp_server.call_tools(
-                server_url=server_url,
-                tool_name=tool_call.function.name,
-                tool_args=json.loads(tool_call.function.arguments)
-            )
-            
-            # Add tool result to conversation
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": str(result)
-            })
-    else:
-        # LLM finished the task
-        print(f"Task completed in {iteration + 1} iterations")
-        print(response.choices[0].message.content)
-        break
-```
-
 ## 🏠 Self-Hosting
 
 Want to run MCP servers yourself? All our servers are open-source:
@@ -354,15 +282,7 @@ cd mcp_servers/github
 docker build -t klavis-github .
 docker run -p 8000:8000 klavis-github
 ```
-
-### MCP Clients
-
-Build custom integrations with our MCP clients:
-
-- **[Discord Bot](mcp-clients/README-Discord.md)** - Deploy AI bots to Discord
-- **[Slack Bot](mcp-clients/README-Slack.md)** - Create Slack AI assistants  
-- **[Web Interface](mcp-clients/README-Web.md)** - Browser-based AI chat
-- **[WhatsApp Bot](mcp-clients/README-WhatsApp.md)** - WhatsApp AI integration
+checkout each readme for more details
 
 ## 📖 Documentation
 
