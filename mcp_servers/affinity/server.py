@@ -1171,15 +1171,7 @@ def main(
             try:
                 result = await get_all_notes(person_id, organization_id, opportunity_id, page_size, page_token)
                 
-                # Handle cases where API returns null data
-                if isinstance(result, dict) and result.get("data") is None:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="No notes found for the specified criteria. The API returned an empty result.",
-                        )
-                    ]
-                elif isinstance(result, dict) and "error" in result:
+                if isinstance(result, dict) and "error" in result:
                     return [
                         types.TextContent(
                             type="text",
@@ -1187,6 +1179,14 @@ def main(
                         )
                     ]
                 
+                if isinstance(result, dict) and "data" in result and result.get("data") is None:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="No notes found for the specified criteria. The API returned an empty result.",
+                        )
+                    ]
+                    
                 return [
                     types.TextContent(
                         type="text",
