@@ -4278,6 +4278,158 @@
           }
         }
       }
+    },
+    "/oauth/linkedin/authorize": {
+      "get": {
+        "tags": ["linkedin-oauth"],
+        "summary": "Authorize LinkedIn",
+        "description": "Start LinkedIn OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeLinkedIn",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/linkedin/callback": {
+      "get": {
+        "tags": ["linkedin-oauth"],
+        "summary": "LinkedIn Callback",
+        "description": "Handles the callback from LinkedIn OAuth authorization.",
+        "operationId": "linkedInOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Authorization code returned by LinkedIn",
+              "title": "Code"
+            },
+            "description": "Authorization code returned by LinkedIn"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "State parameter containing encoded authorization data",
+              "title": "State"
+            },
+            "description": "State parameter containing encoded authorization data"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error code returned by LinkedIn, if any",
+              "title": "Error"
+            },
+            "description": "Error code returned by LinkedIn, if any"
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error description returned by LinkedIn, if any",
+              "title": "Error Description"
+            },
+            "description": "Error description returned by LinkedIn, if any"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedInOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedInOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5136,6 +5288,36 @@
         "required": ["status", "message"],
         "title": "LinearOAuthSuccessResponse"
       },
+      "LinkedInOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          }
+        },
+        "type": "object",
+        "required": ["error"],
+        "title": "LinkedInOAuthErrorResponse"
+      },
+      "LinkedInOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          }
+        },
+        "type": "object",
+        "required": ["message"],
+        "title": "LinkedInOAuthSuccessResponse"
+      },
       "ListToolsRequest": {
         "properties": {
           "serverUrl": {
@@ -5237,6 +5419,7 @@
           "Jira",
           "Klavis ReportGen",
           "Linear",
+          "LinkedIn",
           "Markdown2doc",
           "Notion",
           "Plai",
@@ -5299,6 +5482,7 @@
           "HubSpot",
           "Jira",
           "Linear",
+          "LinkedIn",
           "Notion",
           "Salesforce",
           "Slack",

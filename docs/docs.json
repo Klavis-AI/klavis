@@ -236,6 +236,10 @@
                 "pages": ["api-reference/linear-oauth/authorize-linear"]
               },
               {
+                "group": "Linkedin OAuth",
+                "pages": ["api-reference/linkedin-oauth/authorize-linkedin"]
+              },
+              {
                 "group": "Attio OAuth",
                 "pages": ["api-reference/attio-oauth/authorize-attio"]
               }
