@@ -10,6 +10,7 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
+        "@types/node": "^24.0.15",
         "@typescript-eslint/eslint-plugin": "^7.0.0",
         "@typescript-eslint/parser": "^7.0.0",
         "eslint": "^8.56.0",
@@ -17,5 +18,8 @@
         "eslint-plugin-prettier": "^5.2.6",
         "lint-staged": "^15.5.1",
         "prettier": "^3.5.3"
+    },
+    "dependencies": {
+        "get-uri": "^6.0.5"
     }
 }

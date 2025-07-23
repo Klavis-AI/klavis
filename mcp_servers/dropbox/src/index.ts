@@ -7,7 +7,6 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
-    ListResourcesRequestSchema,
     ListResourceTemplatesRequestSchema,
     ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
@@ -16,7 +15,7 @@ import { Dropbox } from 'dropbox';
 // Import utilities
 import { patchFetchResponse } from './utils/fetch-polyfill.js';
 import { formatDropboxError, addCommonErrorGuidance } from './utils/error-handling.js';
-import { asyncLocalStorage, getDropboxClient } from './utils/context.js';
+import { asyncLocalStorage } from './utils/context.js';
 
 // Import tool definitions
 import { toolDefinitions } from './tools.js';

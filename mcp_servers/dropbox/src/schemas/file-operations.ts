@@ -2,15 +2,23 @@ import { z } from "zod";
 
 export const UploadFileSchema = z.object({
     dropbox_path: z.string().describe("Path where the file should be uploaded in Dropbox (e.g., '/folder/filename.txt')"),
-    local_file_uri: z.string().describe("Local file URI in the format 'file:///absolute/path/to/file' pointing to the file to upload"),
+    source_uri: z.string().describe(
+        "URI of the resource to upload. Supported protocols:\n" +
+        "- data (Data URIs, e.g., data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D)\n" +
+        "- file (File URIs, e.g., file:///mnt/data/example.ini)\n" +
+        "- ftp (FTP URIs, e.g., ftp://ftp.kernel.org/pub/site/README)\n" +
+        "- http (HTTP URIs, e.g., http://www.example.com/path/to/name)\n" +
+        "- https (HTTPS URIs, e.g., https://www.example.com/path/to/name)"
+    ),
     mode: z.enum(['add', 'overwrite', 'update']).optional().default('add').describe("Upload mode"),
     autorename: z.boolean().optional().default(false).describe("Automatically rename file if it already exists"),
     mute: z.boolean().optional().default(false).describe("Suppress notifications"),
-}).refine(
-    (data) => data.local_file_uri.startsWith('file://'),
+})
+.refine(
+    (data) => /^(data:|file:\/\/|ftp:\/\/|https?:\/\/)/.test(data.source_uri),
     {
-        message: "local_file_uri must start with 'file://' protocol",
-        path: ["local_file_uri"],
+        message: "source_uri must start with one of: data:, file://, ftp://, http://, https://",
+        path: ["source_uri"],
     }
 );
 
