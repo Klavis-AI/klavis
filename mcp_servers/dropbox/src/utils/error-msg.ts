@@ -62,7 +62,10 @@ export function wrapGetUriError(error: unknown, path: string): never {
 export function wrapUnknownError(error: unknown, context?: string): never {
     let message = context ? `${context}: ` : '';
 
-    if (error instanceof Error) {
+    if (error instanceof DropboxMCPError) {
+        // If it's already a DropboxMCPError, just rethrow it
+        throw error;
+    } else if (error instanceof Error) {
         message += error.message;
     } else if (typeof error === 'string') {
         message += error;

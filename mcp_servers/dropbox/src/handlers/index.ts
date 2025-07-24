@@ -1,4 +1,3 @@
-// Re-export all handlers from different modules
 export * from './files.js';
 export * from './file-operations.js';
 export * from './sharing.js';

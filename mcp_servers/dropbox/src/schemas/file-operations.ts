@@ -5,7 +5,6 @@ export const UploadFileSchema = z.object({
     source_uri: z.string().describe(
         "URI of the resource to upload. Supported protocols:\n" +
         "- data (Data URIs, e.g., data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D)\n" +
-        "- file (File URIs, e.g., file:///mnt/data/example.ini)\n" +
         "- ftp (FTP URIs, e.g., ftp://ftp.kernel.org/pub/site/README)\n" +
         "- http (HTTP URIs, e.g., http://www.example.com/path/to/name)\n" +
         "- https (HTTPS URIs, e.g., https://www.example.com/path/to/name)"
@@ -15,9 +14,9 @@ export const UploadFileSchema = z.object({
     mute: z.boolean().optional().default(false).describe("Suppress notifications"),
 })
 .refine(
-    (data) => /^(data:|file:\/\/|ftp:\/\/|https?:\/\/)/.test(data.source_uri),
+    (data) => /^(data:||ftp:\/\/|https?:\/\/)/.test(data.source_uri),
     {
-        message: "source_uri must start with one of: data:, file://, ftp://, http://, https://",
+        message: "source_uri must start with one of: data:, ftp://, http://, https://",
         path: ["source_uri"],
     }
 );

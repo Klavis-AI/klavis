@@ -37,7 +37,6 @@ A Model Context Protocol (MCP) server for Dropbox integration, providing compreh
 - **Get Current Account**: Retrieve current user account information
 - **Get Space Usage**: Check storage space usage and allocation
 - **Get Temporary Link**: Generate temporary download links
-- **Get Preview**: Get file previews for supported formats
 
 ## Prerequisites
 
@@ -278,14 +277,6 @@ Get storage space usage
 
 ### get_temporary_link
 Get a temporary download link
-```typescript
-{
-  path: string // File path
-}
-```
-
-### get_preview
-Get file preview
 ```typescript
 {
   path: string // File path

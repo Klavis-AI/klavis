@@ -87,7 +87,7 @@ const getDropboxMcpServer = () => {
 
         try {
             // Determine which handler to use based on the tool name
-            if (['list_folder', 'list_folder_continue', 'create_folder', 'delete_file', 'move_file', 'copy_file', 'search_files', 'get_file_info'].includes(name)) {
+            if (['list_folder', 'list_folder_continue', 'create_folder', 'delete_file', 'move_file', 'copy_file', 'search_files', 'search_files_continue', 'get_file_info'].includes(name)) {
                 return await handleFilesOperation(request);
             }
 
@@ -111,7 +111,7 @@ const getDropboxMcpServer = () => {
                 return await handlePropertiesOperation(request);
             }
 
-            if (['get_current_account', 'get_space_usage', 'get_temporary_link', 'get_preview', 'save_url', 'save_url_check_job_status'].includes(name)) {
+            if (['get_current_account', 'get_space_usage', 'get_temporary_link', 'save_url', 'save_url_check_job_status'].includes(name)) {
                 return await handleAccountOperation(request);
             }
 

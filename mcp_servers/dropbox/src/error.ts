@@ -19,6 +19,7 @@ export class DropboxMCPError extends Error {
 export const ErrorTypes = {
     DROPBOX_API_ERROR: 'DROPBOX_API_ERROR',
     GET_URI_ERROR: 'GET_URI_ERROR',
+    OTHERS_ERROR: 'OTHERS_ERROR',
     UNKNOWN_ERROR: 'UNKNOWN_ERROR'
 } as const;
 
@@ -28,5 +29,6 @@ export const ErrorTypes = {
 export const ErrorModules = {
     DROPBOX_SDK: 'dropbox-sdk',
     GET_URI: 'get-uri',
+    OTHERS: 'others',
     UNKNOWN: 'unknown'
 } as const;

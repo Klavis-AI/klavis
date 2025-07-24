@@ -19,6 +19,7 @@ import {
 } from '../utils/path-url-handling.js';
 import { wrapDropboxError, wrapGetUriError } from '../utils/error-msg.js';
 import { formatDropboxError } from '../utils/error-handling.js';
+import { DropboxMCPError, ErrorModules, ErrorTypes } from '../error.js';
 
 /**
  * Creates an ImageContent object for MCP responses
@@ -72,9 +73,15 @@ export async function handleUploadFile(args: any) {
     const dropbox = getDropboxClient();
 
     let source = validatedArgs.source_uri;
+    // No allow file:// URIs for security reasons
+    if (source.startsWith('file://')) {
+        throw new DropboxMCPError(ErrorTypes.OTHERS_ERROR, ErrorModules.OTHERS,
+            "File URIs are not allowed for security reasons. Please use http://, https://, ftp://, or data: URIs."
+        );
+    }
     const targetPath = validatedArgs.dropbox_path;
     try {
-        // Get stream from URI using get-uri (supports file://, http://, https://, ftp://, etc.)
+        // Get stream from URI using get-uri (supports http://, https://, ftp://, data:.)
         let stream: NodeJS.ReadableStream;
 
         try {
