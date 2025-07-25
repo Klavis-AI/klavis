@@ -20,8 +20,6 @@ from tools import (
     linkedin_token_context,
     get_profile_info,
     create_post,
-    get_user_posts,
-    get_company_info,
 )
 
 load_dotenv()
@@ -99,38 +97,6 @@ def main(
                     }
                 }
             ),
-            types.Tool(
-                name="linkedin_get_user_posts",
-                description="Get recent posts from a user's profile (default 10, max 50).",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "person_id": {
-                            "type": "string",
-                            "description": "The LinkedIn person ID. Leave empty for current user's posts."
-                        },
-                        "count": {
-                            "type": "integer",
-                            "description": "The number of posts to retrieve (1-50).",
-                            "default": 10
-                        }
-                    }
-                }
-            ),
-            types.Tool(
-                name="linkedin_get_company_info",
-                description="Get information about a LinkedIn company.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["company_id"],
-                    "properties": {
-                        "company_id": {
-                            "type": "string",
-                            "description": "The LinkedIn company ID to retrieve information for."
-                        }
-                    }
-                }
-            )
         ]
 
     @app.call_tool()
@@ -185,52 +151,6 @@ def main(
                     )
                 ]
         
-        elif name == "linkedin_get_user_posts":
-            person_id = arguments.get("person_id")
-            count = arguments.get("count", 10)
-            try:
-                result = await get_user_posts(person_id, count)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        
-        elif name == "linkedin_get_company_info":
-            company_id = arguments.get("company_id")
-            if not company_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: company_id parameter is required",
-                    )
-                ]
-            try:
-                result = await get_company_info(company_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
         
         else:
             return [
