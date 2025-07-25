@@ -17,8 +17,6 @@ This server provides the following capabilities through MCP tools:
 |------|-------------|
 | `get_profile_info` | Retrieve LinkedIn profile information (current user or specified person) |
 | `create_post` | Create a text/article post on LinkedIn with customizable visibility |
-| `get_user_posts` | Retrieve recent posts from a user's profile |
-| `get_company_info` | Retrieve information about a LinkedIn company |
 
 ## 🔧 Prerequisites
 
