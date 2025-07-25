@@ -2,6 +2,7 @@ import contextlib
 import logging
 import os
 import json
+import uuid
 from collections.abc import AsyncIterator
 from typing import Any, Dict
 from contextvars import ContextVar
@@ -134,6 +135,7 @@ async def create_event(
     visibility: str = "default",
     attendees: list[str] | None = None,
     send_updates: str = "all",
+    add_google_meet: bool = False,
 ) -> Dict[str, Any]:
     """Create a new event/meeting/sync/meetup in the specified calendar."""
     logger.info(f"Executing tool: create_event with summary: {summary}")
@@ -161,10 +163,25 @@ async def create_event(
         if attendees:
             event["attendees"] = [{"email": email} for email in attendees]
 
+        # Add Google Meet conference if requested
+        if add_google_meet:
+            event["conferenceData"] = {
+                "createRequest": {
+                    "requestId": str(uuid.uuid4()),
+                    "conferenceSolutionKey": {
+                        "type": "hangoutsMeet"
+                    }
+                }
+            }
+
+        # Set conferenceDataVersion to 1 when creating conferences
+        conference_data_version = 1 if add_google_meet else 0
+
         created_event = service.events().insert(
             calendarId=calendar_id, 
             body=event,
-            sendUpdates=send_updates
+            sendUpdates=send_updates,
+            conferenceDataVersion=conference_data_version
         ).execute()
         return {"event": created_event}
     except HttpError as e:
@@ -571,6 +588,11 @@ def main(
                             "enum": ["all", "externalOnly", "none"],
                             "default": "all",
                         },
+                        "add_google_meet": {
+                            "type": "boolean",
+                            "description": "Whether to add a Google Meet conference to the event.",
+                            "default": False,
+                        },
                     },
                 },
             ),
@@ -761,10 +783,12 @@ def main(
                 visibility = arguments.get("visibility", "default")
                 attendees = arguments.get("attendees")
                 send_updates = arguments.get("send_updates", "all")
+                add_google_meet = arguments.get("add_google_meet", False)
                 
                 result = await create_event(
                     summary, start_datetime, end_datetime, calendar_id,
-                    description, location, visibility, attendees, send_updates
+                    description, location, visibility, attendees, send_updates,
+                    add_google_meet
                 )
                 return [
                     types.TextContent(
