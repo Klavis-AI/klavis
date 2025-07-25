@@ -133,6 +133,7 @@ async def create_event(
     location: str | None = None,
     visibility: str = "default",
     attendees: list[str] | None = None,
+    send_updates: str = "all",
 ) -> Dict[str, Any]:
     """Create a new event/meeting/sync/meetup in the specified calendar."""
     logger.info(f"Executing tool: create_event with summary: {summary}")
@@ -160,7 +161,11 @@ async def create_event(
         if attendees:
             event["attendees"] = [{"email": email} for email in attendees]
 
-        created_event = service.events().insert(calendarId=calendar_id, body=event).execute()
+        created_event = service.events().insert(
+            calendarId=calendar_id, 
+            body=event,
+            sendUpdates=send_updates
+        ).execute()
         return {"event": created_event}
     except HttpError as e:
         logger.error(f"Google Calendar API error: {e}")
@@ -560,6 +565,12 @@ def main(
                             "items": {"type": "string"},
                             "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
                         },
+                        "send_updates": {
+                            "type": "string",
+                            "description": "Should attendees be notified of the update?",
+                            "enum": ["all", "externalOnly", "none"],
+                            "default": "all",
+                        },
                     },
                 },
             ),
@@ -749,10 +760,11 @@ def main(
                 location = arguments.get("location")
                 visibility = arguments.get("visibility", "default")
                 attendees = arguments.get("attendees")
+                send_updates = arguments.get("send_updates", "all")
                 
                 result = await create_event(
                     summary, start_datetime, end_datetime, calendar_id,
-                    description, location, visibility, attendees
+                    description, location, visibility, attendees, send_updates
                 )
                 return [
                     types.TextContent(
