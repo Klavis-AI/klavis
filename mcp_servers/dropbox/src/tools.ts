@@ -153,6 +153,12 @@ export const toolDefinitions = [
         inputSchema: zodToJsonSchema(schemas.ListSharedFoldersSchema),
     },
     {
+        name: "list_shared_folders_continue",
+        title: "Continue Shared Folders Listing",
+        description: "Continues listing shared folders using a cursor from previous list_shared_folders operation",
+        inputSchema: zodToJsonSchema(schemas.ListSharedFoldersContinueSchema),
+    },
+    {
         name: "unshare_file",
         title: "Unshare File",
         description: "Remove all members from this file. Does not remove inherited members.",
@@ -225,48 +231,6 @@ export const toolDefinitions = [
         inputSchema: zodToJsonSchema(schemas.GetThumbnailSchema),
     },
     {
-        name: "add_file_properties",
-        title: "Add File Properties",
-        description: "Adds custom properties to a file. Properties are key-value pairs that can be used to store custom metadata about files.",
-        inputSchema: zodToJsonSchema(schemas.AddFilePropertiesSchema),
-    },
-    {
-        name: "overwrite_file_properties",
-        title: "Overwrite File Properties",
-        description: "Overwrites custom properties on a file. This replaces all existing properties for the specified templates.",
-        inputSchema: zodToJsonSchema(schemas.OverwriteFilePropertiesSchema),
-    },
-    {
-        name: "update_file_properties",
-        title: "Update File Properties",
-        description: "Updates custom properties on a file. This allows you to add, update, or remove specific property fields.",
-        inputSchema: zodToJsonSchema(schemas.UpdateFilePropertiesSchema),
-    },
-    {
-        name: "remove_file_properties",
-        title: "Remove File Properties",
-        description: "Removes custom properties from a file by removing entire property templates.",
-        inputSchema: zodToJsonSchema(schemas.RemoveFilePropertiesSchema),
-    },
-    {
-        name: "search_file_properties",
-        title: "Search by Properties",
-        description: "Searches for files based on their custom properties. You can search by property field names or values.",
-        inputSchema: zodToJsonSchema(schemas.SearchFilePropertiesSchema),
-    },
-    {
-        name: "list_property_templates",
-        title: "List Property Templates",
-        description: "Lists all available property templates for your account. Templates define the structure of custom properties.",
-        inputSchema: zodToJsonSchema(schemas.ListPropertyTemplatesSchema),
-    },
-    {
-        name: "get_property_template",
-        title: "Get Property Template",
-        description: "Gets detailed information about a specific property template, including its fields and types.",
-        inputSchema: zodToJsonSchema(schemas.GetPropertyTemplateSchema),
-    },
-    {
         name: "save_url",
         title: "Save URL to Dropbox",
         description: "Downloads content from a URL and saves it as a file in Dropbox. This is useful for saving web content, images, documents, etc. directly from URLs.",
@@ -295,6 +259,12 @@ export const toolDefinitions = [
         title: "List Received Files",
         description: "Lists files that have been shared with the current user by others",
         inputSchema: zodToJsonSchema(schemas.ListReceivedFilesSchema),
+    },
+    {
+        name: "list_received_files_continue",
+        title: "Continue Listing Received Files",
+        description: "Continues listing received files using a cursor from previous list_received_files operation",
+        inputSchema: zodToJsonSchema(schemas.ListReceivedFilesContinueSchema),
     },
     {
         name: "check_job_status",

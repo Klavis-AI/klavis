@@ -13,7 +13,7 @@ export const ListFolderSchema = z.object({
 });
 
 export const ListFolderContinueSchema = z.object({
-    cursor: z.string().describe("\"Cursor\" from previous list_folder/list_folder_continue operation to continue listing"),
+    cursor: z.string().describe("\"Cursor\" from previous list_folder/_continue operation to continue listing"),
 });
 
 export const CreateFolderSchema = z.object({

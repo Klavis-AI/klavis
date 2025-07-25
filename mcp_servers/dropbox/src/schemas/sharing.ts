@@ -80,3 +80,11 @@ export const ListReceivedFilesSchema = z.object({
 export const CheckJobStatusSchema = z.object({
     async_job_id: z.string().min(1).describe("The async job ID returned from a sharing operation"),
 });
+
+export const ListSharedFoldersContinueSchema = z.object({
+    cursor: z.string().describe("Cursor from previous list_shared_folders/_continue operation to continue listing"),
+});
+
+export const ListReceivedFilesContinueSchema = z.object({
+    cursor: z.string().describe("Cursor from previous list_received_files/_continue operation to continue listing"),
+});
