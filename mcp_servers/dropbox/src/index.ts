@@ -90,11 +90,11 @@ const getDropboxMcpServer = () => {
                 return await handleFilesOperation(request);
             }
 
-            if (['upload_file', 'download_file', 'get_thumbnail', 'list_revisions', 'restore_file'].includes(name)) {
+            if (['upload_file', 'download_file', 'get_thumbnail', 'list_revisions', 'restore_file', 'get_temporary_link', 'save_url', 'save_url_check_job_status'].includes(name)) {
                 return await handleFileOperation(request);
             }
 
-            if (['add_file_member', 'list_file_members', 'remove_file_member', 'share_folder', 'list_folder_members', 'add_folder_member', 'list_shared_folders', 'list_shared_folders_continue', 'list_received_files', 'check_job_status', 'unshare_file', 'unshare_folder', 'share_file', 'get_shared_links'].includes(name)) {
+            if (['add_file_member', 'list_file_members', 'remove_file_member', 'share_folder', 'list_folder_members', 'add_folder_member', 'remove_folder_member', 'list_shared_folders', 'list_shared_folders_continue', 'list_received_files', 'check_job_status', 'unshare_file', 'unshare_folder', 'share_file', 'get_shared_links'].includes(name)) {
                 return await handleSharingOperation(request);
             }
 
@@ -106,7 +106,7 @@ const getDropboxMcpServer = () => {
                 return await handleBatchOperation(request);
             }
 
-            if (['get_current_account', 'get_space_usage', 'get_temporary_link', 'save_url', 'save_url_check_job_status'].includes(name)) {
+            if (['get_current_account', 'get_space_usage'].includes(name)) {
                 return await handleAccountOperation(request);
             }
 

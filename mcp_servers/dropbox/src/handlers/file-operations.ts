@@ -80,6 +80,7 @@ export async function handleUploadFile(args: any) {
         );
     }
     const targetPath = validatedArgs.dropbox_path;
+    
     try {
         // Get stream from URI using get-uri (supports http://, https://, ftp://, data:.)
         let stream: NodeJS.ReadableStream;
@@ -90,28 +91,89 @@ export async function handleUploadFile(args: any) {
             wrapGetUriError(error, source);
         }
 
-        // Upload to Dropbox using stream directly
-        const response = await dropbox.filesUpload({
-            path: targetPath,
-            contents: stream,
-            mode: validatedArgs.mode as any,
-            autorename: validatedArgs.autorename,
-            mute: validatedArgs.mute,
+        // Use chunked upload for all files to avoid Node.js fetch duplex issues
+        // and handle both small and large files consistently
+        return await handleChunkedUpload(dropbox, stream, targetPath, validatedArgs, source);
+    } catch (error: unknown) {
+        const baseMessage = `Failed to upload file from ${source} to ${targetPath}`;
+        wrapDropboxError(error, baseMessage);
+    }
+}
+
+/**
+ * Handle large file uploads using Dropbox's chunked upload session
+ */
+async function handleChunkedUpload(
+    dropbox: any, 
+    stream: NodeJS.ReadableStream, 
+    targetPath: string, 
+    validatedArgs: any, 
+    source: string
+) {
+    const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB chunks
+    let sessionId: string | undefined;
+    let uploadedBytes = 0;
+    let buffer = Buffer.alloc(0);
+
+    try {
+        // Start upload session
+        const startResponse = await dropbox.filesUploadSessionStart({
+            close: false,
+            contents: Buffer.alloc(0),
+        });
+        sessionId = startResponse.result.session_id;
+
+        // Process stream in chunks
+        for await (const chunk of stream) {
+            buffer = Buffer.concat([buffer, Buffer.from(chunk)]);
+
+            // If we have enough data for a chunk, upload it
+            while (buffer.length >= CHUNK_SIZE) {
+                const chunkToUpload = buffer.slice(0, CHUNK_SIZE);
+                buffer = buffer.slice(CHUNK_SIZE);
+
+                await dropbox.filesUploadSessionAppendV2({
+                    cursor: {
+                        session_id: sessionId,
+                        offset: uploadedBytes,
+                    },
+                    close: false,
+                    contents: chunkToUpload,
+                });
+
+                uploadedBytes += chunkToUpload.length;
+            }
+        }
+
+        // Upload any remaining data and finish the session
+        const finishResponse = await dropbox.filesUploadSessionFinish({
+            cursor: {
+                session_id: sessionId,
+                offset: uploadedBytes,
+            },
+            commit: {
+                path: targetPath,
+                mode: validatedArgs.mode as any,
+                autorename: validatedArgs.autorename,
+                mute: validatedArgs.mute,
+            },
+            contents: buffer, // Upload remaining data
         });
 
-        const contentSize = response.result.size;
+        const totalSize = uploadedBytes + buffer.length;
 
         return {
             content: [
                 {
                     type: "text",
-                    text: `File uploaded successfully!\n\nSource URI: ${source}\nDropbox path: ${response.result.path_display}\nFile size: ${response.result.size} bytes (${(response.result.size / 1024).toFixed(2)} KB)\nContent size: ${contentSize} bytes\nUpload mode: ${validatedArgs.mode}\nAutorename: ${validatedArgs.autorename}`,
+                    text: `File uploaded successfully (chunked upload)!\n\nSource URI: ${source}\nDropbox path: ${finishResponse.result.path_display}\nFile size: ${finishResponse.result.size} bytes (${(finishResponse.result.size / 1024 / 1024).toFixed(2)} MB)\nUploaded size: ${totalSize} bytes (${(totalSize / 1024 / 1024).toFixed(2)} MB)\nUpload mode: ${validatedArgs.mode}\nAutorename: ${validatedArgs.autorename}`,
                 },
             ],
         };
-    } catch (error: unknown) {
-        const baseMessage = `Failed to upload file from ${source} to ${targetPath}`;
-        wrapDropboxError(error, baseMessage);
+    } catch (error) {
+        // If we started a session but failed, we should consider cleaning up
+        // but Dropbox sessions auto-expire, so it's not critical
+        throw error;
     }
 }
 
@@ -450,6 +512,12 @@ export async function handleFileOperation(request: CallToolRequest): Promise<Cal
             return await handleListRevisions(args) as CallToolResult;
         case "restore_file":
             return await handleRestoreFile(args) as CallToolResult;
+        case "save_url":
+            return await handleSaveUrl(args) as CallToolResult;
+        case "save_url_check_job_status":
+            return await handleSaveUrlCheckJobStatus(args) as CallToolResult;
+        case "get_temporary_link":
+            return await handleGetTemporaryLink(args) as CallToolResult;
         default:
             throw new Error(`Unknown file operation: ${name}`);
     }

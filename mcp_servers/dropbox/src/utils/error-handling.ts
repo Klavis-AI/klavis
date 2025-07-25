@@ -60,6 +60,11 @@ export function addCommonErrorGuidance(errorMessage: string, error: any, context
         errorMessage += `\nError 404: Not found - The ${resource} doesn't exist.\n\nMake sure:\n- The path is correct and starts with '/'\n- The ${resource} exists in your Dropbox\n- You have access to the ${resource}\n- The ${resource} hasn't been moved or deleted`;
     } else if (status === 409) {
         errorMessage += `\nError 409: Conflict - Operation failed due to a conflict.\n\nCommon causes:\n- Resource already exists\n- Concurrent modifications\n- Operation conflicts with current state\n- Name or path conflicts`;
+        
+        // Add specific guidance for sharing operations
+        if (context?.operation === 'share_file' || context?.operation === 'share_folder') {
+            errorMessage += `\n\nFor sharing operations specifically:\n- 'settings_error/not_authorized': Advanced settings (password, expiration) require paid Dropbox accounts\n- 'settings_error/invalid_settings': Check that settings combination is valid for your account type\n- Team-only visibility requires team membership\n- Password protection requires Dropbox Plus/Professional`;
+        }
     } else if (status === 429) {
         errorMessage += `\nError 429: Too many requests - You're hitting rate limits.\n\nTips:\n- Wait a moment before trying again\n- Reduce the frequency of requests\n- Consider batching operations if available`;
     } else if (status === 507) {

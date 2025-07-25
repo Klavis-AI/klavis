@@ -187,6 +187,38 @@ async function handleAddFolderMember(args: any): Promise<CallToolResult> {
 }
 
 /**
+ * Handle remove folder member operation
+ */
+async function handleRemoveFolderMember(args: any): Promise<CallToolResult> {
+    const validatedArgs = schemas.RemoveFolderMemberSchema.parse(args);
+    const dropbox = getDropboxClient();
+
+    const response = await dropbox.sharingRemoveFolderMember({
+        shared_folder_id: validatedArgs.shared_folder_id,
+        member: { ".tag": "email", email: validatedArgs.member },
+        leave_a_copy: validatedArgs.leave_a_copy,
+    });
+
+    const result = response.result as any;
+    let resultText = `Remove folder member operation initiated for shared folder ID: ${validatedArgs.shared_folder_id}\n\n`;
+
+    if (result['.tag'] === 'async_job_id') {
+        resultText += `Operation is being processed asynchronously.\n\nJob ID: ${result.async_job_id}\n\nUse "check_job_status" with this ID to monitor the progress.`;
+    } else {
+        resultText += `Unexpected result: ${JSON.stringify(result)}`;
+    }
+
+    return {
+        content: [
+            {
+                type: "text",
+                text: resultText,
+            },
+        ],
+    };
+}
+
+/**
  * Handle share file operation
  */
 async function handleShareFile(args: any): Promise<CallToolResult> {
@@ -351,53 +383,7 @@ async function handleListSharedFolders(args: any): Promise<CallToolResult> {
     }
 
     if (result.has_more) {
-        resultText += `\nMore results available. Use 'list_shared_folders_continue' with cursor: ${result.cursor}`;
-    }
-
-    return {
-        content: [
-            {
-                type: "text",
-                text: resultText,
-            },
-        ],
-    };
-}
-
-/**
- * Handle list shared folders continue operation
- */
-async function handleListSharedFoldersContinue(args: any): Promise<CallToolResult> {
-    const validatedArgs = schemas.ListSharedFoldersContinueSchema.parse(args);
-    const dropbox = getDropboxClient();
-
-    const response = await dropbox.sharingListFoldersContinue({
-        cursor: validatedArgs.cursor,
-    });
-
-    const result = response.result as any;
-    let resultText = `Shared Folders (continued):\n\n`;
-
-    if (result.entries && result.entries.length > 0) {
-        result.entries.forEach((folder: any, index: number) => {
-            resultText += `${index + 1}. **${folder.name}**\n`;
-            resultText += `   ID: ${folder.shared_folder_id}\n`;
-            resultText += `   Path: ${folder.path_lower || 'N/A'}\n`;
-            resultText += `   Access Type: ${folder.access_type?.['.tag'] || 'Unknown'}\n`;
-            if (folder.is_team_folder) {
-                resultText += `   Team Folder: Yes\n`;
-            }
-            if (folder.policy) {
-                resultText += `   Policy: ${folder.policy.acl_update_policy?.['.tag'] || 'N/A'}\n`;
-            }
-            resultText += `\n`;
-        });
-    } else {
-        resultText += `No more shared folders found.\n`;
-    }
-
-    if (result.has_more) {
-        resultText += `\nMore results available. Use cursor: ${result.cursor}`;
+        resultText += `\nMore results available. Use 'list_shared_folders' with cursor: ${result.cursor}`;
     }
 
     return {
@@ -449,56 +435,7 @@ async function handleListReceivedFiles(args: any): Promise<CallToolResult> {
     }
 
     if (result.has_more) {
-        resultText += `\nMore results available. Use 'list_received_files_continue' with cursor: ${result.cursor}`;
-    }
-
-    return {
-        content: [
-            {
-                type: "text",
-                text: resultText,
-            },
-        ],
-    };
-}
-
-/**
- * Handle list received files continue operation
- */
-async function handleListReceivedFilesContinue(args: any): Promise<CallToolResult> {
-    const validatedArgs = schemas.ListReceivedFilesContinueSchema.parse(args);
-    const dropbox = getDropboxClient();
-
-    const requestArgs: any = {
-        cursor: validatedArgs.cursor,
-    };
-
-    const response = await dropbox.sharingListReceivedFiles(requestArgs);
-
-    const result = response.result as any;
-    let resultText = `Files Shared With You (continued):\n\n`;
-
-    if (result.entries && result.entries.length > 0) {
-        result.entries.forEach((file: any, index: number) => {
-            resultText += `${index + 1}. **${file.name}**\n`;
-            resultText += `   ID: ${file.id}\n`;
-            resultText += `   Path: ${file.path_display || file.path_lower || 'N/A'}\n`;
-            resultText += `   Shared by: ${file.owner_display_names?.[0] || 'Unknown'}\n`;
-            resultText += `   Access Level: ${file.access_type?.['.tag'] || 'Unknown'}\n`;
-            if (file.time_invited) {
-                resultText += `   Invited: ${new Date(file.time_invited).toLocaleString()}\n`;
-            }
-            if (file.preview_url) {
-                resultText += `   Preview: Available\n`;
-            }
-            resultText += `\n`;
-        });
-    } else {
-        resultText += `No more files found.\n`;
-    }
-
-    if (result.has_more) {
-        resultText += `\nMore results available. Use 'list_received_files_continue' with cursor: ${result.cursor}`;
+        resultText += `\nMore results available. Use 'list_received_files' with cursor: ${result.cursor}`;
     }
 
     return {
@@ -568,6 +505,8 @@ export async function handleSharingOperation(request: CallToolRequest): Promise<
                 return await handleListFolderMembers(args);
             case "add_folder_member":
                 return await handleAddFolderMember(args);
+            case "remove_folder_member":
+                return await handleRemoveFolderMember(args);
             case "share_file":
                 return await handleShareFile(args);
             case "get_shared_links":
@@ -578,18 +517,14 @@ export async function handleSharingOperation(request: CallToolRequest): Promise<
                 return await handleUnshareFolder(args);
             case "list_shared_folders":
                 return await handleListSharedFolders(args);
-            case "list_shared_folders_continue":
-                return await handleListSharedFoldersContinue(args);
             case "list_received_files":
                 return await handleListReceivedFiles(args);
-            case "list_received_files_continue":
-                return await handleListReceivedFilesContinue(args);
             case "check_job_status":
                 return await handleCheckJobStatus(args);
             default:
                 throw new Error(`Unknown sharing operation: ${name}`);
         }
     } catch (error) {
-        wrapDropboxError(error, `Failed to execute sharing operation: ${name}`);
+        wrapDropboxError(error, `Failed to execute sharing operation: ${name}`, name);
     }
 }

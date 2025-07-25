@@ -3,10 +3,10 @@ import { z } from "zod";
 export const ShareFileSchema = z.object({
     path: z.string().describe("Path of the file or folder to share"),
     settings: z.object({
-        requested_visibility: z.enum(['public', 'team_only', 'password']).optional().describe("Link visibility"),
-        link_password: z.string().optional().describe("Password for password-protected links"),
-        expires: z.string().optional().describe("Expiration date (ISO 8601 format)"),
-    }).optional().describe("Share settings"),
+        requested_visibility: z.enum(['public', 'team_only', 'password']).optional().describe("Link visibility. 'public' works for all accounts. 'team_only' and 'password' require team membership or paid accounts (Plus/Professional). If you're unsure about your account type, use 'get_current_account' first to check - look for account_type.tag and team fields"),
+        link_password: z.string().optional().describe("Password for password-protected links. PAID FEATURE: Requires Dropbox Plus/Professional or team account. Will cause 'settings_error/not_authorized' on basic/free accounts. Check account type with 'get_current_account' before using"),
+        expires: z.string().optional().describe("Expiration date (ISO 8601 format). PAID FEATURE: Requires Dropbox Plus/Professional or team account. Will cause 'settings_error/not_authorized' on basic/free accounts. Check account type with 'get_current_account' before using"),
+    }).optional().describe("Share settings. For basic/free accounts: leave empty or use only 'requested_visibility': 'public'. Advanced settings require paid accounts - use 'get_current_account' to verify capabilities before setting password/expiration"),
 });
 
 export const GetSharedLinksSchema = z.object({
@@ -37,10 +37,11 @@ export const RemoveFileMemberSchema = z.object({
 
 export const ShareFolderSchema = z.object({
     path: z.string().describe("Path of the folder to share"),
-    member_policy: z.enum(['team', 'anyone']).optional().default('anyone').describe("Who can be a member of this shared folder"),
+    member_policy: z.enum(['team', 'anyone']).optional().default('anyone').describe("Who can be a member of this shared folder. Only applicable if the current user is on a team"),
     acl_update_policy: z.enum(['owner', 'editors']).optional().default('owner').describe("Who can add and remove members"),
-    shared_link_policy: z.enum(['anyone', 'members']).optional().default('anyone').describe("Who can access the shared link"),
-    force_async: z.boolean().optional().default(false).describe("Force asynchronous processing"),
+    shared_link_policy: z.enum(['anyone', 'members']).optional().default('anyone').describe("The policy to apply to shared links created for content inside this shared folder. The current user must be on a team to set this policy to 'members'"),
+    force_async: z.boolean().optional().default(false).describe("Whether to force the share to happen asynchronously"),
+    access_inheritance: z.enum(['inherit', 'no_inherit']).optional().default('inherit').describe("The access inheritance settings for the folder"),
 });
 
 export const ListFolderMembersSchema = z.object({
@@ -69,22 +70,20 @@ export const UnshareFolderSchema = z.object({
 
 export const ListSharedFoldersSchema = z.object({
     limit: z.number().optional().default(100).describe("Maximum number of shared folders to return"),
-    cursor: z.string().optional().describe("Cursor for pagination"),
+    cursor: z.string().optional().describe("Cursor from previous list_shared_folders call to continue listing - use this to get the next page of results"),
 });
 
 export const ListReceivedFilesSchema = z.object({
     limit: z.number().optional().default(100).describe("Maximum number of received files to return"),
-    cursor: z.string().optional().describe("Cursor for pagination"),
+    cursor: z.string().optional().describe("Cursor from previous list_received_files call to continue listing - use this to get the next page of results"),
 });
 
 export const CheckJobStatusSchema = z.object({
     async_job_id: z.string().min(1).describe("The async job ID returned from a sharing operation"),
 });
 
-export const ListSharedFoldersContinueSchema = z.object({
-    cursor: z.string().describe("Cursor from previous list_shared_folders/_continue operation to continue listing"),
-});
-
-export const ListReceivedFilesContinueSchema = z.object({
-    cursor: z.string().describe("Cursor from previous list_received_files/_continue operation to continue listing"),
+export const RemoveFolderMemberSchema = z.object({
+    shared_folder_id: z.string().describe("The ID for the shared folder."),
+    member: z.string().describe("Email address of the member to remove"),
+    leave_a_copy: z.boolean().describe("If true, the removed user will keep their copy of the folder after it's unshared."),
 });

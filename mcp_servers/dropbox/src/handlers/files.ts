@@ -226,6 +226,7 @@ async function handleSearchFiles(args: any): Promise<CallToolResult> {
     // Add more results info
     if (response.result.has_more) {
         resultText += `\n\nMore results available. Showing first ${matches.length} results.`;
+        resultText += `\nUse 'search_files_continue' with cursor: ${response.result.cursor}`;
     }
 
     return {

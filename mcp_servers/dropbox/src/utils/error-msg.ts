@@ -8,16 +8,28 @@ import { DropboxMCPError, ErrorTypes, ErrorModules } from '../error.js';
 /**
  * Wraps a Dropbox API error into our standard error format
  * @param error - The DropboxResponseError to wrap
+ * @param message - Optional custom message
+ * @param operation - Optional operation name for context-specific guidance
  * @throws DropboxMCPError - Always throws, never returns
  */
-export function wrapDropboxError(error: unknown, message?: string): never {
+export function wrapDropboxError(error: unknown, message?: string, operation?: string): never {
     if (error instanceof DropboxResponseError) {
         const status = error.status || 'Unknown';
         const tag = error.error?.error?.['.tag'] || 'unknown';
         const summary = error.error?.error_summary || 'No error summary available';
 
         // Construct detailed message and include user message if provided
-        const detailMessage = `status: ${status}, tag: ${tag}, summary: ${summary}`;
+        let detailMessage = `status: ${status}, tag: ${tag}, summary: ${summary}`;
+        
+        // Add specific guidance for sharing operations
+        if (operation === 'share_file' && status === 409) {
+            if (tag === 'settings_error' && summary.includes('not_authorized')) {
+                detailMessage += `\n\n💡 This error typically means:\n- Advanced sharing settings (password, expiration) require a paid Dropbox account\n- Your account type doesn't support the requested sharing options\n- Try sharing without advanced settings for basic functionality`;
+            } else if (tag === 'settings_error' && summary.includes('invalid_settings')) {
+                detailMessage += `\n\n💡 This error typically means:\n- The combination of sharing settings is not valid\n- Team-only visibility requires team membership\n- Check that all settings are appropriate for your account type`;
+            }
+        }
+        
         const fullMessage = message ? `${message}\n${detailMessage}` : detailMessage;
 
         throw new DropboxMCPError(

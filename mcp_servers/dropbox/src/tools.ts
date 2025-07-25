@@ -59,7 +59,7 @@ export const toolDefinitions = [
     {
         name: "share_file",
         title: "Create Shared Link",
-        description: "Creates a shared link for a file or folder",
+        description: "Creates a shared link for a file or folder. Advanced settings (password protection, expiration dates) require paid Dropbox accounts (Plus/Professional) or team membership. Basic accounts can only use 'public' visibility. If unsure about account capabilities, use 'get_current_account' first to check account type before setting advanced options.",
         inputSchema: zodToJsonSchema(schemas.ShareFileSchema),
     },
     {
@@ -151,12 +151,6 @@ export const toolDefinitions = [
         title: "List Shared Folders",
         description: "Lists all shared folders that the current user has access to",
         inputSchema: zodToJsonSchema(schemas.ListSharedFoldersSchema),
-    },
-    {
-        name: "list_shared_folders_continue",
-        title: "Continue Shared Folders Listing",
-        description: "Continues listing shared folders using a cursor from previous list_shared_folders operation",
-        inputSchema: zodToJsonSchema(schemas.ListSharedFoldersContinueSchema),
     },
     {
         name: "unshare_file",
@@ -261,15 +255,15 @@ export const toolDefinitions = [
         inputSchema: zodToJsonSchema(schemas.ListReceivedFilesSchema),
     },
     {
-        name: "list_received_files_continue",
-        title: "Continue Listing Received Files",
-        description: "Continues listing received files using a cursor from previous list_received_files operation",
-        inputSchema: zodToJsonSchema(schemas.ListReceivedFilesContinueSchema),
-    },
-    {
         name: "check_job_status",
         title: "Check Job Status",
         description: "Checks the status of an asynchronous operation (like unshare_folder, share_folder, etc.)",
         inputSchema: zodToJsonSchema(schemas.CheckJobStatusSchema),
+    },
+    {
+        name: "remove_folder_member",
+        title: "Remove Folder Member",
+        description: "Removes a member from a shared folder.",
+        inputSchema: zodToJsonSchema(schemas.RemoveFolderMemberSchema),
     },
 ];
