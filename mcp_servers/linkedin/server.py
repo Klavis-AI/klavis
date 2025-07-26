@@ -19,7 +19,11 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     linkedin_token_context,
     get_profile_info,
+    get_profile_picture,
     create_post,
+    create_hashtag_post,
+    format_rich_post,
+    create_url_share,
 )
 
 load_dotenv()
@@ -75,6 +79,19 @@ def main(
                 }
             ),
             types.Tool(
+                name="linkedin_get_profile_picture",
+                description="Get LinkedIn profile picture URL. If person_id is not provided, gets current user's profile picture.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "person_id": {
+                            "type": "string",
+                            "description": "The LinkedIn person ID to retrieve profile picture for. Leave empty for current user."
+                        }
+                    }
+                }
+            ),
+            types.Tool(
                 name="linkedin_create_post",
                 description="Create a post on LinkedIn with optional title for article-style posts.",
                 inputSchema={
@@ -88,6 +105,109 @@ def main(
                         "title": {
                             "type": "string",
                             "description": "Optional title for article-style posts. When provided, creates an article format."
+                        },
+                        "visibility": {
+                            "type": "string",
+                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
+                            "default": "PUBLIC"
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="linkedin_create_hashtag_post",
+                description="Create a LinkedIn post with properly formatted hashtags.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["text", "hashtags"],
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The text content of the post."
+                        },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of hashtags to add to the post (# will be added automatically)."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Optional title for article-style posts."
+                        },
+                        "visibility": {
+                            "type": "string",
+                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
+                            "default": "PUBLIC"
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="linkedin_format_rich_post",
+                description="Format rich text for LinkedIn posts with bold, italic, lists, mentions, and hashtags (utility function - doesn't post).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["text"],
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The base text content to format."
+                        },
+                        "bold_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make bold (will be wrapped with **)."
+                        },
+                        "italic_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make italic (will be wrapped with *)."
+                        },
+                        "bullet_points": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of bullet points to add."
+                        },
+                        "numbered_list": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of numbered items to add."
+                        },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of hashtags to add."
+                        },
+                        "mentions": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of usernames to mention (@ will be added automatically)."
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="linkedin_create_url_share",
+                description="Share URLs with metadata preview on LinkedIn.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["url", "text"],
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL to share (must be a valid URL)."
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Commentary text to accompany the shared URL."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Optional title for the shared URL content."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional description for the shared URL content."
                         },
                         "visibility": {
                             "type": "string",
@@ -132,10 +252,144 @@ def main(
                     )
                 ]
         
+        elif name == "linkedin_create_hashtag_post":
+            text = arguments.get("text")
+            hashtags = arguments.get("hashtags", [])
+            title = arguments.get("title")
+            visibility = arguments.get("visibility", "PUBLIC")
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            if not hashtags:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: hashtags parameter is required",
+                    )
+                ]
+            try:
+                result = await create_hashtag_post(text, hashtags, title, visibility)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_format_rich_post":
+            text = arguments.get("text")
+            bold_text = arguments.get("bold_text")
+            italic_text = arguments.get("italic_text")
+            bullet_points = arguments.get("bullet_points")
+            numbered_list = arguments.get("numbered_list")
+            hashtags = arguments.get("hashtags")
+            mentions = arguments.get("mentions")
+            
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = format_rich_post(
+                    text=text,
+                    bold_text=bold_text,
+                    italic_text=italic_text,
+                    bullet_points=bullet_points,
+                    numbered_list=numbered_list,
+                    hashtags=hashtags,
+                    mentions=mentions
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_create_url_share":
+            url = arguments.get("url")
+            text = arguments.get("text")
+            title = arguments.get("title")
+            description = arguments.get("description")
+            visibility = arguments.get("visibility", "PUBLIC")
+            
+            if not url:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: url parameter is required",
+                    )
+                ]
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = await create_url_share(url, text, title, description, visibility)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
         elif name == "linkedin_get_profile_info":
             person_id = arguments.get("person_id")
             try:
                 result = await get_profile_info(person_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_get_profile_picture":
+            person_id = arguments.get("person_id")
+            try:
+                result = await get_profile_picture(person_id)
                 return [
                     types.TextContent(
                         type="text",
