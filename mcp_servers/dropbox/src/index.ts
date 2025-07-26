@@ -14,7 +14,7 @@ import { Dropbox } from 'dropbox';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const DROPBOX_API_KEY = process.env.DROPBOX_API_KEY;
+const DROPBOX_ACCESS_TOKEN = process.env.DROPBOX_ACCESS_TOKEN;
 
 // Import utilities
 import { patchFetchResponse } from './utils/fetch-polyfill.js';
@@ -160,8 +160,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleMcpRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
-        
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+
         // Initialize Dropbox client only if access token is available
         const dropboxClient = accessToken ? createDropboxClient(accessToken as string) : null;
 
@@ -227,7 +227,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleSseRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
 
         const transport = new SSEServerTransport(`/messages`, res);
 
@@ -253,7 +253,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     async function handleMessagesRequest(req: Request, res: Response) {
         const sessionId = req.query.sessionId as string;
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
 
         let transport: SSEServerTransport | undefined;
         transport = sessionId ? transports.get(sessionId) : undefined;

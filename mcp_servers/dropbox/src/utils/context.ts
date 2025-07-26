@@ -10,7 +10,7 @@ export const asyncLocalStorage = new AsyncLocalStorage<{
 export function getDropboxClient() {
     const client = asyncLocalStorage.getStore()?.dropboxClient;
     if (!client) {
-        throw new Error('Access token is missing. Provide it via x-auth-token header or set DROPBOX_API_KEY in the environment.');
+        throw new Error('Access token is missing. Provide it via x-auth-token header or set DROPBOX_ACCESS_TOKEN in the environment.');
     }
     return client;
 }
