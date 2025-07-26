@@ -17,9 +17,8 @@ import {
     dropboxResourceUriToPath,
     isFolderPath
 } from '../utils/path-url-handling.js';
-import { wrapDropboxError, wrapGetUriError } from '../utils/error-msg.js';
-import { formatDropboxError } from '../utils/error-handling.js';
 import { DropboxMCPError, ErrorModules, ErrorTypes } from '../error.js';
+import { wrapGetUriError } from '../utils/error-msg.js';
 
 /**
  * Creates an ImageContent object for MCP responses
@@ -80,34 +79,29 @@ export async function handleUploadFile(args: any) {
         );
     }
     const targetPath = validatedArgs.dropbox_path;
-    
+
+    // Get stream from URI using get-uri (supports http://, https://, ftp://, data:.)
+    let stream: NodeJS.ReadableStream;
+
     try {
-        // Get stream from URI using get-uri (supports http://, https://, ftp://, data:.)
-        let stream: NodeJS.ReadableStream;
-
-        try {
-            stream = await getUri(source);
-        } catch (error) {
-            wrapGetUriError(error, source);
-        }
-
-        // Use chunked upload for all files to avoid Node.js fetch duplex issues
-        // and handle both small and large files consistently
-        return await handleChunkedUpload(dropbox, stream, targetPath, validatedArgs, source);
-    } catch (error: unknown) {
-        const baseMessage = `Failed to upload file from ${source} to ${targetPath}`;
-        wrapDropboxError(error, baseMessage);
+        stream = await getUri(source);
+    } catch (error) {
+        wrapGetUriError(error, source);
     }
+
+    // Use chunked upload for all files to avoid Node.js fetch duplex issues
+    // and handle both small and large files consistently
+    return await handleChunkedUpload(dropbox, stream, targetPath, validatedArgs, source);
 }
 
 /**
  * Handle large file uploads using Dropbox's chunked upload session
  */
 async function handleChunkedUpload(
-    dropbox: any, 
-    stream: NodeJS.ReadableStream, 
-    targetPath: string, 
-    validatedArgs: any, 
+    dropbox: any,
+    stream: NodeJS.ReadableStream,
+    targetPath: string,
+    validatedArgs: any,
     source: string
 ) {
     const CHUNK_SIZE = 4 * 1024 * 1024; // 4MB chunks
@@ -181,79 +175,69 @@ export async function handleDownloadFile(args: any) {
     const validatedArgs = DownloadFileSchema.parse(args);
     const dropbox = getDropboxClient();
     const path = validatedArgs.path;
-    try {
-        if (!isFolderPath(path)) {
-            const { mimeType, contentType } = detectFileType(path);
-            if (['image', 'audio', 'text'].includes(contentType)) {
-                const response = await dropbox.filesDownload({
-                    path: path,
-                });
-                const result = response.result as any;
-                const fileBuffer = Buffer.from(result.fileBinary, 'binary');
-                let content;
-                switch (contentType) {
-                    case 'image':
-                        content = createImageContent(fileBuffer, mimeType);
-                        break;
-                    case 'audio':
-                        content = createAudioContent(fileBuffer, mimeType);
-                        break;
-                    case 'text':
-                        content = {
-                            type: "text",
-                            text: fileBuffer.toString('utf8'),
-                        }
-                }
-                return {
-                    content: [content],
-                };
+    if (!isFolderPath(path)) {
+        const { mimeType, contentType } = detectFileType(path);
+        if (['image', 'audio', 'text'].includes(contentType)) {
+            const response = await dropbox.filesDownload({
+                path: path,
+            });
+            const result = response.result as any;
+            const fileBuffer = Buffer.from(result.fileBinary, 'binary');
+            let content;
+            switch (contentType) {
+                case 'image':
+                    content = createImageContent(fileBuffer, mimeType);
+                    break;
+                case 'audio':
+                    content = createAudioContent(fileBuffer, mimeType);
+                    break;
+                case 'text':
+                    content = {
+                        type: "text",
+                        text: fileBuffer.toString('utf8'),
+                    }
             }
+            return {
+                content: [content],
+            };
         }
-        return {
-            content: [
-                {
-                    type: "text",
-                    text: `Use resources/read to access the fileContent at URI: dropbox://${path}`,
-                },
-            ],
-
-        };
-    } catch (error: unknown) {
-        const baseMessage = `Failed to download file: "${validatedArgs.path}"`;
-        wrapDropboxError(error, baseMessage);
     }
+    return {
+        content: [
+            {
+                type: "text",
+                text: `Use resources/read to access the fileContent at URI: dropbox://${path}`,
+            },
+        ],
+
+    };
 }
 
 export async function handleGetThumbnail(args: any) {
     const validatedArgs = GetThumbnailSchema.parse(args);
     const dropbox = getDropboxClient();
 
-    try {
-        const response = await dropbox.filesGetThumbnailV2({
-            resource: { ".tag": "path", path: validatedArgs.path },
-            format: { ".tag": validatedArgs.format },
-            size: { ".tag": validatedArgs.size },
-        });
+    const response = await dropbox.filesGetThumbnailV2({
+        resource: { ".tag": "path", path: validatedArgs.path },
+        format: { ".tag": validatedArgs.format },
+        size: { ".tag": validatedArgs.size },
+    });
 
-        const result = response.result as any;
+    const result = response.result as any;
 
-        const thumbnailBuffer = Buffer.isBuffer(result.fileBinary)
-            ? result.fileBinary
-            : Buffer.from(result.fileBinary, 'binary');
+    const thumbnailBuffer = Buffer.isBuffer(result.fileBinary)
+        ? result.fileBinary
+        : Buffer.from(result.fileBinary, 'binary');
 
-        const base64Thumbnail = thumbnailBuffer.toString('base64');
-        const mimeType = `image/${validatedArgs.format}`;
+    const base64Thumbnail = thumbnailBuffer.toString('base64');
+    const mimeType = `image/${validatedArgs.format}`;
 
-        // Create image content using the helper function
-        const imageContent = createImageContent(base64Thumbnail, mimeType);
+    // Create image content using the helper function
+    const imageContent = createImageContent(base64Thumbnail, mimeType);
 
-        return {
-            content: [imageContent],
-        };
-    } catch (error: unknown) {
-        const baseMessage = `Failed to get thumbnail for: "${validatedArgs.path}"`;
-        wrapDropboxError(error, baseMessage);
-    }
+    return {
+        content: [imageContent],
+    };
 }
 
 export async function handleGetTemporaryLink(args: any) {
@@ -321,49 +305,36 @@ export async function handleSaveUrl(args: any) {
     const validatedArgs = SaveUrlSchema.parse(args);
     const dropbox = getDropboxClient();
 
-    try {
-        const response = await dropbox.filesSaveUrl({
-            path: validatedArgs.path,
-            url: validatedArgs.url,
-        });
+    const response = await dropbox.filesSaveUrl({
+        path: validatedArgs.path,
+        url: validatedArgs.url,
+    });
 
-        if (response.result['.tag'] === 'complete') {
-            const result = response.result as any;
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL saved successfully!\n\nFile: ${result.path_display || validatedArgs.path}\nSource URL: ${validatedArgs.url}\nSize: ${result.size || 'Unknown'} bytes`,
-                    },
-                ],
-            };
-        } else if (response.result['.tag'] === 'async_job_id') {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save started (async operation)\nJob ID: ${response.result.async_job_id}\n\nSource URL: ${validatedArgs.url}\nDestination: ${validatedArgs.path}\n\nUse 'save_url_check_job_status' with this Job ID to check progress.`,
-                    },
-                ],
-            };
-        } else {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save initiated for: ${validatedArgs.url} -> ${validatedArgs.path}`,
-                    },
-                ],
-            };
-        }
-    } catch (error: unknown) {
-        // Format error message for saving URL
-        const errorMessage = formatDropboxError(error, 'save URL', validatedArgs.path);
+    if (response.result['.tag'] === 'complete') {
+        const result = response.result as any;
         return {
             content: [
                 {
                     type: "text",
-                    text: errorMessage,
+                    text: `URL saved successfully!\n\nFile: ${result.path_display || validatedArgs.path}\nSource URL: ${validatedArgs.url}\nSize: ${result.size || 'Unknown'} bytes`,
+                },
+            ],
+        };
+    } else if (response.result['.tag'] === 'async_job_id') {
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `URL save started (async operation)\nJob ID: ${response.result.async_job_id}\n\nSource URL: ${validatedArgs.url}\nDestination: ${validatedArgs.path}\n\nUse 'save_url_check_job_status' with this Job ID to check progress.`,
+                },
+            ],
+        };
+    } else {
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `URL save initiated for: ${validatedArgs.url} -> ${validatedArgs.path}`,
                 },
             ],
         };
@@ -374,60 +345,47 @@ export async function handleSaveUrlCheckJobStatus(args: any) {
     const validatedArgs = SaveUrlCheckJobStatusSchema.parse(args);
     const dropbox = getDropboxClient();
 
-    try {
-        const response = await dropbox.filesSaveUrlCheckJobStatus({
-            async_job_id: validatedArgs.async_job_id,
-        });
+    const response = await dropbox.filesSaveUrlCheckJobStatus({
+        async_job_id: validatedArgs.async_job_id,
+    });
 
-        const result = response.result;
+    const result = response.result;
 
-        if (result['.tag'] === 'in_progress') {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save operation is still in progress.\nJob ID: ${validatedArgs.async_job_id}\nStatus: Processing...`,
-                    },
-                ],
-            };
-        } else if (result['.tag'] === 'complete') {
-            const completeResult = result as any;
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save completed!\nJob ID: ${validatedArgs.async_job_id}\nFile: ${completeResult.path_display}\nSize: ${completeResult.size} bytes`,
-                    },
-                ],
-            };
-        } else if (result['.tag'] === 'failed') {
-            const failedResult = result as any;
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save failed.\nJob ID: ${validatedArgs.async_job_id}\nError: ${failedResult.reason || 'Unknown error'}`,
-                    },
-                ],
-            };
-        } else {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: `URL save status: ${result['.tag'] || 'Unknown'}\nJob ID: ${validatedArgs.async_job_id}`,
-                    },
-                ],
-            };
-        }
-    } catch (error: unknown) {
-        // Format error message for checking save URL job status
-        const errorMessage = formatDropboxError(error, 'check save URL job status', validatedArgs.async_job_id);
+    if (result['.tag'] === 'in_progress') {
         return {
             content: [
                 {
                     type: "text",
-                    text: errorMessage,
+                    text: `URL save operation is still in progress.\nJob ID: ${validatedArgs.async_job_id}\nStatus: Processing...`,
+                },
+            ],
+        };
+    } else if (result['.tag'] === 'complete') {
+        const completeResult = result as any;
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `URL save completed!\nJob ID: ${validatedArgs.async_job_id}\nFile: ${completeResult.path_display}\nSize: ${completeResult.size} bytes`,
+                },
+            ],
+        };
+    } else if (result['.tag'] === 'failed') {
+        const failedResult = result as any;
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `URL save failed.\nJob ID: ${validatedArgs.async_job_id}\nError: ${failedResult.reason || 'Unknown error'}`,
+                },
+            ],
+        };
+    } else {
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: `URL save status: ${result['.tag'] || 'Unknown'}\nJob ID: ${validatedArgs.async_job_id}`,
                 },
             ],
         };

@@ -4,12 +4,16 @@
 export class DropboxMCPError extends Error {
     public type: string;
     public errorModule: string;
+    public status: string;
+    public error_summary : string;
 
-    constructor(type: string, errorModule: string, message: string) {
+    constructor(type: string, errorModule: string, message: string, status?: string) {
         super(message);
         this.name = 'DropboxMCPError';
         this.type = type;
         this.errorModule = errorModule;
+        this.status = status || '400';
+        this.error_summary = `${type} (${errorModule}): ${message}`;
     }
 }
 

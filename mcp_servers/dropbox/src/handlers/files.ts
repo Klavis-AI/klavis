@@ -11,7 +11,6 @@ import {
     SearchFilesContinueSchema
 } from '../schemas/index.js';
 import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { wrapDropboxError } from "../utils/error-msg.js";
 
 /**
  * Handle list folder operation
@@ -323,30 +322,26 @@ async function handleGetFileInfo(args: any): Promise<CallToolResult> {
 export async function handleFilesOperation(request: CallToolRequest): Promise<CallToolResult> {
     const { name, arguments: args } = request.params;
 
-    try {
-        switch (name) {
-            case "list_folder":
-                return await handleListFolder(args);
-            case "list_folder_continue":
-                return await handleListFolderContinue(args);
-            case "create_folder":
-                return await handleCreateFolder(args);
-            case "delete_file":
-                return await handleDeleteFile(args);
-            case "move_file":
-                return await handleMoveFile(args);
-            case "copy_file":
-                return await handleCopyFile(args);
-            case "search_files":
-                return await handleSearchFiles(args);
-            case "search_files_continue":
-                return await handleSearchFilesContinue(args);
-            case "get_file_info":
-                return await handleGetFileInfo(args);
-            default:
-                throw new Error(`Unknown files operation: ${name}`);
-        }
-    } catch (error) {
-        wrapDropboxError(error, `Failed to execute files operation: ${name}`);
+    switch (name) {
+        case "list_folder":
+            return await handleListFolder(args);
+        case "list_folder_continue":
+            return await handleListFolderContinue(args);
+        case "create_folder":
+            return await handleCreateFolder(args);
+        case "delete_file":
+            return await handleDeleteFile(args);
+        case "move_file":
+            return await handleMoveFile(args);
+        case "copy_file":
+            return await handleCopyFile(args);
+        case "search_files":
+            return await handleSearchFiles(args);
+        case "search_files_continue":
+            return await handleSearchFilesContinue(args);
+        case "get_file_info":
+            return await handleGetFileInfo(args);
+        default:
+            throw new Error(`Unknown files operation: ${name}`);
     }
 }

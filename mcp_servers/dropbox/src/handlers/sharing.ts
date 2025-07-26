@@ -1,7 +1,6 @@
 import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import * as schemas from "../schemas/index.js";
 import { getDropboxClient } from "../utils/context.js";
-import { wrapDropboxError } from "../utils/error-msg.js";
 
 /**
  * Handle add file member operation
@@ -491,40 +490,36 @@ async function handleCheckJobStatus(args: any): Promise<CallToolResult> {
 export async function handleSharingOperation(request: CallToolRequest): Promise<CallToolResult> {
     const { name, arguments: args } = request.params;
 
-    try {
-        switch (name) {
-            case "add_file_member":
-                return await handleAddFileMember(args);
-            case "list_file_members":
-                return await handleListFileMembers(args);
-            case "remove_file_member":
-                return await handleRemoveFileMember(args);
-            case "share_folder":
-                return await handleShareFolder(args);
-            case "list_folder_members":
-                return await handleListFolderMembers(args);
-            case "add_folder_member":
-                return await handleAddFolderMember(args);
-            case "remove_folder_member":
-                return await handleRemoveFolderMember(args);
-            case "share_file":
-                return await handleShareFile(args);
-            case "get_shared_links":
-                return await handleGetSharedLinks(args);
-            case "unshare_file":
-                return await handleUnshareFile(args);
-            case "unshare_folder":
-                return await handleUnshareFolder(args);
-            case "list_shared_folders":
-                return await handleListSharedFolders(args);
-            case "list_received_files":
-                return await handleListReceivedFiles(args);
-            case "check_job_status":
-                return await handleCheckJobStatus(args);
-            default:
-                throw new Error(`Unknown sharing operation: ${name}`);
-        }
-    } catch (error) {
-        wrapDropboxError(error, `Failed to execute sharing operation: ${name}`, name);
+    switch (name) {
+        case "add_file_member":
+            return await handleAddFileMember(args);
+        case "list_file_members":
+            return await handleListFileMembers(args);
+        case "remove_file_member":
+            return await handleRemoveFileMember(args);
+        case "share_folder":
+            return await handleShareFolder(args);
+        case "list_folder_members":
+            return await handleListFolderMembers(args);
+        case "add_folder_member":
+            return await handleAddFolderMember(args);
+        case "remove_folder_member":
+            return await handleRemoveFolderMember(args);
+        case "share_file":
+            return await handleShareFile(args);
+        case "get_shared_links":
+            return await handleGetSharedLinks(args);
+        case "unshare_file":
+            return await handleUnshareFile(args);
+        case "unshare_folder":
+            return await handleUnshareFolder(args);
+        case "list_shared_folders":
+            return await handleListSharedFolders(args);
+        case "list_received_files":
+            return await handleListReceivedFiles(args);
+        case "check_job_status":
+            return await handleCheckJobStatus(args);
+        default:
+            throw new Error(`Unknown sharing operation: ${name}`);
     }
 }

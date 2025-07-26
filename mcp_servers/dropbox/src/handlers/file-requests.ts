@@ -1,7 +1,6 @@
 import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import * as schemas from "../schemas/index.js";
 import { getDropboxClient } from "../utils/context.js";
-import { wrapDropboxError } from "../utils/error-msg.js";
 
 /**
  * Handle create file request operation
@@ -144,27 +143,23 @@ async function handleUpdateFileRequest(args: any): Promise<CallToolResult> {
 export async function handleFileRequestOperation(request: CallToolRequest): Promise<CallToolResult> {
     const { name, arguments: args } = request.params;
 
-    try {
-        switch (name) {
-            case "create_file_request":
-                return await handleCreateFileRequest(args);
+    switch (name) {
+        case "create_file_request":
+            return await handleCreateFileRequest(args);
 
-            case "get_file_request":
-                return await handleGetFileRequest(args);
+        case "get_file_request":
+            return await handleGetFileRequest(args);
 
-            case "list_file_requests":
-                return await handleListFileRequests(args);
+        case "list_file_requests":
+            return await handleListFileRequests(args);
 
-            case "delete_file_request":
-                return await handleDeleteFileRequest(args);
+        case "delete_file_request":
+            return await handleDeleteFileRequest(args);
 
-            case "update_file_request":
-                return await handleUpdateFileRequest(args);
+        case "update_file_request":
+            return await handleUpdateFileRequest(args);
 
-            default:
-                throw new Error(`Unknown file request operation: ${name}`);
-        }
-    } catch (error) {
-        wrapDropboxError(error, `Failed to execute file request operation: ${name}`);
+        default:
+            throw new Error(`Unknown file request operation: ${name}`);
     }
 }
