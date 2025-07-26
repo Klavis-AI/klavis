@@ -298,7 +298,8 @@ We welcome contributions! Here's how to get started:
 1. **Report Issues**: Found a bug? [Open an issue](https://github.com/klavis-ai/klavis/issues)
 2. **Request Features**: Have an idea? [Start a discussion](https://github.com/klavis-ai/klavis/discussions)
 3. **Contribute Code**: Check our [Contributing Guidelines](CONTRIBUTING.md)
-4. **Join Community**: Connect with us on [Discord](https://discord.gg/p7TuTEcssn)
+4. **Build MCP Servers**: Want to add new integrations? See our [MCP Server Guide](MCP_SERVER_GUIDE.md)
+5. **Join Community**: Connect with us on [Discord](https://discord.gg/p7TuTEcssn)
 
 ## 📜 License
 

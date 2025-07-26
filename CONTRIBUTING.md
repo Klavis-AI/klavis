@@ -46,6 +46,18 @@ The project is organized as a monorepo with multiple MCP servers and clients:
 
 When making changes, be mindful of the scope of your change and any potential impacts on other components.
 
+### Building MCP Servers
+
+If you're interested in contributing a new MCP server to the project, we have a comprehensive guide to help you get started:
+
+**[📖 MCP Server Guide](MCP_SERVER_GUIDE.md)** - A complete guide covering:
+- What MCP servers are and how they work
+- How to design effective tools for AI agents
+- Development best practices and testing requirements
+- Step-by-step instructions with examples
+
+This guide is essential reading for anyone wanting to build high-quality MCP servers that integrate well with AI applications.
+
 ## Commit Message Convention
 
 We follow a simplified version of the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages.
