@@ -3,10 +3,14 @@ import { Dropbox } from 'dropbox';
 
 // Create AsyncLocalStorage for request context
 export const asyncLocalStorage = new AsyncLocalStorage<{
-    dropboxClient: Dropbox;
+    dropboxClient: Dropbox | null;
 }>();
 
 // Helper function to get Dropbox client from context
 export function getDropboxClient() {
-    return asyncLocalStorage.getStore()!.dropboxClient;
+    const client = asyncLocalStorage.getStore()?.dropboxClient;
+    if (!client) {
+        throw new Error('Access token is missing. Provide it via x-auth-token header or set DROPBOX_API_KEY in the environment.');
+    }
+    return client;
 }

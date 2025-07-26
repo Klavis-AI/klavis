@@ -11,6 +11,10 @@ import {
     ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { Dropbox } from 'dropbox';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const DROPBOX_API_KEY = process.env.DROPBOX_API_KEY;
 
 // Import utilities
 import { patchFetchResponse } from './utils/fetch-polyfill.js';
@@ -156,21 +160,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleMcpRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] as string;
-        if (!accessToken) {
-            console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-            return res.status(401).json({
-                jsonrpc: '2.0',
-                error: {
-                    code: -32000,
-                    message: 'Access token is missing. Provide it via x-auth-token header.',
-                },
-                id: null,
-            });
-        }
-
-        // Initialize Dropbox client with the access token
-        const dropboxClient = createDropboxClient(accessToken);
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
+        
+        // Initialize Dropbox client only if access token is available
+        const dropboxClient = accessToken ? createDropboxClient(accessToken as string) : null;
 
         const server = getDropboxMcpServer();
         try {
@@ -234,13 +227,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleSseRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] as string;
-        if (!accessToken) {
-            console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-            return res.status(401).json({
-                error: 'Access token is missing. Provide it via x-auth-token header.',
-            });
-        }
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
 
         const transport = new SSEServerTransport(`/messages`, res);
 
@@ -266,19 +253,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     async function handleMessagesRequest(req: Request, res: Response) {
         const sessionId = req.query.sessionId as string;
-        const accessToken = req.headers['x-auth-token'] as string;
-        if (!accessToken) {
-            console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-            return res.status(401).json({
-                error: 'Access token is missing. Provide it via x-auth-token header.',
-            });
-        }
+        const accessToken = req.headers['x-auth-token'] || DROPBOX_API_KEY;
 
         let transport: SSEServerTransport | undefined;
         transport = sessionId ? transports.get(sessionId) : undefined;
         if (transport) {
-            // Initialize Dropbox client with the access token
-            const dropboxClient = createDropboxClient(accessToken);
+            // Initialize Dropbox client only if access token is available
+            const dropboxClient = accessToken ? createDropboxClient(accessToken as string) : null;
 
             asyncLocalStorage.run({ dropboxClient }, async () => {
                 await transport!.handlePostMessage(req, res);
