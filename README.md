@@ -238,9 +238,9 @@ console.log(finalResponse.choices[0].message.content);
 [**View All Servers →**](https://docs.klavis.ai/documentation/introduction#mcp-server-quickstart)
 
 ## 🗺️ Roadmap
-- more high quality MCP Servers (oneDrive, Canva, Figma ...)
+- more high quality MCP Servers (Figma, Canva, Perplexityai, Microsoft teams, Google maps, Bitbucket, Cloudflare, Zoho, Tavily, Posthog, Mem0, Brave Search, Apollo, Exa, Fireflies, Eleven Labs, Hacker News, MicroSoft Calendar)
 - More AI platform integrations ([examples](https://github.com/Klavis-AI/klavis/tree/main/examples) & [docs](https://docs.klavis.ai/documentation/ai-platform-integration/overview) )
-- Event-driven / Webhook 
+- Event-driven / Webhook
 - Unit Tests, integration test
 - /docs improvement
 
