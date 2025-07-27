@@ -34,7 +34,7 @@ Testing is a critical part of the contribution process. Your testing must demons
 First, run your local MCP server and connect it to a client application. Common clients that supports local MCP servers include:
 
 *   **Claude Desktop:** An official desktop application that provides a chat interface for interacting with your server's tools. [Detailed documentations](https://support.anthropic.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop) are available.
-*   **Cursor:** An AI-first code editor that can be configured to connect to custom MCP servers. [Detailed documentations (click the remote server tab)](https://docs.cursor.com/context/mcp#using-mcp-json) are available.
+*   **Cursor:** An AI-first code editor that can be configured to connect to custom MCP servers. [Detailed documentations (click the remote server tab)](https://docs.cursor.com/en/context/mcp#using-mcp-json) are available.
 *   **Visual Studio Code:** Using specific extensions, you can configure VS Code to act as an MCP client. [Detailed documentations](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server) are available.
 *   **Streamable HTTP Client:** For low-level testing, the [steamable_http_client.py](/mcp-clients/src/mcp_clients/streamable_http_client.py) in the Klavis repository is also good for sending raw requests to your server and inspecting its direct responses.
 
