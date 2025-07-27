@@ -7,11 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-COPY mcp_servers/notion_python/requirements.txt .
+COPY mcp_servers/notion/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY mcp_servers/notion_python/server.py .
-COPY mcp_servers/notion_python/tools/ ./tools/
+COPY mcp_servers/notion/server.py .
+COPY mcp_servers/notion/tools/ ./tools/
 
 # Expose the port the server runs on
 EXPOSE 5000
