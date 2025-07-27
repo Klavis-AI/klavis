@@ -1,37 +1,20 @@
-FROM node:22.12-alpine AS builder
+FROM python:3.12-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to install dependencies
-COPY mcp_servers/notion/package.json mcp_servers/notion/package-lock.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies (ignoring scripts to prevent running the prepare script)
-RUN npm install --ignore-scripts
+COPY mcp_servers/notion_python/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application source code
-COPY mcp_servers/notion .
+COPY mcp_servers/notion_python/server.py .
+COPY mcp_servers/notion_python/tools/ ./tools/
 
-# Build the application using TypeScript
-RUN npm run build
-
-FROM node:22-alpine AS release
-
-# Copy build artifacts and dependencies
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-COPY --from=builder /app/src /app/src
-COPY --from=builder /app/scripts /app/scripts
-COPY --from=builder /app/index.ts /app/index.ts
-
-ENV NODE_ENV=production
-
+# Expose the port the server runs on
 EXPOSE 5000
 
-WORKDIR /app
-
-# Install dependencies including tsx for running TypeScript directly
-RUN npm install --production && npm install -g tsx
-
-# Run the server using the index.ts at the root level
-CMD ["tsx", "index.ts"]
+# Command to run the server
+CMD ["python", "server.py"] 
