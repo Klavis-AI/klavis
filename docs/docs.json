@@ -28,6 +28,7 @@
             "group": "Documentation",
             "pages": [
               "documentation/introduction",
+              "develop-with-ai",
               "documentation/oauth_white_label"
             ]
           },
