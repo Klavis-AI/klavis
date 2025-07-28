@@ -33,28 +33,3 @@ async def get_profile_info(person_id: Optional[str] = None) -> Dict[str, Any]:
     except Exception as e:
         logger.exception(f"Error executing tool get_profile_info: {e}")
         raise e
-
-async def get_profile_picture(person_id: Optional[str] = None) -> Dict[str, Any]:
-    """Get LinkedIn profile picture URL. If person_id is None, gets current user's profile picture."""
-    logger.info(f"Executing tool: get_profile_picture with person_id: {person_id}")
-    try:
-        if person_id:
-            return {"error": "Getting other users' profile pictures requires elevated LinkedIn API permissions"}
-        
-        # Get current user's profile info which includes picture
-        profile_data = await make_linkedin_request("GET", "/userinfo")
-        
-        result = {
-            "id": profile_data.get("sub"),
-            "name": profile_data.get("name"),
-            "profile_picture_url": profile_data.get("picture"),
-            "has_picture": bool(profile_data.get("picture"))
-        }
-        
-        if not result["profile_picture_url"]:
-            result["note"] = "No profile picture found or user hasn't made it publicly accessible"
-            
-        return result
-    except Exception as e:
-        logger.exception(f"Error executing tool get_profile_picture: {e}")
-        raise e
