@@ -262,7 +262,7 @@
           },
           {
             "group": "OAuth",
-            "pages": ["knowledge-base/oauth/linkedin", "knowledge-base/oauth/canva"]
+            "pages": ["knowledge-base/oauth/linkedin", "knowledge-base/oauth/canva", "knowledge-base/oauth/xero"]
           }
         ]
       }
