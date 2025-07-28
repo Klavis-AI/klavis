@@ -1,136 +1,116 @@
 # Zapier MCP Server
 
-A Model Context Protocol (MCP) server for Zapier integration that provides tools to manage workflows, tasks, webhooks, and apps.
+A Model Context Protocol (MCP) server for Zapier that follows the standard Python MCP server format.
 
 ## Features
 
-- **Workflow Management**: Create, read, update, and delete Zapier workflows
-- **Task History**: Retrieve task execution history and details
-- **Webhook Management**: Create and manage webhooks for workflow triggers
-- **App Integration**: List and manage connected Zapier apps
-- **Enterprise Architecture**: Built with design patterns and clean architecture
+- **Dual Transport Support**: Both SSE and StreamableHTTP transports
+- **Authentication**: Token-based authentication via headers
+- **Comprehensive API Coverage**: Workflows, tasks, webhooks, and apps
+- **Standard Format**: Follows the same pattern as other Python MCP servers
 
-## Installation
+## Quick Start
 
-1. **Clone the repository**
-```bash
-git clone <repository-url>
-cd mcp_servers/zapier
-```
+### Local Development
 
-2. **Install dependencies**
+1. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Set up environment variables**
+2. Set your Zapier API key:
 ```bash
-# Create .env file
-echo "ZAPIER_API_KEY=your_api_key_here" > .env
+export ZAPIER_API_KEY=your_api_key_here
 ```
 
-4. **Run the server**
+3. Run the server:
 ```bash
 python server.py
 ```
 
-## Configuration
+### HTTP Server Mode
 
-Set the following environment variables:
+Run with HTTP transport for remote access:
 
 ```bash
-ZAPIER_API_KEY=your_zapier_api_key
-API_BASE_URL=https://api.zapier.com/v1
-API_TIMEOUT=30
-LOG_LEVEL=INFO
+python server.py --port 5000
+```
+
+This will start the server with both SSE and StreamableHTTP endpoints:
+- SSE: `http://localhost:5000/sse`
+- StreamableHTTP: `http://localhost:5000/mcp`
+
+### Authentication
+
+The server supports authentication via the `x-auth-token` header:
+
+```bash
+curl -H "x-auth-token: your_zapier_api_key" \
+     http://localhost:5000/mcp
 ```
 
 ## Available Tools
 
-### Workflow Tools
-- `list_workflows`: List all workflows
-- `get_workflow`: Get workflow details
-- `create_workflow`: Create a new workflow
-- `update_workflow`: Update existing workflow
-- `delete_workflow`: Delete a workflow
-- `trigger_workflow`: Manually trigger a workflow
+### Workflows
+- `zapier_list_workflows` - List all workflows
+- `zapier_get_workflow` - Get workflow details
+- `zapier_create_workflow` - Create new workflow
+- `zapier_update_workflow` - Update existing workflow
+- `zapier_delete_workflow` - Delete workflow
+- `zapier_trigger_workflow` - Trigger workflow manually
 
-### Task Tools
-- `list_tasks`: List task execution history
-- `get_task`: Get task details
+### Tasks
+- `zapier_list_tasks` - List tasks
+- `zapier_get_task` - Get task details
 
-### Webhook Tools
-- `list_webhooks`: List all webhooks
-- `create_webhook`: Create a new webhook
-- `get_webhook`: Get webhook details
+### Webhooks
+- `zapier_list_webhooks` - List webhooks
+- `zapier_create_webhook` - Create webhook
+- `zapier_get_webhook` - Get webhook details
 
-### App Tools
-- `list_apps`: List connected apps
-- `get_app`: Get app details
-- `connect_app`: Connect a new app
+### Apps
+- `zapier_list_apps` - List available apps
+- `zapier_get_app` - Get app details
+- `zapier_connect_app` - Connect app to account
 
-## Usage Examples
+## Project Structure
 
-### List Workflows
-```python
-# List all workflows
-result = await call_tool("list_workflows", {})
+```
+mcp_servers/zapier/
+├── server.py              # Main server with CLI and transports
+├── tools/                 # Tool implementations
+│   ├── __init__.py       # Tool exports
+│   ├── base.py           # Authentication utilities
+│   ├── workflows.py      # Workflow tools
+│   ├── tasks.py          # Task tools
+│   ├── webhooks.py       # Webhook tools
+│   └── apps.py           # App tools
+├── requirements.txt       # Dependencies
+├── Dockerfile            # Containerization
+└── README.md            # This file
 ```
 
-### Create Workflow
-```python
-# Create a new workflow
-workflow_data = {
-    "title": "Email to Slack",
-    "description": "Send email notifications to Slack",
-    "trigger_app": "gmail",
-    "trigger_event": "new_email",
-    "action_app": "slack",
-    "action_event": "send_message"
-}
-result = await call_tool("create_workflow", workflow_data)
-```
+## Configuration
 
-### Get Task History
-```python
-# Get task execution history
-result = await call_tool("list_tasks", {"workflow_id": "workflow_123"})
-```
-
-## Testing
-
-Run the test suite:
-
-```bash
-# Run all tests
-python tests/run_tests.py
-
-# Run specific test categories
-python tests/run_tests.py --specific interfaces entities
-
-# Run with verbose output
-python tests/run_tests.py --verbose
-```
-
-## Architecture
-
-This server implements enterprise-grade design patterns:
-
-- **Factory Pattern**: Component creation and dependency injection
-- **Repository Pattern**: Data access abstraction
-- **Service Pattern**: Business logic layer
-- **Strategy Pattern**: Algorithm selection
-- **Decorator Pattern**: Cross-cutting concerns
-- **Clean Architecture**: Layered architecture with clear separation
+Environment variables:
+- `ZAPIER_API_KEY`: Your Zapier API key
+- `ZAPIER_MCP_SERVER_PORT`: Server port (default: 5000)
 
 ## Docker
 
 Build and run with Docker:
 
 ```bash
-# Build the image
 docker build -t zapier-mcp-server .
-
-# Run the container
-docker run -e ZAPIER_API_KEY=your_key zapier-mcp-server
+docker run -p 5000:5000 -e ZAPIER_API_KEY=your_key zapier-mcp-server
 ```
+
+## Development
+
+The server follows the standard Python MCP server pattern used by other servers in this codebase:
+
+1. **Simple server.py** with Click CLI and dual transport support
+2. **Organized tools/** directory with clear separation of concerns
+3. **Context-based authentication** for security
+4. **Async HTTP client** for API calls
+
