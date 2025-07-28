@@ -1,0 +1,110 @@
+---
+title: "Develop with AI"
+description: "Integrate Klavis with your AI development workflow and coding assistants."
+---
+
+Integrate Klavis with your AI development workflow and coding assistants.
+
+Klavis provides LLM-accessible tools that you can plug locally in your coding assistant (Cursor, Windsurf, Claude Desktop, etc.). There are multiple options:
+
+- **An MCP server** that can directly query this documentation and access Klavis tools, ensuring your coding assistant receives real-time information about available commands and features.
+- **Direct API integration** using our REST API endpoints for programmatic access
+- **SDK integration** using our Python or TypeScript SDKs
+- **Copy-paste documentation** for quick context sharing
+
+Alternatively you can also use the native AI assistant built into this documentation portal.
+
+## Option 1: Install the MCP server
+
+Open a terminal and run the following command to install the Klavis MCP server locally:
+
+```bash
+npx @klavis/mcp-server
+```
+
+This will set up the MCP server that allows your AI assistant to:
+- Query Klavis documentation in real-time
+- Access available MCP server tools
+- Get up-to-date API reference information
+- Interact with Klavis services directly
+
+Everything will be set up automatically with proper authentication and configuration.
+
+## Option 2: Use the REST API
+
+Integrate Klavis directly into your AI workflows using our REST API:
+
+```bash
+curl -X GET "https://api.klavis.ai/servers" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+The API provides access to:
+- MCP server management
+- Tool execution
+- OAuth authentication flows
+- Real-time server status
+
+Get your API key from the [Klavis Dashboard](https://www.klavis.ai/home).
+
+## Option 3: SDK Integration
+
+### Python SDK
+
+Install the Python SDK:
+
+```bash
+pip install klavis
+```
+
+Use it in your Python applications:
+
+```python
+from klavis import KlavisClient
+
+client = KlavisClient(api_key="YOUR_API_KEY")
+servers = client.get_servers()
+```
+
+### TypeScript SDK
+
+Install the TypeScript SDK:
+
+```bash
+npm install @klavis/sdk
+```
+
+Use it in your TypeScript/JavaScript applications:
+
+```typescript
+import { KlavisClient } from '@klavis/sdk';
+
+const client = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+const servers = await client.getServers();
+```
+
+## Option 4: Copy-paste documentation context
+
+For quick context sharing, you can copy relevant documentation sections directly into your AI assistant's prompt. Key sections include:
+
+- [API Reference](/api-reference/introduction) - Complete API documentation
+- [MCP Server Quickstart](/documentation/mcp-server/github) - Individual server setup guides  
+- [AI Platform Integrations](/documentation/ai-platform-integration/overview) - Platform-specific integration guides
+
+## Option 5: Use the documentation's built-in assistant
+
+This documentation portal has a built-in AI assistant. Simply click "**✨ Ask AI**" at the top of any page to use it. The assistant has access to the complete Klavis documentation and can help you with:
+
+- Setup and configuration questions
+- API usage examples
+- Troubleshooting common issues
+- Best practices and recommendations
+
+## Getting Started
+
+1. **Choose your integration method** based on your use case
+2. **Get your API key** from the [Klavis Dashboard](https://www.klavis.ai/home)
+3. **Follow the quickstart guide** for your chosen platform
+4. **Test the integration** with a simple API call or tool execution
+
+For detailed setup instructions, see our [platform-specific guides](/documentation/ai-platform-integration/overview). 
