@@ -261,7 +261,7 @@
           },
           {
             "group": "OAuth",
-            "pages": ["knowledge-base/oauth/linkedin"]
+            "pages": ["knowledge-base/oauth/linkedin", "knowledge-base/oauth/canva"]
           }
         ]
       }
