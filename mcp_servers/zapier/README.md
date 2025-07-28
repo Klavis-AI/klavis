@@ -18,9 +18,13 @@ A Model Context Protocol (MCP) server for Zapier that follows the standard Pytho
 pip install -r requirements.txt
 ```
 
-2. Set your Zapier API key:
+2. Set up environment variables:
 ```bash
-export ZAPIER_API_KEY=your_api_key_here
+# Copy the example file
+cp .env.example .env
+
+# Edit .env with your Zapier API key
+ZAPIER_API_KEY=your_zapier_api_key_here
 ```
 
 3. Run the server:
