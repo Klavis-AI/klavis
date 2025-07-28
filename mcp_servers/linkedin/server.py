@@ -19,7 +19,6 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     linkedin_token_context,
     get_profile_info,
-    get_profile_picture,
     create_post,
     create_hashtag_post,
     format_rich_post,
@@ -74,19 +73,6 @@ def main(
                         "person_id": {
                             "type": "string",
                             "description": "The LinkedIn person ID to retrieve information for. Leave empty for current user."
-                        }
-                    }
-                }
-            ),
-            types.Tool(
-                name="linkedin_get_profile_picture",
-                description="Get LinkedIn profile picture URL. If person_id is not provided, gets current user's profile picture.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "person_id": {
-                            "type": "string",
-                            "description": "The LinkedIn person ID to retrieve profile picture for. Leave empty for current user."
                         }
                     }
                 }
@@ -385,26 +371,6 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
-        elif name == "linkedin_get_profile_picture":
-            person_id = arguments.get("person_id")
-            try:
-                result = await get_profile_picture(person_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
         
         else:
             return [
