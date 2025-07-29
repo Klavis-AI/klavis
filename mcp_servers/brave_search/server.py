@@ -483,7 +483,7 @@ def main(
     ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         if name == "brave_search":
             try:
-                result = brave_search(
+                result = await brave_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
                     country=arguments.get("country"),
@@ -516,7 +516,7 @@ def main(
 
         elif name == "brave_image_search":
             try:
-                result = brave_image_search(
+                result = await brave_image_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
                     search_lang=arguments.get("search_lang"),
@@ -531,7 +531,7 @@ def main(
 
         elif name == "brave_news_search":
             try:
-                result = brave_news_search(
+                result = await brave_news_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
                     search_lang=arguments.get("search_lang"),
@@ -551,7 +551,7 @@ def main(
 
         elif name == "brave_video_search":
             try:
-                result = brave_video_search(
+                result = await brave_video_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
                     safesearch=arguments.get("safesearch"),
