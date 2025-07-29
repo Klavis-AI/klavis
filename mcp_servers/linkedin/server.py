@@ -78,7 +78,7 @@ def main(
             ),
             types.Tool(
                 name="linkedin_create_post",
-                description="Create a post on LinkedIn with optional title for article-style posts and hashtags.",
+                description="Create a post on LinkedIn with optional title for article-style posts.",
                 inputSchema={
                     "type": "object",
                     "required": ["text"],
