@@ -90,47 +90,28 @@ def format_rich_post(
             "exception": str(e)
         }
 
-async def create_hashtag_post(text: str, hashtags: List[str], title: Optional[str] = None, visibility: str = "PUBLIC") -> Dict[str, Any]:
-    """Create a LinkedIn post with formatted hashtags"""
-    logger.info(f"Executing tool: create_hashtag_post with {len(hashtags)} hashtags")
-    try:
-        # Format hashtags
-        formatted_hashtags = _format_hashtags(hashtags)
-        
-        # Combine text with hashtags
-        if formatted_hashtags:
-            full_text = f"{text}\n\n{formatted_hashtags}"
-        else:
-            full_text = text
-        
-        # Use the existing create_post function
-        result = await create_post(full_text, title, visibility)
-        
-        # Add hashtag info to result
-        if "error" not in result:
-            result["hashtags_used"] = formatted_hashtags
-            result["hashtag_count"] = len([h for h in hashtags if h.strip()])
-            
-        return result
-    except Exception as e:
-        logger.exception(f"Error executing tool create_hashtag_post: {e}")
-        return {
-            "error": "Hashtag post creation failed",
-            "text": text,
-            "hashtags": hashtags,
-            "exception": str(e)
-        }
-
-async def create_post(text: str, title: Optional[str] = None, visibility: str = "PUBLIC") -> Dict[str, Any]:
-    """Create a post on LinkedIn with optional title for article-style posts."""
+async def create_post(text: str, title: Optional[str] = None, visibility: str = "PUBLIC", hashtags: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Create a post on LinkedIn with optional title for article-style posts and hashtags."""
     tool_name = "create_article_post" if title else "create_text_post"
+    if hashtags:
+        tool_name += "_with_hashtags"
     logger.info(f"Executing tool: {tool_name}")
     try:
         profile = await make_linkedin_request("GET", "/userinfo")
         person_id = profile.get('sub')
         
-        # Format content with title if provided
-        content = f"{title}\n\n{text}" if title else text
+        # Format hashtags if provided
+        hashtag_text = ""
+        if hashtags:
+            formatted_hashtags = _format_hashtags(hashtags)
+            if formatted_hashtags:
+                hashtag_text = f"\n\n{formatted_hashtags}"
+        
+        # Format content with title and hashtags if provided
+        content = text
+        if title:
+            content = f"{title}\n\n{text}"
+        content += hashtag_text
         
         endpoint = "/ugcPosts"
         payload = {
@@ -160,6 +141,11 @@ async def create_post(text: str, title: Optional[str] = None, visibility: str = 
         if title:
             result["title"] = title
             result["note"] = "Created as text post with article format (title + content)"
+        
+        if hashtags:
+            formatted_hashtags = _format_hashtags(hashtags)
+            result["hashtags_used"] = formatted_hashtags
+            result["hashtag_count"] = len([h for h in hashtags if h.strip()])
         
         return result
     except Exception as e:
@@ -245,7 +231,3 @@ async def create_url_share(url: str, text: str, title: Optional[str] = None, des
             error_result["description"] = description
             
         return error_result
-
-
-
-
