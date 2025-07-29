@@ -20,7 +20,6 @@ from tools import (
     linkedin_token_context,
     get_profile_info,
     create_post,
-    create_hashtag_post,
     format_rich_post,
     create_url_share,
 )
@@ -79,7 +78,7 @@ def main(
             ),
             types.Tool(
                 name="linkedin_create_post",
-                description="Create a post on LinkedIn with optional title for article-style posts.",
+                description="Create a post on LinkedIn with optional title for article-style posts and hashtags.",
                 inputSchema={
                     "type": "object",
                     "required": ["text"],
@@ -92,33 +91,10 @@ def main(
                             "type": "string",
                             "description": "Optional title for article-style posts. When provided, creates an article format."
                         },
-                        "visibility": {
-                            "type": "string",
-                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
-                            "default": "PUBLIC"
-                        }
-                    }
-                }
-            ),
-            types.Tool(
-                name="linkedin_create_hashtag_post",
-                description="Create a LinkedIn post with properly formatted hashtags.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["text", "hashtags"],
-                    "properties": {
-                        "text": {
-                            "type": "string",
-                            "description": "The text content of the post."
-                        },
                         "hashtags": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "List of hashtags to add to the post (# will be added automatically)."
-                        },
-                        "title": {
-                            "type": "string",
-                            "description": "Optional title for article-style posts."
+                            "description": "Optional list of hashtags to add to the post (# will be added automatically)."
                         },
                         "visibility": {
                             "type": "string",
@@ -213,6 +189,7 @@ def main(
         if name == "linkedin_create_post":
             text = arguments.get("text")
             title = arguments.get("title")
+            hashtags = arguments.get("hashtags")
             visibility = arguments.get("visibility", "PUBLIC")
             if not text:
                 return [
@@ -222,43 +199,7 @@ def main(
                     )
                 ]
             try:
-                result = await create_post(text, title, visibility)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "linkedin_create_hashtag_post":
-            text = arguments.get("text")
-            hashtags = arguments.get("hashtags", [])
-            title = arguments.get("title")
-            visibility = arguments.get("visibility", "PUBLIC")
-            if not text:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: text parameter is required",
-                    )
-                ]
-            if not hashtags:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: hashtags parameter is required",
-                    )
-                ]
-            try:
-                result = await create_hashtag_post(text, hashtags, title, visibility)
+                result = await create_post(text, title, visibility, hashtags)
                 return [
                     types.TextContent(
                         type="text",
