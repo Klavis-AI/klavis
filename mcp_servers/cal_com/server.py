@@ -610,7 +610,7 @@ def main(
         #Schedule.py------------------------------------------------------------------
         if name == "cal_get_all_schedules":
             try:
-                result = cal_get_all_schedules()
+                result = await cal_get_all_schedules()
                 return [
                     types.TextContent(
                         type="text",
@@ -628,7 +628,7 @@ def main(
 
         elif name == "cal_create_a_schedule":
             try:
-                result = cal_create_a_schedule(
+                result = await cal_create_a_schedule(
                     name=arguments["name"],
                     timeZone=arguments["timeZone"],
                     isDefault=arguments["isDefault"],
@@ -652,7 +652,7 @@ def main(
 
         elif name == "cal_update_a_schedule":
             try:
-                result = cal_update_a_schedule(
+                result = await cal_update_a_schedule(
                     schedule_id=arguments["schedule_id"],
                     name=arguments.get("name"),
                     timeZone=arguments.get("timeZone"),
@@ -677,7 +677,7 @@ def main(
 
         elif name == "cal_get_default_schedule":
             try:
-                result = cal_get_default_schedule()
+                result = await cal_get_default_schedule()
                 return [
                     types.TextContent(
                         type="text",
@@ -695,7 +695,7 @@ def main(
 
         elif name == "cal_get_schedule":
             try:
-                result = cal_get_schedule(
+                result = await cal_get_schedule(
                     schedule_id=arguments["schedule_id"]
                 )
                 return [
@@ -715,7 +715,7 @@ def main(
 
         elif name == "cal_delete_a_schedule":
             try:
-                result = cal_delete_a_schedule(
+                result = await cal_delete_a_schedule(
                     schedule_id=arguments["schedule_id"]
                 )
                 return [
@@ -736,7 +736,7 @@ def main(
         #verified_resources.py-----------------------------------------------------------
         elif name == "cal_request_email_verification_code":
             try:
-                result = cal_request_email_verification_code(
+                result = await cal_request_email_verification_code(
                     email=arguments["email"]
                 )
                 return [
@@ -756,7 +756,7 @@ def main(
 
         elif name == "cal_verify_email_code":
             try:
-                result = cal_verify_email_code(
+                result = await cal_verify_email_code(
                     email=arguments["email"],
                     code=arguments["code"]
                 )
@@ -777,7 +777,7 @@ def main(
 
         elif name == "cal_get_verified_emails":
             try:
-                result = cal_get_verified_emails()
+                result = await cal_get_verified_emails()
                 return [
                     types.TextContent(
                         type="text",
@@ -795,7 +795,7 @@ def main(
 
         elif name == "cal_get_verified_email_by_id":
             try:
-                result = cal_get_verified_email_by_id(
+                result = await cal_get_verified_email_by_id(
                     email_id=arguments["email_id"]
                 )
                 return [
@@ -815,7 +815,7 @@ def main(
 
         elif name == "cal_get_verified_phones":
             try:
-                result = cal_get_verified_phones(
+                result = await cal_get_verified_phones(
                     take=arguments.get("take"),
                     skip=arguments.get("skip")
                 )
@@ -836,7 +836,7 @@ def main(
 
         elif name == "cal_get_verified_phone_by_id":
             try:
-                result = cal_get_verified_phone_by_id(
+                result = await cal_get_verified_phone_by_id(
                     phone_id=arguments["phone_id"]
                 )
                 return [
@@ -857,7 +857,7 @@ def main(
         #webhooks.py-----------------------------------------------------------------------
         elif name == "cal_get_all_webhooks":
             try:
-                result = cal_get_all_webhooks(
+                result = await cal_get_all_webhooks(
                     take=arguments.get("take"),
                     skip=arguments.get("skip")
                 )
@@ -878,7 +878,7 @@ def main(
 
         elif name == "cal_create_webhook":
             try:
-                result = cal_create_webhook(
+                result = await cal_create_webhook(
                     active=arguments["active"],
                     subscriberUrl=arguments["subscriberUrl"],
                     triggers=arguments["triggers"],
@@ -902,7 +902,7 @@ def main(
 
         elif name == "cal_get_webhook":
             try:
-                result = cal_get_webhook(
+                result = await cal_get_webhook(
                     webhook_id=arguments["webhook_id"]
                 )
                 return [
@@ -922,7 +922,7 @@ def main(
 
         elif name == "cal_update_webhook":
             try:
-                result = cal_update_webhook(
+                result = await cal_update_webhook(
                     webhook_id=arguments["webhook_id"],
                     active=arguments.get("active"),
                     subscriberUrl=arguments.get("subscriberUrl"),
@@ -947,7 +947,7 @@ def main(
 
         elif name == "cal_delete_webhook":
             try:
-                result = cal_delete_webhook(
+                result = await cal_delete_webhook(
                     webhook_id=arguments["webhook_id"]
                 )
                 return [
@@ -970,7 +970,7 @@ def main(
         '''
         elif name == "cal_get_stripe_connect_url":
             try:
-                result = cal_get_stripe_connect_url()
+                result = await cal_get_stripe_connect_url()
                 return [
                     types.TextContent(
                         type="text",
@@ -987,7 +987,7 @@ def main(
                 ]
         elif name == "cal_save_stripe_credentials":
             try:
-                result = cal_save_stripe_credentials(
+                result = await cal_save_stripe_credentials(
                     state=arguments["state"],
                     code=arguments["code"]
                 )
@@ -1008,7 +1008,7 @@ def main(
 
         elif name == "cal_check_stripe_connection":
             try:
-                result = cal_check_stripe_connection()
+                result = await cal_check_stripe_connection()
                 return [
                     types.TextContent(
                         type="text",
