@@ -1,0 +1,102 @@
+---
+title: "Setting Up Canva OAuth App"
+description: "Complete guide to creating and configuring a Canva OAuth application"
+---
+
+## Prerequisites
+
+- Canva account
+- Multi-Factor Authentication (MFA) enabled on your Canva account
+
+<Tip>
+Make sure your account has a password. Set it up by going to Settings > Login > Password.
+</Tip>
+
+**Without password configured:**
+<img src="/images/knowledge-base/canva_oauth_app/step1_without_password.png" alt="Canva Settings Without Password" />
+
+**With password configured (showing MFA option):**
+<img src="/images/knowledge-base/canva_oauth_app/step1_with_password.png" alt="Canva Settings With Password and MFA" />
+
+## Step 1: Create Canva Developer Account & Integration
+
+1. Visit [https://developer.canva.com/](https://developer.canva.com/) and sign in with your Canva credentials
+2. Navigate to **"Your integrations"** page
+3. Click **"Create an integration"** and fill out the form:
+   - **Integration type**: Choose between "Public" (available to all users after review) or "Private" (team only)
+   - **Integration name**: Choose a descriptive name
+   - Accept Canva's Developer Terms
+
+## Step 2: Configure Integration Settings
+
+1. Under **"Configuration"** → **"Configure your integration"**, set the following:
+   - **Integration name**: Add your application name
+   - **Client ID**: Make note of this value for later use
+   - **Generate secret**: Click to generate and securely save your Client Secret
+
+<img src="/images/knowledge-base/canva_oauth_app/step2_config.png" alt="Integration Configuration Settings" />
+
+## Step 3: Set Required Scopes
+
+<Note>
+Klavis Canva MCP Server uses the following OAuth scopes: `app:read app:write asset:read asset:write brandtemplate:content:read brandtemplate:meta:read comment:read comment:write design:content:read design:content:write design:meta:read design:permission:read design:permission:write folder:read folder:write folder:permission:read folder:permission:write profile:read`
+</Note>
+
+1. Under **"Scopes"** → **"Set the scopes"**, configure the required permissions as shown in the screenshot below:
+
+<img src="/images/knowledge-base/canva_oauth_app/step3_scope.png" alt="OAuth Scopes Configuration" />
+
+## Step 4: Configure Authentication & Redirect URLs
+
+1. Under **"Authentication"** → **"Add Authentication"**, add redirect URL:
+   - `https://api.klavis.ai/oauth/canva/callback`
+
+<img src="/images/knowledge-base/canva_oauth_app/step4_redirect_url.png" alt="Authentication and Redirect URL Configuration" />
+
+## Step 5: Submit for Review (Public Integrations Only)
+
+<Note>
+If you created a "Private" integration, you can skip this step. Private integrations are immediately available to your team.
+</Note>
+
+For public integrations:
+1. Complete all required configuration sections
+2. Click **"Submit for Review"**
+3. Wait for Canva's approval process
+
+<img src="/images/knowledge-base/canva_oauth_app/step5_submit_for_review.png" alt="Submit Integration for Review" />
+
+## Step 6: Integration Review Status
+
+Once submitted, your integration will show "In Review" status. You'll receive email notifications about the review progress, and you will be asked to complete a questionnaire in the Jira ticket from the email.
+
+<img src="/images/knowledge-base/canva_oauth_app/step7_review_email.png" alt="Integration Review Email Questionnaire" />
+
+<Check>
+You have successfully created a Canva OAuth application! You now have your Client ID and Client Secret ready for integration with Klavis AI.
+</Check>
+
+## (Optional) Step 7: White Labeling 
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own Canva OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your Canva **Client ID** and **Client Secret** from Step 2
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/canva/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/canva/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/oauth_white_label).
+</Tip>
+
+## Resources
+- [Canva Connect API Documentation](https://www.canva.dev/docs/connect/)
+- [Canva OAuth 2.0 Authentication Guide](https://www.canva.dev/docs/connect/authentication/)
+- [Canva Setting up Multi-Factor Authentication](https://www.canva.com/help/login-verification/) 
