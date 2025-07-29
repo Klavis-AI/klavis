@@ -317,7 +317,7 @@ def main(
         # File Operations
         if name == "onedrive_rename_item":
             try:
-                result = onedrive_rename_item(
+                result = await onedrive_rename_item(
                     file_id=arguments["file_id"],
                     new_name=arguments["new_name"]
                 )
@@ -338,7 +338,7 @@ def main(
 
         elif name == "onedrive_move_item":
             try:
-                result = onedrive_move_item(
+                result = await onedrive_move_item(
                     item_id=arguments["item_id"],
                     new_parent_id=arguments["new_parent_id"]
                 )
@@ -359,7 +359,7 @@ def main(
 
         elif name == "onedrive_delete_item":
             try:
-                result = onedrive_delete_item(
+                result = await onedrive_delete_item(
                     item_id=arguments["item_id"]
                 )
                 return [
@@ -380,7 +380,7 @@ def main(
         # File Content Operations
         elif name == "onedrive_read_file_content":
             try:
-                result = onedrive_read_file_content(
+                result = await onedrive_read_file_content(
                     file_id=arguments["file_id"]
                 )
                 return [
@@ -400,7 +400,7 @@ def main(
 
         elif name == "onedrive_overwrite_file_by_id":
             try:
-                result = onedrive_overwrite_file_by_id(
+                result = await onedrive_overwrite_file_by_id(
                     file_id=arguments["file_id"],
                     new_content=arguments["new_content"]
                 )
@@ -422,7 +422,7 @@ def main(
         # File Creation
         elif name == "onedrive_create_file":
             try:
-                result = onedrive_create_file(
+                result = await onedrive_create_file(
                     parent_folder_id=arguments["parent_folder_id"],
                     new_file_name=arguments["new_file_name"],
                     data=arguments.get("data"),
@@ -445,7 +445,7 @@ def main(
 
         elif name == "onedrive_create_file_in_root":
             try:
-                result = onedrive_create_file_in_root(
+                result = await onedrive_create_file_in_root(
                     new_file_name=arguments["new_file_name"],
                     data=arguments.get("data"),
                     if_exists=arguments.get("if_exists", "error")
@@ -468,7 +468,7 @@ def main(
         # Folder Operations
         elif name == "onedrive_create_folder":
             try:
-                result = onedrive_create_folder(
+                result = await onedrive_create_folder(
                     parent_folder_id=arguments["parent_folder_id"],
                     new_folder_name=arguments["new_folder_name"],
                     behavior=arguments.get("behavior", "fail")
@@ -490,7 +490,7 @@ def main(
 
         elif name == "onedrive_create_folder_in_root":
             try:
-                result = onedrive_create_folder_in_root(
+                result = await onedrive_create_folder_in_root(
                     folder_name=arguments["folder_name"]
                 )
                 return [
@@ -511,7 +511,7 @@ def main(
         # Listing & Searching
         elif name == "onedrive_list_root_files_folders":
             try:
-                result = onedrive_list_root_files_folders()
+                result = await onedrive_list_root_files_folders()
                 return [
                     types.TextContent(
                         type="text",
@@ -529,7 +529,7 @@ def main(
 
         elif name == "onedrive_list_inside_folder":
             try:
-                result = onedrive_list_inside_folder(
+                result = await onedrive_list_inside_folder(
                     folder_id=arguments["folder_id"]
                 )
                 return [
@@ -549,7 +549,7 @@ def main(
 
         elif name == "onedrive_search_item_by_name":
             try:
-                result = onedrive_search_item_by_name(
+                result = await onedrive_search_item_by_name(
                     itemname=arguments["itemname"]
                 )
                 return [
@@ -569,7 +569,7 @@ def main(
 
         elif name == "onedrive_search_folder_by_name":
             try:
-                result = onedrive_search_folder_by_name(
+                result = await onedrive_search_folder_by_name(
                     folder_name=arguments["folder_name"]
                 )
                 return [
@@ -589,7 +589,7 @@ def main(
 
         elif name == "onedrive_get_item_by_id":
             try:
-                result = onedrive_get_item_by_id(
+                result = await onedrive_get_item_by_id(
                     item_id=arguments["item_id"]
                 )
                 return [
@@ -610,7 +610,7 @@ def main(
         # Sharing & Permissions
         elif name == "onedrive_list_shared_items":
             try:
-                result = onedrive_list_shared_items()
+                result = await onedrive_list_shared_items()
                 return [
                     types.TextContent(
                         type="text",
@@ -628,7 +628,7 @@ def main(
 
         elif name == "onedrive_create_share_link":
             try:
-                result = onedrive_create_share_link(
+                result = await onedrive_create_share_link(
                     item_id=arguments["item_id"],
                     link_type=arguments.get("link_type", "view"),
                     scope=arguments.get("scope", "anonymous")
