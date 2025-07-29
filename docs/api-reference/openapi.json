@@ -4282,7 +4282,7 @@
     "/oauth/linkedin/authorize": {
       "get": {
         "tags": ["linkedin-oauth"],
-        "summary": "Authorize LinkedIn",
+        "summary": "Authorize Linkedin",
         "description": "Start LinkedIn OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeLinkedIn",
         "parameters": [
@@ -4350,9 +4350,9 @@
     "/oauth/linkedin/callback": {
       "get": {
         "tags": ["linkedin-oauth"],
-        "summary": "LinkedIn Callback",
+        "summary": "Linkedin Callback",
         "description": "Handles the callback from LinkedIn OAuth authorization.",
-        "operationId": "linkedInOAuthCallback",
+        "operationId": "linkedinOAuthCallback",
         "parameters": [
           {
             "name": "code",
@@ -4393,10 +4393,156 @@
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error description returned by LinkedIn, if any",
+              "description": "Detailed error description from LinkedIn, if any",
               "title": "Error Description"
             },
-            "description": "Error description returned by LinkedIn, if any"
+            "description": "Detailed error description from LinkedIn, if any"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedInOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/canva/authorize": {
+      "get": {
+        "tags": ["canva-oauth"],
+        "summary": "Authorize Canva",
+        "description": "Start Canva OAuth flow with PKCE\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated, e.g., \"design:meta:read profile:read\")\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeCanva",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/canva/callback": {
+      "get": {
+        "tags": ["canva-oauth"],
+        "summary": "Canva Oauth Callback",
+        "description": "Handle Canva OAuth callback\n\nThis endpoint is called by Canva after the user authorizes the application.\nIt exchanges the authorization code for an access token using PKCE.",
+        "operationId": "canvaOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Authorization code from Canva",
+              "title": "Code"
+            },
+            "description": "Authorization code from Canva"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "State parameter to prevent CSRF",
+              "title": "State"
+            },
+            "description": "State parameter to prevent CSRF"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error code if authorization failed",
+              "title": "Error"
+            },
+            "description": "Error code if authorization failed"
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error description if authorization failed",
+              "title": "Error Description"
+            },
+            "description": "Error description if authorization failed"
           }
         ],
         "responses": {
@@ -4405,7 +4551,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkedInOAuthSuccessResponse"
+                  "$ref": "#/components/schemas/CanvaOAuthSuccessResponse"
                 }
               }
             }
@@ -4414,7 +4560,260 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkedInOAuthErrorResponse"
+                  "$ref": "#/components/schemas/CanvaOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/canva/refresh_token": {
+      "post": {
+        "tags": ["canva-oauth"],
+        "summary": "Refresh Canva Token",
+        "description": "Refresh an expired Canva access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
+        "operationId": "refresh_canva_token_oauth_canva_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting token refresh",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting token refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvaOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CanvaOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/xero/authorize": {
+      "get": {
+        "tags": ["xero-oauth"],
+        "summary": "Authorize Xero",
+        "description": "Start Xero OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeXero",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/xero/callback": {
+      "get": {
+        "tags": ["xero-oauth"],
+        "summary": "Xero Callback",
+        "description": "Handles the callback from Xero OAuth authorization.",
+        "operationId": "xeroOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Authorization code returned by Xero",
+              "title": "Code"
+            },
+            "description": "Authorization code returned by Xero"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "State parameter containing encoded authorization data",
+              "title": "State"
+            },
+            "description": "State parameter containing encoded authorization data"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Error code returned by Xero, if any",
+              "title": "Error"
+            },
+            "description": "Error code returned by Xero, if any"
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Detailed error description from Xero, if any",
+              "title": "Error Description"
+            },
+            "description": "Detailed error description from Xero, if any"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XeroOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/xero/refresh_token": {
+      "post": {
+        "tags": ["xero-oauth"],
+        "summary": "Refresh Xero Token Endpoint",
+        "description": "Refresh an expired Xero access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
+        "operationId": "refresh_xero_token_endpoint_oauth_xero_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting token refresh",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting token refresh"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    { "$ref": "#/components/schemas/XeroOAuthSuccessResponse" },
+                    { "$ref": "#/components/schemas/XeroOAuthErrorResponse" }
+                  ],
+                  "title": "Response Refresh Xero Token Endpoint Oauth Xero Refresh Token Post",
+                  "$ref": "#/components/schemas/XeroOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XeroOAuthErrorResponse"
                 }
               }
             },
@@ -4609,6 +5008,36 @@
         "required": ["content"],
         "title": "CallToolResult",
         "description": "The server's response to a tool call."
+      },
+      "CanvaOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          }
+        },
+        "type": "object",
+        "required": ["error"],
+        "title": "CanvaOAuthErrorResponse"
+      },
+      "CanvaOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          }
+        },
+        "type": "object",
+        "required": ["message"],
+        "title": "CanvaOAuthSuccessResponse"
       },
       "ClickUpOAuthErrorResponse": {
         "properties": {
@@ -5300,24 +5729,6 @@
         "required": ["error"],
         "title": "LinkedInOAuthErrorResponse"
       },
-      "LinkedInOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "LinkedInOAuthSuccessResponse"
-      },
       "ListToolsRequest": {
         "properties": {
           "serverUrl": {
@@ -5470,6 +5881,7 @@
           "Airtable",
           "Asana",
           "Attio",
+          "Canva",
           "ClickUp",
           "Close",
           "Confluence",
@@ -5487,6 +5899,7 @@
           "Salesforce",
           "Slack",
           "Supabase",
+          "Xero",
           "WordPress"
         ],
         "title": "OAuthServerName"
@@ -5699,6 +6112,44 @@
         "type": "object",
         "required": ["message"],
         "title": "WordPressOAuthSuccessResponse"
+      },
+      "XeroOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          }
+        },
+        "type": "object",
+        "required": ["error"],
+        "title": "XeroOAuthErrorResponse"
+      },
+      "XeroOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": ["message"],
+        "title": "XeroOAuthSuccessResponse"
       }
     },
     "securitySchemes": {
