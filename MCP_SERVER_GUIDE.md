@@ -21,6 +21,16 @@ The effectiveness of an MCP server depends entirely on the design of its tools. 
 
 You can build an MCP server in any language that can serve an HTTP endpoint or communicate over standard I/O. The official MCP provides SDKs, including [Python](https://github.com/modelcontextprotocol/python-sdk) and [TypeScript](https://github.com/modelcontextprotocol/typescript-sdk) that make development much easier.
 
+## Important Resources for MCP Development
+
+When starting with MCP development, it's essential to understand the architecture and operational modes of MCP. Here are some key resources:
+
+- **MCP Architecture Overview:** Provides a comprehensive understanding of the MCP client-server architecture, including the roles of MCP hosts, clients, and servers. It explains the data and transport layers, which are crucial for effective communication and context exchange. [Model Context Protocol Architecture](https://modelcontextprotocol.io/docs/learn/architecture).
+
+- **MCP Server Specification:** Details the operational modes of MCP, including local and remote server configurations, and the supported content protocols such as images, text, audio, and binary data. Understanding these specifications is vital for implementing robust MCP servers. [MCP Server Specification](https://modelcontextprotocol.io/specification/2025-06-18/server).
+
+These documents will help you grasp the foundational concepts and ensure your MCP server implementations are aligned with the protocol standards.
+
 ## Example
 
 You can check the [mcp_server](/mcp_servers/) folder for a list of examples. E.g. [attio](/mcp_servers/attio/) is written is Typescript and [airtable](/mcp_servers/airtable/) is written in Python.
@@ -50,3 +60,13 @@ For every tool you add, you must perform an end-to-end test and document the res
     *   The final, correct result being displayed to the user.
 
 This recording is mandatory. It provides clear, undeniable proof of functionality for reviewers and serves as living documentation for your contribution.
+
+## Guidelines for Function Documentation
+
+For each function you implement, ensure to provide the following details:
+
+- **AI Prompt Words:** Clearly define the prompt words that the AI should use to invoke the function.
+- **Title:** Provide a concise and descriptive title for the function.
+- **Parameter Usage:** Explain how each parameter should be used, including whether they are optional and their default values.
+
+These guidelines will help ensure that your functions are easily understood and correctly utilized by AI clients.
