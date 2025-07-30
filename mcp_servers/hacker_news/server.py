@@ -3,7 +3,6 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict
 
 import click
 import mcp.types as types
