@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from tools import (
 auth_token_context,
-brave_search,
+brave_web_search,
 brave_video_search,
 brave_news_search,
 brave_image_search
@@ -65,230 +65,79 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="brave_search",
+                name="brave_web_search",
                 description="""
-        Perform a Brave search query with many optional filters and personalization headers.
+                Perform a Brave web search.
 
-        This tool queries Brave's Web Search API, which supports advanced parameters like freshness filtering, safesearch, spellcheck, text decorations, custom re-ranking (Goggles), and more.
-
-        It also supports sending user location headers to personalize results.
-
-        Typical use: finding live web results, news, videos, or mixed content based on the query.
-        """,
+                Typical use: get live web results by query, with optional pagination, country, language, and safesearch filters.
+                """,
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": """
-        [Required] The search query to run.  
-        Max 400 characters and 50 words. Supports standard search operators.
-        """
+                            "description": "Required. The search query. Max 400 chars & 50 words."
                         },
                         "count": {
                             "type": "integer",
-                            "description": """
-        Number of web results to return (max 20, default 5).  
-        Controls how many top results to include.
-        """
-                        },
-                        "country": {
-                            "type": "string",
-                            "description": """
-        2-letter country code to localize results (e.g., 'US', 'GB', 'IN').  
-        See Brave supported country codes.
-        """
-                        },
-                        "search_lang": {
-                            "type": "string",
-                            "description": """
-        Language code for search results (e.g., 'en', 'fr').  
-        Affects which language Brave prefers in results.
-        """
-                        },
-                        "ui_lang": {
-                            "type": "string",
-                            "description": """
-        UI language in format like 'en-US', 'fr-FR'.  
-        Changes language for certain UI text in response.
-        """
+                            "description": "Number of results to return (max 20, default 5)."
                         },
                         "offset": {
                             "type": "integer",
-                            "description": """
-        Zero-based offset for pagination (max 9).  
-        Use with count to get next pages (e.g., offset=5, count=5 → get results 6–10).
-        """
+                            "description": "Zero-based offset for pagination."
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "2-letter country code to localize results, e.g., 'US'."
+                        },
+                        "search_lang": {
+                            "type": "string",
+                            "description": "Language code for search results, e.g., 'en'."
                         },
                         "safesearch": {
                             "type": "string",
                             "enum": ["off", "moderate", "strict"],
-                            "description": """
-        Filter adult content.  
-        - 'off': show everything  
-        - 'moderate': hide explicit images/videos  
-        - 'strict': hide most adult content
-        """
-                        },
-                        "spellcheck": {
-                            "type": "string",
-                            "description": """
-        Whether to enable spellcheck on query.  
-        Usually 'true' or 'false'.
-        """
-                        },
-                        "freshness": {
-                            "type": "string",
-                            "description": """
-        Filter by discovery time:  
-        - 'pd': last 24 hours  
-        - 'pw': last 7 days  
-        - 'pm': last 31 days  
-        - 'py': last year  
-        - Or custom range 'YYYY-MM-DDtoYYYY-MM-DD'
-        """
-                        },
-                        "text_decorations": {
-                            "type": "string",
-                            "description": """
-        Whether to include HTML-like highlight markers in snippets.  
-        Usually 'true' or 'false'.
-        """
-                        },
-                        "result_filter": {
-                            "type": "string",
-                            "description": """
-        Comma-separated list of result sections to include.  
-        Options: discussions, faq, infobox, news, query, summarizer, videos, web, locations.
-        """
-                        },
-                        "units": {
-                            "type": "string",
-                            "enum": ["metric", "imperial"],
-                            "description": """
-        Measurement units system (metric or imperial).  
-        Defaults based on country if not set.
-        """
-                        },
-                        "goggles": {
-                            "type": "string",
-                            "description": """
-        ID or URL of a Goggle definition to re-rank results.  
-        Goggles let you change ranking logic.
-        """
-                        },
-                        "extra_snippets": {
-                            "type": "string",
-                            "description": """
-        Whether to return extra alternative text snippets per result.  
-        Usually 'true' or 'false'.
-        """
-                        },
-                        "summary": {
-                            "type": "string",
-                            "description": """
-        Whether to include automatic summaries in web search results.  
-        Usually 'true' or 'false'.
-        """
-                        },
-                        "enable_rich_callback": {
-                            "type": "string",
-                            "description": """
-        Undocumented advanced parameter. Rarely used.
-        """
-                        },
-                        "x_loc_lat": {
-                            "type": "number",
-                            "description": "User latitude (e.g., 37.7749). Helps personalize results."
-                        },
-                        "x_loc_long": {
-                            "type": "number",
-                            "description": "User longitude (e.g., -122.4194). Helps personalize results."
-                        },
-                        "x_loc_timezone": {
-                            "type": "string",
-                            "description": "Timezone string like 'America/Los_Angeles'."
-                        },
-                        "x_loc_city": {
-                            "type": "string",
-                            "description": "City name (e.g., 'San Francisco')."
-                        },
-                        "x_loc_state": {
-                            "type": "string",
-                            "description": "State code (e.g., 'CA')."
-                        },
-                        "x_loc_state_name": {
-                            "type": "string",
-                            "description": "State full name (e.g., 'California')."
-                        },
-                        "x_loc_country": {
-                            "type": "string",
-                            "description": "Country code (e.g., 'US')."
-                        },
-                        "x_loc_postal_code": {
-                            "type": "string",
-                            "description": "Postal code (e.g., '94103')."
+                            "description": "Filter adult content."
                         }
                     },
                     "required": ["query"]
                 }
             ),
+
             types.Tool(
                 name="brave_image_search",
                 description="""
-        Perform an image search using Brave's Image Search API.
+                Perform a Brave image search by query.
 
-        Supports filters like safesearch, language, spellcheck, and country-based localization.
-        Returns a list of images matching the query, optionally spellchecked.
-        Useful when you want to get fresh images from the web.
-        """,
+                Supports safesearch filtering, language and country localization, and pagination.
+                """,
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": """
-        [Required] The search term to find images for.  
-        Max 400 characters and 50 words. Cannot be empty.
-        """
+                            "description": "[Required] Search term for images. Max 400 chars & 50 words."
                         },
                         "count": {
                             "type": "integer",
-                            "description": """
-        Number of images to return (default: 5, max: 200).  
-        Controls how many top images to include.
-        """
+                            "description": "Number of image results to return (default: 5, max: 200)."
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Zero-based offset for pagination."
                         },
                         "search_lang": {
                             "type": "string",
-                            "description": """
-        Language code (like 'en', 'fr') to prefer in results.  
-        Helps surface content in a preferred language.
-        """
+                            "description": "Language code for image results, e.g., 'en'."
                         },
                         "country": {
                             "type": "string",
-                            "description": """
-        2-letter country code to localize results (e.g., 'US', 'GB', 'IN').  
-        See Brave supported country codes.
-        """
+                            "description": "2-letter country code to localize results, e.g., 'US'."
                         },
                         "safesearch": {
                             "type": "string",
                             "enum": ["off", "strict"],
-                            "description": """
-        Filter adult content in images:  
-        - 'off': no filtering  
-        - 'strict': remove adult content (default behavior)
-        """
-                        },
-                        "spellcheck": {
-                            "type": "string",
-                            "description": """
-        Whether to auto-correct misspellings in the query.  
-        Usually 'true' or 'false'.  
-        If enabled and the query is changed, the new query appears in the 'altered' field of the response.
-        """
+                            "description": "Adult content filter: 'off' or 'strict'."
                         }
                     },
                     "required": ["query"]
@@ -297,94 +146,41 @@ def main(
             types.Tool(
                 name="brave_news_search",
                 description="""
-        Perform a news search using Brave's News Search API.
+                Perform a Brave news search by query.
 
-        Returns fresh, localized news results with support for safesearch, language filters,
-        pagination, freshness filters, spellcheck, and Goggles for custom re-ranking.
-        """,
+                Supports safesearch filtering, language and country localization, pagination, and freshness filter to get recent news.
+                """,
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": """
-        [Required] Search term to find news articles for.
-        Cannot be empty; max 400 characters and 50 words.
-        """
+                            "description": "[Required] Search term for news articles. Max 400 chars & 50 words."
                         },
                         "count": {
                             "type": "integer",
-                            "description": """
-        Number of news results to return (default: 5, max: 50).
-        Use with offset for pagination.
-        """
+                            "description": "Number of news results to return (default: 5, max: 50)."
                         },
-                        "search_lang": {
-                            "type": "string",
-                            "description": """
-        Language code (e.g., 'en', 'fr') to prefer in news content.
-        """
-                        },
-                        "ui_lang": {
-                            "type": "string",
-                            "description": """
-        User interface language in <language>-<country> format (e.g., 'en-US').
-        Controls UI text and subtle ranking changes.
-        """
+                        "offset": {
+                            "type": "integer",
+                            "description": "Zero-based offset for pagination."
                         },
                         "country": {
                             "type": "string",
-                            "description": """
-        2-letter country code (e.g., 'US', 'GB', 'IN') to localize results.
-        """
+                            "description": "2-letter country code to localize results, e.g., 'US'."
+                        },
+                        "search_lang": {
+                            "type": "string",
+                            "description": "Language code for news results, e.g., 'en'."
                         },
                         "safesearch": {
                             "type": "string",
                             "enum": ["off", "moderate", "strict"],
-                            "description": """
-        Filter adult or suggestive content in news:
-        - 'off': no filtering
-        - 'moderate': filter explicit content (default)
-        - 'strict': filter explicit + suggestive content
-        """
-                        },
-                        "offset": {
-                            "type": "integer",
-                            "description": """
-        Zero-based offset for pagination (max 9). Use with count to get next pages.
-        Example: count=20 & offset=1 fetches the second page of 20 results.
-        """
-                        },
-                        "spellcheck": {
-                            "type": "string",
-                            "description": """
-        Whether to auto-correct spelling in the query (usually 'true' or 'false').
-        If changed, corrected query appears in 'altered' field of response.
-        """
+                            "description": "Adult content filter: 'off', 'moderate', or 'strict'."
                         },
                         "freshness": {
                             "type": "string",
-                            "description": """
-        Limit results to recent news:
-        - 'pd': Last 24 hours
-        - 'pw': Last 7 days
-        - 'pm': Last 31 days
-        - 'py': Last year
-        - Or custom: 'YYYY-MM-DDtoYYYY-MM-DD'
-        """
-                        },
-                        "extra_snippets": {
-                            "type": "string",
-                            "description": """
-        Include up to 5 extra alternative excerpts (requires specific API plans).
-        """
-                        },
-                        "goggles": {
-                            "type": "string",
-                            "description": """
-        Goggles ID, URL, or definition to custom re-rank news results.
-        Can be repeated for multiple Goggles.
-        """
+                            "description": "Filter by recency: 'pd' (24h), 'pw' (7d), 'pm' (31d), 'py' (year), or custom 'YYYY-MM-DDtoYYYY-MM-DD'."
                         }
                     },
                     "required": ["query"]
@@ -393,81 +189,40 @@ def main(
             types.Tool(
                 name="brave_video_search",
                 description="""
-        Perform a Brave video search and get video results matching a query.
-
-        Supports safesearch filtering, language and country localization, pagination,
-        spellcheck, and freshness filters to narrow results to recent videos.
-        """,
+                Perform a Brave video search by query.
+                Supports safesearch filtering, language and country localization, pagination, and freshness filter to get recent videos.
+                """,
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": """
-        [Required] Search term for videos. Cannot be empty.
-        Max 400 characters and 50 words.
-        """
+                            "description": "[Required] Search term for videos. Max 400 chars & 50 words."
                         },
                         "count": {
                             "type": "integer",
-                            "description": """
-        Number of video results to return (default: 5, max: 50).
-        Use with offset for pagination.
-        """
+                            "description": "Number of video results to return (default: 5, max: 50)."
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Zero-based offset for pagination."
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "2-letter country code to localize results, e.g., 'US'."
+                        },
+                        "search_lang": {
+                            "type": "string",
+                            "description": "Language code for video results, e.g., 'en'."
                         },
                         "safesearch": {
                             "type": "string",
                             "enum": ["off", "moderate", "strict"],
-                            "description": """
-        Adult content filter:
-        - 'off': No filtering (default)
-        - 'moderate': Filter explicit content
-        - 'strict': Filter explicit and suggestive content
-        """
-                        },
-                        "search_lang": {
-                            "type": "string",
-                            "description": """
-        Language code (e.g., 'en', 'fr') to prefer in video content.
-        """
-                        },
-                        "ui_lang": {
-                            "type": "string",
-                            "description": """
-        User interface language in format <language>-<country> (e.g., 'en-US').
-        Affects UI text and subtle ranking changes.
-        """
-                        },
-                        "country": {
-                            "type": "string",
-                            "description": """
-        2-letter country code (e.g., 'US', 'GB', 'IN') to localize results.
-        """
-                        },
-                        "offset": {
-                            "type": "integer",
-                            "description": """
-        Zero-based offset for pagination (max 9). Use with count to fetch next pages.
-        Example: count=20 & offset=1 fetches second page of 20 results.
-        """
-                        },
-                        "spellcheck": {
-                            "type": "string",
-                            "description": """
-        Whether to enable spellcheck on the query ('true' or 'false').
-        If enabled and the query is corrected, the corrected query appears in the 'altered' field.
-        """
+                            "description": "Adult content filter: 'off', 'moderate', or 'strict'."
                         },
                         "freshness": {
                             "type": "string",
-                            "description": """
-        Filter by video discovery date:
-        - 'pd': Last 24 hours
-        - 'pw': Last 7 days
-        - 'pm': Last 31 days
-        - 'py': Last 365 days
-        - Or custom: 'YYYY-MM-DDtoYYYY-MM-DD'
-        """
+                            "description": "Filter by discovery date: 'pd' (24h), 'pw' (7d), 'pm' (31d), 'py' (year), or custom 'YYYY-MM-DDtoYYYY-MM-DD'."
                         }
                     },
                     "required": ["query"]
@@ -481,33 +236,15 @@ def main(
             name: str,
             arguments: dict
     ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        if name == "brave_search":
+        if name == "brave_web_search":
             try:
-                result = await brave_search(
+                result = brave_web_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
+                    offset=arguments.get("offset"),
                     country=arguments.get("country"),
                     search_lang=arguments.get("search_lang"),
-                    ui_lang=arguments.get("ui_lang"),
-                    offset=arguments.get("offset"),
-                    safesearch=arguments.get("safesearch"),
-                    spellcheck=arguments.get("spellcheck"),
-                    freshness=arguments.get("freshness"),
-                    text_decorations=arguments.get("text_decorations"),
-                    result_filter=arguments.get("result_filter"),
-                    units=arguments.get("units"),
-                    goggles=arguments.get("goggles"),
-                    extra_snippets=arguments.get("extra_snippets"),
-                    summary=arguments.get("summary"),
-                    enable_rich_callback=arguments.get("enable_rich_callback"),
-                    x_loc_lat=arguments.get("x_loc_lat"),
-                    x_loc_long=arguments.get("x_loc_long"),
-                    x_loc_timezone=arguments.get("x_loc_timezone"),
-                    x_loc_city=arguments.get("x_loc_city"),
-                    x_loc_state=arguments.get("x_loc_state"),
-                    x_loc_state_name=arguments.get("x_loc_state_name"),
-                    x_loc_country=arguments.get("x_loc_country"),
-                    x_loc_postal_code=arguments.get("x_loc_postal_code")
+                    safesearch=arguments.get("safesearch")
                 )
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
@@ -516,13 +253,13 @@ def main(
 
         elif name == "brave_image_search":
             try:
-                result = await brave_image_search(
+                result = brave_image_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
+                    offset=arguments.get("offset"),
                     search_lang=arguments.get("search_lang"),
                     country=arguments.get("country"),
-                    safesearch=arguments.get("safesearch"),
-                    spellcheck=arguments.get("spellcheck")
+                    safesearch=arguments.get("safesearch")
                 )
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
@@ -531,19 +268,16 @@ def main(
 
         elif name == "brave_news_search":
             try:
-                result = await brave_news_search(
+                result = brave_news_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
-                    search_lang=arguments.get("search_lang"),
-                    ui_lang=arguments.get("ui_lang"),
-                    country=arguments.get("country"),
-                    safesearch=arguments.get("safesearch"),
                     offset=arguments.get("offset"),
-                    spellcheck=arguments.get("spellcheck"),
-                    freshness=arguments.get("freshness"),
-                    extra_snippets=arguments.get("extra_snippets"),
-                    goggles=arguments.get("goggles")
+                    country=arguments.get("country"),
+                    search_lang=arguments.get("search_lang"),
+                    safesearch=arguments.get("safesearch"),
+                    freshness=arguments.get("freshness")
                 )
+
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error in brave_news_search: {e}")
@@ -551,17 +285,16 @@ def main(
 
         elif name == "brave_video_search":
             try:
-                result = await brave_video_search(
+                result = brave_video_search(
                     query=arguments["query"],
                     count=arguments.get("count"),
-                    safesearch=arguments.get("safesearch"),
-                    search_lang=arguments.get("search_lang"),
-                    ui_lang=arguments.get("ui_lang"),
-                    country=arguments.get("country"),
                     offset=arguments.get("offset"),
-                    spellcheck=arguments.get("spellcheck"),
+                    country=arguments.get("country"),
+                    search_lang=arguments.get("search_lang"),
+                    safesearch=arguments.get("safesearch"),
                     freshness=arguments.get("freshness")
                 )
+
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error in brave_video_search: {e}")
