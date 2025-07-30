@@ -25,11 +25,12 @@
         "icon": "server",
         "groups": [
           {
-            "group": "Documentation",
+            "group": "Get Started",
             "pages": [
               "documentation/introduction",
-              "develop-with-ai",
-              "documentation/oauth_white_label"
+              "documentation/develop-with-ai",
+              "documentation/klavis-security",
+              "documentation/klavis-oauth-white-label"
             ]
           },
           {

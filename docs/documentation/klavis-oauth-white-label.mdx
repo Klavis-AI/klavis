@@ -11,26 +11,26 @@ description: 'White-label allows you to integrate our OAuth flows with your own 
 
 OAuth (Open Authorization) is an open standard protocol that allows third-party applications to access resources on behalf of users without exposing their credentials. Klavis AI implements OAuth 2.0 to securely connect with services like GitHub, Slack, Gmail, Notion, and more.
 
-## What is White Labeling?
+## What is White-label?
 
-White labeling allows you to customize the authentication experience with your own branding. When enabled, users will see your application name, logo, and other brand elements during the OAuth flow instead of Klavis AI's.
+White-label allows you to customize the authentication experience with your own branding. When enabled, users will see your application name, logo, and other brand elements during the OAuth flow instead of Klavis AI's.
 
-## OAuth Flow ( w/ white labeling)
+## OAuth Flow (w/ white-label)
 
-![OAuth with white labeling](/images/white-labeling.png)
+![OAuth with white-label](/images/white-labeling.png)
 
 
 ## Implementation
 
-### Setting Up White Labeling
+### Setting Up White-label
 
-To set up white labeling for your OAuth integrations:
+To set up white-label for your OAuth integrations:
 
 <Steps>
   <Step title="Register Your Application">
     Register your application with the third-party service (GitHub, Slack, etc.) to obtain your client ID and client secret.
   </Step>
-  <Step title="Configure White Labeling in Klavis AI">
+      <Step title="Configure White-label in Klavis AI">
     Go to the Klavis AI white label configuration page:
     
     [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
@@ -49,7 +49,7 @@ To set up white labeling for your OAuth integrations:
     <CodeGroup>
     
     ```javascript without SDK
-    // Example: Initiating GitHub OAuth with white labeling
+    // Example: Initiating GitHub OAuth with white-label
     const authUrl = `https://api.klavis.ai/oauth/github/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
     window.location.href = authUrl;
     ```
@@ -61,7 +61,7 @@ To set up white labeling for your OAuth integrations:
       apiKey: "YOUR_API_KEY"
     });
     
-    // Example: Initiating GitHub OAuth with white labeling
+    // Example: Initiating GitHub OAuth with white-label
     const oauthUrl = await klavis.mcpServer.getOAuthUrl({
       serverName: Klavis.McpServerName.Github,
       instanceId: instanceId,
@@ -79,7 +79,7 @@ To set up white labeling for your OAuth integrations:
     
     klavis = Klavis(api_key="YOUR_API_KEY")
     
-    # Example: Initiating GitHub OAuth with white labeling
+    # Example: Initiating GitHub OAuth with white-label
     oauth_url = klavis.mcp_server.get_oauth_url(
         server_name="github",
         instance_id=instance_id,
@@ -124,4 +124,4 @@ async def redirect_to_jira_callback(request: Request):
 
 </Steps>
 
-For technical assistance with OAuth implementation or white labeling, please join our Discord community.
+For technical assistance with OAuth implementation or white-label, please join our Discord community.

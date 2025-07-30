@@ -1,0 +1,35 @@
+---
+title: "Klavis Security"
+description: "Comprehensive security layer for MCP integrations protecting against prompt injection, tool poisoning, and other emerging threats."
+---
+
+![Klavis Security](/images/klavis-security/klavis_security.png)
+
+## Overview
+
+Klavis Guardrails is a comprehensive security layer designed to protect MCP (Model Context Protocol) integrations from emerging threats. It operates as an intelligent proxy between MCP clients and servers, providing real-time threat detection and policy enforcement.
+
+## The Security Challenge
+
+MCP's architecture amplifies security risks by exposing tools, resources, and prompts directly to AI agents. Recent vulnerabilities demonstrate critical flaws:
+
+- **Prompt Injection via Tool Descriptions**: Malicious instructions embedded in MCP tool metadata
+- **Cross-Repository Information Leakage**: Agents coerced into accessing private repositories  
+- **Command Injection and RCE**: Basic security flaws allowing arbitrary code execution
+- **Credential Theft**: MCP servers storing OAuth tokens become high-value targets
+
+![MCP Vulnerabilities](/images/klavis-security/MCP_vulnerabilities.png)
+
+## Security Architecture
+
+![Klavis Security Architecture](/images/klavis-security/klavis_security_architecture.png)
+
+Klavis Guardrails operates as a security proxy that intercepts, analyzes, and enforces policies on all MCP communication in real-time with four key protection mechanisms:
+
+**Tool Poisoning Detection**: Monitors MCP tool metadata using behavioral analysis to identify when tools deviate from declared functionality.
+
+**Prompt Injection Prevention**: Uses advanced NLP to analyze prompts for malicious instructions, detecting sophisticated attacks before they reach the model.
+
+**Privilege Escalation Monitoring**: Enforces granular access controls ensuring MCP servers operate under least privilege principles.
+
+**Command Injection Mitigation**: Performs deep inspection of tool invocations with strict allowlists and input sanitization.
