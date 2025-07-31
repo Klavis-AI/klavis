@@ -1,4 +1,4 @@
-from .base import xero_token_context
+from .base import auth_token_context
 from .organisation import xero_list_organisation_details
 from .contacts import xero_list_contacts, xero_create_contact, xero_update_contact
 from .invoices import xero_list_invoices, xero_create_invoice, xero_update_invoice
@@ -9,7 +9,7 @@ from .get_payroll_timesheet import xero_get_payroll_timesheet
 
 __all__ = [
     # Base
-    "xero_token_context",
+    "auth_token_context",
     
     # Organisation
     "xero_list_organisation_details",
