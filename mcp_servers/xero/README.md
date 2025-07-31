@@ -39,7 +39,7 @@ You'll need one of the following:
 
 ### Xero App Setup
 
-1. **Create a Xero App**:
+1. **Create a [Xero App](https://docs.klavis.ai/knowledge-base/oauth/xero)**:
    - Visit the [Xero Developer Portal](https://developer.xero.com/)
    - Create a new application and add it to your developer account
    - Under the "Configuration" section, configure the following scopes:
