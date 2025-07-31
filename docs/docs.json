@@ -263,8 +263,8 @@
             "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
           },
           {
-            "group": "OAuth",
-            "pages": ["knowledge-base/oauth/linkedin", "knowledge-base/oauth/canva", "knowledge-base/oauth/xero"]
+            "group": "OAuth Apps",
+            "pages": ["knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox"]
           }
         ]
       }
