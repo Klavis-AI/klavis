@@ -4,6 +4,7 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
+from contextvars import ContextVar
 
 import click
 import mcp.types as types
@@ -17,7 +18,7 @@ from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
 from tools import (
-    xero_token_context,
+    auth_token_context,
     xero_list_organisation_details,
     xero_list_contacts,
     xero_list_invoices,
@@ -32,13 +33,11 @@ from tools import (
     xero_update_invoice,
 )
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("xero-mcp-server")
-
-XERO_ACCESS_TOKEN = os.getenv("XERO_ACCESS_TOKEN") or ""  # for local use
 XERO_MCP_SERVER_PORT = int(os.getenv("XERO_MCP_SERVER_PORT", "5000"))
 
 @click.command()
@@ -125,8 +124,8 @@ def main(
                     "properties": {
                         "account_type": {
                             "type": "string",
-                            "description": "Filter by account type",
-                            "enum": ["BANK", "CURRENT", "CURRENTLIABILITY", "DEPRECIATN", "DIRECTCOSTS", "EQUITY", "EXPENSE", "FIXED", "INVENTORY", "LIABILITY", "NONCURRENT", "OTHERINCOME", "OVERHEADS", "PREPAYMENT", "REVENUE", "SALES", "TERMLIABILITY", "PAYGLIABILITY"]
+                            "description": "Filter by account type. The 5 fundamental accounting categories: REVENUE (income/sales), EXPENSE (costs/spending), EQUITY (owner's equity), LIABILITY (debts/obligations), CURRENT (assets/resources)",
+                            "enum": ["REVENUE", "EXPENSE", "EQUITY", "LIABILITY", "CURRENT"]
                         },
                         "status": {
                             "type": "string",
@@ -162,14 +161,6 @@ def main(
                             "type": "string",
                             "description": "Contact name (required)"
                         },
-                        "first_name": {
-                            "type": "string",
-                            "description": "First name for individuals"
-                        },
-                        "last_name": {
-                            "type": "string",
-                            "description": "Last name for individuals"
-                        },
                         "email_address": {
                             "type": "string",
                             "description": "Contact email address"
@@ -182,27 +173,6 @@ def main(
                             "type": "boolean",
                             "description": "Whether contact is a supplier (default: false)",
                             "default": False
-                        },
-                        "is_customer": {
-                            "type": "boolean",
-                            "description": "Whether contact is a customer (default: true)",
-                            "default": True
-                        },
-                        "address_line1": {
-                            "type": "string",
-                            "description": "Address line 1"
-                        },
-                        "address_city": {
-                            "type": "string",
-                            "description": "Address city"
-                        },
-                        "address_postal_code": {
-                            "type": "string",
-                            "description": "Address postal/zip code"
-                        },
-                        "address_country": {
-                            "type": "string",
-                            "description": "Address country"
                         }
                     },
                     "required": ["name"]
@@ -286,14 +256,6 @@ def main(
                             "type": "string",
                             "description": "Contact name"
                         },
-                        "first_name": {
-                            "type": "string",
-                            "description": "First name for individuals"
-                        },
-                        "last_name": {
-                            "type": "string",
-                            "description": "Last name for individuals"
-                        },
                         "email_address": {
                             "type": "string",
                             "description": "Contact email address"
@@ -301,30 +263,6 @@ def main(
                         "phone_number": {
                             "type": "string",
                             "description": "Contact phone number"
-                        },
-                        "is_supplier": {
-                            "type": "boolean",
-                            "description": "Whether contact is a supplier"
-                        },
-                        "is_customer": {
-                            "type": "boolean",
-                            "description": "Whether contact is a customer"
-                        },
-                        "address_line1": {
-                            "type": "string",
-                            "description": "Address line 1"
-                        },
-                        "address_city": {
-                            "type": "string",
-                            "description": "Address city"
-                        },
-                        "address_postal_code": {
-                            "type": "string",
-                            "description": "Address postal/zip code"
-                        },
-                        "address_country": {
-                            "type": "string",
-                            "description": "Address country"
                         }
                     },
                     "required": ["contact_id"]
@@ -634,18 +572,16 @@ def main(
                 ]
         
         elif name == "xero_create_contact":
+            name = arguments.get("name")
+            if not name:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: name parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                name = arguments.get("name")
-                if not name:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'name' parameter is required for creating a contact",
-                        )
-                    ]
-                
-                # Extract optional parameters
                 result = await xero_create_contact(
                     name=name,
                     first_name=arguments.get("first_name"),
@@ -659,7 +595,6 @@ def main(
                     address_postal_code=arguments.get("address_postal_code"),
                     address_country=arguments.get("address_country")
                 )
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -676,18 +611,16 @@ def main(
                 ]
         
         elif name == "xero_create_quote":
+            contact_id = arguments.get("contact_id")
+            if not contact_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                contact_id = arguments.get("contact_id")
-                if not contact_id:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'contact_id' parameter is required for creating a quote",
-                        )
-                    ]
-                
-                # Extract optional parameters
                 result = await xero_create_quote(
                     contact_id=contact_id,
                     date=arguments.get("date"),
@@ -696,7 +629,6 @@ def main(
                     currency_code=arguments.get("currency_code", "USD"),
                     line_items=arguments.get("line_items")
                 )
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -713,18 +645,16 @@ def main(
                 ]
         
         elif name == "xero_update_contact":
+            contact_id = arguments.get("contact_id")
+            if not contact_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                contact_id = arguments.get("contact_id")
-                if not contact_id:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'contact_id' parameter is required for updating a contact",
-                        )
-                    ]
-                
-                # Extract optional parameters
                 result = await xero_update_contact(
                     contact_id=contact_id,
                     name=arguments.get("name"),
@@ -739,7 +669,6 @@ def main(
                     address_postal_code=arguments.get("address_postal_code"),
                     address_country=arguments.get("address_country")
                 )
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -756,19 +685,17 @@ def main(
                 ]
         
         elif name == "xero_get_payroll_timesheet":
+            timesheet_id = arguments.get("timesheet_id")
+            if not timesheet_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: timesheet_id parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                timesheet_id = arguments.get("timesheet_id")
-                if not timesheet_id:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'timesheet_id' parameter is required for retrieving a timesheet",
-                        )
-                    ]
-                
                 result = await xero_get_payroll_timesheet(timesheet_id=timesheet_id)
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -816,18 +743,16 @@ def main(
                 ]
         
         elif name == "xero_create_invoice":
+            contact_id = arguments.get("contact_id")
+            if not contact_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: contact_id parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                contact_id = arguments.get("contact_id")
-                if not contact_id:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'contact_id' parameter is required for creating an invoice",
-                        )
-                    ]
-                
-                # Extract optional parameters
                 result = await xero_create_invoice(
                     contact_id=contact_id,
                     type=arguments.get("type", "ACCREC"),
@@ -838,7 +763,6 @@ def main(
                     line_items=arguments.get("line_items"),
                     status=arguments.get("status", "DRAFT")
                 )
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -855,18 +779,16 @@ def main(
                 ]
         
         elif name == "xero_update_invoice":
+            invoice_id = arguments.get("invoice_id")
+            if not invoice_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: invoice_id parameter is required",
+                    )
+                ]
+            
             try:
-                # Extract required parameter
-                invoice_id = arguments.get("invoice_id")
-                if not invoice_id:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text="Error: 'invoice_id' parameter is required for updating an invoice",
-                        )
-                    ]
-                
-                # Extract optional parameters
                 result = await xero_update_invoice(
                     invoice_id=invoice_id,
                     contact_id=arguments.get("contact_id"),
@@ -878,7 +800,6 @@ def main(
                     line_items=arguments.get("line_items"),
                     status=arguments.get("status")
                 )
-                
                 return [
                     types.TextContent(
                         type="text",
@@ -908,11 +829,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract Xero access token from headers (fallback to environment)
-        xero_token = request.headers.get('x-xero-token') or XERO_ACCESS_TOKEN
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
         
-        # Set the Xero token in context for this request
-        token = xero_token_context.set(xero_token or "")
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -921,7 +842,7 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            xero_token_context.reset(token)
+            auth_token_context.reset(token)
         
         return Response()
 
@@ -938,20 +859,18 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (fallback to environment)
+        # Extract auth token from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
         auth_token = headers.get(b'x-auth-token')
         if auth_token:
             auth_token = auth_token.decode('utf-8')
-        else:
-            auth_token = XERO_ACCESS_TOKEN
         
-        # Set the Xero token in context for this request
-        token = xero_token_context.set(auth_token or "")
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            xero_token_context.reset(token)
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
