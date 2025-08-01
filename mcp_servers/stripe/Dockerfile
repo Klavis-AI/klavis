@@ -10,18 +10,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements file
+# Copy only the requirements first to leverage Docker cache
 COPY mcp_servers/stripe/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the server code
-COPY mcp_servers/stripe/src /app/src
+COPY mcp_servers/stripe/server.py .
+COPY mcp_servers/stripe/tools/ ./tools/
 
-# Create a sample .env file
-RUN echo "STRIPE_API_KEY=your-stripe-api-key\nSTRIPE_MCP_SERVER_PORT=5002" > .env
+# Create example env file
+COPY mcp_servers/stripe/.env.example .env
 
 # Expose the port the server runs on
-EXPOSE 5002
+EXPOSE 5001
 
 # Command to run the server
-CMD ["python", "src/server.py"]
+CMD ["python", "server.py"]
