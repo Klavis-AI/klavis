@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Klavis AI",
-  "description": "Klavis AI is building Open Source MCP clients and Servers.",
+  "description": "Klavis AI is building Open Source MCP Integrations for AI applications.",
   "colors": {
     "primary": "#000000",
     "light": "#ffffff",
@@ -126,6 +126,7 @@
             "group": "Manage MCP Server",
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
+              "api-reference/mcp-server/create-a-unified-mcp-server-instance",
               "api-reference/mcp-server/get-server-instance",
               "api-reference/mcp-server/delete-a-server-instance"
             ]
@@ -146,7 +147,7 @@
           },
           {
             "group": "User",
-            "pages": ["api-reference/user/get-server-instances"]
+            "pages": ["api-reference/user/get-user-instances"]
           },
           {
             "group": "White Labeling",
@@ -160,7 +161,7 @@
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
               "api-reference/mcp-server/set-auth-token",
-              "api-reference/mcp-server/get-auth-metadata",
+              "api-reference/mcp-server/get-authentication-metadata",
               "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
                 "group": "GitHub OAuth",
@@ -193,25 +194,25 @@
               {
                 "group": "Google Calendar OAuth",
                 "pages": [
-                  "api-reference/google-calendar-oauth/authorize-google-calendar"
+                  "api-reference/gcalendar-oauth/authorize-gcalendar"
                 ]
               },
               {
                 "group": "Google Drive OAuth",
                 "pages": [
-                  "api-reference/google-drive-oauth/authorize-google-drive"
+                  "api-reference/gdrive-oauth/authorize-gdrive"
                 ]
               },
               {
                 "group": "Google Docs OAuth",
                 "pages": [
-                  "api-reference/google-docs-oauth/authorize-google-docs"
+                  "api-reference/gdocs-oauth/authorize-gdocs"
                 ]
               },
               {
                 "group": "Google Sheets OAuth",
                 "pages": [
-                  "api-reference/google-sheets-oauth/authorize-google-sheets"
+                  "api-reference/gsheets-oauth/authorize-gsheets"
                 ]
               },
               {
@@ -245,6 +246,18 @@
               {
                 "group": "Attio OAuth",
                 "pages": ["api-reference/attio-oauth/authorize-attio"]
+              },
+              {
+                "group": "Canva OAuth",
+                "pages": ["api-reference/canva-oauth/authorize-canva"]
+              },
+              {
+                "group": "Xero OAuth",
+                "pages": ["api-reference/xero-oauth/authorize-xero"]
+              },
+              {
+                "group": "Dropbox OAuth",
+                "pages": ["api-reference/dropbox-oauth/authorize-dropbox"]
               }
             ]
           }
