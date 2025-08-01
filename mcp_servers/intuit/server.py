@@ -10,7 +10,7 @@ import os
 import logging
 import contextlib
 from collections.abc import AsyncIterator
-from typing import Any, Dict
+from typing import Any
 
 import click
 from tools.http_client import QuickBooksHTTPClient
@@ -33,6 +33,7 @@ logger = logging.getLogger("intuit-mcp-server")
 
 # Environment configuration
 INTUIT_MCP_SERVER_PORT = int(os.getenv("INTUIT_MCP_SERVER_PORT", "5001"))
+
 
 class IntuitMCPService:
     def __init__(self):
@@ -57,10 +58,12 @@ class IntuitMCPService:
         """Get the QuickBooks HTTP client instance."""
         return self.client
 
+
 intuit_service = IntuitMCPService()
 
 # Initialize the MCP server
 server = Server("intuit-mcp-server")
+
 
 @server.list_tools()
 async def list_tools() -> list[types.Tool]:
@@ -68,6 +71,7 @@ async def list_tools() -> list[types.Tool]:
     tool_list = [*accounts.tools, *invoices.tools, *customers.tools]
     logger.info(f"Available tools: {[tool.name for tool in tool_list]}")
     return tool_list
+
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
@@ -94,7 +98,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         "get_customer": intuit_service.customer_manager.get_customer,
         "list_customers": intuit_service.customer_manager.list_customers,
         "update_customer": intuit_service.customer_manager.update_customer,
-        "delete_customer": intuit_service.customer_manager.delete_customer,
+        "deactivate_customer": intuit_service.customer_manager.deactivate_customer,
+        "activate_customer": intuit_service.customer_manager.activate_customer,
     }
 
     if name not in tool_map:
@@ -105,13 +110,22 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
     try:
         result = await tool_map[name](**arguments)
+        if name in ["create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer"]:
+            if isinstance(result, dict):
+                return [types.TextContent(
+                    type="text",
+                    text="\n".join(f"{k}: {v}" for k, v in result.items())
+                )]
         return [types.TextContent(type="text", text=str(result))]
     except Exception as e:
-        logger.error(f"Error executing tool {name}: {e}")
+        import traceback
+        logger.error(f"Error executing tool {name}: {e.message if hasattr(e, 'message') else str(e)}")
+        logger.error(traceback.format_exc())
         return [types.TextContent(
             type="text",
-            text=f"Error executing tool {name}: {str(e)}"
+            text=f"Error executing tool {name}: {e.message if hasattr(e, 'message') else str(e)}"
         )]
+
 
 @click.command()
 @click.option("--port", default=INTUIT_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -192,8 +206,7 @@ def main(
     import uvicorn
 
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
-    
-    return 0
+
 
 if __name__ == "__main__":
     main()

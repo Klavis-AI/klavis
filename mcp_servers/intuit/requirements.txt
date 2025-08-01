@@ -2,5 +2,4 @@ mcp[cli]>=1.12.0
 fastapi
 uvicorn[standard]
 starlette
-aiohttp
-requests
+httpx
