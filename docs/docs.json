@@ -25,11 +25,12 @@
         "icon": "server",
         "groups": [
           {
-            "group": "Documentation",
+            "group": "Get Started",
             "pages": [
               "documentation/introduction",
-              "develop-with-ai",
-              "documentation/oauth_white_label"
+              "documentation/develop-with-ai",
+              "documentation/klavis-security",
+              "documentation/klavis-oauth-white-label"
             ]
           },
           {
@@ -61,6 +62,7 @@
               "documentation/mcp-server/airtable",
               "documentation/mcp-server/asana",
               "documentation/mcp-server/attio",
+              "documentation/mcp-server/brave_search",
               "documentation/mcp-server/calendly",
               "documentation/mcp-server/clickup",
               "documentation/mcp-server/close",
@@ -261,8 +263,8 @@
             "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
           },
           {
-            "group": "OAuth",
-            "pages": ["knowledge-base/oauth/linkedin", "knowledge-base/oauth/canva", "knowledge-base/oauth/xero"]
+            "group": "OAuth Apps",
+            "pages": ["knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox"]
           }
         ]
       }
