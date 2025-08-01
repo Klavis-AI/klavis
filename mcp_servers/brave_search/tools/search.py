@@ -183,7 +183,7 @@ async def brave_video_search(
     offset: int = None,
     country: str = None,
     search_lang: str = None,
-    safesearch: str = "moderate",
+    safesearch: str = None,
     freshness: str = None
 ) -> dict:
     """
@@ -214,14 +214,14 @@ async def brave_video_search(
     }
 
     params = {"q": query,
-              "count": count,
-              "safesearch": safesearch}
+              "count": count}
 
     param_list = [
         ("search_lang", search_lang),
         ("country", country),
         ("offset", offset),
-        ("freshness", freshness)
+        ("freshness", freshness),
+        ("safesearch", safesearch),
     ]
     for k, v in param_list:
         if v is not None:
