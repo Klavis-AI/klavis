@@ -51,8 +51,9 @@ async def brave_web_search(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers, params=params)
-        logger.info("Received Brave search response")
-        return response.json()
+            response.raise_for_status()  # Good practice to check for HTTP errors
+            logger.info("Received Brave search response")
+            return response.json()
 
     except Exception as e:
         logger.error(f"Brave search failed: {e}")
@@ -111,8 +112,8 @@ async def brave_image_search(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers, params=params)
-        logger.info("Received Brave image search response")
-        return response.json()
+            logger.info("Received Brave image search response")
+            return response.json()
     except Exception as e:
         logger.error(f"Brave image search failed: {e}")
         return {"error": f"Could not complete Brave image search for query: {query}"}
@@ -169,8 +170,8 @@ async def brave_news_search(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers, params=params)
-        logger.info("Received Brave news search response")
-        return response.json()
+            logger.info("Received Brave news search response")
+            return response.json()
     except Exception as e:
         logger.error(f"Brave news search failed: {e}")
         return {"error": f"Could not complete Brave news search for query: {query}"}
@@ -182,7 +183,7 @@ async def brave_video_search(
     offset: int = None,
     country: str = None,
     search_lang: str = None,
-    safesearch: str = "off",
+    safesearch: str = "moderate",
     freshness: str = None
 ) -> dict:
     """
@@ -212,7 +213,9 @@ async def brave_video_search(
         "x-subscription-token": token
     }
 
-    params = {"q": query, "count": count, "safesearch": safesearch}
+    params = {"q": query,
+              "count": count,
+              "safesearch": safesearch}
 
     param_list = [
         ("search_lang", search_lang),
@@ -228,8 +231,8 @@ async def brave_video_search(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers, params=params)
-        logger.info("Received Brave video search response")
-        return response.json()
+            logger.info("Received Brave video search response")
+            return response.json()
     except Exception as e:
         logger.error(f"Brave video search failed: {e}")
         return {"error": f"Could not complete Brave video search for query: {query}"}
