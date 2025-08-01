@@ -1,9 +1,0 @@
-# Ignore environment variables
-.env
-
-# Ignore Python cache files
-__pycache__/
-*.pyc
-
-# Ignore proof videos if any
-*.mp4
