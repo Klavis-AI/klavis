@@ -33,8 +33,8 @@ This project is a Model Context Protocol (MCP) server that provides atomic tools
 
 1. **Clone the repository:**
    ```bash
-   git clone <your_repo_url>
-   cd mcp_google_finance
+   git clone <repo_url>
+   cd klavis/mcp_servers/google-finance
    ```
 
 2. **Install dependencies:**
@@ -44,7 +44,7 @@ This project is a Model Context Protocol (MCP) server that provides atomic tools
    ```
 
 3. **Set your Twelve Data API Key:**  
-   Create a `.env` file in the project root:
+   Create a `.env` file:
    ```
    TWELVE_API_KEY=your_api_key_here
    ```
@@ -63,7 +63,6 @@ This project is a Model Context Protocol (MCP) server that provides atomic tools
    ```
    http://127.0.0.1:8000/docs
    ```
-   This lets you test the endpoints directly.
 
 ---
 
@@ -101,50 +100,23 @@ GET /get_company_info?ticker=AAPL
 
 ## **🏗️ System Architecture**
 
-This MCP server follows a modular architecture:
-
 ```
-mcp_google_finance/
-├── server.py                  # Main FastAPI server
-├── requirements.txt           # Dependencies
-├── tools/                     # Atomic tools
+google-finance/
+├── server.py
+├── requirements.txt
+├── Dockerfile
+├── .env.example
+├── tools/
+│   ├── __init__.py
 │   ├── get_stock_price.py
 │   ├── get_historical_data.py
 │   ├── get_market_news.py
 │   └── get_company_info.py
-├── proof/                     # Proof of Correctness screenshots
-└── tests/
-    └── test_tools.py
+├── README.md
 ```
 
 Each tool is independent and focused on a single function.  
 `server.py` orchestrates these tools and exposes them via FastAPI.
-
----
-
-## **🧪 Testing**
-
-Run tests:
-```bash
-pytest
-```
-
----
-
-## **🖼️ Proof of Correctness**
-
-All required screenshots have already been captured and are included in the `proof/` folder of this project.  
-
-The `proof/` folder contains:
-- `server_running.png` – Server running successfully  
-- `get_stock_price.png` – Screenshot of `/get_stock_price` endpoint  
-- `get_historical_data.png` – Screenshot of `/get_historical_data` endpoint  
-- `get_company_info.png` – Screenshot of `/get_company_info` endpoint  
-- `get_market_news.png` – Screenshot of `/get_market_news` endpoint  
-
-These demonstrate:
-- Each request and its response  
-- Server logs confirming the correct tool was triggered  
 
 ---
 
