@@ -1,12 +1,33 @@
-import requests
+import httpx
 import logging
+import json
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 base_url = 'https://hacker-news.firebaseio.com/v0'
+async def hackerNews_item(item_id: int) -> dict:
+    """Fetch a Hacker News item by its numeric item_id.
 
+    Args:
+        item_id (int): Required. The item's unique item_identifier (e.g., `8863`).
+    """
+    url = f"{base_url}/item/{item_id}.json"
+    logger.info(f"Requesting item {item_id} from {url}")
+    try:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item {item_id}")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
+        logger.error(f"Could not get item {item_id}: {e}")
+        return {"error": f"An error occurred while requesting {e.request.url!r}."}
+    except Exception as e:
+        logger.error(f"Unexpected error when fetching item {item_id}: {e}")
+        return json.dumps({"error": str(e)})
 
 async def hackerNews_topstories_ids() -> list:
     """
@@ -19,11 +40,13 @@ async def hackerNews_topstories_ids() -> list:
     url = f"{base_url}/topstories.json"
     logger.info(f"Requesting topstories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched topstories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get topstories: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -42,11 +65,13 @@ async def hackerNews_newstories_ids() -> list:
     url = f"{base_url}/newstories.json"
     logger.info(f"Requesting newstories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched newstories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get newstories: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -65,11 +90,13 @@ async def hackerNews_askstories_ids() -> list:
     url = f"{base_url}/askstories.json"
     logger.info(f"Requesting askstories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched askstories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get askstories: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -88,11 +115,13 @@ async def hackerNews_showstories_ids() -> list:
     url = f"{base_url}/showstories.json"
     logger.info(f"Requesting showstories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched showstories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get showstories: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -111,11 +140,13 @@ async def hackerNews_jobstories_ids() -> list:
     url = f"{base_url}/jobstories.json"
     logger.info(f"Requesting jobstories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched jobstories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get jobstories: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -134,11 +165,13 @@ async def hackerNews_updates_ids() -> dict:
     url = f"{base_url}/updates.json"
     logger.info(f"Requesting updates from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched updates")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get updates: {e}")
         return {"error": str(e)}
     except Exception as e:
@@ -157,11 +190,13 @@ async def hackerNews_beststories_ids() -> list:
     url = f"{base_url}/beststories.json"
     logger.info(f"Requesting beststories from {url}")
     try:
-        result = requests.get(url)
-        result.raise_for_status()
-        logger.info("Successfully fetched beststories IDs")
-        return result.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async client to make a non-blocking request
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            logger.info(f"Successfully fetched item")
+            return response.json()  # This returns a dict
+    except httpx.RequestError as e:
         logger.error(f"Could not get beststories: {e}")
         return {"error": str(e)}
     except Exception as e:

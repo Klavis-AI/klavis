@@ -17,14 +17,6 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     hackerNews_item,
     hackerNews_user,
-    hackerNews_maxitem,
-    hackerNews_updates_ids,
-    hackerNews_showstories_ids,
-    hackerNews_beststories_ids,
-    hackerNews_newstories_ids,
-    hackerNews_jobstories_ids,
-    hackerNews_askstories_ids,
-    hackerNews_topstories_ids,
     hackerNews_askstories,
     hackerNews_jobstories,
     hackerNews_showstories,
@@ -99,16 +91,6 @@ def main(
                         }
                     },
                     "required": ["username"]
-                }
-            ),
-
-            # For hackerNews_maxitem
-            types.Tool(
-                name="hackerNews_maxitem",
-                description="Fetch the current largest item ID on Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
                 }
             ),
             # For hackerNews_topstories
@@ -228,75 +210,6 @@ def main(
                     },
                     "required": []
                 }
-            ),
-            # For hackerNews_topstories_ids
-            types.Tool(
-                name="hackerNews_topstories_ids",
-                description="Fetch IDs of current top stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_newstories_ids
-            types.Tool(
-                name="hackerNews_newstories_ids",
-                description="Fetch IDs of newest stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_askstories_ids
-            types.Tool(
-                name="hackerNews_askstories_ids",
-                description="Fetch IDs of current ask stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_showstories_ids
-            types.Tool(
-                name="hackerNews_showstories_ids",
-                description="Fetch IDs of current show stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_jobstories_ids
-            types.Tool(
-                name="hackerNews_jobstories_ids",
-                description="Fetch IDs of current job stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_updates_ids
-            types.Tool(
-                name="hackerNews_updates_ids",
-                description="Fetch recent updates (items and profiles) from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
-            ),
-
-            # For hackerNews_beststories_ids
-            types.Tool(
-                name="hackerNews_beststories_ids",
-                description="Fetch IDs of current best stories from Hacker News.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                }
             )
         ]
 
@@ -353,25 +266,6 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error executing hackerNews_user: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        # Hacker News Max Item
-        elif name == "hackerNews_maxitem":
-            try:
-                result = await hackerNews_maxitem()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_maxitem: {e}")
                 return [
                     types.TextContent(
                         type="text",
@@ -515,138 +409,6 @@ def main(
                     types.TextContent(
                         type="text",
                         text=f"Error: {str(e)}",
-                    )
-                ]
-        # Hacker News Top Stories IDs
-        if name == "hackerNews_topstories_ids":
-            try:
-                result = await hackerNews_topstories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_topstories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News New Stories IDs
-        elif name == "hackerNews_newstories_ids":
-            try:
-                result = await hackerNews_newstories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_newstories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News Ask Stories IDs
-        elif name == "hackerNews_askstories_ids":
-            try:
-                result = await hackerNews_askstories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_askstories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News Show Stories IDs
-        elif name == "hackerNews_showstories_ids":
-            try:
-                result = await hackerNews_showstories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_showstories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News Job Stories IDs
-        elif name == "hackerNews_jobstories_ids":
-            try:
-                result = await hackerNews_jobstories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_jobstories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News Updates IDs
-        elif name == "hackerNews_updates_ids":
-            try:
-                result = await hackerNews_updates_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_updates_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
-                    )
-                ]
-
-        # Hacker News Best Stories IDs
-        elif name == "hackerNews_beststories_ids":
-            try:
-                result = await hackerNews_beststories_ids()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2) if not isinstance(result, str) else result
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing hackerNews_beststories_ids: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e)})
                     )
                 ]
 
