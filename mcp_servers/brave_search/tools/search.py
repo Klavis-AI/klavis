@@ -1,4 +1,4 @@
-import requests
+import httpx
 from .base import get_brave_client
 import logging
 
@@ -49,9 +49,11 @@ async def brave_web_search(
 
     logger.info(f"Sending Brave search request: {query}")
     try:
-        response = requests.get(url, headers=headers, params=params)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
         logger.info("Received Brave search response")
         return response.json()
+
     except Exception as e:
         logger.error(f"Brave search failed: {e}")
         return {"error": f"Could not complete Brave search for query: {query}"}
@@ -98,7 +100,8 @@ async def brave_image_search(
     param_list = [
         ("search_lang", search_lang),
         ("country", country),
-        ("safesearch", safesearch)
+        ("safesearch", safesearch),
+        ("offset", offset)
     ]
     for k, v in param_list:
         if v is not None:
@@ -106,7 +109,8 @@ async def brave_image_search(
 
     logger.info(f"Sending Brave image search request: {query}")
     try:
-        response = requests.get(url, headers=headers, params=params)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
         logger.info("Received Brave image search response")
         return response.json()
     except Exception as e:
@@ -163,7 +167,8 @@ async def brave_news_search(
 
     logger.info(f"Sending Brave news search request: {query}")
     try:
-        response = requests.get(url, headers=headers, params=params)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
         logger.info("Received Brave news search response")
         return response.json()
     except Exception as e:
@@ -221,7 +226,8 @@ async def brave_video_search(
 
     logger.info(f"Sending Brave video search request: {query}")
     try:
-        response = requests.get(url, headers=headers, params=params)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
         logger.info("Received Brave video search response")
         return response.json()
     except Exception as e:
