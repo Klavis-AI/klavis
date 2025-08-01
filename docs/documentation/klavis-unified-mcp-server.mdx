@@ -15,24 +15,26 @@ The Klavis Unified MCP (Model-Context Protocol) Server provides a single, consol
 This simplifies your application's architecture, reduces complexity, and makes it easier to build powerful AI agents that can leverage a wide range of tools from different services.
 
 ```mermaid
-graph TD
-    subgraph Your Application
-        A["<br>AI Agent<br>&nbsp;"]
+graph LR
+    subgraph "Your Application"
+        A["AI <br> Agent"]
     end
-
-    subgraph Klavis Platform
-        U["<br>Unified MCP Server<br>&nbsp;"]
-        subgraph Individual MCP Servers
-            S1["<br>GitHub MCP Server<br>&nbsp;"]
-            S2["<br>Jira MCP Server<br>&nbsp;"]
-            S3["<br>Slack MCP Server<br>&nbsp;"]
+    
+    A -->|"Single <br> Connection"| U
+    
+    subgraph "Klavis AI Platform"
+        U["Unified <br> MCP Server"]
+        
+        subgraph "Individual MCP Servers"
+            S1["GitHub <br> MCP Server"]
+            S2["Jira <br> MCP Server"] 
+            S3["Slack <br> MCP Server"]
         end
+        
+        U -->|"Manages <br> Connections"| S1
+        U -->|"Manages <br> Connections"| S2
+        U -->|"Manages <br> Connections"| S3
     end
-
-    A -->|Single Connection| U
-    U -->|Manages Connections| S1
-    U -->|Manages Connections| S2
-    U -->|Manages Connections| S3
 ```
 
 
@@ -323,8 +325,6 @@ The `serverUrl` is the single endpoint you'll use for your AI application to con
 
 <Step title="3. Use the Unified MCP Server">
 Connect your AI application or MCP client to the `serverUrl` obtained in the previous step. You can now access tools from all connected MCP servers (e.g., GitHub and Jira) through this single connection.
-
-The Unified MCP Server automatically namespaces tools to avoid conflicts. For example, if both GitHub and Jira have a `search_issues` tool, they will be exposed as `github_search_issues` and `jira_search_issues`.
 
 You can discover all available tools by calling the `list_tools` endpoint on the Unified MCP Server. For more details, see the [API reference for listing tools](https://docs.klavis.ai/api-reference/mcp-server/list-tools).
 
