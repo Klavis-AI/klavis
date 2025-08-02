@@ -273,6 +273,10 @@
             "pages": ["knowledge-base/introduction"]
           },
           {
+            "group": "Onboarding",
+            "pages": ["knowledge-base/onboarding/create-your-first-mcp-server", "knowledge-base/onboarding/use-your-first-mcp-server"]
+          },
+          {
             "group": "Developer",
             "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
           },
