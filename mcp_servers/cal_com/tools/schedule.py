@@ -1,4 +1,4 @@
-import requests
+import httpx
 import json
 import logging
 from .base import get_calcom_client
@@ -39,11 +39,14 @@ async def cal_get_all_schedules() -> dict:
     logging.info(f"Requesting Cal.com schedules from {url}")
 
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise exception for HTTP errors
-        logging.info("Successfully retrieved Cal.com schedules")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager to handle the client's lifecycle
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers)
+            # This checks for HTTP error statuses (e.g., 404, 500)
+            response.raise_for_status()
+            logging.info("Successfully retrieved Cal.com schedules")
+            return response.json()
+    except httpx.RequestError as e:
         logging.error(f"Could not get Cal.com schedules from {url}: {e}")
         return {"error": f"Could not get Cal.com schedules from {url}"}
     except Exception as e:
@@ -102,11 +105,16 @@ async def cal_create_a_schedule(
     logging.info(f"Creating Cal.com schedule: {name}")
 
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        logging.info("Successfully created Cal.com schedule")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager for the client
+        async with httpx.AsyncClient() as client:
+            # The 'json' parameter works the same as in requests
+            response = await client.post(url, json=payload, headers=headers)
+            # Check for HTTP errors (e.g., 4xx or 5xx responses)
+            response.raise_for_status()
+            logging.info("Successfully created Cal.com schedule")
+            return response.json()
+
+    except httpx.RequestError as e:
         logging.error(f"Could not create Cal.com schedule: {e}")
         return {"error": f"Could not create Cal.com schedule: {e}"}
     except Exception as e:
@@ -178,14 +186,24 @@ async def cal_update_a_schedule(
     logging.info(f"Updating Cal.com schedule ID: {schedule_id}")
 
     try:
-        response = requests.patch(url_new, json=payload, headers=headers)
-        response.raise_for_status()
-        logging.info("Successfully updated Cal.com schedule")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager for the client
+        async with httpx.AsyncClient() as client:
+            # Make an async PATCH request
+            response = await client.patch(url_new, json=payload, headers=headers)
+
+            # Check for HTTP errors (e.g., 4xx or 5xx responses)
+            response.raise_for_status()
+
+            logging.info("Successfully updated Cal.com schedule")
+            return response.json()
+
+    except httpx.RequestError as e:
+        # Catch httpx-specific request errors
         logging.error(f"Could not update Cal.com schedule: {e}")
         return {"error": f"Could not update Cal.com schedule: {e}"}
+
     except Exception as e:
+        # A general catch-all for any other errors
         logging.error(f"Unexpected error when updating Cal.com schedule: {e}")
         return {"error": "Unexpected error occurred"}
 
@@ -209,14 +227,24 @@ async def cal_get_default_schedule() -> dict:
     logging.info("Fetching default schedule from Cal.com")
 
     try:
-        response = requests.get(url_new, headers=headers)
-        response.raise_for_status()
-        logging.info("Successfully fetched default schedule")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager for the client
+        async with httpx.AsyncClient() as client:
+            # Make an async GET request
+            response = await client.get(url_new, headers=headers)
+
+            # Check for HTTP errors (e.g., 4xx or 5xx responses)
+            response.raise_for_status()
+
+            logging.info("Successfully fetched default schedule")
+            return response.json()
+
+    except httpx.RequestError as e:
+        # Catch httpx-specific request errors
         logging.error(f"Could not get default schedule: {e}")
         return {"error": f"Could not get default schedule: {e}"}
+
     except Exception as e:
+        # A general catch-all for any other errors
         logging.error(f"Unexpected error when getting default schedule: {e}")
         return {"error": "Unexpected error occurred"}
 
@@ -247,14 +275,24 @@ async def cal_get_schedule(schedule_id: int) -> dict:
     logging.info(f"Fetching Cal.com schedule ID: {schedule_id}")
 
     try:
-        response = requests.get(url_new, headers=headers)
-        response.raise_for_status()
-        logging.info("Successfully fetched schedule")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager for the client
+        async with httpx.AsyncClient() as client:
+            # Make an async GET request
+            response = await client.get(url_new, headers=headers)
+
+            # Check for HTTP errors (e.g., 4xx or 5xx responses)
+            response.raise_for_status()
+
+            logging.info("Successfully fetched schedule")
+            return response.json()
+
+    except httpx.RequestError as e:
+        # Catch httpx-specific request errors
         logging.error(f"Could not get schedule: {e}")
         return {"error": f"Could not get schedule: {e}"}
+
     except Exception as e:
+        # A general catch-all for any other errors
         logging.error(f"Unexpected error when getting schedule: {e}")
         return {"error": "Unexpected error occurred"}
 
@@ -285,13 +323,23 @@ async def cal_delete_a_schedule(schedule_id: int) -> dict:
     logging.info(f"Deleting Cal.com schedule ID: {schedule_id}")
 
     try:
-        response = requests.delete(url_new, headers=headers)
-        response.raise_for_status()
-        logging.info("Successfully deleted schedule")
-        return response.json()
-    except requests.exceptions.RequestException as e:
+        # Use an async context manager for the client
+        async with httpx.AsyncClient() as client:
+            # Make an async DELETE request
+            response = await client.delete(url_new, headers=headers)
+
+            # Check for HTTP errors (e.g., 4xx or 5xx responses)
+            response.raise_for_status()
+
+            logging.info("Successfully deleted schedule")
+            return response.json()
+
+    except httpx.RequestError as e:
+        # Catch httpx-specific request errors
         logging.error(f"Could not delete schedule: {e}")
         return {"error": f"Could not delete schedule: {e}"}
+
     except Exception as e:
+        # A general catch-all for any other errors
         logging.error(f"Unexpected error when deleting schedule: {e}")
         return {"error": "Unexpected error occurred"}

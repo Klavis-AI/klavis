@@ -14,6 +14,11 @@ auth_token_context: ContextVar[str] = ContextVar('auth_token')
 def get_auth_token() -> str:
     try:
         token = auth_token_context.get()
+        if not token:
+            # Fallback to environment variable if no token in context
+            token = os.getenv("CAL_COM_API_KEY")
+            if not token:
+                raise RuntimeError("No authentication token available")
         return token
     except LookupError:
         token = os.getenv("CAL_COM_API_KEY")
