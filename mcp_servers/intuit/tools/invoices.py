@@ -3,8 +3,81 @@ from typing import Any, Dict, List
 from mcp.types import Tool
 from .http_client import QuickBooksHTTPClient
 
+# Minimal properties for invoice creation (required by QuickBooks)
+invoice_properties_minimal = {
+    "CustomerRefValue": {
+        "type": "string",
+        "description": "Customer ID for the invoice"
+    },
+    "CustomerRefName": {
+        "type": "string",
+        "description": "Name of the customer associated with the invoice"
+    },
+    "LineItems": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "LineId": {"type": "string", "description": "Unique ID for this line item. Required for updates, ignored for creates"},
+                "Amount": {"type": "number", "description": "Line total amount"},
+                "Description": {"type": "string", "description": "Line item description"},
+                "DetailType": {"type": "string", "description": "Line detail type: SalesItemLineDetail, GroupLine, DescriptionOnlyLine, DiscountLine, SubTotalLine", "default": "SalesItemLineDetail"},
+                "LineNum": {"type": "number", "description": "Position of the line in the collection"},
+
+                # SalesItemLineDetail fields
+                "ItemId": {"type": "string", "description": "Reference to the inventory item"},
+                "ItemName": {"type": "string", "description": "Name of the inventory item"},
+                "Quantity": {"type": "number", "description": "Quantity of the item"},
+                "UnitPrice": {"type": "number", "description": "Unit price of the item"},
+                "DiscountRate": {"type": "number", "description": "Discount rate applied to this line as a percentage"},
+                "DiscountAmount": {"type": "number", "description": "Discount amount applied to this line"},
+                "ServiceDate": {"type": "string", "description": "Date when the service is performed (YYYY-MM-DD format)"},
+
+                # GroupLineDetail fields
+                "GroupItemId": {"type": "string", "description": "Reference to the group item for bundle lines"},
+                "GroupItemName": {"type": "string", "description": "Name of the group item"},
+                "GroupQuantity": {"type": "number", "description": "Quantity of the group item"},
+
+                # DescriptionOnlyLine fields
+                "IsSubtotal": {"type": "boolean", "description": "Set to true for subtotal lines"},
+
+                # DiscountLineDetail fields
+                "DiscountPercent": {"type": "number", "description": "Percentage discount as a number (10 for 10%)"},
+                "DiscountAccountId": {"type": "string", "description": "Income account used to track discounts"},
+                "DiscountAccountName": {"type": "string", "description": "Name of the discount account"},
+                "IsPercentBased": {"type": "boolean", "description": "True if the discount is a percentage"},
+
+                # References for any line type
+                "ClassId": {"type": "string", "description": "Reference to the Class for the line item"},
+                "ClassName": {"type": "string", "description": "Name of the Class"},
+                "TaxCodeId": {"type": "string", "description": "Reference to the TaxCode for this item"},
+                "TaxCodeName": {"type": "string", "description": "Name of the TaxCode"},
+
+                # Nested lines for GroupLine
+                "GroupLines": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "ItemId": {"type": "string"},
+                            "Quantity": {"type": "number"},
+                            "UnitPrice": {"type": "number"},
+                            "DiscountRate": {"type": "number"},
+                            "ClassId": {"type": "string"},
+                            "TaxCodeId": {"type": "string"}
+                        }
+                    },
+                    "description": "Individual item lines that comprise a bundle (for GroupLineDetail)"
+                }
+            },
+            "required": ["Amount"]
+        }
+    },
+}
+
 # Invoice properties mapping (based on QuickBooks API documentation)
 invoice_properties_user_define = {
+    **invoice_properties_minimal,
     "DocNumber": {
         "type": "string",
         "description": "Reference number for the transaction. If not explicitly provided at create time, this field is populated based on the setting of Preferences:CustomTxnNumber"
@@ -20,74 +93,6 @@ invoice_properties_user_define = {
     "DueDate": {
         "type": "string",
         "description": "Date when the payment of the transaction is due. If date is not provided, the number of days specified in SalesTermRef added the transaction date will be used. Format: yyyy/MM/dd"
-    },
-    "CustomerRefValue": {
-        "type": "string",
-        "description": "Customer ID for the invoice"
-    },
-    "CustomerRefName": {
-        "type": "string",
-        "description": "Name of the customer associated with the invoice"
-    },
-    "LineItems": {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "properties": {
-                "line_id": {"type": "string", "description": "Unique ID for this line item. Required for updates, ignored for creates"},
-                "amount": {"type": "number", "description": "Line total amount"},
-                "description": {"type": "string", "description": "Line item description"},
-                "detail_type": {"type": "string", "description": "Line detail type: SalesItemLineDetail, GroupLine, DescriptionOnlyLine, DiscountLine, SubTotalLine", "default": "SalesItemLineDetail"},
-                "line_num": {"type": "number", "description": "Position of the line in the collection"},
-
-                # SalesItemLineDetail fields
-                "item_id": {"type": "string", "description": "Reference to the inventory item"},
-                "item_name": {"type": "string", "description": "Name of the inventory item"},
-                "quantity": {"type": "number", "description": "Quantity of the item"},
-                "unit_price": {"type": "number", "description": "Unit price of the item"},
-                "discount_rate": {"type": "number", "description": "Discount rate applied to this line as a percentage"},
-                "discount_amount": {"type": "number", "description": "Discount amount applied to this line"},
-                "service_date": {"type": "string", "description": "Date when the service is performed (YYYY-MM-DD format)"},
-
-                # GroupLineDetail fields
-                "group_item_id": {"type": "string", "description": "Reference to the group item for bundle lines"},
-                "group_item_name": {"type": "string", "description": "Name of the group item"},
-                "group_quantity": {"type": "number", "description": "Quantity of the group item"},
-
-                # DescriptionOnlyLine fields
-                "is_subtotal": {"type": "boolean", "description": "Set to true for subtotal lines"},
-
-                # DiscountLineDetail fields
-                "discount_percent": {"type": "number", "description": "Percentage discount as a number (10 for 10%)"},
-                "discount_account_id": {"type": "string", "description": "Income account used to track discounts"},
-                "discount_account_name": {"type": "string", "description": "Name of the discount account"},
-                "is_percent_based": {"type": "boolean", "description": "True if the discount is a percentage"},
-
-                # References for any line type
-                "class_id": {"type": "string", "description": "Reference to the Class for the line item"},
-                "class_name": {"type": "string", "description": "Name of the Class"},
-                "tax_code_id": {"type": "string", "description": "Reference to the TaxCode for this item"},
-                "tax_code_name": {"type": "string", "description": "Name of the TaxCode"},
-
-                # Nested lines for GroupLine
-                "group_lines": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "item_id": {"type": "string"},
-                            "quantity": {"type": "number"},
-                            "unit_price": {"type": "number"},
-                            "discount_rate": {"type": "number"},
-                            "class_id": {"type": "string"},
-                            "tax_code_id": {"type": "string"}
-                        }
-                    },
-                    "description": "Individual item lines that comprise a bundle (for GroupLineDetail)"
-                }
-            },
-            "required": ["amount"]
-        }
     },
     "CustomerMemo": {
         "type": "string",
@@ -351,10 +356,11 @@ invoice_properties_full = {
 create_invoice_tool = Tool(
     name="create_invoice",
     title="Create Invoice",
-    description="Create New Invoice - Create a new invoice in QuickBooks with comprehensive property support including line items, addresses, customer details, and payment settings",
+    description="Create New Invoice - Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line (SalesItemLine, GroupLine, or DescriptionOnlyLine).",
     inputSchema={
         "type": "object",
-        "properties": invoice_properties_user_define,
+        "properties": invoice_properties_minimal,
+        "required": ["CustomerRefValue", "LineItems"]
     }
 )
 
@@ -512,10 +518,14 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
     invoice_data = {}
 
     # Basic invoice information - direct copy
-    for field in ['DocNumber', 'TxnDate', 'ShipDate', 'DueDate', 'CustomerMemo',
+    for field in ['DocNumber', 'TxnDate', 'ShipDate', 'DueDate',
                   'PrivateNote', 'PrintStatus', 'EmailStatus', 'TrackingNum']:
         if field in kwargs:
             invoice_data[field] = kwargs[field]
+
+    # CustomerMemo needs to be in object format
+    if 'CustomerMemo' in kwargs:
+        invoice_data['CustomerMemo'] = {'value': kwargs['CustomerMemo']}
 
     # Boolean fields
     for field in ['AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
@@ -538,80 +548,80 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
         lines = []
         for item in kwargs['LineItems']:
             line = {
-                "Amount": item["amount"],
-                "DetailType": item.get("detail_type", "SalesItemLineDetail"),
-                "Description": item.get("description")
+                "Amount": item["Amount"],
+                "DetailType": item.get("DetailType", "SalesItemLineDetail"),
+                "Description": item.get("Description")
             }
 
-            if item.get("line_id"):
-                line["Id"] = item["line_id"]
-            if item.get("line_num"):
-                line["LineNum"] = item["line_num"]
+            if item.get("LineId"):
+                line["Id"] = item["LineId"]
+            if item.get("LineNum"):
+                line["LineNum"] = item["LineNum"]
 
-            detail_type = item.get("detail_type", "SalesItemLineDetail")
+            detail_type = item.get("DetailType", "SalesItemLineDetail")
 
             if detail_type == "SalesItemLineDetail":
                 sales_detail = {}
-                if item.get("item_id"):
-                    sales_detail["ItemRef"] = {"value": item["item_id"]}
-                    if item.get("item_name"):
-                        sales_detail["ItemRef"]["name"] = item["item_name"]
-                if item.get("quantity"):
-                    sales_detail["Qty"] = item["quantity"]
-                if item.get("unit_price"):
-                    sales_detail["UnitPrice"] = item["unit_price"]
-                if item.get("discount_rate"):
-                    sales_detail["DiscountRate"] = item["discount_rate"]
-                if item.get("discount_amount"):
-                    sales_detail["DiscountAmt"] = item["discount_amount"]
-                if item.get("service_date"):
-                    sales_detail["ServiceDate"] = item["service_date"]
-                if item.get("class_id"):
-                    sales_detail["ClassRef"] = {"value": item["class_id"]}
-                    if item.get("class_name"):
-                        sales_detail["ClassRef"]["name"] = item["class_name"]
-                if item.get("tax_code_id"):
-                    sales_detail["TaxCodeRef"] = {"value": item["tax_code_id"]}
-                    if item.get("tax_code_name"):
-                        sales_detail["TaxCodeRef"]["name"] = item["tax_code_name"]
+                if item.get("ItemId"):
+                    sales_detail["ItemRef"] = {"value": item["ItemId"]}
+                    if item.get("ItemName"):
+                        sales_detail["ItemRef"]["name"] = item["ItemName"]
+                if item.get("Quantity"):
+                    sales_detail["Qty"] = item["Quantity"]
+                if item.get("UnitPrice"):
+                    sales_detail["UnitPrice"] = item["UnitPrice"]
+                if item.get("DiscountRate"):
+                    sales_detail["DiscountRate"] = item["DiscountRate"]
+                if item.get("DiscountAmount"):
+                    sales_detail["DiscountAmt"] = item["DiscountAmount"]
+                if item.get("ServiceDate"):
+                    sales_detail["ServiceDate"] = item["ServiceDate"]
+                if item.get("ClassId"):
+                    sales_detail["ClassRef"] = {"value": item["ClassId"]}
+                    if item.get("ClassName"):
+                        sales_detail["ClassRef"]["name"] = item["ClassName"]
+                if item.get("TaxCodeId"):
+                    sales_detail["TaxCodeRef"] = {"value": item["TaxCodeId"]}
+                    if item.get("TaxCodeName"):
+                        sales_detail["TaxCodeRef"]["name"] = item["TaxCodeName"]
 
                 if sales_detail:
                     line["SalesItemLineDetail"] = sales_detail
 
             elif detail_type == "GroupLineDetail":
                 group_detail = {}
-                if item.get("group_item_id"):
+                if item.get("GroupItemId"):
                     group_detail["GroupItemRef"] = {
-                        "value": item["group_item_id"]}
-                    if item.get("group_item_name"):
-                        group_detail["GroupItemRef"]["name"] = item["group_item_name"]
-                if item.get("group_quantity"):
-                    group_detail["Quantity"] = item["group_quantity"]
+                        "value": item["GroupItemId"]}
+                    if item.get("GroupItemName"):
+                        group_detail["GroupItemRef"]["name"] = item["GroupItemName"]
+                if item.get("GroupQuantity"):
+                    group_detail["Quantity"] = item["GroupQuantity"]
 
                 # Handle nested lines for GroupLine
-                if item.get("group_lines") and isinstance(item["group_lines"], list):
+                if item.get("GroupLines") and isinstance(item["GroupLines"], list):
                     group_lines = []
-                    for group_item in item["group_lines"]:
+                    for group_item in item["GroupLines"]:
                         group_line = {
-                            "Amount": group_item.get("amount", 0),
+                            "Amount": group_item.get("Amount", 0),
                             "DetailType": "SalesItemLineDetail"
                         }
                         group_sales_detail = {}
-                        if group_item.get("item_id"):
+                        if group_item.get("ItemId"):
                             group_sales_detail["ItemRef"] = {
-                                "value": group_item["item_id"]}
-                        if group_item.get("quantity"):
-                            group_sales_detail["Qty"] = group_item["quantity"]
-                        if group_item.get("unit_price"):
-                            group_sales_detail["UnitPrice"] = group_item["unit_price"]
-                        if group_item.get("discount_rate"):
-                            group_sales_detail["DiscountRate"] = group_item["discount_rate"]
-                        if group_item.get("class_id"):
+                                "value": group_item["ItemId"]}
+                        if group_item.get("Quantity"):
+                            group_sales_detail["Qty"] = group_item["Quantity"]
+                        if group_item.get("UnitPrice"):
+                            group_sales_detail["UnitPrice"] = group_item["UnitPrice"]
+                        if group_item.get("DiscountRate"):
+                            group_sales_detail["DiscountRate"] = group_item["DiscountRate"]
+                        if group_item.get("ClassId"):
                             group_sales_detail["ClassRef"] = {
-                                "value": group_item["class_id"]}
-                        if group_item.get("tax_code_id"):
+                                "value": group_item["ClassId"]}
+                        if group_item.get("TaxCodeId"):
                             group_sales_detail["TaxCodeRef"] = {
-                                "value": group_item["tax_code_id"]}
+                                "value": group_item["TaxCodeId"]}
 
                         if group_sales_detail:
                             group_line["SalesItemLineDetail"] = group_sales_detail
@@ -623,41 +633,41 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
 
             elif detail_type == "DescriptionOnlyLine":
                 description_detail = {}
-                if item.get("service_date"):
-                    description_detail["ServiceDate"] = item["service_date"]
-                if item.get("tax_code_id"):
+                if item.get("ServiceDate"):
+                    description_detail["ServiceDate"] = item["ServiceDate"]
+                if item.get("TaxCodeId"):
                     description_detail["TaxCodeRef"] = {
-                        "value": item["tax_code_id"]}
-                    if item.get("tax_code_name"):
-                        description_detail["TaxCodeRef"]["name"] = item["tax_code_name"]
+                        "value": item["TaxCodeId"]}
+                    if item.get("TaxCodeName"):
+                        description_detail["TaxCodeRef"]["name"] = item["TaxCodeName"]
 
                 line["DescriptionLineDetail"] = description_detail
 
             elif detail_type == "DiscountLineDetail":
                 discount_detail = {}
-                if item.get("is_percent_based") is not None:
-                    discount_detail["PercentBased"] = item["is_percent_based"]
-                if item.get("discount_percent"):
-                    discount_detail["DiscountPercent"] = item["discount_percent"]
-                if item.get("discount_account_id"):
+                if item.get("IsPercentBased") is not None:
+                    discount_detail["PercentBased"] = item["IsPercentBased"]
+                if item.get("DiscountPercent"):
+                    discount_detail["DiscountPercent"] = item["DiscountPercent"]
+                if item.get("DiscountAccountId"):
                     discount_detail["DiscountAccountRef"] = {
-                        "value": item["discount_account_id"]}
-                    if item.get("discount_account_name"):
-                        discount_detail["DiscountAccountRef"]["name"] = item["discount_account_name"]
-                if item.get("class_id"):
+                        "value": item["DiscountAccountId"]}
+                    if item.get("DiscountAccountName"):
+                        discount_detail["DiscountAccountRef"]["name"] = item["DiscountAccountName"]
+                if item.get("ClassId"):
                     discount_detail["ClassRef"] = {
-                        "value": item["class_id"], "name": item.get("class_name", "")}
-                if item.get("tax_code_id"):
+                        "value": item["ClassId"], "name": item.get("ClassName", "")}
+                if item.get("TaxCodeId"):
                     discount_detail["TaxCodeRef"] = {
-                        "value": item["tax_code_id"], "name": item.get("tax_code_name", "")}
+                        "value": item["TaxCodeId"], "name": item.get("TaxCodeName", "")}
 
                 line["DiscountLineDetail"] = discount_detail
 
             elif detail_type == "SubTotalLineDetail":
                 subtotal_detail = {}
-                if item.get("item_id"):
+                if item.get("ItemId"):
                     subtotal_detail["ItemRef"] = {
-                        "value": item["item_id"], "name": item.get("item_name", "")}
+                        "value": item["ItemId"], "name": item.get("ItemName", "")}
 
                 line["SubTotalLineDetail"] = subtotal_detail
 
@@ -708,13 +718,21 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Copy basic fields if present
     for field in [
-        'Id', 'DocNumber', 'TxnDate', 'ShipDate', 'DueDate', 'CustomerMemo',
+        'Id', 'DocNumber', 'TxnDate', 'ShipDate', 'DueDate',
         'PrivateNote', 'PrintStatus', 'EmailStatus', 'TrackingNum',
         'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
         'ApplyTaxAfterDiscount', 'Deposit', 'ExchangeRate', 'GlobalTaxCalculation'
     ]:
         if field in invoice_data:
             mcp_object[field] = invoice_data[field]
+
+    # Handle CustomerMemo which might be in object format
+    if 'CustomerMemo' in invoice_data:
+        memo = invoice_data['CustomerMemo']
+        if isinstance(memo, dict) and 'value' in memo:
+            mcp_object['CustomerMemo'] = memo['value']
+        else:
+            mcp_object['CustomerMemo'] = memo
 
     # Handle read-only fields
     for field in ['TotalAmt', 'Balance', 'HomeTotalAmt', 'HomeBalance', 'InvoiceLink']:
@@ -734,11 +752,11 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
         for line in invoice_data['Line']:
             if isinstance(line, dict) and 'Amount' in line:
                 item = {
-                    'amount': line['Amount'],
-                    'description': line.get('Description'),
-                    'line_id': line.get('Id'),
-                    'line_num': line.get('LineNum'),
-                    'detail_type': line.get('DetailType', 'SalesItemLineDetail')
+                    'Amount': line['Amount'],
+                    'Description': line.get('Description'),
+                    'LineId': line.get('Id'),
+                    'LineNum': line.get('LineNum'),
+                    'DetailType': line.get('DetailType', 'SalesItemLineDetail')
                 }
 
                 detail_type = line.get('DetailType', 'SalesItemLineDetail')
@@ -747,35 +765,35 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
                 if detail_type == 'SalesItemLineDetail' and 'SalesItemLineDetail' in line:
                     detail = line['SalesItemLineDetail']
                     if 'ItemRef' in detail:
-                        item['item_id'] = detail['ItemRef'].get('value')
-                        item['item_name'] = detail['ItemRef'].get('name')
+                        item['ItemId'] = detail['ItemRef'].get('value')
+                        item['ItemName'] = detail['ItemRef'].get('name')
                     if 'Qty' in detail:
-                        item['quantity'] = detail['Qty']
+                        item['Quantity'] = detail['Qty']
                     if 'UnitPrice' in detail:
-                        item['unit_price'] = detail['UnitPrice']
+                        item['UnitPrice'] = detail['UnitPrice']
                     if 'DiscountRate' in detail:
-                        item['discount_rate'] = detail['DiscountRate']
+                        item['DiscountRate'] = detail['DiscountRate']
                     if 'DiscountAmt' in detail:
-                        item['discount_amount'] = detail['DiscountAmt']
+                        item['DiscountAmount'] = detail['DiscountAmt']
                     if 'ServiceDate' in detail:
-                        item['service_date'] = detail['ServiceDate']
+                        item['ServiceDate'] = detail['ServiceDate']
                     if 'ClassRef' in detail:
-                        item['class_id'] = detail['ClassRef'].get('value')
-                        item['class_name'] = detail['ClassRef'].get('name')
+                        item['ClassId'] = detail['ClassRef'].get('value')
+                        item['ClassName'] = detail['ClassRef'].get('name')
                     if 'TaxCodeRef' in detail:
-                        item['tax_code_id'] = detail['TaxCodeRef'].get('value')
-                        item['tax_code_name'] = detail['TaxCodeRef'].get(
+                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
+                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
                             'name')
 
                 elif detail_type == 'GroupLineDetail' and 'GroupLineDetail' in line:
                     detail = line['GroupLineDetail']
                     if 'GroupItemRef' in detail:
-                        item['group_item_id'] = detail['GroupItemRef'].get(
+                        item['GroupItemId'] = detail['GroupItemRef'].get(
                             'value')
-                        item['group_item_name'] = detail['GroupItemRef'].get(
+                        item['GroupItemName'] = detail['GroupItemRef'].get(
                             'name')
                     if 'Quantity' in detail:
-                        item['group_quantity'] = detail['Quantity']
+                        item['GroupQuantity'] = detail['Quantity']
 
                     # Handle nested group lines
                     if 'Line' in detail and isinstance(detail['Line'], list):
@@ -784,53 +802,53 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
                             if isinstance(group_line, dict) and 'SalesItemLineDetail' in group_line:
                                 group_detail = group_line['SalesItemLineDetail']
                                 group_item = {
-                                    'item_id': group_detail.get('ItemRef', {}).get('value'),
-                                    'quantity': group_detail.get('Qty'),
-                                    'unit_price': group_detail.get('UnitPrice'),
-                                    'discount_rate': group_detail.get('DiscountRate'),
-                                    'class_id': group_detail.get('ClassRef', {}).get('value'),
-                                    'tax_code_id': group_detail.get('TaxCodeRef', {}).get('value')
+                                    'ItemId': group_detail.get('ItemRef', {}).get('value'),
+                                    'Quantity': group_detail.get('Qty'),
+                                    'UnitPrice': group_detail.get('UnitPrice'),
+                                    'DiscountRate': group_detail.get('DiscountRate'),
+                                    'ClassId': group_detail.get('ClassRef', {}).get('value'),
+                                    'TaxCodeId': group_detail.get('TaxCodeRef', {}).get('value')
                                 }
                                 group_lines.append(group_item)
-                        item['group_lines'] = group_lines
+                        item['GroupLines'] = group_lines
 
                 elif detail_type == 'DescriptionOnlyLine' and 'DescriptionLineDetail' in line:
                     detail = line['DescriptionLineDetail']
                     if 'ServiceDate' in detail:
-                        item['service_date'] = detail['ServiceDate']
+                        item['ServiceDate'] = detail['ServiceDate']
                     if 'TaxCodeRef' in detail:
-                        item['tax_code_id'] = detail['TaxCodeRef'].get('value')
-                        item['tax_code_name'] = detail['TaxCodeRef'].get(
+                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
+                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
                             'name')
                     # Check if this is a subtotal line
                     description = line.get('Description', '')
                     if description and description.startswith('Subtotal:'):
-                        item['is_subtotal'] = True
+                        item['IsSubtotal'] = True
 
                 elif detail_type == 'DiscountLineDetail' and 'DiscountLineDetail' in line:
                     detail = line['DiscountLineDetail']
                     if 'DiscountPercent' in detail:
-                        item['discount_percent'] = detail['DiscountPercent']
+                        item['DiscountPercent'] = detail['DiscountPercent']
                     if 'PercentBased' in detail:
-                        item['is_percent_based'] = detail['PercentBased']
+                        item['IsPercentBased'] = detail['PercentBased']
                     if 'DiscountAccountRef' in detail:
-                        item['discount_account_id'] = detail['DiscountAccountRef'].get(
+                        item['DiscountAccountId'] = detail['DiscountAccountRef'].get(
                             'value')
-                        item['discount_account_name'] = detail['DiscountAccountRef'].get(
+                        item['DiscountAccountName'] = detail['DiscountAccountRef'].get(
                             'name')
                     if 'ClassRef' in detail:
-                        item['class_id'] = detail['ClassRef'].get('value')
-                        item['class_name'] = detail['ClassRef'].get('name')
+                        item['ClassId'] = detail['ClassRef'].get('value')
+                        item['ClassName'] = detail['ClassRef'].get('name')
                     if 'TaxCodeRef' in detail:
-                        item['tax_code_id'] = detail['TaxCodeRef'].get('value')
-                        item['tax_code_name'] = detail['TaxCodeRef'].get(
+                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
+                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
                             'name')
 
                 elif detail_type == 'SubTotalLineDetail' and 'SubTotalLineDetail' in line:
                     detail = line['SubTotalLineDetail']
                     if 'ItemRef' in detail:
-                        item['item_id'] = detail['ItemRef'].get('value')
-                        item['item_name'] = detail['ItemRef'].get('name')
+                        item['ItemId'] = detail['ItemRef'].get('value')
+                        item['ItemName'] = detail['ItemRef'].get('name')
 
                 line_items.append(item)
         mcp_object['LineItems'] = line_items
@@ -1131,10 +1149,10 @@ class InvoiceManager:
 
         sync_token = current_invoice.get('SyncToken', '0')
 
-        # For delete operation, only send Id and SyncToken as per API documentation
+        # For delete operation, wrap in Invoice object
         delete_data = {
             "Id": Id,
-            "SyncToken": sync_token
+            "SyncToken": sync_token,
         }
         return await self.client._post("invoice", delete_data, params={'operation': 'delete'})
 
@@ -1195,10 +1213,10 @@ class InvoiceManager:
 
         sync_token = current_invoice.get('SyncToken', '0')
 
-        # For void operation, only send Id and SyncToken as per API documentation
+        # For void operation, wrap in Invoice object
         void_data = {
             "Id": Id,
-            "SyncToken": sync_token
+            "SyncToken": sync_token,
         }
 
         response = await self.client._post("invoice", void_data, params={'operation': 'void'})
