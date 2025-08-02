@@ -347,10 +347,10 @@ class AccountManager:
             conditions.append(f"SubAccount = {str(kwargs['SubAccount']).lower()}")
 
         if kwargs.get('ParentRefValue'):
-            conditions.append(f"ParentRef = '{kwargs['ParentRefValue']}'")
+            conditions.append(f"ParentRef.value = '{kwargs['ParentRefValue']}'")
 
         if kwargs.get('CurrencyRefValue'):
-            conditions.append(f"CurrencyRef = '{kwargs['CurrencyRefValue']}'")
+            conditions.append(f"CurrencyRef.value = '{kwargs['CurrencyRefValue']}'")
 
         # Name searches (partial match) - we'll need to post-filter these due to QB API limitations
         partial_match_filters = {}
@@ -367,7 +367,7 @@ class AccountManager:
         if kwargs.get('ParentRefName'):
             # For parent name search, we need a subquery
             parent_name = kwargs['ParentRefName'].replace("'", "''")  # Escape single quotes
-            conditions.append(f"ParentRef IN (SELECT Id FROM Account WHERE Name LIKE '%{parent_name}%')")
+            conditions.append(f"ParentRef.value IN (SELECT Id FROM Account WHERE Name LIKE '%{parent_name}%')")
 
         if kwargs.get('CurrencyRefName'):
             partial_match_filters['CurrencyRefName'] = kwargs['CurrencyRefName'].lower()

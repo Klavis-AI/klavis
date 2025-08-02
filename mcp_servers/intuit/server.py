@@ -108,6 +108,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         "create_customer": intuit_service.customer_manager.create_customer,
         "get_customer": intuit_service.customer_manager.get_customer,
         "list_customers": intuit_service.customer_manager.list_customers,
+        "search_customers": intuit_service.customer_manager.search_customers,
         "update_customer": intuit_service.customer_manager.update_customer,
         "deactivate_customer": intuit_service.customer_manager.deactivate_customer,
         "activate_customer": intuit_service.customer_manager.activate_customer,
@@ -146,7 +147,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
                     text="\n".join(f"{k}: {v}" for k, v in result.items())
                 )]
         elif name in ["list_accounts", "search_accounts", "list_invoices", "search_invoices", 
-                      "list_customers", "list_payments", "search_payments", "list_vendors", "search_vendors"]:
+                      "list_customers", "search_customers", "list_payments", "search_payments", "list_vendors", "search_vendors"]:
             # Handle list results
             if isinstance(result, list):
                 if not result:

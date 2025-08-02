@@ -357,6 +357,90 @@ activate_customer_tool = Tool(
     },
 )
 
+search_customers_tool = Tool(
+    name="search_customers",
+    title="Search Customers",
+    description="Advanced Customer Search - Search customers with powerful filters including name, contact info, address, balance, status, and other criteria. Perfect for finding specific customers based on various parameters",
+    inputSchema={
+        "type": "object",
+        "properties": {
+            "DisplayName": {"type": "string", "description": "Search by customer display name (partial match)"},
+            "GivenName": {"type": "string", "description": "Search by given/first name (partial match)"},
+            "FamilyName": {"type": "string", "description": "Search by family/last name (partial match)"},
+            "MiddleName": {"type": "string", "description": "Search by middle name (partial match)"},
+            "CompanyName": {"type": "string", "description": "Search by company name (partial match)"},
+            "PrimaryEmailAddr": {"type": "string", "description": "Search by email address (partial match)"},
+            "PrimaryPhone": {"type": "string", "description": "Search by phone number (partial match)"},
+            "Mobile": {"type": "string", "description": "Search by mobile number (partial match)"},
+            "Fax": {"type": "string", "description": "Search by fax number (partial match)"},
+
+            # Status filters
+            "Active": {"type": "boolean", "description": "Filter by active status"},
+            "Job": {"type": "boolean", "description": "Filter by job status (true for jobs/sub-customers, false for top-level customers)"},
+            "BillWithParent": {"type": "boolean", "description": "Filter by bill with parent status"},
+            "Taxable": {"type": "boolean", "description": "Filter by taxable status"},
+
+            # Identification filters
+            "ResaleNum": {"type": "string", "description": "Search by resale number"},
+            "BusinessNumber": {"type": "string", "description": "Search by business number/PAN"},
+            "GSTIN": {"type": "string", "description": "Search by GSTIN"},
+            "PrimaryTaxIdentifier": {"type": "string", "description": "Search by primary tax identifier"},
+            "SecondaryTaxIdentifier": {"type": "string", "description": "Search by secondary tax identifier"},
+
+            # Address filters - Billing Address
+            "BillAddrCity": {"type": "string", "description": "Search by billing address city"},
+            "BillAddrCountrySubDivisionCode": {"type": "string", "description": "Search by billing address state/province"},
+            "BillAddrPostalCode": {"type": "string", "description": "Search by billing address postal code"},
+            "BillAddrCountry": {"type": "string", "description": "Search by billing address country"},
+            "BillAddrLine1": {"type": "string", "description": "Search by billing address line 1 (partial match)"},
+
+            # Address filters - Shipping Address
+            "ShipAddrCity": {"type": "string", "description": "Search by shipping address city"},
+            "ShipAddrCountrySubDivisionCode": {"type": "string", "description": "Search by shipping address state/province"},
+            "ShipAddrPostalCode": {"type": "string", "description": "Search by shipping address postal code"},
+            "ShipAddrCountry": {"type": "string", "description": "Search by shipping address country"},
+            "ShipAddrLine1": {"type": "string", "description": "Search by shipping address line 1 (partial match)"},
+
+            # Balance filters
+            "MinBalance": {"type": "number", "description": "Minimum balance amount"},
+            "MaxBalance": {"type": "number", "description": "Maximum balance amount"},
+            "MinBalanceWithJobs": {"type": "number", "description": "Minimum balance with jobs amount"},
+            "MaxBalanceWithJobs": {"type": "number", "description": "Maximum balance with jobs amount"},
+
+            # Reference filters
+            "ParentRefValue": {"type": "string", "description": "Filter by parent customer ID (for sub-customers/jobs)"},
+            "ParentRefName": {"type": "string", "description": "Search by parent customer name (partial match)"},
+            "CurrencyRefValue": {"type": "string", "description": "Filter by currency code"},
+            "CurrencyRefName": {"type": "string", "description": "Search by currency name (partial match)"},
+            "SalesTermRefValue": {"type": "string", "description": "Filter by sales term ID"},
+            "SalesTermRefName": {"type": "string", "description": "Search by sales term name (partial match)"},
+            "PaymentMethodRefValue": {"type": "string", "description": "Filter by payment method ID"},
+            "PaymentMethodRefName": {"type": "string", "description": "Search by payment method name (partial match)"},
+            "DefaultTaxCodeRefValue": {"type": "string", "description": "Filter by default tax code ID"},
+            "DefaultTaxCodeRefName": {"type": "string", "description": "Search by default tax code name (partial match)"},
+
+            # Date filters
+            "CreateTimeFrom": {"type": "string", "description": "Search customers created from this date (YYYY-MM-DD format)"},
+            "CreateTimeTo": {"type": "string", "description": "Search customers created to this date (YYYY-MM-DD format)"},
+            "LastUpdatedTimeFrom": {"type": "string", "description": "Search customers last updated from this date (YYYY-MM-DD format)"},
+            "LastUpdatedTimeTo": {"type": "string", "description": "Search customers last updated to this date (YYYY-MM-DD format)"},
+            "OpenBalanceDateFrom": {"type": "string", "description": "Search by opening balance date from (YYYY-MM-DD format)"},
+            "OpenBalanceDateTo": {"type": "string", "description": "Search by opening balance date to (YYYY-MM-DD format)"},
+
+            # Other filters
+            "PreferredDeliveryMethod": {"type": "string", "description": "Filter by preferred delivery method: Print, Email, or None"},
+            "GSTRegistrationType": {"type": "string", "description": "Filter by GST registration type"},
+            "WebAddr": {"type": "string", "description": "Search by website address (partial match)"},
+            "Notes": {"type": "string", "description": "Search by notes/description (partial match)"},
+
+            # Pagination
+            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
+            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
+        },
+        "required": []
+    }
+)
+
 
 def mcp_object_to_customer_data(**kwargs) -> Dict[str, Any]:
     """
@@ -667,7 +751,280 @@ class CustomerManager:
         # Convert response back to MCP format
         return customer_data_to_mcp_object(response['Customer'])
 
+    async def search_customers(self, **kwargs) -> List[Dict[str, Any]]:
+        """
+        Search customers with various filters and pagination support.
+
+        Args:
+            DisplayName: Search by customer display name (partial match)
+            GivenName/FamilyName/MiddleName: Search by name components (partial match)
+            CompanyName: Search by company name (partial match)
+            PrimaryEmailAddr/PrimaryPhone/Mobile/Fax: Search by contact info (partial match)
+
+            # Status filters
+            Active: Filter by active status
+            Job: Filter by job status (sub-customers)
+            BillWithParent: Filter by bill with parent status
+            Taxable: Filter by taxable status
+
+            # Identification filters
+            ResaleNum/BusinessNumber/GSTIN: Search by identification numbers
+            PrimaryTaxIdentifier/SecondaryTaxIdentifier: Search by tax identifiers
+
+            # Address filters (billing and shipping)
+            BillAddrCity/ShipAddrCity: Search by city
+            BillAddrCountrySubDivisionCode/ShipAddrCountrySubDivisionCode: Search by state/province
+            BillAddrPostalCode/ShipAddrPostalCode: Search by postal code
+            BillAddrCountry/ShipAddrCountry: Search by country
+            BillAddrLine1/ShipAddrLine1: Search by address line 1 (partial match)
+
+            # Balance filters
+            MinBalance/MaxBalance: Filter by balance range
+            MinBalanceWithJobs/MaxBalanceWithJobs: Filter by balance with jobs range
+
+            # Reference filters
+            ParentRefValue: Filter by parent customer ID
+            ParentRefName: Search by parent customer name (partial match)
+            CurrencyRefValue: Filter by currency code
+            CurrencyRefName: Search by currency name (partial match)
+            SalesTermRefValue: Filter by sales term ID
+            PaymentMethodRefValue: Filter by payment method ID
+            DefaultTaxCodeRefValue: Filter by default tax code ID
+
+            # Date filters
+            CreateTimeFrom/CreateTimeTo: Filter by creation date range
+            LastUpdatedTimeFrom/LastUpdatedTimeTo: Filter by last updated date range
+            OpenBalanceDateFrom/OpenBalanceDateTo: Filter by opening balance date range
+
+            # Other filters
+            PreferredDeliveryMethod: Filter by delivery method
+            GSTRegistrationType: Filter by GST registration type
+            WebAddr: Search by website (partial match)
+            Notes: Search by notes (partial match)
+
+            MaxResults: Maximum number of results to return (default: 100)
+            StartPosition: Starting position for pagination (default: 1)
+
+        Returns:
+            List of customers matching the search criteria
+        """
+        # Build WHERE clause conditions
+        conditions = []
+
+        # Basic filters with exact matches
+        if kwargs.get('Active') is not None:
+            conditions.append(f"Active = {str(kwargs['Active']).lower()}")
+
+        if kwargs.get('Job') is not None:
+            conditions.append(f"Job = {str(kwargs['Job']).lower()}")
+
+        if kwargs.get('BillWithParent') is not None:
+            conditions.append(
+                f"BillWithParent = {str(kwargs['BillWithParent']).lower()}")
+
+        if kwargs.get('Taxable') is not None:
+            conditions.append(f"Taxable = {str(kwargs['Taxable']).lower()}")
+
+        # Reference filters
+        if kwargs.get('ParentRefValue'):
+            conditions.append(
+                f"ParentRef.value = '{kwargs['ParentRefValue']}'")
+
+        if kwargs.get('CurrencyRefValue'):
+            conditions.append(
+                f"CurrencyRef.value = '{kwargs['CurrencyRefValue']}'")
+
+        if kwargs.get('SalesTermRefValue'):
+            conditions.append(
+                f"SalesTermRef.value = '{kwargs['SalesTermRefValue']}'")
+
+        if kwargs.get('PaymentMethodRefValue'):
+            conditions.append(
+                f"PaymentMethodRef.value = '{kwargs['PaymentMethodRefValue']}'")
+
+        if kwargs.get('DefaultTaxCodeRefValue'):
+            conditions.append(
+                f"DefaultTaxCodeRef.value = '{kwargs['DefaultTaxCodeRefValue']}'")
+
+        # Exact match filters for structured data
+        if kwargs.get('ResaleNum'):
+            conditions.append(f"ResaleNum = '{kwargs['ResaleNum']}'")
+
+        if kwargs.get('BusinessNumber'):
+            conditions.append(f"BusinessNumber = '{kwargs['BusinessNumber']}'")
+
+        if kwargs.get('GSTIN'):
+            conditions.append(f"GSTIN = '{kwargs['GSTIN']}'")
+
+        if kwargs.get('PreferredDeliveryMethod'):
+            conditions.append(
+                f"PreferredDeliveryMethod = '{kwargs['PreferredDeliveryMethod']}'")
+
+        if kwargs.get('GSTRegistrationType'):
+            conditions.append(
+                f"GSTRegistrationType = '{kwargs['GSTRegistrationType']}'")
+
+        # Address filters - exact matches for structured fields
+        address_exact_fields = {
+            'BillAddrCity': 'BillAddr.City',
+            'BillAddrCountrySubDivisionCode': 'BillAddr.CountrySubDivisionCode',
+            'BillAddrPostalCode': 'BillAddr.PostalCode',
+            'BillAddrCountry': 'BillAddr.Country',
+            'ShipAddrCity': 'ShipAddr.City',
+            'ShipAddrCountrySubDivisionCode': 'ShipAddr.CountrySubDivisionCode',
+            'ShipAddrPostalCode': 'ShipAddr.PostalCode',
+            'ShipAddrCountry': 'ShipAddr.Country'
+        }
+
+        for field, qb_field in address_exact_fields.items():
+            if kwargs.get(field):
+                conditions.append(f"{qb_field} = '{kwargs[field]}'")
+
+        # Balance range filters
+        if kwargs.get('MinBalance') is not None:
+            conditions.append(f"Balance >= {kwargs['MinBalance']}")
+        if kwargs.get('MaxBalance') is not None:
+            conditions.append(f"Balance <= {kwargs['MaxBalance']}")
+
+        if kwargs.get('MinBalanceWithJobs') is not None:
+            conditions.append(
+                f"BalanceWithJobs >= {kwargs['MinBalanceWithJobs']}")
+        if kwargs.get('MaxBalanceWithJobs') is not None:
+            conditions.append(
+                f"BalanceWithJobs <= {kwargs['MaxBalanceWithJobs']}")
+
+        # Date range filters
+        if kwargs.get('CreateTimeFrom'):
+            conditions.append(
+                f"MetaData.CreateTime >= '{kwargs['CreateTimeFrom']}'")
+        if kwargs.get('CreateTimeTo'):
+            conditions.append(
+                f"MetaData.CreateTime <= '{kwargs['CreateTimeTo']}'")
+
+        if kwargs.get('LastUpdatedTimeFrom'):
+            conditions.append(
+                f"MetaData.LastUpdatedTime >= '{kwargs['LastUpdatedTimeFrom']}'")
+        if kwargs.get('LastUpdatedTimeTo'):
+            conditions.append(
+                f"MetaData.LastUpdatedTime <= '{kwargs['LastUpdatedTimeTo']}'")
+
+        if kwargs.get('OpenBalanceDateFrom'):
+            conditions.append(
+                f"OpenBalanceDate >= '{kwargs['OpenBalanceDateFrom']}'")
+        if kwargs.get('OpenBalanceDateTo'):
+            conditions.append(
+                f"OpenBalanceDate <= '{kwargs['OpenBalanceDateTo']}'")
+
+        # Partial match filters - we'll post-filter these due to QB API limitations
+        partial_match_filters = {}
+
+        partial_fields = [
+            'DisplayName', 'GivenName', 'FamilyName', 'MiddleName', 'CompanyName',
+            'PrimaryEmailAddr', 'PrimaryPhone', 'Mobile', 'Fax', 'WebAddr', 'Notes',
+            'BillAddrLine1', 'ShipAddrLine1', 'PrimaryTaxIdentifier', 'SecondaryTaxIdentifier'
+        ]
+
+        for field in partial_fields:
+            if kwargs.get(field):
+                partial_match_filters[field] = kwargs[field].lower()
+
+        # Reference name searches (requires subqueries or post-filtering)
+        if kwargs.get('ParentRefName'):
+            parent_name = kwargs['ParentRefName'].replace(
+                "'", "''")  # Escape single quotes
+            conditions.append(
+                f"ParentRef.value IN (SELECT Id FROM Customer WHERE DisplayName LIKE '%{parent_name}%')")
+
+        reference_name_fields = [
+            'CurrencyRefName', 'SalesTermRefName', 'PaymentMethodRefName', 'DefaultTaxCodeRefName']
+        for field in reference_name_fields:
+            if kwargs.get(field):
+                partial_match_filters[field] = kwargs[field].lower()
+
+        # Build the query
+        query = "SELECT * FROM Customer"
+
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        # Add pagination
+        max_results = kwargs.get('MaxResults', 100)
+        start_position = kwargs.get('StartPosition', 1)
+
+        query += f" STARTPOSITION {start_position} MAXRESULTS {max_results}"
+
+        response = await self.client._get('query', params={'query': query})
+
+        # Handle case when no customers are returned
+        if 'Customer' not in response['QueryResponse']:
+            return []
+
+        customers = response['QueryResponse']['Customer']
+
+        # Apply post-filtering for partial matches
+        if partial_match_filters:
+            filtered_customers = []
+            for customer in customers:
+                should_include = True
+
+                for field, search_value in partial_match_filters.items():
+                    if field in ['DisplayName', 'GivenName', 'FamilyName', 'MiddleName', 'CompanyName', 'ResaleNum', 'WebAddr', 'Notes']:
+                        if field in customer and search_value not in customer[field].lower():
+                            should_include = False
+                            break
+                    elif field in ['PrimaryEmailAddr', 'PrimaryPhone', 'Mobile', 'Fax']:
+                        if field in customer and search_value not in customer[field].lower():
+                            should_include = False
+                            break
+                    elif field in ['PrimaryTaxIdentifier', 'SecondaryTaxIdentifier']:
+                        if field in customer and search_value not in customer[field].lower():
+                            should_include = False
+                            break
+                    elif field == 'BillAddrLine1' and 'BillAddr' in customer and isinstance(customer['BillAddr'], dict):
+                        addr_line = customer['BillAddr'].get(
+                            'Line1', '').lower()
+                        if search_value not in addr_line:
+                            should_include = False
+                            break
+                    elif field == 'ShipAddrLine1' and 'ShipAddr' in customer and isinstance(customer['ShipAddr'], dict):
+                        addr_line = customer['ShipAddr'].get(
+                            'Line1', '').lower()
+                        if search_value not in addr_line:
+                            should_include = False
+                            break
+                    elif field == 'CurrencyRefName' and 'CurrencyRef' in customer and isinstance(customer['CurrencyRef'], dict):
+                        currency_name = customer['CurrencyRef'].get(
+                            'name', '').lower()
+                        if search_value not in currency_name:
+                            should_include = False
+                            break
+                    elif field == 'SalesTermRefName' and 'SalesTermRef' in customer and isinstance(customer['SalesTermRef'], dict):
+                        term_name = customer['SalesTermRef'].get(
+                            'name', '').lower()
+                        if search_value not in term_name:
+                            should_include = False
+                            break
+                    elif field == 'PaymentMethodRefName' and 'PaymentMethodRef' in customer and isinstance(customer['PaymentMethodRef'], dict):
+                        method_name = customer['PaymentMethodRef'].get(
+                            'name', '').lower()
+                        if search_value not in method_name:
+                            should_include = False
+                            break
+                    elif field == 'DefaultTaxCodeRefName' and 'DefaultTaxCodeRef' in customer and isinstance(customer['DefaultTaxCodeRef'], dict):
+                        tax_name = customer['DefaultTaxCodeRef'].get(
+                            'name', '').lower()
+                        if search_value not in tax_name:
+                            should_include = False
+                            break
+
+                if should_include:
+                    filtered_customers.append(customer)
+
+            customers = filtered_customers
+
+        return [customer_data_to_mcp_object(customer) for customer in customers]
+
 
 # Export tools
 tools = [create_customer_tool, get_customer_tool, list_customers_tool,
-         update_customer_tool, deactivate_customer_tool, activate_customer_tool]
+         update_customer_tool, deactivate_customer_tool, activate_customer_tool, search_customers_tool]
