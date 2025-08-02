@@ -74,15 +74,15 @@ class QuickBooksHTTPClient:
                 original_exception=e,
             )
 
-    async def _get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _get(self, endpoint: str, params: Dict[str, Any] = {}) -> Dict[str, Any]:
         """GET request."""
         if params is None:
             params = {}
         return await self._make_request('GET', endpoint, params=params)
 
-    async def _post(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _post(self, endpoint: str, data: Dict[str, Any], params: Dict[str, Any] = {}) -> Dict[str, Any]:
         """POST request."""
-        return await self._make_request('POST', endpoint, json=data)
+        return await self._make_request('POST', endpoint, params=params, json=data)
 
     async def close(self):
         await self.async_session.aclose()

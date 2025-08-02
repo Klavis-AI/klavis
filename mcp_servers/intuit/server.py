@@ -69,14 +69,14 @@ server = Server("intuit-mcp-server")
 async def list_tools() -> list[types.Tool]:
     """List available Intuit tools."""
     tool_list = [*accounts.tools, *invoices.tools, *customers.tools]
-    logger.info(f"Available tools: {[tool.name for tool in tool_list]}")
+    logger.debug(f"Available tools: {[tool.name for tool in tool_list]}")
     return tool_list
 
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     """Execute a specific Intuit tool."""
-    logger.info(f"Calling tool: {name} with arguments: {arguments}")
+    logger.debug(f"Calling tool: {name} with arguments: {arguments}")
 
     if not intuit_service.client.is_configured():
         return [types.TextContent(
@@ -94,6 +94,9 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         "list_invoices": intuit_service.invoice_manager.list_invoices,
         "update_invoice": intuit_service.invoice_manager.update_invoice,
         "delete_invoice": intuit_service.invoice_manager.delete_invoice,
+        "send_invoice": intuit_service.invoice_manager.send_invoice,
+        "void_invoice": intuit_service.invoice_manager.void_invoice,
+        "search_invoices": intuit_service.invoice_manager.search_invoices,
         "create_customer": intuit_service.customer_manager.create_customer,
         "get_customer": intuit_service.customer_manager.get_customer,
         "list_customers": intuit_service.customer_manager.list_customers,
