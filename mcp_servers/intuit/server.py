@@ -24,6 +24,7 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from tools import accounts, invoices, customers, payments, vendors
+from tools.accounts import AccountManager
 from tools.invoices import InvoiceManager
 from tools.customers import CustomerManager
 from tools.payments import PaymentManager
@@ -47,7 +48,6 @@ class IntuitMCPService:
         self.vendor_manager = None
         if self.client.is_configured():
             logger.info("QuickBooks HTTP client initialized successfully")
-            from tools.accounts import AccountManager
             self.account_manager = AccountManager(self.client)
             self.invoice_manager = InvoiceManager(self.client)
             self.customer_manager = CustomerManager(self.client)
@@ -74,7 +74,8 @@ server = Server("intuit-mcp-server")
 @server.list_tools()
 async def list_tools() -> list[types.Tool]:
     """List available Intuit tools."""
-    tool_list = [*accounts.tools, *invoices.tools, *customers.tools, *payments.tools, *vendors.tools]
+    tool_list = [*accounts.tools, *invoices.tools, *
+                 customers.tools, *payments.tools, *vendors.tools]
     logger.debug(f"Available tools: {[tool.name for tool in tool_list]}")
     return tool_list
 
@@ -94,6 +95,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         "list_accounts": intuit_service.account_manager.list_accounts,
         "get_account": intuit_service.account_manager.get_account,
         "create_account": intuit_service.account_manager.create_account,
+        "search_accounts": intuit_service.account_manager.search_accounts,
         "update_account": intuit_service.account_manager.update_account,
         "create_invoice": intuit_service.invoice_manager.create_invoice,
         "get_invoice": intuit_service.invoice_manager.get_invoice,
@@ -134,18 +136,27 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
     try:
         result = await tool_map[name](**arguments)
-        if name in ["create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer",
-                   "create_payment", "get_payment", "update_payment", "delete_payment", "send_payment", "void_payment",
-                   "create_vendor", "get_vendor", "update_vendor", "activate_vendor", "deactivate_vendor"]:
+        if name in ["create_account", "get_account", "update_account",
+                    "create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer",
+                    "create_payment", "get_payment", "update_payment", "delete_payment", "send_payment", "void_payment",
+                    "create_vendor", "get_vendor", "update_vendor", "activate_vendor", "deactivate_vendor"]:
             if isinstance(result, dict):
                 return [types.TextContent(
                     type="text",
                     text="\n".join(f"{k}: {v}" for k, v in result.items())
                 )]
+        elif name in ["list_accounts", "search_accounts", "list_invoices", "search_invoices", 
+                      "list_customers", "list_payments", "search_payments", "list_vendors", "search_vendors"]:
+            # Handle list results
+            if isinstance(result, list):
+                if not result:
+                    return [types.TextContent(type="text", text="No results found.")]
+                return [types.TextContent(type="text", text=str(result))]
         return [types.TextContent(type="text", text=str(result))]
     except Exception as e:
         import traceback
-        logger.error(f"Error executing tool {name}: {e.message if hasattr(e, 'message') else str(e)}")
+        logger.error(
+            f"Error executing tool {name}: {e.message if hasattr(e, 'message') else str(e)}")
         logger.error(traceback.format_exc())
         return [types.TextContent(
             type="text",
