@@ -23,9 +23,10 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
-from tools import accounts, invoices, customers
+from tools import accounts, invoices, customers, payments
 from tools.invoices import InvoiceManager
 from tools.customers import CustomerManager
+from tools.payments import PaymentManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,12 +42,14 @@ class IntuitMCPService:
         self.account_manager = None
         self.invoice_manager = None
         self.customer_manager = None
+        self.payment_manager = None
         if self.client.is_configured():
             logger.info("QuickBooks HTTP client initialized successfully")
             from tools.accounts import AccountManager
             self.account_manager = AccountManager(self.client)
             self.invoice_manager = InvoiceManager(self.client)
             self.customer_manager = CustomerManager(self.client)
+            self.payment_manager = PaymentManager(self.client)
         else:
             logger.warning(
                 "QuickBooks configuration not found. Please set:\n"
@@ -68,7 +71,7 @@ server = Server("intuit-mcp-server")
 @server.list_tools()
 async def list_tools() -> list[types.Tool]:
     """List available Intuit tools."""
-    tool_list = [*accounts.tools, *invoices.tools, *customers.tools]
+    tool_list = [*accounts.tools, *invoices.tools, *customers.tools, *payments.tools]
     logger.debug(f"Available tools: {[tool.name for tool in tool_list]}")
     return tool_list
 
@@ -103,6 +106,14 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
         "update_customer": intuit_service.customer_manager.update_customer,
         "deactivate_customer": intuit_service.customer_manager.deactivate_customer,
         "activate_customer": intuit_service.customer_manager.activate_customer,
+        "create_payment": intuit_service.payment_manager.create_payment,
+        "get_payment": intuit_service.payment_manager.get_payment,
+        "list_payments": intuit_service.payment_manager.list_payments,
+        "update_payment": intuit_service.payment_manager.update_payment,
+        "delete_payment": intuit_service.payment_manager.delete_payment,
+        "send_payment": intuit_service.payment_manager.send_payment,
+        "void_payment": intuit_service.payment_manager.void_payment,
+        "search_payments": intuit_service.payment_manager.search_payments,
     }
 
     if name not in tool_map:
@@ -113,7 +124,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
     try:
         result = await tool_map[name](**arguments)
-        if name in ["create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer"]:
+        if name in ["create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer",
+                   "create_payment", "get_payment", "update_payment", "delete_payment", "send_payment", "void_payment"]:
             if isinstance(result, dict):
                 return [types.TextContent(
                     type="text",
