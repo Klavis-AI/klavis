@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 class QuickBooksHTTPClient:
     """Direct HTTP client for QuickBooks API using httpx library."""
 
-    def __init__(self, minor_version: int = 75):
-        self.access_token = os.getenv('QB_ACCESS_TOKEN')
-        self.company_id = os.getenv('QB_REALM_ID')
-        self.environment = os.getenv('QB_ENVIRONMENT', 'sandbox').lower()
+    def __init__(self, access_token: str = None, company_id: str = None, environment: str = None, minor_version: int = 75):
+        # Use provided parameters or fall back to environment variables
+        self.access_token = access_token or os.getenv('QB_ACCESS_TOKEN')
+        self.company_id = company_id or os.getenv('QB_REALM_ID')
+        self.environment = (environment or os.getenv('QB_ENVIRONMENT', 'sandbox')).lower()
         self.minor_version = minor_version
         self.async_session = httpx.AsyncClient()
 

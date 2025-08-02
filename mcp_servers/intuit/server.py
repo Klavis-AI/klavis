@@ -11,9 +11,9 @@ import logging
 import contextlib
 from collections.abc import AsyncIterator
 from typing import Any
+from contextvars import ContextVar
 
 import click
-from tools.http_client import QuickBooksHTTPClient
 import mcp.types as types
 from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
@@ -24,11 +24,7 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from tools import accounts, invoices, customers, payments, vendors
-from tools.accounts import AccountManager
-from tools.invoices import InvoiceManager
-from tools.customers import CustomerManager
-from tools.payments import PaymentManager
-from tools.vendors import VendorManager
+from session_manager import SessionManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,35 +33,12 @@ logger = logging.getLogger("intuit-mcp-server")
 # Environment configuration
 INTUIT_MCP_SERVER_PORT = int(os.getenv("INTUIT_MCP_SERVER_PORT", "5001"))
 
+# Context variable to store QB credentials for the current request
+qb_credentials_context: ContextVar[dict] = ContextVar(
+    'qb_credentials', default=None)
 
-class IntuitMCPService:
-    def __init__(self):
-        self.client = QuickBooksHTTPClient()
-        self.account_manager = None
-        self.invoice_manager = None
-        self.customer_manager = None
-        self.payment_manager = None
-        self.vendor_manager = None
-        if self.client.is_configured():
-            logger.info("QuickBooks HTTP client initialized successfully")
-            self.account_manager = AccountManager(self.client)
-            self.invoice_manager = InvoiceManager(self.client)
-            self.customer_manager = CustomerManager(self.client)
-            self.payment_manager = PaymentManager(self.client)
-            self.vendor_manager = VendorManager(self.client)
-        else:
-            logger.warning(
-                "QuickBooks configuration not found. Please set:\n"
-                "- QB_ACCESS_TOKEN: Your QuickBooks access token\n"
-                "- QB_REALM_ID: Your company/realm ID"
-            )
-
-    def get_client(self) -> QuickBooksHTTPClient:
-        """Get the QuickBooks HTTP client instance."""
-        return self.client
-
-
-intuit_service = IntuitMCPService()
+# Initialize session manager
+session_manager_instance = SessionManager()
 
 # Initialize the MCP server
 server = Server("intuit-mcp-server")
@@ -85,48 +58,67 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
     """Execute a specific Intuit tool."""
     logger.debug(f"Calling tool: {name} with arguments: {arguments}")
 
-    if not intuit_service.client.is_configured():
+    # Extract QuickBooks credentials from arguments if provided
+    qb_access_token = arguments.pop('qb_access_token', None)
+    qb_realm_id = arguments.pop('qb_realm_id', None)
+    qb_environment = arguments.pop('qb_environment', None)
+
+    # If no credentials in arguments, try to get from context (headers)
+    if not any([qb_access_token, qb_realm_id, qb_environment]):
+        context_credentials = qb_credentials_context.get()
+        if context_credentials:
+            qb_access_token = context_credentials.get('access_token')
+            qb_realm_id = context_credentials.get('realm_id')
+            qb_environment = context_credentials.get('environment')
+            logger.debug("Using QB credentials from request headers")
+
+    try:
+        # Get session for this request
+        session = session_manager_instance.get_session(
+            qb_access_token, qb_realm_id, qb_environment)
+    except ValueError as e:
         return [types.TextContent(
             type="text",
-            text="QuickBooks client not configured. Please set QB_ACCESS_TOKEN and QB_REALM_ID environment variables."
+            text=f"Configuration error: {str(e)}. Please provide qb_access_token and qb_realm_id in the request arguments, or set QB_ACCESS_TOKEN and QB_REALM_ID environment variables, or provide credentials via HTTP headers (x-qb-access-token, x-qb-realm-id, x-qb-environment)."
         )]
 
+    # Map tools to session managers
     tool_map = {
-        "list_accounts": intuit_service.account_manager.list_accounts,
-        "get_account": intuit_service.account_manager.get_account,
-        "create_account": intuit_service.account_manager.create_account,
-        "search_accounts": intuit_service.account_manager.search_accounts,
-        "update_account": intuit_service.account_manager.update_account,
-        "create_invoice": intuit_service.invoice_manager.create_invoice,
-        "get_invoice": intuit_service.invoice_manager.get_invoice,
-        "list_invoices": intuit_service.invoice_manager.list_invoices,
-        "update_invoice": intuit_service.invoice_manager.update_invoice,
-        "delete_invoice": intuit_service.invoice_manager.delete_invoice,
-        "send_invoice": intuit_service.invoice_manager.send_invoice,
-        "void_invoice": intuit_service.invoice_manager.void_invoice,
-        "search_invoices": intuit_service.invoice_manager.search_invoices,
-        "create_customer": intuit_service.customer_manager.create_customer,
-        "get_customer": intuit_service.customer_manager.get_customer,
-        "list_customers": intuit_service.customer_manager.list_customers,
-        "search_customers": intuit_service.customer_manager.search_customers,
-        "update_customer": intuit_service.customer_manager.update_customer,
-        "deactivate_customer": intuit_service.customer_manager.deactivate_customer,
-        "activate_customer": intuit_service.customer_manager.activate_customer,
-        "create_payment": intuit_service.payment_manager.create_payment,
-        "get_payment": intuit_service.payment_manager.get_payment,
-        "list_payments": intuit_service.payment_manager.list_payments,
-        "update_payment": intuit_service.payment_manager.update_payment,
-        "delete_payment": intuit_service.payment_manager.delete_payment,
-        "send_payment": intuit_service.payment_manager.send_payment,
-        "void_payment": intuit_service.payment_manager.void_payment,
-        "search_payments": intuit_service.payment_manager.search_payments,
-        "create_vendor": intuit_service.vendor_manager.create_vendor,
-        "get_vendor": intuit_service.vendor_manager.get_vendor,
-        "list_vendors": intuit_service.vendor_manager.list_vendors,
-        "update_vendor": intuit_service.vendor_manager.update_vendor,
-        "activate_vendor": intuit_service.vendor_manager.activate_vendor,
-        "deactivate_vendor": intuit_service.vendor_manager.deactivate_vendor,
-        "search_vendors": intuit_service.vendor_manager.search_vendors,
+        "list_accounts": session.account_manager.list_accounts,
+        "get_account": session.account_manager.get_account,
+        "create_account": session.account_manager.create_account,
+        "search_accounts": session.account_manager.search_accounts,
+        "update_account": session.account_manager.update_account,
+        "create_invoice": session.invoice_manager.create_invoice,
+        "get_invoice": session.invoice_manager.get_invoice,
+        "list_invoices": session.invoice_manager.list_invoices,
+        "update_invoice": session.invoice_manager.update_invoice,
+        "delete_invoice": session.invoice_manager.delete_invoice,
+        "send_invoice": session.invoice_manager.send_invoice,
+        "void_invoice": session.invoice_manager.void_invoice,
+        "search_invoices": session.invoice_manager.search_invoices,
+        "create_customer": session.customer_manager.create_customer,
+        "get_customer": session.customer_manager.get_customer,
+        "list_customers": session.customer_manager.list_customers,
+        "search_customers": session.customer_manager.search_customers,
+        "update_customer": session.customer_manager.update_customer,
+        "deactivate_customer": session.customer_manager.deactivate_customer,
+        "activate_customer": session.customer_manager.activate_customer,
+        "create_payment": session.payment_manager.create_payment,
+        "get_payment": session.payment_manager.get_payment,
+        "list_payments": session.payment_manager.list_payments,
+        "update_payment": session.payment_manager.update_payment,
+        "delete_payment": session.payment_manager.delete_payment,
+        "send_payment": session.payment_manager.send_payment,
+        "void_payment": session.payment_manager.void_payment,
+        "search_payments": session.payment_manager.search_payments,
+        "create_vendor": session.vendor_manager.create_vendor,
+        "get_vendor": session.vendor_manager.get_vendor,
+        "list_vendors": session.vendor_manager.list_vendors,
+        "update_vendor": session.vendor_manager.update_vendor,
+        "activate_vendor": session.vendor_manager.activate_vendor,
+        "deactivate_vendor": session.vendor_manager.deactivate_vendor,
+        "search_vendors": session.vendor_manager.search_vendors,
     }
 
     if name not in tool_map:
@@ -146,7 +138,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
                     type="text",
                     text="\n".join(f"{k}: {v}" for k, v in result.items())
                 )]
-        elif name in ["list_accounts", "search_accounts", "list_invoices", "search_invoices", 
+        elif name in ["list_accounts", "search_accounts", "list_invoices", "search_invoices",
                       "list_customers", "search_customers", "list_payments", "search_payments", "list_vendors", "search_vendors"]:
             # Handle list results
             if isinstance(result, list):
@@ -192,8 +184,31 @@ def main(
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
-        """Handle SSE connections."""
+        """Handle SSE connections with QuickBooks credential extraction."""
         logger.info("Handling SSE connection")
+
+        # Extract headers and check for QB credentials
+        headers = dict(request.scope.get('headers', []))
+        # Convert bytes to string for header values
+        str_headers = {k.decode('utf-8'): v.decode('utf-8')
+                       for k, v in headers.items()}
+
+        # Extract QB credentials from headers
+        qb_access_token, qb_realm_id, qb_environment = session_manager_instance.extract_credentials_from_headers(
+            str_headers)
+
+        # Store credentials in scope for later use
+        if any([qb_access_token, qb_realm_id, qb_environment]):
+            credentials = {
+                'access_token': qb_access_token,
+                'realm_id': qb_realm_id,
+                'environment': qb_environment
+            }
+            request.scope['qb_credentials'] = credentials
+            qb_credentials_context.set(credentials)
+            logger.info(
+                f"QB credentials extracted from SSE headers for realm: {qb_realm_id or 'env'}")
+
         async with sse.connect_sse(
             request.scope, request.receive, request._send
         ) as streams:
@@ -212,8 +227,31 @@ def main(
     async def handle_streamable_http(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
-        """Handle Streamable HTTP requests."""
+        """Handle Streamable HTTP requests with QuickBooks credential extraction."""
         logger.info("Handling StreamableHTTP request")
+
+        # Extract headers and check for QB credentials
+        headers = dict(scope.get('headers', []))
+        # Convert bytes to string for header values
+        str_headers = {k.decode('utf-8'): v.decode('utf-8')
+                       for k, v in headers.items()}
+
+        # Extract QB credentials from headers
+        qb_access_token, qb_realm_id, qb_environment = session_manager_instance.extract_credentials_from_headers(
+            str_headers)
+
+        # Store credentials in scope for later use
+        if any([qb_access_token, qb_realm_id, qb_environment]):
+            credentials = {
+                'access_token': qb_access_token,
+                'realm_id': qb_realm_id,
+                'environment': qb_environment
+            }
+            scope['qb_credentials'] = credentials
+            qb_credentials_context.set(credentials)
+            logger.info(
+                f"QB credentials extracted from headers for realm: {qb_realm_id or 'env'}")
+
         await session_manager.handle_request(scope, receive, send)
 
     @contextlib.asynccontextmanager
@@ -224,7 +262,7 @@ def main(
             try:
                 yield
             finally:
-                await intuit_service.client.close()
+                await session_manager_instance.cleanup()
                 logger.info("Application shutting down...")
 
     starlette_app = Starlette(
