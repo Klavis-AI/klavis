@@ -1179,7 +1179,7 @@ class InvoiceManager:
         # Build query parameters
         params = {}
         if SendTo:
-            params['SendTo'] = SendTo
+            params['sendTo'] = SendTo
 
         # Send request with POST method (empty body as per API spec)
         response = await self.client._make_request('POST', endpoint, params=params)
