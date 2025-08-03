@@ -24,7 +24,10 @@ from tools.search import SearchTools
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 class RedditMCPServer:
@@ -161,37 +164,51 @@ class RedditMCPServer:
         @self.server.call_tool()
         async def handle_call_tool(name: str, arguments: dict) -> List[types.TextContent]:
             """Handle tool calls and route to appropriate tool module."""
+            logger.info(f"🔧 Tool called: {name} with arguments: {arguments}")
             try:
                 # Route to appropriate tool module based on tool name
                 if name == "search_reddit_posts":
+                    logger.info(f"🔍 Searching Reddit posts for: {arguments.get('query', 'N/A')}")
                     result = await self.search_tools.search_posts(arguments)
                 elif name == "get_subreddit_posts":
+                    logger.info(f"📋 Getting posts from subreddit: {arguments.get('subreddit', 'N/A')}")
                     result = await self.subreddits_tools.get_posts(arguments)
                 elif name == "get_trending_subreddits":
+                    logger.info("📈 Getting trending subreddits")
                     result = await self.subreddits_tools.get_trending(arguments)
                 elif name == "get_post_details":
+                    logger.info(f"📄 Getting details for post: {arguments.get('post_id', 'N/A')}")
                     result = await self.posts_tools.get_details(arguments)
                 elif name == "get_post_comments":
+                    logger.info(f"💬 Getting comments for post: {arguments.get('post_id', 'N/A')}")
                     result = await self.posts_tools.get_comments(arguments)
                 elif name == "get_user_profile":
+                    logger.info(f"👤 Getting profile for user: {arguments.get('username', 'N/A')}")
                     result = await self.users_tools.get_profile(arguments)
                 else:
+                    logger.warning(f"❌ Unknown tool requested: {name}")
                     return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
                 
                 # Convert result to TextContent
                 import json
+                logger.info(f"✅ Tool {name} completed successfully")
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
                     
             except Exception as e:
-                logger.error(f"Error calling tool {name}: {str(e)}")
+                logger.error(f"❌ Error calling tool {name}: {str(e)}")
                 return [types.TextContent(type="text", text=f"Tool execution failed: {str(e)}")]
 
 async def main():
     """Main entry point for the Reddit MCP server."""
+    logger.info("🚀 Starting Reddit MCP Server...")
+    logger.info("📋 Available tools: search_reddit_posts, get_subreddit_posts, get_trending_subreddits, get_post_details, get_post_comments, get_user_profile")
+    
     # Initialize the server
     server = RedditMCPServer()
+    logger.info("✅ Reddit MCP Server initialized successfully")
     
     # Run the server
+    logger.info("🔄 Server ready to accept connections...")
     async with stdio_server() as (read_stream, write_stream):
         await server.server.run(
             read_stream,
