@@ -1,8 +1,9 @@
+import httpx
 import logging
 import os
 from typing import Tuple, Union, Dict, Any
 from .base import get_onedrive_client
-from .search_n_list import onedrive_list_inside_folder
+from .onedrive_explore import onedrive_list_inside_folder
 import uuid
 
 # Configure logging
@@ -29,7 +30,8 @@ async def onedrive_read_file_content(file_id: str) -> Union[str, Tuple[str, int,
 
     try:
         logger.info(f"Reading content of file ID: {file_id}")
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
 
         if response.ok:
             logger.info(f"Successfully read content of file ID: {file_id}")
@@ -97,7 +99,8 @@ async def onedrive_create_file(
 
         # Step 3: create the file
         url = f"{client['base_url']}/me/drive/items/{parent_folder_id}:/{final_name}:/content"
-        put_response = requests.put(url, headers=client['headers'], data=data or '')
+        async with httpx.AsyncClient() as client:
+            put_response = await client.put(url, headers=client['headers'], data=data or '')
 
         if put_response.ok:
             logger.info(f"Successfully created file '{final_name}' in folder {parent_folder_id}")
@@ -136,10 +139,12 @@ async def onedrive_create_file_in_root(
         logger.info(f"Creating file '{new_file_name}' in root with if_exists={if_exists}")
 
         # Step 1: list files/folders in root
-        existing_items_resp = requests.get(
-            f"{client['base_url']}/me/drive/root/children",
-            headers=client['headers']
-        )
+        async with httpx.AsyncClient() as client:
+            existing_items_resp = await client.get(
+                f"{client['base_url']}/me/drive/root/children",
+                headers=client['headers']
+            )
+
         if not existing_items_resp.ok:
             logger.error(
                 f"Could not list root contents: {existing_items_resp.status_code} - {existing_items_resp.text}")
@@ -166,7 +171,8 @@ async def onedrive_create_file_in_root(
 
         # Step 3: create the file
         url = f"{client['base_url']}/me/drive/root:/{final_name}:/content"
-        put_response = requests.put(url, headers=client['headers'], data=data or '')
+        async with httpx.AsyncClient() as client:
+            put_response = await client.put(url, headers=client['headers'], data=data or '')
 
         if put_response.ok:
             logger.info(f"Successfully created file '{final_name}' in root")

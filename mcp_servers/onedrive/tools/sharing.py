@@ -1,3 +1,4 @@
+import httpx
 import logging
 from typing import Tuple, Union, Dict, Any, Literal
 from .base import get_onedrive_client
@@ -22,8 +23,8 @@ async def onedrive_list_shared_items() -> Union[Tuple[str, Dict[str, Any]], Tupl
 
     try:
         logger.info("Requesting list of shared items")
-        response = requests.get(url, headers=client['headers'])
-
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
         if response.ok:
             items = response.json()
             item_count = len(items.get('value', []))

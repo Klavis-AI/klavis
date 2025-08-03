@@ -1,3 +1,4 @@
+import httpx
 import logging
 from typing import Tuple, Union, Dict, List, Any
 from .base import get_onedrive_client
@@ -22,7 +23,8 @@ async def onedrive_list_root_files_folders() -> Union[Tuple[str, Dict[str, Any]]
 
     try:
         logger.info("Listing files and folders in root directory")
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
 
         if response.ok:
             files = response.json()
@@ -55,7 +57,8 @@ async def onedrive_list_inside_folder(folder_id: str) -> Union[Tuple[str, Dict[s
 
     try:
         logger.info(f"Listing items inside folder ID: {folder_id}")
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
 
         if response.ok:
             items = response.json()
@@ -88,7 +91,8 @@ async def onedrive_search_item_by_name(itemname: str) -> Union[Tuple[str, Dict[s
 
     try:
         logger.info(f"Searching for items with name: {itemname}")
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
 
         if response.ok:
             items = response.json()
@@ -121,7 +125,8 @@ async def onedrive_search_folder_by_name(folder_name: str) -> Union[Tuple[str, L
 
     try:
         logger.info(f"Searching for folders with name: {folder_name}")
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
 
         if response.ok:
             data = response.json()
@@ -155,8 +160,8 @@ async def onedrive_get_item_by_id(item_id: str) -> Union[Dict[str, Any], Tuple[s
 
     try:
         logger.info(f"Getting item with ID: {item_id}")
-        response = requests.get(url, headers=client['headers'])
-
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=client['headers'])
         if response.ok:
             data = response.json()
             logger.info(f"Successfully retrieved item: {data.get('name', 'unknown')}")

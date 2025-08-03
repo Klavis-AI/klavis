@@ -1,3 +1,4 @@
+import httpx
 import logging
 from typing import Tuple, Union, Dict, Any
 from .base import get_onedrive_client
@@ -37,11 +38,12 @@ async def onedrive_create_folder(
 
     try:
         logger.info(f"Creating folder '{new_folder_name}' in parent {parent_folder_id} with behavior={behavior}")
-        response = requests.post(
-            url,
-            headers={**client['headers'], "Content-Type": "application/json"},
-            json=data
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers={**client['headers'], "Content-Type": "application/json"},
+                json=data
+            )
 
         if response.ok:
             logger.info(f"Successfully created folder '{new_folder_name}' in {parent_folder_id}")
@@ -81,11 +83,8 @@ async def onedrive_create_folder_in_root(
 
     try:
         logger.info(f"Creating folder '{folder_name}' in root directory")
-        response = requests.post(
-            url,
-            headers=client['headers'],
-            json=body
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=client['headers'], json=body)
 
         if response.ok:
             logger.info(f"Successfully created folder '{folder_name}' in root")

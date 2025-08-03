@@ -2,7 +2,7 @@ from .base import (
     auth_token_context
 )
 
-from .both_item import (
+from .combined_files_and_folder import (
     onedrive_rename_item,
     onedrive_move_item,
     onedrive_delete_item
@@ -19,7 +19,7 @@ from .folders import (
     onedrive_create_folder_in_root
 )
 
-from .search_n_list import (
+from .onedrive_explore import (
     onedrive_list_root_files_folders,
     onedrive_list_inside_folder,
     onedrive_search_item_by_name,

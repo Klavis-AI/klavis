@@ -28,11 +28,13 @@ async def onedrive_rename_item(file_id: str, new_name: str) -> Union[Tuple[str, 
 
     try:
         logger.info(f"Renaming item {file_id} to {new_name}")
-        response = requests.patch(
-            url,
-            headers={**client['headers'], "Content-Type": "application/json"},
-            json=data
-        )
+
+        async with httpx.AsyncClient() as client:
+            response = await client.patch(
+                url,
+                headers={ **client['headers'], "Content-Type": "application/json"},
+                json=data
+            )
 
         if response.ok:
             logger.info(f"Successfully renamed item {file_id}")
@@ -68,7 +70,8 @@ async def onedrive_move_item(item_id: str, new_parent_id: str) -> Union[Tuple[st
 
     try:
         logger.info(f"Moving item {item_id} to parent {new_parent_id}")
-        response = requests.patch(url, headers=client['headers'], json=body)
+        async with httpx.AsyncClient() as client:
+            response = await client.patch(url, headers=client['headers'], json=body)
 
         if response.ok:
             logger.info(f"Successfully moved item {item_id}")
@@ -100,7 +103,8 @@ async def onedrive_delete_item(item_id: str) -> Union[Tuple[str], Tuple[str, int
 
     try:
         logger.info(f"Deleting item {item_id}")
-        response = requests.delete(url, headers=client['headers'])
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(url, headers=client['headers'])
 
         if response.status_code == 204:
             logger.info(f"Successfully deleted item {item_id}")
