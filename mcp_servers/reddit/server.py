@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
-
+import mcp.types as types
 
 from tools.posts import PostsTools
 from tools.subreddits import SubredditsTools
@@ -46,16 +46,15 @@ class RedditMCPServer:
     def _register_tools(self):
         """Register all Reddit MCP tools."""
         
-        # Search tools
         @self.server.list_tools()
-        async def handle_list_tools():
+        async def handle_list_tools() -> list[types.Tool]:
             """List all available Reddit MCP tools."""
             return [
                 # Search tools
-                {
-                    "name": "search_reddit_posts",
-                    "description": "Search for posts across Reddit using keywords or phrases. Returns relevant posts with titles, authors, scores, and URLs.",
-                    "inputSchema": {
+                types.Tool(
+                    name="search_reddit_posts",
+                    description="Search for posts across Reddit using keywords or phrases. Returns relevant posts with titles, authors, scores, and URLs.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "query": {
@@ -70,13 +69,13 @@ class RedditMCPServer:
                         },
                         "required": ["query"]
                     }
-                },
+                ),
                 
                 # Subreddit tools
-                {
-                    "name": "get_subreddit_posts",
-                    "description": "Get the latest posts from a specific subreddit. Returns posts with titles, authors, scores, and engagement metrics.",
-                    "inputSchema": {
+                types.Tool(
+                    name="get_subreddit_posts",
+                    description="Get the latest posts from a specific subreddit. Returns posts with titles, authors, scores, and engagement metrics.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "subreddit": {
@@ -91,11 +90,11 @@ class RedditMCPServer:
                         },
                         "required": ["subreddit"]
                     }
-                },
-                {
-                    "name": "get_trending_subreddits",
-                    "description": "Get currently trending subreddits. Returns popular subreddits with subscriber counts and descriptions.",
-                    "inputSchema": {
+                ),
+                types.Tool(
+                    name="get_trending_subreddits",
+                    description="Get currently trending subreddits. Returns popular subreddits with subscriber counts and descriptions.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "limit": {
@@ -105,13 +104,13 @@ class RedditMCPServer:
                             }
                         }
                     }
-                },
+                ),
                 
                 # Post detail tools
-                {
-                    "name": "get_post_details",
-                    "description": "Get detailed information about a specific Reddit post including full text, author, score, and engagement metrics.",
-                    "inputSchema": {
+                types.Tool(
+                    name="get_post_details",
+                    description="Get detailed information about a specific Reddit post including full text, author, score, and engagement metrics.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "post_id": {
@@ -121,11 +120,11 @@ class RedditMCPServer:
                         },
                         "required": ["post_id"]
                     }
-                },
-                {
-                    "name": "get_post_comments",
-                    "description": "Get comments for a specific Reddit post. Returns comment threads with authors, scores, and text content.",
-                    "inputSchema": {
+                ),
+                types.Tool(
+                    name="get_post_comments",
+                    description="Get comments for a specific Reddit post. Returns comment threads with authors, scores, and text content.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "post_id": {
@@ -140,13 +139,13 @@ class RedditMCPServer:
                         },
                         "required": ["post_id"]
                     }
-                },
+                ),
                 
                 # User tools
-                {
-                    "name": "get_user_profile",
-                    "description": "Get information about a Reddit user including karma, account age, and recent activity.",
-                    "inputSchema": {
+                types.Tool(
+                    name="get_user_profile",
+                    description="Get information about a Reddit user including karma, account age, and recent activity.",
+                    inputSchema={
                         "type": "object",
                         "properties": {
                             "username": {
@@ -156,32 +155,36 @@ class RedditMCPServer:
                         },
                         "required": ["username"]
                     }
-                }
+                )
             ]
         
         @self.server.call_tool()
-        async def handle_call_tool(name: str, arguments: dict):
+        async def handle_call_tool(name: str, arguments: dict) -> List[types.TextContent]:
             """Handle tool calls and route to appropriate tool module."""
             try:
                 # Route to appropriate tool module based on tool name
                 if name == "search_reddit_posts":
-                    return await self.search_tools.search_posts(arguments)
+                    result = await self.search_tools.search_posts(arguments)
                 elif name == "get_subreddit_posts":
-                    return await self.subreddits_tools.get_posts(arguments)
+                    result = await self.subreddits_tools.get_posts(arguments)
                 elif name == "get_trending_subreddits":
-                    return await self.subreddits_tools.get_trending(arguments)
+                    result = await self.subreddits_tools.get_trending(arguments)
                 elif name == "get_post_details":
-                    return await self.posts_tools.get_details(arguments)
+                    result = await self.posts_tools.get_details(arguments)
                 elif name == "get_post_comments":
-                    return await self.posts_tools.get_comments(arguments)
+                    result = await self.posts_tools.get_comments(arguments)
                 elif name == "get_user_profile":
-                    return await self.users_tools.get_profile(arguments)
+                    result = await self.users_tools.get_profile(arguments)
                 else:
-                    return [{"error": f"Unknown tool: {name}"}]
+                    return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+                
+                # Convert result to TextContent
+                import json
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
                     
             except Exception as e:
                 logger.error(f"Error calling tool {name}: {str(e)}")
-                return [{"error": f"Tool execution failed: {str(e)}"}]
+                return [types.TextContent(type="text", text=f"Tool execution failed: {str(e)}")]
 
 async def main():
     """Main entry point for the Reddit MCP server."""
@@ -193,13 +196,7 @@ async def main():
         await server.server.run(
             read_stream,
             write_stream,
-            InitializationOptions(
-                server_name="reddit-mcp",
-                server_version="1.0.0",
-                capabilities={
-                    "tools": {}
-                }
-            ),
+            server.server.create_initialization_options()
         )
 
 if __name__ == "__main__":
