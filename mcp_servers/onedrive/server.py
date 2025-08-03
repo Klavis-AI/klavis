@@ -4,7 +4,6 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict, List
-import asyncio
 
 import click
 import mcp.types as types
@@ -28,7 +27,6 @@ from tools import (
 
     # Files
     onedrive_read_file_content,
-    onedrive_overwrite_file_by_id,
     onedrive_create_file,
     onedrive_create_file_in_root,
 
@@ -45,7 +43,6 @@ from tools import (
 
     #Sharing
     onedrive_list_shared_items,
-    onedrive_create_share_link
 )
 
 
@@ -136,18 +133,6 @@ def main(
                         "file_id": {"type": "string", "description": "ID of the file to read"}
                     },
                     "required": ["file_id"]
-                }
-            ),
-            types.Tool(
-                name="onedrive_overwrite_file_by_id",
-                description="Overwrite the content of an existing file in OneDrive.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "file_id": {"type": "string", "description": "ID of the file to overwrite"},
-                        "new_content": {"type": "string", "description": "New content for the file"}
-                    },
-                    "required": ["file_id", "new_content"]
                 }
             ),
 
@@ -283,29 +268,6 @@ def main(
                     "type": "object",
                     "properties": {}
                 }
-            ),
-            types.Tool(
-                name="onedrive_create_share_link",
-                description="Create a sharing link for a OneDrive item.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "item_id": {"type": "string", "description": "ID of the item to share"},
-                        "link_type": {
-                            "type": "string",
-                            "enum": ["view", "edit", "embed"],
-                            "default": "view",
-                            "description": "Link permissions: 'view' (read-only), 'edit' (read-write), 'embed' (embeddable)"
-                        },
-                        "scope": {
-                            "type": "string",
-                            "enum": ["anonymous", "organization"],
-                            "default": "anonymous",
-                            "description": "Link audience: 'anonymous' (anyone), 'organization' (company only)"
-                        }
-                    },
-                    "required": ["item_id"]
-                }
             )
         ]
 
@@ -391,27 +353,6 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error reading file content: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "onedrive_overwrite_file_by_id":
-            try:
-                result = await onedrive_overwrite_file_by_id(
-                    file_id=arguments["file_id"],
-                    new_content=arguments["new_content"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error overwriting file: {e}")
                 return [
                     types.TextContent(
                         type="text",
@@ -619,28 +560,6 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error listing shared items: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "onedrive_create_share_link":
-            try:
-                result = await onedrive_create_share_link(
-                    item_id=arguments["item_id"],
-                    link_type=arguments.get("link_type", "view"),
-                    scope=arguments.get("scope", "anonymous")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error creating share link: {e}")
                 return [
                     types.TextContent(
                         type="text",

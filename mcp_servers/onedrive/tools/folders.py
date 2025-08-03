@@ -1,4 +1,3 @@
-import requests
 import logging
 from typing import Tuple, Union, Dict, Any
 from .base import get_onedrive_client

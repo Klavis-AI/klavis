@@ -1,5 +1,5 @@
+import httpx
 import logging
-import requests
 from typing import Tuple, Union
 from .base import get_onedrive_client
 

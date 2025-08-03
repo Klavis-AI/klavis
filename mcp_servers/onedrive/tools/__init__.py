@@ -10,7 +10,6 @@ from .both_item import (
 
 from .files import (
     onedrive_read_file_content,
-    onedrive_overwrite_file_by_id,
     onedrive_create_file,
     onedrive_create_file_in_root
 )
@@ -29,8 +28,7 @@ from .search_n_list import (
 )
 
 from .sharing import (
-    onedrive_list_shared_items,
-    onedrive_create_share_link
+    onedrive_list_shared_items
 )
 
 __all__ = [
@@ -44,7 +42,6 @@ __all__ = [
 
     # Files
     "onedrive_read_file_content",
-    "onedrive_overwrite_file_by_id",
     "onedrive_create_file",
     "onedrive_create_file_in_root",
 
@@ -60,6 +57,5 @@ __all__ = [
     "onedrive_get_item_by_id",
 
     # Sharing
-    "onedrive_list_shared_items",
-    "onedrive_create_share_link"
+    "onedrive_list_shared_items"
 ]

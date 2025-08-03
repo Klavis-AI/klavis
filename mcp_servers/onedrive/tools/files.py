@@ -1,4 +1,3 @@
-import requests
 import logging
 import os
 from typing import Tuple, Union, Dict, Any
@@ -41,41 +40,6 @@ async def onedrive_read_file_content(file_id: str) -> Union[str, Tuple[str, int,
     except Exception as e:
         logger.error(f"Exception occurred while reading file content: {e}")
         return ("Error:", str(e))
-
-
-async def onedrive_overwrite_file_by_id(file_id: str, new_content: str) -> Union[Tuple[str, Dict], Tuple[str, int, str]]:
-    """
-    Overwrite the content of an existing file in OneDrive.
-
-    Parameters:
-    - file_id: The ID of the file to overwrite
-    - new_content: The new content to write to the file
-
-    Returns:
-    - Tuple with success message and response JSON if successful
-    - Tuple with error message, status code, and response text if failed
-    """
-    client = get_onedrive_client()
-    if not client:
-        logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
-
-    url = f"{client['base_url']}/me/drive/items/{file_id}/content"
-
-    try:
-        logger.info(f"Overwriting content of file ID: {file_id}")
-        response = requests.put(url, headers=client['headers'], data=new_content.encode('utf-8'))
-
-        if response.ok:
-            logger.info(f"Successfully overwrote file ID: {file_id}")
-            return ("File overwritten successfully:", response.json())
-        else:
-            logger.error(f"Error overwriting file {file_id}: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
-    except Exception as e:
-        logger.error(f"Exception occurred while overwriting file: {e}")
-        return ("Error:", str(e))
-
 
 async def onedrive_create_file(
         parent_folder_id: str,
