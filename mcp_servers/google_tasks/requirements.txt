@@ -3,3 +3,6 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 python-dotenv
+click
+mcp>=1.12.0
+starlette>=0.31.0
