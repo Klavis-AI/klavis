@@ -48,7 +48,7 @@ class RedditMCPServer:
         
         # Search tools
         @self.server.list_tools()
-        async def handle_list_tools() -> list[dict]:
+        async def handle_list_tools():
             """List all available Reddit MCP tools."""
             return [
                 # Search tools
@@ -160,7 +160,7 @@ class RedditMCPServer:
             ]
         
         @self.server.call_tool()
-        async def handle_call_tool(name: str, arguments: dict) -> list[dict]:
+        async def handle_call_tool(name: str, arguments: dict):
             """Handle tool calls and route to appropriate tool module."""
             try:
                 # Route to appropriate tool module based on tool name
