@@ -151,6 +151,80 @@ def delete_task(task_list_id: str, task_id: str) -> Dict[str, Any]:
         logger.exception("Error deleting task")
         return _error_from_http(e, "Failed to delete task")
 
+def find_task_list(title: str) -> List[Dict[str, Any]]:
+    service = _get_service()
+    items = service.tasklists().list(maxResults=100).execute().get("items", [])
+    title_l = title.strip().lower()
+    return [
+        {"id": it["id"], "title": it.get("title", "")}
+        for it in items
+        if it.get("title", "").strip().lower() == title_l
+    ]
+
+def find_tasks_by_title(task_list_id: str, title: str, exact: bool = True) -> List[Dict[str, Any]]:
+    service = _get_service()
+    items = service.tasks().list(tasklist=task_list_id, showCompleted=True, showHidden=True).execute().get("items", [])
+    t = title.strip()
+    t_l = t.lower()
+    out = []
+    for it in items or []:
+        name = it.get("title", "")
+        ok = (name == t) if exact else (t_l in name.lower())
+        if ok:
+            out.append({"id": it["id"], "title": name, "status": it.get("status")})
+    return out
+
+def delete_task_by_title(task_list_id: str, title: str, strategy: str = "one", exact: bool = True) -> Dict[str, Any]:
+    matches = find_tasks_by_title(task_list_id, title, exact)
+    if strategy == "one":
+        if len(matches) != 1:
+            return {"error": f"Expected exactly one match, found {len(matches)}", "matches": matches}
+        to_delete = [matches[0]["id"]]
+    elif strategy == "first":
+        if not matches:
+            return {"deleted": [], "matches": []}
+        to_delete = [matches[0]["id"]]
+    elif strategy == "all":
+        to_delete = [m["id"] for m in matches]
+    else:
+        return {"error": f"Unknown strategy '{strategy}'", "matches": matches}
+
+    deleted = []
+    for tid in to_delete:
+        try:
+            delete_task(task_list_id, tid)
+            deleted.append(tid)
+        except Exception as e:
+            return {"error": str(e), "deleted": deleted, "remaining": to_delete[len(deleted):]}
+    return {"deleted": deleted, "matches": matches}
+
+def find_task_list_id_by_title(
+    list_title: str,
+    create_if_missing: bool = False,
+) -> tuple[Optional[str], Dict[str, Any]]:
+    """Return (task_list_id, meta). meta may contain error/created/matches."""
+    lists = list_task_lists()
+    if isinstance(lists, dict) and "error" in lists:
+        return None, {"error": lists["error"]}
+
+    matches = [l for l in lists if l.get("title") == list_title]
+    if not matches:
+        if create_if_missing:
+            created = create_task_list(list_title)
+            if isinstance(created, dict) and "id" in created:
+                return created["id"], {"created": True}
+            return None, {"error": "Failed to create list", "details": created}
+        return None, {"error": "List not found", "candidates": [l.get("title") for l in lists]}
+
+    if len(matches) > 1:
+        return None, {
+            "error": "List title is ambiguous",
+            "matches": [{"id": l.get("id"), "title": l.get("title")} for l in matches],
+        }
+
+    return matches[0].get("id"), {}
+
+
 
 # =========================
 # Simple per-tool rate limiter
@@ -205,14 +279,31 @@ def main(
                 inputSchema={"type": "object", "properties": {}, "required": []},
             ),
             types.Tool(
-                name="gt_create_task_list",
-                description="Create a new Google Task list with the given title.",
+                name="gt_create_task",
+                description="Create a task in the specified task list (by id or title).",
                 inputSchema={
                     "type": "object",
-                    "required": ["title"],
                     "properties": {
-                        "title": {"type": "string", "description": "Title for the new task list."}
+                        "task_list_id":  {"type": "string", "description": "ID of the task list."},
+                        "task_list_title":{"type": "string", "description": "Title of the task list."},
+                        "title":         {"type": "string", "description": "Task title."},
+                        "notes":         {"type": "string", "description": "Optional notes."},
+                        "create_list_if_missing": {
+                            "type": "boolean",
+                            "description": "If true and list_title not found, create the list.",
+                            "default": False
+                        }
                     },
+                    # Require title + (id or title)
+                    "allOf": [
+                        {"required": ["title"]},
+                        {
+                            "anyOf": [
+                                {"required": ["task_list_id"]},
+                                {"required": ["task_list_title"]}
+                            ]
+                        }
+                    ]
                 },
             ),
             types.Tool(
@@ -270,6 +361,34 @@ def main(
                     },
                 },
             ),
+            types.Tool(
+                name="gt_find_task_list",
+                description="Find task lists by exact title. Returns possible matches with ids.",
+                inputSchema={"type":"object","required":["title"],
+                    "properties":{"title":{"type":"string"}}},
+            ),
+            types.Tool(
+                name="gt_find_tasks",
+                description="Find tasks by title in a list. Returns matches with ids.",
+                inputSchema={"type":"object","required":["task_list_id","title"],
+                    "properties":{
+                        "task_list_id":{"type":"string"},
+                        "title":{"type":"string"},
+                        "exact":{"type":"boolean","default":True}
+                    }},
+            ),
+            types.Tool(
+                name="gt_delete_task_by_title",
+                description="Resolve by title then delete. Use strategy: one|first|all.",
+                inputSchema={"type":"object","required":["task_list_id","title"],
+                    "properties":{
+                        "task_list_id":{"type":"string"},
+                        "title":{"type":"string"},
+                        "strategy":{"type":"string","enum":["one","first","all"],"default":"one"},
+                        "exact":{"type":"boolean","default":True}
+                    }},
+            ),
+
         ]
 
     # ---- tool dispatcher ----
@@ -299,9 +418,22 @@ def main(
 
             elif name == "gt_create_task":
                 task_list_id = arguments.get("task_list_id")
+                task_list_title = arguments.get("task_list_title")
                 title = arguments.get("title")
                 notes = arguments.get("notes", "")
+                create_if_missing = bool(arguments.get("create_list_if_missing", False))
+
+                if not task_list_id:
+                    if not task_list_title:
+                        return [types.TextContent(type="text", text=json.dumps({
+                            "error": "Provide task_list_id or task_list_title"
+                        }))]
+                    task_list_id, meta = find_task_list_id_by_title(task_list_title, create_if_missing)
+                    if not task_list_id:
+                        return [types.TextContent(type="text", text=json.dumps(meta))]
+
                 result = await _run_sync(create_task, task_list_id, title, notes)
+                return [types.TextContent(type="text", text=json.dumps(result))]
 
             elif name == "gt_update_task":
                 task_list_id = arguments.get("task_list_id")
@@ -316,6 +448,25 @@ def main(
                 task_id = arguments.get("task_id")
                 result = await _run_sync(delete_task, task_list_id, task_id)
 
+            elif name == "gt_find_task_list":
+                result = await _run_sync(find_task_list, arguments.get("title"))
+
+            elif name == "gt_find_tasks":
+                result = await _run_sync(
+                    find_tasks_by_title,
+                    arguments.get("task_list_id"),
+                    arguments.get("title"),
+                    arguments.get("exact", True),
+                )
+
+            elif name == "gt_delete_task_by_title":
+                result = await _run_sync(
+                    delete_task_by_title,
+                    arguments.get("task_list_id"),
+                    arguments.get("title"),
+                    arguments.get("strategy", "one"),
+                    arguments.get("exact", True),
+                )
             else:
                 result = {"error": f"Unknown tool: {name}"}
 

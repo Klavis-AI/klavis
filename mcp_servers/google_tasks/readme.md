@@ -1,38 +1,48 @@
 # Google Tasks MCP Server
 
 An **MCP (Model Context Protocol)** server that exposes **atomic tools** for Google Tasks.
-It speaks MCP over **Streamable HTTP** (`/mcp/`) and supports **SSE** (`/sse`).
-Designed to be consumed by AI agents (VS Code OpenAI Chat / Copilot Chat with MCP), or tested directly with `curl`.
+It speaks MCP over **Streamable HTTP** (`/mcp/`) and also supports **SSE** (`/sse`).
+Use it from VS Code’s OpenAI/Copilot chat (with MCP enabled) or test directly with `curl`.
 
 ---
 
 ## Features
 
-* **Atomic tools** (one job each): list task lists, create task list, list tasks, create task, update task, delete task.
+* **Atomic tools**: list task lists, create task list, list tasks, create task, update task, delete task.
+* **Name-based arguments**: use **titles** instead of IDs (see below).
 * **Rate limiting** (per tool, configurable).
-* **Stateless** HTTP server; authenticates to Google via OAuth **refresh token**.
+* **Stateless** OAuth2 refresh-token auth to Google.
 * **Dual transports**: SSE (`/sse`) and Streamable HTTP (`/mcp/`).
 
 ---
 
-## Project Layout
+## Name-based arguments (easier than IDs)
+
+Anywhere you’d normally supply an ID, you can provide a **title**:
+
+* For lists, pass **`task_list_title`** instead of `task_list_id`.
+* For tasks, pass **`task_title`** instead of `task_id` (together with a list id/title).
+
+Resolution rules:
+
+* Title match is **case-insensitive, exact**.
+* If both id and title are provided, the **id wins**.
+* If multiple tasks share the same title in a list, the call fails with an error listing candidates.
+* If the list or task title isn’t found, you get a clear “not found” error.
+
+---
+
+## Project layout
 
 ```
 .
-├── server.py            # MCP server (single file)
-├── requirements.txt     # Python deps (includes mcp, starlette, google client)
+├── server.py
+├── requirements.txt
 ├── Dockerfile
-├── .env.example         # sample env file
-├── .vscode/mcp.json     # VS Code MCP client config (example)
-└── proof/               # screenshots proving each tool works
-    ├── gt_list_task_lists.png
-    ├── gt_create_task_list.png
-    ├── gt_list_tasks.png
-    ├── gt_create_task.png
-    ├── gt_update_task.png
-    ├── gt_update_task_result.png
-    ├── gt_delete_task.png
-    └── gt_delete_task_result.png
+├── .env.example
+├── .vscode/
+│   └── mcp.json        # example VS Code MCP client config
+└── proof/              # screenshots (“proof of correctness”)
 ```
 
 ---
@@ -40,16 +50,16 @@ Designed to be consumed by AI agents (VS Code OpenAI Chat / Copilot Chat with MC
 ## Requirements
 
 * Python 3.11+ (or Docker)
-* Google Cloud **OAuth Client (Desktop App)** with the **Tasks** scope granted.
-* A refresh token for the scope: `https://www.googleapis.com/auth/tasks`
+* A Google OAuth **Desktop** client with the **Tasks** scope
+* A refresh token for `https://www.googleapis.com/auth/tasks`
 
-> **Tip**: Create an OAuth client in Google Cloud Console → OAuth consent (user type External is fine for testing) → Credentials → “Create credentials → OAuth client ID → Desktop”. Authorize once (via your own small script or OAuth Playground) to obtain a **refresh token**.
+Create an OAuth client in Google Cloud Console → OAuth consent → Credentials → “Create credentials → OAuth client ID → Desktop”, then obtain a refresh token (e.g., via OAuth Playground).
 
 ---
 
 ## Environment
 
-Create `.env` (see `.env.example`):
+Create `.env` from `.env.example`:
 
 ```env
 GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
@@ -58,30 +68,27 @@ GOOGLE_REFRESH_TOKEN=your_refresh_token
 
 # Optional
 GOOGLE_TASKS_MCP_SERVER_PORT=5000
-GOOGLE_TASKS_RATE_MAX=60       # max calls
-GOOGLE_TASKS_RATE_PERIOD=60    # in seconds
+GOOGLE_TASKS_RATE_MAX=60
+GOOGLE_TASKS_RATE_PERIOD=60
 ```
 
 ---
 
-## Install & Run
+## Install & run
 
-### Option A: Local Python
+**Local Python**
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Run
 python server.py \
-  --port 5000 \
-  --log-level INFO \
-  --rate-max 60 \
-  --rate-period 60
+  --port 5000 --log-level INFO \
+  --rate-max 60 --rate-period 60
 ```
 
-You should see:
+Expected log:
 
 ```
 Server starting on port 5000 with dual transports:
@@ -90,43 +97,36 @@ Server starting on port 5000 with dual transports:
 Uvicorn running on http://0.0.0.0:5000
 ```
 
-### Option B: Docker
+**Docker**
 
 ```bash
 docker build -t google-tasks-server .
 docker run --rm -it --env-file .env -p 5000:5000 google-tasks-server
 ```
 
+> If port 5000 is taken, use another host port (e.g., `-p 5001:5000`) and update the client URL accordingly.
+
 ---
 
-## MCP Tools
+## Tools (input shapes)
 
-The server registers these tools:
-
-| Tool name             | What it does                       | Required args             | Optional args                |
-| --------------------- | ---------------------------------- | ------------------------- | ---------------------------- |
-| `gt_list_task_lists`  | List all Google Task lists         | —                         | —                            |
-| `gt_create_task_list` | Create a task list                 | `title`                   | —                            |
-| `gt_list_tasks`       | List tasks in a task list          | `task_list_id`            | —                            |
-| `gt_create_task`      | Create a task                      | `task_list_id`, `title`   | `notes`                      |
-| `gt_update_task`      | Update a task (title/notes/status) | `task_list_id`, `task_id` | `title`, `notes`, `status`\* |
-| `gt_delete_task`      | Delete a task                      | `task_list_id`, `task_id` | —                            |
-
-\* `status` must be one of: `needsAction`, `completed`.
-
-**Rate limiting:** Per tool; defaults to `60` calls per `60` seconds (tunable via env or CLI). When exceeded the server returns a JSON error like:
-
-```json
-{"error":"Rate limit exceeded for 'gt_create_task': 60 calls per 60s."}
-```
+| Tool                  | What it does              | Required                                                                                 | Optional                                                  |
+| --------------------- | ------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `gt_list_task_lists`  | List all task lists       | —                                                                                        | —                                                         |
+| `gt_create_task_list` | Create a new list         | `title`                                                                                  | —                                                         |
+| `gt_list_tasks`       | List tasks in a list      | **one of** `task_list_id` or `task_list_title`                                           | —                                                         |
+| `gt_create_task`      | Create a task             | **one of** `task_list_id` or `task_list_title`, `title`                                  | `notes`                                                   |
+| `gt_update_task`      | Update title/notes/status | **one of** (`task_list_id` or `task_list_title`), **one of** (`task_id` or `task_title`) | `title`, `notes`, `status` = `needsAction` \| `completed` |
+| `gt_delete_task`      | Delete a task             | **one of** (`task_list_id` or `task_list_title`), **one of** (`task_id` or `task_title`) | —                                                         |
 
 ---
 
 ## Testing with `curl`
 
-> **Important**: Streamable HTTP requires the client to **accept both** `application/json` and `text/event-stream`.
+> **Important**: Accept **both** `application/json` and `text/event-stream`.
+> Use the **trailing slash** on `/mcp/`.
 
-### 1) List tools
+**List tools**
 
 ```bash
 curl -N \
@@ -136,101 +136,73 @@ curl -N \
   http://localhost:5000/mcp/
 ```
 
-### 2) Call a tool
-
-**List Task Lists**
+**List task lists**
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d '{
-        "jsonrpc":"2.0",
-        "id":"2",
-        "method":"tools/call",
-        "params":{"name":"gt_list_task_lists","arguments":{}}
-      }' \
+  -d '{"jsonrpc":"2.0","id":"2","method":"tools/call",
+       "params":{"name":"gt_list_task_lists","arguments":{}}}' \
   http://localhost:5000/mcp/
 ```
 
-**Create Task List**
+**Create list “MCP Test”**
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d '{
-        "jsonrpc":"2.0",
-        "id":"3",
-        "method":"tools/call",
-        "params":{"name":"gt_create_task_list","arguments":{"title":"MCP Test"}}
-      }' \
+  -d '{"jsonrpc":"2.0","id":"3","method":"tools/call",
+       "params":{"name":"gt_create_task_list",
+                 "arguments":{"title":"MCP Test"}}}' \
   http://localhost:5000/mcp/
 ```
 
-**Create Task**
+**Create task by *list title*** (“Write proof screenshots” in “MCP Test”) — *name-based*
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d "{
-        \"jsonrpc\":\"2.0\",
-        \"id\":\"4\",
-        \"method\":\"tools/call\",
-        \"params\":{\"name\":\"gt_create_task\",
-          \"arguments\":{\"task_list_id\":\"<LIST_ID>\",\"title\":\"Write proof screenshots\",\"notes\":\"via MCP\"}
-        }
-      }" \
+  -d '{"jsonrpc":"2.0","id":"4","method":"tools/call",
+       "params":{"name":"gt_create_task",
+                 "arguments":{"task_list_title":"MCP Test",
+                              "title":"Write proof screenshots",
+                              "notes":"via MCP"}}}' \
   http://localhost:5000/mcp/
 ```
 
-**List Tasks**
+**List tasks by *list title*** — *name-based*
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d "{
-        \"jsonrpc\":\"2.0\",
-        \"id\":\"5\",
-        \"method\":\"tools/call\",
-        \"params\":{\"name\":\"gt_list_tasks\",\"arguments\":{\"task_list_id\":\"<LIST_ID>\"}}
-      }" \
+  -d '{"jsonrpc":"2.0","id":"5","method":"tools/call",
+       "params":{"name":"gt_list_tasks",
+                 "arguments":{"task_list_title":"MCP Test"}}}' \
   http://localhost:5000/mcp/
 ```
 
-**Update Task (mark completed)**
+**Mark task completed by *titles*** — *name-based*
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d "{
-        \"jsonrpc\":\"2.0\",
-        \"id\":\"6\",
-        \"method\":\"tools/call\",
-        \"params\":{\"name\":\"gt_update_task\",
-          \"arguments\":{\"task_list_id\":\"<LIST_ID>\",\"task_id\":\"<TASK_ID>\",\"status\":\"completed\"}
-        }
-      }" \
+  -d '{"jsonrpc":"2.0","id":"6","method":"tools/call",
+       "params":{"name":"gt_update_task",
+                 "arguments":{"task_list_title":"MCP Test",
+                              "task_title":"Write proof screenshots",
+                              "status":"completed"}}}' \
   http://localhost:5000/mcp/
 ```
 
-**Delete Task**
+**Delete task by *titles*** — *name-based*
 
 ```bash
-curl -N \
-  -H "Content-Type: application/json" \
+curl -N -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d "{
-        \"jsonrpc\":\"2.0\",
-        \"id\":\"7\",
-        \"method\":\"tools/call\",
-        \"params\":{\"name\":\"gt_delete_task\",
-          \"arguments\":{\"task_list_id\":\"<LIST_ID>\",\"task_id\":\"<TASK_ID>\"}
-        }
-      }" \
+  -d '{"jsonrpc":"2.0","id":"7","method":"tools/call",
+       "params":{"name":"gt_delete_task",
+                 "arguments":{"task_list_title":"MCP Test",
+                              "task_title":"Write proof screenshots"}}}' \
   http://localhost:5000/mcp/
 ```
 
@@ -238,8 +210,7 @@ curl -N \
 
 ## Using in VS Code (MCP)
 
-1. Ensure your server is running on port `5000`.
-
+1. Make sure the server is running (see logs for `/mcp` and `/sse`).
 2. Create `.vscode/mcp.json`:
 
 ```json
@@ -253,73 +224,89 @@ curl -N \
 }
 ```
 
-3. Open **Chat**:
+3. Open **OpenAI Chat** (swirl icon) or **Copilot Chat**:
 
-   * **OpenAI Chat extension** → set **Agent** to a GPT model (e.g., GPT-4o)
-     or
-   * **GitHub Copilot Chat** (with MCP support).
+   * Pick an Agent/Model (e.g., GPT-4o).
+   * Click the **Tools** (beaker) icon and enable **googleTasks**.
 
-4. Click the **Tools** (beaker) icon → **enable** `googleTasks`.
+4. Natural prompts you can use:
 
-5. Try natural prompts:
+   * “List my Google Task lists.”
+   * “Create a task list called ‘MCP Test’.”
+   * “Create a task ‘Write proof screenshots’ in the list ‘MCP Test’.”
+   * “Show tasks in ‘MCP Test’.”
+   * “Mark ‘Write proof screenshots’ done in ‘MCP Test’.”
+   * “Delete the task ‘Write proof screenshots’ in ‘MCP Test’.”
 
-   * “**List my Google Task lists.**”
-   * “**Create a task list called ‘MCP Test’.**”
-   * “**Create a task ‘Write proof screenshots’ in list `<LIST_ID>`.**”
-   * “**Show tasks in `<LIST_ID>`.**”
-   * “**Mark task `<TASK_ID>` completed.**”
-   * “**Delete task `<TASK_ID>` from `<LIST_ID>`.**”
-
-> Some chat clients show a **Continue** confirmation before executing a tool. That’s expected. You can turn it off in the client settings if you prefer.
+> Some clients ask to **Continue** before invoking a tool—that’s expected and can often be disabled in settings.
 
 ---
 
-## Proof of Correctness
+## Proof of correctness (screenshots)
 
-The `proof/` folder contains screenshots for each tool:
+**List & create**
 
-* `gt_list_task_lists.png`
-* `gt_create_task_list.png`
-* `gt_list_tasks.png`
-* `gt_create_task.png`
-* `gt_update_task.png` and `gt_update_task_result.png`
-* `gt_delete_task.png` and `gt_delete_task_result.png`
+![List task lists](proof/gt_list_task_lists.png)
+![Create task list](proof/gt_create_task_list.png)
 
-Each shows a natural-language request, the server/tool invoked, and the result.
+**Create task (by id and by title)**
+
+![Create task (id)](proof/gt_create_task.png)
+![Create task by list title](proof/gt_create_task_by_list_title.png)
+
+**List tasks**
+
+![List tasks](proof/gt_list_tasks.png)
+
+**Update task (by id and by title)**
+
+![Update task (id)](proof/gt_update_task.png)
+![Update task result (id)](proof/gt_update_task_result.png)
+![Update task by title](proof/gt_update_task_by_title.png)
+![Update task by title — result](proof/gt_update_task_by_title_result.png)
+
+**Delete task (by id and by title)**
+
+![Delete task (id)](proof/gt_delete_task.png)
+![Delete task result (id)](proof/gt_delete_task_result.png)
+![Delete task by title](proof/gt_delete_task_by_title.png)
+![Delete task by title — result](proof/gt_delete_task_by_title_result.png)
 
 ---
 
 ## Troubleshooting
 
-* **406 / “Client must accept text/event-stream”**
-  Include both types in `Accept` header:
+* **Port already in use**
+  Stop whatever is listening on `5000`, or run Docker on another host port: `-p 5001:5000` and set URL to `http://localhost:5001/mcp/`.
 
-  ```
-  -H "Accept: application/json, text/event-stream"
-  ```
+* **406 “Client must accept text/event-stream”**
+  Add the correct header: `-H "Accept: application/json, text/event-stream"`.
 
 * **307 redirect / 404**
-  Use the **trailing slash** on `/mcp/` in both `curl` and `.vscode/mcp.json`.
+  Use the **trailing slash**: `/mcp/`.
 
 * **Invalid request parameters**
-  Use MCP methods **`tools/list`** and **`tools/call`** (not `list_tools` etc.).
-  `tools/call` requires: `{"name": "...", "arguments": {...}}`.
+  Use MCP methods `tools/list` and `tools/call`. For `tools/call`, send:
+
+  ```json
+  {"name":"<tool-name>", "arguments": { ... }}
+  ```
+
+* **Google 401/403**
+  Check `.env` values, the refresh token, and that the **Tasks** scope was authorized.
 
 * **Rate limit exceeded**
-  Increase limits with `GOOGLE_TASKS_RATE_MAX` / `GOOGLE_TASKS_RATE_PERIOD`, or wait.
-
-* **Google auth errors (403/401)**
-  Verify `.env` values, refresh token validity, and that the **Tasks** scope was granted.
+  Increase `GOOGLE_TASKS_RATE_MAX` / `GOOGLE_TASKS_RATE_PERIOD`, or wait.
 
 ---
 
-## Security Notes
+## Security
 
-* The server is **stateless** and relies on a **refresh token**. Keep `.env` private.
-* Review rate limits before sharing access beyond local development.
+* The server is **stateless**; protect your `.env` (client id/secret + refresh token).
+* Consider tightening rate limits before exposing beyond localhost.
 
 ---
 
 ## License
 
-MIT (or your preferred license)
+MIT
