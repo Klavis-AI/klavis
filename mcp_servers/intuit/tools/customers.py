@@ -137,19 +137,14 @@ customer_properties_user_define = {
         "description": "Country name for the billing address. For international addresses - countries should be passed as 3 ISO alpha-3 characters or the full name of the country."
     }
 }
+
+# Wont send to AI, but AI actually uses this
+# Leave it here for human understanding
 customer_properties = {
     **customer_properties_user_define,
     "Id": {
         "type": "string",
         "description": "The unique identifier for the customer in QuickBooks. Sort order is ASC by default. System generated"
-    },
-}
-
-customer_properties_full = {
-    **customer_properties,
-    "FullyQualifiedName": {
-        "type": "string",
-        "description": "Fully qualified name of the object. The fully qualified name prepends the topmost parent, followed by each sub element separated by colons. Takes the form of Customer:Job:Sub-job. System generated."
     },
 }
 

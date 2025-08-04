@@ -160,6 +160,8 @@ payment_properties_user_define = {
     }
 }
 
+# Wont send to AI, but AI actually uses this
+# Leave it here for human understanding
 payment_properties = {
     **payment_properties_user_define,
     "Id": {
@@ -169,30 +171,6 @@ payment_properties = {
     "SyncToken": {
         "type": "string", 
         "description": "Version number of the object for concurrent updates"
-    }
-}
-
-payment_properties_full = {
-    **payment_properties,
-    "UnappliedAmt": {
-        "type": "number",
-        "description": "Indicates the amount that has not been applied to pay amounts owed for sales transactions (read-only)"
-    },
-    "TaxExemptionRefValue": {
-        "type": "string",
-        "description": "Reference to the TaxExemption ID associated with this object (read-only)"
-    },
-    "TaxExemptionRefName": {
-        "type": "string",
-        "description": "The Tax Exemption Id for the customer to which this object is associated (read-only)"
-    },
-    "MetaDataCreateTime": {
-        "type": "string",
-        "description": "Time the entity was created in the source domain (read-only)"
-    },
-    "MetaDataLastUpdatedTime": {
-        "type": "string",
-        "description": "Time the entity was last updated in the source domain (read-only)"
     }
 }
 

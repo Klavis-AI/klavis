@@ -28,6 +28,8 @@ account_properties_user_define = {
     }
 }
 
+# Wont send to AI, but AI actually uses this
+# Leave it here for human understanding
 account_properties = {
     **account_properties_user_define,
     "Id": {

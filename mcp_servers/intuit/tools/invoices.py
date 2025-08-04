@@ -203,6 +203,8 @@ invoice_properties_user_define = {
     }
 }
 
+# Wont send to AI, but AI actually uses this
+# Leave it here for human understanding
 invoice_properties = {
     **invoice_properties_user_define,
     "Id": {
@@ -212,30 +214,6 @@ invoice_properties = {
     "SyncToken": {
         "type": "string",
         "description": "Version number of the object for concurrent updates"
-    }
-}
-
-invoice_properties_full = {
-    **invoice_properties,
-    "TotalAmt": {
-        "type": "number",
-        "description": "Indicates the total amount of the transaction (read-only)"
-    },
-    "Balance": {
-        "type": "number",
-        "description": "The balance reflecting any payments made against the transaction (read-only)"
-    },
-    "InvoiceLink": {
-        "type": "string",
-        "description": "Sharable link for the invoice sent to external customers (read-only)"
-    },
-    "RecurDataRefValue": {
-        "type": "string",
-        "description": "Reference to the Recurring Transaction template this Invoice was created from (read-only)"
-    },
-    "RecurDataRefName": {
-        "type": "string",
-        "description": "Name of the Recurring Transaction template (read-only)"
     }
 }
 

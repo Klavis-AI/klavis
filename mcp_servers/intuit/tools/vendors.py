@@ -191,6 +191,8 @@ vendor_properties_user_define = {
     }
 }
 
+# Wont send to AI, but AI actually uses this
+# Leave it here for human understanding
 vendor_properties = {
     **vendor_properties_user_define,
     "Id": {
@@ -200,22 +202,6 @@ vendor_properties = {
     "SyncToken": {
         "type": "string",
         "description": "Version number of the object for concurrent updates"
-    }
-}
-
-vendor_properties_full = {
-    **vendor_properties,
-    "Balance": {
-        "type": "number",
-        "description": "Specifies the open balance amount or the amount unpaid by the vendor (read-only)"
-    },
-    "MetaDataCreateTime": {
-        "type": "string",
-        "description": "Time the entity was created in the source domain (read-only)"
-    },
-    "MetaDataLastUpdatedTime": {
-        "type": "string",
-        "description": "Time the entity was last updated in the source domain (read-only)"
     }
 }
 
