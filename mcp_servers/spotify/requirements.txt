@@ -1,0 +1,15 @@
+# FastMCP and MCP dependencies
+fastmcp
+mcp
+
+# HTTP client for API calls
+httpx
+
+# Data validation and settings
+pydantic
+
+# OpenAI (optional, used in other tools)
+openai
+
+# Environment variable loader
+python-dotenv
