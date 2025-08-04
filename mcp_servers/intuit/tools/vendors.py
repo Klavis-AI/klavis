@@ -4,31 +4,23 @@ from mcp.types import Tool
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for vendor creation (required by QuickBooks)
-# Either DisplayName or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix is required
+# Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required
 vendor_properties_minimal = {
     "DisplayName": {
         "type": "string",
-        "description": "The name of the vendor as displayed. Must be unique across all Vendor, Customer, and Employee objects. Cannot be removed with sparse update. If not supplied, the system generates DisplayName by concatenating vendor name components supplied in the request from the following list: Title, GivenName, MiddleName, FamilyName, and Suffix."
-    },
-    "Title": {
-        "type": "string",
-        "description": "Title of the person. This tag supports i18n, all locales. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes are required during create."
+        "description": "The name of the vendor as displayed. Must be unique across all Vendor, Customer, and Employee objects. Cannot be removed with sparse update. If not supplied, the system generates DisplayName by concatenating vendor name components supplied in the request from the following list: GivenName, MiddleName, FamilyName."
     },
     "GivenName": {
         "type": "string",
-        "description": "Given name or first name of a person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+        "description": "Given name or first name of a person. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
     },
     "MiddleName": {
         "type": "string",
-        "description": "Middle name of the person. The person can have zero or more middle names. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+        "description": "Middle name of the person. The person can have zero or more middle names. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
     },
     "FamilyName": {
         "type": "string",
-        "description": "Family name or the last name of the person. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
-    },
-    "Suffix": {
-        "type": "string",
-        "description": "Suffix of the name. For example, Jr. The DisplayName attribute or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix attributes is required for object create."
+        "description": "Family name or the last name of the person. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
     }
 }
 
@@ -47,57 +39,13 @@ vendor_properties_user_define = {
         "type": "string",
         "description": "Name of the person or organization as printed on a check. If not provided, this is populated from DisplayName. Cannot be removed with sparse update."
     },
-    "Active": {
-        "type": "boolean",
-        "description": "If true, this object is currently enabled for use by QuickBooks."
-    },
     "PrimaryPhone": {
         "type": "string",
         "description": "Primary phone number."
     },
-    "AlternatePhone": {
-        "type": "string",
-        "description": "Alternate phone number."
-    },
-    "Mobile": {
-        "type": "string",
-        "description": "Mobile phone number."
-    },
-    "Fax": {
-        "type": "string",
-        "description": "Fax number."
-    },
     "WebAddr": {
         "type": "string",
         "description": "Website address."
-    },
-    "APAccountRefValue": {
-        "type": "string",
-        "description": "The ID for the accounts payable account to be used for this supplier. Each supplier must have his own AP account. Applicable for France companies, only."
-    },
-    "APAccountRefName": {
-        "type": "string",
-        "description": "The name of the accounts payable account used for this vendor."
-    },
-    "TermRefValue": {
-        "type": "string",
-        "description": "The ID for the default Term associated with this Vendor object."
-    },
-    "TermRefName": {
-        "type": "string",
-        "description": "The name of the default Term associated with this Vendor object."
-    },
-    "Source": {
-        "type": "string",
-        "description": "The Source type of the transactions created by QuickBooks Commerce. Valid values include: QBCommerce"
-    },
-    "GSTIN": {
-        "type": "string",
-        "description": "GSTIN is an identification number assigned to every GST registered business."
-    },
-    "T4AEligible": {
-        "type": "boolean",
-        "description": "True if vendor is T4A eligible. Valid for CA locale"
     },
     "BusinessNumber": {
         "type": "string",
@@ -111,14 +59,6 @@ vendor_properties_user_define = {
         "type": "string",
         "description": "The full name of the currency."
     },
-    "HasTPAR": {
-        "type": "boolean",
-        "description": "Indicate if the vendor has TPAR enabled. TPAR stands for Taxable Payments Annual Report. The TPAR is mandated by ATO to get the details payments that businesses make to contractors for providing services. Some government entities also need to report the grants they have paid in a TPAR."
-    },
-    "TaxReportingBasis": {
-        "type": "string",
-        "description": "The method in which the supplier tracks their income. Applicable for France companies, only. Valid values include: Cash and Accrual."
-    },
     "Vendor1099": {
         "type": "boolean",
         "description": "This vendor is an independent contractor; someone who is given a 1099-MISC form at the end of the year. A 1099 vendor is paid with regular checks, and taxes are not withheld on their behalf."
@@ -130,10 +70,6 @@ vendor_properties_user_define = {
     "BillRate": {
         "type": "number",
         "description": "BillRate can be set to specify this vendor's hourly billing rate."
-    },
-    "T5018Eligible": {
-        "type": "boolean",
-        "description": "True if vendor is T5018 eligible. Valid for CA locale"
     },
     "TaxIdentifier": {
         "type": "string",
@@ -209,7 +145,7 @@ vendor_properties = {
 create_vendor_tool = Tool(
     name="create_vendor",
     title="Create Vendor",
-    description="Create a new vendor in QuickBooks. Either DisplayName or at least one of Title, GivenName, MiddleName, FamilyName, or Suffix is required.",
+    description="Create a new vendor in QuickBooks. Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required.",
     inputSchema={
         "type": "object",
         "properties": vendor_properties_minimal,
@@ -274,13 +210,13 @@ search_vendors_tool = Tool(
 update_vendor_tool = Tool(
     name="update_vendor",
     title="Update Vendor",
-    description="Update an existing vendor in QuickBooks",
+    description="Update an existing vendor in QuickBooks. Use activate_vendor/deactivate_vendor for status changes.",
     inputSchema={
         "type": "object",
         "properties": {
-            **vendor_properties_user_define,
-            "Id": {"type": "string", "description": "The QuickBooks vendor ID to update"}
-        },
+            key: value for key, value in vendor_properties_user_define.items() 
+            if key != "Active"  # Remove Active from update inputs
+        } | {"Id": {"type": "string", "description": "The QuickBooks vendor ID to update"}},
         "required": ["Id"]
     }
 )
@@ -320,12 +256,15 @@ def mcp_object_to_vendor_data(**kwargs) -> Dict[str, Any]:
     vendor_data = {}
 
     # Basic vendor information - direct copy
-    for field in ['DisplayName', 'Title', 'GivenName', 'MiddleName', 'FamilyName', 'Suffix',
-                  'CompanyName', 'PrintOnCheckName', 'Active', 'Source', 'GSTIN', 'T4AEligible',
-                  'BusinessNumber', 'HasTPAR', 'TaxReportingBasis', 'Vendor1099', 'CostRate',
-                  'BillRate', 'T5018Eligible', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType']:
+    for field in ['DisplayName', 'GivenName', 'MiddleName', 'FamilyName',
+                  'CompanyName', 'PrintOnCheckName', 'BusinessNumber', 'Vendor1099', 'CostRate',
+                  'BillRate', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType']:
         if field in kwargs:
             vendor_data[field] = kwargs[field]
+
+    # Handle Active field only for create operation (not for update)
+    if 'Active' in kwargs:
+        vendor_data['Active'] = kwargs['Active']
 
     # Email address
     if 'PrimaryEmailAddr' in kwargs:
@@ -333,7 +272,7 @@ def mcp_object_to_vendor_data(**kwargs) -> Dict[str, Any]:
             'Address': kwargs['PrimaryEmailAddr']}
 
     # Phone numbers
-    phone_fields = ['PrimaryPhone', 'AlternatePhone', 'Mobile', 'Fax']
+    phone_fields = ['PrimaryPhone']
     for field in phone_fields:
         if field in kwargs:
             vendor_data[field] = {'FreeFormNumber': kwargs[field]}
@@ -344,9 +283,8 @@ def mcp_object_to_vendor_data(**kwargs) -> Dict[str, Any]:
 
     # Reference objects - convert separate value/name fields to structured objects
     ref_mappings = [
-        ('APAccountRef', 'APAccountRefValue', 'APAccountRefName'),
-        ('TermRef', 'TermRefValue', 'TermRefName'),
         ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName')
+        # Removed APAccountRef, TermRef from input
     ]
 
     for ref_name, value_field, name_field in ref_mappings:
@@ -397,12 +335,16 @@ def vendor_data_to_mcp_object(vendor_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Copy basic fields if present
     for field in [
-        'Id', 'DisplayName', 'Title', 'GivenName', 'MiddleName', 'FamilyName', 'Suffix',
-        'CompanyName', 'PrintOnCheckName', 'Active', 'Source', 'GSTIN', 'T4AEligible',
-        'BusinessNumber', 'HasTPAR', 'TaxReportingBasis', 'Vendor1099', 'CostRate',
-        'BillRate', 'T5018Eligible', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType',
+        'Id', 'DisplayName', 'GivenName', 'MiddleName', 'FamilyName',
+        'CompanyName', 'PrintOnCheckName', 'Active', 'BusinessNumber', 'Vendor1099', 'CostRate',
+        'BillRate', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType',
         'Balance'
     ]:
+        if field in vendor_data:
+            mcp_object[field] = vendor_data[field]
+
+    # Handle fields that are output-only (not in input schema but preserved in output)
+    for field in ['Title', 'Suffix', 'AlternatePhone', 'Mobile', 'Fax', 'Source', 'GSTIN', 'T4AEligible', 'HasTPAR', 'TaxReportingBasis', 'T5018Eligible']:
         if field in vendor_data:
             mcp_object[field] = vendor_data[field]
 
@@ -411,8 +353,13 @@ def vendor_data_to_mcp_object(vendor_data: Dict[str, Any]) -> Dict[str, Any]:
         if 'Address' in vendor_data['PrimaryEmailAddr']:
             mcp_object['PrimaryEmailAddr'] = vendor_data['PrimaryEmailAddr']['Address']
 
-    # Phone numbers
-    phone_mappings = ['PrimaryPhone', 'AlternatePhone', 'Mobile', 'Fax']
+    # Phone numbers - handle primary phone as input, others as output-only
+    if 'PrimaryPhone' in vendor_data and isinstance(vendor_data['PrimaryPhone'], dict):
+        if 'FreeFormNumber' in vendor_data['PrimaryPhone']:
+            mcp_object['PrimaryPhone'] = vendor_data['PrimaryPhone']['FreeFormNumber']
+    
+    # Handle other phone fields as output-only
+    phone_mappings = ['AlternatePhone', 'Mobile', 'Fax']
     for field in phone_mappings:
         if field in vendor_data and isinstance(vendor_data[field], dict):
             if 'FreeFormNumber' in vendor_data[field]:

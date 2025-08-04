@@ -32,10 +32,6 @@ customer_properties_user_define = {
         "type": "string",
         "description": "The name of the default tax code associated with this Customer object."
     },
-    "Fax": {
-        "type": "string",
-        "description": "Fax number."
-    },
     "BillWithParent": {
         "type": "boolean",
         "description": "If true, this Customer object is billed with its parent. If false, or null the customer is not to be billed with its parent. This attribute is valid only if this entity is a Job or sub Customer."
@@ -63,10 +59,6 @@ customer_properties_user_define = {
     "WebAddr": {
         "type": "string",
         "description": "Website address of the Customer."
-    },
-    "Active": {
-        "type": "boolean",
-        "description": "If true, this entity is currently enabled for use by QuickBooks. If there is an amount in Customer.Balance when setting this Customer object to inactive through the QuickBooks UI, a CreditMemo balancing transaction is created for the amount."
     },
     "CompanyName": {
         "type": "string",
@@ -230,8 +222,6 @@ search_customers_tool = Tool(
             "CompanyName": {"type": "string", "description": "Search by company name (partial match)"},
             "PrimaryEmailAddr": {"type": "string", "description": "Search by email address (partial match)"},
             "PrimaryPhone": {"type": "string", "description": "Search by phone number (partial match)"},
-            "Mobile": {"type": "string", "description": "Search by mobile number (partial match)"},
-            "Fax": {"type": "string", "description": "Search by fax number (partial match)"},
 
             # Status filters
             "Active": {"type": "boolean", "description": "Filter by active status"},
@@ -296,7 +286,7 @@ def mcp_object_to_customer_data(**kwargs) -> Dict[str, Any]:
         customer_data['PrimaryEmailAddr'] = {
             'Address': kwargs['PrimaryEmailAddr']}
 
-    for phone_field in ['PrimaryPhone', 'Mobile', 'Fax']:
+    for phone_field in ['PrimaryPhone', 'Mobile']:
         if phone_field in kwargs:
             customer_data[phone_field] = {
                 'FreeFormNumber': kwargs[phone_field]}
@@ -573,7 +563,7 @@ class CustomerManager:
             DisplayName: Search by customer display name (partial match)
             GivenName/FamilyName/MiddleName: Search by name components (partial match)
             CompanyName: Search by company name (partial match)
-            PrimaryEmailAddr/PrimaryPhone/Mobile/Fax: Search by contact info (partial match)
+            PrimaryEmailAddr/PrimaryPhone/Mobile: Search by contact info (partial match)
 
             # Status filters
             Active: Filter by active status
@@ -734,7 +724,7 @@ class CustomerManager:
 
         partial_fields = [
             'DisplayName', 'GivenName', 'FamilyName', 'MiddleName', 'CompanyName',
-            'PrimaryEmailAddr', 'PrimaryPhone', 'Mobile', 'Fax', 'WebAddr', 'Notes',
+            'PrimaryEmailAddr', 'PrimaryPhone', 'WebAddr', 'Notes',
             'BillAddrLine1', 'ShipAddrLine1', 'PrimaryTaxIdentifier', 'SecondaryTaxIdentifier'
         ]
 
@@ -786,7 +776,7 @@ class CustomerManager:
                         if field in customer and search_value not in customer[field].lower():
                             should_include = False
                             break
-                    elif field in ['PrimaryEmailAddr', 'PrimaryPhone', 'Mobile', 'Fax']:
+                    elif field in ['PrimaryEmailAddr', 'PrimaryPhone']:
                         if field in customer and search_value not in customer[field].lower():
                             should_include = False
                             break

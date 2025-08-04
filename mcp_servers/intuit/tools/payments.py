@@ -10,7 +10,7 @@ payment_properties_minimal = {
         "description": "Indicates the total amount of the transaction. This includes the total of all the charges, allowances, and taxes."
     },
     "CustomerRefValue": {
-        "type": "string", 
+        "type": "string",
         "description": "Customer ID for the payment"
     },
     "CustomerRefName": {
@@ -22,13 +22,9 @@ payment_properties_minimal = {
 # Payment properties mapping (based on QuickBooks API documentation)
 payment_properties_user_define = {
     **payment_properties_minimal,
-    "TxnDate": {
+    "TransactionDate": {
         "type": "string",
         "description": "The date entered by the user when this transaction occurred. For posting transactions, this is the posting date that affects the financial statements. If the date is not supplied, the current date on the server is used. Format: yyyy/MM/dd"
-    },
-    "PrivateNote": {
-        "type": "string",
-        "description": "User entered, organization-private note about the transaction. Max of 4000 chars"
     },
     "PaymentRefNum": {
         "type": "string",
@@ -39,7 +35,7 @@ payment_properties_user_define = {
         "description": "Reference to a PaymentMethod associated with this transaction"
     },
     "PaymentMethodRefName": {
-        "type": "string", 
+        "type": "string",
         "description": "Name of the PaymentMethod associated with this transaction"
     },
     "DepositToAccountRefValue": {
@@ -58,61 +54,9 @@ payment_properties_user_define = {
         "type": "string",
         "description": "The full name of the currency"
     },
-    "ProjectRefValue": {
-        "type": "string",
-        "description": "Reference to the Project ID associated with this transaction. Available with Minor Version 69 and above"
-    },
-    "ProjectRefName": {
-        "type": "string",
-        "description": "Name of the Project associated with this transaction"
-    },
     "ExchangeRate": {
         "type": "number",
         "description": "The number of home currency units it takes to equal one unit of currency specified by CurrencyRef. Applicable if multicurrency is enabled for the company"
-    },
-    "TxnSource": {
-        "type": "string",
-        "description": "Used internally to specify originating source of a credit card transaction"
-    },
-    "TransactionLocationType": {
-        "type": "string",
-        "description": "The account location. Valid values include: WithinFrance, FranceOverseas, OutsideFranceWithEU, OutsideEU. For France locales, only."
-    },
-    "Line": {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "properties": {
-                "Amount": {
-                    "type": "number",
-                    "description": "The amount of the line item. Max 15 digits in 10.5 format"
-                },
-                "LinkedTxn": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "TxnId": {
-                                "type": "string",
-                                "description": "Transaction Id of the related transaction"
-                            },
-                            "TxnType": {
-                                "type": "string", 
-                                "description": "Transaction type of the linked object. Values can be: Expense, Check, CreditCardCredit, JournalEntry, CreditMemo, Invoice"
-                            },
-                            "TxnLineId": {
-                                "type": "string",
-                                "description": "Required for Deposit and Bill entities. The line number of a specific line of the linked transaction"
-                            }
-                        },
-                        "required": ["TxnId", "TxnType"]
-                    },
-                    "description": "Transaction to which the current entity is related"
-                }
-            },
-            "required": ["Amount", "LinkedTxn"]
-        },
-        "description": "Zero or more transactions accounting for this payment"
     },
     # Credit Card Payment fields
     "CreditCardPayment": {
@@ -169,7 +113,7 @@ payment_properties = {
         "description": "The unique QuickBooks payment ID"
     },
     "SyncToken": {
-        "type": "string", 
+        "type": "string",
         "description": "Version number of the object for concurrent updates"
     }
 }
@@ -177,7 +121,7 @@ payment_properties = {
 # MCP Tool definitions
 create_payment_tool = Tool(
     name="create_payment",
-    title="Create Payment", 
+    title="Create Payment",
     description="Create New Payment - Create a new payment in QuickBooks. Requires TotalAmt and CustomerRef. Can be applied to specific invoices/credit memos or created as unapplied credit.",
     inputSchema={
         "type": "object",
@@ -191,7 +135,7 @@ get_payment_tool = Tool(
     title="Get Payment",
     description="Get Single Payment - Retrieve a specific payment by ID from QuickBooks with all its details including line items, amounts, and linked transactions",
     inputSchema={
-        "type": "object", 
+        "type": "object",
         "properties": {
             "Id": {"type": "string", "description": "The QuickBooks payment ID"}
         },
@@ -215,7 +159,7 @@ list_payments_tool = Tool(
 
 search_payments_tool = Tool(
     name="search_payments",
-    title="Search Payments", 
+    title="Search Payments",
     description="Advanced Payment Search - Search payments with powerful filters including dates, amounts, customer info, and status. Perfect for finding specific payments based on criteria",
     inputSchema={
         "type": "object",
@@ -225,10 +169,10 @@ search_payments_tool = Tool(
             "PaymentRefNum": {"type": "string", "description": "Search by payment reference number"},
 
             # Date filters
-            "TxnDateFrom": {"type": "string", "description": "Search payments from this transaction date (YYYY-MM-DD format)"},
-            "TxnDateTo": {"type": "string", "description": "Search payments to this transaction date (YYYY-MM-DD format)"},
+            "TransactionDateFrom": {"type": "string", "description": "Search payments from this transaction date (YYYY-MM-DD format)"},
+            "TransactionDateTo": {"type": "string", "description": "Search payments to this transaction date (YYYY-MM-DD format)"},
 
-            # Amount filters  
+            # Amount filters
             "MinAmount": {"type": "number", "description": "Minimum total amount"},
             "MaxAmount": {"type": "number", "description": "Maximum total amount"},
             "MinUnappliedAmt": {"type": "number", "description": "Minimum unapplied amount"},
@@ -252,13 +196,13 @@ update_payment_tool = Tool(
     description="Update Existing Payment - Modify an existing payment in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
-        "properties": payment_properties_user_define,
+        "properties": {**payment_properties_user_define, "Id": {"type": "string", "description": "The QuickBooks payment ID to update"}},
         "required": ["Id"]
     }
 )
 
 delete_payment_tool = Tool(
-    name="delete_payment", 
+    name="delete_payment",
     title="Delete Payment",
     description="️Delete Payment - Permanently delete a payment from QuickBooks. Use with caution as this action cannot be undone",
     inputSchema={
@@ -282,7 +226,7 @@ send_payment_tool = Tool(
                 "description": "The QuickBooks payment ID to send"
             },
             "SendTo": {
-                "type": "string", 
+                "type": "string",
                 "description": "Email address to send the payment receipt to",
             }
         },
@@ -315,10 +259,13 @@ def mcp_object_to_payment_data(**kwargs) -> Dict[str, Any]:
     payment_data = {}
 
     # Basic payment information - direct copy
-    for field in ['TotalAmt', 'TxnDate', 'PrivateNote', 'PaymentRefNum', 
-                  'ExchangeRate', 'TxnSource', 'TransactionLocationType']:
+    for field in ['TotalAmt', 'PaymentRefNum', 'ExchangeRate']:
         if field in kwargs:
             payment_data[field] = kwargs[field]
+
+    # Handle renamed field: TransactionDate -> TxnDate
+    if 'TransactionDate' in kwargs:
+        payment_data['TxnDate'] = kwargs['TransactionDate']
 
     # Reference objects - convert separate value/name fields to structured objects
     ref_mappings = [
@@ -326,7 +273,6 @@ def mcp_object_to_payment_data(**kwargs) -> Dict[str, Any]:
         ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
         ('PaymentMethodRef', 'PaymentMethodRefValue', 'PaymentMethodRefName'),
         ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName'),
-        ('ProjectRef', 'ProjectRefValue', 'ProjectRefName')
     ]
 
     for ref_name, value_field, name_field in ref_mappings:
@@ -335,29 +281,6 @@ def mcp_object_to_payment_data(**kwargs) -> Dict[str, Any]:
             if name_field in kwargs:
                 ref_obj['name'] = kwargs[name_field]
             payment_data[ref_name] = ref_obj
-
-    # Line items - handle the Line parameter
-    if 'Line' in kwargs and isinstance(kwargs['Line'], list):
-        lines = []
-        for item in kwargs['Line']:
-            line = {
-                "Amount": item["Amount"]
-            }
-            
-            if 'LinkedTxn' in item and isinstance(item['LinkedTxn'], list):
-                linked_txns = []
-                for linked_txn in item['LinkedTxn']:
-                    txn = {
-                        "TxnId": linked_txn["TxnId"],
-                        "TxnType": linked_txn["TxnType"]
-                    }
-                    if 'TxnLineId' in linked_txn:
-                        txn["TxnLineId"] = linked_txn["TxnLineId"]
-                    linked_txns.append(txn)
-                line["LinkedTxn"] = linked_txns
-            
-            lines.append(line)
-        payment_data['Line'] = lines
 
     # Credit Card Payment information
     if 'CreditCardPayment' in kwargs:
@@ -377,11 +300,20 @@ def payment_data_to_mcp_object(payment_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Copy basic fields if present
     for field in [
-        'Id', 'TotalAmt', 'TxnDate', 'PrivateNote', 'PaymentRefNum',
-        'ExchangeRate', 'TxnSource', 'TransactionLocationType', 'UnappliedAmt'
+        'Id', 'TotalAmt', 'PaymentRefNum',
+        'ExchangeRate', 'UnappliedAmt'
     ]:
         if field in payment_data:
             mcp_object[field] = payment_data[field]
+
+    # Handle fields that are output-only (not in input schema but preserved in output)
+    for field in ['PrivateNote', 'TransactionLocationType']:
+        if field in payment_data:
+            mcp_object[field] = payment_data[field]
+
+    # Handle renamed field: TxnDate -> TransactionDate
+    if 'TxnDate' in payment_data:
+        mcp_object['TransactionDate'] = payment_data['TxnDate']
 
     # Reference objects - flatten to separate value and name fields
     ref_mappings = [
@@ -414,7 +346,7 @@ def payment_data_to_mcp_object(payment_data: Dict[str, Any]) -> Dict[str, Any]:
                 line_item = {}
                 if 'Amount' in line:
                     line_item['Amount'] = line['Amount']
-                
+
                 if 'LinkedTxn' in line and isinstance(line['LinkedTxn'], list):
                     linked_txns = []
                     for linked_txn in line['LinkedTxn']:
@@ -428,7 +360,7 @@ def payment_data_to_mcp_object(payment_data: Dict[str, Any]) -> Dict[str, Any]:
                                 txn['TxnLineId'] = linked_txn['TxnLineId']
                             linked_txns.append(txn)
                     line_item['LinkedTxn'] = linked_txns
-                
+
                 lines.append(line_item)
         mcp_object['Line'] = lines
 
@@ -491,7 +423,7 @@ class PaymentManager:
             PaymentRefNum: Search by payment reference number
 
             # Date filters
-            TxnDateFrom/TxnDateTo: Search by transaction date range
+            TransactionDateFrom/TransactionDateTo: Search by transaction date range
 
             # Amount filters
             MinAmount/MaxAmount: Search by total amount range
@@ -519,15 +451,16 @@ class PaymentManager:
 
         if kwargs.get('CustomerName'):
             # For customer name search, we need to use a subquery
-            customer_name = kwargs['CustomerName'].replace("'", "''")  # Escape single quotes
+            customer_name = kwargs['CustomerName'].replace(
+                "'", "''")  # Escape single quotes
             conditions.append(
                 f"CustomerRef IN (SELECT Id FROM Customer WHERE Name LIKE '%{customer_name}%')")
 
         # Date range filters
-        if kwargs.get('TxnDateFrom'):
-            conditions.append(f"TxnDate >= '{kwargs['TxnDateFrom']}'")
-        if kwargs.get('TxnDateTo'):
-            conditions.append(f"TxnDate <= '{kwargs['TxnDateTo']}'")
+        if kwargs.get('TransactionDateFrom'):
+            conditions.append(f"TxnDate >= '{kwargs['TransactionDateFrom']}'")
+        if kwargs.get('TransactionDateTo'):
+            conditions.append(f"TxnDate <= '{kwargs['TransactionDateTo']}'")
 
         # Amount range filters
         if kwargs.get('MinAmount'):
@@ -542,9 +475,11 @@ class PaymentManager:
 
         # Reference filters
         if kwargs.get('PaymentMethodRefValue'):
-            conditions.append(f"PaymentMethodRef = '{kwargs['PaymentMethodRefValue']}'")
+            conditions.append(
+                f"PaymentMethodRef = '{kwargs['PaymentMethodRefValue']}'")
         if kwargs.get('DepositToAccountRefValue'):
-            conditions.append(f"DepositToAccountRef = '{kwargs['DepositToAccountRefValue']}'")
+            conditions.append(
+                f"DepositToAccountRef = '{kwargs['DepositToAccountRefValue']}'")
 
         # Build the complete query
         base_query = "SELECT * FROM Payment"
@@ -578,7 +513,8 @@ class PaymentManager:
 
         # Auto-fetch current sync token
         current_payment_response = await self.client._get(f"payment/{Id}")
-        sync_token = current_payment_response.get('Payment', {}).get('SyncToken', '0')
+        sync_token = current_payment_response.get(
+            'Payment', {}).get('SyncToken', '0')
 
         payment_data = mcp_object_to_payment_data(**kwargs)
         payment_data.update({

@@ -153,22 +153,6 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Country name for the billing address"
     },
-    "SalesTermRefValue": {
-        "type": "string",
-        "description": "Reference to the sales term associated with the transaction"
-    },
-    "SalesTermRefName": {
-        "type": "string",
-        "description": "Name of the sales term associated with the transaction"
-    },
-    "DepartmentRefValue": {
-        "type": "string",
-        "description": "Reference to a Department object specifying the location of the transaction"
-    },
-    "DepartmentRefName": {
-        "type": "string",
-        "description": "Name of the Department associated with the transaction"
-    },
     "ShipMethodRefValue": {
         "type": "string",
         "description": "Reference to the ShipMethod associated with the transaction"
@@ -540,8 +524,6 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
     ref_mappings = [
         ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
         ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('SalesTermRef', 'SalesTermRefValue', 'SalesTermRefName'),
-        ('DepartmentRef', 'DepartmentRefValue', 'DepartmentRefName'),
         ('ShipMethodRef', 'ShipMethodRefValue', 'ShipMethodRefName'),
         ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName')
     ]
