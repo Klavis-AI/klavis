@@ -40,6 +40,8 @@ def create_ticket(
     tags: Optional[List[str]] = None,
     custom_fields: Optional[Dict[str, Any]] = None,
     cc_emails: Optional[List[str]] = None,
+    responder_id: Optional[int] = None,
+    parent_id: Optional[int] = None,
     **kwargs
 ) -> Dict[str, Any]:
     """
@@ -56,6 +58,8 @@ def create_ticket(
         tags: List of tags to associate with the ticket
         custom_fields: Key-value pairs of custom fields
         cc_emails: List of email addresses to CC
+        responder_id: ID of the responder
+        parent_id: ID of the parent ticket. If provided, the ticket will be created as a child of the parent ticket.
         **kwargs: Additional ticket fields (e.g., due_by, fr_due_by, group_id, etc.)
         
     Returns:
@@ -75,6 +79,8 @@ def create_ticket(
             "tags": tags,
             "custom_fields": custom_fields,
             "cc_emails": cc_emails,
+            "responder_id": responder_id,
+            "parent_id": parent_id,
             **kwargs
         }
 
@@ -110,10 +116,12 @@ def create_ticket_with_attachments(
     custom_fields: Optional[Dict[str, Any]] = None,
     cc_emails: Optional[List[str]] = None,
     attachments: Optional[List[Dict[str, Any]]] = None,
+    responder_id: Optional[int] = None,
+    parent_id: Optional[int] = None,
     **kwargs
 ): 
     try:
-       return freshdesk_create_ticket(
+       return create_ticket(
            subject=subject,
            description=description,
            email=email,
@@ -124,6 +132,8 @@ def create_ticket_with_attachments(
            tags=tags,
            custom_fields=custom_fields,
            cc_emails=cc_emails,
+           responder_id=responder_id,
+           parent_id=parent_id,
            attachments=attachments,
            **kwargs
        )
@@ -277,10 +287,18 @@ def list_tickets(
     status: Optional[int] = None,
     priority: Optional[int] = None,
     requester_id: Optional[int] = None,
+    agent_id: Optional[int] = None,
+    email: Optional[str] = None,
     group_id: Optional[int] = None,
+    company_id: Optional[int] = None,
+    ticket_type: Optional[str] = None,
     updated_since: Optional[Union[str, datetime]] = None,
+    due_by: Optional[Union[str, datetime]] = None,
     page: int = 1,
     per_page: int = 30,
+    order_type: Optional[str] = "desc",
+    order_by: Optional[str] = "created_at",
+    include: Optional[str] = None,
     **filters
 ) -> Dict[str, Any]:
     """
@@ -290,10 +308,18 @@ def list_tickets(
         status: Filter by status (2-5)
         priority: Filter by priority (1-4)
         requester_id: Filter by requester ID
+        agent_id: Filter by agent ID (ID of the agent to whom the ticket has been assigned)
+        email: Filter by email address
         group_id: Filter by group ID
+        company_id: Filter by company ID
+        ticket_type: Filter by ticket type
         updated_since: Only return tickets updated since this date (ISO format or datetime object)
+        due_by: Only return tickets due by this date (ISO format or datetime object)
         page: Page number (for pagination)
         per_page: Number of results per page (max 100)
+        order_type: Order type (asc or desc)
+        order_by: Order by (created_at, updated_at, priority, status)
+        include: Include additional data (stats, requester, description)
         **filters: Additional filters as keyword arguments
         
     Returns:
@@ -304,17 +330,37 @@ def list_tickets(
             "status": status,
             "priority": priority,
             "requester_id": requester_id,
+            "agent_id": agent_id,
+            "email": email,
             "group_id": group_id,
+            "company_id": company_id,
+            "type": ticket_type,
             "updated_since": updated_since,
+            "due_by": due_by,
             "page": page,
             "per_page": min(per_page, 100),
+            "order_type": order_type,
+            "order_by": order_by,
+            "include": include,
             **filters 
         }
+
+        if ticket_type is not None:
+            del params["ticket_type"]
 
         if updated_since is not None:
             if isinstance(updated_since, datetime):
                 updated_since = updated_since.isoformat()
             params["updated_since"] = updated_since
+
+        if due_by is not None:
+            if isinstance(due_by, datetime):
+                due_by = due_by.isoformat()
+            params["due_by"] = due_by
+
+        if (params.get("created_since")):
+            if isinstance(params.get("created_since"), datetime):
+                params["created_since"] = params.get("created_since").isoformat()
         
         params = remove_none_values(params)
         
@@ -411,24 +457,34 @@ def search_tickets(
 
 
 
-def merge_tickets(source_ticket_id: int, target_ticket_id: int) -> Dict[str, Any]:
+def merge_tickets(
+    primary_ticket_id: int, 
+    ticket_ids: List[int], 
+    convert_recepients_to_cc: Optional[bool] = False,
+) -> Dict[str, Any]:
     """
     Merge two tickets.
     
     Args:
-        source_ticket_id: ID of the ticket to be merged (will be closed)
-        target_ticket_id: ID of the ticket to merge into
+        primary_ticket_id: ID of the ticket to be merged (will be closed)
+        ticket_ids: List of IDs of tickets to merge into the primary ticket
         
     Returns:
         Dictionary indicating success or failure
     """
     try:
+
+        merge_data = {
+            "primary_id": primary_ticket_id,
+            "ticket_ids": ticket_ids,
+            "convert_recepients_to_cc": convert_recepients_to_cc
+        }
         make_freshdesk_request(
             "POST",
-            f"/tickets/{target_ticket_id}/merge",
-            data={"ids": [source_ticket_id]}
+            f"/tickets/merge",
+            data=merge_data
         )
-        return {"success": True, "message": f"Ticket {source_ticket_id} merged into {target_ticket_id}"}
+        return {"success": True, "message": f"Ticket {primary_ticket_id} merged into {ticket_ids}"}
     except Exception as e:
         return handle_freshdesk_error(e, "merge", "tickets")
 
@@ -444,7 +500,7 @@ def restore_ticket(ticket_id: int) -> Dict[str, Any]:
         Dictionary containing the restored ticket details
     """
     try:
-        response = make_freshdesk_request("PUT", f"/{ticket_id}/restore")
+        response = make_freshdesk_request("PUT", f"/tickets/{ticket_id}/restore")
         return response
     except Exception as e:
         return handle_freshdesk_error(e, "restore", "ticket")

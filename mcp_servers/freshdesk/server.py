@@ -137,6 +137,19 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "string",
                         "description": "Due date for the ticket (format: YYYY-MM-DD)."
                     },
+                    "attachments": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "List of file paths to attach to the ticket."
+                    },
+                    "responder_id": {
+                        "type": "integer",
+                        "description": "ID of the responder."
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "description": "ID of the parent ticket. If provided, the ticket will be created as a child of the parent ticket."
+                    },
                     "group_id": {
                         "type": "integer",
                         "description": "ID of the group to assign the ticket to."
@@ -333,17 +346,77 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "subject": {"type": "string", "description": "The subject of the ticket (required)."},
-                    "description": {"type": "string", "description": "The HTML content of the ticket (required)."},
-                    "email": {"type": "string", "format": "email", "description": "Email address of the requester (required)."},
-                    "name": {"type": "string", "description": "Name of the requester."},
-                    "priority": {"type": "integer", "enum": [1, 2, 3, 4], "description": "Priority of the ticket (1=Low, 2=Medium, 3=High, 4=Urgent). Default is 2 (Medium)."},
-                    "status": {"type": "integer", "enum": [2, 3, 4, 5], "description": "Status of the ticket (2=Open, 3=Pending, 4=Resolved, 5=Closed). Default is 2 (Open)."},
-                    "source": {"type": "integer", "enum": [1, 2, 3, 7, 9, 10], "description": "Source of the ticket (1=Email, 2=Portal, 3=Phone, 7=Chat, 9=Feedback, 10=Outbound Email). Default is 2 (Portal)."},
-                    "tags": {"type": "array", "items": {"type": "string"}, "description": "List of tags to associate with the ticket."},
-                    "custom_fields": {"type": "object", "description": "Key-value pairs of custom fields."},
-                    "cc_emails": {"type": "array", "items": {"type": "string", "format": "email"}, "description": "List of email addresses to CC."},
-                    "attachments": {"type": "array", "items": {"type": "object"}, "description": "List of attachment objects with 'name' and 'content' fields (base64 encoded)."}
+                    "subject": {
+                        "type": "string", 
+                        "description": "The subject of the ticket (required)."
+                    },
+                    "description": {
+                        "type": "string", 
+                        "description": "The HTML content of the ticket (required)."
+                    },
+                    "email": {
+                        "type": "string", 
+                        "format": "email", 
+                        "description": "Email address of the requester (required)."
+                    },
+                    "name": {
+                        "type": "string", 
+                        "description": "Name of the requester."
+                    },
+                    "priority": {
+                        "type": "integer", 
+                        "enum": [1, 2, 3, 4], 
+                        "description": "Priority of the ticket (1=Low, 2=Medium, 3=High, 4=Urgent). Default is 2 (Medium)."
+                    },
+                    "status": {
+                        "type": "integer", 
+                        "enum": [2, 3, 4, 5], 
+                        "description": "Status of the ticket (2=Open, 3=Pending, 4=Resolved, 5=Closed). Default is 2 (Open)."
+                    },
+                    "source": {
+                        "type": "integer", 
+                        "enum": [1, 2, 3, 7, 9, 10], 
+                        "description": "Source of the ticket (1=Email, 2=Portal, 3=Phone, 7=Chat, 9=Feedback, 10=Outbound Email). Default is 2 (Portal)."
+                    },
+                    "tags": {
+                        "type": "array", 
+                        "items": {"type": "string"}, 
+                        "description": "List of tags to associate with the ticket."
+                    },
+                    "custom_fields": {  
+                        "type": "object", 
+                        "description": "Key-value pairs of custom fields."
+                    },
+                    "cc_emails": {
+                        "type": "array", 
+                        "items": {"type": "string", "format": "email"}, 
+                        "description": "List of email addresses to CC."
+                    },
+                    "attachments": {
+                        "type": "array", 
+                        "items": {"type": "object"}, 
+                        "description": "List of attachment objects with 'name' and 'content' fields (base64 encoded)."
+                    },
+                    "due_by": {
+                        "type": "string", 
+                        "description": "Due date for the ticket (ISO 8601 format)."
+                    },
+                    "fr_due_by": {
+                        "type": "string", 
+                        "description": "Due date for the ticket (ISO 8601 format)."
+                    },
+                    "group_id": {
+                        "type": "integer", 
+                        "description": "ID of the group."
+                    },
+                    "responder_id": {
+                        "type": "integer", 
+                        "description": "ID of the responder."
+                    },
+                    "parent_id": {
+                        "type": "integer", 
+                        "description": "ID of the parent ticket. If provided, the ticket will be created as a child of the parent ticket."
+                    }
                 },
                 "required": ["subject", "description", "email"]
             }
@@ -383,13 +456,77 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "status": {"type": "integer", "enum": [2, 3, 4, 5], "description": "Filter by status (2=Open, 3=Pending, 4=Resolved, 5=Closed)."},
-                    "priority": {"type": "integer", "enum": [1, 2, 3, 4], "description": "Filter by priority (1=Low, 2=Medium, 3=High, 4=Urgent)."},
-                    "requester_id": {"type": "integer", "description": "Filter by requester ID."},
-                    "group_id": {"type": "integer", "description": "Filter by group ID."},
-                    "updated_since": {"type": "string", "format": "date-time", "description": "Only return tickets updated since this date (ISO 8601 format)."},
-                    "page": {"type": "integer", "description": "Page number for pagination. Default is 1."},
-                    "per_page": {"type": "integer", "description": "Number of results per page (max 100). Default is 30."}
+                    "status": {
+                        "type": "integer", 
+                        "enum": [2, 3, 4, 5], 
+                        "description": "Filter by status (2=Open, 3=Pending, 4=Resolved, 5=Closed)."
+                    },
+                    "priority": {
+                        "type": "integer", 
+                        "enum": [1, 2, 3, 4], 
+                        "description": "Filter by priority (1=Low, 2=Medium, 3=High, 4=Urgent)."
+                    },
+                    "requester_id": {
+                        "type": "integer", 
+                        "description": "Filter by requester ID."
+                    },
+                    "email": {
+                        "type": "string", 
+                        "format": "email", 
+                        "description": "Filter by email address."
+                    },
+                    "agent_id": {
+                        "type": "integer", 
+                        "description": "Filter by agent ID (ID of the agent to whom the ticket has been assigned)."
+                    },
+                    "company_id": {
+                        "type": "integer", 
+                        "description": "Filter by company ID."
+                    },
+                    "group_id": {
+                        "type": "integer", 
+                        "description": "Filter by group ID."
+                    },
+                    "ticket_type": {
+                        "type": "string", 
+                        "description": "Filter by ticket type."
+                    },
+                    "updated_since": {
+                        "type": "string", 
+                        "format": "date-time", 
+                        "description": "Only return tickets updated since this date (ISO 8601 format)."
+                    },
+                    "created_since": {
+                        "type": "string", 
+                        "format": "date-time", 
+                        "description": "Only return tickets created since this date (ISO 8601 format)."
+                    },
+                    "due_by": {
+                        "type": "string", 
+                        "format": "date-time", 
+                        "description": "Only return tickets due by this date (ISO 8601 format)."
+                    },
+                    "order_by": {
+                        "type": "string", 
+                        "description": "Order by (created_at, updated_at, priority, status). Default is created_at."
+                    },
+                    "order_type": {
+                        "type": "string", 
+                        "enum": ["asc", "desc"], 
+                        "description": "Order type (asc or desc). Default is desc."
+                    },
+                    "include": {
+                        "type": "string", 
+                        "description": "Include additional data (stats, requester, description)."
+                    },
+                    "page": {
+                        "type": "integer", 
+                        "description": "Page number for pagination. Default is 1."
+                    },
+                    "per_page": {
+                        "type": "integer", 
+                        "description": "Number of results per page (max 100). Default is 30."
+                    }
                 }
             }
         ),
@@ -399,16 +536,20 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "source_ticket_id": {
+                    "primary_ticket_id": {
                         "type": "integer",
                         "description": "ID of the ticket to be merged (will be closed) (required)."
                     },
-                    "target_ticket_id": {
+                    "ticket_ids": {
                         "type": "integer",
                         "description": "ID of the ticket to merge into (required)."
+                    },
+                    "convert_recepients_to_cc": {
+                        "type": "boolean",
+                        "description": "Convert recipients to CC (optional). Default is False."
                     }
                 },
-                "required": ["source_ticket_id", "target_ticket_id"]
+                "required": ["primary_ticket_id", "ticket_ids"]
             }
         ),
         types.Tool(
