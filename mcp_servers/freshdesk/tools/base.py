@@ -252,3 +252,8 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
         error_response['error']['message'] = f"Failed to {operation}: {error_response['error']['message']}"
     
     return error_response
+
+
+def remove_none_values(data: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: v for k, v in data.items() if v is not None}
+    

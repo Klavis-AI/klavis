@@ -23,6 +23,20 @@ from .tickets import (
     delete_archived_ticket,
 )
 
+from .contacts import (
+    create_contact,
+    get_contact,
+    list_contacts,
+    update_contact,
+    delete_contact,
+    search_contacts,
+    make_contact_agent,
+    restore_contact,
+    send_contact_invite,
+    merge_contacts,
+    filter_contacts,
+)
+
 __all__ = [
 
     # Tickets
@@ -44,5 +58,19 @@ __all__ = [
 
     # Attachments
     'delete_attachment',
-    'create_ticket_with_attachments'
+    'create_ticket_with_attachments',
+
+    # Contacts
+    'create_contact',
+    'get_contact',
+    'list_contacts',
+    'update_contact',
+    'delete_contact',
+    'search_contacts',
+    'autocomplete_contacts',
+    'make_contact_agent',
+    'restore_contact',
+    'send_contact_invite',
+    'merge_contacts',
+    'filter_contacts',
 ] 

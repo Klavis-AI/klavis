@@ -35,10 +35,21 @@ from tools import (
     delete_archived_ticket,
     delete_attachment,
     create_ticket_with_attachments,
+    delete_multiple_tickets,
     
-
-
     # Contact tools
+
+    create_contact,
+    get_contact,
+    list_contacts,
+    update_contact,
+    delete_contact,
+    search_contacts,
+    filter_contacts,
+    make_contact_agent,
+    restore_contact,
+    send_contact_invite,
+    merge_contacts
     
     
 )
@@ -445,6 +456,162 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
                 "required": ["ticket_id"]
             }
+        ),
+        types.Tool(
+            name="create_contact",
+            description="Create a new contact in Freshdesk.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Name of the contact"},
+                    "email": {"type": "string", "format": "email", "description": "Primary email address"},
+                    "phone": {"type": "string", "description": "Telephone number"},
+                    "company_id": {"type": "integer", "description": "ID of the company"},
+                    "description": {"type": "string", "description": "Description of the contact"}
+                },
+                "required": ["name"]
+            }
+        ),
+        types.Tool(
+            name="get_contact",
+            description="Retrieve a contact by ID.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to retrieve"}
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="list_contacts",
+            description="List all contacts, optionally filtered by parameters.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "format": "email", "description": "Filter by email"},
+                    "phone": {"type": "string", "description": "Filter by phone number"},
+                    "mobile": {"type": "string", "description": "Filter by mobile number"},
+                    "company_id": {"type": "integer", "description": "Filter by company ID"},
+                    "state": {"type": "string", "description": "Filter by state (verified, unverified, blocked, deleted)"},
+                    "updated_since": {"type": "string", "description": "Filter by last updated date (ISO 8601 format)"},
+                    "page": {"type": "integer", "description": "Page number for pagination. Default is 1."},
+                    "per_page": {"type": "integer", "description": "Number of results per page (max 100). Default is 30."}
+                }
+            }
+        ),
+        types.Tool(
+            name="update_contact",
+            description="Update an existing contact.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to update"},
+                    "name": {"type": "string", "description": "New name"},
+                    "email": {"type": "string", "format": "email", "description": "New primary email"},
+                    "phone": {"type": "string", "description": "New phone number"},
+                    "mobile": {"type": "string", "description": "New mobile number"},
+                    "company_id": {"type": "integer", "description": "New company ID"},
+                    "description": {"type": "string", "description": "New description"},
+                    "job_title": {"type": "string", "description": "New job title"},
+                    "tags": {"type": "array", "items": {"type": "string"}, "description": "Updated list of tags"},
+                    "custom_fields": {"type": "object", "description": "Updated custom fields"},
+                    "avatar_path": {"type": "string", "description": "Path to new avatar image file"},
+                    "address": {"type": "string", "description": "Address of the contact"},
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="delete_contact",
+            description="Delete a contact. Set hard_delete=True to permanently delete.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to delete"},
+                    "hard_delete": {"type": "boolean", "default": False, "description": "If true, permanently delete the contact"},
+                    "force": {"type": "boolean", "default": False, "description": "If true, force hard delete even if not soft deleted first"}
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="search_contacts",
+            description="Search for contacts by name",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "term": {"type": "string", "description": "Search term"}
+                },
+                "required": ["term"]
+            }
+        ),
+        types.Tool(
+            name="filter_contacts",
+            description="Filter contacts by fields. using this format - contact_field:integer OR contact_field:'string' AND contact_field:boolean e.g. {query: 'field_name:field_value'} - name:John Doe",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Filter query"},
+                    "page": {"type": "integer", "description": "Page number (1-based)", "default": 1},
+                    "updated_since": {"type": "string", "description": "Filter by last updated date (ISO 8601 format)"}
+                },
+                "required": ["query"]
+            }
+        ),
+        types.Tool(
+            name="make_contact_agent",
+            description="Make a contact an agent.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to make an agent"},
+                    "occasional": {"type": "boolean", "description": "Whether agent is occasional"},
+                    "signature": {"type": "string", "description": "HTML signature for the agent"},
+                    "ticket_scope": {"type": "integer", "description": "Ticket scope for the agent"},
+                    "skill_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of skill IDs"},
+                    "group_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of group IDs"},
+                    "role_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of role IDs"},
+                    "agent_type": {"type": "string", "description": "Agent type (support_agent or business_agent)"},
+                    "focus_mode": {"type": "boolean", "description": "Whether agent is in focus mode"}
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="restore_contact",
+            description="Restore a deleted contact.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to restore"}
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="send_contact_invite",
+            description="Send an invite to a contact.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "contact_id": {"type": "integer", "description": "ID of the contact to send an invite to"}
+                },
+                "required": ["contact_id"]
+            }
+        ),
+        types.Tool(
+            name="merge_contacts",
+            description="Merge multiple contacts into a primary contact.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "primary_contact_id": {"type": "integer", "description": "ID of the primary contact to merge into"},
+                    "secondary_contact_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of contact IDs to merge into the primary contact"},
+                    "contact_data": {"type": "object", "description": "Optional dictionary of fields to update on the primary contact"}
+                },
+                "required": ["primary_contact_id", "secondary_contact_ids"]
+            }
         )
     ]
 
@@ -486,18 +653,38 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await delete_multiple_tickets(**arguments)
             elif name == "delete_attachment":
                 result = await delete_attachment(**arguments)
+
+            elif name == "create_contact":
+                result = await create_contact(**arguments)
+            elif name == "get_contact":
+                result = await get_contact(**arguments)
+            elif name == "list_contacts":
+                result = await list_contacts(**arguments)
+            elif name == "update_contact":
+                result = await update_contact(**arguments)
+            elif name == "delete_contact":
+                result = await delete_contact(**arguments)
+            elif name == "search_contacts":
+                result = await search_contacts(**arguments)
+            elif name == "merge_contacts":
+                result = await merge_contacts(**arguments)
+            elif name == "filter_contacts":
+                result = await filter_contacts(**arguments)
+            elif name == "make_contact_agent":
+                result = await make_contact_agent(**arguments)
+            elif name == "restore_contact":
+                result = await restore_contact(**arguments)
+            elif name == "send_contact_invite":
+                result = await send_contact_invite(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
-
             
-
             if(result.get("error")):
                 logger.error(f"Error executing tool {name}: {result.get('error')}")
                 return [types.TextContent(type="text", text=f"Error: {result.get('error')}")]
             
             logger.info(f"Tool {name} executed successfully with arguments: {arguments}")
 
-            
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             
         except ValueError as e:

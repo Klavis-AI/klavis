@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
-from .base import make_freshdesk_request, handle_freshdesk_error
+from .base import make_freshdesk_request, handle_freshdesk_error, remove_none_values
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -71,25 +71,19 @@ def create_ticket(
             "priority": priority,
             "status": status,
             "source": source,
+            "name": name,
+            "tags": tags,
+            "custom_fields": custom_fields,
+            "cc_emails": cc_emails,
             **kwargs
         }
 
         options = { }
-        
-        if name:
-            ticket_data["name"] = name
-            
-        if tags:
-            ticket_data["tags"] = tags
-            
-        if custom_fields:
-            ticket_data["custom_fields"] = custom_fields
-            
-        if cc_emails:
-            ticket_data["cc_emails"] = cc_emails
-            
+
+        ticket_data = remove_none_values(ticket_data)
         # Handle attachments if provided
         if attachments:
+
             options["files"] = attachments
             options["headers"] = {
                 "Content-Type": "multipart/form-data",
@@ -187,22 +181,17 @@ def update_ticket(
         Dictionary containing updated ticket details
     """
     try:
-        update_data = {}
+        update_data = {
+            "subject": subject,
+            "description": description,
+            "priority": priority,
+            "status": status,
+            "tags": tags,
+            "custom_fields": custom_fields,
+            **kwargs
+        }
         
-        if subject is not None:
-            update_data["subject"] = subject
-        if description is not None:
-            update_data["description"] = description
-        if priority is not None:
-            update_data["priority"] = priority
-        if status is not None:
-            update_data["status"] = status
-        if tags is not None:
-            update_data["tags"] = tags
-        if custom_fields is not None:
-            update_data["custom_fields"] = custom_fields
-            
-        update_data.update(kwargs)
+        update_data = remove_none_values(update_data)
         
         if not update_data:
             return {"success": False, "error": "No fields to update"}
@@ -253,9 +242,11 @@ def delete_multiple_tickets(ticket_ids: List[int]) -> Dict[str, Any]:
             return {"success": False, "error": "No ticket IDs provided"}
 
         endpoint = "/tickets/bulk_delete"
-        data = {"bulk_action":{
-            "ids": ticket_ids
-        }}
+        data = {
+            "bulk_action":{
+                "ids": ticket_ids
+            }
+        }
         make_freshdesk_request("POST", endpoint, data=data)
         return {"success": True, "message": f"Tickets {ticket_ids} deleted successfully"}
     except Exception as e:
@@ -310,24 +301,22 @@ def list_tickets(
     """
     try:
         params = {
+            "status": status,
+            "priority": priority,
+            "requester_id": requester_id,
+            "group_id": group_id,
+            "updated_since": updated_since,
             "page": page,
-            "per_page": min(per_page, 100) 
+            "per_page": min(per_page, 100),
+            **filters 
         }
-        
-        if status is not None:
-            params["status"] = status
-        if priority is not None:
-            params["priority"] = priority
-        if requester_id is not None:
-            params["requester_id"] = requester_id
-        if group_id is not None:
-            params["group_id"] = group_id
+
         if updated_since is not None:
             if isinstance(updated_since, datetime):
                 updated_since = updated_since.isoformat()
             params["updated_since"] = updated_since
-            
-        params.update(filters)
+        
+        params = remove_none_values(params)
         
         response = make_freshdesk_request(
             "GET", 
@@ -473,10 +462,12 @@ def watch_ticket(ticket_id: int, user_id: Optional[int] = None) -> Dict[str, Any
         Dictionary indicating success or failure
     """
     try:
-        data = {}
-        if user_id:
-            data["user_id"] = user_id
-            
+        data = {
+            "user_id": user_id
+        }
+
+        data = remove_none_values(data)
+        
         make_freshdesk_request(
             "POST",
             f"/tickets/{ticket_id}/watch",
@@ -530,23 +521,19 @@ def forward_ticket(
     try:
         data = {
             "to_emails": to_emails,
+            "cc_emails": cc_emails,
+            "bcc_emails": bcc_emails,
+            "body": body,
+            "subject": subject,
+            **kwargs
         }
         
-        if cc_emails:
-            data["cc_emails"] = cc_emails
-        if bcc_emails:
-            data["bcc_emails"] = bcc_emails
-        if body:
-            data["body"] = body
-        if subject:
-            data["subject"] = subject
-            
-        data.update(kwargs)
-        
+        data = remove_none_values(data)
+
         make_freshdesk_request(
             "POST",
             f"/tickets/{ticket_id}/forward",
-            data={"email": data}
+            data=data
         )
         return {"success": True, "message": f"Ticket {ticket_id} forwarded successfully"}
     except Exception as e:
