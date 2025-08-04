@@ -236,7 +236,7 @@ from klavis import Klavis
 klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
 # Create a Unified MCP server instance
-unified_server = klavis_client.mcp_server.create_unified_server_instance(
+unified_server = klavis_client.mcp_server.create_unified_mcp_server_instance(
     user_id="<YOUR_USER_ID>",
     platform_name="<YOUR_PLATFORM_NAME>",
 )
@@ -250,7 +250,7 @@ import { KlavisClient } from 'klavis';
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 
 // Create a Unified MCP server instance
-const unifiedServer = await klavisClient.mcpServer.createUnifiedServerInstance({
+const unifiedServer = await klavisClient.mcpServer.createUnifiedMcpServerInstance({
     userId: "<YOUR_USER_ID>",
     platformName: "<YOUR_PLATFORM_NAME>",
 });
