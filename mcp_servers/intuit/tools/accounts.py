@@ -11,32 +11,16 @@ account_properties_minimal = {
     },
     "AccountType": {
         "type": "string",
-        "description": "Account type classification. Valid values: Bank, Other Current Asset, Fixed Asset, Other Asset, Accounts Receivable, Equity, Expense, Other Expense, Cost of Goods Sold, Accounts Payable, Credit Card, Long Term Liability, Other Current Liability, Income, Other Income. Required if AccountSubType is not specified."
-    },
-    "AccountSubType": {
-        "type": "string",
-        "description": "Account sub-type classification based on AccountType, All AccountType have 'Default' type if you not choice or you can manually choice it. BANK: CashOnHand, Checking, MoneyMarket, RentsHeldInTrust, Savings, TrustAccounts, CashAndCashEquivalents, OtherEarMarkedBankAccounts. OTHER_CURRENT_ASSET: AllowanceForBadDebts, DevelopmentCosts, EmployeeCashAdvances, OtherCurrentAssets, Inventory, Investment_MortgageRealEstateLoans, Investment_Other, Investment_TaxExemptSecurities, Investment_USGovernmentObligations, LoansToOfficers, LoansToOthers, LoansToStockholders, PrepaidExpenses, Retainage, UndepositedFunds, AssetsAvailableForSale, BalWithGovtAuthorities, CalledUpShareCapitalNotPaid, ExpenditureAuthorisationsAndLettersOfCredit, GlobalTaxDeferred, GlobalTaxRefund, InternalTransfers, OtherConsumables, ProvisionsCurrentAssets, ShortTermInvestmentsInRelatedParties, ShortTermLoansAndAdvancesToRelatedParties, TradeAndOtherReceivables. FIXED_ASSET: AccumulatedDepletion, AccumulatedDepreciation, DepletableAssets, FixedAssetComputers, FixedAssetCopiers, FixedAssetFurniture, FixedAssetPhone, FixedAssetPhotoVideo, FixedAssetSoftware, FixedAssetOtherToolsEquipment, FurnitureAndFixtures, Land, LeaseholdImprovements, OtherFixedAssets, AccumulatedAmortization, Buildings, IntangibleAssets, MachineryAndEquipment, Vehicles, AssetsInCourseOfConstruction, CapitalWip, CumulativeDepreciationOnIntangibleAssets, IntangibleAssetsUnderDevelopment, LandAsset, NonCurrentAssets, ParticipatingInterests, ProvisionsFixedAssets. OTHER_ASSET: LeaseBuyout, OtherLongTermAssets, SecurityDeposits, AccumulatedAmortizationOfOtherAssets, Goodwill, Licenses, OrganizationalCosts, AssetsHeldForSale, AvailableForSaleFinancialAssets, DeferredTax, Investments, LongTermInvestments, LongTermLoansAndAdvancesToRelatedParties, OtherIntangibleAssets, OtherLongTermInvestments, OtherLongTermLoansAndAdvances, PrepaymentsAndAccruedIncome, ProvisionsNonCurrentAssets. ACCOUNTS_RECEIVABLE: AccountsReceivable. EQUITY: OpeningBalanceEquity, PartnersEquity, RetainedEarnings, AccumulatedAdjustment, OwnersEquity, PaidInCapitalOrSurplus, PartnerContributions, PartnerDistributions, PreferredStock, CommonStock, TreasuryStock, EstimatedTaxes, Healthcare, PersonalIncome, PersonalExpense, AccumulatedOtherComprehensiveIncome, CalledUpShareCapital, CapitalReserves, DividendDisbursed, EquityInEarningsOfSubsiduaries, InvestmentGrants, MoneyReceivedAgainstShareWarrants, OtherFreeReserves, ShareApplicationMoneyPendingAllotment, ShareCapital, Funds. EXPENSE: AdvertisingPromotional, BadDebts, BankCharges, CharitableContributions, CommissionsAndFees, Entertainment, EntertainmentMeals, EquipmentRental, FinanceCosts, GlobalTaxExpense, Insurance, InterestPaid, LegalProfessionalFees, OfficeExpenses, OfficeGeneralAdministrativeExpenses, OtherBusinessExpenses, OtherMiscellaneousServiceCost, PromotionalMeals, RentOrLeaseOfBuildings, RepairMaintenance, ShippingFreightDelivery, SuppliesMaterials, Travel, TravelMeals, Utilities, Auto, CostOfLabor, DuesSubscriptions, PayrollExpenses, TaxesPaid, UnappliedCashBillPaymentExpense, AmortizationExpense, AppropriationsToDepreciation, BorrowingCost, DistributionCosts, ExternalServices, ExtraordinaryCharges, IncomeTaxExpense, LossOnDiscontinuedOperationsNetOfTax, ManagementCompensation, OtherCurrentOperatingCharges, OtherExternalServices, OtherRentalCosts, OtherSellingExpenses, ProjectStudiesSurveysAssessments, PurchasesRebates, ShippingAndDeliveryExpense, StaffCosts, Sundry, TravelExpensesGeneralAndAdminExpenses, TravelExpensesSellingExpense. OTHER_EXPENSE: Depreciation, ExchangeGainOrLoss, OtherMiscellaneousExpense, PenaltiesSettlements, Amortization, GasAndFuel, HomeOffice, HomeOwnerRentalInsurance, OtherHomeOfficeExpenses, MortgageInterest, RentAndLease, RepairsAndMaintenance, ParkingAndTolls, Vehicle, VehicleInsurance, VehicleLease, VehicleLoanInterest, VehicleLoan, VehicleRegistration, VehicleRepairs, OtherVehicleExpenses, WashAndRoadServices, DeferredTaxExpense, Depletion, ExceptionalItems, ExtraordinaryItems, IncomeTaxOtherExpense, MatCredit, PriorPeriodItems, TaxRoundoffGainOrLoss. COST_OF_GOODS_SOLD: EquipmentRentalCos, OtherCostsOfServiceCos, ShippingFreightDeliveryCos, SuppliesMaterialsCogs, CostOfLaborCos, CostOfSales, FreightAndDeliveryCost. ACCOUNTS_PAYABLE: AccountsPayable, OutstandingDuesMicroSmallEnterprise, OutstandingDuesOtherThanMicroSmallEnterprise. CREDIT_CARD: CreditCard. LONG_TERM_LIABILITY: NotesPayable, OtherLongTermLiabilities, ShareholderNotesPayable, AccrualsAndDeferredIncome, AccruedLongLermLiabilities, AccruedVacationPayable, BankLoans, DebtsRelatedToParticipatingInterests, DeferredTaxLiabilities, GovernmentAndOtherPublicAuthorities, GroupAndAssociates, LiabilitiesRelatedToAssetsHeldForSale, LongTermBorrowings, LongTermDebit, LongTermEmployeeBenefitObligations, ObligationsUnderFinanceLeases, OtherLongTermProvisions, ProvisionForLiabilities, ProvisionsNonCurrentLiabilities, StaffAndRelatedLongTermLiabilityAccounts. OTHER_CURRENT_LIABILITY: DirectDepositPayable, LineOfCredit, LoanPayable, GlobalTaxPayable, GlobalTaxSuspense, OtherCurrentLiabilities, PayrollClearing, PayrollTaxPayable, PrepaidExpensesPayable, RentsInTrustLiability, TrustAccountsLiabilities, FederalIncomeTaxPayable, InsurancePayable, SalesTaxPayable, StateLocalIncomeTaxPayable, AccruedLiabilities, CurrentLiabilities, CurrentPortionEmployeeBenefitsObligations, CurrentPortionOfObligationsUnderFinanceLeases, CurrentTaxLiability, DividendsPayable, DutiesAndTaxes, InterestPayables, ProvisionForWarrantyObligations, ProvisionsCurrentLiabilities, ShortTermBorrowings, SocialSecurityAgencies, StaffAndRelatedLiabilityAccounts, SundryDebtorsAndCreditors, TradeAndOtherPayables. INCOME: NonProfitIncome, OtherPrimaryIncome, SalesOfProductIncome, ServiceFeeIncome, DiscountsRefundsGiven, UnappliedCashPaymentIncome, CashReceiptIncome, OperatingGrants, OtherCurrentOperatingIncome, OwnWorkCapitalized, RevenueGeneral, SalesRetail, SalesWholesale, SavingsByTaxScheme. OTHER_INCOME: DividendIncome, InterestEarned, OtherInvestmentIncome, OtherMiscellaneousIncome, TaxExemptInterest, GainLossOnSaleOfFixedAssets, GainLossOnSaleOfInvestments, LossOnDisposalOfAssets, OtherOperatingIncome, UnrealisedLossOnSecuritiesNetOfTax. Required if AccountType is not specified."
+        "description": "Account type classification. Valid values: Bank, Other Current Asset, Fixed Asset, Other Asset, Accounts Receivable, Equity, Expense, Other Expense, Cost of Goods Sold, Accounts Payable, Credit Card, Long Term Liability, Other Current Liability, Income, Other Income."
     }
 }
 
 # Account properties mapping (based on QuickBooks API documentation)
 account_properties_user_define = {
     **account_properties_minimal,
-    "AcctNum": {
-        "type": "string",
-        "description": "User-defined account number to help identify the account within the chart-of-accounts"
-    },
     "Description": {
         "type": "string",
         "description": "User entered description for the account, which may include user entered information to guide bookkeepers/accountants in deciding what journal entries to post to the account"
-    },
-    "ParentRefValue": {
-        "type": "string",
-        "description": "The ID for the parent account if this represents a SubAccount"
-    },
-    "ParentRefName": {
-        "type": "string",
-        "description": "The name of the parent account if this represents a SubAccount"
     },
     "Active": {
         "type": "boolean",
@@ -114,33 +98,22 @@ search_accounts_tool = Tool(
         "type": "object",
         "properties": {
             "Name": {"type": "string", "description": "Search by account name (partial match)"},
-            "AcctNum": {"type": "string", "description": "Search by account number"},
             "AccountType": {"type": "string", "description": "Filter by account type: Bank, Other Current Asset, Fixed Asset, Other Asset, Accounts Receivable, Equity, Expense, Other Expense, Cost of Goods Sold, Accounts Payable, Credit Card, Long Term Liability, Other Current Liability, Income, Other Income"},
-            "AccountSubType": {"type": "string", "description": "Filter by account subtype (see AccountSubType documentation for valid values)"},
             "Classification": {"type": "string", "description": "Filter by classification: Asset, Liability, Income, Expense, Equity"},
             "Active": {"type": "boolean", "description": "Filter by active status"},
-            "SubAccount": {"type": "boolean", "description": "Filter by sub-account status (true for sub-accounts, false for top-level accounts)"},
             "FullyQualifiedName": {"type": "string", "description": "Search by fully qualified name (partial match)"},
             "Description": {"type": "string", "description": "Search by description (partial match)"},
-            "ParentRefValue": {"type": "string", "description": "Filter by parent account ID (for sub-accounts)"},
-            "ParentRefName": {"type": "string", "description": "Search by parent account name (partial match)"},
-            
-            # Balance filters
-            "MinCurrentBalance": {"type": "number", "description": "Minimum current balance"},
-            "MaxCurrentBalance": {"type": "number", "description": "Maximum current balance"},
-            "MinCurrentBalanceWithSubAccounts": {"type": "number", "description": "Minimum current balance including sub-accounts"},
-            "MaxCurrentBalanceWithSubAccounts": {"type": "number", "description": "Maximum current balance including sub-accounts"},
-            
+
             # Currency filters
             "CurrencyRefValue": {"type": "string", "description": "Filter by currency code"},
             "CurrencyRefName": {"type": "string", "description": "Search by currency name (partial match)"},
-            
+
             # Date filters
             "CreateTimeFrom": {"type": "string", "description": "Search accounts created from this date (YYYY-MM-DD format)"},
             "CreateTimeTo": {"type": "string", "description": "Search accounts created to this date (YYYY-MM-DD format)"},
             "LastUpdatedTimeFrom": {"type": "string", "description": "Search accounts last updated from this date (YYYY-MM-DD format)"},
             "LastUpdatedTimeTo": {"type": "string", "description": "Search accounts last updated to this date (YYYY-MM-DD format)"},
-            
+
             # Pagination
             "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
@@ -158,16 +131,9 @@ def mcp_object_to_account_data(**kwargs) -> Dict[str, Any]:
     account_data = {}
 
     # Basic account information - direct copy
-    for field in ['Name', 'AccountType', 'AccountSubType', 'AcctNum', 'Description', 'Active']:
+    for field in ['Name', 'AccountType', 'Description', 'Active']:
         if field in kwargs:
             account_data[field] = kwargs[field]
-
-    # Parent reference
-    if 'ParentRefValue' in kwargs:
-        parent_ref = {'value': kwargs['ParentRefValue']}
-        if 'ParentRefName' in kwargs:
-            parent_ref['name'] = kwargs['ParentRefName']
-        account_data['ParentRef'] = parent_ref
 
     return account_data
 
@@ -184,27 +150,16 @@ def account_data_to_mcp_object(account_data: Dict[str, Any]) -> Dict[str, Any]:
         'Id': 'Id',
         'Name': 'Name',
         'AccountType': 'AccountType',
-        'AccountSubType': 'AccountSubType',
-        'AcctNum': 'AcctNum',
         'Description': 'Description',
         'Active': 'Active',
         'Classification': 'Classification',
-        'SubAccount': 'SubAccount',
         'FullyQualifiedName': 'FullyQualifiedName',
-        'CurrentBalance': 'CurrentBalance',
-        'CurrentBalanceWithSubAccounts': 'CurrentBalanceWithSubAccounts'
+        'CurrentBalance': 'CurrentBalance'
     }
 
     for qb_field, mcp_field in field_mappings.items():
         if qb_field in account_data:
             mcp_object[mcp_field] = account_data[qb_field]
-
-    # Parent reference
-    if 'ParentRef' in account_data and isinstance(account_data['ParentRef'], dict):
-        if 'value' in account_data['ParentRef']:
-            mcp_object['ParentRefValue'] = account_data['ParentRef']['value']
-        if 'name' in account_data['ParentRef']:
-            mcp_object['ParentRefName'] = account_data['ParentRef']['name']
 
     # Currency reference
     if 'CurrencyRef' in account_data and isinstance(account_data['CurrencyRef'], dict):
@@ -295,29 +250,23 @@ class AccountManager:
 
         Args:
             Name: Search by account name (partial match)
-            AcctNum: Search by account number
             AccountType: Filter by account type
-            AccountSubType: Filter by account subtype
             Classification: Filter by classification (Asset, Liability, Income, Expense, Equity)
             Active: Filter by active status
-            SubAccount: Filter by sub-account status
             FullyQualifiedName: Search by fully qualified name (partial match)
             Description: Search by description (partial match)
-            ParentRefValue: Filter by parent account ID
-            ParentRefName: Search by parent account name (partial match)
-            
+
             # Balance filters
             MinCurrentBalance/MaxCurrentBalance: Filter by current balance range
-            MinCurrentBalanceWithSubAccounts/MaxCurrentBalanceWithSubAccounts: Filter by balance with sub-accounts range
-            
+
             # Currency filters
             CurrencyRefValue: Filter by currency code
             CurrencyRefName: Search by currency name (partial match)
-            
+
             # Date filters
             CreateTimeFrom/CreateTimeTo: Filter by creation date range
             LastUpdatedTimeFrom/LastUpdatedTimeTo: Filter by last updated date range
-            
+
             MaxResults: Maximum number of results to return (default: 100)
             StartPosition: Starting position for pagination (default: 1)
 
@@ -328,14 +277,8 @@ class AccountManager:
         conditions = []
 
         # Basic filters
-        if kwargs.get('AcctNum'):
-            conditions.append(f"AcctNum = '{kwargs['AcctNum']}'")
-
         if kwargs.get('AccountType'):
             conditions.append(f"AccountType = '{kwargs['AccountType']}'")
-
-        if kwargs.get('AccountSubType'):
-            conditions.append(f"AccountSubType = '{kwargs['AccountSubType']}'")
 
         if kwargs.get('Classification'):
             conditions.append(f"Classification = '{kwargs['Classification']}'")
@@ -343,14 +286,9 @@ class AccountManager:
         if kwargs.get('Active') is not None:
             conditions.append(f"Active = {str(kwargs['Active']).lower()}")
 
-        if kwargs.get('SubAccount') is not None:
-            conditions.append(f"SubAccount = {str(kwargs['SubAccount']).lower()}")
-
-        if kwargs.get('ParentRefValue'):
-            conditions.append(f"ParentRef.value = '{kwargs['ParentRefValue']}'")
-
         if kwargs.get('CurrencyRefValue'):
-            conditions.append(f"CurrencyRef.value = '{kwargs['CurrencyRefValue']}'")
+            conditions.append(
+                f"CurrencyRef.value = '{kwargs['CurrencyRefValue']}'")
 
         # Name searches (partial match) - we'll need to post-filter these due to QB API limitations
         partial_match_filters = {}
@@ -364,46 +302,42 @@ class AccountManager:
         if kwargs.get('Description'):
             partial_match_filters['Description'] = kwargs['Description'].lower()
 
-        if kwargs.get('ParentRefName'):
-            # For parent name search, we need a subquery
-            parent_name = kwargs['ParentRefName'].replace("'", "''")  # Escape single quotes
-            conditions.append(f"ParentRef.value IN (SELECT Id FROM Account WHERE Name LIKE '%{parent_name}%')")
-
         if kwargs.get('CurrencyRefName'):
             partial_match_filters['CurrencyRefName'] = kwargs['CurrencyRefName'].lower()
 
         # Balance range filters
         if kwargs.get('MinCurrentBalance') is not None:
-            conditions.append(f"CurrentBalance >= {kwargs['MinCurrentBalance']}")
+            conditions.append(
+                f"CurrentBalance >= {kwargs['MinCurrentBalance']}")
         if kwargs.get('MaxCurrentBalance') is not None:
-            conditions.append(f"CurrentBalance <= {kwargs['MaxCurrentBalance']}")
-
-        if kwargs.get('MinCurrentBalanceWithSubAccounts') is not None:
-            conditions.append(f"CurrentBalanceWithSubAccounts >= {kwargs['MinCurrentBalanceWithSubAccounts']}")
-        if kwargs.get('MaxCurrentBalanceWithSubAccounts') is not None:
-            conditions.append(f"CurrentBalanceWithSubAccounts <= {kwargs['MaxCurrentBalanceWithSubAccounts']}")
+            conditions.append(
+                f"CurrentBalance <= {kwargs['MaxCurrentBalance']}")
 
         # Date range filters
         if kwargs.get('CreateTimeFrom'):
-            conditions.append(f"MetaData.CreateTime >= '{kwargs['CreateTimeFrom']}'")
+            conditions.append(
+                f"MetaData.CreateTime >= '{kwargs['CreateTimeFrom']}'")
         if kwargs.get('CreateTimeTo'):
-            conditions.append(f"MetaData.CreateTime <= '{kwargs['CreateTimeTo']}'")
+            conditions.append(
+                f"MetaData.CreateTime <= '{kwargs['CreateTimeTo']}'")
 
         if kwargs.get('LastUpdatedTimeFrom'):
-            conditions.append(f"MetaData.LastUpdatedTime >= '{kwargs['LastUpdatedTimeFrom']}'")
+            conditions.append(
+                f"MetaData.LastUpdatedTime >= '{kwargs['LastUpdatedTimeFrom']}'")
         if kwargs.get('LastUpdatedTimeTo'):
-            conditions.append(f"MetaData.LastUpdatedTime <= '{kwargs['LastUpdatedTimeTo']}'")
+            conditions.append(
+                f"MetaData.LastUpdatedTime <= '{kwargs['LastUpdatedTimeTo']}'")
 
         # Build the query
         query = "SELECT * FROM Account"
-        
+
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
 
         # Add pagination
         max_results = kwargs.get('MaxResults', 100)
         start_position = kwargs.get('StartPosition', 1)
-        
+
         query += f" STARTPOSITION {start_position} MAXRESULTS {max_results}"
 
         response = await self.client._get('query', params={'query': query})
@@ -413,13 +347,13 @@ class AccountManager:
             return []
 
         accounts = response['QueryResponse']['Account']
-        
+
         # Apply post-filtering for partial matches
         if partial_match_filters:
             filtered_accounts = []
             for account in accounts:
                 should_include = True
-                
+
                 for field, search_value in partial_match_filters.items():
                     if field == 'Name' and 'Name' in account:
                         if search_value not in account['Name'].lower():
@@ -434,14 +368,15 @@ class AccountManager:
                             should_include = False
                             break
                     elif field == 'CurrencyRefName' and 'CurrencyRef' in account and isinstance(account['CurrencyRef'], dict):
-                        currency_name = account['CurrencyRef'].get('name', '').lower()
+                        currency_name = account['CurrencyRef'].get(
+                            'name', '').lower()
                         if search_value not in currency_name:
                             should_include = False
                             break
-                
+
                 if should_include:
                     filtered_accounts.append(account)
-            
+
             accounts = filtered_accounts
 
         return [account_data_to_mcp_object(account) for account in accounts]

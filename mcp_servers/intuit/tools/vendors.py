@@ -37,7 +37,7 @@ vendor_properties_user_define = {
     **vendor_properties_minimal,
     "PrimaryEmailAddr": {
         "type": "string",
-        "description": "Primary email address. The address format must follow the RFC 822 standard."
+        "description": "Primary email address."
     },
     "CompanyName": {
         "type": "string",
@@ -155,18 +155,6 @@ vendor_properties_user_define = {
     "BillAddrLine2": {
         "type": "string",
         "description": "Second line of the billing address."
-    },
-    "BillAddrLine3": {
-        "type": "string",
-        "description": "Third line of the billing address."
-    },
-    "BillAddrLine4": {
-        "type": "string",
-        "description": "Fourth line of the billing address."
-    },
-    "BillAddrLine5": {
-        "type": "string",
-        "description": "Fifth line of the billing address."
     },
     "BillAddrCity": {
         "type": "string",
@@ -383,8 +371,7 @@ def mcp_object_to_vendor_data(**kwargs) -> Dict[str, Any]:
             vendor_data[ref_name] = ref_obj
 
     # Billing Address
-    bill_addr_fields = ['BillAddrLine1', 'BillAddrLine2', 'BillAddrLine3', 'BillAddrLine4', 'BillAddrLine5',
-                        'BillAddrCity', 'BillAddrCountry', 'BillAddrCountrySubDivisionCode', 'BillAddrPostalCode']
+    bill_addr_fields = ['BillAddrLine1', 'BillAddrLine2', 'BillAddrCity', 'BillAddrCountry', 'BillAddrCountrySubDivisionCode', 'BillAddrPostalCode']
 
     bill_addr = {}
     for field in bill_addr_fields:
@@ -476,9 +463,6 @@ def vendor_data_to_mcp_object(vendor_data: Dict[str, Any]) -> Dict[str, Any]:
         addr_mappings = {
             'Line1': 'BillAddrLine1',
             'Line2': 'BillAddrLine2',
-            'Line3': 'BillAddrLine3',
-            'Line4': 'BillAddrLine4',
-            'Line5': 'BillAddrLine5',
             'City': 'BillAddrCity',
             'Country': 'BillAddrCountry',
             'CountrySubDivisionCode': 'BillAddrCountrySubDivisionCode',

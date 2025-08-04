@@ -21,7 +21,7 @@ invoice_properties_minimal = {
                 "LineId": {"type": "string", "description": "Unique ID for this line item. Required for updates, ignored for creates"},
                 "Amount": {"type": "number", "description": "Line total amount"},
                 "Description": {"type": "string", "description": "Line item description"},
-                "DetailType": {"type": "string", "description": "Line detail type: SalesItemLineDetail, GroupLine, DescriptionOnlyLine, DiscountLine, SubTotalLine", "default": "SalesItemLineDetail"},
+                "DetailType": {"type": "string", "description": "Line detail type: SalesItemLineDetail, DescriptionOnlyLine, DiscountLine, SubTotalLine", "default": "SalesItemLineDetail"},
                 "LineNum": {"type": "number", "description": "Position of the line in the collection"},
 
                 # SalesItemLineDetail fields
@@ -33,11 +33,6 @@ invoice_properties_minimal = {
                 "DiscountAmount": {"type": "number", "description": "Discount amount applied to this line"},
                 "ServiceDate": {"type": "string", "description": "Date when the service is performed (YYYY-MM-DD format)"},
 
-                # GroupLineDetail fields
-                "GroupItemId": {"type": "string", "description": "Reference to the group item for bundle lines"},
-                "GroupItemName": {"type": "string", "description": "Name of the group item"},
-                "GroupQuantity": {"type": "number", "description": "Quantity of the group item"},
-
                 # DescriptionOnlyLine fields
                 "IsSubtotal": {"type": "boolean", "description": "Set to true for subtotal lines"},
 
@@ -47,28 +42,8 @@ invoice_properties_minimal = {
                 "DiscountAccountName": {"type": "string", "description": "Name of the discount account"},
                 "IsPercentBased": {"type": "boolean", "description": "True if the discount is a percentage"},
 
-                # References for any line type
-                "ClassId": {"type": "string", "description": "Reference to the Class for the line item"},
-                "ClassName": {"type": "string", "description": "Name of the Class"},
                 "TaxCodeId": {"type": "string", "description": "Reference to the TaxCode for this item"},
-                "TaxCodeName": {"type": "string", "description": "Name of the TaxCode"},
-
-                # Nested lines for GroupLine
-                "GroupLines": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "ItemId": {"type": "string"},
-                            "Quantity": {"type": "number"},
-                            "UnitPrice": {"type": "number"},
-                            "DiscountRate": {"type": "number"},
-                            "ClassId": {"type": "string"},
-                            "TaxCodeId": {"type": "string"}
-                        }
-                    },
-                    "description": "Individual item lines that comprise a bundle (for GroupLineDetail)"
-                }
+                "TaxCodeName": {"type": "string", "description": "Name of the TaxCode"}
             },
             "required": ["Amount"]
         }
@@ -82,7 +57,7 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Reference number for the transaction. If not explicitly provided at create time, this field is populated based on the setting of Preferences:CustomTxnNumber"
     },
-    "TxnDate": {
+    "TransactionDate": {
         "type": "string",
         "description": "The date entered by the user when this transaction occurred. Format: yyyy/MM/dd"
     },
@@ -98,10 +73,6 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "User-entered message to the customer; this message is visible to end user on their transactions"
     },
-    "PrivateNote": {
-        "type": "string",
-        "description": "User entered, organization-private note about the transaction"
-    },
     "BillEmail": {
         "type": "string",
         "description": "Identifies the e-mail address where the invoice is sent"
@@ -110,10 +81,6 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Identifies the carbon copy e-mail address where the invoice is sent"
     },
-    "BillEmailBcc": {
-        "type": "string",
-        "description": "Identifies the blind carbon copy e-mail address where the invoice is sent"
-    },
     "ShipFromAddrLine1": {
         "type": "string",
         "description": "First line of the address where goods are shipped from"
@@ -121,18 +88,6 @@ invoice_properties_user_define = {
     "ShipFromAddrLine2": {
         "type": "string",
         "description": "Second line of the address where goods are shipped from"
-    },
-    "ShipFromAddrLine3": {
-        "type": "string",
-        "description": "Third line of the address where goods are shipped from"
-    },
-    "ShipFromAddrLine4": {
-        "type": "string",
-        "description": "Fourth line of the address where goods are shipped from"
-    },
-    "ShipFromAddrLine5": {
-        "type": "string",
-        "description": "Fifth line of the address where goods are shipped from"
     },
     "ShipFromAddrCity": {
         "type": "string",
@@ -158,18 +113,6 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Second line of the shipping address"
     },
-    "ShipAddrLine3": {
-        "type": "string",
-        "description": "Third line of the shipping address"
-    },
-    "ShipAddrLine4": {
-        "type": "string",
-        "description": "Fourth line of the shipping address"
-    },
-    "ShipAddrLine5": {
-        "type": "string",
-        "description": "Fifth line of the shipping address"
-    },
     "ShipAddrCity": {
         "type": "string",
         "description": "City name for the shipping address"
@@ -193,18 +136,6 @@ invoice_properties_user_define = {
     "BillAddrLine2": {
         "type": "string",
         "description": "Second line of the billing address"
-    },
-    "BillAddrLine3": {
-        "type": "string",
-        "description": "Third line of the billing address"
-    },
-    "BillAddrLine4": {
-        "type": "string",
-        "description": "Fourth line of the billing address"
-    },
-    "BillAddrLine5": {
-        "type": "string",
-        "description": "Fifth line of the billing address"
     },
     "BillAddrCity": {
         "type": "string",
@@ -230,14 +161,6 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Name of the sales term associated with the transaction"
     },
-    "ClassRefValue": {
-        "type": "string",
-        "description": "Reference to the Class associated with the transaction"
-    },
-    "ClassRefName": {
-        "type": "string",
-        "description": "Name of the Class associated with the transaction"
-    },
     "DepartmentRefValue": {
         "type": "string",
         "description": "Reference to a Department object specifying the location of the transaction"
@@ -262,37 +185,9 @@ invoice_properties_user_define = {
         "type": "string",
         "description": "Full name of the currency"
     },
-    "ExchangeRate": {
-        "type": "number",
-        "description": "The exchange rate between the transaction currency and the home currency"
-    },
-    "GlobalTaxCalculation": {
-        "type": "string",
-        "description": "Method in which tax is applied. Allowed values are: TaxExcluded, TaxInclusive, and NotApplicable"
-    },
-    "ApplyTaxAfterDiscount": {
-        "type": "boolean",
-        "description": "If true, subtract the discount first and then calculate the sales tax"
-    },
-    "PrintStatus": {
-        "type": "string",
-        "description": "Printing status of the invoice. Valid values: NotSet, NeedToPrint, PrintComplete"
-    },
-    "EmailStatus": {
-        "type": "string",
-        "description": "Email status of the invoice. Valid values: NotSet, NeedToSend, EmailSent"
-    },
     "TrackingNum": {
         "type": "string",
         "description": "Shipping provider's tracking number for the delivery of the goods"
-    },
-    "AllowOnlineACHPayment": {
-        "type": "boolean",
-        "description": "Specifies if this invoice can be paid with online bank transfers"
-    },
-    "AllowOnlineCreditCardPayment": {
-        "type": "boolean",
-        "description": "Specifies if online credit card payments are allowed for this invoice"
     },
     "Deposit": {
         "type": "number",
@@ -330,14 +225,6 @@ invoice_properties_full = {
         "type": "number",
         "description": "The balance reflecting any payments made against the transaction (read-only)"
     },
-    "HomeTotalAmt": {
-        "type": "number",
-        "description": "Total amount of the transaction in the home currency (read-only)"
-    },
-    "HomeBalance": {
-        "type": "number",
-        "description": "Convenience field containing amount in Balance expressed in home currency (read-only)"
-    },
     "InvoiceLink": {
         "type": "string",
         "description": "Sharable link for the invoice sent to external customers (read-only)"
@@ -356,7 +243,7 @@ invoice_properties_full = {
 create_invoice_tool = Tool(
     name="create_invoice",
     title="Create Invoice",
-    description="Create New Invoice - Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line (SalesItemLine, GroupLine, or DescriptionOnlyLine).",
+    description="Create New Invoice - Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line (SalesItemLine or DescriptionOnlyLine).",
     inputSchema={
         "type": "object",
         "properties": invoice_properties_minimal,
@@ -403,8 +290,8 @@ search_invoices_tool = Tool(
             "CustomerName": {"type": "string", "description": "Search by customer name (partial match)"},
 
             # Date filters
-            "TxnDateFrom": {"type": "string", "description": "Search invoices from this transaction date (YYYY-MM-DD format)"},
-            "TxnDateTo": {"type": "string", "description": "Search invoices to this transaction date (YYYY-MM-DD format)"},
+            "TransactionDateFrom": {"type": "string", "description": "Search invoices from this transaction date (YYYY-MM-DD format)"},
+            "TransactionDateTo": {"type": "string", "description": "Search invoices to this transaction date (YYYY-MM-DD format)"},
             "DueDateFrom": {"type": "string", "description": "Search invoices from this due date (YYYY-MM-DD format)"},
             "DueDateTo": {"type": "string", "description": "Search invoices to this due date (YYYY-MM-DD format)"},
             "ShipDateFrom": {"type": "string", "description": "Search invoices from this ship date (YYYY-MM-DD format)"},
@@ -415,10 +302,6 @@ search_invoices_tool = Tool(
             "MaxAmount": {"type": "number", "description": "Maximum total amount"},
             "MinBalance": {"type": "number", "description": "Minimum balance amount"},
             "MaxBalance": {"type": "number", "description": "Maximum balance amount"},
-
-            # Status filters
-            "EmailStatus": {"type": "string", "description": "Email status: NotSet, NeedToSend, EmailSent"},
-            "PrintStatus": {"type": "string", "description": "Print status: NotSet, NeedToPrint, PrintComplete"},
 
             # Address filters - Billing Address
             "BillAddrCity": {"type": "string", "description": "Search by billing address city"},
@@ -455,7 +338,10 @@ update_invoice_tool = Tool(
     description="Update Existing Invoice - Modify an existing invoice in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
-        "properties": invoice_properties_user_define,
+        "properties": {
+            **invoice_properties_user_define,
+            "Id": {"type": "string", "description": "The QuickBooks invoice ID to update"}
+        },
         "required": ["Id"]
     }
 )
@@ -518,28 +404,36 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
     invoice_data = {}
 
     # Basic invoice information - direct copy
-    for field in ['DocNumber', 'TxnDate', 'ShipDate', 'DueDate',
-                  'PrivateNote', 'PrintStatus', 'EmailStatus', 'TrackingNum']:
+    for field in ['DocNumber', 'ShipDate', 'DueDate',
+                  'PrintStatus', 'EmailStatus', 'TrackingNum']:
         if field in kwargs:
             invoice_data[field] = kwargs[field]
+
+    # Handle renamed field: TransactionDate -> TxnDate
+    if 'TransactionDate' in kwargs:
+        invoice_data['TxnDate'] = kwargs['TransactionDate']
 
     # CustomerMemo needs to be in object format
     if 'CustomerMemo' in kwargs:
         invoice_data['CustomerMemo'] = {'value': kwargs['CustomerMemo']}
 
     # Boolean fields
-    for field in ['AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
-                  'ApplyTaxAfterDiscount']:
+    for field in ['ApplyTaxAfterDiscount', 'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment']:
         if field in kwargs:
             invoice_data[field] = kwargs[field]
 
     # Numeric fields
-    for field in ['Deposit', 'ExchangeRate', 'GlobalTaxCalculation']:
+    for field in ['Deposit', 'ExchangeRate']:
+        if field in kwargs:
+            invoice_data[field] = kwargs[field]
+
+    # String fields
+    for field in ['GlobalTaxCalculation']:
         if field in kwargs:
             invoice_data[field] = kwargs[field]
 
     # Email addresses - convert to structured objects
-    for email_field in ['BillEmail', 'BillEmailCc', 'BillEmailBcc']:
+    for email_field in ['BillEmail', 'BillEmailCc']:
         if email_field in kwargs:
             invoice_data[email_field] = {'Address': kwargs[email_field]}
 
@@ -576,10 +470,6 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
                     sales_detail["DiscountAmt"] = item["DiscountAmount"]
                 if item.get("ServiceDate"):
                     sales_detail["ServiceDate"] = item["ServiceDate"]
-                if item.get("ClassId"):
-                    sales_detail["ClassRef"] = {"value": item["ClassId"]}
-                    if item.get("ClassName"):
-                        sales_detail["ClassRef"]["name"] = item["ClassName"]
                 if item.get("TaxCodeId"):
                     sales_detail["TaxCodeRef"] = {"value": item["TaxCodeId"]}
                     if item.get("TaxCodeName"):
@@ -616,9 +506,6 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
                             group_sales_detail["UnitPrice"] = group_item["UnitPrice"]
                         if group_item.get("DiscountRate"):
                             group_sales_detail["DiscountRate"] = group_item["DiscountRate"]
-                        if group_item.get("ClassId"):
-                            group_sales_detail["ClassRef"] = {
-                                "value": group_item["ClassId"]}
                         if group_item.get("TaxCodeId"):
                             group_sales_detail["TaxCodeRef"] = {
                                 "value": group_item["TaxCodeId"]}
@@ -654,9 +541,6 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
                         "value": item["DiscountAccountId"]}
                     if item.get("DiscountAccountName"):
                         discount_detail["DiscountAccountRef"]["name"] = item["DiscountAccountName"]
-                if item.get("ClassId"):
-                    discount_detail["ClassRef"] = {
-                        "value": item["ClassId"], "name": item.get("ClassName", "")}
                 if item.get("TaxCodeId"):
                     discount_detail["TaxCodeRef"] = {
                         "value": item["TaxCodeId"], "name": item.get("TaxCodeName", "")}
@@ -679,7 +563,6 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
         ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
         ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
         ('SalesTermRef', 'SalesTermRefValue', 'SalesTermRefName'),
-        ('ClassRef', 'ClassRefValue', 'ClassRefName'),
         ('DepartmentRef', 'DepartmentRefValue', 'DepartmentRefName'),
         ('ShipMethodRef', 'ShipMethodRefValue', 'ShipMethodRefName'),
         ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName')
@@ -694,7 +577,7 @@ def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
 
     # Address fields - convert flattened fields to structured objects
     for addr_type in ['BillAddr', 'ShipAddr', 'ShipFromAddr']:
-        address_fields = ['Line1', 'Line2', 'Line3', 'Line4', 'Line5',
+        address_fields = ['Line1', 'Line2',
                           'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']
 
         has_address = any(kwargs.get(f'{addr_type}{field}')
@@ -718,13 +601,26 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Copy basic fields if present
     for field in [
-        'Id', 'DocNumber', 'TxnDate', 'ShipDate', 'DueDate',
-        'PrivateNote', 'PrintStatus', 'EmailStatus', 'TrackingNum',
-        'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
-        'ApplyTaxAfterDiscount', 'Deposit', 'ExchangeRate', 'GlobalTaxCalculation'
+        'Id', 'DocNumber', 'ShipDate', 'DueDate', 'TrackingNum', 'Deposit'
     ]:
         if field in invoice_data:
             mcp_object[field] = invoice_data[field]
+
+    # Copy fields that are preserved in output only (not in input schema)
+    for field in [
+        'PrintStatus', 'EmailStatus', 'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
+        'ApplyTaxAfterDiscount', 'ExchangeRate', 'GlobalTaxCalculation'
+    ]:
+        if field in invoice_data:
+            mcp_object[field] = invoice_data[field]
+
+    # Handle renamed field: TxnDate -> TransactionDate
+    if 'TxnDate' in invoice_data:
+        mcp_object['TransactionDate'] = invoice_data['TxnDate']
+
+    # Handle fields that are output-only (not in input schema but preserved in output)
+    if 'PrivateNote' in invoice_data:
+        mcp_object['PrivateNote'] = invoice_data['PrivateNote']
 
     # Handle CustomerMemo which might be in object format
     if 'CustomerMemo' in invoice_data:
@@ -735,7 +631,7 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
             mcp_object['CustomerMemo'] = memo
 
     # Handle read-only fields
-    for field in ['TotalAmt', 'Balance', 'HomeTotalAmt', 'HomeBalance', 'InvoiceLink']:
+    for field in ['TotalAmt', 'Balance', 'InvoiceLink']:
         if field in invoice_data:
             mcp_object[field] = invoice_data[field]
 
@@ -777,9 +673,6 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
                         item['DiscountAmount'] = detail['DiscountAmt']
                     if 'ServiceDate' in detail:
                         item['ServiceDate'] = detail['ServiceDate']
-                    if 'ClassRef' in detail:
-                        item['ClassId'] = detail['ClassRef'].get('value')
-                        item['ClassName'] = detail['ClassRef'].get('name')
                     if 'TaxCodeRef' in detail:
                         item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
                         item['TaxCodeName'] = detail['TaxCodeRef'].get(
@@ -806,7 +699,6 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
                                     'Quantity': group_detail.get('Qty'),
                                     'UnitPrice': group_detail.get('UnitPrice'),
                                     'DiscountRate': group_detail.get('DiscountRate'),
-                                    'ClassId': group_detail.get('ClassRef', {}).get('value'),
                                     'TaxCodeId': group_detail.get('TaxCodeRef', {}).get('value')
                                 }
                                 group_lines.append(group_item)
@@ -836,9 +728,6 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
                             'value')
                         item['DiscountAccountName'] = detail['DiscountAccountRef'].get(
                             'name')
-                    if 'ClassRef' in detail:
-                        item['ClassId'] = detail['ClassRef'].get('value')
-                        item['ClassName'] = detail['ClassRef'].get('name')
                     if 'TaxCodeRef' in detail:
                         item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
                         item['TaxCodeName'] = detail['TaxCodeRef'].get(
@@ -858,7 +747,6 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
         ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
         ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
         ('SalesTermRef', 'SalesTermRefValue', 'SalesTermRefName'),
-        ('ClassRef', 'ClassRefValue', 'ClassRefName'),
         ('DepartmentRef', 'DepartmentRefValue', 'DepartmentRefName'),
         ('ShipMethodRef', 'ShipMethodRefValue', 'ShipMethodRefName'),
         ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName'),
@@ -888,8 +776,7 @@ def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
     for addr_type, prefix in address_mappings:
         if addr_type in invoice_data and isinstance(invoice_data[addr_type], dict):
             addr = invoice_data[addr_type]
-            for field in ['Line1', 'Line2', 'Line3', 'Line4', 'Line5',
-                          'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']:
+            for field in ['Line1', 'Line2', 'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']:
                 if field in addr:
                     mcp_object[f'{prefix}{field}'] = addr[field]
 
@@ -940,17 +827,13 @@ class InvoiceManager:
             CustomerName: Search by customer name (partial match)
 
             # Date filters
-            TxnDateFrom/TxnDateTo: Search by transaction date range
+            TransactionDateFrom/TransactionDateTo: Search by transaction date range
             DueDateFrom/DueDateTo: Search by due date range  
             ShipDateFrom/ShipDateTo: Search by ship date range
 
             # Amount filters
             MinAmount/MaxAmount: Search by total amount range
             MinBalance/MaxBalance: Search by balance amount range
-
-            # Status filters
-            EmailStatus: Email status filter
-            PrintStatus: Print status filter
 
             # Address filters (billing, shipping, ship-from)
             BillAddrCity, ShipAddrCity, ShipFromAddrCity: Search by city
@@ -983,10 +866,10 @@ class InvoiceManager:
                 f"CustomerRef IN (SELECT Id FROM Customer WHERE Name LIKE '%{customer_name}%')")
 
         # Date range filters
-        if kwargs.get('TxnDateFrom'):
-            conditions.append(f"TxnDate >= '{kwargs['TxnDateFrom']}'")
-        if kwargs.get('TxnDateTo'):
-            conditions.append(f"TxnDate <= '{kwargs['TxnDateTo']}'")
+        if kwargs.get('TransactionDateFrom'):
+            conditions.append(f"TxnDate >= '{kwargs['TransactionDateFrom']}'")
+        if kwargs.get('TransactionDateTo'):
+            conditions.append(f"TxnDate <= '{kwargs['TransactionDateTo']}'")
 
         if kwargs.get('DueDateFrom'):
             conditions.append(f"DueDate >= '{kwargs['DueDateFrom']}'")
@@ -1008,12 +891,6 @@ class InvoiceManager:
             conditions.append(f"Balance >= {kwargs['MinBalance']}")
         if kwargs.get('MaxBalance'):
             conditions.append(f"Balance <= {kwargs['MaxBalance']}")
-
-        # Status filters
-        if kwargs.get('EmailStatus'):
-            conditions.append(f"EmailStatus = '{kwargs['EmailStatus']}'")
-        if kwargs.get('PrintStatus'):
-            conditions.append(f"PrintStatus = '{kwargs['PrintStatus']}'")
 
         # Address filters - Note: QuickBooks API has limited support for nested object queries
         # For address searches, we'll need to use more complex queries or post-filter results
