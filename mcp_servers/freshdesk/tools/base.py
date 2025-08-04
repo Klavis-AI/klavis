@@ -27,11 +27,11 @@ def gen_random_password(length: int = 10) -> str:
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
-def make_freshdesk_request(
+async def make_freshdesk_request(
     method: str, 
     endpoint: str, 
     data: Optional[Dict] = None,
-    options: Optional[Dict] = None,
+    options: Optional[Dict] = {},
 ) -> Any:
     """Make an HTTP request to the Freshdesk API.
     
@@ -161,7 +161,7 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
             'details': []
         }
     }
-    
+
     # Handle requests.exceptions.RequestException and its subclasses
     if isinstance(e, requests.exceptions.RequestException):
         error_response['error']['code'] = 'request_error'
@@ -178,7 +178,7 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
                 404: 'not_found',
                 405: 'method_not_allowed',
                 406: 'unsupported_accept_header',
-                409: 'conflict',
+                409: 'conflict', 
                 415: 'unsupported_content_type',
                 429: 'rate_limit_exceeded',
                 500: 'server_error'

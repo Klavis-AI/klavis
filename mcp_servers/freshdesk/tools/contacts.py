@@ -129,7 +129,7 @@ async def list_contacts(
         "state": state,
         "updated_since": updated_since,
         "page": page,
-        "per_page": min(per_page, 100)  # API max is 100
+        "per_page": min(per_page, 100) 
     }
     
     # Remove None values
@@ -399,8 +399,8 @@ async def merge_contacts(
     
     try:
         return await make_freshdesk_request(
-            "POST",
-            f"/contacts/{primary_contact_id}/merge",
+            "PUT",
+            f"/contacts/merge",
             data=merge_data
         )
     except Exception as e:

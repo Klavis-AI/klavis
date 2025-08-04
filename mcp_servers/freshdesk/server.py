@@ -747,9 +747,43 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "primary_contact_id": {"type": "integer", "description": "ID of the primary contact to merge into"},
-                    "secondary_contact_ids": {"type": "array", "items": {"type": "integer"}, "description": "List of contact IDs to merge into the primary contact"},
-                    "contact_data": {"type": "object", "description": "Optional dictionary of fields to update on the primary contact"}
+                    "primary_contact_id": {
+                        "type": "integer", 
+                        "description": "ID of the primary contact to merge into"
+                    },
+                    "secondary_contact_ids": {
+                        "type": "array", 
+                        "items": {"type": "integer"}, 
+                        "description": "List of contact IDs to merge into the primary contact"
+                    },
+                    "contact_data": {
+                        "type": "object", 
+                        "description": "Optional dictionary of fields to update on the primary contact",
+                        "properties": {
+                            "email": {
+                                "type": "string", 
+                                "description": "Primary email address of the contact."
+                            },
+                            "phone": {
+                                "type": "string", 
+                                "description": "Phone number of the contact."
+                            }, 
+                            "mobile": {
+                                "type": "string", 
+                                "description": "Mobile number of the contact."
+                            },
+                            "company_ids": {
+                                "type": "array", 
+                                "items": {"type": "integer"}, 
+                                "description": "IDs of the companies associated with the contact"
+                            },
+                            "other_emails": {
+                                "type": "array", 
+                                "items": {"type": "string"}, 
+                                "description": "Additional emails associated with the contact"
+                            },
+                        }
+                    }
                 },
                 "required": ["primary_contact_id", "secondary_contact_ids"]
             }
