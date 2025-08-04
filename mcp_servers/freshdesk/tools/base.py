@@ -4,7 +4,10 @@ import random
 import string
 from typing import Any, Dict, Optional
 import base64
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 FRESHDESK_API_KEY = os.getenv("FRESHDESK_API_KEY")
 if not FRESHDESK_API_KEY:
@@ -40,6 +43,8 @@ def make_freshdesk_request(
             timeout: Request timeout in seconds (default: 10)
             use_pwd: Use basic authentication with a random password (default: True)
             query_params: Optional query parameters as a dictionary
+            headers: Optional headers as a dictionary
+            files: Optional files as a dictionary
         
     Returns:
         Parsed JSON response from the API
@@ -64,9 +69,11 @@ def make_freshdesk_request(
     timeout = int(options.get("timeout", 10))
     use_pwd = options.get("use_pwd", True)
     query_params = options.get("query_params", {})
+    extra_headers = options.get("headers", {})
     
     headers = {
         "Content-Type": "application/json",
+        **extra_headers,
     }
 
     random_password = gen_random_password()
