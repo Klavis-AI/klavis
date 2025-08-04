@@ -187,17 +187,11 @@ invoice_properties_user_define = {
     }
 }
 
-# Wont send to AI, but AI actually uses this
-# Leave it here for human understanding
 invoice_properties = {
     **invoice_properties_user_define,
     "Id": {
         "type": "string",
         "description": "The unique QuickBooks invoice ID"
-    },
-    "SyncToken": {
-        "type": "string",
-        "description": "Version number of the object for concurrent updates"
     }
 }
 
@@ -300,10 +294,7 @@ update_invoice_tool = Tool(
     description="Update Existing Invoice - Modify an existing invoice in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
-        "properties": {
-            **invoice_properties_user_define,
-            "Id": {"type": "string", "description": "The QuickBooks invoice ID to update"}
-        },
+        "properties": invoice_properties,
         "required": ["Id"]
     }
 )

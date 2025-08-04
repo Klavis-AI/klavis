@@ -127,17 +127,11 @@ vendor_properties_user_define = {
     }
 }
 
-# Wont send to AI, but AI actually uses this
-# Leave it here for human understanding
 vendor_properties = {
     **vendor_properties_user_define,
     "Id": {
         "type": "string",
         "description": "The unique QuickBooks vendor ID"
-    },
-    "SyncToken": {
-        "type": "string",
-        "description": "Version number of the object for concurrent updates"
     }
 }
 
@@ -214,9 +208,9 @@ update_vendor_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": {
-            key: value for key, value in vendor_properties_user_define.items() 
+            key: value for key, value in vendor_properties.items() 
             if key != "Active"  # Remove Active from update inputs
-        } | {"Id": {"type": "string", "description": "The QuickBooks vendor ID to update"}},
+        },
         "required": ["Id"]
     }
 )

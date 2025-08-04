@@ -28,8 +28,6 @@ account_properties_user_define = {
     }
 }
 
-# Wont send to AI, but AI actually uses this
-# Leave it here for human understanding
 account_properties = {
     **account_properties_user_define,
     "Id": {
@@ -84,11 +82,8 @@ update_account_tool = Tool(
     description="Update an existing account in QuickBooks",
     inputSchema={
         "type": "object",
-        "properties": {
-            **account_properties_user_define,
-            "Id": {"type": "string", "description": "The QuickBooks account ID (required)"}
-        },
-        "required": ["Id"]
+        "properties": account_properties,
+        "required": ["Id", "Name"]
     }
 )
 

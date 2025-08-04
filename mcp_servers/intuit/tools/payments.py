@@ -104,17 +104,11 @@ payment_properties_user_define = {
     }
 }
 
-# Wont send to AI, but AI actually uses this
-# Leave it here for human understanding
 payment_properties = {
     **payment_properties_user_define,
     "Id": {
         "type": "string",
         "description": "The unique QuickBooks payment ID"
-    },
-    "SyncToken": {
-        "type": "string",
-        "description": "Version number of the object for concurrent updates"
     }
 }
 
@@ -196,7 +190,7 @@ update_payment_tool = Tool(
     description="Update Existing Payment - Modify an existing payment in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
-        "properties": {**payment_properties_user_define, "Id": {"type": "string", "description": "The QuickBooks payment ID to update"}},
+        "properties": payment_properties,
         "required": ["Id"]
     }
 )
