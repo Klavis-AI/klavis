@@ -1,7 +1,7 @@
 from .base import get_spotify_token
 import requests
 
-def search_tracks(query:str, type:str ,limit:int=10) -> dict:
+def search_tracks(query:str, type:str="track" ,limit:int=10) -> dict:
     """Search for tracks on Spotify."""
     try:
         access_token = get_spotify_token()
