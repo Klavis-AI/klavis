@@ -1,8 +1,8 @@
 [project]
 name = "freshdesk"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "A Multi-Capability Server for Freshdesk"
+
 requires-python = ">=3.12"
 dependencies = [
     "mcp>=1.12.3",
