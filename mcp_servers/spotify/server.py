@@ -63,27 +63,25 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
-
             types.Tool(
-                name="spotify_search",
-                description="Search for content on Spotify",
+                name="spotify_search_tracks",
+                description="Search for tracks on Spotify",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Search query"
-                        },
-                        "type": {
-                            "type": "string",
-                            "enum": ["track", "album", "artist", "playlist", "show", "episode", "audiobook"],
-                            "description": "Type of content to search for , defaults to 'track'",
-                            "default": "track"
+                            "description": "Search query for tracks"
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of results to return",
+                            "description": "Number of results to return (default: 10)",
                             "default": 10
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Offset for pagination (default: 0)",
+                            "default": 0
                         }
                     },
                     "required": ["query"]
@@ -95,21 +93,33 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        # Log the tool call with name and arguments
         logger.info(f"Tool called: {name}")
         logger.debug(f"Tool arguments: {json.dumps(arguments, indent=2)}")
         
-        if name == "spotify_search":
-            try:
-                result = search_tracks(
-                    query=arguments.get("query"),
-                    type=arguments.get("type"),
-                    limit=arguments.get("limit", 10)
+        if name == "spotify_search_tracks":
+            query = arguments.get("query", "")
+            type= arguments.get("type", "track")
+            limit = arguments.get("limit", 10)
+
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Query parameter is required for search.",
+                    )
+                ]
+            
+            token =  get_spotify_token()
+    
+            result = search_tracks(query, type,limit, token)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
                 )
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            ]
+            
+            return result
 
         return [
             types.TextContent(
@@ -125,7 +135,7 @@ def main(
         logger.info("Handling SSE connection")
         
         # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get("x-auth-token")
+        auth_token = request.headers.get('x-auth-token')
         
         # Set the auth token in context for this request (can be None)
         token = auth_token_context.set(auth_token or "")

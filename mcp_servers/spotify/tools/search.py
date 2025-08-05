@@ -1,10 +1,9 @@
 from .base import get_spotify_token
 import requests
 
-def search_tracks(query:str, type:str="track" ,limit:int=10) -> dict:
+def search_tracks(query:str, type:str="track" ,limit:int=10,access_token=None):
     """Search for tracks on Spotify."""
     try:
-        access_token = get_spotify_token()
         search_url= 'https://api.spotify.com/v1/search'
         headers = {
             'Authorization': f'Bearer {access_token}'
@@ -14,26 +13,29 @@ def search_tracks(query:str, type:str="track" ,limit:int=10) -> dict:
         params = {
             'q': query,
             'type': type,  # e.g., 'track', 'album', 'artist'
-            'limit': 10  # optional: limit number of results
+            'limit': limit  # optional: limit number of results
         }
-
+        # logger.info(f"Search URL: {search_url} headers: {headers} params: {params}")
         response = requests.get(search_url, headers=headers, params=params)
         results = response.json()
+        # logger.info(f"Search results: {results}")
         
         output=[]
 
-        for track in results[type+"s"]['items']:
+        for track in results["tracks"]['items']:
             if type=="track":
+                
                 output.append({
                     'name': track['name'],
-                    'artists': track['artists'],
+                    
+                    'artists': [artist['name'] for artist in track['artists']],
                     'album': track['album']['name'],
                     'release_date': track['album']['release_date']
                 })
             elif type=="album":
                 output.append({
                     'name': track['name'],
-                    'artists': track['artists'],
+                    'artists': [artist['name'] for artist in track['artists']],
                     'release_date': track['release_date']
                 })
             elif type=="artist":
@@ -65,8 +67,10 @@ def search_tracks(query:str, type:str="track" ,limit:int=10) -> dict:
                     'authors': track['authors'],
                    
                 })
-            return output
+        # logger.info(f"Formatted output: {output}")
+        return output
+    
     except requests.RequestException as e:
         print(f"An error occurred while searching for tracks: {e}")
         return {"error": str(e)}
-            
+    # return "FIANL"     

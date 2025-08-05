@@ -8,7 +8,7 @@ auth_token_context: ContextVar[str] = ContextVar('auth_token', default="")
 
 
 def get_spotify_token() -> str:
-    """Get Notion client with authentication token from context or environment."""
+    """Get Spotify client with authentication token from context or environment."""
     # Try to get token from context first (for HTTP requests)
     
     if auth_token_context.get() != "":
