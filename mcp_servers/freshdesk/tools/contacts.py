@@ -78,7 +78,7 @@ async def create_contact(
         else:
             return await make_freshdesk_request("POST", "/contacts", data=contact_data, options=options)
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "create", "contact")
 
 async def get_contact(contact_id: int) -> Dict[str, Any]:
     """
@@ -93,7 +93,7 @@ async def get_contact(contact_id: int) -> Dict[str, Any]:
     try:
         return await make_freshdesk_request("GET", f"/contacts/{contact_id}")
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "retrieve", "contact")
 
 async def list_contacts(
     email: Optional[str] = None,
@@ -138,7 +138,7 @@ async def list_contacts(
     try:
         return await make_freshdesk_request("GET", "/contacts", options={"query_params": params})
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "list", "contacts")
 
 
 async def update_contact(
@@ -210,7 +210,7 @@ async def update_contact(
         else:
             return await make_freshdesk_request("PUT", f"/contacts/{contact_id}", data=contact_data)
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "update", "contact")
 
 async def delete_contact(
     contact_id: int, 
@@ -237,7 +237,7 @@ async def delete_contact(
         else:
             return await make_freshdesk_request("DELETE", f"/contacts/{contact_id}")
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "delete", "contact")
 
 
 async def filter_contacts(
@@ -268,7 +268,7 @@ async def filter_contacts(
     try:
         return await make_freshdesk_request("GET", "/search/contacts", options={"query_params": params})
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "filter", "contacts")
 
 async def search_contacts(term: str) -> Dict[str, Any]:
     """
@@ -283,7 +283,7 @@ async def search_contacts(term: str) -> Dict[str, Any]:
     try:
         return await make_freshdesk_request("GET", "/contacts/autocomplete", options={"query_params": {"term": term}})
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "search", "contacts")
 
 async def make_contact_agent(
     contact_id: int,
@@ -334,7 +334,7 @@ async def make_contact_agent(
             data=agent_data
         )
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "create", "contact_agent")
 
 async def restore_contact(contact_id: int) -> Dict[str, Any]:
     """
@@ -352,7 +352,7 @@ async def restore_contact(contact_id: int) -> Dict[str, Any]:
             f"/contacts/{contact_id}/restore"
         )
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "restore", "contact")
 
 async def send_contact_invite(contact_id: int) -> Dict[str, Any]:
     """
@@ -370,7 +370,7 @@ async def send_contact_invite(contact_id: int) -> Dict[str, Any]:
             f"/contacts/{contact_id}/send_invite"
         )
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "send", "contact_invite")
 
 async def merge_contacts(
     primary_contact_id: int,
@@ -404,4 +404,4 @@ async def merge_contacts(
             data=merge_data
         )
     except Exception as e:
-        return handle_freshdesk_error(e)
+        return handle_freshdesk_error(e, "merge", "contacts")

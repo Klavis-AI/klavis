@@ -118,16 +118,6 @@ async def make_freshdesk_request(
     except requests.exceptions.TooManyRedirects as e:
         raise requests.exceptions.TooManyRedirects("Too many redirects while connecting to Freshdesk API") from e
         
-    except requests.exceptions.RequestException as e:
-        error_msg = f"Error connecting to Freshdesk API: {str(e)}"
-        if hasattr(e, 'response') and e.response is not None:
-            try:
-                error_details = e.response.json()
-                error_msg = f"Freshdesk API Error ({e.response.status_code}): {error_details.get('message', 'No error details')}"
-            except ValueError:
-                error_msg = f"Freshdesk API Error ({e.response.status_code}): {e.response.text or 'No error details'}"
-        raise requests.exceptions.RequestException(error_msg) from e
-        
     except ValueError as e:
         raise ValueError(f"Failed to parse JSON response from Freshdesk API: {str(e)}") from e
 
@@ -165,11 +155,11 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
     # Handle requests.exceptions.RequestException and its subclasses
     if isinstance(e, requests.exceptions.RequestException):
         error_response['error']['code'] = 'request_error'
-        
+
         # Handle HTTP errors (4XX, 5XX)
         if hasattr(e, 'response') and e.response is not None:
             status_code = e.response.status_code
-            
+
             # Map status codes to error codes
             status_to_code = {
                 400: 'invalid_request',
@@ -210,6 +200,8 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
                             'message': error_data['message'],
                             'code': error_code
                         })
+                else:
+                    error_response['error']['message'] = f"{str(e)}"
             except ValueError:
                 # If we can't parse JSON, use the response text
                 error_response['error']['message'] = f"Freshdesk API error: {e.response.text}"
@@ -228,7 +220,7 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
             else:
                 error_response['error'].update({
                     'code': 'request_failed',
-                    'message': f"Request to Freshdesk API failed: {str(e)}"
+                    'message': f"{str(e)}"
                 })
     
     # Handle JSON decode errors
@@ -247,9 +239,9 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
     
     # Add operation and object type context to the error message
     if object_type:
-        error_response['error']['message'] = f"Failed to {operation} {object_type}: {error_response['error']['message']}"
+        error_response['error']['message'] = f"Failed to {operation} {object_type} due to: {error_response['error']['message']}"
     else:
-        error_response['error']['message'] = f"Failed to {operation}: {error_response['error']['message']}"
+        error_response['error']['message'] = f"Failed to {operation} due to: {error_response['error']['message']}"
     
     return error_response
 

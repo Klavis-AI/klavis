@@ -86,11 +86,18 @@ async def create_ticket(
 
         options = { }
 
+        ticket_type = kwargs.pop("ticket_type", None)
+
+        if ticket_type:
+            ticket_data["type"] = ticket_type
+
         ticket_data = remove_none_values(ticket_data)
         # Handle attachments if provided
         if attachments:
 
-            options["files"] = attachments
+            options["files"] ={ 
+                "attachments": attachments
+            }
             options["headers"] = {
                 "Content-Type": "multipart/form-data",
             }
@@ -141,21 +148,21 @@ async def create_ticket_with_attachments(
         return handle_freshdesk_error(e, "create", "ticket")
 
 
-async def get_ticket(ticket_id: int, include_conversations: bool = False) -> Dict[str, Any]:
+async def get_ticket(ticket_id: int, include: str = None) -> Dict[str, Any]:
     """
     Retrieve a ticket by its ID.
     
     Args:
         ticket_id: ID of the ticket to retrieve
-        include_conversations: Whether to include conversation history
+        include: Optional query parameter to include additional data (e.g., 'conversations', 'requester', 'company', 'stats')
         
     Returns:
         Dictionary containing ticket details
     """
     try:
         endpoint = f"/tickets/{ticket_id}"
-        if include_conversations:
-            endpoint += "?include=conversations"
+        if include:
+            endpoint += f"?include={include}"
             
         response = await make_freshdesk_request("GET", endpoint)
         return response
@@ -370,13 +377,6 @@ async def list_tickets(
             options={"query_params": params}
         )
         
-        if isinstance(response, list):
-            return {
-                "tickets": response,
-                "page": page,
-                "per_page": per_page,
-                "total": len(response)
-            }
         return response
         
     except Exception as e:

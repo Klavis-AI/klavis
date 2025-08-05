@@ -150,6 +150,18 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "integer",
                         "description": "ID of the parent ticket. If provided, the ticket will be created as a child of the parent ticket."
                     },
+                    "company_id": {
+                        "type": "integer",
+                        "description": "ID of the company to assign the ticket to."
+                    },
+                    "product_id": {
+                        "type": "integer",
+                        "description": "ID of the product to assign the ticket to."
+                    },
+                    "ticket_type": {
+                        "type": "string",
+                        "description": "Type of the ticket. Helps categorize the ticket according to the different kinds of issues"
+                    },
                     "group_id": {
                         "type": "integer",
                         "description": "ID of the group to assign the ticket to."
@@ -169,9 +181,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "integer",
                         "description": "ID of the ticket to retrieve (required)."
                     },
-                    "include_conversations": {
-                        "type": "boolean",
-                        "description": "Whether to include conversation history. Default is false."
+                    "include": {
+                        "type": "string",
+                        "description": "Optional query parameter to include additional data (e.g., 'conversations', 'requester', 'company', 'stats')"
                     }
                 },
                 "required": ["ticket_id"]
@@ -853,10 +865,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await send_contact_invite(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
-            
-            if(result.get("error")):
+
+            if isinstance(result, dict) and result.get("error") :
                 logger.error(f"Error executing tool {name}: {result.get('error')}")
-                return [types.TextContent(type="text", text=f"Error: {result.get('error')}")]
+                return [types.TextContent(type="text", text=f"{result.get('error')}")]
             
             logger.info(f"Tool {name} executed successfully with arguments: {arguments}")
 
