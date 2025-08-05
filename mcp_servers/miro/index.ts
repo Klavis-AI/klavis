@@ -12,18 +12,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Miro API configuration
-// TODO: Verify the correct Miro API base URL from their documentation
 const MIRO_API_URL = 'https://api.miro.com/v2';
 
-// Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
   miroClient: MiroClient;
 }>();
 
 let mcpServerInstance: Server | null = null;
 
-// Miro API Client
 class MiroClient {
   private accessToken: string;
   private baseUrl: string;
@@ -54,7 +50,6 @@ class MiroClient {
     return response.json();
   }
 
-  // Board operations
   async getBoards(limit: number = 25, teamId?: string): Promise<any> {
     let endpoint = `/boards?limit=${limit}`;
     if (teamId) {
@@ -114,7 +109,6 @@ class MiroClient {
     });
   }
 
-  // Board items operations
   async getBoardItems(boardId: string, limit: number = 50, type?: string): Promise<any> {
     let endpoint = `/boards/${boardId}/items?limit=${limit}`;
     if (type) {
@@ -176,7 +170,6 @@ class MiroClient {
     });
   }
 
-  // Team and organization operations
   async getTeams(): Promise<any> {
     return this.makeRequest('/teams', {
       method: 'GET',
@@ -189,7 +182,6 @@ class MiroClient {
     });
   }
 
-  // Webhook operations
   async createWebhook(
     boardId: string,
     data: {
@@ -218,14 +210,12 @@ class MiroClient {
     });
   }
 
-  // Export operations
   async exportBoard(boardId: string, format: 'pdf' | 'png' | 'jpeg'): Promise<any> {
     return this.makeRequest(`/boards/${boardId}/export?format=${format}`, {
       method: 'GET',
     });
   }
 
-  // Comment operations
   async createComment(boardId: string, itemId: string, text: string): Promise<any> {
     return this.makeRequest(`/boards/${boardId}/items/${itemId}/comments`, {
       method: 'POST',
@@ -406,18 +396,16 @@ class MiroClient {
     });
   }
 
-  // Board sharing operations
-  // Updated MiroClient method
   async inviteCollaborator(
     boardId: string,
     data: {
-      email?: string; // Keep for backward compatibility
-      emails?: string[]; // New array support
+      email?: string; 
+      emails?: string[]; 
       role?: 'viewer' | 'commenter' | 'editor';
       message?: string;
     },
   ): Promise<any> {
-    // Handle both single email and array formats
+    
     let emailsToInvite: string[];
 
     if (data.emails) {
@@ -464,7 +452,6 @@ class MiroClient {
   }
 }
 
-// Getter function for the client
 function getMiroClient() {
   const store = asyncLocalStorage.getStore();
   if (!store || !store.miroClient) {
@@ -476,7 +463,6 @@ function getMiroClient() {
   return store.miroClient;
 }
 
-// Tool definitions
 const CREATE_BOARD_TOOL: Tool = {
   name: 'miro_create_board',
   description: 'Create a new Miro board with a specified name and optional description.',
@@ -494,11 +480,10 @@ const CREATE_BOARD_TOOL: Tool = {
       sharingPolicy: {
         type: 'string',
         description: 'Board sharing policy',
-        enum: ['private', 'view', 'comment', 'edit'], // Updated enum values
+        enum: ['private', 'view', 'comment', 'edit'], 
         default: 'private',
       },
       teamId: {
-        // Added teamId option
         type: 'string',
         description: 'Optional team ID to create the board under',
       },
@@ -521,7 +506,6 @@ const LIST_BOARDS_TOOL: Tool = {
         maximum: 100,
       },
       teamId: {
-        // Added team filtering
         type: 'string',
         description: 'Filter boards by team ID',
       },
@@ -562,7 +546,6 @@ const GET_BOARD_ITEMS_TOOL: Tool = {
         maximum: 100,
       },
       type: {
-        // Added type filtering
         type: 'string',
         description: 'Filter items by type (e.g., "shape", "text", "sticker")',
         enum: ['shape', 'text', 'sticker', 'image', 'frame', 'card', 'embed', 'connector'],
@@ -585,7 +568,7 @@ const ADD_STICKY_NOTE_TOOL: Tool = {
       content: {
         type: 'string',
         description: 'Text content of the sticky note',
-        maxLength: 8000, // Miro's content limit
+        maxLength: 8000, 
       },
       x: {
         type: 'number',
@@ -600,11 +583,10 @@ const ADD_STICKY_NOTE_TOOL: Tool = {
       color: {
         type: 'string',
         description: 'Color of the sticky note',
-        enum: ['yellow', 'green', 'blue', 'red', 'gray', 'orange', 'purple', 'pink'], // Full Miro color palette
+        enum: ['yellow', 'green', 'blue', 'red', 'gray', 'orange', 'purple', 'pink'], 
         default: 'yellow',
       },
       width: {
-        // Added size control
         type: 'number',
         description: 'Width of the sticky note (default: auto)',
         minimum: 50,
@@ -651,7 +633,7 @@ const ADD_SHAPE_TOOL: Tool = {
           'bottom_arrow',
           'arrows',
           'bracket',
-        ], // Full Miro shape list
+        ], 
       },
       content: {
         type: 'string',
@@ -686,10 +668,9 @@ const ADD_SHAPE_TOOL: Tool = {
         type: 'string',
         description: 'Fill color of the shape in HEX format (default: #2d9bf0)',
         default: '#2d9bf0',
-        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', // HEX color validation
+        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', 
       },
       borderColor: {
-        // Added border control
         type: 'string',
         description: 'Border color in HEX format (default: #1a1a1a)',
         default: '#1a1a1a',
@@ -726,7 +707,6 @@ const ADD_TEXT_ITEM_TOOL: Tool = {
         default: 0,
       },
       width: {
-        // Added width control
         type: 'number',
         description: 'Width of the text box (default: 200, min: 50, max: 32767)',
         default: 200,
@@ -747,7 +727,6 @@ const ADD_TEXT_ITEM_TOOL: Tool = {
         pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
       },
       textAlign: {
-        // Added text alignment
         type: 'string',
         description: 'Text alignment',
         enum: ['left', 'center', 'right'],
@@ -777,7 +756,6 @@ const CREATE_CONNECTOR_TOOL: Tool = {
         description: 'ID of the ending item for the connector',
       },
       shape: {
-        // Added connector shape
         type: 'string',
         description: 'Shape of the connector line',
         enum: ['straight', 'elbowed', 'curved'],
@@ -790,14 +768,12 @@ const CREATE_CONNECTOR_TOOL: Tool = {
         default: 'normal',
       },
       strokeColor: {
-        // Added stroke color
         type: 'string',
         description: 'Color of the connector line in HEX format',
         default: '#000000',
         pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
       },
       captions: {
-        // Added captions support
         type: 'array',
         description: 'Text labels to add along the connector',
         items: {
@@ -829,7 +805,6 @@ const INVITE_COLLABORATOR_TOOL: Tool = {
         description: 'ID of the board to invite the collaborator to',
       },
       emails: {
-        // Changed to array to support multiple invites
         type: 'array',
         description: 'Email addresses of the people to invite',
         items: {
@@ -845,7 +820,6 @@ const INVITE_COLLABORATOR_TOOL: Tool = {
         default: 'editor',
       },
       message: {
-        // Added invitation message
         type: 'string',
         description: 'Personalized message to include with the invitation',
         maxLength: 500,
@@ -1225,7 +1199,6 @@ const CREATE_BOARD_ITEM_TOOL: Tool = {
   },
 };
 
-// Utility functions
 function safeLog(
   level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency',
   data: any,
@@ -1238,7 +1211,6 @@ function safeLog(
   }
 }
 
-// Main server function
 const getMiroMcpServer = () => {
   if (!mcpServerInstance) {
     mcpServerInstance = new Server(
@@ -1256,15 +1228,12 @@ const getMiroMcpServer = () => {
     mcpServerInstance.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [
-          // Board Management Tools
           CREATE_BOARD_TOOL,
           UPDATE_BOARD_TOOL,
           DELETE_BOARD_TOOL,
           LIST_BOARDS_TOOL,
           GET_BOARD_DETAILS_TOOL,
           EXPORT_BOARD_TOOL,
-
-          // Board Content Tools
           GET_BOARD_ITEMS_TOOL,
           GET_BOARD_ITEM_TOOL,
           CREATE_BOARD_ITEM_TOOL,
@@ -1274,23 +1243,15 @@ const getMiroMcpServer = () => {
           ADD_TEXT_ITEM_TOOL,
           CREATE_CONNECTOR_TOOL,
           DELETE_BOARD_ITEM_TOOL,
-
-          // Collaboration Tools
           INVITE_COLLABORATOR_TOOL,
           GET_BOARD_MEMBERS_TOOL,
           UPDATE_BOARD_MEMBER_ROLE_TOOL,
           REMOVE_BOARD_MEMBER_TOOL,
-
-          // Comment Tools
           CREATE_COMMENT_TOOL,
           GET_COMMENTS_TOOL,
-
-          // Webhook Integration Tools
           CREATE_WEBHOOK_TOOL,
           GET_WEBHOOKS_TOOL,
           DELETE_WEBHOOK_TOOL,
-
-          // Team and Organization Tools
           GET_TEAMS_TOOL,
           GET_TEAM_MEMBERS_TOOL,
         ],
@@ -1355,10 +1316,6 @@ const getMiroMcpServer = () => {
 
       try {
         switch (name) {
-          // Add these cases to your switch statement:
-
-          // 1234567890-_____)(*&^%$#@!)
-
           case 'miro_create_board': {
             const client = getMiroClient();
             const result = await client.createBoard({
@@ -1847,7 +1804,6 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  // TODO: Verify the correct environment variable name for Miro access token
   const accessToken = process.env.MIRO_ACCESS_TOKEN || (req.headers['x-auth-token'] as string);
 
   if (!accessToken) {
@@ -1864,7 +1820,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
     });
   }
 
-  // Validate token format
   if (!accessToken.startsWith('Bearer ') && !accessToken.match(/^[a-zA-Z0-9_-]+$/)) {
     return res.status(401).json({
       jsonrpc: '2.0',
@@ -1894,7 +1849,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
     res.on('close', () => {
       console.log('Request closed');
       transport.close();
-      // server.close();
     });
   } catch (error: any) {
     console.error('Error handling MCP request:', error);
@@ -1951,13 +1905,10 @@ app.get('/health', (req: Request, res: Response) => {
 // DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
 //=============================================================================
 
-// to support multiple simultaneous connections we have a lookup object from
-// sessionId to transport
 const transports = new Map<string, SSEServerTransport>();
 
 app.get('/sse', async (req, res) => {
   try {
-    // Optional: Validate authentication at connection time
     const accessToken = process.env.MIRO_ACCESS_TOKEN || (req.headers['x-auth-token'] as string);
 
     if (!accessToken) {
@@ -1967,12 +1918,11 @@ app.get('/sse', async (req, res) => {
 
     const transport = new SSEServerTransport('/messages', res);
 
-    // Enhanced cleanup
     res.on('close', async () => {
       console.log(`SSE connection closed for session: ${transport.sessionId}`);
       try {
         transports.delete(transport.sessionId);
-        await transport.close(); // Properly close transport
+        await transport.close(); 
       } catch (error) {
         console.error('Error during SSE cleanup:', error);
       }
@@ -1983,10 +1933,9 @@ app.get('/sse', async (req, res) => {
       transports.delete(transport.sessionId);
     });
 
-    // Store transport before connecting
     transports.set(transport.sessionId, transport);
 
-    const server = getMiroMcpServer(); // Should return singleton
+    const server = getMiroMcpServer(); 
     await server.connect(transport);
 
     console.log(`SSE connection established with session: ${transport.sessionId}`);
@@ -2019,7 +1968,6 @@ app.post('/messages', async (req, res) => {
       return res.status(401).json({ error: 'Missing Miro access token' });
     }
 
-    // Validate token format
     if (!accessToken.match(/^[a-zA-Z0-9_-]+$/) && !accessToken.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Invalid token format' });
     }
