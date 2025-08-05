@@ -17,7 +17,40 @@ White-label allows you to customize the authentication experience with your own 
 
 ## OAuth Flow (w/ white-label)
 
-![OAuth with white-label](/images/white-labeling.png)
+```mermaid
+sequenceDiagram
+    actor EndUser
+    participant ClientApp as Your  App
+    participant KlavisAI as Klavis AI
+    participant ThirdPartyIdP as Third-party App
+
+    %% --- OAuth Flow Initiation ---
+    EndUser->>ClientApp: 1. Initiates action in Your App<br/> (e.g., "Connect my Account").
+    ClientApp->>KlavisAI: 2. Requests Klavis AI <br/> to start OAuth flow.
+
+    activate KlavisAI
+    Note over KlavisAI: Klavis AI retrieves the Your App's Config
+    KlavisAI->>EndUser: 3. Redirects End-User's browser to <br/> Third-party authorization endpoint.
+    deactivate KlavisAI
+    activate EndUser
+
+    EndUser->>ThirdPartyIdP: 4. Browser navigates to Third-party authorization URL.
+    activate ThirdPartyIdP
+    ThirdPartyIdP-->>EndUser: 5. Third-party App presents its Login & Consent screen with Your App Info and Logo.
+ 
+    EndUser->>ThirdPartyIdP: 6. End-User authenticates with Third-party App & grants consent.
+    deactivate EndUser
+    ThirdPartyIdP-->>KlavisAI: 7. Third-party App redirects <br/>Klavis AI callback URI.
+    deactivate ThirdPartyIdP
+
+    %% --- Token Exchange (Klavis AI with Third-party) ---
+    KlavisAI->>ThirdPartyIdP: 8. Klavis AI exchanges <br/> Authorization Code for Access Token.
+    activate ThirdPartyIdP
+    ThirdPartyIdP-->>KlavisAI: 9. Third-party returns <br/>Access/Refresh Token to Klavis AI.
+    deactivate ThirdPartyIdP
+
+    KlavisAI->>EndUser: 10. OAuth White Labeling succeeds.
+```
 
 
 ## Implementation
