@@ -47,6 +47,10 @@ from .companies import (
     search_companies_by_name,
 )
 
+from .accounts import (
+    get_current_account,
+)
+
 __all__ = [
 
     # Tickets
@@ -91,4 +95,7 @@ __all__ = [
     'delete_company',
     'filter_companies',
     'search_companies_by_name',
+
+    # Accounts
+    'get_current_account',
 ] 

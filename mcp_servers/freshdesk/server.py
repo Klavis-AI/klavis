@@ -59,6 +59,9 @@ from tools import (
     delete_company,
     filter_companies,
     search_companies_by_name,
+
+    # Account tools
+    get_current_account,
     
     
 )
@@ -1062,6 +1065,16 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "required": ["name"]
                 }
             ),
+
+            types.Tool(
+                name="get_current_account",
+                description="Retrieve the current account.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            ),
     ]
 
     @app.call_tool()
@@ -1140,6 +1153,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await filter_companies(**arguments)
             elif name == "search_companies_by_name":
                 result = await search_companies_by_name(**arguments)
+                
+            elif name == "get_current_account":
+                result = await get_current_account()
             else:
                 raise ValueError(f"Unknown tool: {name}")
 
