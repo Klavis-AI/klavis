@@ -74,7 +74,17 @@ from tools import (
     update_agent,
     delete_agent,
     search_agents,
-    bulk_create_agents
+    bulk_create_agents,
+    
+    # Thread tools
+    create_thread,
+    get_thread_by_id,
+    update_thread,
+    delete_thread,
+    create_thread_message,
+    get_thread_message_by_id,
+    update_thread_message,
+    delete_thread_message
 )
 
 # Configure logging
@@ -134,8 +144,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
-            types.Tool(
-            name="create_ticket",
+        types.Tool(
+            name="freshdesk_create_ticket",
             description="Create a new ticket in Freshdesk.",
             inputSchema={
                 "type": "object",
@@ -225,7 +235,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="get_ticket_by_id",
+            name="freshdesk_get_ticket_by_id",
             description="Retrieve a ticket by its ID.",
             inputSchema={
                 "type": "object",
@@ -243,7 +253,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="update_ticket",
+            name="freshdesk_update_ticket",
             description="Update an existing ticket in Freshdesk.",
             inputSchema={
                 "type": "object",
@@ -284,7 +294,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="delete_ticket",
+            name="freshdesk_delete_ticket",
             description="Delete a ticket by its ID.",
             inputSchema={
                 "type": "object",
@@ -298,7 +308,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="add_note_to_ticket",
+            name="freshdesk_add_note_to_ticket",
             description="Add a note to a ticket.",
             inputSchema={
                 "type": "object",
@@ -334,7 +344,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="reply_to_a_ticket",
+            name="freshdesk_reply_to_a_ticket",
             description="Reply to a ticket.",
             inputSchema={
                 "type": "object",
@@ -371,7 +381,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="update_note",
+            name="freshdesk_update_note",
             description="Update a note or reply to a ticket.",
             inputSchema={
                 "type": "object",
@@ -390,7 +400,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="delete_note",
+            name="freshdesk_delete_note",
             description="Delete a note or reply to a ticket.",
             inputSchema={
                 "type": "object",
@@ -404,7 +414,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="forward_ticket",
+            name="freshdesk_forward_ticket",
             description="Forward a ticket to additional email addresses.",
             inputSchema={
                 "type": "object",
@@ -441,7 +451,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="get_archived_ticket",
+            name="freshdesk_get_archived_ticket",
             description="Retrieve an archived ticket by its ID.",
             inputSchema={
                 "type": "object",
@@ -455,7 +465,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="delete_archived_ticket",
+            name="freshdesk_delete_archived_ticket",
             description="Permanently delete an archived ticket.",
             inputSchema={
                 "type": "object",
@@ -469,7 +479,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="filter_tickets", 
+            name="freshdesk_filter_tickets", 
             description="Use ticket fields to filter through tickets and get a list of tickets matching the specified ticket fields.", 
             inputSchema={
             "type": "object",
@@ -490,7 +500,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             "required": ["query"]
         }),
         types.Tool(
-            name="create_ticket_with_attachments",
+            name="freshdesk_create_ticket_with_attachments",
             description="Create a new ticket with attachments in Freshdesk.",
             inputSchema={
                 "type": "object",
@@ -567,7 +577,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="delete_multiple_tickets",
+            name="freshdesk_delete_multiple_tickets",
             description="Delete multiple tickets at once.",
             inputSchema={
                 "type": "object",
@@ -582,7 +592,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="delete_attachment",
+            name="freshdesk_delete_attachment",
             description="Delete an attachment from a ticket.",
             inputSchema={
                 "type": "object",
@@ -596,7 +606,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="list_tickets",
+            name="freshdesk_list_tickets",
             description="List tickets with optional filtering.",
             inputSchema={
                 "type": "object",
@@ -676,7 +686,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="merge_tickets",
+            name="freshdesk_merge_tickets",
             description="Merge two tickets.",
             inputSchema={
                 "type": "object",
@@ -698,7 +708,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="restore_ticket",
+            name="freshdesk_restore_ticket",
             description="Restore a deleted ticket.",
             inputSchema={
                 "type": "object",
@@ -712,7 +722,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="watch_ticket",
+            name="freshdesk_watch_ticket",
             description="Watch a ticket for updates.",
             inputSchema={
                 "type": "object",
@@ -730,7 +740,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="unwatch_ticket",
+            name="freshdesk_unwatch_ticket",
             description="Stop watching a ticket.",
             inputSchema={
                 "type": "object",
@@ -744,22 +754,38 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="create_contact",
+            name="freshdesk_create_contact",
             description="Create a new contact in Freshdesk.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "Name of the contact"},
-                    "email": {"type": "string", "format": "email", "description": "Primary email address"},
-                    "phone": {"type": "string", "description": "Telephone number"},
-                    "company_id": {"type": "integer", "description": "ID of the company"},
-                    "description": {"type": "string", "description": "Description of the contact"}
+                    "name": {
+                        "type": "string", 
+                        "description": "Name of the contact"
+                    },
+                    "email": {
+                        "type": "string", 
+                        "format": "email", 
+                        "description": "Primary email address"
+                    },
+                    "phone": {
+                        "type": "string", 
+                        "description": "Telephone number"
+                    },
+                    "company_id": {
+                        "type": "integer", 
+                        "description": "ID of the company"
+                    },
+                    "description": {
+                        "type": "string", 
+                        "description": "Description of the contact"
+                    }
                 },
                 "required": ["name"]
             }
         ),
         types.Tool(
-            name="get_contact_by_id",
+            name="freshdesk_get_contact_by_id",
             description="Retrieve a contact by ID.",
             inputSchema={
                 "type": "object",
@@ -770,7 +796,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="list_contacts",
+            name="freshdesk_list_contacts",
             description="List all contacts, optionally filtered by parameters.",
             inputSchema={
                 "type": "object",
@@ -800,13 +826,19 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "string", 
                         "description": "Filter by last updated date (ISO 8601 format)"
                     },
-                    "page": {"type": "integer", "description": "Page number for pagination. Default is 1."},
-                    "per_page": {"type": "integer", "description": "Number of results per page (max 100). Default is 30."}
+                    "page": {
+                        "type": "integer", 
+                        "description": "Page number for pagination. Default is 1."
+                    },
+                    "per_page": {
+                        "type": "integer", 
+                        "description": "Number of results per page (max 100). Default is 30."
+                    }
                 }
             }
         ),
         types.Tool(
-            name="update_contact",
+            name="freshdesk_update_contact",
             description="Update an existing contact.",
             inputSchema={
                 "type": "object",
@@ -836,31 +868,61 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "integer", 
                         "description": "New company ID"
                     },
-                    "description": {"type": "string", "description": "New description"},
-                    "job_title": {"type": "string", "description": "New job title"},
-                    "tags": {"type": "array", "items": {"type": "string"}, "description": "Updated list of tags"},
-                    "custom_fields": {"type": "object", "description": "Updated custom fields"},
-                    "avatar_path": {"type": "string", "description": "Path to new avatar image file"},
-                    "address": {"type": "string", "description": "Address of the contact"},
+                    "description": {
+                        "type": "string", 
+                        "description": "New description"
+                    },
+                    "job_title": {
+                        "type": "string", 
+                        "description": "New job title"
+                    },
+                    "tags": {
+                        "type": "array", 
+                        "items": {"type": "string"}, 
+                        "description": "Updated list of tags"
+                    },
+                    "custom_fields": {
+                        "type": "object", 
+                        "description": "Updated custom fields"
+                    },
+                    "avatar_path": {
+                        "type": "string", 
+                        "description": "Path to new avatar image file"
+                    },
+                    "address": {
+                        "type": "string", 
+                        "description": "Address of the contact"
+                    }
                 },
                 "required": ["contact_id"]
             }
         ),
         types.Tool(
-            name="delete_contact",
+            name="freshdesk_delete_contact",
             description="Delete a contact. Set hard_delete=True to permanently delete.",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "contact_id": {"type": "integer", "description": "ID of the contact to delete"},
-                    "hard_delete": {"type": "boolean", "default": False, "description": "If true, permanently delete the contact"},
-                    "force": {"type": "boolean", "default": False, "description": "If true, force hard delete even if not soft deleted first"}
+                    "contact_id": {
+                        "type": "integer", 
+                        "description": "ID of the contact to delete"
+                    },
+                    "hard_delete": {
+                        "type": "boolean", 
+                        "default": False, 
+                        "description": "If true, permanently delete the contact"
+                    },
+                    "force": {
+                        "type": "boolean", 
+                        "default": False, 
+                        "description": "If true, force hard delete even if not soft deleted first"
+                    }
                 },
                 "required": ["contact_id"]
             }
         ),
         types.Tool(
-            name="search_contacts_by_name",
+            name="freshdesk_search_contacts_by_name",
             description="Search for contacts by name",
             inputSchema={
                 "type": "object",
@@ -871,7 +933,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="filter_contacts",
+            name="freshdesk_filter_contacts",
             description="Filter contacts by fields",
             inputSchema={
                 "type": "object",
@@ -894,7 +956,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="make_contact_agent",
+            name="freshdesk_make_contact_agent",
             description="Make a contact an agent.",
             inputSchema={
                 "type": "object",
@@ -913,7 +975,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="restore_contact",
+            name="freshdesk_restore_contact",
             description="Restore a deleted contact.",
             inputSchema={
                 "type": "object",
@@ -924,7 +986,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="send_contact_invite",
+            name="freshdesk_send_contact_invite",
             description="Send an invite to a contact.",
             inputSchema={
                 "type": "object",
@@ -935,7 +997,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="merge_contacts",
+            name="freshdesk_merge_contacts",
             description="Merge multiple contacts into a primary contact.",
             inputSchema={
                 "type": "object",
@@ -982,12 +1044,12 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-                name="create_company",
-                description="Create a new company in Freshdesk.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "name": {
+            name="freshdesk_create_company",
+            description="Create a new company in Freshdesk.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {
                             "type": "string",
                             "description": "Name of the company (required, unique)"
                         },
@@ -1035,7 +1097,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="get_company_by_id",
+                name="freshdesk_get_company_by_id",
                 description="Retrieve a company by ID.",
                 inputSchema={
                     "type": "object",
@@ -1049,7 +1111,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="list_companies",
+                name="freshdesk_list_companies",
                 description="List all companies with optional filtering.",
                 inputSchema={
                     "type": "object",
@@ -1076,7 +1138,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="update_company",
+                name="freshdesk_update_company",
                 description="Update an existing company.",
                 inputSchema={
                     "type": "object",
@@ -1132,7 +1194,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="delete_company",
+                name="freshdesk_delete_company",
                 description="Delete a company from Freshdesk.",
                 inputSchema={
                     "type": "object",
@@ -1146,7 +1208,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="filter_companies",
+                name="freshdesk_filter_companies",
                 description="Filter companies using a query string. ",
                 inputSchema={
                     "type": "object",
@@ -1173,7 +1235,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="search_companies_by_name",
+                name="freshdesk_search_companies_by_name",
                 description="Search for companies by name (autocomplete).",
                 inputSchema={
                     "type": "object",
@@ -1188,7 +1250,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             ),
 
             types.Tool(
-                name="get_current_account",
+                name="freshdesk_get_current_account",
                 description="Retrieve the current account.",
                 inputSchema={
                     "type": "object",
@@ -1197,7 +1259,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="list_agents",
+                name="freshdesk_list_agents",
                 description="List all agents with optional filtering",
                 inputSchema={
                     "type": "object",
@@ -1233,7 +1295,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             ),
             types.Tool(
-                name="get_agent_by_id",
+                name="freshdesk_get_agent_by_id",
                 description="Get details of a specific agent by ID",
                 inputSchema={
                     "type": "object",
@@ -1247,7 +1309,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="get_current_agent",
+                name="freshdesk_get_current_agent",
                 description="Get details of the currently authenticated agent",
                 inputSchema={
                     "type": "object",
@@ -1255,7 +1317,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="create_agent",
+                name="freshdesk_create_agent",
                 description="Create a new agent",
                 inputSchema={
                     "type": "object",
@@ -1322,7 +1384,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="update_agent",
+                name="freshdesk_update_agent",
                 description="Update an existing agent",
                 inputSchema={
                     "type": "object",
@@ -1380,7 +1442,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="delete_agent",
+                name="freshdesk_delete_agent",
                 description="Delete an agent (downgrades to contact)",
                 inputSchema={
                     "type": "object",
@@ -1391,7 +1453,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="search_agents",
+                name="freshdesk_search_agents",
                 description="Search for agents by name or email",
                 inputSchema={
                     "type": "object",
@@ -1402,7 +1464,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
             ),
             types.Tool(
-                name="bulk_create_agents",
+                name="freshdesk_bulk_create_agents",
                 description="Create multiple agents in bulk",
                 inputSchema={
                     "type": "object",
@@ -1473,110 +1535,369 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "required": ["agents_data"],
                 },
             ),
+            
+            # Thread tools
+            types.Tool(
+                name="freshdesk_create_thread",
+                description="Create a new thread in Freshdesk.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "thread_type": {
+                            "type": "string",
+                            "enum": ["forward", "discussion", "private"],
+                            "description": "Type of thread (forward, discussion, private)"
+                        },
+                        "parent_id": {
+                            "type": "integer",
+                            "description": "ID of the parent object (usually ticket)"
+                        },
+                        "parent_type": {
+                            "type": "string",
+                            "default": "ticket",
+                            "description": "Type of parent object (default: ticket)"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Title of the thread"
+                        },
+                        "created_by": {
+                            "type": "string",
+                            "description": "ID of the user creating the thread"
+                        },
+                        "anchor_id": {
+                            "type": "integer",
+                            "description": "ID of the anchor object (e.g., conversation ID)"
+                        },
+                        "anchor_type": {
+                            "type": "string",
+                            "description": "Type of anchor object (e.g., conversation)"
+                        },
+                        "participants_emails": {
+                            "type": "array",
+                            "items": {"type": "string", "format": "email"},
+                            "description": "List of email addresses of participants"
+                        },
+                        "participants_agents": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of agent IDs of participants"
+                        },
+                        "additional_info": {
+                            "type": "object",
+                            "description": "Additional information like email_config_id"
+                        }
+                    },
+                    "required": ["thread_type", "parent_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_get_thread_by_id",
+                description="Get a thread by its ID.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "thread_id": {
+                            "type": "integer",
+                            "description": "ID of the thread to retrieve"
+                        }
+                    },
+                    "required": ["thread_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_update_thread",
+                description="Update a thread in Freshdesk.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "thread_id": {
+                            "type": "integer",
+                            "description": "ID of the thread to update"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "New title for the thread"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "New description for the thread"
+                        }
+                    },
+                    "required": ["thread_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_delete_thread",
+                description="Delete a thread from Freshdesk. Note: This is an irreversible action!",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "thread_id": {
+                            "type": "integer",
+                            "description": "ID of the thread to delete"
+                        }
+                    },
+                    "required": ["thread_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_create_thread_message",
+                description="Create a new message for a thread.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "thread_id": {
+                            "type": "integer",
+                            "description": "ID of the thread to add message to"
+                        },
+                        "body": {
+                            "type": "string",
+                            "description": "HTML content of the message"
+                        },
+                        "body_text": {
+                            "type": "string",
+                            "description": "Plain text content of the message"
+                        },
+                        "attachment_ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "List of attachment IDs to include"
+                        },
+                        "inline_attachment_ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "List of inline attachment IDs"
+                        },
+                        "participants_email_to": {
+                            "type": "array",
+                            "items": {"type": "string", "format": "email"},
+                            "description": "List of email addresses to send to"
+                        },
+                        "participants_email_cc": {
+                            "type": "array",
+                            "items": {"type": "string", "format": "email"},
+                            "description": "List of email addresses to CC"
+                        },
+                        "participants_email_bcc": {
+                            "type": "array",
+                            "items": {"type": "string", "format": "email"},
+                            "description": "List of email addresses to BCC"
+                        },
+                        "participants_email_from": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email address to send from"
+                        },
+                        "additional_info": {
+                            "type": "object",
+                            "description": "Additional information like has_quoted_text, email_subject"
+                        },
+                        "full_message": {
+                            "type": "string",
+                            "description": "HTML content with original and quoted text"
+                        },
+                        "full_message_text": {
+                            "type": "string",
+                            "description": "Plain text with quoted text"
+                        }
+                    },
+                    "required": ["thread_id", "body"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_get_thread_message_by_id",
+                description="Get a thread message by its ID.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "integer",
+                            "description": "ID of the message to retrieve"
+                        }
+                    },
+                    "required": ["message_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_update_thread_message",
+                description="Update a thread message.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "integer",
+                            "description": "ID of the message to update"
+                        },
+                        "body": {
+                            "type": "string",
+                            "description": "New HTML content of the message"
+                        },
+                        "body_text": {
+                            "type": "string",
+                            "description": "New plain text content of the message"
+                        },
+                        "attachment_ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "New list of attachment IDs"
+                        },
+                        "inline_attachment_ids": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                            "description": "New list of inline attachment IDs"
+                        },
+                        "additional_info": {
+                            "type": "object",
+                            "description": "New additional information"
+                        }
+                    },
+                    "required": ["message_id"]
+                }
+            ),
+            
+            types.Tool(
+                name="freshdesk_delete_thread_message",
+                description="Delete a thread message. Note: This is an irreversible action!",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "integer",
+                            "description": "ID of the message to delete"
+                        }
+                    },
+                    "required": ["message_id"]
+                }
+            ),
         ]
     
     @app.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         try:
 
-            if name == "create_ticket":
+            if name == "freshdesk_create_ticket":
                 result = await create_ticket(**arguments)
-            elif name == "get_ticket_by_id":
+            elif name == "freshdesk_get_ticket_by_id":
                 result = await get_ticket_by_id(**arguments)
-            elif name == "list_tickets":
+            elif name == "freshdesk_list_tickets":
                 result = await list_tickets(**arguments)
-            elif name == "filter_tickets":
+            elif name == "freshdesk_filter_tickets":
                 result = await filter_tickets(**arguments)
-            elif name == "add_note_to_ticket":
+            elif name == "freshdesk_add_note_to_ticket":
                 result = await add_note_to_ticket(**arguments)
-            elif name == "reply_to_a_ticket":
+            elif name == "freshdesk_reply_to_a_ticket":
                 result = await reply_to_a_ticket(**arguments)
-            elif name == "update_note":
+            elif name == "freshdesk_update_note":
                 result = await update_note(**arguments)
-            elif name == "delete_note":
+            elif name == "freshdesk_delete_note":
                 result = await delete_note(**arguments)
-            elif name == "merge_tickets":
+            elif name == "freshdesk_merge_tickets":
                 result = await merge_tickets(**arguments)
-            elif name == "restore_ticket":
+            elif name == "freshdesk_restore_ticket":
                 result = await restore_ticket(**arguments)
-            elif name == "watch_ticket":
+            elif name == "freshdesk_watch_ticket":
                 result = await watch_ticket(**arguments)
-            elif name == "unwatch_ticket":
+            elif name == "freshdesk_unwatch_ticket":
                 result = await unwatch_ticket(**arguments)
-            elif name == "forward_ticket":
+            elif name == "freshdesk_forward_ticket":
                 result = await forward_ticket(**arguments)
-            elif name == "update_ticket":
+            elif name == "freshdesk_update_ticket":
                 result = await update_ticket(**arguments)
-            elif name == "create_ticket_with_attachments":
+            elif name == "freshdesk_create_ticket_with_attachments":
                 result = await create_ticket_with_attachments(**arguments)
-            elif name == "get_archived_ticket":
+            elif name == "freshdesk_get_archived_ticket":
                 result = await get_archived_ticket(**arguments)
-            elif name == "delete_archived_ticket":
+            elif name == "freshdesk_delete_archived_ticket":
                 result = await delete_archived_ticket(**arguments)
-            elif name == "delete_ticket":
+            elif name == "freshdesk_delete_ticket":
                 result = await delete_ticket(**arguments)
-            elif name == "delete_multiple_tickets":
+            elif name == "freshdesk_delete_multiple_tickets":
                 result = await delete_multiple_tickets(**arguments)
-            elif name == "delete_attachment":
+            elif name == "freshdesk_delete_attachment":
                 result = await delete_attachment(**arguments)
 
-            elif name == "create_contact":
+            elif name == "freshdesk_create_contact":
                 result = await create_contact(**arguments)
-            elif name == "get_contact_by_id":
+            elif name == "freshdesk_get_contact_by_id":
                 result = await get_contact_by_id(**arguments)
-            elif name == "list_contacts":
+            elif name == "freshdesk_list_contacts":
                 result = await list_contacts(**arguments)
-            elif name == "update_contact":
+            elif name == "freshdesk_update_contact":
                 result = await update_contact(**arguments)
-            elif name == "delete_contact":
+            elif name == "freshdesk_delete_contact":
                 result = await delete_contact(**arguments)
-            elif name == "search_contacts_by_name":
+            elif name == "freshdesk_search_contacts_by_name":
                 result = await search_contacts_by_name(**arguments)
-            elif name == "merge_contacts":
+            elif name == "freshdesk_merge_contacts":
                 result = await merge_contacts(**arguments)
-            elif name == "filter_contacts":
+            elif name == "freshdesk_filter_contacts":
                 result = await filter_contacts(**arguments)
-            elif name == "make_contact_agent":
+            elif name == "freshdesk_make_contact_agent":
                 result = await make_contact_agent(**arguments)
-            elif name == "restore_contact":
+            elif name == "freshdesk_restore_contact":
                 result = await restore_contact(**arguments)
-            elif name == "send_contact_invite":
+            elif name == "freshdesk_send_contact_invite":
                 result = await send_contact_invite(**arguments)
 
-            elif name == "create_company":
+            elif name == "freshdesk_create_company":
                 result = await create_company(**arguments)
-            elif name == "get_company_by_id":
+            elif name == "freshdesk_get_company_by_id":
                 result = await get_company_by_id(**arguments)
-            elif name == "list_companies":
+            elif name == "freshdesk_list_companies":
                 result = await list_companies(**arguments)
-            elif name == "update_company":
+            elif name == "freshdesk_update_company":
                 result = await update_company(**arguments)
-            elif name == "delete_company":
+            elif name == "freshdesk_delete_company":
                 result = await delete_company(**arguments)
-            elif name == "filter_companies":
+            elif name == "freshdesk_filter_companies":
                 result = await filter_companies(**arguments)
-            elif name == "search_companies_by_name":
+            elif name == "freshdesk_search_companies_by_name":
                 result = await search_companies_by_name(**arguments)
                 
-            elif name == "get_current_account":
+            elif name == "freshdesk_get_current_account":
                 result = await get_current_account()
 
-            elif name == "get_current_agent":
+            elif name == "freshdesk_get_current_agent":
                 result = await get_current_agent()
-            elif name == "get_agent_by_id":
+            elif name == "freshdesk_get_agent_by_id":
                 result = await get_agent_by_id(**arguments)
-            elif name == "list_agents":
+            elif name == "freshdesk_list_agents":
                 result = await list_agents(**arguments)
-            elif name == "create_agent":
+            elif name == "freshdesk_create_agent":
                 result = await create_agent(**arguments)
-            elif name == "update_agent":
+            elif name == "freshdesk_update_agent":
                 result = await update_agent(**arguments)
-            elif name == "delete_agent":
+            elif name == "freshdesk_delete_agent":
                 result = await delete_agent(**arguments)
-            elif name == "search_agents":
+            elif name == "freshdesk_search_agents":
                 result = await search_agents(**arguments)
-            elif name == "bulk_create_agents":
+            elif name == "freshdesk_bulk_create_agents":
                 result = await bulk_create_agents(**arguments)
+                
+            # Thread tools
+            elif name == "freshdesk_create_thread":
+                result = await create_thread(**arguments)
+            elif name == "freshdesk_get_thread_by_id":
+                result = await get_thread_by_id(**arguments)
+            elif name == "freshdesk_update_thread":
+                result = await update_thread(**arguments)
+            elif name == "freshdesk_delete_thread":
+                result = await delete_thread(**arguments)
+            elif name == "freshdesk_create_thread_message":
+                result = await create_thread_message(**arguments)
+            elif name == "freshdesk_get_thread_message_by_id":
+                result = await get_thread_message_by_id(**arguments)
+            elif name == "freshdesk_update_thread_message":
+                result = await update_thread_message(**arguments)
+            elif name == "freshdesk_delete_thread_message":
+                result = await delete_thread_message(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
 

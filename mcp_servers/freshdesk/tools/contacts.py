@@ -373,7 +373,7 @@ async def merge_contacts(
         Dict with success status or error information
     """
     if not secondary_contact_ids:
-        return {"error": "At least one secondary contact ID is required"}
+        raise ValueError("At least one secondary contact ID is required")
     
     merge_data = {
         "primary_contact_id": primary_contact_id,

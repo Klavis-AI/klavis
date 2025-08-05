@@ -65,6 +65,17 @@ from .agents import (
     bulk_create_agents,
 )
 
+from .thread import (
+    create_thread,
+    get_thread_by_id,
+    update_thread,
+    delete_thread,
+    create_thread_message,
+    get_thread_message_by_id,
+    update_thread_message,
+    delete_thread_message
+)
+
 __all__ = [
 
     # Tickets
@@ -125,4 +136,14 @@ __all__ = [
     'delete_agent',
     'search_agents',
     'bulk_create_agents',
+    
+    # Threads
+    'create_thread',
+    'get_thread_by_id',
+    'update_thread',
+    'delete_thread',
+    'create_thread_message',
+    'get_thread_message_by_id',
+    'update_thread_message',
+    'delete_thread_message'
 ] 
