@@ -281,47 +281,6 @@ The server provides comprehensive error handling:
 }
 ```
 
-## Logging
-
-The server provides detailed logging at multiple levels:
-
-- **DEBUG**: Detailed request/response information
-- **INFO**: General operation logs
-- **WARNING**: Non-critical issues
-- **ERROR**: Error conditions
-- **CRITICAL**: Critical failures
-
-Configure logging level with the `--log-level` option.
-
-## Security Considerations
-
-- **API Key Security**: Store API keys in environment variables, never in code
-- **Network Security**: Use HTTPS in production environments
-- **Access Control**: Implement proper access controls for the MCP server
-- **Rate Limiting**: Respect Freshdesk API rate limits
-- **Data Privacy**: Ensure compliance with data protection regulations
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify `FRESHDESK_API_KEY` is correct
-   - Check `FRESHDESK_DOMAIN` format
-   - Ensure API key has necessary permissions
-
-2. **Connection Issues**
-   - Verify network connectivity
-   - Check firewall settings
-   - Ensure port 5000 is available
-
-3. **Rate Limiting**
-   - Implement exponential backoff
-   - Monitor API usage
-   - Consider caching frequently accessed data
-
-### Debug Mode
-
 Enable debug logging for detailed troubleshooting:
 
 ```bash
