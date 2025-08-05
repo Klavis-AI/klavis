@@ -2,9 +2,10 @@ import requests
 import os
 import random
 import string
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 import base64
 from dotenv import load_dotenv
+from util import rate_limiter
 
 
 load_dotenv()
@@ -70,11 +71,15 @@ async def make_freshdesk_request(
     use_pwd = options.get("use_pwd", True)
     query_params = options.get("query_params", {})
     extra_headers = options.get("headers", {})
+    files = options.get("files", None)
     
     headers = {
         "Content-Type": "application/json",
         **extra_headers,
     }
+
+    if files:
+       del headers["Content-Type"]
 
     random_password = gen_random_password()
 
@@ -83,22 +88,36 @@ async def make_freshdesk_request(
     if query_params:
         request_args["params"] = query_params
 
+    if files:
+        request_args["files"] = files
+
+    if headers.get("Content-Type", None) == "application/json":
+        request_args["json"] = data
+    else:
+        request_args["data"] = data
+
     if not use_pwd:
         api_key = base64.b64encode(f"{FRESHDESK_API_KEY}:{random_password}").decode("utf-8")
         headers["Authorization"] = f"{api_key}"
     else:
         request_args["auth"] = (FRESHDESK_API_KEY, random_password)
-    
+
     try:
         
         response = requests.request(
             method=method.upper(),
             url=url,
             headers=headers,
-            json=data,
             timeout=timeout,
             **request_args,
         )
+        
+        rate_limiter.update_from_headers(response.headers)
+
+        if response.status_code == 429:
+            retry_after = int(response.headers.get('Retry-After', 30))
+            await asyncio.sleep(retry_after)
+            return await make_freshdesk_request(method, endpoint, data, options)
         
         # Log response status for debugging
         print(f"Freshdesk API {method.upper()} {endpoint} - Status: {response.status_code}")
@@ -244,6 +263,46 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
         error_response['error']['message'] = f"Failed to {operation} due to: {error_response['error']['message']}"
     
     return error_response
+
+
+def handle_freshdesk_attachments(field_name: str, attachments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    resolved_attachments = []
+    for attachment in attachments:
+        if attachment["type"] == "local":
+            print(attachment)
+            file_content = open(attachment["content"], "rb")
+            file_name = attachment.get("name", gen_random_password(15))
+            resolved_attachments.append((
+                f"{field_name}[]",
+                (file_name, file_content, attachment.get("media_type", "application/octet-stream"))
+            ))
+        elif attachment["type"] == "file":
+            file_encoding = attachment.get("encoding", "utf-8")
+            file_content_str = attachment["content"]
+            file_content = file_content_str.encode(file_encoding)
+            file_name = attachment.get("name", gen_random_password(15))
+            resolved_attachments.append((
+                f"{field_name}[]",
+                (file_name, file_content, attachment.get("media_type", "application/octet-stream"))
+            ))
+        elif attachment["type"] == "base64":
+            file_content = base64.b64decode(attachment["content"])
+            file_name = attachment.get("name", gen_random_password(15))
+            resolved_attachments.append((
+                f"{field_name}[]",
+                (file_name, file_content, attachment.get("media_type", "application/octet-stream")),
+            ))
+        elif attachment["type"] == "url":
+            file_content = requests.get(attachment["content"]).content
+            file_name = attachment.get("name", gen_random_password(15))
+            resolved_attachments.append((
+                f"{field_name}[]",
+                (file_name, file_content, attachment.get("media_type", "application/octet-stream")),
+            ))
+        else:
+            raise ValueError(f"Invalid attachment type: {attachment['type']}")
+    return resolved_attachments
+        
 
 
 def remove_none_values(data: Dict[str, Any]) -> Dict[str, Any]:

@@ -21,6 +21,9 @@ from .tickets import (
     forward_ticket,
     get_archived_ticket,
     delete_archived_ticket,
+    reply_to_a_ticket,
+    update_note,
+    delete_note,
 )
 
 from .contacts import (
@@ -69,7 +72,10 @@ __all__ = [
     'forward_ticket',
     'get_archived_ticket',
     'delete_archived_ticket',
-
+    'reply_to_a_ticket',
+    'update_note',
+    'delete_note',
+    
     # Attachments
     'delete_attachment',
     'create_ticket_with_attachments',

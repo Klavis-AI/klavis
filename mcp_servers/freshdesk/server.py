@@ -36,6 +36,9 @@ from tools import (
     delete_attachment,
     create_ticket_with_attachments,
     delete_multiple_tickets,
+    reply_to_a_ticket,
+    update_note,
+    delete_note,
     
     # Contact tools
 
@@ -71,6 +74,40 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 FRESHDESK_MCP_SERVER_PORT = int(os.getenv("FRESHDESK_MCP_SERVER_PORT", "5000"))
 FRESHDESK_API_KEY = os.getenv("FRESHDESK_API_KEY")
+
+
+attachment_schema = {
+    "type": "array", 
+    "items":{
+        "type": "object" , 
+        "properties": {
+            "type": {
+                "type": "string", 
+                "enum": ["url", "file", "base64", "local"], 
+                "default": "local",
+                "description": "Type of the attachment (e.g., 'file')."
+            }, 
+            "content": {
+                "type": "string", 
+                "description": "Base64 encoded content of the attachment or URL of the attachment."
+            },
+            "name": {
+                "type": "string",
+                "description": "Name of the attachment."
+            },
+            "media_type": {
+                "type": "string",
+                "description": "Media type of the attachment. Example: 'image/png' or 'application/pdf' or 'text/plain'"
+            },
+            "encoding": {
+                "type": "string",
+                "default": "utf-8",
+                "description": "Encoding of the attachment content. Default is 'utf-8'."
+            }
+        }
+    }, 
+    "description": "List of attachment objects with 'type' and 'content' fields."
+}
 
 @click.command()
 @click.option("--port", default=FRESHDESK_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -149,11 +186,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "string",
                         "description": "Due date for the ticket (format: YYYY-MM-DD)."
                     },
-                    "attachments": {
-                        "type": "array",
-                        "items": {"type": "object"},
-                        "description": "List of file paths to attach to the ticket."
-                    },
+                    "attachments": attachment_schema,
                     "responder_id": {
                         "type": "integer",
                         "description": "ID of the responder."
@@ -270,12 +303,96 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "type": "string",
                         "description": "Content of the note (required)."
                     },
+                    "user_id": {
+                        "type": "integer",
+                        "description": "ID of the user adding the note (defaults to authenticated user)."
+                    },
+                    "incoming": {
+                        "type": "boolean",
+                        "description": "Whether the note is incoming. Default is false."
+                    },
+                    "notify_emails": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "email"},
+                        "description": "List of email addresses to notify"
+                    },
                     "private": {
                         "type": "boolean",
                         "description": "Whether the note is private. Default is false."
-                    }
+                    },
+                    "attachments": attachment_schema
                 },
                 "required": ["ticket_id", "body"]
+            }
+        ),
+        types.Tool(
+            name="reply_to_a_ticket",
+            description="Reply to a ticket.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "ticket_id": {
+                        "type": "integer",
+                        "description": "ID of the ticket (required)."
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Content of the reply (required)."
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "description": "ID of the user replying (defaults to authenticated user)."
+                    },
+                    "cc_emails": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "email"},
+                        "description": "List of email addresses to CC"
+                    },
+                    "bcc_emails": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "email"},
+                        "description": "List of email addresses to BCC"
+                    },
+                    "from_email": {
+                        "type": "string",
+                        "description": "Email address to use as the sender"
+                    },
+                    "attachments": attachment_schema
+                },
+                "required": ["ticket_id", "body"]
+            }
+        ),
+        types.Tool(
+            name="update_note",
+            description="Update a note or reply to a ticket.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "note_id": {
+                        "type": "integer",
+                        "description": "ID of the note (required)."
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "Content of the note (required)."
+                    },
+                    "attachments": attachment_schema
+                },
+                "required": ["note_id", "body"]
+            }
+        ),
+        types.Tool(
+            name="delete_note",
+            description="Delete a note or reply to a ticket.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "note_id": {
+                        "type": "integer",
+                        "description": "ID of the note (required)."
+                    }
+                },
+                "required": ["note_id"]
             }
         ),
         types.Tool(
@@ -416,11 +533,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "items": {"type": "string", "format": "email"}, 
                         "description": "List of email addresses to CC."
                     },
-                    "attachments": {
-                        "type": "array", 
-                        "items": {"type": "object"}, 
-                        "description": "List of attachment objects with 'name' and 'content' fields (base64 encoded)."
-                    },
+                    "attachments": attachment_schema,
                     "due_by": {
                         "type": "string", 
                         "description": "Due date for the ticket (ISO 8601 format)."
@@ -1091,6 +1204,12 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await filter_tickets(**arguments)
             elif name == "add_note_to_ticket":
                 result = await add_note_to_ticket(**arguments)
+            elif name == "reply_to_a_ticket":
+                result = await reply_to_a_ticket(**arguments)
+            elif name == "update_note":
+                result = await update_note(**arguments)
+            elif name == "delete_note":
+                result = await delete_note(**arguments)
             elif name == "merge_tickets":
                 result = await merge_tickets(**arguments)
             elif name == "restore_ticket":

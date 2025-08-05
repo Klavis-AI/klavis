@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
-from .base import make_freshdesk_request, handle_freshdesk_error, remove_none_values
+from .base import make_freshdesk_request, handle_freshdesk_error, remove_none_values, handle_freshdesk_attachments
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -92,21 +92,17 @@ async def create_ticket(
             ticket_data["type"] = ticket_type
 
         ticket_data = remove_none_values(ticket_data)
+
         # Handle attachments if provided
         if attachments:
-
-            options["files"] ={ 
-                "attachments": attachments
-            }
-            options["headers"] = {
-                "Content-Type": "multipart/form-data",
-            }
+            options["files"] = handle_freshdesk_attachments("attachments", attachments)
         
         logger.info(f"Creating ticket with data: {ticket_data}")
         response = await make_freshdesk_request("POST", "/tickets", data=ticket_data, options=options)
         return response
         
     except Exception as e:
+        logger.error(f"Failed to create ticket: {str(e)}")
         return handle_freshdesk_error(e, "create", "ticket")
 
 
@@ -179,6 +175,7 @@ async def update_ticket(
     status: Optional[int] = None,
     tags: Optional[List[str]] = None,
     custom_fields: Optional[Dict[str, Any]] = None,
+    attachments: Optional[List[Dict[str, Any]]] = None,
     **kwargs
 ) -> Dict[str, Any]:
     """
@@ -191,6 +188,7 @@ async def update_ticket(
         priority: New priority (1-4, if updating)
         status: New status (2-5, if updating)
         tags: New tags (if updating)
+        attachments: New attachments (if updating)
         custom_fields: Updated custom fields (if any)
         **kwargs: Additional fields to update
         
@@ -198,6 +196,8 @@ async def update_ticket(
         Dictionary containing updated ticket details
     """
     try:
+        attachments = kwargs.pop("attachments", None)
+
         update_data = {
             "subject": subject,
             "description": description,
@@ -214,7 +214,13 @@ async def update_ticket(
             return {"success": False, "error": "No fields to update"}
             
         logger.info(f"Updating ticket {ticket_id} with data: {update_data}")
-        response = await make_freshdesk_request("PUT", f"/tickets/{ticket_id}", data=update_data)
+
+        options = {}
+
+        if attachments:
+            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+
+        response = await make_freshdesk_request("PUT", f"/tickets/{ticket_id}", data=update_data, options=options)
         return response
         
     except Exception as e:
@@ -387,7 +393,11 @@ async def add_note_to_ticket(
     ticket_id: int,
     body: str,
     private: bool = False,
-    user_id: Optional[int] = None
+    user_id: Optional[int] = None,
+    incoming: Optional[bool] = False,
+    notify_emails: Optional[List[str]] = None,
+    attachments: Optional[List[Dict[str, Any]]] = None
+    
 ) -> Dict[str, Any]:
     """
     Add a note to a ticket.
@@ -397,6 +407,9 @@ async def add_note_to_ticket(
         body: Content of the note
         private: Whether the note is private
         user_id: ID of the agent adding the note (defaults to authenticated user)
+        incoming: Whether the note is incoming
+        notify_emails: List of email addresses to notify
+        attachments: List of attachments to add to the note
         
     Returns:
         Dictionary containing the created note details
@@ -404,21 +417,144 @@ async def add_note_to_ticket(
     try:
         note_data = {
             "body": body,
-            "private": private
+            "private": private,
+            "incoming": incoming,
+            "notify_emails": notify_emails,
+            "user_id": user_id,
         }
         
-        if user_id is not None:
-            note_data["user_id"] = user_id
+        note_data = remove_none_values(note_data)
             
+        options = {}
+
+        if attachments:
+            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+
         response = await make_freshdesk_request(
             "POST",
             f"/tickets/{ticket_id}/notes",
-            data=note_data
+            data=note_data,
+            options=options
         )
         return response
         
     except Exception as e:
-        return handle_freshdesk_error(e, "add note to", "ticket")
+        return handle_freshdesk_error(e, "add_note_to", "ticket")
+
+
+async def reply_to_a_ticket(
+    ticket_id: int,
+    body: str,
+    user_id: Optional[int] = None,
+    cc_emails: Optional[List[str]] = None,
+    bcc_emails: Optional[List[str]] = None,
+    from_email: Optional[str] = None,
+    attachments: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    """
+    Reply to a ticket.
+    
+    Args:
+        ticket_id: ID of the ticket
+        body: Content of the reply
+        user_id: ID of the agent replying (defaults to authenticated user)
+        cc_emails: List of email addresses to CC
+        bcc_emails: List of email addresses to BCC
+        attachments: List of attachments to add to the reply
+        from_email: Email address to use as the sender
+        
+    Returns:
+        Dictionary containing the created reply details
+    """
+    try:
+        data = {
+            "body": body,
+            "user_id": user_id,
+            "cc_emails": cc_emails or [],
+            "bcc_emails": bcc_emails or [],
+            "from_email": from_email
+        }
+        
+        data = remove_none_values(data)
+            
+        options = {}
+
+        if attachments:
+            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+
+        response = await make_freshdesk_request(
+            "POST",
+            f"/tickets/{ticket_id}/reply",
+            data=data,
+            options=options
+        )
+        return response
+        
+    except Exception as e:
+        return handle_freshdesk_error(e, "reply_to", "ticket")
+
+
+async def update_note(
+    note_id: int,
+    body: str,
+    attachments: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    """
+    Update a note or reply to a ticket.
+    
+    Args:
+        note_id: ID of the note
+        body: Content of the note
+        attachments: List of attachments to add to the note
+        
+    Returns:
+        Dictionary containing the updated note details
+    """
+    try:
+        note_data = {
+            "body": body,
+        }
+        
+        note_data = remove_none_values(note_data)
+            
+        options = {}
+
+        if attachments:
+            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+
+        response = await make_freshdesk_request(
+            "PUT",
+            f"/conversations/{note_id}",
+            data=note_data,
+            options=options
+        )
+        return response
+        
+    except Exception as e:
+        return handle_freshdesk_error(e, "update", "note")
+
+
+async def delete_note(
+    note_id: int,
+) -> Dict[str, Any]:
+    """
+    Delete a note or reply to a ticket.
+    
+    Args:
+        note_id: ID of the note
+        
+    Returns:
+        Dictionary containing the deleted note details
+    """
+    try:
+        response = await make_freshdesk_request(
+            "DELETE",
+            f"/conversations/{note_id}",
+        )
+        return response
+        
+    except Exception as e:
+        return handle_freshdesk_error(e, "delete", "note")
 
 
 async def filter_tickets(
