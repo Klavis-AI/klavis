@@ -9,5 +9,3 @@ from mcp.server.lowlevel import Server
 import uvicorn
 
 
-if __name__ == "__main__":
-    main()
