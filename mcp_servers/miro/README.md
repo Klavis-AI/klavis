@@ -1,52 +1,89 @@
-# Attio MCP Server
+# Miro MCP Server
 
-This directory contains a Model Context Protocol (MCP) server for integrating [Attio CRM](https://attio.com/) capabilities into applications like Klavis, Cursor, Claude, and other LLM clients. It allows leveraging Attio's powerful customer relationship management features through a standardized protocol.
+This directory contains a Model Context Protocol (MCP) server for integrating [Miro](https://miro.com/) capabilities into applications like Klavis, Cursor, Claude, and other LLM clients. It allows leveraging Miro's powerful visual collaboration platform features through a standardized protocol.
 
 ## Features
 
-This server exposes the following Attio CRM functionalities as tools:
+This server exposes the following Miro functionalities as tools:
 
-*   `attio_search_people`: Search for people in your Attio workspace with advanced filtering options (name, email, company, job title, description, location).
-*   `attio_search_companies`: Search for companies in your Attio workspace with filtering by name, domain, description, location, and team members.
-*   `attio_search_deals`: Search for deals in your Attio workspace with filtering by name, stage, and value range.
-*   `attio_search_notes`: Search for notes across all objects in your Attio workspace by content, title, or markdown.
-*   `attio_create_note`: Create new notes attached to people, companies, or deals in your Attio workspace.
+### Board Management
+* `miro_create_board`: Create new Miro boards with customizable settings
+* `miro_update_board`: Update existing board properties (name, description, sharing policy)
+* `miro_delete_board`: Permanently delete boards
+* `miro_list_boards`: Get all accessible boards with optional team filtering
+* `miro_get_board_details`: Retrieve detailed information about specific boards
+* `miro_export_board`: Export boards in PDF, PNG, or JPEG formats
+
+### Content Management
+* `miro_get_board_items`: Get all items from a board with optional type filtering
+* `miro_get_board_item`: Get detailed information about specific board items
+* `miro_create_board_item`: Create generic board items with flexible content
+* `miro_update_board_item`: Update existing board item properties
+* `miro_add_sticky_note`: Add colorful sticky notes with positioning
+* `miro_add_shape`: Add various geometric shapes (rectangles, circles, arrows, etc.)
+* `miro_add_text_item`: Add formatted text elements
+* `miro_create_connector`: Create connectors between board items with styling options
+* `miro_delete_board_item`: Remove items from boards
+
+### Collaboration
+* `miro_invite_collaborator`: Invite users to boards with role management
+* `miro_get_board_members`: List all board members and their roles
+* `miro_update_board_member_role`: Change member permissions (viewer/commenter/editor)
+* `miro_remove_board_member`: Remove users from board access
+* `miro_create_comment`: Add comments to board items
+* `miro_get_comments`: Retrieve comments from board items
+
+### Integrations
+* `miro_create_webhook`: Set up webhook notifications for board events
+* `miro_get_webhooks`: List all webhooks configured for a board
+* `miro_delete_webhook`: Remove webhook integrations
+
+### Team Management
+* `miro_get_teams`: List all accessible teams
+* `miro_get_team_members`: Get members of specific teams
 
 ## Prerequisites
 
-*   **Node.js:** Version 18.0.0 or higher.
-*   **npm:** Node Package Manager (usually comes with Node.js).
-*   **Docker:** (Recommended) For containerized deployment.
-*   **Attio API Key:** Obtainable from your [Attio workspace settings](https://app.attio.com/).
+* **Node.js:** Version 18.0.0 or higher
+* **npm:** Node Package Manager (usually comes with Node.js)
+* **Docker:** (Recommended) For containerized deployment
+* **Miro Access Token:** Obtainable from your [Miro Developer Console](https://developers.miro.com/)
 
 ## Environment Setup
 
-Before running the server, you need to configure your Attio API credentials.
+Before running the server, you need to configure your Miro API credentials.
 
-1.  Create an environment file:
-    ```bash
-    cp mcp_servers/attio/.env.example mcp_servers/attio/.env
-    ```
-    
-    **Note:** If `.env.example` doesn't exist, create `.env` directly:
-    ```bash
-    touch mcp_servers/attio/.env
-    ```
+1. Create an environment file:
+cp mcp_servers/miro/.env.example mcp_servers/miro/.env
 
-2.  Edit `mcp_servers/attio/.env` and add your Attio API key:
-    ```dotenv
-    # Attio API credentials
-    ATTIO_API_KEY=your-actual-api-key-here
+**Note:** If `.env.example` doesn't exist, create `.env` directly:
+touch mcp_servers/miro/.env
 
-    # --- Optional: Server configuration --- 
-    # PORT=5000
-    # ------
-    ```
+2. Edit `mcp_servers/miro/.env` and add your Miro access token:
 
-*   `ATTIO_API_KEY` (Required): Your API key for the Attio service. You can obtain this from your Attio workspace settings under Developers > API keys.
-*   `PORT` (Optional): The port number for the server to listen on. Defaults to 5000.
+Miro API credentials
+MIRO_ACCESS_TOKEN=your-actual-access-token-here
 
-*(Note: When using Docker, the `.env` file should be in the `mcp_servers/attio/` directory and will be used during container runtime.)*
+
+* `MIRO_ACCESS_TOKEN` (Required): Your access token for the Miro API. You can obtain this from your Miro Developer Console by creating an app and generating a Personal Access Token (for development) or implementing OAuth 2.0 flow (for production).
+* `PORT` (Optional): The port number for the server to listen on. Defaults to 5000.
+
+*(Note: When using Docker, the `.env` file should be in the `mcp_servers/miro/` directory and will be used during container runtime.)*
+
+## Getting Your Miro Access Token
+
+### For Development (Personal Access Token):
+1. Visit the [Miro Developer Console](https://developers.miro.com/)
+2. Sign in with your Miro account
+3. Create a new app or select an existing one
+4. Generate a Personal Access Token
+5. Copy the token and use it as your `MIRO_ACCESS_TOKEN`
+
+### For Production (OAuth 2.0):
+1. Register your application in the Miro Developer Console
+2. Configure redirect URIs and required scopes
+3. Implement OAuth 2.0 authorization code flow
+4. Exchange authorization codes for access tokens
 
 ## Running Locally
 
@@ -56,21 +93,20 @@ There are two primary ways to run the server locally:
 
 This method packages the server and its dependencies into a container.
 
-1.  **Build the Docker Image:**
-    *   Navigate to the root directory of the `klavis` project.
-    *   Run the build command:
-        ```bash
-        # Replace 'attio-mcp-server' with your desired tag
-        docker build -t attio-mcp-server -f mcp_servers/attio/Dockerfile .
-        ```
+1. **Build the Docker Image:**
+* Navigate to the root directory of the `klavis` project.
+* Run the build command:
+  ```
+  # Replace 'miro-mcp-server' with your desired tag
+  docker build -t miro-mcp-server -f mcp_servers/miro/Dockerfile .
+  ```
 
-2.  **Run the Docker Container:**
-    ```bash
-    # This runs the server on port 5000
-    docker run -p 5000:5000 --env-file mcp_servers/attio/.env attio-mcp-server 
-    ```
-    *   `-p 5000:5000`: Maps port 5000 on your host machine to port 5000 inside the container.
-    *   `--env-file mcp_servers/attio/.env`: Passes the environment variables from your `.env` file to the container.
+2. **Run the Docker Container:**
+This runs the server on port 5000
+docker run -p 5000:5000 --env-file mcp_servers/miro/.env miro-mcp-server
+
+* `-p 5000:5000`: Maps port 5000 on your host machine to port 5000 inside the container.
+* `--env-file mcp_servers/miro/.env`: Passes the environment variables from your `.env` file to the container.
 
 The server will start, and you should see log output indicating it's running, typically listening on `http://localhost:5000`.
 
@@ -78,89 +114,122 @@ The server will start, and you should see log output indicating it's running, ty
 
 This method runs the server directly using your local Node.js environment.
 
-1.  **Navigate to the Server Directory:**
-    ```bash
-    cd mcp_servers/attio
-    ```
+1. **Navigate to the Server Directory:**
 
-2.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
+cd mcp_servers/miro
 
-3.  **Build the Server Code:**
-    (This compiles the TypeScript code to JavaScript)
-    ```bash
-    npm run build
-    ```
 
-4.  **Start the Server:**
-    ```bash
-    npm start
-    ```
+2. **Install Dependencies:**
+npm install
 
-The server will start using the environment variables defined in `mcp_servers/attio/.env` and listen on port 5000 (or the port specified by the `PORT` environment variable, if set).
+
+3. **Build the Server Code:**
+(This compiles the TypeScript code to JavaScript)
+npm run build
+
+
+4. **Start the Server:**
+npm start
+
+
+The server will start using the environment variables defined in `mcp_servers/miro/.env` and listen on port 5000 (or the port specified by the `PORT` environment variable, if set).
 
 ## API Reference
 
 ### Available Tools
 
-#### `attio_search_people`
-Search for people in your Attio workspace.
+#### Board Management Tools
+
+##### `miro_create_board`
+Create a new Miro board.
 
 **Parameters:**
-- `query` (string, optional): Search query for people (searches across name, email, company, job title, description, location)
-- `email` (string, optional): Filter by specific email address
-- `limit` (number, optional): Maximum number of results to return (default: 25, max: 50)
+- `name` (string, required): Name of the board
+- `description` (string, optional): Board description
+- `policy` (string, optional): Sharing policy ("private", "view", "comment", "edit", default: "private")
+- `teamId` (string, optional): Team ID to create the board under
 
-#### `attio_search_companies`
-Search for companies in your Attio workspace.
-
-**Parameters:**
-- `query` (string, optional): Search query for companies (searches across name, domain, description, employees names, employees descriptions, location)
-- `domain` (string, optional): Filter by company domain
-- `limit` (number, optional): Maximum number of results to return (default: 25, max: 50)
-
-#### `attio_search_deals`
-Search for deals in your Attio workspace.
+##### `miro_list_boards`
+Get all accessible boards.
 
 **Parameters:**
-- `name` (string, optional): Filter by deal name
-- `stage` (string, optional): Filter by deal stage (one of "Lead", "In Progress", "Won 🎉", "Lost")
-- `minValue` (number, optional): Minimum deal value
-- `maxValue` (number, optional): Maximum deal value
-- `limit` (number, optional): Maximum number of results to return (default: 25, max: 50)
+- `limit` (number, optional): Maximum number of boards to return (default: 25, max: 100)
+- `teamId` (string, optional): Filter boards by team ID
 
-#### `attio_search_notes`
-Search for notes across all objects in your Attio workspace.
+##### `miro_get_board_details`
+Get detailed information about a specific board.
 
 **Parameters:**
-- `query` (string, optional): Search query for notes content (searches title, plaintext content, and markdown content). Leave empty to get all notes
-- `limit` (number, optional): Maximum number of notes to fetch and search through (default: 50, max: 50)
+- `board_id` (string, required): ID of the board
 
-#### `attio_create_note`
-Create a new note for a given record in Attio.
+#### Content Management Tools
+
+##### `miro_add_sticky_note`
+Add a sticky note to a board.
 
 **Parameters:**
-- `parent_object` (string, required): The object type to attach the note to ("people", "companies", or "deals")
-- `parent_record_id` (string, required): The ID of the record to attach the note to
-- `title` (string, required): Title of the note
-- `content` (string, required): Content of the note
-- `format` (string, optional): Format of the note content ("plaintext" or "markdown", default: "plaintext")
+- `board_id` (string, required): ID of the board
+- `content` (string, required): Text content of the sticky note
+- `x` (number, optional): X coordinate (default: 0)
+- `y` (number, optional): Y coordinate (default: 0)
+- `color` (string, optional): Color ("yellow", "green", "blue", "red", "gray", "orange", "purple", "pink", default: "yellow")
+
+##### `miro_add_shape`
+Add a shape to a board.
+
+**Parameters:**
+- `board_id` (string, required): ID of the board
+- `shape` (string, required): Shape type ("rectangle", "circle", "triangle", "arrow", etc.)
+- `content` (string, optional): Text content inside the shape
+- `x`, `y` (number, optional): Position coordinates
+- `width`, `height` (number, optional): Shape dimensions
+- `color` (string, optional): Fill color in HEX format
+
+##### `miro_add_text_item`
+Add formatted text to a board.
+
+**Parameters:**
+- `board_id` (string, required): ID of the board
+- `content` (string, required): Text content
+- `x`, `y` (number, optional): Position coordinates
+- `fontSize` (number, optional): Font size in pixels (default: 14)
+- `color` (string, optional): Text color in HEX format
+
+##### `miro_create_connector`
+Create a connector between two board items.
+
+**Parameters:**
+- `board_id` (string, required): ID of the board
+- `start_item_id` (string, required): ID of the starting item
+- `end_item_id` (string, required): ID of the ending item
+- `shape` (string, optional): Connector shape ("straight", "elbowed", "curved", default: "curved")
+- `style` (string, optional): Line style ("normal", "dashed", "dotted")
+- `strokeColor` (string, optional): Line color in HEX format
+
+#### Collaboration Tools
+
+##### `miro_invite_collaborator`
+Invite users to collaborate on a board.
+
+**Parameters:**
+- `board_id` (string, required): ID of the board
+- `emails` (array, required): Array of email addresses to invite
+- `role` (string, optional): Access level ("viewer", "commenter", "editor", default: "editor")
+- `message` (string, optional): Personal invitation message
 
 ## Authentication
 
 The server supports two methods of authentication:
 
-1. **Environment Variable (Recommended):** Set `ATTIO_API_KEY` in your `.env` file.
-2. **HTTP Header:** Pass the API key as `x-auth-token` header in requests to the MCP server.
+1. **Environment Variable (Recommended):** Set `MIRO_ACCESS_TOKEN` in your `.env` file.
+2. **HTTP Header:** Pass the access token as `x-auth-token` header in requests to the MCP server.
 
 ## Development
 
-*   **Linting:** `npm run lint` (check code style), `npm run lint:fix` (automatically fix issues)
-*   **Formatting:** `npm run format` (using Prettier)
-*   **Testing:** `npm test` (runs Jest tests)
-*   **Building:** `npm run build` (compile TypeScript to JavaScript)
+* **Linting:** `npm run lint` (check code style), `npm run lint:fix` (automatically fix issues)
+* **Formatting:** `npm run format` (using Prettier)
+* **Testing:** `npm test` (runs Jest tests)
+* **Building:** `npm run build` (compile TypeScript to JavaScript)
 
 ## Protocol Support
 
@@ -172,15 +241,30 @@ The server automatically handles both transport types on different endpoints:
 - `/mcp` - Streamable HTTP Transport
 - `/sse` and `/messages` - HTTP+SSE Transport
 
-## Contributing
+## Testing with MCP Clients
 
-Contributions are welcome! Please follow standard GitHub practices (fork, branch, pull request).
+### Cursor IDE
+1. Create `.cursor/mcp.json` in your project:
+{
+"mcpServers": {
+"miro": {
+"url": "http://localhost:5000/sse",
+"env": {
+"MIRO_ACCESS_TOKEN": "your_actual_token_here"
+}
+}
+}
+}
 
-## License
 
-This project is licensed under the MIT License.
+2. Enable the server in Cursor settings
+3. Test with natural language: "Create a new Miro board called 'Project Planning'"
+
+### Claude Desktop
+Configure your MCP server in Claude Desktop's settings to connect via the SSE endpoint.
+
 
 ## Support
 
 For issues related to this MCP server, please create an issue in the repository.
-For Attio API questions, consult the [Attio API documentation](https://developers.attio.com/). 
+For Miro API questions, consult the [Miro API documentation](https://developers.miro.com/reference/).
