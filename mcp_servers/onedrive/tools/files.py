@@ -24,7 +24,7 @@ async def onedrive_read_file_content(file_id: str) -> Union[str, Tuple[str, int,
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/items/{file_id}/content"
 
@@ -35,10 +35,10 @@ async def onedrive_read_file_content(file_id: str) -> Union[str, Tuple[str, int,
             return response.text
     except Exception as e:
         logger.error(f"Exception occurred while reading file content: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 async def onedrive_create_file(
-        parent_folder_id: str,
+        parent_folder: str,
         new_file_name: str,
         data: str = None,
         if_exists: str = 'error'
@@ -47,7 +47,7 @@ async def onedrive_create_file(
     Create a new file in a specific OneDrive folder.
 
     Parameters:
-    - parent_folder_id: ID of the parent folder
+    - parent_folder: 'root' to create in root or ID of the parent folder
     - new_file_name: Name for the new file
     - data: Content for the new file (optional)
     - if_exists: Behavior when file exists ('error', 'rename', or 'replace')
@@ -59,16 +59,16 @@ async def onedrive_create_file(
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     try:
-        logger.info(f"Creating file '{new_file_name}' in folder {parent_folder_id} with if_exists={if_exists}")
+        logger.info(f"Creating file '{new_file_name}' in folder {parent_folder} with if_exists={if_exists}")
 
         # Step 1: list files/folders inside parent folder
-        result = await onedrive_list_inside_folder(parent_folder_id)
+        result = await onedrive_list_inside_folder(parent_folder)
 
         if not result or len(result) < 2:
-            logger.error(f"Could not list contents of folder {parent_folder_id}")
+            logger.error(f"Could not list contents of folder {parent_folder}")
             return ("Could not list folder contents",)
 
         _, existing_items = result
@@ -79,7 +79,7 @@ async def onedrive_create_file(
         final_name = new_file_name
         if new_file_name in existing_names:
             if if_exists == 'error':
-                logger.warning(f"File '{new_file_name}' already exists in folder {parent_folder_id}")
+                logger.warning(f"File '{new_file_name}' already exists in folder {parent_folder}")
                 return (f"File '{new_file_name}' already exists. Aborting.",)
             elif if_exists == 'rename':
                 name, ext = os.path.splitext(new_file_name)
@@ -92,71 +92,11 @@ async def onedrive_create_file(
                 return ("Invalid if_exists option.",)
 
         # Step 3: create the file
-        url = f"{client['base_url']}/me/drive/items/{parent_folder_id}:/{final_name}:/content"
+        url = f"{client['base_url']}/me/drive/items/{parent_folder}:/{final_name}:/content"
         async with httpx.AsyncClient() as httpx_client:
             put_response = await httpx_client.put(url, headers=client['headers'], data=data or '')
-            return ("File created:", put_response.json())
+            return "File created:", put_response.json()
     except Exception as e:
         logger.error(f"Exception occurred while creating file: {e}")
-        return ("Error:", str(e))
-
-
-async def onedrive_create_file_in_root(
-        new_file_name: str,
-        data: str = None,
-        if_exists: str = 'error'
-) -> Union[Tuple[str, Dict], Tuple[str, int, str]]:
-    """
-    Create a new file in the root of OneDrive.
-
-    Parameters:
-    - new_file_name: Name for the new file
-    - data: Content for the new file (optional)
-    - if_exists: Behavior when file exists ('error', 'rename', or 'replace')
-
-    Returns:
-    - Tuple with success message and response JSON if successful
-    - Tuple with error message and details if failed
-    """
-    client = get_onedrive_client()
-    if not client:
-        logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
-
-    try:
-        logger.info(f"Creating file '{new_file_name}' in root with if_exists={if_exists}")
-
-        # Step 1: list files/folders in root
-        async with httpx.AsyncClient() as httpx_client:
-            existing_items_resp = await httpx_client.get(
-                f"{client['base_url']}/me/drive/root/children",
-                headers=client['headers']
-            )
-        existing_items = existing_items_resp.json().get('value', [])
-        existing_names = [item['name'] for item in existing_items]
-
-        # Step 2: handle existing file
-        final_name = new_file_name
-        if new_file_name in existing_names:
-            if if_exists == 'error':
-                logger.warning(f"File '{new_file_name}' already exists in root")
-                return (f"File '{new_file_name}' already exists. Aborting.",)
-            elif if_exists == 'rename':
-                name, ext = os.path.splitext(new_file_name)
-                final_name = f"{name}_{uuid.uuid4().hex}{ext}"
-                logger.info(f"Renaming file to '{final_name}' due to naming conflict")
-            elif if_exists == 'replace':
-                logger.info(f"File exists, will replace '{new_file_name}'")
-            else:
-                logger.error(f"Invalid if_exists option: {if_exists}")
-                return ("Invalid if_exists option.",)
-
-        # Step 3: create the file
-        url = f"{client['base_url']}/me/drive/root:/{final_name}:/content"
-        async with httpx.AsyncClient() as httpx_client:
-            put_response = await httpx_client.put(url, headers=client['headers'], data=data or '')
-            return ("File created:", put_response.json())
-    except Exception as e:
-        logger.error(f"Exception occurred while creating file in root: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 

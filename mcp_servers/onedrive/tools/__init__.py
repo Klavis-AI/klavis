@@ -11,12 +11,12 @@ from .combined_files_and_folder import (
 from .files import (
     onedrive_read_file_content,
     onedrive_create_file,
-    onedrive_create_file_in_root
+    #onedrive_create_file_in_root
 )
 
 from .folders import (
     onedrive_create_folder,
-    onedrive_create_folder_in_root
+    #onedrive_create_folder_in_root
 )
 
 from .onedrive_explore import (
@@ -43,11 +43,11 @@ __all__ = [
     # Files
     "onedrive_read_file_content",
     "onedrive_create_file",
-    "onedrive_create_file_in_root",
+    #"onedrive_create_file_in_root",
 
     # Folders
     "onedrive_create_folder",
-    "onedrive_create_folder_in_root",
+    #"onedrive_create_folder_in_root",
 
     # Search & List
     "onedrive_list_root_files_folders",

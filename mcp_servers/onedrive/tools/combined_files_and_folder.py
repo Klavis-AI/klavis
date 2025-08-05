@@ -21,7 +21,7 @@ async def onedrive_rename_item(file_id: str, new_name: str) -> Union[Tuple[str, 
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/items/{file_id}"
     data = {"name": new_name}
@@ -35,11 +35,10 @@ async def onedrive_rename_item(file_id: str, new_name: str) -> Union[Tuple[str, 
                 headers={ **client['headers'], "Content-Type": "application/json"},
                 json=data
             )
-            logger.info(f"Successfully renamed item {file_id}")
-            return ("Renamed successfully:", response.json())
+            return "Renamed successfully:", response.json()
     except Exception as e:
         logger.error(f"Exception occurred while renaming item: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 
 async def onedrive_move_item(item_id: str, new_parent_id: str) -> Union[Tuple[str, dict], Tuple[str, int, str]]:
@@ -56,7 +55,7 @@ async def onedrive_move_item(item_id: str, new_parent_id: str) -> Union[Tuple[st
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/items/{item_id}"
     body = {
@@ -67,8 +66,7 @@ async def onedrive_move_item(item_id: str, new_parent_id: str) -> Union[Tuple[st
         logger.info(f"Moving item {item_id} to parent {new_parent_id}")
         async with httpx.AsyncClient() as httpx_client:
             response = await httpx_client.patch(url, headers=client['headers'], json=body)
-            logger.info(f"Successfully moved item {item_id}")
-            return ("Item moved:", response.json())
+            return "Item moved:", response.json()
     except Exception as e:
         logger.error(f"Exception occurred while moving item: {e}")
         return ("Error:", str(e))
@@ -101,7 +99,6 @@ async def onedrive_delete_item(item_id: str) -> Union[Tuple[str], Tuple[str, int
             # Key Fix: Check the status code from the response.
             # A successful delete operation returns 204 No Content.
             if response.status_code == 204:
-                logger.info(f"Successfully deleted item {item_id}")
                 return "Deleted successfully"
             else:
                 # If it's not 204, the API returned an error.

@@ -28,11 +28,9 @@ from tools import (
     # Files
     onedrive_read_file_content,
     onedrive_create_file,
-    onedrive_create_file_in_root,
 
     # Folders
     onedrive_create_folder,
-    onedrive_create_folder_in_root,
 
     # Search & List
     onedrive_list_root_files_folders,
@@ -139,11 +137,11 @@ def main(
             # File Creation
             types.Tool(
                 name="onedrive_create_file",
-                description="Create a new file in a specific OneDrive folder.",
+                description="Create a new file in OneDrive.",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "parent_folder_id": {"type": "string", "description": "ID of the parent folder"},
+                        "parent_folder": {"type": "string", "description": "'root' to create in root or ID of the parent folder"},
                         "new_file_name": {"type": "string", "description": "Name for the new file"},
                         "data": {"type": "string", "description": "Content for the new file (optional)"},
                         "if_exists": {
@@ -153,36 +151,18 @@ def main(
                             "description": "Behavior when file exists: 'error' (abort), 'rename' (create unique name), 'replace' (overwrite)"
                         }
                     },
-                    "required": ["parent_folder_id", "new_file_name"]
-                }
-            ),
-            types.Tool(
-                name="onedrive_create_file_in_root",
-                description="Create a new file in the root of OneDrive.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "new_file_name": {"type": "string", "description": "Name for the new file"},
-                        "data": {"type": "string", "description": "Content for the new file (optional)"},
-                        "if_exists": {
-                            "type": "string",
-                            "enum": ["error", "rename", "replace"],
-                            "default": "error",
-                            "description": "Behavior when file exists: 'error' (abort), 'rename' (create unique name), 'replace' (overwrite)"
-                        }
-                    },
-                    "required": ["new_file_name"]
+                    "required": ["parent_folder", "new_file_name"]
                 }
             ),
 
             # Folder Operations
             types.Tool(
                 name="onedrive_create_folder",
-                description="Create a new folder in a specific OneDrive parent folder.",
+                description="Create a new folder in OneDrive.",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "parent_folder_id": {"type": "string", "description": "ID of the parent folder"},
+                        "parent_folder": {"type": "string", "description": "'root' to create in root or ID of the parent folder"},
                         "new_folder_name": {"type": "string", "description": "Name for the new folder"},
                         "behavior": {
                             "type": "string",
@@ -191,18 +171,7 @@ def main(
                             "description": "Conflict resolution: 'fail' (return error), 'replace' (overwrite), 'rename' (unique name)"
                         }
                     },
-                    "required": ["parent_folder_id", "new_folder_name"]
-                }
-            ),
-            types.Tool(
-                name="onedrive_create_folder_in_root",
-                description="Create a new folder in the root of OneDrive.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "folder_name": {"type": "string", "description": "Name for the new folder"}
-                    },
-                    "required": ["folder_name"]
+                    "required": ["parent_folder", "new_folder_name"]
                 }
             ),
 
@@ -364,7 +333,7 @@ def main(
         elif name == "onedrive_create_file":
             try:
                 result = await onedrive_create_file(
-                    parent_folder_id=arguments["parent_folder_id"],
+                    parent_folder=arguments["parent_folder"],
                     new_file_name=arguments["new_file_name"],
                     data=arguments.get("data"),
                     if_exists=arguments.get("if_exists", "error")
@@ -384,33 +353,11 @@ def main(
                     )
                 ]
 
-        elif name == "onedrive_create_file_in_root":
-            try:
-                result = await onedrive_create_file_in_root(
-                    new_file_name=arguments["new_file_name"],
-                    data=arguments.get("data"),
-                    if_exists=arguments.get("if_exists", "error")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error creating file in root: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
         # Folder Operations
         elif name == "onedrive_create_folder":
             try:
                 result = await onedrive_create_folder(
-                    parent_folder_id=arguments["parent_folder_id"],
+                    parent_folder=arguments["parent_folder"],
                     new_folder_name=arguments["new_folder_name"],
                     behavior=arguments.get("behavior", "fail")
                 )
@@ -422,26 +369,6 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error creating folder: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "onedrive_create_folder_in_root":
-            try:
-                result = await onedrive_create_folder_in_root(
-                    folder_name=arguments["folder_name"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error creating folder in root: {e}")
                 return [
                     types.TextContent(
                         type="text",

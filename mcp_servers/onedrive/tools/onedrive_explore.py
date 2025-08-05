@@ -17,7 +17,7 @@ async def onedrive_list_root_files_folders() -> Union[Tuple[str, Dict[str, Any]]
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/root/children"
 
@@ -25,12 +25,10 @@ async def onedrive_list_root_files_folders() -> Union[Tuple[str, Dict[str, Any]]
         logger.info("Listing files and folders in root directory")
         async with httpx.AsyncClient() as httpx_client:
             response = await httpx_client.get(url, headers=client['headers'])
-            files = response.json()
-            logger.info(f"Found {len(files.get('value', []))} items in root")
-            return ("Files:", files)
+            return "Files:", response.json()
     except Exception as e:
         logger.error(f"Exception while listing root items: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 async def onedrive_list_inside_folder(folder_id: str) -> Union[Tuple[str, Dict[str, Any]], Tuple[str, int, str]]:
     """
@@ -46,7 +44,7 @@ async def onedrive_list_inside_folder(folder_id: str) -> Union[Tuple[str, Dict[s
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/items/{folder_id}/children"
 
@@ -54,12 +52,10 @@ async def onedrive_list_inside_folder(folder_id: str) -> Union[Tuple[str, Dict[s
         logger.info(f"Listing items inside folder ID: {folder_id}")
         async with httpx.AsyncClient() as httpx_client:
             response = await httpx_client.get(url, headers=client['headers'])
-            items = response.json()
-            logger.info(f"Found {len(items.get('value', []))} items in folder {folder_id}")
-            return ("Items inside folder:", items)
+            return "Items inside folder:", response.json()
     except Exception as e:
         logger.error(f"Exception while listing folder items: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 async def onedrive_search_item_by_name(itemname: str) -> Union[Tuple[str, Dict[str, Any]], Tuple[str, int, str]]:
     """
@@ -75,7 +71,7 @@ async def onedrive_search_item_by_name(itemname: str) -> Union[Tuple[str, Dict[s
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/root/search(q='{itemname}')"
 
@@ -83,12 +79,10 @@ async def onedrive_search_item_by_name(itemname: str) -> Union[Tuple[str, Dict[s
         logger.info(f"Searching for items with name: {itemname}")
         async with httpx.AsyncClient() as httpx_client:
             response = await httpx_client.get(url, headers=client['headers'])
-            items = response.json()
-            logger.info(f"Found {len(items.get('value', []))} matching items")
-            return ("Found items:", items)
+            return "Found items:", response.json()
     except Exception as e:
         logger.error(f"Exception while searching items: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 async def onedrive_search_folder_by_name(folder_name: str) -> Union[Tuple[str, List[Dict[str, Any]]], Tuple[str, int, str]]:
     """
@@ -104,7 +98,7 @@ async def onedrive_search_folder_by_name(folder_name: str) -> Union[Tuple[str, L
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/root/search(q='{folder_name}')"
 
@@ -114,12 +108,11 @@ async def onedrive_search_folder_by_name(folder_name: str) -> Union[Tuple[str, L
             response = await httpx_client.get(url, headers=client['headers'])
             data = response.json()
             folders = [item for item in data.get('value', []) if 'folder' in item]
-            logger.info(f"Found {len(folders)} matching folders")
-            return ("Found folders:", folders)
+            return "Found folders:", folders
 
     except Exception as e:
         logger.error(f"Exception while searching folders: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
 
 async def onedrive_get_item_by_id(item_id: str) -> Union[Dict[str, Any], Tuple[str, int, str]]:
     """
@@ -135,7 +128,7 @@ async def onedrive_get_item_by_id(item_id: str) -> Union[Dict[str, Any], Tuple[s
     client = get_onedrive_client()
     if not client:
         logger.error("Could not get OneDrive client")
-        return ("Could not get OneDrive client",)
+        return "Could not get OneDrive client"
 
     url = f"{client['base_url']}/me/drive/items/{item_id}"
 
@@ -148,4 +141,4 @@ async def onedrive_get_item_by_id(item_id: str) -> Union[Dict[str, Any], Tuple[s
             return data
     except Exception as e:
         logger.error(f"Exception while getting item: {e}")
-        return ("Error:", str(e))
+        return "Error:", str(e)
