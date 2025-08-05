@@ -23,16 +23,9 @@ async def onedrive_list_shared_items() -> Union[Tuple[str, Dict[str, Any]], Tupl
 
     try:
         logger.info("Requesting list of shared items")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-        if response.ok:
-            items = response.json()
-            item_count = len(items.get('value', []))
-            logger.info(f"Successfully retrieved {item_count} shared items")
-            return ("Items shared with me:", items)
-        else:
-            logger.error(f"Failed to get shared items. Status: {response.status_code}, Response: {response.text}")
-            return ("Error:", response.status_code, response.text)
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
+            return ("Items shared with me:", response.json())
     except Exception as e:
         logger.error(f"Exception while fetching shared items: {str(e)}")
         return ("Error:", str(e))

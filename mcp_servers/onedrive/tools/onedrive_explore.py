@@ -23,16 +23,11 @@ async def onedrive_list_root_files_folders() -> Union[Tuple[str, Dict[str, Any]]
 
     try:
         logger.info("Listing files and folders in root directory")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
             files = response.json()
             logger.info(f"Found {len(files.get('value', []))} items in root")
             return ("Files:", files)
-        else:
-            logger.error(f"Error listing root items: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception while listing root items: {e}")
         return ("Error:", str(e))
@@ -57,16 +52,11 @@ async def onedrive_list_inside_folder(folder_id: str) -> Union[Tuple[str, Dict[s
 
     try:
         logger.info(f"Listing items inside folder ID: {folder_id}")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
             items = response.json()
             logger.info(f"Found {len(items.get('value', []))} items in folder {folder_id}")
             return ("Items inside folder:", items)
-        else:
-            logger.error(f"Error listing folder items: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception while listing folder items: {e}")
         return ("Error:", str(e))
@@ -91,16 +81,11 @@ async def onedrive_search_item_by_name(itemname: str) -> Union[Tuple[str, Dict[s
 
     try:
         logger.info(f"Searching for items with name: {itemname}")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
             items = response.json()
             logger.info(f"Found {len(items.get('value', []))} matching items")
             return ("Found items:", items)
-        else:
-            logger.error(f"Error searching items: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception while searching items: {e}")
         return ("Error:", str(e))
@@ -125,17 +110,13 @@ async def onedrive_search_folder_by_name(folder_name: str) -> Union[Tuple[str, L
 
     try:
         logger.info(f"Searching for folders with name: {folder_name}")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
             data = response.json()
             folders = [item for item in data.get('value', []) if 'folder' in item]
             logger.info(f"Found {len(folders)} matching folders")
             return ("Found folders:", folders)
-        else:
-            logger.error(f"Error searching folders: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
+
     except Exception as e:
         logger.error(f"Exception while searching folders: {e}")
         return ("Error:", str(e))
@@ -160,15 +141,11 @@ async def onedrive_get_item_by_id(item_id: str) -> Union[Dict[str, Any], Tuple[s
 
     try:
         logger.info(f"Getting item with ID: {item_id}")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'])
             data = response.json()
             logger.info(f"Successfully retrieved item: {data.get('name', 'unknown')}")
             return data
-        else:
-            logger.error(f"Error getting item: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception while getting item: {e}")
         return ("Error:", str(e))

@@ -38,19 +38,13 @@ async def onedrive_create_folder(
 
     try:
         logger.info(f"Creating folder '{new_folder_name}' in parent {parent_folder_id} with behavior={behavior}")
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.post(
                 url,
                 headers={**client['headers'], "Content-Type": "application/json"},
                 json=data
             )
-
-        if response.ok:
-            logger.info(f"Successfully created folder '{new_folder_name}' in {parent_folder_id}")
             return ("Folder created successfully:", response.json())
-        else:
-            logger.error(f"Failed to create folder: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception occurred while creating folder: {e}")
         return ("Error:", str(e))
@@ -83,15 +77,10 @@ async def onedrive_create_folder_in_root(
 
     try:
         logger.info(f"Creating folder '{folder_name}' in root directory")
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=client['headers'], json=body)
-
-        if response.ok:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.post(url, headers=client['headers'], json=body)
             logger.info(f"Successfully created folder '{folder_name}' in root")
             return response.json()
-        else:
-            logger.error(f"Failed to create folder in root: {response.status_code} - {response.text}")
-            return ("Error creating folder:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception occurred while creating folder in root: {e}")
         return ("Error:", str(e))

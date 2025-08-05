@@ -30,15 +30,9 @@ async def onedrive_read_file_content(file_id: str) -> Union[str, Tuple[str, int,
 
     try:
         logger.info(f"Reading content of file ID: {file_id}")
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=client['headers'])
-
-        if response.ok:
-            logger.info(f"Successfully read content of file ID: {file_id}")
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'],  follow_redirects=True)
             return response.text
-        else:
-            logger.error(f"Error reading file {file_id}: {response.status_code} - {response.text}")
-            return ("Error:", response.status_code, response.text)
     except Exception as e:
         logger.error(f"Exception occurred while reading file content: {e}")
         return ("Error:", str(e))
@@ -99,15 +93,9 @@ async def onedrive_create_file(
 
         # Step 3: create the file
         url = f"{client['base_url']}/me/drive/items/{parent_folder_id}:/{final_name}:/content"
-        async with httpx.AsyncClient() as client:
-            put_response = await client.put(url, headers=client['headers'], data=data or '')
-
-        if put_response.ok:
-            logger.info(f"Successfully created file '{final_name}' in folder {parent_folder_id}")
+        async with httpx.AsyncClient() as httpx_client:
+            put_response = await httpx_client.put(url, headers=client['headers'], data=data or '')
             return ("File created:", put_response.json())
-        else:
-            logger.error(f"Error creating file: {put_response.status_code} - {put_response.text}")
-            return ("Error creating file:", put_response.status_code, put_response.text)
     except Exception as e:
         logger.error(f"Exception occurred while creating file: {e}")
         return ("Error:", str(e))
@@ -139,17 +127,11 @@ async def onedrive_create_file_in_root(
         logger.info(f"Creating file '{new_file_name}' in root with if_exists={if_exists}")
 
         # Step 1: list files/folders in root
-        async with httpx.AsyncClient() as client:
-            existing_items_resp = await client.get(
+        async with httpx.AsyncClient() as httpx_client:
+            existing_items_resp = await httpx_client.get(
                 f"{client['base_url']}/me/drive/root/children",
                 headers=client['headers']
             )
-
-        if not existing_items_resp.ok:
-            logger.error(
-                f"Could not list root contents: {existing_items_resp.status_code} - {existing_items_resp.text}")
-            return ("Could not list root contents:", existing_items_resp.status_code, existing_items_resp.text)
-
         existing_items = existing_items_resp.json().get('value', [])
         existing_names = [item['name'] for item in existing_items]
 
@@ -171,15 +153,9 @@ async def onedrive_create_file_in_root(
 
         # Step 3: create the file
         url = f"{client['base_url']}/me/drive/root:/{final_name}:/content"
-        async with httpx.AsyncClient() as client:
-            put_response = await client.put(url, headers=client['headers'], data=data or '')
-
-        if put_response.ok:
-            logger.info(f"Successfully created file '{final_name}' in root")
+        async with httpx.AsyncClient() as httpx_client:
+            put_response = await httpx_client.put(url, headers=client['headers'], data=data or '')
             return ("File created:", put_response.json())
-        else:
-            logger.error(f"Error creating file: {put_response.status_code} - {put_response.text}")
-            return ("Error creating file:", put_response.status_code, put_response.text)
     except Exception as e:
         logger.error(f"Exception occurred while creating file in root: {e}")
         return ("Error:", str(e))
