@@ -148,7 +148,7 @@ async def create_ticket_with_attachments(
         return handle_freshdesk_error(e, "create", "ticket")
 
 
-async def get_ticket(ticket_id: int, include: str = None) -> Dict[str, Any]:
+async def get_ticket_by_id(ticket_id: int, include: str = None) -> Dict[str, Any]:
     """
     Retrieve a ticket by its ID.
     
@@ -421,16 +421,16 @@ async def add_note_to_ticket(
         return handle_freshdesk_error(e, "add note to", "ticket")
 
 
-async def search_tickets(
+async def filter_tickets(
     query: str,
     page: int = 1,
     per_page: int = 30
 ) -> Dict[str, Any]:
     """
-    Search for tickets using Freshdesk's search syntax.
+    Filter tickets using a query string.
     
     Args:
-        query: Search query string (e.g., "priority:3 AND status:2")
+        query: Filter query string (e.g., "priority:3 AND status:2 OR priority:4")
         page: Page number (for pagination)
         per_page: Number of results per page (max 30)
         
@@ -453,7 +453,7 @@ async def search_tickets(
         return response
         
     except Exception as e:
-        return handle_freshdesk_error(e, "search", "tickets")
+        return handle_freshdesk_error(e, "filter", "tickets")
 
 
 

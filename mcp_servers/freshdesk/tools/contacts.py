@@ -61,7 +61,6 @@ async def create_contact(
         **kwargs
     }
     
-    # Remove None values
     contact_data = remove_none_values(contact_data)
 
     options = { }
@@ -80,7 +79,7 @@ async def create_contact(
     except Exception as e:
         return handle_freshdesk_error(e, "create", "contact")
 
-async def get_contact(contact_id: int) -> Dict[str, Any]:
+async def get_contact_by_id(contact_id: int) -> Dict[str, Any]:
     """
     Retrieve a contact by ID.
     
@@ -132,7 +131,6 @@ async def list_contacts(
         "per_page": min(per_page, 100) 
     }
     
-    # Remove None values
     params = remove_none_values(params)
     
     try:
@@ -188,7 +186,6 @@ async def update_contact(
         **kwargs
     }
     
-    # Remove None values
     contact_data = remove_none_values(contact_data)
 
     options = {}
@@ -249,7 +246,7 @@ async def filter_contacts(
     Filter contacts using a query string.
     
     Args:
-        query: Search query string
+        query: Filter query string (e.g., "priority:3 AND status:2 OR priority:4")
         page: Page number (1-based)
         updated_since: Filter by last updated date (ISO 8601 format)
         
@@ -257,12 +254,11 @@ async def filter_contacts(
         Dict containing search results and pagination info
     """
     params = {
-        "query": f"'{query}'",  # Wrap in quotes for exact phrase matching
+        "query": f"'{query}'",
         "page": page,
         "updated_since": updated_since
     }
     
-    # Remove None values
     params = remove_none_values(params)
     
     try:
@@ -270,18 +266,18 @@ async def filter_contacts(
     except Exception as e:
         return handle_freshdesk_error(e, "filter", "contacts")
 
-async def search_contacts(term: str) -> Dict[str, Any]:
+async def search_contacts_by_name(name: str) -> Dict[str, Any]:
     """
     Search contacts by name for autocomplete.
     
     Args:
-        term: Search term (contact name or part of name)
+        name: Search term (contact name or part of name)
         
     Returns:
         List of matching contacts with basic info
     """
     try:
-        return await make_freshdesk_request("GET", "/contacts/autocomplete", options={"query_params": {"term": term}})
+        return await make_freshdesk_request("GET", "/contacts/autocomplete", options={"query_params": {"term": name}})
     except Exception as e:
         return handle_freshdesk_error(e, "search", "contacts")
 
@@ -324,7 +320,6 @@ async def make_contact_agent(
         "focus_mode": focus_mode
     }
     
-    # Remove None values
     agent_data = remove_none_values(agent_data)
     
     try:

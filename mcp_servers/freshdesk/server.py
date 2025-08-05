@@ -22,10 +22,10 @@ from tools import (
     create_ticket,
     update_ticket,
     delete_ticket,
-    get_ticket,
+    get_ticket_by_id,
     list_tickets,
     add_note_to_ticket,
-    search_tickets,
+    filter_tickets,
     merge_tickets,
     restore_ticket,
     watch_ticket,
@@ -40,16 +40,25 @@ from tools import (
     # Contact tools
 
     create_contact,
-    get_contact,
+    get_contact_by_id,
     list_contacts,
     update_contact,
     delete_contact,
-    search_contacts,
+    search_contacts_by_name,
     filter_contacts,
     make_contact_agent,
     restore_contact,
     send_contact_invite,
-    merge_contacts
+    merge_contacts,
+
+    # Company tools
+    create_company,
+    get_company_by_id,
+    list_companies,
+    update_company,
+    delete_company,
+    filter_companies,
+    search_companies_by_name,
     
     
 )
@@ -172,7 +181,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="get_ticket",
+            name="get_ticket_by_id",
             description="Retrieve a ticket by its ID.",
             inputSchema={
                 "type": "object",
@@ -332,14 +341,14 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="search_tickets", 
-            description="Search for tickets.", 
+            name="filter_tickets", 
+            description="Use ticket fields to filter through tickets and get a list of tickets matching the specified ticket fields.", 
             inputSchema={
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "Search query (required)."
+                    "description": "Query string to filter tickets (required). Format - (ticket_field:integer OR ticket_field:'string') AND ticket_field:boolean"
                 },
                 "page": {
                     "type": "integer",
@@ -626,7 +635,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="get_contact",
+            name="get_contact_by_id",
             description="Retrieve a contact by ID.",
             inputSchema={
                 "type": "object",
@@ -642,12 +651,31 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "email": {"type": "string", "format": "email", "description": "Filter by email"},
-                    "phone": {"type": "string", "description": "Filter by phone number"},
-                    "mobile": {"type": "string", "description": "Filter by mobile number"},
-                    "company_id": {"type": "integer", "description": "Filter by company ID"},
-                    "state": {"type": "string", "description": "Filter by state (verified, unverified, blocked, deleted)"},
-                    "updated_since": {"type": "string", "description": "Filter by last updated date (ISO 8601 format)"},
+                    "email": {
+                        "type": "string", 
+                        "format": "email", 
+                        "description": "Filter by email"
+                    },
+                    "phone": {
+                        "type": "string", 
+                        "description": "Filter by phone number"
+                    },
+                    "mobile": {
+                        "type": "string", 
+                        "description": "Filter by mobile number"
+                    },
+                    "company_id": {
+                        "type": "integer", 
+                        "description": "Filter by company ID"
+                    },
+                    "state": {
+                        "type": "string", 
+                        "description": "Filter by state (verified, unverified, blocked, deleted)"
+                    },
+                    "updated_since": {
+                        "type": "string", 
+                        "description": "Filter by last updated date (ISO 8601 format)"
+                    },
                     "page": {"type": "integer", "description": "Page number for pagination. Default is 1."},
                     "per_page": {"type": "integer", "description": "Number of results per page (max 100). Default is 30."}
                 }
@@ -659,12 +687,31 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "contact_id": {"type": "integer", "description": "ID of the contact to update"},
-                    "name": {"type": "string", "description": "New name"},
-                    "email": {"type": "string", "format": "email", "description": "New primary email"},
-                    "phone": {"type": "string", "description": "New phone number"},
-                    "mobile": {"type": "string", "description": "New mobile number"},
-                    "company_id": {"type": "integer", "description": "New company ID"},
+                    "contact_id": {
+                        "type": "integer", 
+                        "description": "ID of the contact to update"
+                    },
+                    "name": {
+                        "type": "string", 
+                        "description": "New name"
+                    },
+                    "email": {
+                        "type": "string", 
+                        "format": "email", 
+                        "description": "New primary email"
+                    },
+                    "phone": {
+                        "type": "string", 
+                        "description": "New phone number"
+                    },
+                    "mobile": {
+                        "type": "string", 
+                        "description": "New mobile number"
+                    },
+                    "company_id": {
+                        "type": "integer", 
+                        "description": "New company ID"
+                    },
                     "description": {"type": "string", "description": "New description"},
                     "job_title": {"type": "string", "description": "New job title"},
                     "tags": {"type": "array", "items": {"type": "string"}, "description": "Updated list of tags"},
@@ -689,25 +736,35 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
         ),
         types.Tool(
-            name="search_contacts",
+            name="search_contacts_by_name",
             description="Search for contacts by name",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "term": {"type": "string", "description": "Search term"}
+                    "name": {"type": "string", "description": "Name of the contact to search for"}
                 },
-                "required": ["term"]
+                "required": ["name"]
             }
         ),
         types.Tool(
             name="filter_contacts",
-            description="Filter contacts by fields. using this format - contact_field:integer OR contact_field:'string' AND contact_field:boolean e.g. {query: 'field_name:field_value'} - name:John Doe",
+            description="Filter contacts by fields",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "Filter query"},
-                    "page": {"type": "integer", "description": "Page number (1-based)", "default": 1},
-                    "updated_since": {"type": "string", "description": "Filter by last updated date (ISO 8601 format)"}
+                    "query": {
+                        "type": "string", 
+                        "description": "Filter query using this format - contact_field:integer OR contact_field:'string' AND contact_field:boolean e.g. {query: 'field_name:field_value'} - name:John Doe"
+                    },
+                    "page": {
+                        "type": "integer", 
+                        "description": "Page number (1-based)", 
+                        "default": 1
+                    },
+                    "updated_since": {
+                        "type": "string", 
+                        "description": "Filter by last updated date (ISO 8601 format)"
+                    }
                 },
                 "required": ["query"]
             }
@@ -799,7 +856,212 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
                 "required": ["primary_contact_id", "secondary_contact_ids"]
             }
-        )
+        ),
+        types.Tool(
+                name="create_company",
+                description="Create a new company in Freshdesk.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the company (required, unique)"
+                        },
+                        "domains": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of company domains"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Description of the company"
+                        },
+                        "note": {
+                            "type": "string",
+                            "description": "Any specific note about the company"
+                        },
+                        "health_score": {
+                            "type": "string",
+                            "description": "Health score of the company"
+                        },
+                        "account_tier": {
+                            "type": "string",
+                            "description": "Account tier of the company"
+                        },
+                        "renewal_date": {
+                            "type": "string",
+                            "description": "Contract renewal date (YYYY-MM-DD)"
+                        },
+                        "industry": {
+                            "type": "string",
+                            "description": "Industry the company serves in"
+                        },
+                        "custom_fields": {
+                            "type": "object",
+                            "description": "Dictionary of custom field values"
+                        },
+                        "lookup_parameter": {
+                            "type": "string",
+                            "enum": ["display_id", "primary_field_value"],
+                            "default": "display_id",
+                            "description": "Lookup parameter type for custom objects"
+                        }
+                    },
+                    "required": ["name"]
+                }
+            ),
+            types.Tool(
+                name="get_company_by_id",
+                description="Retrieve a company by ID.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "company_id": {
+                            "type": "integer",
+                            "description": "ID of the company to retrieve (required)."
+                        }
+                    },
+                    "required": ["company_id"]
+                }
+            ),
+            types.Tool(
+                name="list_companies",
+                description="List all companies with optional filtering.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "updated_since": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Filter companies updated since this date (ISO 8601 format)"
+                        },
+                        "page": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1,
+                            "description": "Page number (1-based)"
+                        },
+                        "per_page": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 30,
+                            "description": "Number of records per page (max 100)"
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="update_company",
+                description="Update an existing company.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "company_id": {
+                            "type": "integer",
+                            "description": "ID of the company to update (required)."
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "New name for the company"
+                        },
+                        "domains": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of domains (will replace existing domains if provided)"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "New description"
+                        },
+                        "note": {
+                            "type": "string",
+                            "description": "New note"
+                        },
+                        "health_score": {
+                            "type": "string",
+                            "description": "Updated health score"
+                        },
+                        "account_tier": {
+                            "type": "string",
+                            "description": "Updated account tier"
+                        },
+                        "renewal_date": {
+                            "type": "string",
+                            "description": "New renewal date (YYYY-MM-DD)"
+                        },
+                        "industry": {
+                            "type": "string",
+                            "description": "Updated industry"
+                        },
+                        "custom_fields": {
+                            "type": "object",
+                            "description": "Dictionary of custom field values to update"
+                        },
+                        "lookup_parameter": {
+                            "type": "string",
+                            "enum": ["display_id", "primary_field_value"],
+                            "description": "Lookup parameter type for custom objects"
+                        }
+                    },
+                    "required": ["company_id"]
+                }
+            ),
+            types.Tool(
+                name="delete_company",
+                description="Delete a company from Freshdesk.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "company_id": {
+                            "type": "integer",
+                            "description": "ID of the company to delete (required)."
+                        }
+                    },
+                    "required": ["company_id"]
+                }
+            ),
+            types.Tool(
+                name="filter_companies",
+                description="Filter companies using a query string. ",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Query string to filter companies (domain, created_at, updated_at, custom fields) - company_field:integer OR company_field:'string' AND company_field:boolean e.g. {query: 'field_name:field_value'} - domain:Example"
+                        },
+                        "page": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1,
+                            "description": "Page number (1-based)"
+                        },
+                        "per_page": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 30,
+                            "default": 30,
+                            "description": "Number of records per page (max 30)"
+                        }
+                    },
+                    "required": ["query"]
+                }
+            ),
+            types.Tool(
+                name="search_companies_by_name",
+                description="Search for companies by name (autocomplete).",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Search name (case-insensitive) (required)."
+                        }
+                    },
+                    "required": ["name"]
+                }
+            ),
     ]
 
     @app.call_tool()
@@ -808,12 +1070,12 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
             if name == "create_ticket":
                 result = await create_ticket(**arguments)
-            elif name == "get_ticket":
-                result = await get_ticket(**arguments)
+            elif name == "get_ticket_by_id":
+                result = await get_ticket_by_id(**arguments)
             elif name == "list_tickets":
                 result = await list_tickets(**arguments)
-            elif name == "search_tickets":
-                result = await search_tickets(**arguments)
+            elif name == "filter_tickets":
+                result = await filter_tickets(**arguments)
             elif name == "add_note_to_ticket":
                 result = await add_note_to_ticket(**arguments)
             elif name == "merge_tickets":
@@ -843,16 +1105,16 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
             elif name == "create_contact":
                 result = await create_contact(**arguments)
-            elif name == "get_contact":
-                result = await get_contact(**arguments)
+            elif name == "get_contact_by_id":
+                result = await get_contact_by_id(**arguments)
             elif name == "list_contacts":
                 result = await list_contacts(**arguments)
             elif name == "update_contact":
                 result = await update_contact(**arguments)
             elif name == "delete_contact":
                 result = await delete_contact(**arguments)
-            elif name == "search_contacts":
-                result = await search_contacts(**arguments)
+            elif name == "search_contacts_by_name":
+                result = await search_contacts_by_name(**arguments)
             elif name == "merge_contacts":
                 result = await merge_contacts(**arguments)
             elif name == "filter_contacts":
@@ -863,6 +1125,21 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await restore_contact(**arguments)
             elif name == "send_contact_invite":
                 result = await send_contact_invite(**arguments)
+
+            elif name == "create_company":
+                result = await create_company(**arguments)
+            elif name == "get_company_by_id":
+                result = await get_company_by_id(**arguments)
+            elif name == "list_companies":
+                result = await list_companies(**arguments)
+            elif name == "update_company":
+                result = await update_company(**arguments)
+            elif name == "delete_company":
+                result = await delete_company(**arguments)
+            elif name == "filter_companies":
+                result = await filter_companies(**arguments)
+            elif name == "search_companies_by_name":
+                result = await search_companies_by_name(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
 

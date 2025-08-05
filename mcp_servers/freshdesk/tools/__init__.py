@@ -5,13 +5,13 @@
 from .base import make_freshdesk_request
 from .tickets import (
     create_ticket,
-    get_ticket,
+    get_ticket_by_id,
     update_ticket,
     delete_ticket,
     delete_multiple_tickets,
     list_tickets,
     add_note_to_ticket,
-    search_tickets,
+    filter_tickets,
     merge_tickets,
     restore_ticket,
     watch_ticket,
@@ -25,29 +25,39 @@ from .tickets import (
 
 from .contacts import (
     create_contact,
-    get_contact,
+    get_contact_by_id,
     list_contacts,
     update_contact,
     delete_contact,
-    search_contacts,
     make_contact_agent,
     restore_contact,
     send_contact_invite,
     merge_contacts,
     filter_contacts,
+    search_contacts_by_name,
+)
+
+from .companies import (
+    create_company,
+    get_company_by_id,
+    list_companies,
+    update_company,
+    delete_company,
+    filter_companies,
+    search_companies_by_name,
 )
 
 __all__ = [
 
     # Tickets
     'create_ticket',
-    'get_ticket',
+    'get_ticket_by_id',
     'update_ticket',
     'delete_ticket',
     'delete_multiple_tickets',
     'list_tickets',
     'add_note_to_ticket',
-    'search_tickets',
+    'filter_tickets',
     'merge_tickets',
     'restore_ticket',
     'watch_ticket',
@@ -62,15 +72,23 @@ __all__ = [
 
     # Contacts
     'create_contact',
-    'get_contact',
+    'get_contact_by_id',
     'list_contacts',
     'update_contact',
     'delete_contact',
-    'search_contacts',
-    'autocomplete_contacts',
     'make_contact_agent',
     'restore_contact',
     'send_contact_invite',
     'merge_contacts',
     'filter_contacts',
+    'search_contacts_by_name',
+
+    # Companies
+    'create_company',
+    'get_company_by_id',
+    'list_companies',
+    'update_company',
+    'delete_company',
+    'filter_companies',
+    'search_companies_by_name',
 ] 
