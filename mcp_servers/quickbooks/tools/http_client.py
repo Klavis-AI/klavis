@@ -2,7 +2,7 @@ import os
 import logging
 import httpx
 from typing import Dict, Any
-from errors import IntuitError
+from errors import QuickBooksError
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class QuickBooksHTTPClient:
                 resp_json = try_get_resp_json(e.response)
             else:
                 resp_json = None
-            raise IntuitError(
+            raise QuickBooksError(
                 f"Error: {str(e)}, Status code: {e.response.status_code if e.response else 'N/A'}, Response: {resp_json}",
                 original_exception=e,
             )

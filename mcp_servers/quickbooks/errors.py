@@ -1,7 +1,7 @@
 import traceback
 
 
-class IntuitError(Exception):
+class QuickBooksError(Exception):
     """
     A custom error wrapper that preserves the original traceback and allows custom error messages.
     """
@@ -16,7 +16,7 @@ class IntuitError(Exception):
             self.traceback = None
 
     def __str__(self):
-        base = f"IntuitError: {self.message}"
+        base = f"QuickBooksError: {self.message}"
         if self.original_exception:
             base += f"\nCaused by: {repr(self.original_exception)}"
         if self.traceback:

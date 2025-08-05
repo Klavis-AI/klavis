@@ -1,4 +1,4 @@
-# Intuit QuickBooks MCP Server
+# QuickBooks MCP Server
 
 A Model Context Protocol (MCP) server for QuickBooks integration, providing comprehensive accounting and business management capabilities.
 
@@ -85,7 +85,7 @@ Edit `.env` with your QuickBooks app credentials:
 
 ```bash
 # Server Port Configuration (optional)
-INTUIT_MCP_SERVER_PORT=5001
+QB_MCP_SERVER_PORT=5001
 
 # QuickBooks OAuth Credentials (required)
 QB_ACCESS_TOKEN=your_access_token_here
@@ -138,7 +138,7 @@ Add to your MCP client configuration:
 ```json
 {
   "servers": {
-    "intuit": {
+    "quickbooks": {
       "type": "http",
       "url": "http://localhost:5001/mcp",
       "headers": {
@@ -212,7 +212,7 @@ QB_REALM_ID=your_realm_id
 
 # Optional: Environment Configuration
 QB_ENVIRONMENT=sandbox  # Use 'production' for live QuickBooks data
-INTUIT_MCP_SERVER_PORT=5001  # Server port, defaults to 5001
+QB_MCP_SERVER_PORT=5001  # Server port, defaults to 5001
 ```
 
 ### Credential Authentication
@@ -330,14 +330,14 @@ npx @modelcontextprotocol/inspector python server.py
 
 ```bash
 # Build the image
-docker build -t intuit-mcp-server .
+docker build -t quickbooks-mcp-server .
 
 # Run with environment variables
 docker run -p 5001:5001 \
   -e QB_ACCESS_TOKEN=your_access_token \
   -e QB_REALM_ID=your_realm_id \
   -e QB_ENVIRONMENT=sandbox \
-  intuit-mcp-server
+  quickbooks-mcp-server
 ```
 
 ### Using Docker Compose
@@ -345,7 +345,7 @@ docker run -p 5001:5001 \
 ```yaml
 version: '3.8'
 services:
-  intuit-mcp:
+  quickbooks-mcp:
     build: .
     ports:
       - "5001:5001"
@@ -430,5 +430,5 @@ The server validates your QuickBooks connection on startup. Check the logs for:
 QB_ACCESS_TOKEN=your_access_token_here
 QB_REALM_ID=your_company_realm_id_here
 QB_ENVIRONMENT=sandbox
-INTUIT_MCP_SERVER_PORT=5001
+QB_MCP_SERVER_PORT=5001
 ```

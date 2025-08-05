@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Intuit MCP Server with SSE and Streamable HTTP Transport
+QuickBooks MCP Server with SSE and Streamable HTTP Transport
 
-This server provides MCP tools for interacting with Intuit QuickBooks APIs.
+This server provides MCP tools for interacting with QuickBooks APIs.
 Supports both Server-Sent Events (SSE) and Streamable HTTP transport modes.
 """
 
@@ -28,10 +28,10 @@ from session_manager import SessionManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("intuit-mcp-server")
+logger = logging.getLogger("quickbooks-mcp-server")
 
 # Environment configuration
-INTUIT_MCP_SERVER_PORT = int(os.getenv("INTUIT_MCP_SERVER_PORT", "5001"))
+QB_MCP_SERVER_PORT = int(os.getenv("QB_MCP_SERVER_PORT", "5001"))
 
 # Context variable to store QB credentials for the current request
 qb_credentials_context: ContextVar[dict] = ContextVar(
@@ -41,12 +41,12 @@ qb_credentials_context: ContextVar[dict] = ContextVar(
 session_manager_instance = SessionManager()
 
 # Initialize the MCP server
-server = Server("intuit-mcp-server")
+server = Server("quickbooks-mcp-server")
 
 
 @server.list_tools()
 async def list_tools() -> list[types.Tool]:
-    """List available Intuit tools."""
+    """List available QuickBooks tools."""
     tool_list = [*accounts.tools, *invoices.tools, *
                  customers.tools, *payments.tools, *vendors.tools]
     logger.debug(f"Available tools: {[tool.name for tool in tool_list]}")
@@ -55,7 +55,7 @@ async def list_tools() -> list[types.Tool]:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-    """Execute a specific Intuit tool."""
+    """Execute a specific QuickBooks tool."""
     logger.debug(f"Calling tool: {name} with arguments: {arguments}")
 
     # Extract QuickBooks credentials from arguments if provided
@@ -158,7 +158,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
 
 @click.command()
-@click.option("--port", default=INTUIT_MCP_SERVER_PORT, help="Port to listen on for HTTP")
+@click.option("--port", default=QB_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
     "--log-level",
     default="INFO",
@@ -175,7 +175,7 @@ def main(
     log_level: str,
     json_response: bool,
 ) -> int:
-    """Start the Intuit MCP server with SSE and Streamable HTTP support."""
+    """Start the QuickBooks MCP server with SSE and Streamable HTTP support."""
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
