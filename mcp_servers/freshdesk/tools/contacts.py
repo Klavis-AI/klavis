@@ -67,15 +67,9 @@ async def create_contact(
     
     try:
         if avatar_path:
-            # Use multipart form data for file upload
-            with open(avatar_path, 'rb') as f:
-                options["files"] = {'avatar': (os.path.basename(avatar_path), f, mimetypes.guess_type(avatar_path)[0])}
-                options["headers"] = {
-                    "Content-Type": "multipart/form-data",
-                }
-                return await make_freshdesk_request("POST", "/contacts", data=contact_data, options=options)
-        else:
-            return await make_freshdesk_request("POST", "/contacts", data=contact_data, options=options)
+            options["files"] = handle_freshdesk_attachments("avatar", [{"type": "local", "content": avatar_path, "name": os.path.basename(avatar_path), "media_type": mimetypes.guess_type(avatar_path)[0]}])
+    
+        return await make_freshdesk_request("POST", "/contacts", data=contact_data, options=options)
     except Exception as e:
         return handle_freshdesk_error(e, "create", "contact")
 
@@ -188,26 +182,21 @@ async def update_contact(
     
     contact_data = remove_none_values(contact_data)
 
+    if not contact_data:
+        raise ValueError("No fields to update")
+
     options = {}
     
     try:
         if avatar_path:
-            # Use multipart form data for file upload
-            with open(avatar_path, 'rb') as f:
-                options["files"] = {'avatar': (os.path.basename(avatar_path), f, mimetypes.guess_type(avatar_path)[0])}
-                options["headers"] = {
-                    "Content-Type": "multipart/form-data",
-                }
-                return await make_freshdesk_request(
-                    "PUT", 
-                    f"/contacts/{contact_id}", 
-                    data=contact_data, 
-                    options=options
-                )
-        else:
-            return await make_freshdesk_request("PUT", f"/contacts/{contact_id}", data=contact_data)
+            options["files"] = handle_freshdesk_attachments("avatar", [{"type": "local", "content": avatar_path, "name": os.path.basename(avatar_path), "media_type": mimetypes.guess_type(avatar_path)[0]}])
+           
+        return await make_freshdesk_request("PUT", f"/contacts/{contact_id}", data=contact_data, options=options)
+        
     except Exception as e:
         return handle_freshdesk_error(e, "update", "contact")
+
+
 
 async def delete_contact(
     contact_id: int, 

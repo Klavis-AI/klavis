@@ -267,13 +267,14 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
 
 def handle_freshdesk_attachments(field_name: str, attachments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     resolved_attachments = []
+
     for attachment in attachments:
         if attachment["type"] == "local":
-            print(attachment)
             file_content = open(attachment["content"], "rb")
             file_name = attachment.get("name", gen_random_password(15))
+
             resolved_attachments.append((
-                f"{field_name}[]",
+                f"{field_name}",
                 (file_name, file_content, attachment.get("media_type", "application/octet-stream"))
             ))
         elif attachment["type"] == "file":
@@ -282,21 +283,21 @@ def handle_freshdesk_attachments(field_name: str, attachments: List[Dict[str, An
             file_content = file_content_str.encode(file_encoding)
             file_name = attachment.get("name", gen_random_password(15))
             resolved_attachments.append((
-                f"{field_name}[]",
+                f"{field_name}",
                 (file_name, file_content, attachment.get("media_type", "application/octet-stream"))
             ))
         elif attachment["type"] == "base64":
             file_content = base64.b64decode(attachment["content"])
             file_name = attachment.get("name", gen_random_password(15))
             resolved_attachments.append((
-                f"{field_name}[]",
+                f"{field_name}",
                 (file_name, file_content, attachment.get("media_type", "application/octet-stream")),
             ))
         elif attachment["type"] == "url":
             file_content = requests.get(attachment["content"]).content
             file_name = attachment.get("name", gen_random_password(15))
             resolved_attachments.append((
-                f"{field_name}[]",
+                f"{field_name}",
                 (file_name, file_content, attachment.get("media_type", "application/octet-stream")),
             ))
         else:

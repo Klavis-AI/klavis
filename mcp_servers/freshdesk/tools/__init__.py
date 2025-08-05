@@ -54,6 +54,17 @@ from .accounts import (
     get_current_account,
 )
 
+from .agents import (
+    list_agents,
+    get_agent_by_id,
+    get_current_agent,
+    create_agent,
+    update_agent,
+    delete_agent,
+    search_agents,
+    bulk_create_agents,
+)
+
 __all__ = [
 
     # Tickets
@@ -104,4 +115,14 @@ __all__ = [
 
     # Accounts
     'get_current_account',
+    
+    # Agent exports
+    'list_agents',
+    'get_agent_by_id',
+    'get_current_agent',
+    'create_agent',
+    'update_agent',
+    'delete_agent',
+    'search_agents',
+    'bulk_create_agents',
 ] 

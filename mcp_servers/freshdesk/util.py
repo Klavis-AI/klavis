@@ -50,7 +50,7 @@ class FreshdeskRateLimiter:
         if self.rate_limit_remaining < self.rate_limit_total * 0.1:  
             time_left_in_window = 60 - (now - self.window_start)
             if time_left_in_window > 0:
-                # Distribute remaining requests over remaining time left
+                # Distribute remaining requests over time left
                 sleep_time = max(sleep_time, time_left_in_window / (self.rate_limit_remaining + 1))
         
         return sleep_time

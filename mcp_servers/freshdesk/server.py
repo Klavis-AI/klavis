@@ -66,7 +66,15 @@ from tools import (
     # Account tools
     get_current_account,
     
-    
+    # Agent tools
+    list_agents,
+    get_agent_by_id,
+    get_current_agent,
+    create_agent,
+    update_agent,
+    delete_agent,
+    search_agents,
+    bulk_create_agents
 )
 
 # Configure logging
@@ -1188,8 +1196,285 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "required": []
                 }
             ),
-    ]
-
+            types.Tool(
+                name="list_agents",
+                description="List all agents with optional filtering",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "type": "string", 
+                            "description": "Filter by email address"
+                        },
+                        "mobile": {
+                            "type": "string", 
+                            "description": "Filter by mobile number"
+                        },
+                        "phone": {
+                            "type": "string", 
+                            "description": "Filter by phone number"
+                        },
+                        "state": {
+                            "type": "string", 
+                            "enum": ["fulltime", "occasional"], 
+                            "description": "Filter by agent state"
+                        },
+                        "page": {
+                            "type": "integer", 
+                            "description": "Page number (1-based)", 
+                            "default": 1
+                        },
+                        "per_page": {
+                            "type": "integer", 
+                            "description": "Number of results per page (max 100)", 
+                            "default": 30
+                        },
+                    },
+                }
+            ),
+            types.Tool(
+                name="get_agent_by_id",
+                description="Get details of a specific agent by ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "agent_id": {
+                            "type": "integer", 
+                            "description": "ID of the agent to retrieve"
+                        },
+                    },
+                    "required": ["agent_id"],
+                },
+            ),
+            types.Tool(
+                name="get_current_agent",
+                description="Get details of the currently authenticated agent",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+            ),
+            types.Tool(
+                name="create_agent",
+                description="Create a new agent",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "type": "string", 
+                            "description": "Email address of the agent"
+                        },
+                        "name": {
+                            "type": "string", 
+                            "description": "Name of the agent"
+                        },
+                        "ticket_scope": {
+                            "type": "integer", 
+                            "enum": [1, 2, 3], 
+                            "description": "Ticket permission (1=Global, 2=Group, 3=Restricted)"
+                        },
+                        "role_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "List of role IDs for the agent"
+                        },
+                        "group_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "List of group IDs the agent belongs to"
+                        },
+                        "skill_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "List of skill IDs for the agent"
+                        },
+                        "occasional": {
+                            "type": "boolean", 
+                            "description": "Whether the agent is occasional (True) or full-time (False)", 
+                            "default": False
+                        },
+                        "signature": {
+                            "type": "string", 
+                            "description": "HTML signature for the agent"
+                        },
+                        "language": {
+                            "type": "string", 
+                            "description": "Language code (default: 'en')", 
+                            "default": "en"
+                        },
+                        "time_zone": {
+                            "type": "string", 
+                            "description": "Time zone for the agent"
+                        },
+                        "agent_type": {
+                            "type": "integer", 
+                            "enum": [1, 2, 3], 
+                            "description": "Type of agent (1=Support, 2=Field, 3=Collaborator)", 
+                            "default": 1
+                        },
+                        "focus_mode": {
+                            "type": "boolean", 
+                            "description": "Whether focus mode is enabled", 
+                            "default": True
+                        },
+                    },
+                    "required": ["email", "name", "ticket_scope", "role_ids"],
+                },
+            ),
+            types.Tool(
+                name="update_agent",
+                description="Update an existing agent",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "agent_id": {
+                            "type": "integer", 
+                            "description": "ID of the agent to update"
+                        },
+                        "email": {
+                            "type": "string", 
+                            "description": "New email address"
+                        },
+                        "ticket_scope": {
+                            "type": "integer", 
+                            "enum": [1, 2, 3], 
+                            "description": "New ticket permission (1=Global, 2=Group, 3=Restricted)"
+                        },
+                        "role_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "New list of role IDs"
+                        },
+                        "group_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "New list of group IDs"
+                        },
+                        "skill_ids": {
+                            "type": "array", 
+                            "items": {"type": "integer"}, 
+                            "description": "New list of skill IDs"
+                        },
+                        "occasional": {
+                            "type": "boolean", 
+                            "description": "Whether the agent is occasional"
+                        },
+                        "signature": {
+                            "type": "string", 
+                            "description": "New HTML signature"
+                        },
+                        "language": {
+                            "type": "string", 
+                            "description": "New language code"
+                        },
+                        "time_zone": {
+                            "type": "string", 
+                            "description": "New time zone"
+                        },
+                        "focus_mode": {
+                            "type": "boolean", 
+                            "description": "Whether focus mode is enabled"
+                        },
+                    },
+                    "required": ["agent_id"],
+                },
+            ),
+            types.Tool(
+                name="delete_agent",
+                description="Delete an agent (downgrades to contact)",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "agent_id": {"type": "integer", "description": "ID of the agent to delete"},
+                    },
+                    "required": ["agent_id"],
+                },
+            ),
+            types.Tool(
+                name="search_agents",
+                description="Search for agents by name or email",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "term": {"type": "string", "description": "Search term (name or email)"},
+                    },
+                    "required": ["term"],
+                },
+            ),
+            types.Tool(
+                name="bulk_create_agents",
+                description="Create multiple agents in bulk",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "agents_data": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string", 
+                                        "description": "Email address of the agent"
+                                    },
+                                    "name": {
+                                        "type": "string", 
+                                        "description": "Name of the agent"
+                                    },
+                                    "ticket_scope": {
+                                        "type": "integer", 
+                                        "enum": [1, 2, 3], 
+                                        "description": "Ticket permission (1=Global, 2=Group, 3=Restricted)"
+                                    },
+                                    "role_ids": {
+                                        "type": "array", 
+                                        "items": {"type": "integer"}, 
+                                        "description": "List of role IDs for the agent"
+                                    },
+                                    "group_ids": {
+                                        "type": "array", 
+                                        "items": {"type": "integer"}, 
+                                        "description": "List of group IDs the agent belongs to"
+                                    },
+                                    "skill_ids": {
+                                        "type": "array", 
+                                        "items": {"type": "integer"}, 
+                                        "description": "List of skill IDs for the agent"
+                                    },
+                                    "occasional": {
+                                        "type": "boolean", 
+                                        "description": "Whether the agent is occasional (True) or full-time (False)"
+                                    },
+                                    "signature": {
+                                        "type": "string", 
+                                        "description": "HTML signature for the agent"
+                                    },
+                                    "language": {
+                                        "type": "string", 
+                                        "description": "Language code (default: 'en')"
+                                    },
+                                    "time_zone": {
+                                        "type": "string", 
+                                        "description": "Time zone for the agent"
+                                    },
+                                    "agent_type": {
+                                        "type": "integer", 
+                                        "description": "Type of agent (1=Support, 2=Field, 3=Collaborator)"
+                                    },
+                                    "focus_mode": {
+                                        "type": "boolean", 
+                                        "description": "Whether focus mode is enabled (default: True)"
+                                    },
+                                },
+                                "required": ["email", "name", "ticket_scope", "role_ids"],
+                            },
+                            "description": "List of agent data objects",
+                        },
+                    },
+                    "required": ["agents_data"],
+                },
+            ),
+        ]
+    
     @app.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         try:
@@ -1275,6 +1560,23 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 
             elif name == "get_current_account":
                 result = await get_current_account()
+
+            elif name == "get_current_agent":
+                result = await get_current_agent()
+            elif name == "get_agent_by_id":
+                result = await get_agent_by_id(**arguments)
+            elif name == "list_agents":
+                result = await list_agents(**arguments)
+            elif name == "create_agent":
+                result = await create_agent(**arguments)
+            elif name == "update_agent":
+                result = await update_agent(**arguments)
+            elif name == "delete_agent":
+                result = await delete_agent(**arguments)
+            elif name == "search_agents":
+                result = await search_agents(**arguments)
+            elif name == "bulk_create_agents":
+                result = await bulk_create_agents(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
 

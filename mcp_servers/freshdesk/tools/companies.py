@@ -190,7 +190,7 @@ async def update_company(
         update_data = remove_none_values(update_data)
         
         if not update_data:
-            return {"success": False, "error": "No fields to update"}
+            raise ValueError("No fields to update")
             
         response = await make_freshdesk_request(
             "PUT",

@@ -95,7 +95,7 @@ async def create_ticket(
 
         # Handle attachments if provided
         if attachments:
-            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+            options["files"] = handle_freshdesk_attachments("attachments[]", attachments)
         
         logger.info(f"Creating ticket with data: {ticket_data}")
         response = await make_freshdesk_request("POST", "/tickets", data=ticket_data, options=options)
@@ -196,7 +196,7 @@ async def update_ticket(
         Dictionary containing updated ticket details
     """
     try:
-        attachments = kwargs.pop("attachments", None)
+        attachments = attachments or []
 
         update_data = {
             "subject": subject,
@@ -211,14 +211,14 @@ async def update_ticket(
         update_data = remove_none_values(update_data)
         
         if not update_data:
-            return {"success": False, "error": "No fields to update"}
+            raise ValueError("No fields to update")
             
         logger.info(f"Updating ticket {ticket_id} with data: {update_data}")
 
         options = {}
 
         if attachments:
-            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+            options["files"] = handle_freshdesk_attachments("attachments[]", attachments)
 
         response = await make_freshdesk_request("PUT", f"/tickets/{ticket_id}", data=update_data, options=options)
         return response
@@ -428,7 +428,7 @@ async def add_note_to_ticket(
         options = {}
 
         if attachments:
-            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+            options["files"] = handle_freshdesk_attachments("attachments[]", attachments)
 
         response = await make_freshdesk_request(
             "POST",
@@ -480,7 +480,7 @@ async def reply_to_a_ticket(
         options = {}
 
         if attachments:
-            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+            options["files"] = handle_freshdesk_attachments("attachments[]", attachments)
 
         response = await make_freshdesk_request(
             "POST",
@@ -520,7 +520,7 @@ async def update_note(
         options = {}
 
         if attachments:
-            options["files"] = handle_freshdesk_attachments("attachments", attachments)
+            options["files"] = handle_freshdesk_attachments("attachments[]", attachments)
 
         response = await make_freshdesk_request(
             "PUT",
