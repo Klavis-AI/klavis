@@ -144,6 +144,11 @@ To add new tools:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## 📹 Proof of Correctness
+
+Video demonstration showing all 6 tools working with real-time logs:
+**https://youtu.be/o1PJg6jgPmM**
+
 ---
 
 **Last updated: August 5, 2025**
