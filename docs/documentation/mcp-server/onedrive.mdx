@@ -13,4 +13,200 @@ import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
 
 Follow the instructions below to integrate OneDrive MCP server to your AI application using our API or SDK.
 
-Coming Soon 
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a OneDrive MCP Server
+
+Use the following endpoint to create a new remote OneDrive MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a OneDrive MCP server instance
+onedrive_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.ONEDRIVE,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a OneDrive MCP server instance
+const onedriveServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Onedrive,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "OneDrive",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"OneDrive\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"OneDrive\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://onedrive-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/onedrive/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+
+<Check> **serverUrl** specifies the endpoint of the OneDrive MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private OneDrive information.</Note>
+
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(onedrive_server.oauth_url)
+```
+
+```javascript TypeScript
+// The OAuth URL is provided in the server response
+console.log('OAuth URL:', onedriveServer.oauthUrl);
+
+// Redirect user to authorize
+window.location.href = onedriveServer.oauthUrl;
+```
+
+
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/onedrive/authorize"
+
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class OneDriveOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/onedrive/authorize?instance_id=" +
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+
+        System.out.println("Redirect to: " + authUrl);
+
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+
+
+</CodeGroup>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                          | Description                                                                                     |
+|-----------------------------------|-------------------------------------------------------------------------------------------------|
+| onedrive_rename_item              | Rename a file or folder by its ID                                                               |
+| onedrive_move_item                | Move a file or folder into another folder                                                       |
+| onedrive_delete_item              | Delete a file or folder by its ID                                                               |
+| onedrive_read_file_content        | Read the raw content of a text file                                                             |
+| onedrive_create_file              | Create a new file in a folder or root                                                           |
+| onedrive_create_folder            | Create a new folder inside a folder or root                                                     |
+| onedrive_list_root_files_folders  | List all files and folders in the root of OneDrive                                              |
+| onedrive_list_inside_folder       | List contents of a specific folder                                                              |
+| onedrive_search_item_by_name      | Search files and folders by name                                                                |
+| onedrive_search_folder_by_name    | Search only folders by name                                                                     |
+| onedrive_get_item_by_id           | Get details or metadata of a file or folder by its ID                                           |
+| onedrive_list_shared_items        | List items that are shared with the user                                                        |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
