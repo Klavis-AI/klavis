@@ -44,9 +44,9 @@ customer_properties_user_define = {
         "type": "string",
         "description": "The name of the currency in which all amounts associated with this customer are expressed."
     },
-    "Mobile": {
+    "PrimaryPhone": {
         "type": "string",
-        "description": "Mobile phone number."
+        "description": "Primary phone number."
     },
     "Taxable": {
         "type": "boolean",
@@ -284,10 +284,15 @@ def mcp_object_to_customer_data(**kwargs) -> Dict[str, Any]:
         customer_data['PrimaryEmailAddr'] = {
             'Address': kwargs['PrimaryEmailAddr']}
 
-    for phone_field in ['PrimaryPhone', 'Mobile']:
-        if phone_field in kwargs:
-            customer_data[phone_field] = {
-                'FreeFormNumber': kwargs[phone_field]}
+    # Handle phone fields - use PrimaryPhone as the standard input field
+    if 'PrimaryPhone' in kwargs:
+        customer_data['PrimaryPhone'] = {
+            'FreeFormNumber': kwargs['PrimaryPhone']}
+
+    # Handle Mobile input (for backward compatibility with existing code)
+    if 'Mobile' in kwargs:
+        customer_data['Mobile'] = {
+            'FreeFormNumber': kwargs['Mobile']}
 
     if 'WebAddr' in kwargs:
         customer_data['WebAddr'] = {'URI': kwargs['WebAddr']}
@@ -307,8 +312,10 @@ def mcp_object_to_customer_data(**kwargs) -> Dict[str, Any]:
 
     # Address fields - convert flattened fields to structured objects
     for addr_type in ['BillAddr', 'ShipAddr']:
-        address_fields = ['Line1', 'Line2', 'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']
-        has_address = any(kwargs.get(f'{addr_type}{field}') for field in address_fields)
+        address_fields = ['Line1', 'Line2', 'City',
+                          'CountrySubDivisionCode', 'PostalCode', 'Country']
+        has_address = any(kwargs.get(f'{addr_type}{field}')
+                          for field in address_fields)
         if has_address:
             addr_obj = {}
             for field in address_fields:
@@ -561,7 +568,7 @@ class CustomerManager:
             DisplayName: Search by customer display name (partial match)
             GivenName/FamilyName/MiddleName: Search by name components (partial match)
             CompanyName: Search by company name (partial match)
-            PrimaryEmailAddr/PrimaryPhone/Mobile: Search by contact info (partial match)
+            PrimaryEmailAddr/PrimaryPhone: Search by contact info (partial match)
 
             # Status filters
             Active: Filter by active status

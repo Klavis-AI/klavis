@@ -58,49 +58,56 @@ payment_properties_user_define = {
         "type": "number",
         "description": "The number of home currency units it takes to equal one unit of currency specified by CurrencyRef. Applicable if multicurrency is enabled for the company"
     },
-    # Credit Card Payment fields
-    "CreditCardPayment": {
-        "type": "object",
-        "properties": {
-            "CreditChargeInfo": {
-                "type": "object",
-                "properties": {
-                    "CcExpiryMonth": {
-                        "type": "integer",
-                        "description": "Expiration Month on card, expressed as a number: 1=January, 2=February, etc."
-                    },
-                    "CcExpiryYear": {
-                        "type": "integer",
-                        "description": "Expiration Year on card, expressed as a 4 digit number 1999, 2003, etc."
-                    },
-                    "ProcessPayment": {
-                        "type": "boolean",
-                        "description": "false or no value-Store credit card information only. true-Store credit card payment transaction information in CreditChargeResponse"
-                    },
-                    "PostalCode": {
-                        "type": "string",
-                        "description": "Credit card holder billing postal code. Five digits in the USA. Max 30 characters"
-                    },
-                    "Amount": {
-                        "type": "number",
-                        "description": "The amount processed using the credit card"
-                    },
-                    "NameOnAcct": {
-                        "type": "string",
-                        "description": "Account holder name, as printed on the card"
-                    },
-                    "Type": {
-                        "type": "string",
-                        "description": "Type of credit card. For example, MasterCard, Visa, Discover, American Express, and so on"
-                    },
-                    "BillAddrStreet": {
-                        "type": "string",
-                        "description": "Credit card holder billing address of record: the street address to which credit card statements are sent. Max 255 characters"
-                    }
-                }
-            }
-        },
-        "description": "Information about a payment received by credit card. Inject with data only if the payment was transacted through Intuit Payments API"
+    # Credit Card Payment fields - flattened structure with parent node keywords
+    # CreditChargeInfo fields
+    "CreditCardPaymentCcExpiryMonth": {
+        "type": "integer",
+        "description": "Expiration Month on card, expressed as a number: 1=January, 2=February, etc."
+    },
+    "CreditCardPaymentCcExpiryYear": {
+        "type": "integer",
+        "description": "Expiration Year on card, expressed as a 4 digit number 1999, 2003, etc."
+    },
+    "CreditCardPaymentProcessPayment": {
+        "type": "boolean",
+        "description": "false or no value-Store credit card information only. true-Store credit card payment transaction information in CreditChargeResponse"
+    },
+    "CreditCardPaymentPostalCode": {
+        "type": "string",
+        "description": "Credit card holder billing postal code. Five digits in the USA. Max 30 characters"
+    },
+    "CreditCardPaymentAmount": {
+        "type": "number",
+        "description": "The amount processed using the credit card"
+    },
+    "CreditCardPaymentNameOnAcct": {
+        "type": "string",
+        "description": "Account holder name, as printed on the card"
+    },
+    "CreditCardPaymentType": {
+        "type": "string",
+        "description": "Type of credit card. For example, MasterCard, Visa, Discover, American Express, and so on"
+    },
+    "CreditCardPaymentBillAddrStreet": {
+        "type": "string",
+        "description": "Credit card holder billing address of record: the street address to which credit card statements are sent. Max 255 characters"
+    },
+    # CreditChargeResponse fields
+    "CreditCardPaymentStatus": {
+        "type": "string",
+        "description": "Indicates the status of the payment transaction. Possible values include Completed, Unknown."
+    },
+    "CreditCardPaymentAuthCode": {
+        "type": "string",
+        "description": "Code returned from the credit card processor to indicate that the charge will be paid by the card issuer. Max 100 characters"
+    },
+    "CreditCardPaymentTransactionAuthorizationTime": {
+        "type": "string",
+        "description": "Timestamp indicating the time in which the card processor authorized the transaction. Format: YYYY-MM-DDTHH:MM:SS (Local time zone: YYYY-MM-DDTHH:MM:SS UTC: YYYY-MM-DDT HH:MM:SSZ Specific time zone: YYYY-MM-DDT HH:MM:SS +/- HH:MM)"
+    },
+    "CreditCardPaymentCCTransId": {
+        "type": "string",
+        "description": "Unique identifier of the payment transaction. It can be used to track the status of transactions, or to search transactions. Max 100 characters"
     }
 }
 
@@ -276,11 +283,52 @@ def mcp_object_to_payment_data(**kwargs) -> Dict[str, Any]:
                 ref_obj['name'] = kwargs[name_field]
             payment_data[ref_name] = ref_obj
 
-    # Credit Card Payment information
-    if 'CreditCardPayment' in kwargs:
-        cc_payment = kwargs['CreditCardPayment']
-        if isinstance(cc_payment, dict):
-            payment_data['CreditCardPayment'] = cc_payment
+    # Credit Card Payment information - reconstruct nested structure from flattened fields
+    credit_card_fields = {
+        'CreditCardPaymentCcExpiryMonth': 'CcExpiryMonth',
+        'CreditCardPaymentCcExpiryYear': 'CcExpiryYear',
+        'CreditCardPaymentProcessPayment': 'ProcessPayment',
+        'CreditCardPaymentPostalCode': 'PostalCode',
+        'CreditCardPaymentAmount': 'Amount',
+        'CreditCardPaymentNameOnAcct': 'NameOnAcct',
+        'CreditCardPaymentType': 'Type',
+        'CreditCardPaymentBillAddrStreet': 'BillAddrStreet'
+    }
+
+    credit_charge_response_fields = {
+        'CreditCardPaymentStatus': 'Status',
+        'CreditCardPaymentAuthCode': 'AuthCode',
+        'CreditCardPaymentTransactionAuthorizationTime': ('TxnAuthorizationTime', 'dateTime'),
+        'CreditCardPaymentCCTransId': 'CCTransId'
+    }
+
+    # Build CreditChargeInfo if any credit card fields are present
+    credit_charge_info = {}
+    for mcp_field, qb_field in credit_card_fields.items():
+        if mcp_field in kwargs:
+            credit_charge_info[qb_field] = kwargs[mcp_field]
+
+    # Build CreditChargeResponse if any response fields are present
+    credit_charge_response = {}
+    for mcp_field, qb_field in credit_charge_response_fields.items():
+        if mcp_field in kwargs:
+            if isinstance(qb_field, tuple):
+                # Handle nested fields like TxnAuthorizationTime.dateTime
+                parent_field, child_field = qb_field
+                if parent_field not in credit_charge_response:
+                    credit_charge_response[parent_field] = {}
+                credit_charge_response[parent_field][child_field] = kwargs[mcp_field]
+            else:
+                credit_charge_response[qb_field] = kwargs[mcp_field]
+
+    # Construct CreditCardPayment object if we have any credit card data
+    if credit_charge_info or credit_charge_response:
+        cc_payment = {}
+        if credit_charge_info:
+            cc_payment['CreditChargeInfo'] = credit_charge_info
+        if credit_charge_response:
+            cc_payment['CreditChargeResponse'] = credit_charge_response
+        payment_data['CreditCardPayment'] = cc_payment
 
     return payment_data
 
@@ -358,9 +406,46 @@ def payment_data_to_mcp_object(payment_data: Dict[str, Any]) -> Dict[str, Any]:
                 lines.append(line_item)
         mcp_object['Line'] = lines
 
-    # Credit Card Payment information
+    # Credit Card Payment information - flatten nested structure
     if 'CreditCardPayment' in payment_data:
-        mcp_object['CreditCardPayment'] = payment_data['CreditCardPayment']
+        cc_payment = payment_data['CreditCardPayment']
+        if isinstance(cc_payment, dict):
+            # Flatten CreditChargeInfo fields
+            if 'CreditChargeInfo' in cc_payment:
+                charge_info = cc_payment['CreditChargeInfo']
+                if isinstance(charge_info, dict):
+                    charge_info_mapping = {
+                        'CcExpiryMonth': 'CreditCardPaymentCcExpiryMonth',
+                        'CcExpiryYear': 'CreditCardPaymentCcExpiryYear',
+                        'ProcessPayment': 'CreditCardPaymentProcessPayment',
+                        'PostalCode': 'CreditCardPaymentPostalCode',
+                        'Amount': 'CreditCardPaymentAmount',
+                        'NameOnAcct': 'CreditCardPaymentNameOnAcct',
+                        'Type': 'CreditCardPaymentType',
+                        'BillAddrStreet': 'CreditCardPaymentBillAddrStreet'
+                    }
+                    for qb_field, mcp_field in charge_info_mapping.items():
+                        if qb_field in charge_info:
+                            mcp_object[mcp_field] = charge_info[qb_field]
+
+            # Flatten CreditChargeResponse fields
+            if 'CreditChargeResponse' in cc_payment:
+                charge_response = cc_payment['CreditChargeResponse']
+                if isinstance(charge_response, dict):
+                    response_mapping = {
+                        'Status': 'CreditCardPaymentStatus',
+                        'AuthCode': 'CreditCardPaymentAuthCode',
+                        'CCTransId': 'CreditCardPaymentCCTransId'
+                    }
+                    for qb_field, mcp_field in response_mapping.items():
+                        if qb_field in charge_response:
+                            mcp_object[mcp_field] = charge_response[qb_field]
+
+                    # Handle nested TxnAuthorizationTime.dateTime
+                    if 'TxnAuthorizationTime' in charge_response:
+                        txn_auth_time = charge_response['TxnAuthorizationTime']
+                        if isinstance(txn_auth_time, dict) and 'dateTime' in txn_auth_time:
+                            mcp_object['CreditCardPaymentTransactionAuthorizationTime'] = txn_auth_time['dateTime']
 
     # MetaData fields
     if 'MetaData' in payment_data and isinstance(payment_data['MetaData'], dict):
