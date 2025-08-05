@@ -266,6 +266,16 @@ def handle_freshdesk_error(e: Exception, operation: str, object_type: str = "") 
 
 
 def handle_freshdesk_attachments(field_name: str, attachments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Handle attachments for Freshdesk API requests.
+    
+    Args:
+        field_name: Name of the field to which the attachment is being added
+        attachments: List of attachments to be added
+        
+    Returns:
+        List of resolved attachments ready to be sent in the API request
+    """
     resolved_attachments = []
 
     for attachment in attachments:
