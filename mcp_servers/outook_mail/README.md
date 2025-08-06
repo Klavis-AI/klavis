@@ -16,16 +16,6 @@ We use these Microsoft Graph scopes:
 
 ## Tool Categories
 
-### 🔗 Attachment Operations
-| Tool Name | Description | Required Parameters |
-|----------|-------------|---------------------|
-| `outlookMail_add_attachment` | Add attachment to draft message | `message_id`, `file_path` |
-| `outlookMail_list_attachments` | List message attachments | `message_id` |
-| `outlookMail_get_attachment` | Get specific attachment | `message_id`, `attachment_id` |
-| `outlookMail_download_attachment` | Download attachment | `message_id`, `attachment_id`, `save_path` |
-| `outlookMail_delete_attachment` | Delete attachment | `message_id`, `attachment_id` |
-| `outlookMail_upload_large_attachment` | Upload large attachments | `message_id`, `file_path` |
-
 ### 📁 Folder Management
 | Tool Name | Description | Required Parameters |
 |----------|-------------|---------------------|
@@ -34,12 +24,8 @@ We use these Microsoft Graph scopes:
 | `outlookMail_get_mail_folder` | Get folder details | `folder_id` |
 | `outlookMail_delete_folder` | Delete folder | `folder_id` |
 | `outlookMail_update_folder_display_name` | Rename folder | `folder_id`, `display_name` |
-| `outlookMail_create_child_folder` | Create child folder | `parent_folder_id`, `display_name` |
-| `outlookMail_list_child_folders` | List child folders | `folder_id` |
-| `outlookMail_move_folder` | Move folder | `folder_id`, `destination_id` |
-| `outlookMail_copy_folder` | Copy folder | `folder_id`, `destination_id` |
-| `outlookMail_permanent_delete_folder` | Permanent delete | `user_id`, `folder_id` |
-| `outlookMail_get_folder_delta` | Track folder changes | - |
+| `outlookMail_get_messages_from_folder` | Get messages from folder | `folder_id` |
+
 
 ### 🔍 Search Folders
 | Tool Name | Description | Required Parameters |
@@ -48,8 +34,6 @@ We use these Microsoft Graph scopes:
 | `outlookMail_get_mail_search_folder` | Get search folder | `folder_id` |
 | `outlookMail_update_mail_search_folder` | Update search folder | `folder_id` |
 | `outlookMail_delete_mail_search_folder` | Delete search folder | `folder_id` |
-| `outlookMail_permanent_delete_mail_search_folder` | Permanent delete search folder | `folder_id` |
-| `outlookMail_get_messages_from_folder` | Get messages from folder | `folder_id` |
 
 ### ✉️ Message Operations
 | Tool Name | Description | Required Parameters |
@@ -61,27 +45,6 @@ We use these Microsoft Graph scopes:
 | `outlookMail_delete_draft` | Delete draft | `message_id` |
 | `outlookMail_create_forward_draft` | Create forward draft | `message_id`, `to_recipients`, `comment` |
 | `outlookMail_create_reply_draft` | Create reply draft | `message_id`, `comment` |
-| `outlookMail_forward_message` | Forward message | `message_id`, `to_recipients` |
-| `outlookMail_reply_all` | Reply to all | `message_id`, `comment` |
-| `outlookMail_move_message` | Move message | `message_id`, `destination_folder_id` |
-| `outlookMail_copy_message` | Copy message | `message_id`, `destination_folder_id` |
-| `outlookMail_permanent_delete` | Permanent delete | `user_id`, `message_id` |
-
-### ⚙️ Message Rules
-| Tool Name | Description | Required Parameters |
-|----------|-------------|---------------------|
-| `outlookMail_list_inbox_rules` | List inbox rules | - |
-| `outlookMail_get_inbox_rule_by_id` | Get rule by ID | `rule_id` |
-| `outlookMail_create_message_rule` | Create new rule | `displayName`, `sequence`, `actions` |
-| `outlookMail_update_message_rule` | Update existing rule | `rule_id` |
-| `outlookMail_delete_message_rule` | Delete rule | `rule_id` |
-
-### 🎯 Focused Inbox
-| Tool Name | Description | Required Parameters |
-|----------|-------------|---------------------|
-| `outlookMail_list_inference_overrides` | List inbox overrides | - |
-| `outlookMail_update_inference_override` | Update override | `override_id` |
-| `outlookMail_delete_inference_override` | Delete override | `override_id` |
 
 ---
 
