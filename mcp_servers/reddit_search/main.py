@@ -5,6 +5,7 @@ from tools import find_relevant_subreddits
 logger = logging.getLogger(__name__)
 mcp = FastMCP()
 
+# define the tools
 @mcp.tool()
 async def find_relevant_subreddits(query: str) -> str :
     """
@@ -16,13 +17,15 @@ async def find_relevant_subreddits(query: str) -> str :
     subreddits = await find_relevant_subreddits(query)
     return subreddits
 
+
 @mcp.tool()
 async def search_subreddit_posts(subreddit: str, query: str) -> str:
     """
     Searches a subreddit for posts matching a query.
     """
     logger.info(f"Executing tool 'search_subreddit_posts' with subreddit: '{subreddit}' and query: '{query}'")
-    return "Subreddit post search not implemented yet."
+    posts = await search_subreddit_posts(subreddit, query)
+    return posts
 
 @mcp.tool()
 async def get_subreddit_post_comments(subreddit: str, post_id: str) -> str:

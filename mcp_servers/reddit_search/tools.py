@@ -102,3 +102,25 @@ async def find_relevant_subreddits(query: str) -> List[SubredditInfo]:
         for sub in subreddits
     ]
 
+async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
+    """ search for posts in a subreddit and clean up the data """
+    headers = _get_reddit_auth_header()
+    params = {"q": query, "limit": 10, "restrict_sr": "true"}
+
+    logger.info(f"making API call to search for posts in subreddit: '{subreddit}' with query: '{query}'")
+    response = requests.get(f"{REDDIT_API_BASE}/r/{subreddit}/search", headers=headers, params=params)
+    response.raise_for_status()
+
+    posts = response.json()["data"]["children"]
+
+    return [
+        PostInfo(
+            id=post["data"]["id"],
+            subreddit=post["data"]["subreddit"],
+            title=post["data"]["title"],
+            score=post["data"]["score"],
+            url=post["data"]["url"],
+            comment_count=post["data"]["num_comments"],
+        )
+        for post in posts
+    ]
