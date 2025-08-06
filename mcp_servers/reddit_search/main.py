@@ -1,5 +1,6 @@
 import logging
 from mcp.server.fastmcp import FastMCP
+from tools import find_relevant_subreddits
 
 logger = logging.getLogger(__name__)
 mcp = FastMCP()
@@ -12,8 +13,8 @@ async def find_relevant_subreddits(query: str) -> str :
     """
     logger.info(f"Executing tool 'find_subreddits' with query: '{query}'")   
 
-    # TODO: Implement the logic to find relevant subreddits.
-    return "Subreddit search not implemented yet."
+    subreddits = await find_relevant_subreddits(query)
+    return subreddits
 
 @mcp.tool()
 async def search_subreddit_posts(subreddit: str, query: str) -> str:
