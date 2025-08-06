@@ -18,9 +18,22 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from tools import (
-    get_spotify_token,
+    get_spotify_access_token,
+    get_spotify_client,
     search_tracks,
-    auth_token_context
+    auth_token_context,
+    get_tracks_info,
+    get_user_spotify_client,
+    get_user_saved_tracks,
+    check_user_saved_tracks,
+    save_tracks_for_current_user,
+    remove_user_saved_tracks,
+    get_albums_info,
+    get_album_tracks,
+    get_user_saved_albums,
+    save_albums_for_current_user,
+    remove_albums_for_current_user,
+    check_user_saved_albums,
 )
 
 load_dotenv()
@@ -65,28 +78,203 @@ def main(
         return [
             types.Tool(
                 name="spotify_search_tracks",
-                description="Search for tracks on Spotify",
+                description="Search on Spotify",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Search query for tracks"
+                            "description": "Search query for (track, album, artist, playlist, show, episode)"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of search  a track or album or artist or playlist or show or episode",
+                            "enum": ["track", "album", "artist", "playlist", "show", "episode"]
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Number of results to return (default: 10)",
                             "default": 10
                         },
+                        
+                    },
+                    "required": ["query","type"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_track_info",
+                description="Get detailed information about a specific track",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify track IDs to retrieve information for"
+                        },
+                    },
+                    "required": ["ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_user_saved_tracks",
+                description="Get the user's saved tracks (liked/saved songs) from Spotify",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of tracks to return (default: 20, max: 50)",
+                            "default": 20
+                        },
                         "offset": {
                             "type": "integer",
-                            "description": "Offset for pagination (default: 0)",
+                            "description": "Index of the first track to return (for pagination, default: 0)",
                             "default": 0
                         }
                     },
-                    "required": ["query"]
+                    "required": []
                 }
-            )
+            ),
+            types.Tool(
+                name="spotify_check_user_saved_tracks",
+                description="Check if a track or multiple tracks is saved in the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify track IDs to check"
+                        },
+                    },
+                    "required": ["track_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_save_tracks_for_current_user",
+                description="Save tracks to the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify track IDs to save"
+                        },
+                    },
+                    "required": ["track_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_remove_user_saved_tracks",
+                description="Remove tracks from the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "track_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify track IDs to remove"
+                        },
+                    },
+                    "required": ["track_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_albums_info",
+                description="Get detailed information about one or multiple albums",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "album_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify album IDs to retrieve information for"
+                        },
+                    },
+                    "required": ["album_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_album_tracks",
+                description="Get detailed information about tracks in a specific album",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "album_id": {
+                            "type": "string",
+                            "description": "Spotify album ID to retrieve tracks for"
+                        },
+                    },
+                    "required": ["album_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_user_saved_albums",
+                description="Get the user's saved albums from Spotify",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of albums to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first album to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_save_albums_for_current_user",
+                description="Save albums to the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "album_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify album IDs to save"
+                        },
+                    },
+                    "required": ["album_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_remove_albums_for_current_user",
+                description="Remove albums from the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "album_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify album IDs to remove"
+                        },
+                    },
+                    "required": ["album_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_check_user_saved_albums",
+                description="Check if an album or multiple albums is saved in the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "album_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify album IDs to check"
+                        },
+                    },
+                    "required": ["album_ids"]
+                }
+            ),
         ]
 
     @app.call_tool()
@@ -96,11 +284,15 @@ def main(
         logger.info(f"Tool called: {name}")
         logger.debug(f"Tool arguments: {json.dumps(arguments, indent=2)}")
         
+        
+        token =  get_spotify_access_token()
+        sp= get_spotify_client()
+        spOauth,user_token = get_user_spotify_client()
         if name == "spotify_search_tracks":
             query = arguments.get("query", "")
-            type= arguments.get("type", "track")
+            type= arguments.get("type","")
             limit = arguments.get("limit", 10)
-
+            logger.info(f"Searching tracks with query: {query}, type: {type}, limit: {limit}")
             if not query:
                 return [
                     types.TextContent(
@@ -109,9 +301,28 @@ def main(
                     )
                 ]
             
-            token =  get_spotify_token()
+            
     
-            result = search_tracks(query, type,limit, token)
+            result = search_tracks(query, type,limit,sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            return result
+        elif name == "spotify_get_track_info":
+            track_ids = arguments.get("ids", "")
+            logger.info(f"Getting track info for track_id: {track_ids}")
+            if not track_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ID parameter is required to get track information.",
+                    )
+                ]
+    
+            result = get_tracks_info(track_ids, sp)
             result = [
                 types.TextContent(
                     type="text",
@@ -120,7 +331,197 @@ def main(
             ]
             
             return result
-
+        elif name == "spotify_get_user_saved_tracks":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting user saved tracks with limit: {limit}, offset: {offset}")
+            
+            result = get_user_saved_tracks(spOauth, limit, offset)
+            logger.info(f"User saved tracks result: {result}")
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_check_user_saved_tracks":
+            track_ids = arguments.get("track_ids", [])
+            logger.info(f"Checking user saved tracks for IDs: {track_ids}")
+            if not track_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="track_ids parameter is required to check saved tracks.",
+                    )
+                ]
+    
+            result = check_user_saved_tracks(track_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_save_tracks_for_current_user":
+            track_ids = arguments.get("track_ids", [])
+            logger.info(f"Saving tracks for current user: {track_ids}")
+            if not track_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="track_ids parameter is required to save tracks.",
+                    )
+                ]
+    
+            result = save_tracks_for_current_user(track_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_remove_user_saved_tracks":
+            track_ids = arguments.get("track_ids", [])
+            logger.info(f"Removing tracks for current user: {track_ids}")
+            if not track_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="track_ids parameter is required to remove tracks.",
+                    )
+                ]
+    
+            result = remove_user_saved_tracks(track_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_albums_info":
+            album_ids = arguments.get("album_ids", [])
+            logger.info(f"Getting albums info for IDs: {album_ids}")
+            if not album_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="album_ids parameter is required to get album information.",
+                    )
+                ]
+    
+            result = get_albums_info(album_ids, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_album_tracks":
+            album_id = arguments.get("album_id", "")
+            logger.info(f"Getting album tracks for album_id: {album_id}")
+            if not album_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="album_id parameter is required to get album tracks.",
+                    )
+                ]
+    
+            result = get_album_tracks(album_id, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_user_saved_albums":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting user saved albums with limit: {limit}, offset: {offset}")
+            
+            result = get_user_saved_albums(spOauth, limit, offset)
+            logger.info(f"User saved albums result: {result}")
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_save_albums_for_current_user":
+            album_ids = arguments.get("album_ids", [])
+            logger.info(f"Saving albums for current user: {album_ids}")
+            if not album_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="album_ids parameter is required to save albums.",
+                    )
+                ]
+    
+            result = save_albums_for_current_user(album_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+            
+        elif name == "spotify_remove_albums_for_current_user":
+            album_ids = arguments.get("album_ids", [])
+            logger.info(f"Removing albums for current user: {album_ids}")
+            if not album_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="album_ids parameter is required to remove albums.",
+                    )
+                ]
+    
+            result = remove_albums_for_current_user(album_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_check_user_saved_albums":
+            album_ids = arguments.get("album_ids", [])
+            logger.info(f"Checking user saved albums for IDs: {album_ids}")
+            if not album_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="album_ids parameter is required to check saved albums.",
+                    )
+                ]
+    
+            result = check_user_saved_albums(album_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
         return [
             types.TextContent(
                 type="text",
