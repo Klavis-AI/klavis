@@ -1,4 +1,4 @@
-import requests
+import httpx
 import logging
 from .base import get_onedrive_client
 
@@ -42,10 +42,10 @@ async def outlookMail_create_mail_search_folder(
     }
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        logging.info(f"Created search folder: {display_name}")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Could not create search folder at {url}: {e}")
         return {"error": f"Could not create search folder at {url}"}
@@ -88,10 +88,10 @@ async def outlookMail_update_mail_search_folder(
         payload["filterQuery"] = filterQuery
 
     try:
-        response = requests.patch(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        logging.info(f"Updated mail folder: {folder_id}")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.patch(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Could not update mail folder at {url}: {e}")
         return {"error": f"Could not update mail folder at {url}"}
