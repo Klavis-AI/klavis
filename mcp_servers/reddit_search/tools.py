@@ -18,7 +18,7 @@ REDDIT_API_BASE = "https://oauth.reddit.com"
 REDDIT_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
 
 # cached access token
-_ACCESS_TOKEN = None
+_access_token = None
 
 def _get_reddit_auth_header() -> dict[str, str]:
     """
@@ -49,7 +49,7 @@ def _get_reddit_auth_header() -> dict[str, str]:
     _access_token = token_data["access_token"]
     logger.info("Successfully obtained and cached new Reddit API access token.")
 
-    return {"Authorization": f"Bearer {_ACCESS_TOKEN}"}
+    return {"Authorization": f"Bearer {_access_token}"}
 
 # define the structure of the returned data
 class SubredditInfo(TypedDict):
@@ -84,20 +84,23 @@ class PostDetails(TypedDict):
 # implement the functions utilised by the tools
 async def find_relevant_subreddits(query: str) -> List[SubredditInfo]:
     """ find subreddits that are relevant to the query and clean up the data """
-    header = _get_reddit_auth_header()
-    params = {"query": query, "limit": 10}
+    headers = _get_reddit_auth_header()
+    params = {"q": query, "limit": 10, "type": "sr"}
 
     logger.info(f"Making API call to Reddit to find subreddits for query: '{query}'")
-    response = requests.get(f"{REDDIT_API_BASE}/subreddits/search", headers=header, params=params)
+    response = requests.get(f"{REDDIT_API_BASE}/subreddits/search", headers=headers, params=params)
     response.raise_for_status()
 
-    subreddits = response.json()["subreddits"]
+    data = response.json()
+    # Reddit API returns data in listing format: {"data": {"children": [...]}}
+    subreddits = data["data"]["children"]
+    
     # We loop through the raw results and build a clean list of our SubredditInfo objects.
     return [
         SubredditInfo(
-            name=sub["name"],
-            subscriber_count=sub["subscriber_count"],
-            description=sub.get("public_description", "No description provided."),
+            name=sub["data"]["display_name"],
+            subscriber_count=sub["data"]["subscribers"],
+            description=sub["data"].get("public_description", "No description provided."),
         )
         for sub in subreddits
     ]
