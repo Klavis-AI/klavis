@@ -1,4 +1,4 @@
-import requests
+import httpx
 import logging
 from .base import get_onedrive_client
 import base64
@@ -44,9 +44,9 @@ async def outlookMail_get_attachment(
         params['$expand'] = expand
 
     try:
-        response = requests.get(url, headers=client['headers'], params=params)
-        logger.info("Fetched attachment from Outlook mail")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'], params=params)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook attachment at {url}: {e}")
         return {"error": f"Could not get Outlook attachment at {url}"}
@@ -75,7 +75,8 @@ async def outlookMail_download_attachment(
     url = f"{client['base_url']}/me/messages/{message_id}/attachments/{attachment_id}/$value"
 
     try:
-        response = requests.get(url, headers=client['headers'])
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'])
         response.raise_for_status()
 
         with open(save_path, "wb") as f:
@@ -109,7 +110,8 @@ async def outlookMail_delete_attachment(
 
     url = f"{client['base_url']}/me/messages/{message_id}/attachments/{attachment_id}"
     try:
-        response = requests.delete(url, headers=client['headers'])
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             logging.info("Deleted attachment from Outlook draft message")
             return "Deleted"
@@ -163,12 +165,10 @@ async def outlookMail_add_attachment(
             "name": attachment_name,
             "contentBytes": content_bytes
         }
-
-        response = requests.post(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-
-        logging.info("Added attachment to Outlook draft message")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
 
     except Exception as e:
         logging.error(f"Could not add attachment to Outlook draft message at {url}: {e}")
@@ -216,11 +216,12 @@ async def outlookMail_upload_large_attachment(
         payload["AttachmentItem"]["contentId"] = content_id
 
     try:
-        session_res = requests.post(url, headers=client['headers'], json=payload)
-        session_res.raise_for_status()
-        upload_url = session_res.json().get("uploadUrl")
-        if not upload_url:
-            return {"error": "Upload session URL not found"}
+        async with httpx.AsyncClient() as httpx_client:
+            session_res = httpx_client.post(url, headers=client['headers'], json=payload)
+            session_res.raise_for_status()
+            upload_url = session_res.json().get("uploadUrl")
+            if not upload_url:
+                return {"error": "Upload session URL not found"}
     except Exception as e:
         logger.error(f"Could not create upload session: {e}")
         return {"error": f"Could not create upload session: {e}"}
@@ -238,7 +239,8 @@ async def outlookMail_upload_large_attachment(
                     "Content-Length": str(len(chunk)),
                     "Content-Range": f"bytes {start_byte}-{end_byte}/{file_size}"
                 }
-                put_res = requests.put(upload_url, headers=headers, data=chunk)
+                async with httpx.AsyncClient() as httpx_client:
+                    put_res = httpx_client.put(upload_url, headers=headers, data=chunk)
                 put_res.raise_for_status()
                 file_pos += len(chunk)
                 logger.info(f"Uploaded bytes {start_byte}-{end_byte}")
@@ -268,10 +270,10 @@ async def outlookMail_list_attachments(message_id: str) -> dict:
     url = f"{client['base_url']}/me/messages/{message_id}/attachments"
 
     try:
-        response = requests.get(url, headers=client['headers'])
-        response.raise_for_status()
-        logging.info(f"Fetched attachments for message {message_id}")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'])
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Could not list attachments at {url}: {e}")
         return {"error": f"Could not list attachments at {url}: {e}"}

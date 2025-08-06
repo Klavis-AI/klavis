@@ -1,4 +1,3 @@
-import requests
 import httpx
 import logging
 from .base import get_onedrive_client
@@ -63,9 +62,9 @@ async def outlookMail_list_messages(
         params['$select'] = select
 
     try:
-        response = requests.get(url, headers=client['headers'], params=params)
-        logger.info("Retrieved Outlook mail messages")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'], params=params)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook messages from {url}: {e}")
         return {"error": f"Could not get Outlook messages from {url}"}
@@ -131,9 +130,9 @@ async def outlookMail_list_messages_from_folder(
         params['$select'] = select
 
     try:
-        response = requests.get(url, headers=client['headers'], params=params)
-        logger.info("Retrieved Outlook mail messages")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'], params=params)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook messages from {url}: {e}")
         return {"error": f"Could not get Outlook messages from {url}"}
@@ -155,8 +154,8 @@ async def outlookMail_read_message(message_id: str) -> dict:
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
-    async with httpx.AsyncClient() as client:
-        res = await client.get(url, headers=client['headers'])
+    async with httpx.AsyncClient() as httpx_client:
+        res = await httpx_client.get(url, headers=client['headers'])
         return res.json()
 
 
@@ -217,9 +216,10 @@ async def outlookMail_create_draft(
             payload[key] = [{"emailAddress": {"address": email}} for email in emails]
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logger.error(f"Could not create Outlook draft message at {url}: {e}")
         return {"error": f"Could not create Outlook draft message at {url}"}
@@ -317,9 +317,10 @@ async def outlookMail_update_draft(
             payload[key] = [{"emailAddress": {"address": email}} for email in emails]
 
     try:
-        response = requests.patch(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.patch(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logger.error(f"Could not update Outlook draft message at {url}: {e}")
         return {"error": f"Could not update Outlook draft message at {url}"}
@@ -345,7 +346,8 @@ async def outlookMail_delete_draft(message_id: str) -> dict:
 
     try:
         logger.info(f"Deleting draft Outlook mail message at {url}")
-        response = requests.delete(url, headers=client['headers'])
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             return {"Success":"Deleted"}
         else:
@@ -396,9 +398,9 @@ async def outlookMail_create_forward_draft(
     }
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        logger.info("Created draft forward Outlook mail message")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not create Outlook forward draft message at {url}: {e}")
         return {"error": f"Could not create Outlook forward draft message at {url}"}
@@ -432,9 +434,9 @@ async def outlookMail_create_reply_draft(
 
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        logger.info("Created draft reply Outlook mail message")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not create Outlook reply draft message at {url}: {e}")
         return {"error": f"Could not create Outlook reply draft message at {url}"}
@@ -467,9 +469,9 @@ async def outlookMail_create_reply_all_draft(
     }
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        logger.info("Created reply-all draft Outlook mail message")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            return response.json()
     except Exception as e:
         logger.error(f"Could not create reply-all draft at {url}: {e}")
         return {"error": f"Could not create reply-all draft at {url}"}
@@ -492,7 +494,8 @@ async def outlookMail_send_draft(message_id: str) -> dict:
     url = f"{client['base_url']}/me/messages/{message_id}/send"
 
     try:
-        response = requests.post(url, headers=client['headers'])
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'])
         if response.status_code == 202 or response.status_code == 200 or response.status_code == 204:
             logger.info("Draft sent successfully")
             return {"success": "Draft sent successfully"}

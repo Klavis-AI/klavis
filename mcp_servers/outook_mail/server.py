@@ -347,6 +347,21 @@ def main(
 
             #messages.py-----------------------------------------------------------
             types.Tool(
+                name="outlookMail_read_message",
+                description="Get a specific Outlook mail message by its ID using Microsoft Graph API.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "string",
+                            "description": "The ID of the message to retrieve"
+                        }
+                    },
+                    "required": ["message_id"],
+                    "additionalProperties": False
+                }
+            ),
+            types.Tool(
                 name="outlookMail_list_messages",
                 description="Retrieve a list of Outlook mail messages from the signed-in user's mailbox",
                 inputSchema={
@@ -475,101 +490,6 @@ def main(
                             "type": "array",
                             "items": {"type": "string", "format": "email"},
                             "description": "Recipient email addresses for 'Bcc' (only updatable in draft state)"
-                        },
-                        "reply_to": {
-                            "type": "array",
-                            "items": {"type": "string", "format": "email"},
-                            "description": "Email addresses for reply-to (only updatable in draft state)"
-                        },
-                        "importance": {
-                            "type": "string",
-                            "enum": ["Low", "Normal", "High"],
-                            "description": "Message importance level"
-                        },
-                        "internet_message_id": {
-                            "type": "string",
-                            "description": "RFC2822 message ID (only updatable in draft state)"
-                        },
-                        "is_delivery_receipt_requested": {
-                            "type": "boolean",
-                            "description": "Whether delivery receipt is requested"
-                        },
-                        "is_read": {
-                            "type": "boolean",
-                            "description": "Read status of the message"
-                        },
-                        "is_read_receipt_requested": {
-                            "type": "boolean",
-                            "description": "Whether read receipt is requested"
-                        },
-                        "categories": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Category strings (e.g., ['Urgent', 'FollowUp'])"
-                        },
-                        "inference_classification": {
-                            "type": "string",
-                            "enum": ["focused", "other"],
-                            "description": "Inference classification"
-                        },
-                        "flag": {
-                            "type": "object",
-                            "description": "Follow-up flag settings",
-                            "properties": {
-                                "completedDateTime": {
-                                    "type": "object",
-                                    "properties": {
-                                        "dateTime": {"type": "string", "format": "date-time"},
-                                        "timeZone": {"type": "string"}
-                                    }
-                                },
-                                "dueDateTime": {
-                                    "type": "object",
-                                    "properties": {
-                                        "dateTime": {"type": "string", "format": "date-time"},
-                                        "timeZone": {"type": "string"}
-                                    }
-                                },
-                                "flagStatus": {
-                                    "type": "string",
-                                    "enum": ["notFlagged", "flagged", "complete"]
-                                },
-                                "startDateTime": {
-                                    "type": "object",
-                                    "properties": {
-                                        "dateTime": {"type": "string", "format": "date-time"},
-                                        "timeZone": {"type": "string"}
-                                    }
-                                }
-                            }
-                        },
-                        "from_sender": {
-                            "type": "object",
-                            "description": "Mailbox owner/sender (must match actual mailbox)",
-                            "properties": {
-                                "emailAddress": {
-                                    "type": "object",
-                                    "properties": {
-                                        "address": {"type": "string", "format": "email"},
-                                        "name": {"type": "string"}
-                                    },
-                                    "required": ["address"]
-                                }
-                            }
-                        },
-                        "sender": {
-                            "type": "object",
-                            "description": "Actual sending account (for shared mailboxes/delegates)",
-                            "properties": {
-                                "emailAddress": {
-                                    "type": "object",
-                                    "properties": {
-                                        "address": {"type": "string", "format": "email"},
-                                        "name": {"type": "string"}
-                                    },
-                                    "required": ["address"]
-                                }
-                            }
                         }
                     },
                     "required": ["message_id"],
@@ -578,22 +498,12 @@ def main(
                         {"required": ["body_content"]},
                         {"required": ["to_recipients"]},
                         {"required": ["cc_recipients"]},
-                        {"required": ["bcc_recipients"]},
-                        {"required": ["reply_to"]},
-                        {"required": ["importance"]},
-                        {"required": ["internet_message_id"]},
-                        {"required": ["is_delivery_receipt_requested"]},
-                        {"required": ["is_read"]},
-                        {"required": ["is_read_receipt_requested"]},
-                        {"required": ["categories"]},
-                        {"required": ["inference_classification"]},
-                        {"required": ["flag"]},
-                        {"required": ["from_sender"]},
-                        {"required": ["sender"]}
+                        {"required": ["bcc_recipients"]}
                     ],
                     "additionalProperties": False
                 }
             ),
+
             types.Tool(
                 name="outlookMail_delete_draft",
                 description="Delete an existing Outlook draft message by message ID",
@@ -724,27 +634,6 @@ def main(
                                 "format": "email"
                             },
                             "description": "List of email addresses for 'Bcc'"
-                        },
-                        "reply_to": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "format": "email"
-                            },
-                            "description": "List of email addresses for 'Reply-To'"
-                        },
-                        "importance": {
-                            "type": "string",
-                            "enum": ["Low", "Normal", "High"],
-                            "default": "Normal",
-                            "description": "Message importance level"
-                        },
-                        "categories": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "List of category strings (e.g., ['FollowUp', 'ProjectX'])"
                         }
                     },
                     "required": ["subject", "body_content", "to_recipients"],
@@ -1045,6 +934,25 @@ def main(
                     )
                 ]
         # Message Operations
+        elif name == "outlookMail_read_message":
+            try:
+                result = await outlookMail_read_message(
+                    message_id=arguments["message_id"]
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}"
+                    )
+                ]
+
         elif name == "outlookMail_list_messages":
             try:
                 result = outlookMail_list_messages(
@@ -1101,17 +1009,6 @@ def main(
                     to_recipients=arguments.get("to_recipients"),
                     cc_recipients=arguments.get("cc_recipients"),
                     bcc_recipients=arguments.get("bcc_recipients"),
-                    reply_to=arguments.get("reply_to"),
-                    importance=arguments.get("importance"),
-                    internet_message_id=arguments.get("internet_message_id"),
-                    is_delivery_receipt_requested=arguments.get("is_delivery_receipt_requested"),
-                    is_read=arguments.get("is_read"),
-                    is_read_receipt_requested=arguments.get("is_read_receipt_requested"),
-                    categories=arguments.get("categories"),
-                    inference_classification=arguments.get("inference_classification"),
-                    flag=arguments.get("flag"),
-                    from_sender=arguments.get("from_sender"),
-                    sender=arguments.get("sender")
                 )
                 return [
                     types.TextContent(
@@ -1240,9 +1137,6 @@ def main(
                     to_recipients=arguments["to_recipients"],
                     cc_recipients=arguments.get("cc_recipients"),
                     bcc_recipients=arguments.get("bcc_recipients"),
-                    reply_to=arguments.get("reply_to"),
-                    importance=arguments.get("importance", "Normal"),
-                    categories=arguments.get("categories")
                 )
                 return [
                     types.TextContent(

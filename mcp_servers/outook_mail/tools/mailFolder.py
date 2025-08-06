@@ -1,4 +1,4 @@
-import requests
+import httpx
 import logging
 from .base import get_onedrive_client
 
@@ -26,9 +26,9 @@ async def outlookMail_list_folders(include_hidden: bool = True) -> dict:
         params["includeHiddenFolders"] = "true"
 
     try:
-        response = requests.get(url, headers=client['headers'], params=params)
+        async with httpx.AsyncClient as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'], params=params)
         response.raise_for_status()
-        logging.info("Fetched mail folders")
         return response.json()
     except Exception as e:
         logging.error(f"Could not get mail folders from {url}: {e}")
@@ -70,9 +70,9 @@ async def outlookMail_get_messages_from_folder(
         params['$select'] = select
 
     try:
-        response = requests.get(url, headers=client['headers'], params=params)
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.get(url, headers=client['headers'], params=params)
         response.raise_for_status()
-        logging.info(f"Retrieved messages from folder {folder_id}")
         return response.json()
     except Exception as e:
         logging.error(f"Could not get messages from {url}: {e}")
@@ -97,10 +97,10 @@ async def outlookMail_get_mail_folder(folder_id: str) -> dict:
     url = f"{client['base_url']}/me/mailFolders/{folder_id}"
 
     try:
-        response = requests.get(url, headers=client['headers'])
-        response.raise_for_status()
-        logging.info(f"Retrieved mail folder {folder_id}")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.get(url, headers=client['headers'])
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Could not get mail folder at {url}: {e}")
         return {"error": f"Could not get mail folder at {url}"}
@@ -132,10 +132,10 @@ async def outlookMail_create_mail_folder(
     }
 
     try:
-        response = requests.post(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        logging.info(f"Created mail folder: {display_name}")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Could not create mail folder at {url}: {e}")
         return {"error": f"Could not create mail folder at {url}"}
@@ -163,10 +163,10 @@ async def outlookMail_update_folder_display_name(
     payload = {"displayName": display_name}
 
     try:
-        response = requests.patch(url, headers=client['headers'], json=payload)
-        response.raise_for_status()
-        logging.info(f"Updated folder {folder_id} display name to '{display_name}'")
-        return response.json()
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.patch(url, headers=client['headers'], json=payload)
+            response.raise_for_status()
+            return response.json()
     except Exception as e:
         logging.error(f"Failed to update folder at {url}: {e}")
         return {"error": f"Failed to update folder at {url}"}
@@ -189,7 +189,8 @@ async def outlookMail_delete_folder(folder_id: str) -> dict:
     url = f"{client['base_url']}/me/mailFolders/{folder_id}"
 
     try:
-        response = requests.delete(url, headers=client['headers'])
+        async with httpx.AsyncClient() as httpx_client:
+            response = httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             logging.info(f"Deleted folder with ID {folder_id}")
             return {"message": f"Folder {folder_id} deleted successfully"}
