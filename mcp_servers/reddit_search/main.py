@@ -33,7 +33,8 @@ async def get_subreddit_post_comments(subreddit: str, post_id: str) -> str:
     Gets the comments for a specific post in a subreddit.
     """
     logger.info(f"Executing tool 'get_subreddit_post_comments' with subreddit: '{subreddit}' and post_id: '{post_id}'")
-    return "Subreddit post comments not implemented yet."
+    comments = await get_subreddit_post_comments(subreddit, post_id)
+    return comments
 
 def main():
     print("Hello from reddit-search!")

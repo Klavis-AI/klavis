@@ -124,3 +124,33 @@ async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
         )
         for post in posts
     ]
+
+async def get_post_and_top_comments(post_id: str, subreddit: str) -> PostDetails:
+    """Gets post and comment details via the Reddit API and cleans the data."""
+    headers = _get_reddit_auth_header()
+    params = {"limit": 3, "sort": "top"}
+
+    logger.info(f"Making API call to Reddit for comments on post '{post_id}'")
+    response = requests.get(f"{REDDIT_API_BASE}/r/{subreddit}/comments/{post_id}", headers=headers, params=params)
+    response.raise_for_status()
+
+    data = response.json()
+    post_data = data[0]["data"]["children"][0]["data"]
+    comments_data = data[1]["data"]["children"]
+
+    # Here we assemble our final, nested PostDetails object from the raw API data.
+    return PostDetails(
+        title=post_data["title"],
+        author=post_data["author"],
+        text=post_data.get("selftext", "[This post has no text content]"),
+        score=post_data["score"],
+        top_comments=[
+            CommentInfo(
+                author=comment["data"].get("author", "[deleted]"),
+                text=comment["data"].get("body", ""),
+                score=comment["data"].get("score", 0),
+            )
+            # We add a small check to filter out any empty or deleted comments.
+            for comment in comments_data if comment.get("data", {}).get("body")
+        ],
+    )
