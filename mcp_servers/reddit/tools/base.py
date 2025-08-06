@@ -1,12 +1,13 @@
 """
 Base Reddit MCP Client
-Handles authentication and API requests to Reddit.
+Handles authentication and API requests to Reddit with auth token context support.
 """
 
 import logging
 import os
 import requests
 from typing import Dict, Any, Optional
+from contextvars import ContextVar
 
 logger = logging.getLogger(__name__)
 
@@ -14,18 +15,35 @@ logger = logging.getLogger(__name__)
 REDDIT_AUTH_URL = "https://www.reddit.com/api/v1/access_token"
 REDDIT_API_BASE = "https://oauth.reddit.com"
 
+# Context variable to store auth tokens for hosting service support
+# Supports x-auth-token proxying for multi-tenant deployments
+auth_token_context: ContextVar[str] = ContextVar("auth_token")
+
+def get_auth_context() -> Optional[str]:
+    """Get the auth token from context if available for hosting service support."""
+    try:
+        return auth_token_context.get()
+    except LookupError:
+        return None
+
 class RedditMCPClient:
     """Reddit API client for MCP server."""
     
     def __init__(self):
         """Initialize Reddit API client with credentials."""
+        # Primary auth from environment (for standalone mode)
         self.client_id = os.getenv("REDDIT_CLIENT_ID")
         self.client_secret = os.getenv("REDDIT_CLIENT_SECRET")
         self.user_agent = os.getenv("REDDIT_USER_AGENT", "klavis-reddit-mcp/1.0")
         self.access_token = None
         
-        if not all([self.client_id, self.client_secret]):
-            raise ValueError("Missing required Reddit API credentials (client_id and client_secret) in environment variables")
+        # Support for hosting service via x-auth-token context
+        self.auth_context_token = None
+        
+        # Only require env credentials if no context token available
+        context_auth = get_auth_context()
+        if not context_auth and not all([self.client_id, self.client_secret]):
+            raise ValueError("Missing required Reddit API credentials (client_id and client_secret) in environment variables or auth context")
     
     def authenticate(self):
         """Authenticate with Reddit API using client credentials flow."""
