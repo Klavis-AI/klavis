@@ -1,6 +1,7 @@
 import os 
 import logging
 import requests
+from typing import Dict,List, TypedDict
 
 from dotenv import load_dotenv
 
@@ -49,3 +50,55 @@ def _get_reddit_auth_header() -> dict[str, str]:
     logger.info("Successfully obtained and cached new Reddit API access token.")
 
     return {"Authorization": f"Bearer {_ACCESS_TOKEN}"}
+
+# define the structure of the returned data
+class SubredditInfo(TypedDict):
+    """Structured data for a single subreddit."""
+    name: str
+    subscriber_count: int
+    description: str
+
+class PostInfo(TypedDict):
+    """Structured data for a Reddit post summary."""
+    id: str
+    subreddit: str
+    title: str
+    score: int
+    url: str
+    comment_count: int
+
+class CommentInfo(TypedDict):
+    """Structured data for a single comment."""
+    author: str
+    text: str
+    score: int
+
+class PostDetails(TypedDict):
+    """The combined structure for a post and its top comments."""
+    title: str
+    author: str
+    text: str
+    score: int
+    top_comments: List[CommentInfo]
+
+# implement the functions utilised by the tools
+async def find_relevant_subreddits(query: str) -> List[SubredditInfo]:
+    """ find subreddits that are relevant to the query and clean up the data """
+    header = _get_reddit_auth_header()
+    params = {"query": query, "limit": 10}
+
+    logger.info(f"Making API call to Reddit to find subreddits for query: '{query}'")
+    response = requests.get(f"{REDDIT_API_BASE}/subreddits/search", headers=header, params=params)
+    response.raise_for_status()
+
+    subreddits = response.json()["subreddits"]
+    # We loop through the raw results and build a clean list of our SubredditInfo objects.
+    return [
+        SubredditInfo(
+            name=sub["name"],
+            subscriber_count=sub["subscriber_count"],
+            description=sub.get("public_description", "No description provided."),
+        )
+        for sub in subreddits
+    ]
+

@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 mcp = FastMCP()
 
 @mcp.tool()
-async def find_subreddit(query: str) -> str :
+async def find_relevant_subreddits(query: str) -> str :
     """
     Finds relevant subreddits based on a query.
     Use this first to discover communities when a user does not specify one.
