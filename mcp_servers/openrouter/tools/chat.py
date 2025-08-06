@@ -232,14 +232,42 @@ async def create_chat_completion_stream(
         
         logger.info(f"Successfully created streaming chat completion with model: {model}")
         
-        return {
-            "success": True,
-            "data": response,
-            "model": model,
-            "stream": True,
-            "usage": response.get("usage", {}),
-            "choices": response.get("choices", []),
-        }
+        if response.get("stream"):
+            logger.info("Returning streaming generator to caller...")
+            
+            # Get the stream generator and return it directly
+            generator = response.get("generator")
+            if generator:
+                return {
+                    "success": True,
+                    "data": {
+                        "stream": True,
+                        "generator": generator,
+                        "message": "Stream generator ready for processing"
+                    },
+                    "model": model,
+                    "stream": True,
+                    "usage": None,
+                    "choices": [],
+                }
+            else:
+                return {
+                    "success": True,
+                    "data": response,
+                    "model": model,
+                    "stream": True,
+                    "usage": response.get("usage", {}),
+                    "choices": response.get("choices", []),
+                }
+        else:
+            return {
+                "success": True,
+                "data": response,
+                "model": model,
+                "stream": True,
+                "usage": response.get("usage", {}),
+                "choices": response.get("choices", []),
+            }
         
     except OpenRouterToolExecutionError:
         raise

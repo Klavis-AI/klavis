@@ -7,6 +7,7 @@ import logging
 from typing import Optional, Dict, Any
 import httpx
 from pydantic import BaseModel, Field
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,70 @@ class OpenRouterClient:
                         details=error_data,
                     )
                 
-                return response.json()
+                if data and data.get("stream") and response.status_code == 200:
+                    # For streaming responses, return a generator that yields chunks
+                    async def stream_generator():
+                        try:
+                            chunk_count = 0
+                            async for chunk in response.aiter_text():
+                                lines = chunk.split('\n')
+                                for line in lines:
+                                    if line.startswith('data: '):
+                                        data_line = line[6:]
+                                        if data_line.strip() == '[DONE]':
+                                            logger.info("Received [DONE] marker - stream complete")
+                                            yield {
+                                                "chunk": None,
+                                                "is_complete": True,
+                                                "total_chunks": chunk_count,
+                                                "message": "Stream completed"
+                                            }
+                                            return
+                                        try:
+                                            json_data = json.loads(data_line)
+                                            if 'choices' in json_data and json_data['choices']:
+                                                delta = json_data['choices'][0].get('delta', {})
+                                                if 'content' in delta:
+                                                    chunk_count += 1
+                                                    content = delta['content']
+                                                    logger.info(f"Yielding chunk {chunk_count}: '{content}'")
+                                                    yield {
+                                                        "chunk": content,
+                                                        "is_complete": False,
+                                                        "chunk_number": chunk_count,
+                                                        "message": f"Chunk {chunk_count} received"
+                                                    }
+                                        except json.JSONDecodeError:
+                                            continue
+                            
+                            yield {
+                                "chunk": None,
+                                "is_complete": True,
+                                "total_chunks": chunk_count,
+                                "message": "Stream ended without [DONE] marker"
+                            }
+                            
+                        except Exception as e:
+                            logger.error(f"Error in stream generator: {e}")
+                            yield {
+                                "chunk": None,
+                                "is_complete": True,
+                                "error": str(e),
+                                "message": f"Stream error: {str(e)}"
+                            }
+                    
+                    return {
+                        "stream": True,
+                        "status_code": response.status_code,
+                        "generator": stream_generator(),
+                        "message": "Stream generator created"
+                    }
+                
+                # Try to parse as JSON, but handle empty responses gracefully
+                if response.content:
+                    return response.json()
+                else:
+                    return {"status": "success", "message": "Empty response received"}
                 
             except httpx.TimeoutException:
                 raise OpenRouterToolExecutionError(
@@ -108,6 +172,15 @@ class OpenRouterClient:
                     additional_prompt_content="There was a network error. Please check your connection and try again.",
                     developer_message=f"Network error: {str(e)}",
                 )
+            except Exception as e:
+                if "Expecting value" in str(e) and data and data.get("stream"):
+                    return {
+                        "stream": True,
+                        "status_code": response.status_code,
+                        "content": "Streaming response received",
+                        "message": "This is a streaming response. Use appropriate streaming client to handle it."
+                    }
+                raise
     
     async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Make a GET request."""

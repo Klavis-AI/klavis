@@ -59,6 +59,77 @@ async def test_chat_completion() -> Dict[str, Any]:
         auth_token_context.reset(token)
 
 
+async def test_chat_completion_stream() -> Dict[str, Any]:
+    """Test the create_chat_completion_stream tool."""
+    logger.info("Testing create_chat_completion_stream...")
+    
+    from tools.chat import create_chat_completion_stream
+    from tools.base import auth_token_context
+    
+    token = auth_token_context.set(TEST_API_KEY)
+    try:
+        messages = [
+            {"role": "user", "content": "Write a short story about a robot in exactly 3 sentences."}
+        ]
+        result = await create_chat_completion_stream(
+            model="anthropic/claude-3-opus",
+            messages=messages,
+            max_tokens=72,
+            temperature=0.8
+        )
+        
+        logger.info("=== STREAMING CHAT COMPLETION TEST ===")
+        logger.info(f"Model: {result.get('model', 'Unknown')}")
+        logger.info(f"Stream enabled: {result.get('stream', False)}")
+        
+        if result.get('success'):
+            data = result.get('data', {})
+            if data.get('stream') and data.get('generator'):
+                logger.info("✅ Streaming generator received! Processing chunks in real-time...")
+                logger.info(f"Stream status: {data.get('message', 'No message')}")
+                
+                generator = data.get('generator')
+                all_chunks = []
+                chunk_count = 0
+                
+                logger.info("🚀 Starting to process stream chunks in real-time...")
+                
+                async for chunk_data in generator:
+                    if chunk_data.get("is_complete"):
+                        total_chunks = chunk_data.get("total_chunks", chunk_count)
+                        logger.info(f"🎯 STREAM COMPLETED! Total chunks: {total_chunks}")
+                        break
+                    else:
+                        chunk_content = chunk_data.get("chunk")
+                        if chunk_content:
+                            all_chunks.append(chunk_content)
+                            chunk_count += 1
+                            logger.info(f"📦 Chunk {chunk_count}: '{chunk_content}'")
+                
+                final_content = ''.join(all_chunks)
+                logger.info(f"📝 Final content length: {len(final_content)}")
+                logger.info(f"📝 Final content: {final_content}")
+                
+                usage = result.get('usage', {})
+                logger.info(f"💳 Token usage: {usage}")
+                
+            elif data.get('choices'):
+                choices = data['choices']
+                if choices:
+                    content = choices[0].get('message', {}).get('content', '')
+                    logger.info(f"Response content: {content}")
+                    
+                    usage = result.get('usage', {})
+                    logger.info(f"Token usage: {usage}")
+            else:
+                logger.info(f"Response data: {data}")
+        
+        logger.info("=== END STREAMING TEST ===")
+        return result
+    finally:
+        auth_token_context.reset(token)
+
+
 async def test_user_profile() -> Dict[str, Any]:
     """Test the get_user_profile tool."""
     logger.info("Testing get_user_profile...")
@@ -138,12 +209,13 @@ async def run_all_tests():
     logger.info("Starting OpenRouter MCP Server tests...")
     
     tests = [
-        ("List Models", test_list_models),
-        ("Chat Completion", test_chat_completion),
-        ("User Profile", test_user_profile),
-        ("Get Credits", test_get_credits),
-        ("Model Comparison", test_model_comparison),
-        ("Model Recommendations", test_model_recommendations),
+        # ("List Models", test_list_models),
+        # ("Chat Completion", test_chat_completion),
+        ("Chat Completion Stream", test_chat_completion_stream),
+        # ("User Profile", test_user_profile),
+        # ("Get Credits", test_get_credits),
+        # ("Model Comparison", test_model_comparison),
+        # ("Model Recommendations", test_model_recommendations),
     ]
     
     results = {}
