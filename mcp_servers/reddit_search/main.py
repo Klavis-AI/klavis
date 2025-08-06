@@ -6,19 +6,30 @@ mcp = FastMCP()
 
 @mcp.tool()
 async def find_subreddit(query: str) -> str :
-     """
+    """
     Finds relevant subreddits based on a query.
     Use this first to discover communities when a user does not specify one.
     """
-
-    # This log message will appear in our terminal every time the AI uses this tool.
     logger.info(f"Executing tool 'find_subreddits' with query: '{query}'")   
 
-    # This is where we would call the Reddit API to find relevant subreddits.
-    # For now, we'll just return a placeholder response.
-    
+    # TODO: Implement the logic to find relevant subreddits.
     return "Subreddit search not implemented yet."
 
+@mcp.tool()
+async def search_subreddit_posts(subreddit: str, query: str) -> str:
+    """
+    Searches a subreddit for posts matching a query.
+    """
+    logger.info(f"Executing tool 'search_subreddit_posts' with subreddit: '{subreddit}' and query: '{query}'")
+    return "Subreddit post search not implemented yet."
+
+@mcp.tool()
+async def get_subreddit_post_comments(subreddit: str, post_id: str) -> str:
+    """
+    Gets the comments for a specific post in a subreddit.
+    """
+    logger.info(f"Executing tool 'get_subreddit_post_comments' with subreddit: '{subreddit}' and post_id: '{post_id}'")
+    return "Subreddit post comments not implemented yet."
 
 def main():
     print("Hello from reddit-search!")
@@ -26,3 +37,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    mcp.run()
