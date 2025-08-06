@@ -209,13 +209,13 @@ async def run_all_tests():
     logger.info("Starting OpenRouter MCP Server tests...")
     
     tests = [
-        # ("List Models", test_list_models),
-        # ("Chat Completion", test_chat_completion),
+        ("List Models", test_list_models),
+        ("Chat Completion", test_chat_completion),
         ("Chat Completion Stream", test_chat_completion_stream),
-        # ("User Profile", test_user_profile),
-        # ("Get Credits", test_get_credits),
-        # ("Model Comparison", test_model_comparison),
-        # ("Model Recommendations", test_model_recommendations),
+        ("User Profile", test_user_profile),
+        ("Get Credits", test_get_credits),
+        ("Model Comparison", test_model_comparison),
+        ("Model Recommendations", test_model_recommendations),
     ]
     
     results = {}
