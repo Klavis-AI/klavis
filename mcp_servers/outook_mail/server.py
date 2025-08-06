@@ -493,13 +493,6 @@ def main(
                         }
                     },
                     "required": ["message_id"],
-                    "anyOf": [
-                        {"required": ["subject"]},
-                        {"required": ["body_content"]},
-                        {"required": ["to_recipients"]},
-                        {"required": ["cc_recipients"]},
-                        {"required": ["bcc_recipients"]}
-                    ],
                     "additionalProperties": False
                 }
             ),
@@ -654,7 +647,7 @@ def main(
         # Attachment Operations
         if name == "outlookMail_add_attachment":
             try:
-                result = outlookMail_add_attachment(
+                result = await outlookMail_add_attachment(
                     message_id=arguments["message_id"],
                     file_path=arguments["file_path"],
                     attachment_name=arguments.get("attachment_name")
@@ -676,7 +669,7 @@ def main(
 
         elif name == "outlookMail_list_attachments":
             try:
-                result = outlookMail_list_attachments(
+                result = await outlookMail_list_attachments(
                     message_id=arguments["message_id"]
                 )
                 return [
@@ -696,7 +689,7 @@ def main(
 
         elif name == "outlookMail_get_attachment":
             try:
-                result = outlookMail_get_attachment(
+                result = await outlookMail_get_attachment(
                     message_id=arguments["message_id"],
                     attachment_id=arguments["attachment_id"],
                     expand=arguments.get("expand")
@@ -718,7 +711,7 @@ def main(
 
         elif name == "outlookMail_download_attachment":
             try:
-                result = outlookMail_download_attachment(
+                result = await outlookMail_download_attachment(
                     message_id=arguments["message_id"],
                     attachment_id=arguments["attachment_id"],
                     save_path=arguments["save_path"]
@@ -740,7 +733,7 @@ def main(
 
         elif name == "outlookMail_delete_attachment":
             try:
-                result = outlookMail_delete_attachment(
+                result = await outlookMail_delete_attachment(
                     message_id=arguments["message_id"],
                     attachment_id=arguments["attachment_id"]
                 )
@@ -761,7 +754,7 @@ def main(
 
         elif name == "outlookMail_upload_large_attachment":
             try:
-                result = outlookMail_upload_large_attachment(
+                result = await outlookMail_upload_large_attachment(
                     message_id=arguments["message_id"],
                     file_path=arguments["file_path"],
                     is_inline=arguments.get("is_inline", False),
@@ -784,7 +777,7 @@ def main(
         # Mail Folder Operations
         elif name == "outlookMail_delete_folder":
             try:
-                result = outlookMail_delete_folder(
+                result = await outlookMail_delete_folder(
                     folder_id=arguments["folder_id"]
                 )
                 return [
@@ -804,7 +797,7 @@ def main(
 
         elif name == "outlookMail_create_mail_folder":
             try:
-                result = outlookMail_create_mail_folder(
+                result = await outlookMail_create_mail_folder(
                     display_name=arguments["display_name"],
                     is_hidden=arguments.get("is_hidden", False)
                 )
@@ -825,7 +818,7 @@ def main(
 
         elif name == "outlookMail_list_folders":
             try:
-                result = outlookMail_list_folders(
+                result = await outlookMail_list_folders(
                     include_hidden=arguments.get("include_hidden", True)
                 )
                 return [
@@ -845,7 +838,7 @@ def main(
 
         elif name == "outlookMail_get_mail_folder":
             try:
-                result = outlookMail_get_mail_folder(
+                result = await outlookMail_get_mail_folder(
                     folder_id=arguments["folder_id"]
                 )
                 return [
@@ -865,7 +858,7 @@ def main(
 
         elif name == "outlookMail_update_folder_display_name":
             try:
-                result = outlookMail_update_folder_display_name(
+                result = await outlookMail_update_folder_display_name(
                     folder_id=arguments["folder_id"],
                     display_name=arguments["display_name"]
                 )
@@ -888,7 +881,7 @@ def main(
         # Mail Search Folder Operations
         elif name == "outlookMail_create_mail_search_folder":
             try:
-                result = outlookMail_create_mail_search_folder(
+                result = await outlookMail_create_mail_search_folder(
                     parent_folder_id=arguments["parent_folder_id"],
                     display_name=arguments["display_name"],
                     include_nested_folders=arguments["include_nested_folders"],
@@ -912,7 +905,7 @@ def main(
 
         elif name == "outlookMail_update_mail_search_folder":
             try:
-                result = outlookMail_update_mail_search_folder(
+                result = await outlookMail_update_mail_search_folder(
                     folder_id=arguments["folder_id"],
                     displayName=arguments.get("displayName"),
                     includeNestedFolders=arguments.get("includeNestedFolders"),
@@ -955,7 +948,7 @@ def main(
 
         elif name == "outlookMail_list_messages":
             try:
-                result = outlookMail_list_messages(
+                result = await outlookMail_list_messages(
                     top=arguments.get("top", 10),
                     filter_query=arguments.get("filter_query"),
                     orderby=arguments.get("orderby"),
@@ -978,7 +971,7 @@ def main(
 
         elif name == "outlookMail_list_messages_from_folder":
             try:
-                result = outlookMail_list_messages_from_folder(
+                result = await outlookMail_list_messages_from_folder(
                     folder_id=arguments["folder_id"],
                     top=arguments.get("top", 10),
                     filter_query=arguments.get("filter_query"),
@@ -1002,7 +995,7 @@ def main(
 
         elif name == "outlookMail_update_draft":
             try:
-                result = outlookMail_update_draft(
+                result = await outlookMail_update_draft(
                     message_id=arguments["message_id"],
                     subject=arguments.get("subject"),
                     body_content=arguments.get("body_content"),
@@ -1027,7 +1020,7 @@ def main(
         # Message Operations
         elif name == "outlookMail_delete_draft":
             try:
-                result = outlookMail_delete_draft(
+                result = await outlookMail_delete_draft(
                     message_id=arguments["message_id"]
                 )
                 return [
@@ -1047,7 +1040,7 @@ def main(
 
         elif name == "outlookMail_create_forward_draft":
             try:
-                result = outlookMail_create_forward_draft(
+                result = await outlookMail_create_forward_draft(
                     message_id=arguments["message_id"],
                     comment=arguments["comment"],
                     to_recipients=arguments["to_recipients"]
@@ -1069,7 +1062,7 @@ def main(
 
         elif name == "outlookMail_create_reply_draft":
             try:
-                result = outlookMail_create_reply_draft(
+                result = await outlookMail_create_reply_draft(
                     message_id=arguments["message_id"],
                     comment=arguments["comment"]
                 )
@@ -1090,7 +1083,7 @@ def main(
 
         elif name == "outlookMail_create_reply_all_draft":
             try:
-                result = outlookMail_create_reply_all_draft(
+                result = await outlookMail_create_reply_all_draft(
                     message_id=arguments["message_id"],
                     comment=arguments.get("comment", "")
                 )
@@ -1111,7 +1104,7 @@ def main(
 
         elif name == "outlookMail_send_draft":
             try:
-                result = outlookMail_send_draft(
+                result = await outlookMail_send_draft(
                     message_id=arguments["message_id"]
                 )
                 return [
@@ -1131,7 +1124,7 @@ def main(
 
         elif name == "outlookMail_create_draft":
             try:
-                result = outlookMail_create_draft(
+                result = await outlookMail_create_draft(
                     subject=arguments["subject"],
                     body_content=arguments["body_content"],
                     to_recipients=arguments["to_recipients"],
