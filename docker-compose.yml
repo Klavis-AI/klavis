@@ -1,0 +1,12 @@
+version: '3'
+services:
+  neon-mcp-server:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env.example
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python server.py
