@@ -50,6 +50,8 @@ class MiroClient {
     return response.json();
   }
 
+  // ================== BOARDS ==================
+  // START ======
   async getBoards(limit: number = 25, teamId?: string): Promise<any> {
     let endpoint = `/boards?limit=${limit}`;
     if (teamId) {
@@ -63,23 +65,55 @@ class MiroClient {
   async createBoard(data: {
     name: string;
     description?: string;
-    sharingPolicy?: 'private' | 'view' | 'comment' | 'edit';
+    sharingPolicy?: {
+      access: 'private' | 'view' | 'comment' | 'edit';
+      inviteToAccountAndBoardLinkAccess?: 'no_access' | 'viewer' | 'commenter' | 'editor';
+      organizationAccess?: 'private' | 'view' | 'comment' | 'edit';
+      teamAccess?: 'private' | 'view' | 'comment' | 'edit';
+    };
+    permissionsPolicy?: {
+      collaborationToolsStartAccess?: 'all_editors' | 'board_owners_and_coowners';
+      copyAccess?: 'anyone' | 'team_members' | 'team_editors' | 'board_owner';
+      sharingAccess?: 'owner_and_coowners' | 'team_members_with_editing_rights';
+    };
     teamId?: string;
+    projectId?: string;
   }): Promise<any> {
+    const payload: any = {
+      name: data.name,
+    };
+
+    if (data.description) {
+      payload.description = data.description;
+    }
+
+    if (data.sharingPolicy || data.permissionsPolicy) {
+      payload.policy = {};
+
+      if (data.sharingPolicy) {
+        payload.policy.sharingPolicy = data.sharingPolicy;
+      }
+
+      if (data.permissionsPolicy) {
+        payload.policy.permissionsPolicy = data.permissionsPolicy;
+      }
+    }
+
+    if (data.teamId) {
+      payload.teamId = data.teamId;
+    }
+
+    if (data.projectId) {
+      payload.projectId = data.projectId;
+    }
+
     return this.makeRequest('/boards', {
       method: 'POST',
-      body: JSON.stringify({
-        name: data.name,
-        description: data.description,
-        policy: {
-          sharingPolicy: data.sharingPolicy || 'private',
-        },
-        teamId: data.teamId,
-      }),
+      body: JSON.stringify(payload),
     });
   }
 
-  async getBoardDetails(boardId: string): Promise<any> {
+  async getSpecificBoard(boardId: string): Promise<any> {
     return this.makeRequest(`/boards/${boardId}`, {
       method: 'GET',
     });
@@ -90,16 +124,62 @@ class MiroClient {
     data: {
       name?: string;
       description?: string;
-      sharingPolicy?: 'private' | 'view' | 'comment' | 'edit';
+      teamId?: string;
+      projectId?: string;
+      policy?: {
+        sharingPolicy?: {
+          access?: 'private' | 'view' | 'comment' | 'edit';
+          inviteToAccountAndBoardLinkAccess?: 'no_access' | 'viewer' | 'commenter' | 'editor';
+          organizationAccess?: 'private' | 'view' | 'comment' | 'edit';
+          teamAccess?: 'private' | 'view' | 'comment' | 'edit';
+        };
+        permissionsPolicy?: {
+          collaborationToolsStartAccess?: 'all_editors' | 'board_owners_and_coowners';
+          copyAccess?: 'anyone' | 'team_members' | 'team_editors' | 'board_owner';
+          sharingAccess?: 'team_members_with_editing_rights' | 'owner_and_coowners';
+        };
+      };
     },
   ): Promise<any> {
+    const payload: any = {};
+
+    if (data.name !== undefined) {
+      if (data.name.length < 1 || data.name.length > 60) {
+        throw new Error('Board name must be between 1 and 60 characters');
+      }
+      payload.name = data.name;
+    }
+
+    if (data.description !== undefined) {
+      if (data.description.length > 300) {
+        throw new Error('Board description must not exceed 300 characters');
+      }
+      payload.description = data.description;
+    }
+
+    if (data.teamId !== undefined) {
+      payload.teamId = data.teamId;
+    }
+
+    if (data.projectId !== undefined) {
+      payload.projectId = data.projectId;
+    }
+
+    if (data.policy) {
+      payload.policy = {};
+
+      if (data.policy.sharingPolicy) {
+        payload.policy.sharingPolicy = data.policy.sharingPolicy;
+      }
+
+      if (data.policy.permissionsPolicy) {
+        payload.policy.permissionsPolicy = data.policy.permissionsPolicy;
+      }
+    }
+
     return this.makeRequest(`/boards/${boardId}`, {
       method: 'PATCH',
-      body: JSON.stringify({
-        name: data.name,
-        description: data.description,
-        policy: data.sharingPolicy ? { sharingPolicy: data.sharingPolicy } : undefined,
-      }),
+      body: JSON.stringify(payload),
     });
   }
 
@@ -108,324 +188,11 @@ class MiroClient {
       method: 'DELETE',
     });
   }
+  // End ======
+  // ================== BOARDS ==================
 
-  async getBoardItems(boardId: string, limit: number = 50, type?: string): Promise<any> {
-    let endpoint = `/boards/${boardId}/items?limit=${limit}`;
-    if (type) {
-      endpoint += `&type=${type}`;
-    }
-    return this.makeRequest(endpoint, {
-      method: 'GET',
-    });
-  }
-
-  async getBoardItem(boardId: string, itemId: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
-      method: 'GET',
-    });
-  }
-
-  async createBoardItem(
-    boardId: string,
-    data: {
-      type: 'shape' | 'text' | 'sticker' | 'image' | 'frame' | 'card' | 'embed';
-      content: any;
-      position?: { x: number; y: number };
-      style?: any;
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items`, {
-      method: 'POST',
-      body: JSON.stringify({
-        type: data.type,
-        data: data.content,
-        position: data.position,
-        style: data.style,
-      }),
-    });
-  }
-
-  async updateBoardItem(
-    boardId: string,
-    itemId: string,
-    data: {
-      content?: any;
-      position?: { x: number; y: number };
-      style?: any;
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({
-        data: data.content,
-        position: data.position,
-        style: data.style,
-      }),
-    });
-  }
-
-  async deleteBoardItem(boardId: string, itemId: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async getTeams(): Promise<any> {
-    return this.makeRequest('/teams', {
-      method: 'GET',
-    });
-  }
-
-  async getTeamMembers(teamId: string): Promise<any> {
-    return this.makeRequest(`/teams/${teamId}/members`, {
-      method: 'GET',
-    });
-  }
-
-  async createWebhook(
-    boardId: string,
-    data: {
-      url: string;
-      events: string[];
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/webhooks`, {
-      method: 'POST',
-      body: JSON.stringify({
-        url: data.url,
-        events: data.events,
-      }),
-    });
-  }
-
-  async getWebhooks(boardId: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/webhooks`, {
-      method: 'GET',
-    });
-  }
-
-  async deleteWebhook(boardId: string, webhookId: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/webhooks/${webhookId}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async exportBoard(boardId: string, format: 'pdf' | 'png' | 'jpeg'): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/export?format=${format}`, {
-      method: 'GET',
-    });
-  }
-
-  async createComment(boardId: string, itemId: string, text: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items/${itemId}/comments`, {
-      method: 'POST',
-      body: JSON.stringify({
-        text,
-      }),
-    });
-  }
-
-  async getComments(boardId: string, itemId: string): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/items/${itemId}/comments`, {
-      method: 'GET',
-    });
-  }
-  async createStickyNote(
-    boardId: string,
-    data: {
-      content: string;
-      x?: number;
-      y?: number;
-      color?: 'yellow' | 'green' | 'blue' | 'red' | 'gray' | 'orange' | 'purple' | 'pink';
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/stickers`, {
-      method: 'POST',
-      body: JSON.stringify({
-        data: {
-          content: data.content,
-          shape: 'square',
-        },
-        position: {
-          x: data.x || 0,
-          y: data.y || 0,
-        },
-        style: {
-          fillColor: data.color || 'yellow',
-          textAlign: 'center',
-          textAlignVertical: 'middle',
-        },
-      }),
-    });
-  }
-
-  async createShape(
-    boardId: string,
-    data: {
-      content?: string;
-      shape:
-        | 'rectangle'
-        | 'round_rectangle'
-        | 'circle'
-        | 'triangle'
-        | 'rhombus'
-        | 'parallelogram'
-        | 'trapezoid'
-        | 'pentagon'
-        | 'hexagon'
-        | 'octagon'
-        | 'wedge_round_rectangle'
-        | 'star'
-        | 'flow_chart_predefined_process'
-        | 'cloud'
-        | 'cross'
-        | 'can'
-        | 'right_arrow'
-        | 'left_arrow'
-        | 'top_arrow'
-        | 'bottom_arrow'
-        | 'arrows'
-        | 'bracket';
-      x?: number;
-      y?: number;
-      width?: number;
-      height?: number;
-      color?: string;
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/shapes`, {
-      method: 'POST',
-      body: JSON.stringify({
-        data: {
-          content: data.content || '',
-          shape: data.shape,
-        },
-        position: {
-          x: data.x || 0,
-          y: data.y || 0,
-        },
-        geometry: {
-          width: data.width || 100,
-          height: data.height || 100,
-        },
-        style: {
-          fillColor: data.color || 'blue',
-          borderColor: '#1a1a1a',
-          borderWidth: '2.0',
-          borderOpacity: '1.0',
-          fillOpacity: '1.0',
-        },
-      }),
-    });
-  }
-
-  async createTextItem(
-    boardId: string,
-    data: {
-      content: string;
-      x?: number;
-      y?: number;
-      width?: number;
-      fontSize?: number;
-      color?: string;
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/texts`, {
-      method: 'POST',
-      body: JSON.stringify({
-        data: {
-          content: data.content,
-        },
-        position: {
-          x: data.x || 0,
-          y: data.y || 0,
-        },
-        geometry: {
-          width: data.width || 200,
-        },
-        style: {
-          fontSize: data.fontSize ? `${data.fontSize}px` : '14px',
-          textColor: data.color || '#1a1a1a',
-          backgroundOpacity: '0.0',
-          borderOpacity: '0.0',
-        },
-      }),
-    });
-  }
-
-  async createConnector(
-    boardId: string,
-    data: {
-      startItemId: string;
-      endItemId: string;
-      shape?: 'straight' | 'elbowed' | 'curved';
-      style?: {
-        strokeColor?: string;
-        strokeWidth?: string;
-        strokeStyle?: 'normal' | 'dotted' | 'dashed';
-      };
-      captions?: Array<{
-        content: string;
-        position: number;
-      }>;
-    },
-  ): Promise<any> {
-    return this.makeRequest(`/boards/${boardId}/connectors`, {
-      method: 'POST',
-      body: JSON.stringify({
-        startItem: {
-          id: data.startItemId,
-        },
-        endItem: {
-          id: data.endItemId,
-        },
-        shape: data.shape || 'curved',
-        style: {
-          strokeColor: data.style?.strokeColor || '#000000',
-          strokeWidth: data.style?.strokeWidth || '2.0',
-          strokeStyle: data.style?.strokeStyle || 'normal',
-        },
-        captions:
-          data.captions?.map((caption) => ({
-            content: caption.content,
-            position: caption.position,
-            textAlignVertical: 'middle',
-            textAlign: 'center',
-          })) || [],
-      }),
-    });
-  }
-
-  async inviteCollaborator(
-    boardId: string,
-    data: {
-      email?: string; 
-      emails?: string[]; 
-      role?: 'viewer' | 'commenter' | 'editor';
-      message?: string;
-    },
-  ): Promise<any> {
-    
-    let emailsToInvite: string[];
-
-    if (data.emails) {
-      emailsToInvite = data.emails;
-    } else if (data.email) {
-      emailsToInvite = [data.email];
-    } else {
-      throw new Error('Either email or emails must be provided');
-    }
-
-    return this.makeRequest(`/boards/${boardId}/members`, {
-      method: 'POST',
-      body: JSON.stringify({
-        emails: emailsToInvite,
-        role: data.role || 'editor',
-        message: data.message || '',
-      }),
-    });
-  }
-
+  // ================== BOARD MEMBERS ==================
+  // START ======
   async getBoardMembers(boardId: string): Promise<any> {
     return this.makeRequest(`/boards/${boardId}/members`, {
       method: 'GET',
@@ -435,7 +202,7 @@ class MiroClient {
   async updateBoardMemberRole(
     boardId: string,
     userId: string,
-    role: 'viewer' | 'commenter' | 'editor',
+    role: 'viewer' | 'commenter' | 'editor' | 'coowner' | 'owner',
   ): Promise<any> {
     return this.makeRequest(`/boards/${boardId}/members/${userId}`, {
       method: 'PATCH',
@@ -450,6 +217,874 @@ class MiroClient {
       method: 'DELETE',
     });
   }
+  // End ======
+  // ================== BOARD MEMBERS ==================
+
+  // ================== ITEMS ==================
+  // START ======
+
+  async getBoardItems(boardId: string, limit: number = 50, type?: string): Promise<any> {
+    let endpoint = `/boards/${boardId}/items?limit=${limit}`;
+    if (type) {
+      endpoint += `&type=${type}`;
+    }
+    return this.makeRequest(endpoint, {
+      method: 'GET',
+    });
+  }
+
+  async getSpecificBoardItem(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateItemPosition(
+    boardId: string,
+    itemId: string,
+    data: {
+      position?: { x: number; y: number };
+      parentId?: string | null;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (data.position) {
+      payload.position = {
+        x: data.position.x,
+        y: data.position.y,
+      };
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteBoardItem(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/items/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== ITEMS ==================
+
+  // ================== APP CARD ITEMS ==================
+  // START ======
+  async createAppCard(
+    boardId: string,
+    data: {
+      title?: string;
+      description?: string;
+      status?: 'disconnected' | 'connected' | 'disabled';
+      fields?: Array<{
+        name: string;
+        value: string;
+        type?: string;
+      }>;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      fillColor?: string;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {
+      data: {
+        title: data.title || 'sample app card item',
+        description: data.description,
+        status: data.status || 'disconnected',
+      },
+      style: {
+        fillColor: data.fillColor || '#2d9bf0',
+      },
+    };
+
+    if (data.fields && data.fields.length > 0) {
+      payload.data.fields = data.fields;
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x || 0,
+        y: data.y || 0,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId) {
+      payload.parent = {
+        id: data.parentId,
+      };
+    }
+
+    return this.makeRequest(`/boards/${boardId}/app_cards`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getAppCard(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/app_cards/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateAppCard(
+    boardId: string,
+    itemId: string,
+    data: {
+      title?: string;
+      description?: string;
+      status?: 'disconnected' | 'connected' | 'disabled';
+      fields?: Array<{
+        name: string;
+        value: string;
+        type?: string;
+      }>;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      fillColor?: string;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.status !== undefined ||
+      data.fields !== undefined
+    ) {
+      payload.data = {};
+      if (data.title !== undefined) payload.data.title = data.title;
+      if (data.description !== undefined) payload.data.description = data.description;
+      if (data.status !== undefined) payload.data.status = data.status;
+      if (data.fields !== undefined) payload.data.fields = data.fields;
+    }
+
+    if (data.fillColor !== undefined) {
+      payload.style = {
+        fillColor: data.fillColor,
+      };
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x,
+        y: data.y,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/app_cards/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteAppCard(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/app_cards/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== APP CARD ITEMS ==================
+
+  // ================== CARD ITEMS ==================
+  // START ======
+  async createCard(
+    boardId: string,
+    data: {
+      title?: string;
+      description?: string;
+      assigneeId?: string;
+      dueDate?: string;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      cardTheme?: string;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {
+      data: {
+        title: data.title || 'sample card item',
+      },
+      style: {
+        cardTheme: data.cardTheme || '#2d9bf0',
+      },
+    };
+
+    if (data.description !== undefined) payload.data.description = data.description;
+    if (data.assigneeId !== undefined) payload.data.assigneeId = data.assigneeId;
+    if (data.dueDate !== undefined) payload.data.dueDate = data.dueDate;
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x || 0,
+        y: data.y || 0,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId) {
+      payload.parent = {
+        id: data.parentId,
+      };
+    }
+
+    return this.makeRequest(`/boards/${boardId}/cards`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getCard(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/cards/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateCard(
+    boardId: string,
+    itemId: string,
+    data: {
+      title?: string;
+      description?: string;
+      assigneeId?: string;
+      dueDate?: string;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      cardTheme?: string;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.assigneeId !== undefined ||
+      data.dueDate !== undefined
+    ) {
+      payload.data = {};
+      if (data.title !== undefined) payload.data.title = data.title;
+      if (data.description !== undefined) payload.data.description = data.description;
+      if (data.assigneeId !== undefined) payload.data.assigneeId = data.assigneeId;
+      if (data.dueDate !== undefined) payload.data.dueDate = data.dueDate;
+    }
+
+    if (data.cardTheme !== undefined) {
+      payload.style = {
+        cardTheme: data.cardTheme,
+      };
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x,
+        y: data.y,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/cards/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteCard(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/cards/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== CARD ITEMS ==================
+
+  // ================== SHAPE ITEMS ==================
+  // START ======
+  async createShape(
+    boardId: string,
+    data: {
+      content?: string;
+      shape?:
+        | 'rectangle'
+        | 'round_rectangle'
+        | 'circle'
+        | 'triangle'
+        | 'rhombus'
+        | 'parallelogram'
+        | 'trapezoid'
+        | 'pentagon'
+        | 'hexagon'
+        | 'octagon'
+        | 'wedge_round_rectangle_callout'
+        | 'star'
+        | 'flow_chart_predefined_process'
+        | 'cloud'
+        | 'cross'
+        | 'can'
+        | 'right_arrow'
+        | 'left_arrow'
+        | 'left_right_arrow'
+        | 'left_brace'
+        | 'right_brace';
+      borderColor?: string;
+      borderOpacity?: number;
+      borderStyle?: 'normal' | 'dotted' | 'dashed';
+      borderWidth?: number;
+      color?: string;
+      fillColor?: string;
+      fillOpacity?: number;
+      fontFamily?: string;
+      fontSize?: number;
+      textAlign?: 'left' | 'center' | 'right';
+      textAlignVertical?: 'top' | 'middle' | 'bottom';
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {
+      data: {
+        content: data.content || '',
+        shape: data.shape || 'rectangle',
+      },
+      style: {
+        borderColor: data.borderColor || '#1a1a1a',
+        borderOpacity:
+          data.borderOpacity !== undefined
+            ? data.borderOpacity.toString()
+            : data.borderColor
+              ? '1.0'
+              : '0.0',
+        borderStyle: data.borderStyle || 'normal',
+        borderWidth: data.borderWidth !== undefined ? data.borderWidth.toString() : '2.0',
+        color: data.color || '#1a1a1a',
+        fillColor: data.fillColor || '#ffffff',
+        fillOpacity:
+          data.fillOpacity !== undefined
+            ? data.fillOpacity.toString()
+            : data.fillColor
+              ? '1.0'
+              : '0.0',
+        fontFamily: data.fontFamily || 'arial',
+        fontSize: data.fontSize !== undefined ? data.fontSize.toString() : '14',
+        textAlign: data.textAlign || 'center',
+        textAlignVertical: data.textAlignVertical || 'top',
+      },
+    };
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x || 0,
+        y: data.y || 0,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId) {
+      payload.parent = {
+        id: data.parentId,
+      };
+    }
+
+    return this.makeRequest(`/boards/${boardId}/shapes`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getShape(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/shapes/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateShape(
+    boardId: string,
+    itemId: string,
+    data: {
+      content?: string;
+      shape?:
+        | 'rectangle'
+        | 'round_rectangle'
+        | 'circle'
+        | 'triangle'
+        | 'rhombus'
+        | 'parallelogram'
+        | 'trapezoid'
+        | 'pentagon'
+        | 'hexagon'
+        | 'octagon'
+        | 'wedge_round_rectangle_callout'
+        | 'star'
+        | 'flow_chart_predefined_process'
+        | 'cloud'
+        | 'cross'
+        | 'can'
+        | 'right_arrow'
+        | 'left_arrow'
+        | 'left_right_arrow'
+        | 'left_brace'
+        | 'right_brace';
+      borderColor?: string;
+      borderOpacity?: number;
+      borderStyle?: 'normal' | 'dotted' | 'dashed';
+      borderWidth?: number;
+      color?: string;
+      fillColor?: string;
+      fillOpacity?: number;
+      fontFamily?: string;
+      fontSize?: number;
+      textAlign?: 'left' | 'center' | 'right';
+      textAlignVertical?: 'top' | 'middle' | 'bottom';
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      rotation?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (data.content !== undefined || data.shape !== undefined) {
+      payload.data = {};
+      if (data.content !== undefined) payload.data.content = data.content;
+      if (data.shape !== undefined) payload.data.shape = data.shape;
+    }
+
+    if (
+      data.borderColor !== undefined ||
+      data.borderOpacity !== undefined ||
+      data.borderStyle !== undefined ||
+      data.borderWidth !== undefined ||
+      data.color !== undefined ||
+      data.fillColor !== undefined ||
+      data.fillOpacity !== undefined ||
+      data.fontFamily !== undefined ||
+      data.fontSize !== undefined ||
+      data.textAlign !== undefined ||
+      data.textAlignVertical !== undefined
+    ) {
+      payload.style = {};
+      if (data.borderColor !== undefined) payload.style.borderColor = data.borderColor;
+      if (data.borderOpacity !== undefined)
+        payload.style.borderOpacity = data.borderOpacity.toString();
+      if (data.borderStyle !== undefined) payload.style.borderStyle = data.borderStyle;
+      if (data.borderWidth !== undefined) payload.style.borderWidth = data.borderWidth.toString();
+      if (data.color !== undefined) payload.style.color = data.color;
+      if (data.fillColor !== undefined) payload.style.fillColor = data.fillColor;
+      if (data.fillOpacity !== undefined) payload.style.fillOpacity = data.fillOpacity.toString();
+      if (data.fontFamily !== undefined) payload.style.fontFamily = data.fontFamily;
+      if (data.fontSize !== undefined) payload.style.fontSize = data.fontSize.toString();
+      if (data.textAlign !== undefined) payload.style.textAlign = data.textAlign;
+      if (data.textAlignVertical !== undefined)
+        payload.style.textAlignVertical = data.textAlignVertical;
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x,
+        y: data.y,
+      };
+    }
+
+    if (data.width || data.height || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height) payload.geometry.height = data.height;
+      if (data.rotation !== undefined) payload.geometry.rotation = data.rotation;
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/shapes/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteShape(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/shapes/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== SHAPE ITEMS ==================
+
+  // ================== STICKY NOTE ITEMS ==================
+  // START ======
+  async createStickyNote(
+    boardId: string,
+    data: {
+      content: string;
+      shape?: 'square' | 'rectangle';
+      fillColor?:
+        | 'gray'
+        | 'light_yellow'
+        | 'yellow'
+        | 'orange'
+        | 'light_green'
+        | 'green'
+        | 'dark_green'
+        | 'cyan'
+        | 'light_pink'
+        | 'pink'
+        | 'violet'
+        | 'red'
+        | 'light_blue'
+        | 'blue'
+        | 'dark_blue'
+        | 'black';
+      textAlign?: 'left' | 'center' | 'right';
+      textAlignVertical?: 'top' | 'middle' | 'bottom';
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {
+      data: {
+        content: data.content,
+        shape: data.shape || 'square',
+      },
+      style: {
+        fillColor: data.fillColor || 'light_yellow',
+        textAlign: data.textAlign || 'center',
+        textAlignVertical: data.textAlignVertical || 'top',
+      },
+    };
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x || 0,
+        y: data.y || 0,
+      };
+    }
+
+    if (data.width || data.height) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height && !data.width) payload.geometry.height = data.height;
+    }
+
+    if (data.parentId) {
+      payload.parent = {
+        id: data.parentId,
+      };
+    }
+
+    return this.makeRequest(`/boards/${boardId}/sticky_notes`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getStickyNote(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/sticky_notes/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateStickyNote(
+    boardId: string,
+    itemId: string,
+    data: {
+      content?: string;
+      shape?: 'square' | 'rectangle';
+      fillColor?:
+        | 'gray'
+        | 'light_yellow'
+        | 'yellow'
+        | 'orange'
+        | 'light_green'
+        | 'green'
+        | 'dark_green'
+        | 'cyan'
+        | 'light_pink'
+        | 'pink'
+        | 'violet'
+        | 'red'
+        | 'light_blue'
+        | 'blue'
+        | 'dark_blue'
+        | 'black';
+      textAlign?: 'left' | 'center' | 'right';
+      textAlignVertical?: 'top' | 'middle' | 'bottom';
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (data.content !== undefined || data.shape !== undefined) {
+      payload.data = {};
+      if (data.content !== undefined) payload.data.content = data.content;
+      if (data.shape !== undefined) payload.data.shape = data.shape;
+    }
+
+    if (
+      data.fillColor !== undefined ||
+      data.textAlign !== undefined ||
+      data.textAlignVertical !== undefined
+    ) {
+      payload.style = {};
+      if (data.fillColor !== undefined) payload.style.fillColor = data.fillColor;
+      if (data.textAlign !== undefined) payload.style.textAlign = data.textAlign;
+      if (data.textAlignVertical !== undefined)
+        payload.style.textAlignVertical = data.textAlignVertical;
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x,
+        y: data.y,
+      };
+    }
+
+    if (data.width || data.height) {
+      payload.geometry = {};
+      if (data.width) payload.geometry.width = data.width;
+      if (data.height && !data.width) payload.geometry.height = data.height;
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/sticky_notes/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteStickyNote(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/sticky_notes/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== STICKY NOTE ITEMS ==================
+
+  // ================== TEXT ITEMS ==================
+  // START ======
+  async createText(
+    boardId: string,
+    data: {
+      content: string;
+      color?: string;
+      fillColor?: string;
+      fillOpacity?: number;
+      fontFamily?: string;
+      fontSize?: number;
+      textAlign?: 'left' | 'center' | 'right';
+      x?: number;
+      y?: number;
+      width?: number;
+      rotation?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {
+      data: {
+        content: data.content,
+      },
+      style: {
+        color: data.color || '#1a1a1a',
+        fillColor: data.fillColor || '#ffffff',
+        fillOpacity:
+          data.fillOpacity !== undefined
+            ? data.fillOpacity.toString()
+            : data.fillColor
+              ? '1.0'
+              : '0.0',
+        fontFamily: data.fontFamily || 'arial',
+        fontSize: data.fontSize !== undefined ? data.fontSize.toString() : '14',
+        textAlign: data.textAlign || 'center',
+      },
+    };
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x || 0,
+        y: data.y || 0,
+      };
+    }
+
+    if (data.width || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) {
+        const minWidth = (data.fontSize || 14) * 1.7;
+        payload.geometry.width = Math.max(data.width, minWidth);
+      }
+      if (data.rotation !== undefined) {
+        payload.geometry.rotation = data.rotation;
+      }
+    }
+
+    if (data.parentId) {
+      payload.parent = {
+        id: data.parentId,
+      };
+    }
+
+    return this.makeRequest(`/boards/${boardId}/texts`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getText(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/texts/${itemId}`, {
+      method: 'GET',
+    });
+  }
+
+  async updateText(
+    boardId: string,
+    itemId: string,
+    data: {
+      content?: string;
+      color?: string;
+      fillColor?: string;
+      fillOpacity?: number;
+      fontFamily?: string;
+      fontSize?: number;
+      textAlign?: 'left' | 'center' | 'right';
+      x?: number;
+      y?: number;
+      width?: number;
+      rotation?: number;
+      parentId?: string;
+    },
+  ): Promise<any> {
+    const payload: any = {};
+
+    if (data.content !== undefined) {
+      payload.data = {
+        content: data.content,
+      };
+    }
+
+    if (
+      data.color !== undefined ||
+      data.fillColor !== undefined ||
+      data.fillOpacity !== undefined ||
+      data.fontFamily !== undefined ||
+      data.fontSize !== undefined ||
+      data.textAlign !== undefined
+    ) {
+      payload.style = {};
+      if (data.color !== undefined) payload.style.color = data.color;
+      if (data.fillColor !== undefined) payload.style.fillColor = data.fillColor;
+      if (data.fillOpacity !== undefined) payload.style.fillOpacity = data.fillOpacity.toString();
+      if (data.fontFamily !== undefined) payload.style.fontFamily = data.fontFamily;
+      if (data.fontSize !== undefined) payload.style.fontSize = data.fontSize.toString();
+      if (data.textAlign !== undefined) payload.style.textAlign = data.textAlign;
+    }
+
+    if (data.x !== undefined || data.y !== undefined) {
+      payload.position = {
+        x: data.x,
+        y: data.y,
+      };
+    }
+
+    if (data.width || data.rotation !== undefined) {
+      payload.geometry = {};
+      if (data.width) {
+        const minWidth = (data.fontSize || 14) * 1.7;
+        payload.geometry.width = Math.max(data.width, minWidth);
+      }
+      if (data.rotation !== undefined) {
+        payload.geometry.rotation = data.rotation;
+      }
+    }
+
+    if (data.parentId !== undefined) {
+      payload.parent = data.parentId ? { id: data.parentId } : null;
+    }
+
+    return this.makeRequest(`/boards/${boardId}/texts/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async deleteText(boardId: string, itemId: string): Promise<any> {
+    return this.makeRequest(`/boards/${boardId}/texts/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+  // End ======
+  // ================== TEXT ITEMS ==================
 }
 
 function getMiroClient() {
@@ -463,6 +1098,8 @@ function getMiroClient() {
   return store.miroClient;
 }
 
+// ================== BOARDS ==================
+// START ======
 const CREATE_BOARD_TOOL: Tool = {
   name: 'miro_create_board',
   description: 'Create a new Miro board with a specified name and optional description.',
@@ -477,15 +1114,19 @@ const CREATE_BOARD_TOOL: Tool = {
         type: 'string',
         description: 'Optional description for the board',
       },
-      sharingPolicy: {
+      access: {
         type: 'string',
-        description: 'Board sharing policy',
-        enum: ['private', 'view', 'comment', 'edit'], 
+        description: 'Board access level',
+        enum: ['private', 'view', 'comment', 'edit'],
         default: 'private',
       },
       teamId: {
         type: 'string',
         description: 'Optional team ID to create the board under',
+      },
+      projectId: {
+        type: 'string',
+        description: 'Optional project ID to create the board under',
       },
     },
     required: ['name'],
@@ -513,8 +1154,8 @@ const LIST_BOARDS_TOOL: Tool = {
   },
 };
 
-const GET_BOARD_DETAILS_TOOL: Tool = {
-  name: 'miro_get_board_details',
+const GET_SPECIFIC_BOARD_TOOL: Tool = {
+  name: 'miro_get_specific_board',
   description: 'Get detailed information about a specific board including metadata and settings.',
   inputSchema: {
     type: 'object',
@@ -528,329 +1169,10 @@ const GET_BOARD_DETAILS_TOOL: Tool = {
   },
 };
 
-const GET_BOARD_ITEMS_TOOL: Tool = {
-  name: 'miro_get_board_items',
-  description: 'Get all items (widgets) from a specific board with optional filtering.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to get items from',
-      },
-      limit: {
-        type: 'number',
-        description: 'Maximum number of items to return (default: 50, max: 100)',
-        default: 50,
-        minimum: 1,
-        maximum: 100,
-      },
-      type: {
-        type: 'string',
-        description: 'Filter items by type (e.g., "shape", "text", "sticker")',
-        enum: ['shape', 'text', 'sticker', 'image', 'frame', 'card', 'embed', 'connector'],
-      },
-    },
-    required: ['board_id'],
-  },
-};
-
-const ADD_STICKY_NOTE_TOOL: Tool = {
-  name: 'miro_add_sticky_note',
-  description: 'Add a sticky note to a Miro board at specified coordinates.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to add the sticky note to',
-      },
-      content: {
-        type: 'string',
-        description: 'Text content of the sticky note',
-        maxLength: 8000, 
-      },
-      x: {
-        type: 'number',
-        description: 'X coordinate for the sticky note position (default: 0)',
-        default: 0,
-      },
-      y: {
-        type: 'number',
-        description: 'Y coordinate for the sticky note position (default: 0)',
-        default: 0,
-      },
-      color: {
-        type: 'string',
-        description: 'Color of the sticky note',
-        enum: ['yellow', 'green', 'blue', 'red', 'gray', 'orange', 'purple', 'pink'], 
-        default: 'yellow',
-      },
-      width: {
-        type: 'number',
-        description: 'Width of the sticky note (default: auto)',
-        minimum: 50,
-        maximum: 1000,
-      },
-    },
-    required: ['board_id', 'content'],
-  },
-};
-
-const ADD_SHAPE_TOOL: Tool = {
-  name: 'miro_add_shape',
-  description: 'Add a shape to a Miro board with customizable properties.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to add the shape to',
-      },
-      shape: {
-        type: 'string',
-        description: 'Type of shape to create',
-        enum: [
-          'rectangle',
-          'round_rectangle',
-          'circle',
-          'triangle',
-          'rhombus',
-          'parallelogram',
-          'trapezoid',
-          'pentagon',
-          'hexagon',
-          'octagon',
-          'wedge_round_rectangle',
-          'star',
-          'flow_chart_predefined_process',
-          'cloud',
-          'cross',
-          'can',
-          'right_arrow',
-          'left_arrow',
-          'top_arrow',
-          'bottom_arrow',
-          'arrows',
-          'bracket',
-        ], 
-      },
-      content: {
-        type: 'string',
-        description: 'Optional text content inside the shape',
-        maxLength: 8000,
-      },
-      x: {
-        type: 'number',
-        description: 'X coordinate for the shape position (default: 0)',
-        default: 0,
-      },
-      y: {
-        type: 'number',
-        description: 'Y coordinate for the shape position (default: 0)',
-        default: 0,
-      },
-      width: {
-        type: 'number',
-        description: 'Width of the shape (default: 100, min: 10, max: 32767)',
-        default: 100,
-        minimum: 10,
-        maximum: 32767,
-      },
-      height: {
-        type: 'number',
-        description: 'Height of the shape (default: 100, min: 10, max: 32767)',
-        default: 100,
-        minimum: 10,
-        maximum: 32767,
-      },
-      color: {
-        type: 'string',
-        description: 'Fill color of the shape in HEX format (default: #2d9bf0)',
-        default: '#2d9bf0',
-        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', 
-      },
-      borderColor: {
-        type: 'string',
-        description: 'Border color in HEX format (default: #1a1a1a)',
-        default: '#1a1a1a',
-        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-      },
-    },
-    required: ['board_id', 'shape'],
-  },
-};
-
-const ADD_TEXT_ITEM_TOOL: Tool = {
-  name: 'miro_add_text_item',
-  description: 'Add a text item to a Miro board with formatting options.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to add the text to',
-      },
-      content: {
-        type: 'string',
-        description: 'Text content to add',
-        maxLength: 8000,
-      },
-      x: {
-        type: 'number',
-        description: 'X coordinate for the text position (default: 0)',
-        default: 0,
-      },
-      y: {
-        type: 'number',
-        description: 'Y coordinate for the text position (default: 0)',
-        default: 0,
-      },
-      width: {
-        type: 'number',
-        description: 'Width of the text box (default: 200, min: 50, max: 32767)',
-        default: 200,
-        minimum: 50,
-        maximum: 32767,
-      },
-      fontSize: {
-        type: 'number',
-        description: 'Font size in pixels (default: 14, min: 1, max: 200)',
-        default: 14,
-        minimum: 1,
-        maximum: 200,
-      },
-      color: {
-        type: 'string',
-        description: 'Color of the text in HEX format (default: #1a1a1a)',
-        default: '#1a1a1a',
-        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-      },
-      textAlign: {
-        type: 'string',
-        description: 'Text alignment',
-        enum: ['left', 'center', 'right'],
-        default: 'left',
-      },
-    },
-    required: ['board_id', 'content'],
-  },
-};
-
-const CREATE_CONNECTOR_TOOL: Tool = {
-  name: 'miro_create_connector',
-  description: 'Create a connector between two items on a Miro board with customizable style.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the items',
-      },
-      start_item_id: {
-        type: 'string',
-        description: 'ID of the starting item for the connector',
-      },
-      end_item_id: {
-        type: 'string',
-        description: 'ID of the ending item for the connector',
-      },
-      shape: {
-        type: 'string',
-        description: 'Shape of the connector line',
-        enum: ['straight', 'elbowed', 'curved'],
-        default: 'curved',
-      },
-      style: {
-        type: 'string',
-        description: 'Style of the connector line',
-        enum: ['normal', 'dashed', 'dotted'],
-        default: 'normal',
-      },
-      strokeColor: {
-        type: 'string',
-        description: 'Color of the connector line in HEX format',
-        default: '#000000',
-        pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
-      },
-      captions: {
-        type: 'array',
-        description: 'Text labels to add along the connector',
-        items: {
-          type: 'object',
-          properties: {
-            content: { type: 'string' },
-            position: {
-              type: 'number',
-              description: 'Position along connector (0-1)',
-              minimum: 0,
-              maximum: 1,
-            },
-          },
-        },
-      },
-    },
-    required: ['board_id', 'start_item_id', 'end_item_id'],
-  },
-};
-
-const INVITE_COLLABORATOR_TOOL: Tool = {
-  name: 'miro_invite_collaborator',
-  description: 'Invite one or more collaborators to a Miro board with specified access level.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to invite the collaborator to',
-      },
-      emails: {
-        type: 'array',
-        description: 'Email addresses of the people to invite',
-        items: {
-          type: 'string',
-          format: 'email',
-        },
-        minItems: 1,
-      },
-      role: {
-        type: 'string',
-        description: 'Access level to assign to the collaborator',
-        enum: ['viewer', 'commenter', 'editor'],
-        default: 'editor',
-      },
-      message: {
-        type: 'string',
-        description: 'Personalized message to include with the invitation',
-        maxLength: 500,
-      },
-    },
-    required: ['board_id', 'emails'],
-  },
-};
-
-const DELETE_BOARD_ITEM_TOOL: Tool = {
-  name: 'miro_delete_board_item',
-  description: 'Permanently delete a specific item from a Miro board.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the item',
-      },
-      item_id: {
-        type: 'string',
-        description: 'ID of the item to delete',
-      },
-    },
-    required: ['board_id', 'item_id'],
-  },
-};
-
 const UPDATE_BOARD_TOOL: Tool = {
   name: 'miro_update_board',
-  description: "Update an existing Miro board's name, description, or sharing policy.",
+  description:
+    "Update an existing Miro board's properties including name, description, policies, and team/project assignment.",
   inputSchema: {
     type: 'object',
     properties: {
@@ -860,16 +1182,57 @@ const UPDATE_BOARD_TOOL: Tool = {
       },
       name: {
         type: 'string',
-        description: 'New name for the board',
+        description: 'New name for the board (1-60 characters)',
+        minLength: 1,
+        maxLength: 60,
       },
       description: {
         type: 'string',
-        description: 'New description for the board',
+        description: 'New description for the board (max 300 characters)',
+        maxLength: 300,
       },
-      sharingPolicy: {
+      team_id: {
         type: 'string',
-        description: 'New sharing policy for the board',
+        description: 'ID of team to move the board to',
+      },
+      project_id: {
+        type: 'string',
+        description: 'ID of project/space to add the board to',
+      },
+      access: {
+        type: 'string',
+        description: 'Public-level access to the board',
         enum: ['private', 'view', 'comment', 'edit'],
+      },
+      invite_to_account_and_board_link_access: {
+        type: 'string',
+        description: 'User role when inviting via invite link',
+        enum: ['no_access', 'viewer', 'commenter', 'editor'],
+      },
+      organization_access: {
+        type: 'string',
+        description: 'Organization-level access to the board',
+        enum: ['private', 'view', 'comment', 'edit'],
+      },
+      team_access: {
+        type: 'string',
+        description: 'Team-level access to the board',
+        enum: ['private', 'view', 'comment', 'edit'],
+      },
+      collaboration_tools_start_access: {
+        type: 'string',
+        description: 'Who can start collaboration tools (timer, voting, etc.)',
+        enum: ['all_editors', 'board_owners_and_coowners'],
+      },
+      copy_access: {
+        type: 'string',
+        description: 'Who can copy the board and download content',
+        enum: ['anyone', 'team_members', 'team_editors', 'board_owner'],
+      },
+      sharing_access: {
+        type: 'string',
+        description: 'Who can change access and invite users',
+        enum: ['team_members_with_editing_rights', 'owner_and_coowners'],
       },
     },
     required: ['board_id'],
@@ -890,221 +1253,11 @@ const DELETE_BOARD_TOOL: Tool = {
     required: ['board_id'],
   },
 };
+// END ======
+// ================== BOARDS ==================
 
-const GET_BOARD_ITEM_TOOL: Tool = {
-  name: 'miro_get_board_item',
-  description: 'Get detailed information about a specific item on a board.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the item',
-      },
-      item_id: {
-        type: 'string',
-        description: 'ID of the item to get details for',
-      },
-    },
-    required: ['board_id', 'item_id'],
-  },
-};
-
-const UPDATE_BOARD_ITEM_TOOL: Tool = {
-  name: 'miro_update_board_item',
-  description: 'Update properties of an existing board item.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the item',
-      },
-      item_id: {
-        type: 'string',
-        description: 'ID of the item to update',
-      },
-      content: {
-        type: 'object',
-        description: 'Updated content for the item',
-      },
-      position: {
-        type: 'object',
-        description: 'New position for the item',
-        properties: {
-          x: { type: 'number' },
-          y: { type: 'number' },
-        },
-      },
-      style: {
-        type: 'object',
-        description: 'Updated style properties for the item',
-      },
-    },
-    required: ['board_id', 'item_id'],
-  },
-};
-
-const GET_TEAMS_TOOL: Tool = {
-  name: 'miro_get_teams',
-  description: 'Get all teams accessible to the current user.',
-  inputSchema: {
-    type: 'object',
-    properties: {},
-  },
-};
-
-const GET_TEAM_MEMBERS_TOOL: Tool = {
-  name: 'miro_get_team_members',
-  description: 'Get members of a specific team.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      team_id: {
-        type: 'string',
-        description: 'ID of the team to get members for',
-      },
-    },
-    required: ['team_id'],
-  },
-};
-
-const CREATE_WEBHOOK_TOOL: Tool = {
-  name: 'miro_create_webhook',
-  description: 'Create a webhook to receive notifications about board events.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to create webhook for',
-      },
-      url: {
-        type: 'string',
-        format: 'uri',
-        description: 'URL to send webhook notifications to',
-      },
-      events: {
-        type: 'array',
-        description: 'List of events to subscribe to',
-        items: {
-          type: 'string',
-          enum: [
-            'item_created',
-            'item_updated',
-            'item_deleted',
-            'board_updated',
-            'board_shared',
-            'board_member_added',
-            'board_member_removed',
-            'board_member_role_updated',
-          ],
-        },
-        minItems: 1,
-      },
-    },
-    required: ['board_id', 'url', 'events'],
-  },
-};
-
-const GET_WEBHOOKS_TOOL: Tool = {
-  name: 'miro_get_webhooks',
-  description: 'Get all webhooks configured for a board.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to get webhooks for',
-      },
-    },
-    required: ['board_id'],
-  },
-};
-
-const DELETE_WEBHOOK_TOOL: Tool = {
-  name: 'miro_delete_webhook',
-  description: 'Delete a specific webhook from a board.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the webhook',
-      },
-      webhook_id: {
-        type: 'string',
-        description: 'ID of the webhook to delete',
-      },
-    },
-    required: ['board_id', 'webhook_id'],
-  },
-};
-
-const EXPORT_BOARD_TOOL: Tool = {
-  name: 'miro_export_board',
-  description: 'Export a board in the specified format.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board to export',
-      },
-      format: {
-        type: 'string',
-        description: 'Export format',
-        enum: ['pdf', 'png', 'jpeg'],
-        default: 'pdf',
-      },
-    },
-    required: ['board_id'],
-  },
-};
-
-const CREATE_COMMENT_TOOL: Tool = {
-  name: 'miro_create_comment',
-  description: 'Add a comment to a specific board item.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the item',
-      },
-      item_id: {
-        type: 'string',
-        description: 'ID of the item to comment on',
-      },
-      text: {
-        type: 'string',
-        description: 'Comment text',
-        maxLength: 8000,
-      },
-    },
-    required: ['board_id', 'item_id', 'text'],
-  },
-};
-
-const GET_COMMENTS_TOOL: Tool = {
-  name: 'miro_get_comments',
-  description: 'Get all comments for a specific board item.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      board_id: {
-        type: 'string',
-        description: 'ID of the board containing the item',
-      },
-      item_id: {
-        type: 'string',
-        description: 'ID of the item to get comments for',
-      },
-    },
-    required: ['board_id', 'item_id'],
-  },
-};
-
+// ================== BOARD MEMBERS ==================
+// START ======
 const GET_BOARD_MEMBERS_TOOL: Tool = {
   name: 'miro_get_board_members',
   description: 'Get all members and their roles for a specific board.',
@@ -1162,42 +1315,1293 @@ const REMOVE_BOARD_MEMBER_TOOL: Tool = {
     required: ['board_id', 'user_id'],
   },
 };
+// END ======
+// ================== BOARD MEMBERS ==================
 
-const CREATE_BOARD_ITEM_TOOL: Tool = {
-  name: 'miro_create_board_item',
-  description: 'Create a generic board item with flexible type and content.',
+// ================== ITEMS ==================
+// START ======
+const GET_BOARD_ITEMS_TOOL: Tool = {
+  name: 'miro_get_board_items',
+  description: 'Get all items (widgets) from a specific board with optional filtering.',
   inputSchema: {
     type: 'object',
     properties: {
       board_id: {
         type: 'string',
-        description: 'ID of the board to add the item to',
+        description: 'ID of the board to get items from',
+      },
+      limit: {
+        type: 'number',
+        description: 'Maximum number of items to return (default: 50, max: 100)',
+        default: 50,
+        minimum: 1,
+        maximum: 100,
       },
       type: {
         type: 'string',
-        description: 'Type of item to create',
-        enum: ['shape', 'text', 'sticker', 'image', 'frame', 'card', 'embed'],
-      },
-      content: {
-        type: 'object',
-        description: 'Content data for the item (structure depends on type)',
-      },
-      position: {
-        type: 'object',
-        description: 'Position of the item on the board',
-        properties: {
-          x: { type: 'number', default: 0 },
-          y: { type: 'number', default: 0 },
-        },
-      },
-      style: {
-        type: 'object',
-        description: 'Style properties for the item',
+        description: 'Filter items by type (e.g., "shape", "text", "sticker")',
+        enum: ['shape', 'text', 'sticker', 'image', 'frame', 'card', 'embed', 'connector'],
       },
     },
-    required: ['board_id', 'type', 'content'],
+    required: ['board_id'],
   },
 };
+
+const GET_SPECIFIC_BOARD_ITEM_TOOL: Tool = {
+  name: 'miro_get_specific_board_item',
+  description: 'Get detailed information about a specific item on a board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the item',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the item to get details for',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_ITEM_POSITION_TOOL: Tool = {
+  name: 'miro_update_item_position',
+  description: 'Update the position or parent of an item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the item',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the item to update',
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the item position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the item position',
+      },
+      parent_id: {
+        type: 'string',
+        description:
+          'ID of parent frame to attach item to (omit to keep current parent, use "null" to attach to canvas)',
+      },
+      attach_to_canvas: {
+        type: 'boolean',
+        description:
+          'Set to true to attach item directly to canvas (removes from any parent frame)',
+        default: false,
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_BOARD_ITEM_TOOL: Tool = {
+  name: 'miro_delete_board_item',
+  description: 'Permanently delete a specific item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the item',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// END ======
+// ================== ITEMS ==================
+
+// ================== APP CARD ITEMS ==================
+// START ======
+const ADD_APP_CARD_TOOL: Tool = {
+  name: 'miro_add_app_card_item',
+  description: 'Add an app card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board to add the app card to',
+      },
+      title: {
+        type: 'string',
+        description: 'Title of the app card',
+      },
+      description: {
+        type: 'string',
+        description: 'Description of the app card',
+      },
+      status: {
+        type: 'string',
+        description: 'Connection status of the app card',
+        enum: ['disconnected', 'connected', 'disabled'],
+        default: 'disconnected',
+      },
+      fields: {
+        type: 'array',
+        description: 'Custom preview fields for the app card',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Field name' },
+            value: { type: 'string', description: 'Field value' },
+            type: { type: 'string', description: 'Field type' },
+          },
+          required: ['name', 'value'],
+        },
+      },
+      x: {
+        type: 'number',
+        description: 'X coordinate for the app card position',
+      },
+      y: {
+        type: 'number',
+        description: 'Y coordinate for the app card position',
+      },
+      width: {
+        type: 'number',
+        description: 'Width of the app card in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'Height of the app card in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'Rotation angle in degrees',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'Fill color in hex format (e.g., #2d9bf0)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'ID of parent frame to attach the app card to',
+      },
+    },
+    required: ['board_id'],
+  },
+};
+
+const GET_APP_CARD_TOOL: Tool = {
+  name: 'miro_get_app_card_item',
+  description: 'Get information about a specific app card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the app card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the app card item to retrieve',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_APP_CARD_TOOL: Tool = {
+  name: 'miro_update_app_card_item',
+  description: 'Update an app card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the app card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the app card item to update',
+      },
+      title: {
+        type: 'string',
+        description: 'New title of the app card',
+      },
+      description: {
+        type: 'string',
+        description: 'New description of the app card',
+      },
+      status: {
+        type: 'string',
+        description: 'New connection status of the app card',
+        enum: ['disconnected', 'connected', 'disabled'],
+      },
+      fields: {
+        type: 'array',
+        description: 'Updated custom preview fields for the app card',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Field name' },
+            value: { type: 'string', description: 'Field value' },
+            type: { type: 'string', description: 'Field type' },
+          },
+          required: ['name', 'value'],
+        },
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the app card position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the app card position',
+      },
+      width: {
+        type: 'number',
+        description: 'New width of the app card in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'New height of the app card in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'New rotation angle in degrees',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'New fill color in hex format (e.g., #2d9bf0)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'New parent frame ID (use "null" to attach to canvas)',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_APP_CARD_TOOL: Tool = {
+  name: 'miro_delete_app_card_item',
+  description: 'Delete an app card item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the app card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the app card item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// END ======
+// ================== APP CARD ITEMS ==================
+
+// ================== CARD ITEMS ==================
+// START ======
+const ADD_CARD_TOOL: Tool = {
+  name: 'miro_add_card_item',
+  description: 'Add a card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board to add the card to',
+      },
+      title: {
+        type: 'string',
+        description: 'Title of the card',
+      },
+      description: {
+        type: 'string',
+        description: 'Description of the card',
+      },
+      assignee_id: {
+        type: 'string',
+        description: 'User ID of the person assigned to this card',
+      },
+      due_date: {
+        type: 'string',
+        description: 'Due date in ISO 8601 format (e.g., 2024-12-31T23:59:59Z)',
+        format: 'date-time',
+      },
+      x: {
+        type: 'number',
+        description: 'X coordinate for the card position',
+      },
+      y: {
+        type: 'number',
+        description: 'Y coordinate for the card position',
+      },
+      width: {
+        type: 'number',
+        description: 'Width of the card in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'Height of the card in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'Rotation angle in degrees',
+      },
+      card_theme: {
+        type: 'string',
+        description: 'Card theme color in hex format (e.g., #2d9bf0)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'ID of parent frame to attach the card to',
+      },
+    },
+    required: ['board_id'],
+  },
+};
+
+const GET_CARD_TOOL: Tool = {
+  name: 'miro_get_card_item',
+  description: 'Get information about a specific card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the card item to retrieve',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_CARD_TOOL: Tool = {
+  name: 'miro_update_card_item',
+  description: 'Update a card item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the card item to update',
+      },
+      title: {
+        type: 'string',
+        description: 'New title of the card',
+      },
+      description: {
+        type: 'string',
+        description: 'New description of the card',
+      },
+      assignee_id: {
+        type: 'string',
+        description: 'New assignee user ID for the card',
+      },
+      due_date: {
+        type: 'string',
+        description: 'New due date in ISO 8601 format (e.g., 2024-12-31T23:59:59Z)',
+        format: 'date-time',
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the card position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the card position',
+      },
+      width: {
+        type: 'number',
+        description: 'New width of the card in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'New height of the card in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'New rotation angle in degrees',
+      },
+      card_theme: {
+        type: 'string',
+        description: 'New card theme color in hex format (e.g., #2d9bf0)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'New parent frame ID (use "null" to attach to canvas)',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_CARD_TOOL: Tool = {
+  name: 'miro_delete_card_item',
+  description: 'Delete a card item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the card',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the card item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// END ======
+// ================== CARD ITEMS ==================
+
+// ================== SHAPE ITEMS ==================
+// START ======
+const ADD_SHAPE_TOOL: Tool = {
+  name: 'miro_add_shape',
+  description: 'Add a shape item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board to add the shape to',
+      },
+      content: {
+        type: 'string',
+        description: 'Text content to display on the shape',
+      },
+      shape: {
+        type: 'string',
+        description: 'Type of shape to create',
+        enum: [
+          'rectangle',
+          'round_rectangle',
+          'circle',
+          'triangle',
+          'rhombus',
+          'parallelogram',
+          'trapezoid',
+          'pentagon',
+          'hexagon',
+          'octagon',
+          'wedge_round_rectangle_callout',
+          'star',
+          'flow_chart_predefined_process',
+          'cloud',
+          'cross',
+          'can',
+          'right_arrow',
+          'left_arrow',
+          'left_right_arrow',
+          'left_brace',
+          'right_brace',
+        ],
+        default: 'rectangle',
+      },
+      border_color: {
+        type: 'string',
+        description: 'Border color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      border_opacity: {
+        type: 'number',
+        description: 'Border opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      border_style: {
+        type: 'string',
+        description: 'Border style',
+        enum: ['normal', 'dotted', 'dashed'],
+        default: 'normal',
+      },
+      border_width: {
+        type: 'number',
+        description: 'Border width (1 to 24)',
+        minimum: 1,
+        maximum: 24,
+      },
+      color: {
+        type: 'string',
+        description: 'Text color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'Fill color in hex format (e.g., #ffffff)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_opacity: {
+        type: 'number',
+        description: 'Fill opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      font_family: {
+        type: 'string',
+        description: 'Font family',
+        enum: [
+          'arial',
+          'abril_fatface',
+          'bangers',
+          'eb_garamond',
+          'georgia',
+          'graduate',
+          'gravitas_one',
+          'fredoka_one',
+          'nixie_one',
+          'open_sans',
+          'permanent_marker',
+          'pt_sans',
+          'pt_sans_narrow',
+          'pt_serif',
+          'rammetto_one',
+          'roboto',
+          'roboto_condensed',
+          'roboto_slab',
+          'caveat',
+          'times_new_roman',
+          'titan_one',
+          'lemon_tuesday',
+          'roboto_mono',
+          'noto_sans',
+          'plex_sans',
+          'plex_serif',
+          'plex_mono',
+          'spoof',
+          'tiempos_text',
+          'formular',
+        ],
+        default: 'arial',
+      },
+      font_size: {
+        type: 'number',
+        description: 'Font size (10 to 288)',
+        minimum: 10,
+        maximum: 288,
+      },
+      text_align: {
+        type: 'string',
+        description: 'Horizontal text alignment',
+        enum: ['left', 'center', 'right'],
+        default: 'center',
+      },
+      text_align_vertical: {
+        type: 'string',
+        description: 'Vertical text alignment',
+        enum: ['top', 'middle', 'bottom'],
+        default: 'top',
+      },
+      x: {
+        type: 'number',
+        description: 'X coordinate for the shape position',
+      },
+      y: {
+        type: 'number',
+        description: 'Y coordinate for the shape position',
+      },
+      width: {
+        type: 'number',
+        description: 'Width of the shape in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'Height of the shape in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'Rotation angle in degrees',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'ID of parent frame to attach the shape to',
+      },
+    },
+    required: ['board_id'],
+  },
+};
+
+const GET_SHAPE_TOOL: Tool = {
+  name: 'miro_get_shape',
+  description: 'Get information about a specific shape item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the shape',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the shape item to retrieve',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_SHAPE_TOOL: Tool = {
+  name: 'miro_update_shape',
+  description: 'Update a shape item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the shape',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the shape item to update',
+      },
+      content: {
+        type: 'string',
+        description: 'New text content to display on the shape',
+      },
+      shape: {
+        type: 'string',
+        description: 'New type of shape',
+        enum: [
+          'rectangle',
+          'round_rectangle',
+          'circle',
+          'triangle',
+          'rhombus',
+          'parallelogram',
+          'trapezoid',
+          'pentagon',
+          'hexagon',
+          'octagon',
+          'wedge_round_rectangle_callout',
+          'star',
+          'flow_chart_predefined_process',
+          'cloud',
+          'cross',
+          'can',
+          'right_arrow',
+          'left_arrow',
+          'left_right_arrow',
+          'left_brace',
+          'right_brace',
+        ],
+      },
+      border_color: {
+        type: 'string',
+        description: 'New border color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      border_opacity: {
+        type: 'number',
+        description: 'New border opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      border_style: {
+        type: 'string',
+        description: 'New border style',
+        enum: ['normal', 'dotted', 'dashed'],
+      },
+      border_width: {
+        type: 'number',
+        description: 'New border width (1 to 24)',
+        minimum: 1,
+        maximum: 24,
+      },
+      color: {
+        type: 'string',
+        description: 'New text color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'New fill color in hex format (e.g., #ffffff)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_opacity: {
+        type: 'number',
+        description: 'New fill opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      font_family: {
+        type: 'string',
+        description: 'New font family',
+        enum: [
+          'arial',
+          'abril_fatface',
+          'bangers',
+          'eb_garamond',
+          'georgia',
+          'graduate',
+          'gravitas_one',
+          'fredoka_one',
+          'nixie_one',
+          'open_sans',
+          'permanent_marker',
+          'pt_sans',
+          'pt_sans_narrow',
+          'pt_serif',
+          'rammetto_one',
+          'roboto',
+          'roboto_condensed',
+          'roboto_slab',
+          'caveat',
+          'times_new_roman',
+          'titan_one',
+          'lemon_tuesday',
+          'roboto_mono',
+          'noto_sans',
+          'plex_sans',
+          'plex_serif',
+          'plex_mono',
+          'spoof',
+          'tiempos_text',
+          'formular',
+        ],
+      },
+      font_size: {
+        type: 'number',
+        description: 'New font size (10 to 288)',
+        minimum: 10,
+        maximum: 288,
+      },
+      text_align: {
+        type: 'string',
+        description: 'New horizontal text alignment',
+        enum: ['left', 'center', 'right'],
+      },
+      text_align_vertical: {
+        type: 'string',
+        description: 'New vertical text alignment',
+        enum: ['top', 'middle', 'bottom'],
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the shape position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the shape position',
+      },
+      width: {
+        type: 'number',
+        description: 'New width of the shape in pixels',
+      },
+      height: {
+        type: 'number',
+        description: 'New height of the shape in pixels',
+      },
+      rotation: {
+        type: 'number',
+        description: 'New rotation angle in degrees',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'New parent frame ID (use "null" to attach to canvas)',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_SHAPE_TOOL: Tool = {
+  name: 'miro_delete_shape',
+  description: 'Delete a shape item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the shape',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the shape item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// END ======
+// ================== SHAPE ITEMS ==================
+
+// ================== STICKY NOTE ITEMS ==================
+// START ======
+const ADD_STICKY_NOTE_TOOL: Tool = {
+  name: 'miro_add_sticky_note',
+  description: 'Add a sticky note item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board to add the sticky note to',
+      },
+      content: {
+        type: 'string',
+        description: 'Text content of the sticky note',
+      },
+      shape: {
+        type: 'string',
+        description: 'Shape of the sticky note',
+        enum: ['square', 'rectangle'],
+        default: 'square',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'Fill color of the sticky note',
+        enum: [
+          'gray',
+          'light_yellow',
+          'yellow',
+          'orange',
+          'light_green',
+          'green',
+          'dark_green',
+          'cyan',
+          'light_pink',
+          'pink',
+          'violet',
+          'red',
+          'light_blue',
+          'blue',
+          'dark_blue',
+          'black',
+        ],
+        default: 'light_yellow',
+      },
+      text_align: {
+        type: 'string',
+        description: 'Horizontal text alignment',
+        enum: ['left', 'center', 'right'],
+        default: 'center',
+      },
+      text_align_vertical: {
+        type: 'string',
+        description: 'Vertical text alignment',
+        enum: ['top', 'middle', 'bottom'],
+        default: 'top',
+      },
+      x: {
+        type: 'number',
+        description: 'X coordinate for the sticky note position',
+      },
+      y: {
+        type: 'number',
+        description: 'Y coordinate for the sticky note position',
+      },
+      width: {
+        type: 'number',
+        description: 'Width of the sticky note in pixels (cannot be used with height)',
+      },
+      height: {
+        type: 'number',
+        description: 'Height of the sticky note in pixels (cannot be used with width)',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'ID of parent frame to attach the sticky note to',
+      },
+    },
+    required: ['board_id', 'content'],
+  },
+};
+
+const GET_STICKY_NOTE_TOOL: Tool = {
+  name: 'miro_get_sticky_note',
+  description: 'Get information about a specific sticky note item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the sticky note',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the sticky note item to retrieve',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_STICKY_NOTE_TOOL: Tool = {
+  name: 'miro_update_sticky_note',
+  description: 'Update a sticky note item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the sticky note',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the sticky note item to update',
+      },
+      content: {
+        type: 'string',
+        description: 'New text content of the sticky note',
+      },
+      shape: {
+        type: 'string',
+        description: 'New shape of the sticky note',
+        enum: ['square', 'rectangle'],
+      },
+      fill_color: {
+        type: 'string',
+        description: 'New fill color of the sticky note',
+        enum: [
+          'gray',
+          'light_yellow',
+          'yellow',
+          'orange',
+          'light_green',
+          'green',
+          'dark_green',
+          'cyan',
+          'light_pink',
+          'pink',
+          'violet',
+          'red',
+          'light_blue',
+          'blue',
+          'dark_blue',
+          'black',
+        ],
+      },
+      text_align: {
+        type: 'string',
+        description: 'New horizontal text alignment',
+        enum: ['left', 'center', 'right'],
+      },
+      text_align_vertical: {
+        type: 'string',
+        description: 'New vertical text alignment',
+        enum: ['top', 'middle', 'bottom'],
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the sticky note position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the sticky note position',
+      },
+      width: {
+        type: 'number',
+        description: 'New width of the sticky note in pixels (cannot be used with height)',
+      },
+      height: {
+        type: 'number',
+        description: 'New height of the sticky note in pixels (cannot be used with width)',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'New parent frame ID (use "null" to attach to canvas)',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_STICKY_NOTE_TOOL: Tool = {
+  name: 'miro_delete_sticky_note',
+  description: 'Delete a sticky note item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the sticky note',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the sticky note item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// END ======
+// ================== STICKY NOTE ITEMS ==================
+
+// ================== TEXT ITEMS ==================
+// START ======
+const ADD_TEXT_TOOL: Tool = {
+  name: 'miro_add_text_item',
+  description: 'Add a text item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board to add the text to',
+      },
+      content: {
+        type: 'string',
+        description: 'Text content to display',
+      },
+      color: {
+        type: 'string',
+        description: 'Text color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'Background color in hex format (e.g., #ffffff)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_opacity: {
+        type: 'number',
+        description: 'Background opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      font_family: {
+        type: 'string',
+        description: 'Font family',
+        enum: [
+          'arial',
+          'abril_fatface',
+          'bangers',
+          'eb_garamond',
+          'georgia',
+          'graduate',
+          'gravitas_one',
+          'fredoka_one',
+          'nixie_one',
+          'open_sans',
+          'permanent_marker',
+          'pt_sans',
+          'pt_sans_narrow',
+          'pt_serif',
+          'rammetto_one',
+          'roboto',
+          'roboto_condensed',
+          'roboto_slab',
+          'caveat',
+          'times_new_roman',
+          'titan_one',
+          'lemon_tuesday',
+          'roboto_mono',
+          'noto_sans',
+          'plex_sans',
+          'plex_serif',
+          'plex_mono',
+          'spoof',
+          'tiempos_text',
+          'formular',
+        ],
+        default: 'arial',
+      },
+      font_size: {
+        type: 'number',
+        description: 'Font size (minimum 1)',
+        minimum: 1,
+      },
+      text_align: {
+        type: 'string',
+        description: 'Text alignment',
+        enum: ['left', 'center', 'right'],
+        default: 'center',
+      },
+      x: {
+        type: 'number',
+        description: 'X coordinate for the text position',
+      },
+      y: {
+        type: 'number',
+        description: 'Y coordinate for the text position',
+      },
+      width: {
+        type: 'number',
+        description: 'Width of the text box in pixels (minimum 1.7 times font size)',
+      },
+      rotation: {
+        type: 'number',
+        description: 'Rotation angle in degrees',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'ID of parent frame to attach the text to',
+      },
+    },
+    required: ['board_id', 'content'],
+  },
+};
+
+const GET_TEXT_TOOL: Tool = {
+  name: 'miro_get_text_item',
+  description: 'Get information about a specific text item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the text',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the text item to retrieve',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const UPDATE_TEXT_TOOL: Tool = {
+  name: 'miro_update_text_item',
+  description: 'Update a text item on a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the text',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the text item to update',
+      },
+      content: {
+        type: 'string',
+        description: 'New text content to display',
+      },
+      color: {
+        type: 'string',
+        description: 'New text color in hex format (e.g., #1a1a1a)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_color: {
+        type: 'string',
+        description: 'New background color in hex format (e.g., #ffffff)',
+        pattern: '^#([A-Fa-f0-9]{6})$',
+      },
+      fill_opacity: {
+        type: 'number',
+        description: 'New background opacity (0.0 to 1.0)',
+        minimum: 0,
+        maximum: 1,
+      },
+      font_family: {
+        type: 'string',
+        description: 'New font family',
+        enum: [
+          'arial',
+          'abril_fatface',
+          'bangers',
+          'eb_garamond',
+          'georgia',
+          'graduate',
+          'gravitas_one',
+          'fredoka_one',
+          'nixie_one',
+          'open_sans',
+          'permanent_marker',
+          'pt_sans',
+          'pt_sans_narrow',
+          'pt_serif',
+          'rammetto_one',
+          'roboto',
+          'roboto_condensed',
+          'roboto_slab',
+          'caveat',
+          'times_new_roman',
+          'titan_one',
+          'lemon_tuesday',
+          'roboto_mono',
+          'noto_sans',
+          'plex_sans',
+          'plex_serif',
+          'plex_mono',
+          'spoof',
+          'tiempos_text',
+          'formular',
+        ],
+      },
+      font_size: {
+        type: 'number',
+        description: 'New font size (minimum 1)',
+        minimum: 1,
+      },
+      text_align: {
+        type: 'string',
+        description: 'New text alignment',
+        enum: ['left', 'center', 'right'],
+      },
+      x: {
+        type: 'number',
+        description: 'New X coordinate for the text position',
+      },
+      y: {
+        type: 'number',
+        description: 'New Y coordinate for the text position',
+      },
+      width: {
+        type: 'number',
+        description: 'New width of the text box in pixels (minimum 1.7 times font size)',
+      },
+      rotation: {
+        type: 'number',
+        description: 'New rotation angle in degrees',
+      },
+      parent_id: {
+        type: 'string',
+        description: 'New parent frame ID (use "null" to attach to canvas)',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+
+const DELETE_TEXT_TOOL: Tool = {
+  name: 'miro_delete_text_item',
+  description: 'Delete a text item from a Miro board.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      board_id: {
+        type: 'string',
+        description: 'ID of the board containing the text',
+      },
+      item_id: {
+        type: 'string',
+        description: 'ID of the text item to delete',
+      },
+    },
+    required: ['board_id', 'item_id'],
+  },
+};
+// End ======
+// ================== TEXT ITEMS ==================
 
 function safeLog(
   level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency',
@@ -1232,82 +2636,35 @@ const getMiroMcpServer = () => {
           UPDATE_BOARD_TOOL,
           DELETE_BOARD_TOOL,
           LIST_BOARDS_TOOL,
-          GET_BOARD_DETAILS_TOOL,
-          EXPORT_BOARD_TOOL,
+          GET_SPECIFIC_BOARD_TOOL,
           GET_BOARD_ITEMS_TOOL,
-          GET_BOARD_ITEM_TOOL,
-          CREATE_BOARD_ITEM_TOOL,
-          UPDATE_BOARD_ITEM_TOOL,
-          ADD_STICKY_NOTE_TOOL,
-          ADD_SHAPE_TOOL,
-          ADD_TEXT_ITEM_TOOL,
-          CREATE_CONNECTOR_TOOL,
+          GET_SPECIFIC_BOARD_ITEM_TOOL,
+          UPDATE_ITEM_POSITION_TOOL,
           DELETE_BOARD_ITEM_TOOL,
-          INVITE_COLLABORATOR_TOOL,
           GET_BOARD_MEMBERS_TOOL,
           UPDATE_BOARD_MEMBER_ROLE_TOOL,
           REMOVE_BOARD_MEMBER_TOOL,
-          CREATE_COMMENT_TOOL,
-          GET_COMMENTS_TOOL,
-          CREATE_WEBHOOK_TOOL,
-          GET_WEBHOOKS_TOOL,
-          DELETE_WEBHOOK_TOOL,
-          GET_TEAMS_TOOL,
-          GET_TEAM_MEMBERS_TOOL,
+          ADD_APP_CARD_TOOL,
+          GET_APP_CARD_TOOL,
+          UPDATE_APP_CARD_TOOL,
+          DELETE_APP_CARD_TOOL,
+          ADD_CARD_TOOL,
+          GET_CARD_TOOL,
+          UPDATE_CARD_TOOL,
+          DELETE_CARD_TOOL,
+          ADD_SHAPE_TOOL,
+          GET_SHAPE_TOOL,
+          UPDATE_SHAPE_TOOL,
+          DELETE_SHAPE_TOOL,
+          ADD_STICKY_NOTE_TOOL,
+          GET_STICKY_NOTE_TOOL,
+          UPDATE_STICKY_NOTE_TOOL,
+          DELETE_STICKY_NOTE_TOOL,
+          ADD_TEXT_TOOL,
+          GET_TEXT_TOOL,
+          UPDATE_TEXT_TOOL,
+          DELETE_TEXT_TOOL,
         ],
-        categories: [
-          {
-            name: 'board_management',
-            description: 'Tools for creating and managing Miro boards',
-          },
-          {
-            name: 'content_management',
-            description: 'Tools for adding and managing content on boards',
-          },
-          {
-            name: 'collaboration',
-            description: 'Tools for managing board collaborators and comments',
-          },
-          {
-            name: 'integrations',
-            description: 'Tools for webhook integrations and external connections',
-          },
-          {
-            name: 'teams_orgs',
-            description: 'Tools for team and organization management',
-          },
-        ],
-        organization: {
-          board_management: [
-            'miro_create_board',
-            'miro_update_board',
-            'miro_delete_board',
-            'miro_list_boards',
-            'miro_get_board_details',
-            'miro_export_board',
-          ],
-          content_management: [
-            'miro_get_board_items',
-            'miro_get_board_item',
-            'miro_create_board_item',
-            'miro_update_board_item',
-            'miro_add_sticky_note',
-            'miro_add_shape',
-            'miro_add_text_item',
-            'miro_create_connector',
-            'miro_delete_board_item',
-          ],
-          collaboration: [
-            'miro_invite_collaborator',
-            'miro_get_board_members',
-            'miro_update_board_member_role',
-            'miro_remove_board_member',
-            'miro_create_comment',
-            'miro_get_comments',
-          ],
-          integrations: ['miro_create_webhook', 'miro_get_webhooks', 'miro_delete_webhook'],
-          teams_orgs: ['miro_get_teams', 'miro_get_team_members'],
-        },
       };
     });
 
@@ -1316,12 +2673,20 @@ const getMiroMcpServer = () => {
 
       try {
         switch (name) {
+          // ================== BOARDS ==================
+          // START ======
           case 'miro_create_board': {
             const client = getMiroClient();
             const result = await client.createBoard({
               name: (args as any)?.name,
               description: (args as any)?.description,
-              sharingPolicy: (args as any)?.string || 'private',
+              sharingPolicy: (args as any)?.access
+                ? {
+                    access: (args as any)?.access,
+                  }
+                : undefined,
+              teamId: (args as any)?.teamId,
+              projectId: (args as any)?.projectId,
             });
 
             return {
@@ -1348,146 +2713,9 @@ const getMiroMcpServer = () => {
             };
           }
 
-          case 'miro_get_board_details': {
+          case 'miro_get_specific_board': {
             const client = getMiroClient();
-            const result = await client.getBoardDetails((args as any)?.board_id);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_get_board_items': {
-            const client = getMiroClient();
-            const result = await client.getBoardItems(
-              (args as any)?.board_id,
-              (args?.limit as number) || 50,
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_add_sticky_note': {
-            const client = getMiroClient();
-            const result = await client.createStickyNote((args as any)?.board_id, {
-              content: (args as any)?.content,
-              x: (args as any)?.x || 0,
-              y: (args as any)?.y || 0,
-              color: (args as any)?.color || 'yellow',
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_add_shape': {
-            const client = getMiroClient();
-            const result = await client.createShape((args as any)?.board_id, {
-              shape: (args as any)?.shape,
-              content: (args as any)?.content,
-              x: (args as any)?.x || 0,
-              y: (args as any)?.y || 0,
-              width: (args as any)?.width || 100,
-              height: (args as any)?.height || 100,
-              color: (args as any)?.color || 'blue',
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_add_text_item': {
-            const client = getMiroClient();
-            const result = await client.createTextItem((args as any)?.board_id, {
-              content: (args as any)?.content,
-              x: (args as any)?.x || 0,
-              y: (args as any)?.y || 0,
-              fontSize: (args as any)?.fontSize || 14,
-              color: (args as any)?.color || 'black',
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_create_connector': {
-            const client = getMiroClient();
-            const result = await client.createConnector((args as any)?.board_id, {
-              startItemId: (args as any)?.start_item_id,
-              endItemId: (args as any)?.end_item_id,
-              shape: (args as any)?.shape || 'curved',
-              style: {
-                strokeColor: (args as any)?.stroke_color || '#000000',
-                strokeWidth: (args as any)?.stroke_width || '2.0',
-                strokeStyle: (args as any)?.stroke_style || 'normal',
-              },
-              captions: (args as any)?.captions,
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_invite_collaborator': {
-            const client = getMiroClient();
-            const result = await client.inviteCollaborator((args as any)?.board_id, {
-              emails: (args as any)?.emails,
-              role: (args as any)?.role || 'editor',
-              message: (args as any)?.message,
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_delete_board_item': {
-            const client = getMiroClient();
-            const result = await client.deleteBoardItem(
-              (args as any)?.board_id,
-              (args as any)?.item_id,
-            );
+            const result = await client.getSpecificBoard((args as any)?.board_id);
 
             return {
               content: [
@@ -1501,10 +2729,57 @@ const getMiroMcpServer = () => {
 
           case 'miro_update_board': {
             const client = getMiroClient();
+
+            let policy: any = undefined;
+
+            const hasSharingPolicy =
+              (args as any)?.access ||
+              (args as any)?.invite_to_account_and_board_link_access ||
+              (args as any)?.organization_access ||
+              (args as any)?.team_access;
+
+            const hasPermissionsPolicy =
+              (args as any)?.collaboration_tools_start_access ||
+              (args as any)?.copy_access ||
+              (args as any)?.sharing_access;
+
+            if (hasSharingPolicy || hasPermissionsPolicy) {
+              policy = {};
+
+              if (hasSharingPolicy) {
+                policy.sharingPolicy = {};
+                if ((args as any)?.access) policy.sharingPolicy.access = (args as any).access;
+                if ((args as any)?.invite_to_account_and_board_link_access) {
+                  policy.sharingPolicy.inviteToAccountAndBoardLinkAccess = (
+                    args as any
+                  ).invite_to_account_and_board_link_access;
+                }
+                if ((args as any)?.organization_access)
+                  policy.sharingPolicy.organizationAccess = (args as any).organization_access;
+                if ((args as any)?.team_access)
+                  policy.sharingPolicy.teamAccess = (args as any).team_access;
+              }
+
+              if (hasPermissionsPolicy) {
+                policy.permissionsPolicy = {};
+                if ((args as any)?.collaboration_tools_start_access) {
+                  policy.permissionsPolicy.collaborationToolsStartAccess = (
+                    args as any
+                  ).collaboration_tools_start_access;
+                }
+                if ((args as any)?.copy_access)
+                  policy.permissionsPolicy.copyAccess = (args as any).copy_access;
+                if ((args as any)?.sharing_access)
+                  policy.permissionsPolicy.sharingAccess = (args as any).sharing_access;
+              }
+            }
+
             const result = await client.updateBoard((args as any)?.board_id, {
               name: (args as any)?.name,
               description: (args as any)?.description,
-              sharingPolicy: (args as any)?.sharingPolicy,
+              teamId: (args as any)?.team_id,
+              projectId: (args as any)?.project_id,
+              policy: policy,
             });
 
             return {
@@ -1530,179 +2805,11 @@ const getMiroMcpServer = () => {
               ],
             };
           }
+          // End ======
+          // ================== BOARDS ==================
 
-          case 'miro_get_board_item': {
-            const client = getMiroClient();
-            const result = await client.getBoardItem(
-              (args as any)?.board_id,
-              (args as any)?.item_id,
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_update_board_item': {
-            const client = getMiroClient();
-            const result = await client.updateBoardItem(
-              (args as any)?.board_id,
-              (args as any)?.item_id,
-              {
-                content: (args as any)?.content,
-                position: (args as any)?.position
-                  ? {
-                      x: (args as any)?.position?.x,
-                      y: (args as any)?.position?.y,
-                    }
-                  : undefined,
-                style: (args as any)?.style,
-              },
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_get_teams': {
-            const client = getMiroClient();
-            const result = await client.getTeams();
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_get_team_members': {
-            const client = getMiroClient();
-            const result = await client.getTeamMembers((args as any)?.team_id);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_create_webhook': {
-            const client = getMiroClient();
-            const result = await client.createWebhook((args as any)?.board_id, {
-              url: (args as any)?.url,
-              events: (args as any)?.events || [],
-            });
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_get_webhooks': {
-            const client = getMiroClient();
-            const result = await client.getWebhooks((args as any)?.board_id);
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_delete_webhook': {
-            const client = getMiroClient();
-            const result = await client.deleteWebhook(
-              (args as any)?.board_id,
-              (args as any)?.webhook_id,
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_export_board': {
-            const client = getMiroClient();
-            const result = await client.exportBoard(
-              (args as any)?.board_id,
-              (args as any)?.format || 'pdf',
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_create_comment': {
-            const client = getMiroClient();
-            const result = await client.createComment(
-              (args as any)?.board_id,
-              (args as any)?.item_id,
-              (args as any)?.text,
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
-          case 'miro_get_comments': {
-            const client = getMiroClient();
-            const result = await client.getComments(
-              (args as any)?.board_id,
-              (args as any)?.item_id,
-            );
-
-            return {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(result, null, 2),
-                },
-              ],
-            };
-          }
-
+          // ================== BOARD MEMBERS ==================
+          // START ======
           case 'miro_get_board_members': {
             const client = getMiroClient();
             const result = await client.getBoardMembers((args as any)?.board_id);
@@ -1751,19 +2858,118 @@ const getMiroMcpServer = () => {
               ],
             };
           }
+          // End ======
+          // ================== BOARD MEMBERS ==================
 
-          case 'miro_create_board_item': {
+          // ================== ITEMS ==================
+          // START ======
+          case 'miro_get_board_items': {
             const client = getMiroClient();
-            const result = await client.createBoardItem((args as any)?.board_id, {
-              type: (args as any)?.type,
-              content: (args as any)?.content,
-              position: (args as any)?.position
+            const result = await client.getBoardItems(
+              (args as any)?.board_id,
+              (args?.limit as number) || 50,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_get_specific_board_item': {
+            const client = getMiroClient();
+            const result = await client.getSpecificBoardItem(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_item_position': {
+            const client = getMiroClient();
+
+            const position =
+              (args as any)?.x !== undefined || (args as any)?.y !== undefined
                 ? {
-                    x: (args as any)?.position?.x || 0,
-                    y: (args as any)?.position?.y || 0,
+                    x: (args as any)?.x,
+                    y: (args as any)?.y,
                   }
-                : { x: 0, y: 0 },
-              style: (args as any)?.style,
+                : undefined;
+
+            let parentId: string | null | undefined = undefined;
+
+            if ((args as any)?.attach_to_canvas === true) {
+              parentId = null;
+            } else if ((args as any)?.parent_id !== undefined) {
+              parentId = (args as any)?.parent_id === 'null' ? null : (args as any)?.parent_id;
+            }
+
+            const result = await client.updateItemPosition(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                position: position,
+                parentId: parentId,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_board_item': {
+            const client = getMiroClient();
+            const result = await client.deleteBoardItem(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+          // End ======
+          // ================== ITEMS ==================
+
+          // ================== APP CARD ITEMS ==================
+          // START ======
+          case 'miro_add_app_card_item': {
+            const client = getMiroClient();
+            const result = await client.createAppCard((args as any)?.board_id, {
+              title: (args as any)?.title,
+              description: (args as any)?.description,
+              status: (args as any)?.status,
+              fields: (args as any)?.fields,
+              x: (args as any)?.x,
+              y: (args as any)?.y,
+              width: (args as any)?.width,
+              height: (args as any)?.height,
+              rotation: (args as any)?.rotation,
+              fillColor: (args as any)?.fill_color,
+              parentId: (args as any)?.parent_id,
             });
 
             return {
@@ -1775,6 +2981,447 @@ const getMiroMcpServer = () => {
               ],
             };
           }
+
+          case 'miro_get_app_card_item': {
+            const client = getMiroClient();
+            const result = await client.getAppCard((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_app_card_item': {
+            const client = getMiroClient();
+            const result = await client.updateAppCard(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                title: (args as any)?.title,
+                description: (args as any)?.description,
+                status: (args as any)?.status,
+                fields: (args as any)?.fields,
+                x: (args as any)?.x,
+                y: (args as any)?.y,
+                width: (args as any)?.width,
+                height: (args as any)?.height,
+                rotation: (args as any)?.rotation,
+                fillColor: (args as any)?.fill_color,
+                parentId: (args as any)?.parent_id,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_app_card_item': {
+            const client = getMiroClient();
+            const result = await client.deleteAppCard(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'App card deleted successfully',
+                },
+              ],
+            };
+          }
+          // End ======
+          // ================== APP CARD ITEMS ==================
+
+          // ================== CARD ITEMS ==================
+          // START ======
+          case 'miro_add_card_item': {
+            const client = getMiroClient();
+            const result = await client.createCard((args as any)?.board_id, {
+              title: (args as any)?.title,
+              description: (args as any)?.description,
+              assigneeId: (args as any)?.assignee_id,
+              dueDate: (args as any)?.due_date,
+              x: (args as any)?.x,
+              y: (args as any)?.y,
+              width: (args as any)?.width,
+              height: (args as any)?.height,
+              rotation: (args as any)?.rotation,
+              cardTheme: (args as any)?.card_theme,
+              parentId: (args as any)?.parent_id,
+            });
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_get_card_item': {
+            const client = getMiroClient();
+            const result = await client.getCard((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_card_item': {
+            const client = getMiroClient();
+            const result = await client.updateCard(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                title: (args as any)?.title,
+                description: (args as any)?.description,
+                assigneeId: (args as any)?.assignee_id,
+                dueDate: (args as any)?.due_date,
+                x: (args as any)?.x,
+                y: (args as any)?.y,
+                width: (args as any)?.width,
+                height: (args as any)?.height,
+                rotation: (args as any)?.rotation,
+                cardTheme: (args as any)?.card_theme,
+                parentId: (args as any)?.parent_id,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_card_item': {
+            const client = getMiroClient();
+            const result = await client.deleteCard((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Card deleted successfully',
+                },
+              ],
+            };
+          }
+          // End ======
+          // ================== CARD ITEMS ==================
+
+          // ================== SHAPE ITEMS ==================
+          // START ======
+          case 'miro_add_shape': {
+            const client = getMiroClient();
+            const result = await client.createShape((args as any)?.board_id, {
+              content: (args as any)?.content,
+              shape: (args as any)?.shape,
+              borderColor: (args as any)?.border_color,
+              borderOpacity: (args as any)?.border_opacity,
+              borderStyle: (args as any)?.border_style,
+              borderWidth: (args as any)?.border_width,
+              color: (args as any)?.color,
+              fillColor: (args as any)?.fill_color,
+              fillOpacity: (args as any)?.fill_opacity,
+              fontFamily: (args as any)?.font_family,
+              fontSize: (args as any)?.font_size,
+              textAlign: (args as any)?.text_align,
+              textAlignVertical: (args as any)?.text_align_vertical,
+              x: (args as any)?.x,
+              y: (args as any)?.y,
+              width: (args as any)?.width,
+              height: (args as any)?.height,
+              rotation: (args as any)?.rotation,
+              parentId: (args as any)?.parent_id,
+            });
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_get_shape': {
+            const client = getMiroClient();
+            const result = await client.getShape((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_shape': {
+            const client = getMiroClient();
+            const result = await client.updateShape(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                content: (args as any)?.content,
+                shape: (args as any)?.shape,
+                borderColor: (args as any)?.border_color,
+                borderOpacity: (args as any)?.border_opacity,
+                borderStyle: (args as any)?.border_style,
+                borderWidth: (args as any)?.border_width,
+                color: (args as any)?.color,
+                fillColor: (args as any)?.fill_color,
+                fillOpacity: (args as any)?.fill_opacity,
+                fontFamily: (args as any)?.font_family,
+                fontSize: (args as any)?.font_size,
+                textAlign: (args as any)?.text_align,
+                textAlignVertical: (args as any)?.text_align_vertical,
+                x: (args as any)?.x,
+                y: (args as any)?.y,
+                width: (args as any)?.width,
+                height: (args as any)?.height,
+                rotation: (args as any)?.rotation,
+                parentId: (args as any)?.parent_id,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_shape': {
+            const client = getMiroClient();
+            const result = await client.deleteShape(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Shape deleted successfully',
+                },
+              ],
+            };
+          }
+          // End ======
+          // ================== SHAPE ITEMS ==================
+
+          // ================== STICKY NOTE ITEMS ==================
+          // START ======
+          case 'miro_add_sticky_note': {
+            const client = getMiroClient();
+            const result = await client.createStickyNote((args as any)?.board_id, {
+              content: (args as any)?.content,
+              shape: (args as any)?.shape,
+              fillColor: (args as any)?.fill_color,
+              textAlign: (args as any)?.text_align,
+              textAlignVertical: (args as any)?.text_align_vertical,
+              x: (args as any)?.x,
+              y: (args as any)?.y,
+              width: (args as any)?.width,
+              height: (args as any)?.height,
+              parentId: (args as any)?.parent_id,
+            });
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_get_sticky_note': {
+            const client = getMiroClient();
+            const result = await client.getStickyNote(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_sticky_note': {
+            const client = getMiroClient();
+            const result = await client.updateStickyNote(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                content: (args as any)?.content,
+                shape: (args as any)?.shape,
+                fillColor: (args as any)?.fill_color,
+                textAlign: (args as any)?.text_align,
+                textAlignVertical: (args as any)?.text_align_vertical,
+                x: (args as any)?.x,
+                y: (args as any)?.y,
+                width: (args as any)?.width,
+                height: (args as any)?.height,
+                parentId: (args as any)?.parent_id,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_sticky_note': {
+            const client = getMiroClient();
+            const result = await client.deleteStickyNote(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Sticky note deleted successfully',
+                },
+              ],
+            };
+          }
+          // End ======
+          // ================== STICKY NOTE ITEMS ==================
+
+          // ================== TEXT ITEMS ==================
+          // START ======
+          case 'miro_add_text_item': {
+            const client = getMiroClient();
+            const result = await client.createText((args as any)?.board_id, {
+              content: (args as any)?.content,
+              color: (args as any)?.color,
+              fillColor: (args as any)?.fill_color,
+              fillOpacity: (args as any)?.fill_opacity,
+              fontFamily: (args as any)?.font_family,
+              fontSize: (args as any)?.font_size,
+              textAlign: (args as any)?.text_align,
+              x: (args as any)?.x,
+              y: (args as any)?.y,
+              width: (args as any)?.width,
+              rotation: (args as any)?.rotation,
+              parentId: (args as any)?.parent_id,
+            });
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_get_text_item': {
+            const client = getMiroClient();
+            const result = await client.getText((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_update_text_item': {
+            const client = getMiroClient();
+            const result = await client.updateText(
+              (args as any)?.board_id,
+              (args as any)?.item_id,
+              {
+                content: (args as any)?.content,
+                color: (args as any)?.color,
+                fillColor: (args as any)?.fill_color,
+                fillOpacity: (args as any)?.fill_opacity,
+                fontFamily: (args as any)?.font_family,
+                fontSize: (args as any)?.font_size,
+                textAlign: (args as any)?.text_align,
+                x: (args as any)?.x,
+                y: (args as any)?.y,
+                width: (args as any)?.width,
+                rotation: (args as any)?.rotation,
+                parentId: (args as any)?.parent_id,
+              },
+            );
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(result, null, 2),
+                },
+              ],
+            };
+          }
+
+          case 'miro_delete_text_item': {
+            const client = getMiroClient();
+            const result = await client.deleteText((args as any)?.board_id, (args as any)?.item_id);
+
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Text deleted successfully',
+                },
+              ],
+            };
+          }
+
+          // End ======
+          // ================== TEXT ITEMS ==================
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -1922,7 +3569,7 @@ app.get('/sse', async (req, res) => {
       console.log(`SSE connection closed for session: ${transport.sessionId}`);
       try {
         transports.delete(transport.sessionId);
-        await transport.close(); 
+        await transport.close();
       } catch (error) {
         console.error('Error during SSE cleanup:', error);
       }
@@ -1935,7 +3582,7 @@ app.get('/sse', async (req, res) => {
 
     transports.set(transport.sessionId, transport);
 
-    const server = getMiroMcpServer(); 
+    const server = getMiroMcpServer();
     await server.connect(transport);
 
     console.log(`SSE connection established with session: ${transport.sessionId}`);
