@@ -78,7 +78,7 @@ async def outlookMail_get_messages_from_folder(
         logging.error(f"Could not get messages from {url}: {e}")
         return {"error": f"Could not get messages from {url}"}
 
-async def outlookMail_get_mail_folder(folder_id: str) -> dict:
+async def outlookMail_get_mail_folder_details(folder_id: str) -> dict:
     """
     Get details of a specific mail folder by its ID.
 
