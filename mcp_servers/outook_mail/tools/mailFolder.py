@@ -1,6 +1,6 @@
 import httpx
 import logging
-from .base import get_onedrive_client
+from .base import get_outlookMail_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ async def outlookMail_list_folders(include_hidden: bool = True) -> dict:
     Returns:
         dict: JSON response with list of folders or an error.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -26,7 +26,7 @@ async def outlookMail_list_folders(include_hidden: bool = True) -> dict:
         params["includeHiddenFolders"] = "true"
 
     try:
-        async with httpx.AsyncClient as httpx_client:
+        async with httpx.AsyncClient() as httpx_client:
             response = await httpx_client.get(url, headers=client['headers'], params=params)
         response.raise_for_status()
         return response.json()
@@ -54,7 +54,7 @@ async def outlookMail_get_messages_from_folder(
     Returns:
         dict: JSON response with list of messages, or error info.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -89,7 +89,7 @@ async def outlookMail_get_mail_folder(folder_id: str) -> dict:
         dict: JSON response from Microsoft Graph with folder details,
               or error info if request fails.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -98,7 +98,7 @@ async def outlookMail_get_mail_folder(folder_id: str) -> dict:
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'])
+            response = await httpx_client.get(url, headers=client['headers'])
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -120,7 +120,7 @@ async def outlookMail_create_mail_folder(
         dict: JSON response from Microsoft Graph with the created folder info,
               or error info if request fails.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -133,7 +133,7 @@ async def outlookMail_create_mail_folder(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -154,7 +154,7 @@ async def outlookMail_update_folder_display_name(
     Returns:
         dict: JSON response on success, or error details.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -164,7 +164,7 @@ async def outlookMail_update_folder_display_name(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.patch(url, headers=client['headers'], json=payload)
+            response = await httpx_client.patch(url, headers=client['headers'], json=payload)
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -181,7 +181,7 @@ async def outlookMail_delete_folder(folder_id: str) -> dict:
     Returns:
         dict: Result message or error details.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -190,7 +190,7 @@ async def outlookMail_delete_folder(folder_id: str) -> dict:
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.delete(url, headers=client['headers'])
+            response = await httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             logging.info(f"Deleted folder with ID {folder_id}")
             return {"message": f"Folder {folder_id} deleted successfully"}

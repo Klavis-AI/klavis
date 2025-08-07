@@ -5,7 +5,7 @@ auth_token_context
 from .attachments import (
 outlookMail_add_attachment,
 outlookMail_list_attachments,
-outlookMail_get_attachment,
+outlookMail_get_attachment_details,
 outlookMail_download_attachment,
 outlookMail_delete_attachment,
 outlookMail_upload_large_attachment,
@@ -17,11 +17,6 @@ outlookMail_create_mail_folder,
 outlookMail_list_folders,
 outlookMail_get_mail_folder,
 outlookMail_update_folder_display_name,
-)
-
-from .mailSearchFolder import (
-outlookMail_create_mail_search_folder,
-outlookMail_update_mail_search_folder,
 )
 
 
@@ -36,7 +31,8 @@ outlookMail_create_reply_draft,
 outlookMail_delete_draft,
 outlookMail_update_draft,
 outlookMail_create_forward_draft,
-outlookMail_send_draft
+outlookMail_send_draft,
+outlookMail_move_message
 )
 
 __all__ = [
@@ -46,7 +42,7 @@ __all__ = [
     #attachment.py
     "outlookMail_add_attachment",
     "outlookMail_list_attachments",
-    "outlookMail_get_attachment",
+    "outlookMail_get_attachment_details",
     "outlookMail_download_attachment",
     "outlookMail_delete_attachment",
     "outlookMail_upload_large_attachment",
@@ -59,10 +55,6 @@ __all__ = [
     "outlookMail_get_mail_folder",
     "outlookMail_update_folder_display_name",
 
-    #mailSearchFolder.py
-    "outlookMail_create_mail_search_folder",
-    "outlookMail_update_mail_search_folder",
-
     #messages.py
     "outlookMail_send_draft",
     "outlookMail_read_message",
@@ -74,4 +66,5 @@ __all__ = [
     "outlookMail_update_draft",
     "outlookMail_create_forward_draft",
     "outlookMail_list_messages_from_folder",
+    "outlookMail_move_message"
 ]

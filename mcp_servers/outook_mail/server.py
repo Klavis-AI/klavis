@@ -22,7 +22,7 @@ from tools import (
     # attachments
     outlookMail_add_attachment,
     outlookMail_list_attachments,
-    outlookMail_get_attachment,
+    outlookMail_get_attachment_details,
     outlookMail_download_attachment,
     outlookMail_delete_attachment,
     outlookMail_upload_large_attachment,
@@ -34,10 +34,6 @@ from tools import (
     outlookMail_get_mail_folder,
     outlookMail_update_folder_display_name,
 
-    # mailSearchFolder
-    outlookMail_create_mail_search_folder,
-    outlookMail_update_mail_search_folder,
-
     # messages
     outlookMail_read_message,
     outlookMail_send_draft,
@@ -48,7 +44,8 @@ from tools import (
     outlookMail_delete_draft,
     outlookMail_update_draft,
     outlookMail_create_forward_draft,
-    outlookMail_list_messages_from_folder
+    outlookMail_list_messages_from_folder,
+    outlookMail_move_message
 )
 
 
@@ -130,7 +127,7 @@ def main(
                 }
             ),
             types.Tool(
-                name="outlookMail_get_attachment",
+                name="outlookMail_get_attachment_details",
                 description="Get a specific attachment from an Outlook mail message by message ID and attachment ID. Optionally expand related entities.",
                 inputSchema={
                     "type": "object",
@@ -277,71 +274,6 @@ def main(
                         "display_name": {"type": "string", "description": "New display name"}
                     },
                     "required": ["folder_id", "display_name"]
-                }
-            ),
-
-            # mailSearchFolder---------------------------------------------------
-            types.Tool(
-                name="outlookMail_create_mail_search_folder",
-                description="Create a new mail search folder under a specified parent folder.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "parent_folder_id": {
-                            "type": "string",
-                            "description": "ID of the parent mail folder"
-                        },
-                        "display_name": {
-                            "type": "string",
-                            "description": "Display name for the search folder"
-                        },
-                        "include_nested_folders": {
-                            "type": "boolean",
-                            "description": "Whether to include subfolders in search"
-                        },
-                        "source_folder_ids": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "List of folder IDs to search"
-                        },
-                        "filter_query": {
-                            "type": "string",
-                            "description": "OData filter query (e.g., \"contains(subject, 'weekly digest')\")"
-                        }
-                    },
-                    "required": ["parent_folder_id", "display_name", "include_nested_folders",
-                                 "source_folder_ids", "filter_query"]
-                }
-            ),
-            types.Tool(
-                name="outlookMail_update_mail_search_folder",
-                description="Update a mail folder (typically a mailSearchFolder) in Outlook.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "folder_id": {
-                            "type": "string",
-                            "description": "The unique ID of the folder to update"
-                        },
-                        "displayName": {
-                            "type": "string",
-                            "description": "New display name for the folder"
-                        },
-                        "includeNestedFolders": {
-                            "type": "boolean",
-                            "description": "Whether to do deep search (True) or shallow (False)"
-                        },
-                        "sourceFolderIds": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "IDs of folders to be mined"
-                        },
-                        "filterQuery": {
-                            "type": "string",
-                            "description": "OData filter (e.g., \"contains(subject, 'weekly digest')\")"
-                        }
-                    },
-                    "required": ["folder_id"]
                 }
             ),
 
@@ -632,6 +564,25 @@ def main(
                     "required": ["subject", "body_content", "to_recipients"],
                     "additionalProperties": False
                 }
+            ),
+            types.Tool(
+                name="outlookMail_move_message",
+                description="Move an Outlook mail message to another folder by folder ID or well-known name like 'deleteditems'.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "string",
+                            "description": "ID of the message to move"
+                        },
+                        "destination_folder_id": {
+                            "type": "string",
+                            "description": "ID of the destination folder (e.g. 'deleteditems' or a custom folder ID)"
+                        }
+                    },
+                    "required": ["message_id", "destination_folder_id"],
+                    "additionalProperties": False
+                }
             )
 
         ]
@@ -687,9 +638,9 @@ def main(
                     )
                 ]
 
-        elif name == "outlookMail_get_attachment":
+        elif name == "outlookMail_get_attachment_details":
             try:
-                result = await outlookMail_get_attachment(
+                result = await outlookMail_get_attachment_details(
                     message_id=arguments["message_id"],
                     attachment_id=arguments["attachment_id"],
                     expand=arguments.get("expand")
@@ -702,6 +653,27 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error getting attachment: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "outlookMail_move_message":
+            try:
+                result = await outlookMail_move_message(
+                    message_id=arguments["message_id"],
+                    destination_folder_id=arguments["destination_folder_id"]
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error moving message: {e}")
                 return [
                     types.TextContent(
                         type="text",
@@ -877,55 +849,6 @@ def main(
                     )
                 ]
 
-
-        # Mail Search Folder Operations
-        elif name == "outlookMail_create_mail_search_folder":
-            try:
-                result = await outlookMail_create_mail_search_folder(
-                    parent_folder_id=arguments["parent_folder_id"],
-                    display_name=arguments["display_name"],
-                    include_nested_folders=arguments["include_nested_folders"],
-                    source_folder_ids=arguments["source_folder_ids"],
-                    filter_query=arguments["filter_query"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error creating search folder: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_update_mail_search_folder":
-            try:
-                result = await outlookMail_update_mail_search_folder(
-                    folder_id=arguments["folder_id"],
-                    displayName=arguments.get("displayName"),
-                    includeNestedFolders=arguments.get("includeNestedFolders"),
-                    sourceFolderIds=arguments.get("sourceFolderIds"),
-                    filterQuery=arguments.get("filterQuery")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error updating search folder: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
         # Message Operations
         elif name == "outlookMail_read_message":
             try:
