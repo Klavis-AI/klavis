@@ -6,7 +6,7 @@ from .mailFolder import (
 outlookMail_delete_folder,
 outlookMail_create_mail_folder,
 outlookMail_list_folders,
-outlookMail_get_mail_folder,
+outlookMail_get_mail_folder_details,
 outlookMail_update_folder_display_name,
 )
 
@@ -34,7 +34,7 @@ __all__ = [
     "outlookMail_delete_folder",
     "outlookMail_create_mail_folder",
     "outlookMail_list_folders",
-    "outlookMail_get_mail_folder",
+    "outlookMail_get_mail_folder_details",
     "outlookMail_update_folder_display_name",
 
     #messages.py

@@ -23,7 +23,7 @@ from tools import (
     outlookMail_delete_folder,
     outlookMail_create_mail_folder,
     outlookMail_list_folders,
-    outlookMail_get_mail_folder,
+    outlookMail_get_mail_folder_details,
     outlookMail_update_folder_display_name,
 
     # messages
@@ -118,7 +118,7 @@ def main(
             ),
 
             types.Tool(
-                name="outlookMail_get_mail_folder",
+                name="outlookMail_get_mail_folder_details",
                 description="Get details of a specific mail folder by its ID.",
                 inputSchema={
                     "type": "object",
@@ -520,9 +520,9 @@ def main(
                     )
                 ]
 
-        elif name == "outlookMail_get_mail_folder":
+        elif name == "outlookMail_get_mail_folder_details":
             try:
-                result = await outlookMail_get_mail_folder(
+                result = await outlookMail_get_mail_folder_details(
                     folder_id=arguments["folder_id"]
                 )
                 return [
