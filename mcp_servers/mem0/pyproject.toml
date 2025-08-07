@@ -1,0 +1,11 @@
+[project]
+name = "mem0"
+version = "0.1.0"
+description = "mem0 MCP Server for memory management and semantic search"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.12.3",
+    "mem0ai>=0.1.115",
+]
