@@ -18,15 +18,6 @@ We use these Microsoft Graph scopes:
 
 ---
 
-### 📎 Attachment Operations
-
-| Tool Name                            | Description              | Required Parameters |
-| ------------------------------------ | ------------------------ | ------------------- |
-| `outlookMail_list_attachments`       | List message attachments | `message_id`        |
-| `outlookMail_get_attachment_details` | Get attachment metadata  | `message_id`        |
-
----
-
 ### 📁 Folder Management
 
 | Tool Name                                | Description         | Required Parameters         |
