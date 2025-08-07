@@ -1,0 +1,9 @@
+google-api-python-client>=2.117.0
+google-auth>=2.29.0
+python-dotenv>=1.0.1
+mcp-python-sdk>=0.1.0  # hypothetical package name matching others
+starlette>=0.36.3
+uvicorn[standard]>=0.29.0
+click>=8.1.7
+tenacity>=8.2.3
+
