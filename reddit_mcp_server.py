@@ -533,19 +533,21 @@ class RedditMCPServer:
 
     async def run(self):
         """Run the MCP server."""
-        async with ServerSession(
-            StdioServerParameters(),
-            self.server,
-            InitializationOptions(
-                server_name="reddit-mcp-server",
-                server_version="1.0.0",
-                capabilities=self.server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
+        from mcp.server.stdio import stdio_server
+        
+        async with stdio_server() as (read_stream, write_stream):
+            await self.server.run(
+                read_stream=read_stream,
+                write_stream=write_stream,
+                initialization_options=InitializationOptions(
+                    server_name="reddit-mcp-server",
+                    server_version="1.0.0",
+                    capabilities=self.server.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
                 ),
-            ),
-        ) as session:
-            await session.run()
+            )
 
 
 async def main():
