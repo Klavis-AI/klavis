@@ -2,7 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0+-00a393.svg)](https://fastapi.tiangolo.com/)
 [![Coinbase API](https://img.shields.io/badge/Coinbase_API-Advanced_Trade-1652f0.svg)](https://docs.cloud.coinbase.com/advanced-trade/)
 
 ## 📖 Overview
@@ -177,9 +176,6 @@ COINBASE_API_SECRET="-----BEGIN EC PRIVATE KEY-----\nYourPrivateKeyHere\n-----EN
 |------------|--------------|-------------|
 | `wallet:accounts:read` | Account Tools | View account balances and details |
 | `wallet:transactions:read` | Transaction Tools | Access transaction history |
-| `wallet:addresses:read` | Address Tools | View cryptocurrency addresses |
-| `wallet:buys:read` | Trading Tools | View buy orders and history |
-| `wallet:sells:read` | Trading Tools | View sell orders and history |
 
 **Note**: Market data and product information tools work without any API credentials.
 
@@ -236,8 +232,6 @@ Once the server is running, it exposes the following endpoints:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Health check and server status |
-| `/health` | GET | Detailed health information |
 | `/sse` | GET | Server-Sent Events for MCP communication |
 | `/mcp` | POST | Streamable HTTP for MCP requests |
 
@@ -380,7 +374,7 @@ The server uses JWT (JSON Web Token) authentication for accessing private Coinba
 - **Signature Algorithm**: Uses ECDSA or Ed25519 based on your API key configuration
 - **Secure Headers**: All requests include proper authentication headers
 
-### Public vs Private Endpoints
+### Public & Private Endpoints
 
 #### Public Endpoints (No Authentication Required)
 - Market data (current prices, historical data)
@@ -391,36 +385,16 @@ The server uses JWT (JSON Web Token) authentication for accessing private Coinba
 - Account information and balances
 - Transaction history
 - Portfolio data and analytics
-- Trading operations
 
-### Security Best Practices
-
-```bash
-# ✅ DO: Use environment variables
-export COINBASE_API_KEY=your_key
-export COINBASE_API_SECRET=your_secret
-
-# ❌ DON'T: Hardcode credentials in scripts
-COINBASE_API_KEY="your_key"  # Never do this
-```
-
-**Security Checklist:**
-- ✅ Never commit API keys to version control
-- ✅ Use environment variables for sensitive data
-- ✅ Rotate API keys regularly
-- ✅ Set IP restrictions in production
-- ✅ Use minimum required permissions
-- ✅ Monitor API usage and logs
 
 ## 📊 Rate Limits & Performance
 
 ### Coinbase API Rate Limits
 
-| Endpoint Type | Rate Limit | Timeframe |
-|---------------|------------|-----------|
-| Public Market Data | 10 requests/second | Per IP address |
-| Private Account Data | 5 requests/second | Per API key |
-| Advanced Trade | 30 requests/second | Per API key |
+For the latest and most accurate rate limit information, please refer to the official Coinbase documentation:
+
+- **Coinbase Consumer APIs**: [Coinbase App API Rate Limiting](https://docs.cdp.coinbase.com/coinbase-app/api-architecture/rate-limiting#coinbase-app-rate-limiting)
+- **Coinbase Exchange APIs**: [Coinbase Exchange API Rate Limits](https://docs.cdp.coinbase.com/exchange/rest-api/rate-limits)
 
 ### Server Configuration
 
@@ -509,35 +483,6 @@ docker run --env-file .env coinbase-mcp-server env | grep COINBASE
 docker build --no-cache -t coinbase-mcp-server .
 ```
 
-### Debug Mode
-
-Enable debug logging for detailed troubleshooting:
-
-```bash
-# Run with debug logging
-python server.py --log-level DEBUG
-
-# Or set environment variable
-export LOG_LEVEL=DEBUG
-python server.py
-```
-
-### Health Checks
-
-Monitor server health:
-
-```bash
-# Basic health check
-curl http://localhost:5000/
-
-# Detailed health information
-curl http://localhost:5000/health
-
-# Test MCP protocol
-curl -X POST http://localhost:5000/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"method": "tools/list", "params": {}}'
-```
 
 ## 📝 Example Usage
 
@@ -596,36 +541,20 @@ async def analyze_portfolio():
 ## 📖 Additional Resources
 
 - **[Coinbase API Documentation](https://docs.cloud.coinbase.com/advanced-trade/)** - Official API reference
-- **[MCP Protocol Specification](https://github.com/modelcontextprotocol)** - Model Context Protocol details
-- **[JWT Authentication Guide](https://jwt.io/introduction)** - Understanding JWT tokens
 - **[Rate Limiting Best Practices](https://docs.cloud.coinbase.com/advanced-trade/docs/auth#rate-limiting)** - Coinbase rate limit guidelines
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Follow the existing code structure.
+2. Add new tools to the appropriate files in the `tools/` directory.
+3. Update `tools/__init__.py` to export new functions
+4. Add tools calls and definitions to server.py
+5. Update the README with new functionalities
 
-## 🆘 Support
 
-If you encounter any issues or have questions:
+## 📜 License
 
-1. Check the [Troubleshooting](#-troubleshooting) section above
-2. Review [Coinbase API Documentation](https://docs.cloud.coinbase.com/advanced-trade/)
-3. Open an issue in the repository
-4. Contact the development team
-
----
-
-<div align="center">
-  <p><strong>Ready to integrate Coinbase with your AI applications?</strong></p>
-  <p>Start building with cryptocurrency data and account management!</p>
-</div>
+This project follows the same license as the parent Klavis project.
