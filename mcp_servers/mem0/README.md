@@ -51,10 +51,6 @@ uv run server.py
 }
 ```
 
-## Demo
-
-
-
 ## Features
 
 The server provides three main tools for managing persistent memories using mem0:
