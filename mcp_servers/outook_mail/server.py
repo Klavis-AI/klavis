@@ -20,12 +20,8 @@ from tools import (
     auth_token_context,
 
     # attachments
-    outlookMail_add_attachment,
     outlookMail_list_attachments,
     outlookMail_get_attachment_details,
-    outlookMail_download_attachment,
-    outlookMail_delete_attachment,
-    outlookMail_upload_large_attachment,
 
     # mailFolder
     outlookMail_delete_folder,
@@ -91,28 +87,6 @@ def main(
             # File Operations
             # attachment.py----------------------------------------------------------
             types.Tool(
-                name="outlookMail_add_attachment",
-                description="Add an attachment to a draft Outlook mail message by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the draft message to which the file will be attached"
-                        },
-                        "file_path": {
-                            "type": "string",
-                            "description": "Path to the local file to attach"
-                        },
-                        "attachment_name": {
-                            "type": "string",
-                            "description": "Optional custom name for the attachment; defaults to the file's basename"
-                        }
-                    },
-                    "required": ["message_id", "file_path"]
-                }
-            ),
-            types.Tool(
                 name="outlookMail_list_attachments",
                 description="List attachments from an Outlook mail message by its ID.",
                 inputSchema={
@@ -146,73 +120,6 @@ def main(
                         }
                     },
                     "required": ["message_id", "attachment_id"]
-                }
-            ),
-            types.Tool(
-                name="outlookMail_download_attachment",
-                description="Download an attachment from Outlook mail as raw binary using $value and save it locally.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the message that has the attachment"
-                        },
-                        "attachment_id": {
-                            "type": "string",
-                            "description": "ID of the attachment to download"
-                        },
-                        "save_path": {
-                            "type": "string",
-                            "description": "Local file path to save the downloaded attachment"
-                        }
-                    },
-                    "required": ["message_id", "attachment_id", "save_path"]
-                }
-            ),
-            types.Tool(
-                name="outlookMail_delete_attachment",
-                description="Delete an attachment from a draft Outlook mail message.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the message containing the attachment"
-                        },
-                        "attachment_id": {
-                            "type": "string",
-                            "description": "ID of the attachment to delete"
-                        }
-                    },
-                    "required": ["message_id", "attachment_id"]
-                }
-            ),
-            types.Tool(
-                name="outlookMail_upload_large_attachment",
-                description="Upload a large file attachment to a draft message using an upload session.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the draft message to attach the file to"
-                        },
-                        "file_path": {
-                            "type": "string",
-                            "description": "Local path to the file"
-                        },
-                        "is_inline": {
-                            "type": "boolean",
-                            "description": "If True, marks the attachment as inline",
-                            "default": False
-                        },
-                        "content_id": {
-                            "type": "string",
-                            "description": "Content-ID for inline images (optional)"
-                        }
-                    },
-                    "required": ["message_id", "file_path"]
                 }
             ),
 
@@ -596,29 +503,7 @@ def main(
 
 
         # Attachment Operations
-        if name == "outlookMail_add_attachment":
-            try:
-                result = await outlookMail_add_attachment(
-                    message_id=arguments["message_id"],
-                    file_path=arguments["file_path"],
-                    attachment_name=arguments.get("attachment_name")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error adding attachment: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_list_attachments":
+        if name == "outlookMail_list_attachments":
             try:
                 result = await outlookMail_list_attachments(
                     message_id=arguments["message_id"]
@@ -660,92 +545,6 @@ def main(
                     )
                 ]
 
-        elif name == "outlookMail_move_message":
-            try:
-                result = await outlookMail_move_message(
-                    message_id=arguments["message_id"],
-                    destination_folder_id=arguments["destination_folder_id"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error moving message: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_download_attachment":
-            try:
-                result = await outlookMail_download_attachment(
-                    message_id=arguments["message_id"],
-                    attachment_id=arguments["attachment_id"],
-                    save_path=arguments["save_path"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error downloading attachment: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_delete_attachment":
-            try:
-                result = await outlookMail_delete_attachment(
-                    message_id=arguments["message_id"],
-                    attachment_id=arguments["attachment_id"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error deleting attachment: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_upload_large_attachment":
-            try:
-                result = await outlookMail_upload_large_attachment(
-                    message_id=arguments["message_id"],
-                    file_path=arguments["file_path"],
-                    is_inline=arguments.get("is_inline", False),
-                    content_id=arguments.get("content_id")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error uploading large attachment: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
         # Mail Folder Operations
         elif name == "outlookMail_delete_folder":
             try:
@@ -1062,6 +861,26 @@ def main(
                 ]
             except Exception as e:
                 logger.exception(f"Error creating draft message: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "outlookMail_move_message":
+            try:
+                result = await outlookMail_move_message(
+                    message_id=arguments["message_id"],
+                    destination_folder_id=arguments["destination_folder_id"]
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error moving message: {e}")
                 return [
                     types.TextContent(
                         type="text",
