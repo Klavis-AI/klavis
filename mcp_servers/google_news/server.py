@@ -46,6 +46,7 @@ def main(
     log_level: str,
     json_response: bool,
 ) -> int:
+    # Initialize and start the Google News MCP server with configurable transport options
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -55,6 +56,7 @@ def main(
 
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
+        # Return the available MCP tools for Google News search and trending articles
         return [
             types.Tool(
                 name="google_news_search",
@@ -124,6 +126,7 @@ def main(
         name: str,
         arguments: dict
     ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        # Handle tool execution requests by routing to appropriate Google News functions
         if name == "google_news_search":
             try:
                 result = await google_news_search(
@@ -156,6 +159,7 @@ def main(
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
+        # Handle Server-Sent Events connections with authentication token management
         logger.info("Handling SSE connection")
         
         auth_token = request.headers.get('x-auth-token')
@@ -183,6 +187,7 @@ def main(
     async def handle_streamable_http(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
+        # Handle HTTP streaming requests with authentication token extraction and context management
         logger.info("Handling StreamableHTTP request")
         
         headers = dict(scope.get("headers", []))
@@ -198,6 +203,7 @@ def main(
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        # Manage the application lifecycle with proper startup and shutdown handling
         async with session_manager.run():
             logger.info("Google News MCP Server started with dual transports!")
             try:
