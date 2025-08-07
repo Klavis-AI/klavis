@@ -19,10 +19,6 @@ from dotenv import load_dotenv
 from tools import (
     auth_token_context,
 
-    # attachments
-    outlookMail_list_attachments,
-    outlookMail_get_attachment_details,
-
     # mailFolder
     outlookMail_delete_folder,
     outlookMail_create_mail_folder,
@@ -85,44 +81,6 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             # File Operations
-            # attachment.py----------------------------------------------------------
-            types.Tool(
-                name="outlookMail_list_attachments",
-                description="List attachments from an Outlook mail message by its ID.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the message to list attachments from"
-                        }
-                    },
-                    "required": ["message_id"]
-                }
-            ),
-            types.Tool(
-                name="outlookMail_get_attachment_details",
-                description="Get a specific attachment from an Outlook mail message by message ID and attachment ID. Optionally expand related entities.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "message_id": {
-                            "type": "string",
-                            "description": "ID of the message that has the attachment"
-                        },
-                        "attachment_id": {
-                            "type": "string",
-                            "description": "ID of the attachment to retrieve"
-                        },
-                        "expand": {
-                            "type": "string",
-                            "description": "OData $expand expression to include related entities (e.g., 'microsoft.graph.itemattachment/item')"
-                        }
-                    },
-                    "required": ["message_id", "attachment_id"]
-                }
-            ),
-
             # mailfolder.py----------------------------------------------
             types.Tool(
                 name="outlookMail_delete_folder",
@@ -500,53 +458,8 @@ def main(
             arguments: dict
     ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
 
-
-
-        # Attachment Operations
-        if name == "outlookMail_list_attachments":
-            try:
-                result = await outlookMail_list_attachments(
-                    message_id=arguments["message_id"]
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error listing attachments: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "outlookMail_get_attachment_details":
-            try:
-                result = await outlookMail_get_attachment_details(
-                    message_id=arguments["message_id"],
-                    attachment_id=arguments["attachment_id"],
-                    expand=arguments.get("expand")
-                )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error getting attachment: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
         # Mail Folder Operations
-        elif name == "outlookMail_delete_folder":
+        if name == "outlookMail_delete_folder":
             try:
                 result = await outlookMail_delete_folder(
                     folder_id=arguments["folder_id"]

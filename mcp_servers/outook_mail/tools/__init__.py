@@ -2,11 +2,6 @@ from .base import (
 auth_token_context
 )
 
-from .attachments import (
-outlookMail_list_attachments,
-outlookMail_get_attachment_details,
-)
-
 from .mailFolder import (
 outlookMail_delete_folder,
 outlookMail_create_mail_folder,
@@ -34,11 +29,6 @@ outlookMail_move_message
 __all__ = [
     #base.py
     "auth_token_context",
-
-    #attachment.py
-    "outlookMail_list_attachments",
-    "outlookMail_get_attachment_details",
-
 
     #mailfolder.py
     "outlookMail_delete_folder",
