@@ -19,7 +19,12 @@ from dotenv import load_dotenv
 from tools import (
     auth_token_context,
     google_news_search,
-    google_news_trending
+    google_news_trending,
+    google_news_headlines,
+    google_news_by_source,
+    google_news_date_range,
+    google_news_topics_list,
+    google_news_sources_list
 )
 
 logger = logging.getLogger(__name__)
@@ -118,6 +123,122 @@ def main(
                     },
                     "required": []
                 }
+            ),
+            types.Tool(
+                name="google_news_headlines",
+                description="""
+                Get Google News headlines by category.
+                
+                Retrieve news headlines filtered by specific categories like business, technology, sports, etc.
+                """,
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "category": {
+                            "type": "string",
+                            "description": "News category (business, technology, sports, health, entertainment, science, world, politics)"
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Two-letter country code (e.g., 'us', 'uk', 'ca'). Default: 'us'"
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Two-letter language code (e.g., 'en', 'es', 'fr'). Default: 'en'"
+                        },
+                        "sort_by": {
+                            "type": "string",
+                            "description": "Sort method: 'relevance' or 'date'. Default: 'relevance'"
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="google_news_by_source",
+                description="""
+                Get Google News articles from a specific source.
+                
+                Retrieve news articles from a particular news outlet or publisher.
+                """,
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "source": {
+                            "type": "string",
+                            "description": "News source name (e.g., 'CNN', 'BBC', 'Reuters')"
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Two-letter country code (e.g., 'us', 'uk', 'ca'). Default: 'us'"
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Two-letter language code (e.g., 'en', 'es', 'fr'). Default: 'en'"
+                        }
+                    },
+                    "required": ["source"]
+                }
+            ),
+            types.Tool(
+                name="google_news_date_range",
+                description="""
+                Search Google News with date range filtering.
+                
+                Search for news articles within a specific date range using date operators.
+                """,
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Search query for news articles"
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "description": "Start date in YYYY-MM-DD format (e.g., '2023-01-01')"
+                        },
+                        "end_date": {
+                            "type": "string",
+                            "description": "End date in YYYY-MM-DD format (e.g., '2023-12-31')"
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Two-letter country code (e.g., 'us', 'uk', 'ca'). Default: 'us'"
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Two-letter language code (e.g., 'en', 'es', 'fr'). Default: 'en'"
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="google_news_topics_list",
+                description="""
+                Get available Google News topics/categories.
+                
+                Returns a list of available news topics and categories that can be used with other tools.
+                """,
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="google_news_sources_list",
+                description="""
+                Get popular Google News sources.
+                
+                Returns a list of popular news sources and publishers that can be used with the by_source tool.
+                """,
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
             )
         ]
 
@@ -151,6 +272,61 @@ def main(
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error in google_news_trending: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "google_news_headlines":
+            try:
+                result = await google_news_headlines(
+                    category=arguments.get("category"),
+                    country=arguments.get("country", "us"),
+                    language=arguments.get("language", "en"),
+                    sort_by=arguments.get("sort_by", "relevance")
+                )
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error in google_news_headlines: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "google_news_by_source":
+            try:
+                result = await google_news_by_source(
+                    source=arguments.get("source"),
+                    country=arguments.get("country", "us"),
+                    language=arguments.get("language", "en")
+                )
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error in google_news_by_source: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "google_news_date_range":
+            try:
+                result = await google_news_date_range(
+                    query=arguments.get("query"),
+                    start_date=arguments.get("start_date"),
+                    end_date=arguments.get("end_date"),
+                    country=arguments.get("country", "us"),
+                    language=arguments.get("language", "en")
+                )
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error in google_news_date_range: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "google_news_topics_list":
+            try:
+                result = await google_news_topics_list()
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error in google_news_topics_list: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "google_news_sources_list":
+            try:
+                result = await google_news_sources_list()
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error in google_news_sources_list: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]
 
         else:
