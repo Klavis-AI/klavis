@@ -3,12 +3,8 @@ auth_token_context
 )
 
 from .attachments import (
-outlookMail_add_attachment,
 outlookMail_list_attachments,
 outlookMail_get_attachment_details,
-outlookMail_download_attachment,
-outlookMail_delete_attachment,
-outlookMail_upload_large_attachment,
 )
 
 from .mailFolder import (
@@ -40,12 +36,8 @@ __all__ = [
     "auth_token_context",
 
     #attachment.py
-    "outlookMail_add_attachment",
     "outlookMail_list_attachments",
     "outlookMail_get_attachment_details",
-    "outlookMail_download_attachment",
-    "outlookMail_delete_attachment",
-    "outlookMail_upload_large_attachment",
 
 
     #mailfolder.py
