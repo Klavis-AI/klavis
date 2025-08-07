@@ -14,7 +14,13 @@ def process_spotify_items(items, type):
         list: List of simplified dicts with relevant metadata for each item.
     """
     output = []
+    if not items:
+        return output
+
     for item in items:
+        if not item:
+            continue
+
         if type == "track":
             output.append({
                 "track_id": item.get("id"),

@@ -34,6 +34,35 @@ from tools import (
     save_albums_for_current_user,
     remove_albums_for_current_user,
     check_user_saved_albums,
+    get_artists_info,
+    get_artist_albums,
+    get_artist_top_tracks,
+    get_episodes_info,
+    save_episodes_for_current_user,
+    get_user_saved_episodes,
+    remove_episodes_for_current_user,
+    check_user_saved_episodes,
+    get_playlist_by_id,
+    get_user_owned_playlists,
+    update_playlist_details,
+    get_current_user_profile,
+    get_current_user_top_items,
+    get_spotify_user_public_profile,
+    follow_playlist,
+    unfollow_playlist,
+    get_current_user_followed_artists,
+    follow_artists_or_users,
+    unfollow_artists_or_users,
+    check_user_follows,
+    add_items_to_playlist,
+    remove_items_from_playlist,
+    get_current_user_playlists,
+    get_multiple_shows,
+    get_show_episodes,
+    get_current_user_saved_shows,
+    save_shows_to_user_library,
+    remove_shows_from_user_library,
+    check_user_saved_shows,
 )
 
 load_dotenv()
@@ -89,7 +118,7 @@ def main(
                         "type": {
                             "type": "string",
                             "description": "Type of search  a track or album or artist or playlist or show or episode",
-                            "enum": ["track", "album", "artist", "playlist", "show", "episode"]
+                            "enum": ["track", "album", "artist", "playlist", "show", "episode","audiobook"],
                         },
                         "limit": {
                             "type": "integer",
@@ -273,6 +302,540 @@ def main(
                         },
                     },
                     "required": ["album_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_artists_info",
+                description="Get detailed information about one or multiple artists",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "artist_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify artist IDs to retrieve information for"
+                        },
+                    },
+                    "required": ["artist_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_artist_albums",
+                description="Get detailed information about albums by a specific artist",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "artist_id": {
+                            "type": "string",
+                            "description": "Spotify artist ID to retrieve albums for"
+                        },
+                    },
+                    "required": ["artist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_artist_top_tracks",
+                description="Get the top tracks of a specific artist by country",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "artist_id": {
+                            "type": "string",
+                            "description": "Spotify artist ID to retrieve top tracks for"
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "2-letter country code (e.g., 'US', 'GB', 'IN')"
+                        },
+                    },
+                    "required": ["artist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_episodes_info",
+                description="Get detailed information about one or multiple podcast episodes",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "episode_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify episode IDs to retrieve information for"
+                        },
+                        "market": {
+                            "type": "string",
+                            "description": "Country market to restrict results (ISO 3166-1 alpha-2, default: None)",
+                            "default": None
+                        }
+                    },
+                    "required": ["episode_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_save_episodes_for_current_user",
+                description="Save podcast episodes to the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "episode_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify episode IDs to save"
+                        },
+                    },
+                    "required": ["episode_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_user_saved_episodes",
+                description="Get the user's saved podcast episodes from Spotify",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of episodes to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first episode to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_remove_episodes_for_current_user",
+                description="Remove podcast episodes from the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "episode_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify episode IDs to remove"
+                        },
+                    },
+                    "required": ["episode_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_check_user_saved_episodes",
+                description="Check if a podcast episode or multiple episodes is saved in the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "episode_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify episode IDs to check"
+                        },
+                    },
+                    "required": ["episode_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_playlist_by_id",
+                description="Get a Spotify playlist's full metadata and contents by its Spotify ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to retrieve"
+                        },
+                        "market": {
+                            "type": "string",
+                            "description": "Country market to restrict results (ISO 3166-1 alpha-2, default: None)",
+                            "default": None
+                        }
+                    },
+                    "required": ["playlist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_user_owned_playlists",
+                description="Get playlists owned by a specific user",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Spotify user ID to retrieve owned playlists for"
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of playlists to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first playlist to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": ["user_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_update_playlist_details",
+                description="Change a playlist's name and/or public/private state",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to update"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "New name for the playlist (optional)"
+                        },
+                        "public": {
+                            "type": "boolean",
+                            "description": "Set to true to make the playlist public, false for private (optional)"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "New description for the playlist (optional)"
+                        }
+                    },
+                    "required": ["playlist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_current_user_profile",
+                description="Get the current authenticated user's profile information",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_get_current_user_top_items",
+                description="Get the current user's top artists or tracks",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "item_type": {
+                            "type": "string",
+                            "description": "Type of items to retrieve (artists or tracks)",
+                            "enum": ["artists", "tracks"]
+                        },
+                        "time_range": {
+                            "type": "string",
+                            "description": "Time range for top items (short_term, medium_term, long_term)",
+                            "default": "medium_term"
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of items to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first item to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": ["item_type"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_spotify_user_public_profile",
+                description="Get public profile information about a Spotify user by their user ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Spotify User ID (username) to retrieve public profile for"
+                        },
+                    },
+                    "required": ["user_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_follow_playlist",
+                description="Follow a Spotify playlist",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to follow"
+                        },
+                        "public": {
+                            "type": "boolean",
+                            "description": "Set to true to make the playlist public, false for private (optional)"
+                        }
+                    },
+                    "required": ["playlist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_unfollow_playlist",
+                description="Unfollow a Spotify playlist",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to unfollow"
+                        },
+                    },
+                    "required": ["playlist_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_current_user_followed_artists",
+                description="Get the current user's followed artists",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of artists to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "after": {
+                            "type": "string",
+                            "description": "Cursor to get the next page of results (optional)"
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_follow_artists_or_users",
+                description="Follow one or more artists or Spotify users",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify artist/user IDs to follow"
+                        },
+                    },
+                    "required": ["ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_unfollow_artists_or_users",
+                description="Unfollow one or more artists or Spotify users",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify artist/user IDs to unfollow"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of IDs: 'artist' or 'user'",
+                            "enum": ["artist", "user"],
+                            "default": "artist"
+                        }
+
+                    },
+                    "required": ["ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_check_user_follows",
+                description="Check if the current user follows one or more artists or Spotify users",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify artist/user IDs to check"
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Type of IDs: 'artist' or 'user'",
+                            "enum": ["artist", "user"],
+                            "default": "artist"
+                        }
+                    },
+                    "required": ["ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_add_items_to_playlist",
+                description="Add items (tracks, episodes) to a Spotify playlist",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to add items to"
+                        },
+                        "uris": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify URIs (tracks, episodes) to add"
+                        },
+                        "position": {
+                            "type": "integer",
+                            "description": "Position in the playlist to insert the items (optional)"
+                        }
+                    },
+                    "required": ["playlist_id", "uris"]
+                }
+            ),
+            types.Tool(
+                name="spotify_remove_items_from_playlist",
+                description="Remove items (tracks, episodes) from a Spotify playlist",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "playlist_id": {
+                            "type": "string",
+                            "description": "Spotify playlist ID to remove items from"
+                        },
+                        "uris": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify URIs (tracks, episodes) to remove"
+                        }
+                    },
+                    "required": ["playlist_id", "uris"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_current_user_playlists",
+                description="Get playlists created by the current authenticated user",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of playlists to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first playlist to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_get_multiple_shows",
+                description="Get detailed information about multiple podcast shows",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "show_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify show IDs to retrieve information for"
+                        },
+                    },
+                    "required": ["show_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_show_episodes",
+                description="Get episodes of a specific podcast show",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "show_id": {
+                            "type": "string",
+                            "description": "Spotify show ID to retrieve episodes for"
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of episodes to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first episode to return (for pagination, default: 0)",
+                            "default": 0
+                        },
+                        "market": {
+                            "type": "string",
+                            "description": "Country market to restrict results (ISO 3166-1 alpha-2, default: None)",
+                            "default": None
+                        }
+                    },
+                    "required": ["show_id"]
+                }
+            ),
+            types.Tool(
+                name="spotify_get_current_user_saved_shows",
+                description="Get the current user's saved podcast shows",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Max number of shows to return (default: 20, max: 50)",
+                            "default": 20
+                        },
+                        "offset": {
+                            "type": "integer",
+                            "description": "Index of the first show to return (for pagination, default: 0)",
+                            "default": 0
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="spotify_save_shows_to_user_library",
+                description="Save podcast shows to the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "show_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify show IDs to save"
+                        },
+                    },
+                    "required": ["show_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_remove_shows_from_user_library",
+                description="Remove podcast shows from the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "show_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify show IDs to remove"
+                        },
+                    },
+                    "required": ["show_ids"]
+                }
+            ),
+            types.Tool(
+                name="spotify_check_user_saved_shows",
+                description="Check if a podcast show or multiple shows is saved in the user's library",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "show_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of Spotify show IDs to check"
+                        },
+                    },
+                    "required": ["show_ids"]
                 }
             ),
         ]
@@ -522,6 +1085,568 @@ def main(
             ]
             
             return result
+        elif name == "spotify_get_artists_info":
+            artist_ids = arguments.get("artist_ids", [])
+            logger.info(f"Getting artists info for IDs: {artist_ids}")
+            if not artist_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="artist_ids parameter is required to get artist information.",
+                    )
+                ]
+            result = get_artists_info(artist_ids, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_artist_albums":
+            artist_id = arguments.get("artist_id", "")
+            logger.info(f"Getting artist albums for artist_id: {artist_id}")
+            if not artist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="artist_id parameter is required to get artist albums.",
+                    )
+                ]
+            result = get_artist_albums(artist_id, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+
+            return result
+        elif name == "spotify_get_artist_top_tracks":
+            artist_id = arguments.get("artist_id", "")
+            country = arguments.get("country", None)
+            logger.info(f"Getting artist top tracks for artist_id: {artist_id}, country: {country}")
+            if not artist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="artist_id parameter is required to get artist top tracks.",
+                    )
+                ]
+            result = get_artist_top_tracks(artist_id, sp, country)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+
+            return result
+        elif name == "spotify_get_episodes_info":
+            episode_ids = arguments.get("episode_ids", [])
+            market = arguments.get("market", None)
+            logger.info(f"Getting episodes info for IDs: {episode_ids}, market: {market}")
+            if not episode_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="episode_ids parameter is required to get episode information.",
+                    )
+                ]
+            result = get_episodes_info(episode_ids, sp, market)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+
+            return result
+        elif name == "spotify_save_episodes_for_current_user":
+            episode_ids = arguments.get("episode_ids", [])
+            logger.info(f"Saving episodes for current user: {episode_ids}")
+            if not episode_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="episode_ids parameter is required to save episodes.",
+                    )
+                ]
+            result = save_episodes_for_current_user(episode_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            return result
+        elif name == "spotify_get_user_saved_episodes":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting user saved episodes with limit: {limit}, offset: {offset}")
+            
+            result = get_user_saved_episodes(spOauth, limit, offset)
+            logger.info(f"User saved episodes result: {result}")
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_remove_episodes_for_current_user":
+            episode_ids = arguments.get("episode_ids", [])
+            logger.info(f"Removing episodes for current user: {episode_ids}")
+            if not episode_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="episode_ids parameter is required to remove episodes.",
+                    )
+                ]
+    
+            result = remove_episodes_for_current_user(episode_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_check_user_saved_episodes":
+            episode_ids = arguments.get("episode_ids", [])
+            logger.info(f"Checking user saved episodes for IDs: {episode_ids}")
+            if not episode_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="episode_ids parameter is required to check saved episodes.",
+                    )
+                ]
+    
+            result = check_user_saved_episodes(episode_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_playlist_by_id":
+            playlist_id = arguments.get("playlist_id", "")
+            market = arguments.get("market", None)
+            logger.info(f"Getting playlist by ID: {playlist_id}, market: {market}")
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to get playlist information.",
+                    )
+                ]
+    
+            result = get_playlist_by_id(playlist_id, sp, market)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_user_owned_playlists":
+            user_id = arguments.get("user_id", "")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting user owned playlists for user_id: {user_id}, limit: {limit}, offset: {offset}")
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="user_id parameter is required to get owned playlists.",
+                    )
+                ]
+    
+            result = get_user_owned_playlists(user_id, sp, limit, offset)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_update_playlist_details":
+            playlist_id = arguments.get("playlist_id", "")
+            name = arguments.get("name", None)
+            public = arguments.get("public", None)
+            description = arguments.get("description", None)
+            logger.info(f"Updating playlist details for playlist_id: {playlist_id}, name: {name}, public: {public}, description: {description}")
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to update playlist details.",
+                    )
+                ]
+    
+            result = update_playlist_details(playlist_id, name, public, description, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_current_user_profile":
+            logger.info("Getting current user profile")
+            result = get_current_user_profile(spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_current_user_top_items":
+            item_type = arguments.get("item_type", "artists")
+            time_range = arguments.get("time_range", "medium_term")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            
+            logger.info(f"Getting current user top items: type={item_type}, time_range={time_range}, limit={limit}, offset={offset}")
+            
+        
+    
+            result = get_current_user_top_items(spOauth,item_type, time_range, limit, offset)
+            
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_spotify_user_public_profile":
+            user_id = arguments.get("user_id", "")
+            logger.info(f"Getting public profile for user_id: {user_id}")
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="user_id parameter is required to get public profile.",
+                    )
+                ]
+    
+            result = get_spotify_user_public_profile(user_id, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_follow_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            public = arguments.get("public", None)
+            logger.info(f"Following playlist with ID: {playlist_id}, public: {public}")
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to follow a playlist.",
+                    )
+                ]
+    
+            result = follow_playlist(playlist_id, public, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_unfollow_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            type= arguments.get("type", "artist")  
+            logger.info(f"Unfollowing playlist with ID: {playlist_id}")
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to unfollow a playlist.",
+                    )
+                ]
+    
+            result = unfollow_playlist(playlist_id, type,spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_current_user_followed_artists":
+            limit = arguments.get("limit", 20)
+            after = arguments.get("after", None)
+            logger.info(f"Getting followed artists with limit: {limit}, after: {after}")
+            
+            result = get_current_user_followed_artists(spOauth, limit, after)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_follow_artists_or_users":
+            ids = arguments.get("ids", [])
+            logger.info(f"Following artists/users with IDs: {ids}")
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to follow artists or users.",
+                    )
+                ]
+    
+            result = follow_artists_or_users(ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_unfollow_artists_or_users":
+            ids = arguments.get("ids", [])
+            type = arguments.get("type", "artist")  # or "user"
+            logger.info(f"Unfollowing artists/users with IDs: {ids}")
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to unfollow artists or users.",
+                    )
+                ]
+    
+            result = unfollow_artists_or_users(ids, type,spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_check_user_follows":
+            ids = arguments.get("ids", [])
+            type = arguments.get("type", "artist")  # or "user"
+            logger.info(f"Checking if user follows artists/users with IDs: {ids}")
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to check follows.",
+                    )
+                ]
+    
+            result = check_user_follows(ids, type,spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_add_items_to_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            uris = arguments.get("uris", [])
+            position = arguments.get("position", None)
+            logger.info(f"Adding items to playlist: {playlist_id}, uris: {uris}, position: {position}")
+            if not playlist_id or not uris:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id and uris parameters are required to add items to a playlist.",
+                    )
+                ]
+    
+            result = add_items_to_playlist(playlist_id, uris, spOauth, position)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_remove_items_from_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            uris = arguments.get("uris", [])
+            logger.info(f"Removing items from playlist: {playlist_id}, uris: {uris}")
+            if not playlist_id or not uris:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id and uris parameters are required to remove items from a playlist.",
+                    )
+                ]
+    
+            result = remove_items_from_playlist(playlist_id, uris, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_current_user_playlists":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting current user playlists with limit: {limit}, offset: {offset}")
+            
+            result = get_current_user_playlists(spOauth, limit, offset)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_multiple_shows":
+            show_ids = arguments.get("show_ids", [])
+            logger.info(f"Getting multiple shows for IDs: {show_ids}")
+            if not show_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_ids parameter is required to get multiple shows.",
+                    )
+                ]
+    
+            result = get_multiple_shows(show_ids, sp)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_show_episodes":
+            show_id = arguments.get("show_id", "")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            market = arguments.get("market", "US")
+            logger.info(f"Getting episodes for show_id: {show_id}, limit: {limit}, offset: {offset}, market: {market}")
+            if not show_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_id parameter is required to get show episodes.",
+                    )
+                ]
+    
+            result = get_show_episodes(show_id,sp, limit, offset, market)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_get_current_user_saved_shows":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting current user saved shows with limit: {limit}, offset: {offset}")
+            
+            result = get_current_user_saved_shows(spOauth, limit, offset)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_save_shows_to_user_library":
+            show_ids = arguments.get("show_ids", [])
+            logger.info(f"Saving shows to user library: {show_ids}")
+            if not show_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_ids parameter is required to save shows.",
+                    )
+                ]
+    
+            result = save_shows_to_user_library(show_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        elif name == "spotify_remove_shows_from_user_library":
+            show_ids = arguments.get("show_ids", [])
+            logger.info(f"Removing shows from user library: {show_ids}")
+            if not show_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_ids parameter is required to remove shows.",
+                    )
+                ]
+    
+            result = remove_shows_from_user_library(show_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+        
+        elif name == "spotify_check_user_saved_shows":
+            show_ids = arguments.get("show_ids", [])
+            logger.info(f"Checking user saved shows for IDs: {show_ids}")
+            if not show_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_ids parameter is required to check saved shows.",
+                    )
+                ]
+    
+            result = check_user_saved_shows(show_ids, spOauth)
+            result = [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps(result, indent=2)
+                )
+            ]
+            
+            return result
+
         return [
             types.TextContent(
                 type="text",
