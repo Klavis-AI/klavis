@@ -1,13 +1,13 @@
 import httpx
 import logging
-from .base import get_onedrive_client
+from .base import get_outlookMail_client
 import base64
 import os
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def outlookMail_get_attachment(
+async def outlookMail_get_attachment_details(
         message_id: str,
         attachment_id: str,
         expand: str = None
@@ -32,7 +32,7 @@ async def outlookMail_get_attachment(
           https://graph.microsoft.com/v1.0/me/messages/{message_id}/attachments/{attachment_id}
           and adds $expand if provided.
     """
-    client = get_onedrive_client()  # same client you’re using for other outlook calls
+    client = get_outlookMail_client()  # same client you’re using for other outlook calls
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -45,7 +45,7 @@ async def outlookMail_get_attachment(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'], params=params)
+            response = await httpx_client.get(url, headers=client['headers'], params=params)
             return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook attachment at {url}: {e}")
@@ -67,7 +67,7 @@ async def outlookMail_download_attachment(
     Returns:
         str: Path where the file is saved, or an error message.
     """
-    client = get_onedrive_client()  # your usual client setup
+    client = get_outlookMail_client()  # your usual client setup
     if not client:
         logging.error("Could not get Outlook client")
         return "Could not get Outlook client"
@@ -76,7 +76,7 @@ async def outlookMail_download_attachment(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'])
+            response = await httpx_client.get(url, headers=client['headers'])
         response.raise_for_status()
 
         with open(save_path, "wb") as f:
@@ -103,7 +103,7 @@ async def outlookMail_delete_attachment(
     Returns:
         str or dict: "Deleted" if successful, or error message/details.
     """
-    client = get_onedrive_client()  # your existing auth method
+    client = get_outlookMail_client()  # your existing auth method
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -111,7 +111,7 @@ async def outlookMail_delete_attachment(
     url = f"{client['base_url']}/me/messages/{message_id}/attachments/{attachment_id}"
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.delete(url, headers=client['headers'])
+            response = await httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             logging.info("Deleted attachment from Outlook draft message")
             return "Deleted"
@@ -145,7 +145,7 @@ async def outlookMail_add_attachment(
         dict: JSON response from Microsoft Graph API with attachment details,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()  # your existing auth helper
+    client = get_outlookMail_client()  # your existing auth helper
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -166,7 +166,7 @@ async def outlookMail_add_attachment(
             "contentBytes": content_bytes
         }
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             response.raise_for_status()
             return response.json()
 
@@ -194,7 +194,7 @@ async def outlookMail_upload_large_attachment(
         dict: JSON response from Microsoft Graph API with final upload session result,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()  # your existing method to get the client
+    client = get_outlookMail_client()  # your existing method to get the client
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -217,7 +217,7 @@ async def outlookMail_upload_large_attachment(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            session_res = httpx_client.post(url, headers=client['headers'], json=payload)
+            session_res = await httpx_client.post(url, headers=client['headers'], json=payload)
             session_res.raise_for_status()
             upload_url = session_res.json().get("uploadUrl")
             if not upload_url:
@@ -240,7 +240,7 @@ async def outlookMail_upload_large_attachment(
                     "Content-Range": f"bytes {start_byte}-{end_byte}/{file_size}"
                 }
                 async with httpx.AsyncClient() as httpx_client:
-                    put_res = httpx_client.put(upload_url, headers=headers, data=chunk)
+                    put_res = await httpx_client.put(upload_url, headers=headers, data=chunk)
                 put_res.raise_for_status()
                 file_pos += len(chunk)
                 logger.info(f"Uploaded bytes {start_byte}-{end_byte}")
@@ -262,7 +262,7 @@ async def outlookMail_list_attachments(message_id: str) -> dict:
         dict: JSON response from Microsoft Graph API with the list of attachments,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()  # same client used for other Outlook calls
+    client = get_outlookMail_client()  # same client used for other Outlook calls
     if not client:
         logging.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -271,7 +271,7 @@ async def outlookMail_list_attachments(message_id: str) -> dict:
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'])
+            response = await httpx_client.get(url, headers=client['headers'])
             response.raise_for_status()
             return response.json()
     except Exception as e:

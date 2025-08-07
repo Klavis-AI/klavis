@@ -1,6 +1,6 @@
 import httpx
 import logging
-from .base import get_onedrive_client
+from .base import get_outlookMail_client
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ async def outlookMail_list_messages(
           with the provided query parameters.
     """
 
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -63,7 +63,7 @@ async def outlookMail_list_messages(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'], params=params)
+            response = await httpx_client.get(url, headers=client['headers'], params=params)
             return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook messages from {url}: {e}")
@@ -114,7 +114,7 @@ async def outlookMail_list_messages_from_folder(
           with the provided query parameters.
     """
 
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -131,7 +131,7 @@ async def outlookMail_list_messages_from_folder(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.get(url, headers=client['headers'], params=params)
+            response = await httpx_client.get(url, headers=client['headers'], params=params)
             return response.json()
     except Exception as e:
         logger.error(f"Could not get Outlook messages from {url}: {e}")
@@ -150,7 +150,7 @@ async def outlookMail_read_message(message_id: str) -> dict:
     dict: The message object, or error on failure
     """
     url = f"https://graph.microsoft.com/v1.0/me/messages/{message_id}"
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -189,7 +189,7 @@ async def outlookMail_create_draft(
     - The draft is saved to the user's Drafts folder.
     - Recipient lists accept simple email strings; function builds correct schema.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -217,7 +217,7 @@ async def outlookMail_create_draft(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -281,7 +281,7 @@ async def outlookMail_update_draft(
             "content": "<html>...</html>"
         }
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -318,7 +318,7 @@ async def outlookMail_update_draft(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.patch(url, headers=client['headers'], json=payload)
+            response = await httpx_client.patch(url, headers=client['headers'], json=payload)
             response.raise_for_status()
             return response.json()
     except Exception as e:
@@ -337,7 +337,7 @@ async def outlookMail_delete_draft(message_id: str) -> dict:
         dict: JSON response from Microsoft Graph API with updated draft details,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -347,7 +347,7 @@ async def outlookMail_delete_draft(message_id: str) -> dict:
     try:
         logger.info(f"Deleting draft Outlook mail message at {url}")
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.delete(url, headers=client['headers'])
+            response = await httpx_client.delete(url, headers=client['headers'])
         if response.status_code == 204:
             return {"Success":"Deleted"}
         else:
@@ -382,7 +382,7 @@ async def outlookMail_create_forward_draft(
         dict: JSON response from Microsoft Graph API with the created draft forward's details,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()  # same method you used to get your client and headers
+    client = get_outlookMail_client()  # same method you used to get your client and headers
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -399,7 +399,7 @@ async def outlookMail_create_forward_draft(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             return response.json()
     except Exception as e:
         logger.error(f"Could not create Outlook forward draft message at {url}: {e}")
@@ -421,7 +421,7 @@ async def outlookMail_create_reply_draft(
         dict: JSON response from Microsoft Graph API with the created draft reply's details,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -435,7 +435,7 @@ async def outlookMail_create_reply_draft(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             return response.json()
     except Exception as e:
         logger.error(f"Could not create Outlook reply draft message at {url}: {e}")
@@ -457,7 +457,7 @@ async def outlookMail_create_reply_all_draft(
         dict: JSON response from Microsoft Graph API with the draft details,
               or an error message if the request fails.
     """
-    client = get_onedrive_client()  # reuse your existing token logic
+    client = get_outlookMail_client()  # reuse your existing token logic
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -470,7 +470,7 @@ async def outlookMail_create_reply_all_draft(
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'], json=payload)
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
             return response.json()
     except Exception as e:
         logger.error(f"Could not create reply-all draft at {url}: {e}")
@@ -486,7 +486,7 @@ async def outlookMail_send_draft(message_id: str) -> dict:
     Returns:
         dict: Empty response if successful, or error details.
     """
-    client = get_onedrive_client()
+    client = get_outlookMail_client()
     if not client:
         logger.error("Could not get Outlook client")
         return {"error": "Could not get Outlook client"}
@@ -495,7 +495,7 @@ async def outlookMail_send_draft(message_id: str) -> dict:
 
     try:
         async with httpx.AsyncClient() as httpx_client:
-            response = httpx_client.post(url, headers=client['headers'])
+            response = await httpx_client.post(url, headers=client['headers'])
         if response.status_code == 202 or response.status_code == 200 or response.status_code == 204:
             logger.info("Draft sent successfully")
             return {"success": "Draft sent successfully"}
@@ -507,3 +507,43 @@ async def outlookMail_send_draft(message_id: str) -> dict:
     except Exception as e:
         logger.error(f"Could not send Outlook draft message at {url}: {e}")
         return {"error": f"Could not send Outlook draft message at {url}"}
+
+async def outlookMail_move_message(
+        message_id: str,
+        destination_folder_id: str
+) -> dict:
+    """
+    Move an Outlook mail message to another folder.
+
+    Args:
+        message_id (str): ID of the message to move.
+        destination_folder_id (str): ID of the target folder.
+                                     Example: 'deleteditems' or actual folder ID.
+
+    Returns:
+        dict: JSON response from Microsoft Graph API with moved message details,
+              or an error message if it fails.
+    """
+    client = get_outlookMail_client()
+    if not client:
+        logger.error("Could not get Outlook client")
+        return {"error": "Could not get Outlook client"}
+
+    url = f"{client['base_url']}/me/messages/{message_id}/move"
+
+    payload = {
+        "destinationId": destination_folder_id
+    }
+
+    try:
+        async with httpx.AsyncClient() as httpx_client:
+            response = await httpx_client.post(url, headers=client['headers'], json=payload)
+            return response.json()
+    except Exception as e:
+        logger.error(f"Could not move Outlook mail message at {url}: {e}")
+        return {"error": f"Could not move Outlook mail message at {url}"}
+
+
+if __name__ == "__main__":
+    #print(await outlookMail_create_draft('dss','sds','dsds'))
+    pass
