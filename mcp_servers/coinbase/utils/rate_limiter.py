@@ -17,8 +17,7 @@ class RateLimitConfig:
     """Configuration class for rate limiting settings."""
 
     def __init__(self):
-        # Smart defaults for Coinbase API limits
-        # These are conservative defaults that work for most users
+        # Default rate limit for Coinbase API
         self.default_max_requests_per_second = int(
             os.getenv("COINBASE_DEFAULT_RATE_LIMIT", "2")
         )
