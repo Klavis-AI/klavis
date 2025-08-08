@@ -28,12 +28,12 @@ pip install -r requirements.txt
 cp .env.example .env
 # edit .env:
 # AMPLITUDE_API_KEY=...
-
-Mock Test
-
+```
+## Mock Test
+```bash
 pytest
-
-Smoke tests (live)
+```
+## Smoke tests (live)
 
 1) track_event (HTTP V2, JSON body)
 ```bash
@@ -48,13 +48,14 @@ curl -sS -X POST "https://api2.amplitude.com/2/httpapi" \
       "event_properties":{"source":"mcp","purpose":"smoke_test"}
     }]
   }'
-
+```
+```bash
 2) identify_user (form-encoded, NOT JSON)
 curl --location --request POST "https://api2.amplitude.com/identify" \
   --header "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "api_key=YOUR_API_KEY" \
   --data-urlencode 'identification=[{"user_id":"mcp_user_12345","user_properties":{"plan":"free","source":"mcp"}}]'
-
+```
 Expected: success
 
 Common pitfall: sending JSON here → 400 missing_event.
