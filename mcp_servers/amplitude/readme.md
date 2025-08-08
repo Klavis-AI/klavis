@@ -1,11 +1,9 @@
-# Amplitude MCP Server (Short)
+# Amplitude MCP Serve
 
-Atomic MCP tools for Amplitude that work on any project:
+An MCP (Model Context Protocol) server exposing atomic Amplitude tools for AI agents. Built with the standard MCP Python SDK (FastMCP). 
 
 - **track_event** — send one event via HTTP V2
 - **identify_user** — set user properties / link user_id or device_id
-
-Optional (plan-gated, not enabled by default):
 - **list_event_categories** — Amplitude Taxonomy (Enterprise)
 - **get_user_profile** — User Profile API (Activation, US-only)
 
@@ -31,32 +29,57 @@ cp .env.example .env
 ```
 ## Mock Test
 ```bash
-pytest
+python -m pytest
 ```
-## Smoke tests (live)
 
-1) track_event (HTTP V2, JSON body)
-```bash
-US endpoint (default):
-curl -sS -X POST "https://api2.amplitude.com/2/httpapi" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "api_key":"YOUR_API_KEY",
-    "events":[{
-      "event_type":"mcp_smoke_test",
-      "user_id":"mcp_user_12345",
-      "event_properties":{"source":"mcp","purpose":"smoke_test"}
-    }]
-  }'
-```
-```bash
-2) identify_user (form-encoded, NOT JSON)
-curl --location --request POST "https://api2.amplitude.com/identify" \
-  --header "Content-Type: application/x-www-form-urlencoded" \
-  --data-urlencode "api_key=YOUR_API_KEY" \
-  --data-urlencode 'identification=[{"user_id":"mcp_user_12345","user_properties":{"plan":"free","source":"mcp"}}]'
-```
-Expected: success
+## Tools (function docs for AI clients)
 
-Common pitfall: sending JSON here → 400 missing_event.
-EU projects: https://api.eu.amplitude.com/identify.
+1) track_event
+	•	Title: Track a single event (HTTP V2)
+	•	AI Prompt Words: track event, log event, record event
+	•	Parameters:
+	•	event_type (str, required) — event name
+	•	user_id (str, optional) — user identifier (≥5 chars)
+	•	device_id (str, optional) — alternative to user_id (≥5 chars)
+	•	event_properties (dict or JSON string, optional) — custom props
+	•	time (int ms or seconds, optional) — timestamp; seconds auto-converted to ms
+
+Example:
+
+“Track an Amplitude event named test for user username with properties {source:mcp, purpose:test}.”
+
+2) identify_user
+	•	Title: Identify user / set user properties (Identify API)
+	•	AI Prompt Words: identify user, set user properties, update user profile
+	•	Parameters:
+	•	user_id (str, optional)
+	•	device_id (str, optional)
+	•	user_properties (dict, optional) — plain props to $set
+	•	operations (dict, optional) — advanced ops like $set, $add; overrides user_properties if provided
+
+On success returns the string success.
+
+Natural prompt example:
+
+“Identify username and set {plan:free, source:test}.”
+
+3) get_user_profile (visible; may be plan-gated)
+	•	Title: Get user profile (Profile API)
+	•	AI Prompt Words: get user profile, fetch user properties, show profile data
+	•	Parameters:
+	•	user_id (str, required)
+	•	get_amp_props, get_cohort_ids, get_recs, get_computations (bool, optional)
+
+
+Natural prompt example:
+
+“Get user profile for username including get_amp_props=true.”
+
+4) list_event_categories (visible; may be plan-gated)
+	•	Title: List event categories (Taxonomy)
+	•	AI Prompt Words: list categories, show taxonomy categories
+	•	Parameters: (none)
+
+Natural prompt example:
+
+“List Amplitude event categories.”
