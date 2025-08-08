@@ -17,7 +17,7 @@ Follow the instructions below to integrate Hacker News MCP server to your AI app
 
 - [Create an API key](https://www.klavis.ai/home/api-keys)
 
-### 1. Create a Hacker News MCP Server
+### Create a Hacker News MCP Server
 
 Use the following endpoint to create a new remote Hacker News MCP server instance:
 
@@ -110,75 +110,13 @@ HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/i
 ```json SDK Response
 {
   "serverUrl": "https://hackernews-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/hackernews/authorize?instance_id=<instance-id>"
+  "instanceId": "<instance-id>"
 }
 ```
 </CodeGroup>
 
 <Check>**serverUrl** specifies the endpoint of the Hacker News MCP server, which you can connect with the MCP client of your application.</Check>
 <Note>**instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Hacker News information.</Note>
-
-### 2. Implement OAuth Authorization
-
-Redirect users to the OAuth authorization flow:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(hacker_news_server.oauth_url)
-```
-
-```javascript TypeScript
-// The OAuth URL is provided in the server response
-console.log('OAuth URL:', hackerNewsServer.oauthUrl);
-
-// Redirect user to authorize
-window.location.href = hackerNewsServer.oauthUrl;
-```
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/hackernews/authorize"
-
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class HackerNewsOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/hackernews/authorize?instance_id=" +
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
-
-        System.out.println("Redirect to: " + authUrl);
-
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
-</CodeGroup>
 
 <Tip>
 You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
