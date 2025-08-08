@@ -18,7 +18,7 @@ COPY mcp_servers/freshdesk/tools/ ./tools/
 COPY mcp_servers/freshdesk/.env.example .env
 
 # Expose the port the server runs on
-EXPOSE 5001
+EXPOSE 5000
 
 # Command to run the server
 CMD ["python", "server.py"] 
