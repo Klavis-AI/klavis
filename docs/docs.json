@@ -80,6 +80,7 @@
               "documentation/mcp-server/google_docs",
               "documentation/mcp-server/google_drive",
               "documentation/mcp-server/google_sheets",
+              "documentation/mcp-server/hacker_news",
               "documentation/mcp-server/hubspot",
               "documentation/mcp-server/jira",
               "documentation/mcp-server/klavis-reportgen",
