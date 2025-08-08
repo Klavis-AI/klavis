@@ -1,16 +1,24 @@
-import os
-import json
-import time
 import logging
 import contextlib
-import asyncio
-from collections import defaultdict, deque
+import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict, List, Optional
+from tools.helpers import _run_sync
+from tools.ratelimit import RateLimiter, TooManyRequests
+from tools.task import (
+    list_task_lists,
+    create_task_list,
+    list_tasks,
+    create_task,
+    update_task,
+    delete_task,
+    find_task_list,
+    find_tasks_by_title,
+    delete_task_by_title,
+    find_task_list_id_by_title,
+)
 
-import click
 from dotenv import load_dotenv
-
+import os
 # MCP / transports
 import mcp.types as types
 from mcp.server.lowlevel import Server
@@ -23,11 +31,6 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
-# Google Tasks
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
 
 # =========================
 # Environment / Logging
@@ -37,221 +40,12 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("google-tasks-mcp-server")
 
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REFRESH_TOKEN = os.getenv("GOOGLE_REFRESH_TOKEN")
-
-if not (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET and GOOGLE_REFRESH_TOKEN):
-    raise ValueError(
-        "Missing Google OAuth env vars. Required: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN."
-    )
-
 MCP_PORT = int(os.getenv("GOOGLE_TASKS_MCP_SERVER_PORT", "5000"))
 
 # Default rate limits (can override via CLI or env)
 DEFAULT_RATE_MAX = int(os.getenv("GOOGLE_TASKS_RATE_MAX", "60"))       # calls
 DEFAULT_RATE_PERIOD = int(os.getenv("GOOGLE_TASKS_RATE_PERIOD", "60")) # seconds
 
-
-# =========================
-# Helpers
-# =========================
-def _get_service():
-    """Build a Google Tasks API service using refresh token flow."""
-    creds = Credentials(
-        None,
-        refresh_token=GOOGLE_REFRESH_TOKEN,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=GOOGLE_CLIENT_ID,
-        client_secret=GOOGLE_CLIENT_SECRET,
-    )
-    return build("tasks", "v1", credentials=creds)
-
-def _error_from_http(e: HttpError, default_msg: str) -> Dict[str, Any]:
-    """Normalize Google API errors."""
-    status = getattr(e, "resp", None).status if getattr(e, "resp", None) else None
-    try:
-        body = e.error_details if hasattr(e, "error_details") else None
-    except Exception:
-        body = None
-    if status in (403, 429):
-        return {"error": "Rate limit exceeded or unauthorized.", "status": status}
-    return {"error": f"{default_msg} (HTTP {status})", "status": status, "details": str(e)}
-
-async def _run_sync(fn, *args, **kwargs):
-    """Run blocking Google client calls in a thread."""
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, lambda: fn(*args, **kwargs))
-
-
-# =========================
-# Atomic functions (sync)
-# =========================
-def list_task_lists() -> List[Dict[str, Any]]:
-    try:
-        service = _get_service()
-        result = service.tasklists().list(maxResults=50).execute()
-        return result.get("items", [])
-    except HttpError as e:
-        logger.exception("Error listing task lists")
-        return _error_from_http(e, "Failed to list task lists")
-
-def create_task_list(title: str) -> Dict[str, Any]:
-    try:
-        service = _get_service()
-        return service.tasklists().insert(body={"title": title}).execute()
-    except HttpError as e:
-        logger.exception("Error creating task list")
-        return _error_from_http(e, "Failed to create task list")
-
-def list_tasks(task_list_id: str) -> List[Dict[str, Any]]:
-    try:
-        service = _get_service()
-        result = service.tasks().list(tasklist=task_list_id).execute()
-        return result.get("items", [])
-    except HttpError as e:
-        logger.exception("Error listing tasks")
-        return _error_from_http(e, "Failed to list tasks")
-
-def create_task(task_list_id: str, title: str, notes: str = "") -> Dict[str, Any]:
-    try:
-        service = _get_service()
-        return service.tasks().insert(tasklist=task_list_id, body={"title": title, "notes": notes}).execute()
-    except HttpError as e:
-        logger.exception("Error creating task")
-        return _error_from_http(e, "Failed to create task")
-
-def update_task(
-    task_list_id: str,
-    task_id: str,
-    title: Optional[str] = None,
-    notes: Optional[str] = None,
-    status: Optional[str] = None,
-) -> Dict[str, Any]:
-    try:
-        service = _get_service()
-        existing = service.tasks().get(tasklist=task_list_id, task=task_id).execute()
-        if title is not None:
-            existing["title"] = title
-        if notes is not None:
-            existing["notes"] = notes
-        if status is not None:
-            existing["status"] = status  # 'needsAction' or 'completed'
-        return service.tasks().update(tasklist=task_list_id, task=task_id, body=existing).execute()
-    except HttpError as e:
-        logger.exception("Error updating task")
-        return _error_from_http(e, "Failed to update task")
-
-def delete_task(task_list_id: str, task_id: str) -> Dict[str, Any]:
-    try:
-        service = _get_service()
-        service.tasks().delete(tasklist=task_list_id, task=task_id).execute()
-        return {"status": "deleted"}
-    except HttpError as e:
-        logger.exception("Error deleting task")
-        return _error_from_http(e, "Failed to delete task")
-
-def find_task_list(title: str) -> List[Dict[str, Any]]:
-    service = _get_service()
-    items = service.tasklists().list(maxResults=100).execute().get("items", [])
-    title_l = title.strip().lower()
-    return [
-        {"id": it["id"], "title": it.get("title", "")}
-        for it in items
-        if it.get("title", "").strip().lower() == title_l
-    ]
-
-def find_tasks_by_title(task_list_id: str, title: str, exact: bool = True) -> List[Dict[str, Any]]:
-    service = _get_service()
-    items = service.tasks().list(tasklist=task_list_id, showCompleted=True, showHidden=True).execute().get("items", [])
-    t = title.strip()
-    t_l = t.lower()
-    out = []
-    for it in items or []:
-        name = it.get("title", "")
-        ok = (name == t) if exact else (t_l in name.lower())
-        if ok:
-            out.append({"id": it["id"], "title": name, "status": it.get("status")})
-    return out
-
-def delete_task_by_title(task_list_id: str, title: str, strategy: str = "one", exact: bool = True) -> Dict[str, Any]:
-    matches = find_tasks_by_title(task_list_id, title, exact)
-    if strategy == "one":
-        if len(matches) != 1:
-            return {"error": f"Expected exactly one match, found {len(matches)}", "matches": matches}
-        to_delete = [matches[0]["id"]]
-    elif strategy == "first":
-        if not matches:
-            return {"deleted": [], "matches": []}
-        to_delete = [matches[0]["id"]]
-    elif strategy == "all":
-        to_delete = [m["id"] for m in matches]
-    else:
-        return {"error": f"Unknown strategy '{strategy}'", "matches": matches}
-
-    deleted = []
-    for tid in to_delete:
-        try:
-            delete_task(task_list_id, tid)
-            deleted.append(tid)
-        except Exception as e:
-            return {"error": str(e), "deleted": deleted, "remaining": to_delete[len(deleted):]}
-    return {"deleted": deleted, "matches": matches}
-
-def find_task_list_id_by_title(
-    list_title: str,
-    create_if_missing: bool = False,
-) -> tuple[Optional[str], Dict[str, Any]]:
-    """Return (task_list_id, meta). meta may contain error/created/matches."""
-    lists = list_task_lists()
-    if isinstance(lists, dict) and "error" in lists:
-        return None, {"error": lists["error"]}
-
-    matches = [l for l in lists if l.get("title") == list_title]
-    if not matches:
-        if create_if_missing:
-            created = create_task_list(list_title)
-            if isinstance(created, dict) and "id" in created:
-                return created["id"], {"created": True}
-            return None, {"error": "Failed to create list", "details": created}
-        return None, {"error": "List not found", "candidates": [l.get("title") for l in lists]}
-
-    if len(matches) > 1:
-        return None, {
-            "error": "List title is ambiguous",
-            "matches": [{"id": l.get("id"), "title": l.get("title")} for l in matches],
-        }
-
-    return matches[0].get("id"), {}
-
-
-
-# =========================
-# Simple per-tool rate limiter
-# =========================
-class TooManyRequests(Exception):
-    pass
-
-class RateLimiter:
-    def __init__(self, max_calls: int, period_seconds: int):
-        self.max = max_calls
-        self.period = period_seconds
-        self.calls = defaultdict(deque)  # key -> deque[timestamps]
-
-    def hit(self, key: str):
-        now = time.monotonic()
-        dq = self.calls[key]
-        # purge old calls
-        while dq and (now - dq[0]) > self.period:
-            dq.popleft()
-        if len(dq) >= self.max:
-            raise TooManyRequests(f"Rate limit exceeded for '{key}': {self.max} calls per {self.period}s.")
-        dq.append(now)
-
-
-# =========================
-# CLI / Server
-# =========================
 def main(
     port: int,
     log_level: str,
