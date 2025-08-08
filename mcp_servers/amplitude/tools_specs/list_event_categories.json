@@ -1,0 +1,6 @@
+{
+    "name": "list_event_categories",
+    "description": "Lists all event categories in Amplitude taxonomy. Returns an array of objects {id, name}.",
+    "inputs": {},
+    "outputs": {"categories": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}}}
+  }
