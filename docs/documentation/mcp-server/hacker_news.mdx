@@ -1,0 +1,142 @@
+---
+title: 'Hacker News'
+description: 'Learn how to use Klavis to connect your AI application to Hacker News MCP Server'
+---
+
+import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+
+<NoCodeSnippet />
+
+---
+
+## For Developer
+
+Follow the instructions below to integrate Hacker News MCP server to your AI application using our API or SDK.
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### Create a Hacker News MCP Server
+
+Use the following endpoint to create a new remote Hacker News MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Hacker News MCP server instance
+hacker_news_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.HACKER_NEWS,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Hacker News MCP server instance
+const hackerNewsServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.HackerNews,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Hacker News",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Hacker News\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Hacker News\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://hackernews-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>**serverUrl** specifies the endpoint of the Hacker News MCP server, which you can connect with the MCP client of your application.</Check>
+<Note>**instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Hacker News information.</Note>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name | Description |
+|---|---|
+| hackerNews_item | Fetches a single Hacker News item by its unique ID. |
+| hackerNews_user | Retrieves a Hacker News user's profile by their username. |
+| hackerNews_topstories | Fetches a list of the current top stories. |
+| hackerNews_beststories | Fetches a list of the all-time best stories. |
+| hackerNews_newstories | Fetches a list of the most recent stories. |
+| hackerNews_showstories | Fetches a list of the latest "Show HN" stories. |
+| hackerNews_askstories | Fetches a list of the latest "Ask HN" stories. |
+| hackerNews_jobstories | Fetches a list of the latest job postings. |
+| hackerNews_updates | Fetches recent updates, including new items and changed profiles. |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
