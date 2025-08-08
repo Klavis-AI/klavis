@@ -9,10 +9,11 @@ def test_identify_user_form_encoded(mock_post):
     mock_resp.raise_for_status = lambda: None
     mock_post.return_value = mock_resp
 
-    out = identify_user(user_id="mcp_user_12345", user_properties={"plan":"free"})
+#userid is something you can choose it will be automatically updated to Amplitude
+    out = identify_user(user_id="jain_mcp_2247", user_properties={"plan":"free"})
     assert out["status_code"] == 200
     assert out["response"] == "success"
-    # Ensure form-encoded POST (data=...), not JSON
+
     _, kwargs = mock_post.call_args
     assert kwargs.get("data") and "identification" in kwargs["data"]
     assert kwargs.get("url", IDENTIFY_URL) or True

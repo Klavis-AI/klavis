@@ -1,6 +1,7 @@
 import os
 import requests
 from typing import Dict
+import logging
 
 AMPLITUDE_API_ENDPOINT = "https://api2.amplitude.com/2/httpapi"
 API_KEY = os.getenv("AMPLITUDE_API_KEY")
@@ -19,6 +20,8 @@ def track_event(event_type: str, user_id: str, event_properties: Dict = None, ti
       status_code: HTTP status code of the response.
       response: Parsed JSON response.
     """
+    logger = logging.getLogger("amplitude_mcp")
+    logger.info("TOOL_CALL track_event", extra={"event_type": event_type, "user_id": user_id})
     payload = {
         "api_key": API_KEY, 
         "events": [

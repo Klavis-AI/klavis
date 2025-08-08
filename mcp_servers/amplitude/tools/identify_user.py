@@ -13,11 +13,11 @@ def identify_user(
     operations: Optional[Dict] = None,
 ) -> Dict:
     """
-    Identify a user and set user properties via Amplitude Identify API.
+    Identify a user and set user properties.
 
     Inputs:
-      user_id: Optional user_id (>=5 chars recommended by Amplitude).
-      device_id: Optional device_id (>=5 chars).
+      user_id: str
+      device_id: str
       user_properties: Plain properties to $set (e.g., {"plan":"free"}).
       operations: Advanced ops dict (e.g., {"$set": {...}, "$add": {...}}). If provided, overrides user_properties.
 

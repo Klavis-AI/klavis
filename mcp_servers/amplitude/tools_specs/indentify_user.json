@@ -1,6 +1,6 @@
 {
     "name": "identify_user",
-    "description": "Sets user properties or links a user_id/device_id via Amplitude Identify API. Inputs: user_id (string, optional), device_id (string, optional), user_properties (object), operations (object with $set/$add/etc). Returns status_code and raw response.",
+    "description": "Sets user properties via Amplitude Identify API. Inputs: user_id (string), device_id (string), user_properties (object), operations (object with $set or $add). Returns status_code and raw response.",
     "inputs": {
       "user_id": {"type": "string", "description": "Amplitude user identifier"},
       "device_id": {"type": "string", "description": "Device identifier"},

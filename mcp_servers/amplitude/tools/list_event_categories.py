@@ -1,6 +1,8 @@
 import os
 import requests
 from dotenv import load_dotenv
+import logging
+
 
 # Load credentials
 load_dotenv()
@@ -16,6 +18,9 @@ def list_event_categories() -> list:
     Returns:
       List of category objects with id and name.
     """
+    logger = logging.getLogger("amplitude_mcp")
+    logger.info("TOOL_CALL list_event_categories")
+    
     resp = requests.get(CATEGORY_ENDPOINT, auth=(API_KEY, API_SECRET))
     resp.raise_for_status()
     data = resp.json().get("data", [])
