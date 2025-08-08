@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic[dotenv]
+splunk-sdk
+python-dotenv
+pytest
+httpx
