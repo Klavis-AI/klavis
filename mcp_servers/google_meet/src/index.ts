@@ -24,9 +24,25 @@ const asyncLocalStorage = new AsyncLocalStorage<RequestContext>();
 async function getAccessToken(): Promise<string> {
   const store = asyncLocalStorage.getStore();
   const accessToken = (store?.accessToken || '').trim();
+  
   if (!accessToken) {
     throw new Error('Missing OAuth access token. Pass a valid token in the x-auth-token header.');
   }
+  
+  // Basic token format validation
+  if (accessToken.length < 10) {
+    throw new Error('Invalid access token format. Token is too short.');
+  }
+  
+  if (accessToken.length > 4096) {
+    throw new Error('Invalid access token format. Token is too long.');
+  }
+  
+  // Check for potentially dangerous characters
+  if (!/^[a-zA-Z0-9\-_.~:/?#[\]@!$&'()*+,;=]+$/.test(accessToken)) {
+    throw new Error('Invalid access token format. Token contains invalid characters.');
+  }
+  
   return accessToken;
 }
 
@@ -35,26 +51,62 @@ async function getAccessToken(): Promise<string> {
 const CreateMeetingSchema = z.object({});
 
 const GetMeetingDetailsSchema = z.object({
-  space_id: z.string().min(1).describe('Meeting space ID (spaces/{space-id})'),
+  space_id: z.string()
+    .min(1, 'Space ID cannot be empty')
+    .max(1000, 'Space ID is too long')
+    .regex(/^spaces\/[a-zA-Z0-9\-_]+$/, 'Invalid space ID format. Must be in format: spaces/{space-id}')
+    .describe('Meeting space ID (spaces/{space-id})'),
 });
 
 
 
 const GetPastMeetingsSchema = z.object({
-  page_size: z.number().int().positive().max(100).optional().default(10).describe('Maximum number of records to return'),
-  page_token: z.string().optional().describe('Token for pagination'),
-  filter: z.string().optional().describe('Filter expression'),
+  page_size: z.number()
+    .int('Page size must be an integer')
+    .positive('Page size must be positive')
+    .max(100, 'Page size cannot exceed 100')
+    .optional()
+    .default(10)
+    .describe('Maximum number of records to return'),
+  page_token: z.string()
+    .max(5000, 'Page token is too long')
+    .optional()
+    .describe('Token for pagination'),
+  filter: z.string()
+    .max(2000, 'Filter expression is too long')
+    .optional()
+    .describe('Filter expression'),
 });
 
 const GetPastMeetingDetailsSchema = z.object({
-  conference_record_id: z.string().min(1).describe('Conference record ID (conferenceRecords/{record-id})'),
+  conference_record_id: z.string()
+    .min(1, 'Conference record ID cannot be empty')
+    .max(1000, 'Conference record ID is too long')
+    .regex(/^conferenceRecords\/[a-zA-Z0-9\-_]+$/, 'Invalid conference record ID format. Must be in format: conferenceRecords/{record-id}')
+    .describe('Conference record ID (conferenceRecords/{record-id})'),
 });
 
 const GetPastMeetingParticipantsSchema = z.object({
-  conference_record_id: z.string().min(1).describe('Conference record ID (conferenceRecords/{record-id})'),
-  page_size: z.number().int().positive().max(100).optional().default(10).describe('Maximum number of participants to return'),
-  page_token: z.string().optional().describe('Token for pagination'),
-  filter: z.string().optional().describe('Filter expression'),
+  conference_record_id: z.string()
+    .min(1, 'Conference record ID cannot be empty')
+    .max(1000, 'Conference record ID is too long')
+    .regex(/^conferenceRecords\/[a-zA-Z0-9\-_]+$/, 'Invalid conference record ID format. Must be in format: conferenceRecords/{record-id}')
+    .describe('Conference record ID (conferenceRecords/{record-id})'),
+  page_size: z.number()
+    .int('Page size must be an integer')
+    .positive('Page size must be positive')
+    .max(100, 'Page size cannot exceed 100')
+    .optional()
+    .default(10)
+    .describe('Maximum number of participants to return'),
+  page_token: z.string()
+    .max(5000, 'Page token is too long')
+    .optional()
+    .describe('Token for pagination'),
+  filter: z.string()
+    .max(2000, 'Filter expression is too long')
+    .optional()
+    .describe('Filter expression'),
 });
 
 
@@ -120,26 +172,39 @@ const tools: Tool[] = [
 async function createMeeting(args: z.infer<typeof CreateMeetingSchema>) {
   const accessToken = await getAccessToken();
   
-  const response = await fetch('https://meet.googleapis.com/v2/spaces', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({}),
-  });
+  try {
+    const response = await fetch('https://meet.googleapis.com/v2/spaces', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to create meeting space: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to create meeting space: ${response.status} ${error}`);
+    }
+
+    const space = await response.json() as MeetingSpace;
+    
+    // Validate response structure
+    if (!space.name || !space.meetingUri) {
+      throw new Error('Invalid response from Google Meet API: missing required fields');
+    }
+    
+    return {
+      space_id: space.name,
+      meet_link: space.meetingUri,
+      space,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Unexpected error creating meeting: ${String(error)}`);
   }
-
-  const space = await response.json() as MeetingSpace;
-  return {
-    space_id: space.name,
-    meet_link: space.meetingUri,
-    space,
-  };
 }
 
 
@@ -147,24 +212,37 @@ async function createMeeting(args: z.infer<typeof CreateMeetingSchema>) {
 async function getMeetingDetails(args: z.infer<typeof GetMeetingDetailsSchema>) {
   const accessToken = await getAccessToken();
   
-  const response = await fetch(`https://meet.googleapis.com/v2/${args.space_id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+  try {
+    const response = await fetch(`https://meet.googleapis.com/v2/${encodeURIComponent(args.space_id)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to get meeting space: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to get meeting space: ${response.status} ${error}`);
+    }
+
+    const space = await response.json() as MeetingSpace;
+    
+    // Validate response structure
+    if (!space.name || !space.meetingUri) {
+      throw new Error('Invalid response from Google Meet API: missing required fields');
+    }
+    
+    return {
+      space_id: space.name,
+      meet_link: space.meetingUri,
+      space,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Unexpected error getting meeting details: ${String(error)}`);
   }
-
-  const space = await response.json() as MeetingSpace;
-  return {
-    space_id: space.name,
-    meet_link: space.meetingUri,
-    space,
-  };
 }
 
 
@@ -172,78 +250,113 @@ async function getMeetingDetails(args: z.infer<typeof GetMeetingDetailsSchema>) 
 async function getPastMeetings(args: z.infer<typeof GetPastMeetingsSchema>) {
   const accessToken = await getAccessToken();
   
-  const params = new URLSearchParams();
-  params.append('pageSize', args.page_size?.toString() || '10');
-  if (args.page_token) params.append('pageToken', args.page_token);
-  if (args.filter) params.append('filter', args.filter);
+  try {
+    const params = new URLSearchParams();
+    params.append('pageSize', args.page_size?.toString() || '10');
+    if (args.page_token) params.append('pageToken', args.page_token);
+    if (args.filter) params.append('filter', args.filter);
 
-  const response = await fetch(`https://meet.googleapis.com/v2/conferenceRecords?${params.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+    const response = await fetch(`https://meet.googleapis.com/v2/conferenceRecords?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to list conference records: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to list conference records: ${response.status} ${error}`);
+    }
+
+    const data = await response.json() as ApiResponse<ConferenceRecord[]>;
+    
+    // Ensure we return an array even if API returns undefined
+    const conferenceRecords = Array.isArray(data.conferenceRecords) ? data.conferenceRecords : [];
+    
+    return {
+      conference_records: conferenceRecords,
+      next_page_token: data.nextPageToken as string | undefined,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Unexpected error getting past meetings: ${String(error)}`);
   }
-
-  const data = await response.json() as ApiResponse<ConferenceRecord[]>;
-  return {
-    conference_records: data.conferenceRecords || [],
-    next_page_token: data.nextPageToken as string | undefined,
-  };
 }
 
 async function getPastMeetingDetails(args: z.infer<typeof GetPastMeetingDetailsSchema>) {
   const accessToken = await getAccessToken();
   
-  const response = await fetch(`https://meet.googleapis.com/v2/${args.conference_record_id}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+  try {
+    const response = await fetch(`https://meet.googleapis.com/v2/${encodeURIComponent(args.conference_record_id)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to get conference record: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to get conference record: ${response.status} ${error}`);
+    }
+
+    const record = await response.json() as ConferenceRecord;
+    
+    // Validate response structure
+    if (!record.name) {
+      throw new Error('Invalid response from Google Meet API: missing required fields');
+    }
+    
+    return {
+      conference_record_id: record.name,
+      record,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Unexpected error getting past meeting details: ${String(error)}`);
   }
-
-  const record = await response.json() as ConferenceRecord;
-  return {
-    conference_record_id: record.name,
-    record,
-  };
 }
 
 async function getPastMeetingParticipants(args: z.infer<typeof GetPastMeetingParticipantsSchema>) {
   const accessToken = await getAccessToken();
   
-  const params = new URLSearchParams();
-  params.append('pageSize', args.page_size?.toString() || '10');
-  if (args.page_token) params.append('pageToken', args.page_token);
-  if (args.filter) params.append('filter', args.filter);
+  try {
+    const params = new URLSearchParams();
+    params.append('pageSize', args.page_size?.toString() || '10');
+    if (args.page_token) params.append('pageToken', args.page_token);
+    if (args.filter) params.append('filter', args.filter);
 
-  const response = await fetch(`https://meet.googleapis.com/v2/${args.conference_record_id}/participants?${params.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+    const response = await fetch(`https://meet.googleapis.com/v2/${encodeURIComponent(args.conference_record_id)}/participants?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to list participants: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to list participants: ${response.status} ${error}`);
+    }
+
+    const data = await response.json() as ApiResponse<Participant[]>;
+    
+    // Ensure we return an array even if API returns undefined
+    const participants = Array.isArray(data.participants) ? data.participants : [];
+    
+    return {
+      participants,
+      next_page_token: data.nextPageToken as string | undefined,
+      participant_count: participants.length,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Unexpected error getting past meeting participants: ${String(error)}`);
   }
-
-  const data = await response.json() as ApiResponse<Participant[]>;
-  return {
-    participants: data.participants || [],
-    next_page_token: data.nextPageToken as string | undefined,
-    participant_count: (data.participants || []).length,
-  };
 }
 
 
