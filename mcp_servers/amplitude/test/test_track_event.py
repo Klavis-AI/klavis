@@ -10,7 +10,7 @@ def test_track_event(mock_requests):
     mock_resp.raise_for_status = lambda: None
     mock_requests.post.return_value = mock_resp
 
-    result = track_event("test_event", "user123", {"key": "value"}, 1620000000000)
+    result = track_event("test_event", "jain_mcp_2247", {"key": "value"}, 1620000000000)
     assert result["status_code"] == 200
     assert result["response"] == {"events_ingested": 1}
     mock_requests.post.assert_called_with(AMPLITUDE_API_ENDPOINT, json=mock.ANY)

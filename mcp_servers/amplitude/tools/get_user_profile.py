@@ -1,8 +1,9 @@
 import os
 import requests
 from dotenv import load_dotenv
+import logging
 
-# Load Amplitude secret key
+# Load secret key
 load_dotenv()
 API_SECRET = os.getenv("AMPLITUDE_API_SECRET")
 USER_PROFILE_ENDPOINT = "https://profile-api.amplitude.com/v1/userprofile"
@@ -28,6 +29,9 @@ def get_user_profile(
     Returns:
       The full JSON response from Amplitude's User Profile API.
     """
+    logger = logging.getLogger("amplitude_mcp")
+    logger.info("TOOL_CALL get_user_profile", extra={"user_id": user_id})
+    
     headers = {"Authorization": f"Api-Key {API_SECRET}"}
     params = {"user_id": user_id}
     if get_amp_props:
