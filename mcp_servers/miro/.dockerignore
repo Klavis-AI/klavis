@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.git
+.gitignore
+README.md
+.env.example
+coverage/
+.nyc_output/
+docs/
