@@ -1,0 +1,3 @@
+replicate
+python-dotenv
+requests
