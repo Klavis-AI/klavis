@@ -4,6 +4,7 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
+import anyio
 
 import click
 from dotenv import load_dotenv
@@ -15,28 +16,34 @@ from starlette.applications import Starlette
 from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
+from contextvars import ContextVar
 
-from .tools.tasklists import (
-    list_tasklists as gt_list_tasklists,
-    get_tasklist as gt_get_tasklist,
-    create_tasklist as gt_create_tasklist,
-    delete_tasklist as gt_delete_tasklist,
-)
-from .tools.tasks import (
-    list_tasks as gt_list_tasks,
-    get_task as gt_get_task,
-    create_task as gt_create_task,
-    update_task as gt_update_task,
-    move_task as gt_move_task,
+from tools import (
     clear_completed_tasks as gt_clear_completed_tasks,
+    create_task as gt_create_task,
+    create_tasklist as gt_create_tasklist,
     delete_task as gt_delete_task,
+    delete_tasklist as gt_delete_tasklist,
+    get_task as gt_get_task,
+    get_tasklist as gt_get_tasklist,
+    list_tasks as gt_list_tasks,
+    list_tasklists as gt_list_tasklists,
+    move_task as gt_move_task,
+    patch_task as gt_patch_task,
+    patch_tasklist as gt_patch_tasklist,
+    update_task as gt_update_task,
+    update_tasklist as gt_update_tasklist,
 )
+
+auth_token_context = ContextVar("auth_token", default=None)
 
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 GOOGLE_TASKS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_TASKS_MCP_SERVER_PORT", "5000"))
+
+
 
 
 @click.command()
@@ -61,6 +68,8 @@ def main(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
+
+
 
     app = Server("google-tasks-mcp-server")
 
@@ -110,6 +119,30 @@ def main(
                             "type": "string",
                             "description": "ID of the tasklist to delete.",
                         }
+                    },
+                },
+            ),
+            types.Tool(
+                name="google_patch_tasklist",
+                description="Patch fields on a tasklist (e.g., title).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["tasklist_id"],
+                    "properties": {
+                        "tasklist_id": {"type": "string"},
+                        "title": {"type": "string"},
+                    },
+                },
+            ),
+            types.Tool(
+                name="google_update_tasklist",
+                description="Update a tasklist (full update semantics).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["tasklist_id"],
+                    "properties": {
+                        "tasklist_id": {"type": "string"},
+                        "title": {"type": "string"},
                     },
                 },
             ),
@@ -219,96 +252,379 @@ def main(
                     },
                 },
             ),
+            types.Tool(
+                name="google_patch_task",
+                description="Patch fields on a task (partial update).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["tasklist_id", "task_id"],
+                    "properties": {
+                        "tasklist_id": {"type": "string"},
+                        "task_id": {"type": "string"},
+                        "title": {"type": "string"},
+                        "notes": {"type": "string"},
+                        "due": {"type": "string"},
+                        "status": {"type": "string"},
+                        "parent": {"type": "string"},
+                        "position": {"type": "string"},
+                    },
+                },
+            ),
         ]
 
     # ---------------------- call_tool ----------------------
     @app.call_tool()
-    async def call_tool(name: str, arguments: dict) -> list[
-        types.TextContent | types.ImageContent | types.EmbeddedResource
-    ]:
-        try:
-            if name == "google_list_tasklists":
+    async def call_tool(
+        name: str, arguments: dict
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        # Log the tool call with name and arguments
+        logger.info(f"Tool called: {name}")
+        logger.debug(f"Tool arguments: {json.dumps(arguments, indent=2)}")
+
+        if name == "google_list_tasklists":
+            try:
                 result = gt_list_tasklists()
-            elif name == "google_get_tasklist":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_get_tasklist":
+            try:
                 result = gt_get_tasklist(arguments["tasklist_id"])
-            elif name == "google_create_tasklist":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_create_tasklist":
+            try:
                 result = gt_create_tasklist(arguments["title"])
-            elif name == "google_delete_tasklist":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_delete_tasklist":
+            try:
                 gt_delete_tasklist(arguments["tasklist_id"])
                 result = {"status": "deleted"}
-            elif name == "google_list_tasks":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_patch_tasklist":
+            try:
+                fields = arguments.copy()
+                tasklist_id = fields.pop("tasklist_id")
+                result = gt_patch_tasklist(tasklist_id, **fields)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_update_tasklist":
+            try:
+                result = gt_update_tasklist(
+                    arguments["tasklist_id"], arguments.get("title")
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_list_tasks":
+            try:
                 result = gt_list_tasks(
-                    arguments["tasklist_id"],
-                    arguments.get("show_completed", True),
+                    arguments["tasklist_id"], arguments.get("show_completed", True)
                 )
-            elif name == "google_get_task":
-                result = gt_get_task(arguments["tasklist_id"], arguments["task_id"])
-            elif name == "google_create_task":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_get_task":
+            try:
+                result = gt_get_task(
+                    arguments["tasklist_id"], arguments["task_id"]
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_create_task":
+            try:
                 result = gt_create_task(
-                    tasklist_id=arguments["tasklist_id"],
-                    title=arguments["title"],
-                    notes=arguments.get("notes"),
-                    due=arguments.get("due"),
-                    parent=arguments.get("parent"),
-                    position=arguments.get("position"),
+                    arguments["tasklist_id"],
+                    arguments["title"],
+                    arguments.get("notes"),
+                    arguments.get("due"),
+                    arguments.get("parent"),
+                    arguments.get("position"),
                 )
-            elif name == "google_update_task":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_update_task":
+            try:
                 updates = arguments.copy()
                 tasklist_id = updates.pop("tasklist_id")
                 task_id = updates.pop("task_id")
                 result = gt_update_task(tasklist_id, task_id, **updates)
-            elif name == "google_move_task":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_move_task":
+            try:
                 result = gt_move_task(
                     arguments["tasklist_id"],
                     arguments["task_id"],
-                    parent=arguments.get("parent"),
-                    previous=arguments.get("previous"),
+                    arguments.get("parent"),
+                    arguments.get("previous"),
                 )
-            elif name == "google_clear_completed_tasks":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_clear_completed_tasks":
+            try:
                 gt_clear_completed_tasks(arguments["tasklist_id"])
                 result = {"status": "cleared"}
-            elif name == "google_delete_task":
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_delete_task":
+            try:
                 gt_delete_task(arguments["tasklist_id"], arguments["task_id"])
                 result = {"status": "deleted"}
-            else:
                 return [
-                    types.TextContent(type="text", text=f"Unknown tool: {name}"),
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
                 ]
-
-            # Success path
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        elif name == "google_patch_task":
+            try:
+                fields = arguments.copy()
+                tasklist_id = fields.pop("tasklist_id")
+                task_id = fields.pop("task_id")
+                result = gt_patch_task(tasklist_id, task_id, **fields)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        else:
             return [
-                types.TextContent(type="text", text=json.dumps(result, indent=2)),
-            ]
-        except Exception as exc:
-            logger.exception("Error executing tool %s: %s", name, exc)
-            return [
-                types.TextContent(type="text", text=f"Error: {str(exc)}"),
+                types.TextContent(type="text", text=f"Unknown tool: {name}"),
             ]
 
     # ---------------------- Transports ----------------------
 
-    sse_transport = SseServerTransport("/messages")
-    session_manager = StreamableHTTPSessionManager(app=app, event_store=None, json_response=json_response, stateless=True)
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
+        """Handle SSE-based MCP connections."""
         logger.info("Handling SSE connection")
-        async with sse_transport.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await app.run(streams[0], streams[1], app.create_initialization_options())
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
+        
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
         return Response()
 
-    async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
-        await session_manager.handle_request(scope, receive, send)
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        """Handle StreamableHTTP-based MCP connections."""
+        logger.info("Handling StreamableHTTP request")
+        
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        headers = dict(scope.get("headers", []))
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(_: Starlette) -> AsyncIterator[None]:
-        yield
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
 
+    # Create an ASGI application with routes for both transports
     starlette_app = Starlette(
         lifespan=lifespan,
         routes=[
-            Route("/sse", handle_sse, methods=["GET"]),
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+
+            # StreamableHTTP route mounted at /mcp; Starlette's Mount handles both /mcp and /mcp/
             Mount("/mcp", app=handle_streamable_http),
         ],
     )
@@ -316,7 +632,8 @@ def main(
     import uvicorn
 
     logger.info(f"Starting Google Tasks MCP Server on port {port}")
-    uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+    # Force lifespan handling ON to ensure session_manager.run() is entered
+    uvicorn.run(starlette_app, host="0.0.0.0", port=port, lifespan="on")
 
     return 0
 
