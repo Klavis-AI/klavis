@@ -32,6 +32,7 @@ class Anthropic(BaseLLM):
         self.anthropic_client = AsyncAnthropic()
         self.model = model or "claude-3-5-sonnet-20241022"  # Default model
         self.max_tokens = self.config.max_tokens  # Default max tokens
+        self._extracted_system_message = ""  # Store system messages extracted from chat history
 
     async def create_streaming_generator(
             self, messages: list, available_tools: list, resources: list = None
@@ -51,9 +52,22 @@ class Anthropic(BaseLLM):
         # Prepare request parameters
         system_message = ""
 
+        # Add extracted system message from chat history
+        if self._extracted_system_message:
+            system_message = self._extracted_system_message
+        elif hasattr(Anthropic, '_last_extracted_system_message') and Anthropic._last_extracted_system_message:
+            # Use the system message extracted by from_chat_messages
+            system_message = Anthropic._last_extracted_system_message
+            # Store it in the instance for future use
+            self._extracted_system_message = Anthropic._last_extracted_system_message
+
         # Add system message if operating in a specific platform context
         if self.platform and self.platform_config.get("system_message"):
-            system_message = self.platform_config["system_message"]
+            if system_message:
+                system_message += "\n\n" + self.platform_config["system_message"]
+            else:
+                system_message = self.platform_config["system_message"]
+        
         if resources:
             system_message += (
                     "\n\nThere are some resources that may be relevant to the conversation. You can use them to answer the user's question.\n\n"
@@ -187,14 +201,26 @@ class Anthropic(BaseLLM):
         logger.info("Sending non-streaming request to Claude")
 
         # Prepare request parameters
-        system_message = None
+        system_message = ""
         request_messages = (
             messages.copy()
         )  # Make a copy to avoid modifying the original
 
+        # Add extracted system message from chat history
+        if self._extracted_system_message:
+            system_message = self._extracted_system_message
+        elif hasattr(Anthropic, '_last_extracted_system_message') and Anthropic._last_extracted_system_message:
+            # Use the system message extracted by from_chat_messages
+            system_message = Anthropic._last_extracted_system_message
+            # Store it in the instance for future use
+            self._extracted_system_message = Anthropic._last_extracted_system_message
+
         # Add system message if operating in a specific platform context
         if self.platform and self.platform_config.get("system_message"):
-            system_message = self.platform_config["system_message"]
+            if system_message:
+                system_message += "\n\n" + self.platform_config["system_message"]
+            else:
+                system_message = self.platform_config["system_message"]
 
         # Create request parameters
         kwargs = {
@@ -308,15 +334,39 @@ class Anthropic(BaseLLM):
             List of messages in Anthropic format
         """
         anthropic_messages = []
-
-        # TODO: Handle system messages
+        
+        # Extract and combine system messages
+        system_message_parts = []
+        non_system_messages = []
+        
         for chat_message in chat_messages:
+            if chat_message.role == MessageRole.SYSTEM:
+                # Extract text content from system messages
+                for content in chat_message.content:
+                    if content.type == ContentType.TEXT and content.text:
+                        system_message_parts.append(content.text)
+            else:
+                # Keep non-system messages for processing
+                non_system_messages.append(chat_message)
+        
+        # Store the combined system message in a class variable that can be accessed by instance methods
+        # Note: Using a simple approach since this is a static method
+        combined_system_message = "\n\n".join(system_message_parts) if system_message_parts else ""
+        
+        # Store in a module-level variable that instances can access
+        # This is a temporary solution since we can't modify the method signature
+        if hasattr(Anthropic, '_last_extracted_system_message'):
+            Anthropic._last_extracted_system_message = combined_system_message
+        else:
+            setattr(Anthropic, '_last_extracted_system_message', combined_system_message)
+
+        # Process non-system messages
+        for chat_message in non_system_messages:
             # Map MessageRole to Anthropic role
             # Note: Anthropic doesn't support system or tool as message roles
             role_map = {
                 MessageRole.USER: "user",
                 MessageRole.ASSISTANT: "assistant",
-                MessageRole.SYSTEM: "user",  # Map system to user with special handling
                 MessageRole.TOOL: "user",  # Map tool to user with special handling
             }
 
