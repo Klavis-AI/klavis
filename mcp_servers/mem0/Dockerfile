@@ -20,4 +20,4 @@ COPY .env.example .env
 EXPOSE 8080
 
 # Command to run the MCP server
-CMD ["python", "server.py"]
+CMD ["uv", "run",  "server.py"]
