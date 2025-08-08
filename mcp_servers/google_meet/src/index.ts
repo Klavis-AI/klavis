@@ -32,25 +32,25 @@ async function getAccessToken(): Promise<string> {
 
 
 
-const CreateMeetingSpaceSchema = z.object({});
+const CreateMeetingSchema = z.object({});
 
-const MeetingSpaceIdSchema = z.object({
+const GetMeetingDetailsSchema = z.object({
   space_id: z.string().min(1).describe('Meeting space ID (spaces/{space-id})'),
 });
 
 
 
-const ListConferenceRecordsSchema = z.object({
+const GetPastMeetingsSchema = z.object({
   page_size: z.number().int().positive().max(100).optional().default(10).describe('Maximum number of records to return'),
   page_token: z.string().optional().describe('Token for pagination'),
   filter: z.string().optional().describe('Filter expression'),
 });
 
-const ConferenceRecordIdSchema = z.object({
+const GetPastMeetingDetailsSchema = z.object({
   conference_record_id: z.string().min(1).describe('Conference record ID (conferenceRecords/{record-id})'),
 });
 
-const ListParticipantsSchema = z.object({
+const GetPastMeetingParticipantsSchema = z.object({
   conference_record_id: z.string().min(1).describe('Conference record ID (conferenceRecords/{record-id})'),
   page_size: z.number().int().positive().max(100).optional().default(10).describe('Maximum number of participants to return'),
   page_token: z.string().optional().describe('Token for pagination'),
@@ -91,33 +91,33 @@ interface ApiResponse<T> {
 
 const tools: Tool[] = [
   {
-    name: 'create_space',
-    description: 'Create a new Google Meet space',
-    inputSchema: zodToJsonSchema(CreateMeetingSpaceSchema) as Tool['inputSchema'],
+    name: 'create_meeting',
+    description: 'Create a new meeting',
+    inputSchema: zodToJsonSchema(CreateMeetingSchema) as Tool['inputSchema'],
   },
   {
-    name: 'get_space',
-    description: 'Get details of a Google Meet space',
-    inputSchema: zodToJsonSchema(MeetingSpaceIdSchema) as Tool['inputSchema'],
+    name: 'get_meeting_details',
+    description: 'Get details of a meeting',
+    inputSchema: zodToJsonSchema(GetMeetingDetailsSchema) as Tool['inputSchema'],
   },
   {
-    name: 'list_conference_records',
-    description: 'List conference records for completed meetings',
-    inputSchema: zodToJsonSchema(ListConferenceRecordsSchema) as Tool['inputSchema'],
+    name: 'get_past_meetings',
+    description: 'Get details for completed meetings',
+    inputSchema: zodToJsonSchema(GetPastMeetingsSchema) as Tool['inputSchema'],
   },
   {
-    name: 'get_conference_record',
-    description: 'Get details of a specific conference record',
-    inputSchema: zodToJsonSchema(ConferenceRecordIdSchema) as Tool['inputSchema'],
+    name: 'get_past_meeting_details',
+    description: 'Get details of a specific meeting',
+    inputSchema: zodToJsonSchema(GetPastMeetingDetailsSchema) as Tool['inputSchema'],
   },
   {
-    name: 'list_participants',
-    description: 'List participants from a conference record',
-    inputSchema: zodToJsonSchema(ListParticipantsSchema) as Tool['inputSchema'],
+    name: 'get_past_meeting_participants',
+    description: 'Get a list of participants from a past meeting',
+    inputSchema: zodToJsonSchema(GetPastMeetingParticipantsSchema) as Tool['inputSchema'],
   },
 ];
 
-async function createMeetingSpace(args: z.infer<typeof CreateMeetingSpaceSchema>) {
+async function createMeeting(args: z.infer<typeof CreateMeetingSchema>) {
   const accessToken = await getAccessToken();
   
   const response = await fetch('https://meet.googleapis.com/v2/spaces', {
@@ -144,7 +144,7 @@ async function createMeetingSpace(args: z.infer<typeof CreateMeetingSpaceSchema>
 
 
 
-async function getMeetingSpace(args: z.infer<typeof MeetingSpaceIdSchema>) {
+async function getMeetingDetails(args: z.infer<typeof GetMeetingDetailsSchema>) {
   const accessToken = await getAccessToken();
   
   const response = await fetch(`https://meet.googleapis.com/v2/${args.space_id}`, {
@@ -169,7 +169,7 @@ async function getMeetingSpace(args: z.infer<typeof MeetingSpaceIdSchema>) {
 
 
 
-async function listConferenceRecords(args: z.infer<typeof ListConferenceRecordsSchema>) {
+async function getPastMeetings(args: z.infer<typeof GetPastMeetingsSchema>) {
   const accessToken = await getAccessToken();
   
   const params = new URLSearchParams();
@@ -196,7 +196,7 @@ async function listConferenceRecords(args: z.infer<typeof ListConferenceRecordsS
   };
 }
 
-async function getConferenceRecord(args: z.infer<typeof ConferenceRecordIdSchema>) {
+async function getPastMeetingDetails(args: z.infer<typeof GetPastMeetingDetailsSchema>) {
   const accessToken = await getAccessToken();
   
   const response = await fetch(`https://meet.googleapis.com/v2/${args.conference_record_id}`, {
@@ -218,7 +218,7 @@ async function getConferenceRecord(args: z.infer<typeof ConferenceRecordIdSchema
   };
 }
 
-async function listParticipants(args: z.infer<typeof ListParticipantsSchema>) {
+async function getPastMeetingParticipants(args: z.infer<typeof GetPastMeetingParticipantsSchema>) {
   const accessToken = await getAccessToken();
   
   const params = new URLSearchParams();
@@ -262,30 +262,30 @@ const getGoogleMeetMcpServer = () => {
 
     try {
       switch (name) {
-        case 'create_space': {
-          const v = CreateMeetingSpaceSchema.parse(args);
-          const res = await createMeetingSpace(v);
+        case 'create_meeting': {
+          const v = CreateMeetingSchema.parse(args);
+          const res = await createMeeting(v);
           return { content: [{ type: 'text', text: JSON.stringify(res) }] } as const;
         }
-        case 'get_space': {
-          const v = MeetingSpaceIdSchema.parse(args);
-          const res = await getMeetingSpace(v);
+        case 'get_meeting_details': {
+          const v = GetMeetingDetailsSchema.parse(args);
+          const res = await getMeetingDetails(v);
           return { content: [{ type: 'text', text: JSON.stringify(res) }] } as const;
         }
         
-        case 'list_conference_records': {
-          const v = ListConferenceRecordsSchema.parse(args);
-          const res = await listConferenceRecords(v);
+        case 'get_past_meetings': {
+          const v = GetPastMeetingsSchema.parse(args);
+          const res = await getPastMeetings(v);
           return { content: [{ type: 'text', text: JSON.stringify(res) }] } as const;
         }
-        case 'get_conference_record': {
-          const v = ConferenceRecordIdSchema.parse(args);
-          const res = await getConferenceRecord(v);
+        case 'get_past_meeting_details': {
+          const v = GetPastMeetingDetailsSchema.parse(args);
+          const res = await getPastMeetingDetails(v);
           return { content: [{ type: 'text', text: JSON.stringify(res) }] } as const;
         }
-        case 'list_participants': {
-          const v = ListParticipantsSchema.parse(args);
-          const res = await listParticipants(v);
+        case 'get_past_meeting_participants': {
+          const v = GetPastMeetingParticipantsSchema.parse(args);
+          const res = await getPastMeetingParticipants(v);
           return { content: [{ type: 'text', text: JSON.stringify(res) }] } as const;
         }
         default:

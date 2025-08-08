@@ -13,13 +13,13 @@ A TypeScript MCP server for Google Meet that lets you create meeting spaces and 
 ## Available Tools
 
 ### Meeting Space Operations
-- `google_meet_create_space`: Create a new Google Meet space
-- `google_meet_get_space`: Retrieve details of a Google Meet space
+- `create_meeting`: Create a new Google Meet space
+- `get_meeting_details`: Retrieve details of a Google Meet space
 
 ### Conference Records Operations  
-- `google_meet_list_conference_records`: List conference records for completed meetings
-- `google_meet_get_conference_record`: Get details of a specific conference record
-- `google_meet_list_participants`: List participants from a conference record
+- `get_past_meetings`: List conference records for completed meetings
+- `get_past_meeting_details`: Get details of a specific conference record
+- `get_past_meeting_participants`: List participants from a conference record
 
 ## Requirements
 
@@ -84,7 +84,7 @@ docker run --rm -p 5000:5000 --env-file mcp_servers/google_meet/.env google-meet
 ### Create a Meeting Space
 ```json
 {
-  "name": "google_meet_create_space",
+  "name": "create_meeting",
   "arguments": {}
 }
 ```
@@ -94,7 +94,7 @@ The Meet API doesn't let you set custom names or descriptions when creating spac
 ### Get Meeting Space Details
 ```json
 {
-  "name": "google_meet_get_space", 
+  "name": "get_meeting_details", 
   "arguments": {
     "space_id": "spaces/abc123"
   }
@@ -104,7 +104,7 @@ The Meet API doesn't let you set custom names or descriptions when creating spac
 ### List Conference Records
 ```json
 {
-  "name": "google_meet_list_conference_records",
+  "name": "get_past_meetings",
   "arguments": {
     "page_size": 10
   }
@@ -114,7 +114,7 @@ The Meet API doesn't let you set custom names or descriptions when creating spac
 ### Get Participants from Conference Record
 ```json
 {
-  "name": "google_meet_list_participants",
+  "name": "get_past_meeting_participants",
   "arguments": {
     "conference_record_id": "conferenceRecords/abc123",
     "page_size": 50
