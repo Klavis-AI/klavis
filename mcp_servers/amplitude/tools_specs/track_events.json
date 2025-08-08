@@ -1,0 +1,14 @@
+{
+    "name": "track_event",
+    "description": "Records an event in Amplitude via HTTP V2 API. Inputs: event_type (string), user_id (string), event_properties (object), time (integer). Returns status_code and parsed response.",
+    "inputs": {
+      "event_type": {"type": "string", "description": "Name of the event"},
+      "user_id": {"type": "string", "description": "Unique user identifier"},
+      "event_properties": {"type": "object", "description": "Event-specific properties"},
+      "time": {"type": "integer", "description": "UNIX timestamp in milliseconds"}
+    },
+    "outputs": {
+      "status_code": {"type": "integer"},
+      "response": {"type": "object"}
+    }
+  }
