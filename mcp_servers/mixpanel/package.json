@@ -1,0 +1,42 @@
+{
+    "name": "@klavis-ai/mcp-server-mixpanel",
+    "version": "1.0.0",
+    "description": "MCP server for Mixpanel",
+    "type": "module",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "tsc && node dist/index.js",
+        "lint": "eslint src/**/*.ts",
+        "format": "prettier --write src/**/*.ts",
+        "docker:build": "docker build -t mixpanel-mcp-server -f Dockerfile ../../",
+        "docker:run": "docker run -p 5000:5000 --env-file .env mixpanel-mcp-server"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.17.1",
+        "dotenv": "^17.2.1",
+        "express": "^5.1.0",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.2.0",
+        "@typescript-eslint/eslint-plugin": "^8.39.0",
+        "@typescript-eslint/parser": "^8.39.0",
+        "eslint": "^9.32.0",
+        "eslint-config-prettier": "^10.1.8",
+        "prettier": "^3.6.2",
+        "typescript": "^5.9.2"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "keywords": [
+        "mcp",
+        "mixpanel",
+        "api-integration"
+    ],
+    "author": "Klavis AI"
+}
