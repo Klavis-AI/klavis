@@ -150,9 +150,5 @@ The functionality of this MCP server has been verified through end-to-end testin
 
     
 
-A video demonstrating this testing pipeline will be added below.
 
-**[Link to Video ](https://youtu.be/JhYlHwPWW5U)**
-
-![MCP Google Tasks Demo](mcp.jpg)
 
