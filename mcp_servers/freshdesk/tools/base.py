@@ -6,21 +6,47 @@ from typing import Any, Dict, Optional, List
 import base64
 from dotenv import load_dotenv
 from util import rate_limiter
+from contextvars import ContextVar
 
 
 load_dotenv()
 
-FRESHDESK_API_KEY = os.getenv("FRESHDESK_API_KEY")
-if not FRESHDESK_API_KEY:
-    raise ValueError("FRESHDESK_API_KEY environment variable is required")
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+domain_context: ContextVar[str] = ContextVar('domain')
+
+def get_config_value(
+    context_var: ContextVar[str],
+    env_name: str,
+) -> str:
+    try:
+        value = context_var.get()
+        if value:
+            return value
+    except LookupError:
+        pass
+    
+    value = os.getenv(env_name)
+    if value:
+        return value
+
+    raise RuntimeError(
+        f"No {env_name} found. Please set either the {env_name} environment variable "
+        f"or provide it in the context."
+    )
 
 
-FRESHDESK_DOMAIN = os.getenv("FRESHDESK_DOMAIN")
-if not FRESHDESK_DOMAIN:
-    raise ValueError("FRESHDESK_DOMAIN environment variable is required")
+def get_auth_token() -> str:
+    return get_config_value(
+        context_var=auth_token_context,
+        env_name="FRESHDESK_API_KEY"
+    )
 
 
-FRESHDESK_API_BASE = f"https://{FRESHDESK_DOMAIN}.freshdesk.com/api/v2"
+def get_domain() -> str:
+    return get_config_value(
+        context_var=domain_context,
+        env_name="FRESHDESK_DOMAIN"
+    )
 
 
 def gen_random_password(length: int = 10) -> str:
@@ -63,6 +89,10 @@ async def make_freshdesk_request(
     
     if data is not None and not isinstance(data, dict):
         raise ValueError("Data must be a dictionary or None")
+
+    FRESHDESK_API_BASE = f"https://{get_domain()}.freshdesk.com/api/v2"
+    FRESHDESK_API_KEY = get_auth_token()
+    
     
     url = f"{FRESHDESK_API_BASE}{endpoint}"
 

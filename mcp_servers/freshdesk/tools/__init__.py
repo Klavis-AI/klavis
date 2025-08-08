@@ -2,7 +2,7 @@
 # This package contains all the tool implementations organized by object type
 
 
-from .base import make_freshdesk_request
+from .base import  auth_token_context, domain_context
 from .tickets import (
     create_ticket,
     get_ticket_by_id,
@@ -77,6 +77,10 @@ from .thread import (
 )
 
 __all__ = [
+
+    # Context variables
+    'auth_token_context',
+    'domain_context',
 
     # Tickets
     'create_ticket',

@@ -17,7 +17,13 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
+
 from tools import (
+
+    # Context variables
+    auth_token_context,
+    domain_context,
+
     # Ticket tools
     create_ticket,
     update_ticket,
@@ -1921,8 +1927,20 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
-            await app.run(streams[0], streams[1], app.create_initialization_options())
+
+          # Extract auth credentials from headers
+        auth_token = request.headers.get('x-auth-token')
+        domain = request.headers.get('x-domain')
+        
+        # Set the auth token and domain in context for this request
+        auth_token_token = auth_token_context.set(auth_token or "")
+        domain_token = domain_context.set(domain or "")
+        try:
+            async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
+                await app.run(streams[0], streams[1], app.create_initialization_options())
+        finally:
+            auth_token_context.reset(auth_token_token)
+            domain_context.reset(domain_token)
         return Response()
 
     # Set up StreamableHTTP transport
@@ -1935,10 +1953,28 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info("Handling StreamableHTTP request")
+
+          # Extract auth credentials from headers
+        headers = dict(scope.get("headers", []))
+        auth_token = headers.get(b'x-auth-token')
+        domain = headers.get(b'x-domain')
+        
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        if domain:
+            domain = domain.decode('utf-8')
+        
+        # Set the auth token and domain in context for this request
+        auth_token_token = auth_token_context.set(auth_token or "")
+        domain_token = domain_context.set(domain or "")
+
         try:
             await session_manager.handle_request(scope, receive, send)
         except Exception as e:
             logger.exception(f"Error handling StreamableHTTP request: {e}")
+        finally:
+            auth_token_context.reset(auth_token_token)
+            domain_context.reset(domain_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
