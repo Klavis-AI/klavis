@@ -51,12 +51,12 @@ def get_user_profile(
     get_recs: bool = False,
     get_computations: bool = False,
 ) -> dict:
-    """Fetch user profile (may require Activation plan; returns a friendly error if unavailable)."""
+    """Fetch user profile"""
     logger.info("TOOL_CALL get_user_profile", extra={"user_id": user_id})
     try:
         return _get_user_profile(user_id, get_amp_props, get_cohort_ids, get_recs, get_computations)
     except Exception as e:
-        return {"error": "profile_api_unavailable_or_unauthorized", "detail": str(e)}
+        return {"error": "Error fetching user profile", "detail": str(e)}
 
 @mcp.tool()
 def list_event_categories() -> dict:
