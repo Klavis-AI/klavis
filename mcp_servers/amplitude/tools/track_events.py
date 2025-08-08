@@ -6,13 +6,14 @@ import logging
 AMPLITUDE_API_ENDPOINT = "https://api2.amplitude.com/2/httpapi"
 API_KEY = os.getenv("AMPLITUDE_API_KEY")
 
-def track_event(event_type: str, user_id: str, event_properties: Dict = None, time: int = None) -> Dict:
+def track_event(event_type: str, device_id: str, user_id: str, event_properties: Dict = None, time: int = None) -> Dict:
     """
     Sends a single event to Amplitude via HTTP V2 API.
 
     Inputs:
       event_type: Name of the event (string).
       user_id: Unique identifier for the user (string).
+      device_id: Unique identifier for the device (string).
       event_properties: Dictionary of event-specific properties.
       time: UNIX timestamp in milliseconds.
 
@@ -28,6 +29,7 @@ def track_event(event_type: str, user_id: str, event_properties: Dict = None, ti
             {
                 "event_type": event_type,
                 "user_id": user_id,
+                "device_id": device_id,
                 "event_properties": event_properties or {},
                 "time": time
             }
