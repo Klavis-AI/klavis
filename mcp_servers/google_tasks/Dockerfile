@@ -17,7 +17,7 @@ COPY mcp_servers/google_tasks/__init__.py ./
 COPY mcp_servers/google_tasks/tools/ ./tools/
 
 # Provide an example env file inside the container (replace or override with -e at runtime)
-COPY mcp_servers/google_tasks/env.example .env
+COPY mcp_servers/google_tasks/.env.example .env
 
 EXPOSE 5000
 

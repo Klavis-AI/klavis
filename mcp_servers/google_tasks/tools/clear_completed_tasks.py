@@ -4,7 +4,13 @@ import logging
 
 from googleapiclient.errors import HttpError
 
-from . import get_service
+try:  # package context
+    from ..auth import get_service  # type: ignore
+except Exception:
+    try:  # script context
+        from auth import get_service  # type: ignore
+    except Exception:  # repo-root context
+        from mcp_servers.google_tasks.auth import get_service  # type: ignore
 
 logger = logging.getLogger(__name__)
 

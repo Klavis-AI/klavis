@@ -2,6 +2,7 @@ import os
 import logging
 from functools import lru_cache
 from typing import Optional
+import contextvars
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
@@ -55,8 +56,18 @@ def _build_credentials() -> Credentials:
     return creds
 
 
-def get_tasks_service() -> Resource:
+def _get_tasks_service() -> Resource:
     """Return an authorized googleapiclient Resource for the Tasks API (v1)."""
     creds = _build_credentials()
     return build("tasks", "v1", credentials=creds, cache_discovery=False)
 
+tasks_service_context: contextvars.ContextVar = contextvars.ContextVar(
+    "google_tasks_service", default=None
+)
+
+def get_service():
+    svc = tasks_service_context.get()
+    if svc is None:
+        svc = _get_tasks_service()
+        tasks_service_context.set(svc)
+    return svc

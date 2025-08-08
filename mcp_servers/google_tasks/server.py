@@ -69,6 +69,32 @@ def main(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Suppress noisy ClosedResourceError logs from StreamableHTTP when clients
+    # close their write stream (normal shutdown behavior)
+    class _SuppressClosedResourceError(logging.Filter):
+        def filter(self, record: logging.LogRecord) -> bool:  # noqa: D401
+            if record.name != "mcp.server.streamable_http":
+                return True
+            message_text = record.getMessage()
+            try:
+                exc_type = record.exc_info[0] if record.exc_info else None
+                is_closed = (
+                    exc_type is not None and getattr(exc_type, "__name__", "") == "ClosedResourceError"
+                )
+            except Exception:
+                is_closed = False
+
+            # Drop the specific router error that occurs on normal client close
+            if is_closed and "Error in message router" in message_text:
+                return False
+
+            # Demote any residual mentions to INFO to avoid alarming logs
+            if "ClosedResourceError" in message_text:
+                record.levelno = logging.INFO
+                record.levelname = "INFO"
+            return True
+
+    logging.getLogger("mcp.server.streamable_http").addFilter(_SuppressClosedResourceError())
 
 
     app = Server("google-tasks-mcp-server")

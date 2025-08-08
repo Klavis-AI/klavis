@@ -145,8 +145,14 @@ The functionality of this MCP server has been verified through end-to-end testin
 3.  **Cleanup**:
     - `google_clear_completed_tasks`: All completed tasks were successfully cleared.
     - `google_delete_tasklist`: The test tasklist and its remaining contents were successfully deleted.
+4. **transport**
+    - both the sse and streamable http methods are tested
+
+    
 
 A video demonstrating this testing pipeline will be added below.
 
-**[Link to Video Demonstration](URL_TO_VIDEO)**
+**[Link to Video ](https://youtu.be/JhYlHwPWW5U)**
+
+![MCP Google Tasks Demo](mcp.jpg)
 
