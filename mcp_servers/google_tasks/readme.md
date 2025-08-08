@@ -43,6 +43,10 @@ Resolution rules:
 ├── .vscode/
 │   └── mcp.json        # example VS Code MCP client config
 └── proof/              # screenshots (“proof of correctness”)
+└── tools/
+    └── helpers.py  
+    └── ratelimit.py 
+    └── task.py 
 ```
 
 ---
