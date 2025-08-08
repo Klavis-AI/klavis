@@ -1,0 +1,21 @@
+{
+  "name": "google_analytics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@google-analytics/data": "^5.2.0",
+    "@modelcontextprotocol/sdk": "^1.17.1",
+    "dotenv": "^17.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3"
+  }
+}
