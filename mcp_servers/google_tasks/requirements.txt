@@ -1,0 +1,13 @@
+# Server dependencies
+uvicorn==0.35.0
+click==8.2.1
+mcp==1.12.3
+starlette==0.47.2
+
+# Google API dependencies
+google-api-python-client==2.177.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
+
+# Utility dependencies
+python-dotenv==1.1.1
