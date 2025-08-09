@@ -4,7 +4,9 @@
 from .memories import (
     add_memory,
     get_all_memories,
-    search_memories
+    search_memories,
+    update_memory,
+    delete_memory
 )
 from .base import get_user_id, mem0_api_key_context
 
@@ -13,6 +15,8 @@ __all__ = [
     "add_memory",
     "get_all_memories",
     "search_memories",
+    "update_memory",
+    "delete_memory",
     
     # Base
     "get_user_id",

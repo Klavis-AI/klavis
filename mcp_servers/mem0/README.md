@@ -44,7 +44,7 @@ uv run server.py
 {
   "mcpServers": {
     "mem0": {
-      "transport": "sse",
+      "transport": "http",
       "url": "http://localhost:5000/mcp"
     }
   }
@@ -60,6 +60,8 @@ This server provides the following capabilities through MCP tools:
 | `mem0_add_memory` | Store code snippets, implementation details, and programming knowledge for future reference |
 | `mem0_get_all_memories` | Retrieve all stored memories for comprehensive context analysis |
 | `mem0_search_memories` | Semantically search through stored memories using natural language queries |
+| `mem0_update_memory` | Update an existing memory with new content while maintaining its unique identifier |
+| `mem0_delete_memory` | Delete a specific memory by ID or delete all memories for a user |
 
 ## Why?
 

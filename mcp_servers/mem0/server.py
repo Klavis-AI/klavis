@@ -20,6 +20,8 @@ from tools import (
     add_memory,
     get_all_memories,
     search_memories,
+    update_memory,
+    delete_memory,
 )
 
 load_dotenv()
@@ -125,6 +127,50 @@ def main(
                     }
                 }
             ),
+            types.Tool(
+                name="mem0_update_memory",
+                description="Update an existing memory with new data. This tool allows you to modify the content of a previously stored memory while maintaining its unique identifier. Use this when you need to correct, enhance, or completely replace the content of an existing memory entry.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["memory_id", "data"],
+                    "properties": {
+                        "memory_id": {
+                            "type": "string",
+                            "description": "The unique identifier of the memory to update."
+                        },
+                        "data": {
+                            "type": "string",
+                            "description": "The new content to replace the existing memory data."
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="mem0_delete_memory",
+                description="Delete a specific memory by ID or delete all memories for a user. This tool provides options to remove individual memories or clear all stored memories for a user. Use with caution as deleted memories cannot be recovered.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "memory_id": {
+                            "type": "string",
+                            "description": "The unique identifier of the memory to delete. Required if delete_all is false."
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        },
+                        "delete_all": {
+                            "type": "boolean",
+                            "description": "If true, deletes all memories for the user. If false, deletes specific memory by ID.",
+                            "default": False
+                        }
+                    }
+                }
+            ),
         ]
 
     @app.call_tool()
@@ -193,6 +239,62 @@ def main(
                 ]
             try:
                 result = await search_memories(query, user_id, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mem0_update_memory":
+            memory_id = arguments.get("memory_id")
+            data = arguments.get("data")
+            user_id = arguments.get("user_id")
+            if not memory_id or not data:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: memory_id and data parameters are required",
+                    )
+                ]
+            try:
+                result = await update_memory(memory_id, data, user_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mem0_delete_memory":
+            memory_id = arguments.get("memory_id")
+            user_id = arguments.get("user_id")
+            delete_all = arguments.get("delete_all", False)
+            if not delete_all and not memory_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: memory_id parameter is required when delete_all is false",
+                    )
+                ]
+            try:
+                result = await delete_memory(memory_id, user_id, delete_all)
                 return [
                     types.TextContent(
                         type="text",
