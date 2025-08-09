@@ -99,20 +99,6 @@ COINBASE_API_SECRET="-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIExample123PrivateK
 COINBASE_MCP_SERVER_PORT=5000
 COINBASE_API_BASE_URL=https://api.coinbase.com
 COINBASE_EXCHANGE_URL=https://api.exchange.coinbase.com
-
-# === Optional Rate Limiting (Advanced Users Only) ===
-# The server includes smart defaults that work for most users.
-# Only override these if you have specific rate limiting needs.
-COINBASE_DEFAULT_RATE_LIMIT=2
-COINBASE_MARKET_DATA_RATE_LIMIT=3
-COINBASE_ACCOUNTS_RATE_LIMIT=2
-COINBASE_PRODUCTS_RATE_LIMIT=2
-
-# === Optional Retry Configuration (Advanced Users Only) ===
-COINBASE_MAX_RETRY_ATTEMPTS=3
-COINBASE_INITIAL_DELAY=1.0
-COINBASE_MAX_DELAY=10.0
-COINBASE_BACKOFF_FACTOR=2.0
 ```
 
 **🔑 Important .env File Notes:**
