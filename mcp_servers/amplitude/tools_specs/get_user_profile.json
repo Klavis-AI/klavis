@@ -1,0 +1,14 @@
+{
+    "name": "get_user_profile",
+    "description": "Retrieves an Amplitude user profile. Inputs: user_id (string), get_amp_props (boolean), get_cohort_ids (boolean), get_recs (boolean), get_computations (boolean). Returns the JSON response from Amplitude's User Profile API.",
+    "inputs": {
+      "user_id": {"type": "string", "description": "Amplitude user identifier"},
+      "get_amp_props": {"type": "boolean", "description": "Include computed and custom user properties"},
+      "get_cohort_ids": {"type": "boolean", "description": "Include cohort IDs"},
+      "get_recs": {"type": "boolean", "description": "Include recommendation data"},
+      "get_computations": {"type": "boolean", "description": "Include computed properties"}
+    },
+    "outputs": {
+      "userData": {"type": "object", "description": "Response object containing user profile and optional fields"}
+    }
+  }
