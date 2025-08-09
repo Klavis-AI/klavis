@@ -1,3 +1,4 @@
+HEAD
 <div align="center">
   <picture>
     <img src="https://raw.githubusercontent.com/klavis-ai/klavis/main/static/klavis-ai.png" width="80">
@@ -316,3 +317,125 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
     <a href="examples/">Examples</a>
   </p>
 </div>
+=======
+# Playwright MCP Server for Klavis AI
+
+## Overview
+
+This project implements a **Model Context Protocol (MCP) server** using **Playwright** and **FastAPI** as part of the Klavis AI take-home assignment. The server exposes atomic browser automation tools via REST API endpoints, enabling external clients like Cursor to control browser instances with **natural language commands**.
+
+Key capabilities include:
+- Launching Chromium, Firefox, or WebKit browsers
+- Opening and closing browser pages (tabs)
+- Navigating pages to specified URLs
+- Clicking elements via CSS selectors
+- Filling input fields with text
+- Taking screenshots of pages
+- Extracting text content from page elements
+
+This solution demonstrates asynchronous Python API development, browser automation integration, and clear, production-ready error handling.
+
+---
+
+## Installation & Setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/klavis-playwright-mcp.git
+cd klavis-playwright-mcp
+```
+2. Create and activate a virtual environment (recommended):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # macOS/Linux
+.venv\Scripts\activate         # Windows
+```
+3. Install project dependencies:
+
+```bash
+pip install -r requirements.txt
+playwright install
+```
+4. Verify Playwright installation:
+
+```bash
+python3 -c "import asyncio; from playwright.async_api import async_playwright; print('Playwright installed correctly')"
+```
+## Running the Server
+
+Start the server locally on port 8000:
+
+```bash
+uvicorn mcp_server:app --host 0.0.0.0 --port 8000 --reload
+```
+You should see console messages indicating Playwright and FastAPI are running.
+
+## MCP JSON Configuration for Cursor
+Configure Cursor or other MCP-compatible clients with the following MCP server JSON config:
+
+```json
+{
+  "mcpServers": {
+    "PlaywrightMCP": {
+      "url": "http://localhost:8000",
+      "description": "Playwright MCP REST server"
+    }
+  }
+}
+```
+
+## Sample Natural Language Commands
+Replace <browser_id> and <page_id> with actual IDs returned by the server.
+
+Launch a Chromium browser:
+```css
+Launch a Chromium browser
+```
+Create a new page in browser <browser_id>:
+
+```css
+Create a new page in browser with ID <browser_id>
+```
+
+Navigate page <page_id> to https://example.com:
+
+```css
+Navigate page with ID <page_id> to https://example.com
+```
+Fill input field input[name='q'] on page <page_id> with text "Playwright automation":
+
+```css
+Fill selector "input[name='q']" on page with ID <page_id> with text "Playwright automation"
+```
+
+Click button with selector input[type='submit'] on page <page_id>:
+
+```css
+Click selector "input[type='submit']" on page with ID <page_id>
+```
+
+Take a screenshot of page <page_id>:
+```css
+Take screenshot of page with ID <page_id>
+```
+
+Get text content of element h1 on page <page_id>:
+```css
+Get text content of selector "h1" on page with ID <page_id>
+```
+
+## Notes
+- Always start the MCP server before issuing commands.
+
+- Use the returned IDs exactly as provided by the server.
+
+- This server runs browsers in headless mode by default.
+
+- Adjust timeouts or headless mode in mcp_server.py if needed.
+
+### Contact
+For any questions or clarifications, please reach out.
+
+Thank you for reviewing my submission!
