@@ -232,10 +232,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
     async def handle_sse(request):
         """
         SSE transport endpoint.
-        If header 'x-tavily-key' is present, bind it for the request via ContextVar.
+        If header 'x-auth-token' is present, bind it for the request via ContextVar.
         """
         logger.info("Handling SSE connection")
-        api_key = request.headers.get("x-tavily-key") or request.headers.get("x-auth-token")
+        api_key = request.headers.get("x-auth-token")
         token = None
         if api_key:
             token = tavily_api_key_context.set(api_key)
@@ -258,11 +258,11 @@ def main(port: int, log_level: str, json_response: bool) -> int:
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         """
         Streamable HTTP transport endpoint.
-        Accepts 'x-tavily-key' (preferred) or 'x-auth-token' header for per-request auth.
+        Accepts 'x-auth-token' header for per-request auth.
         """
         logger.info("Handling StreamableHTTP request")
         headers = {k.decode("utf-8"): v.decode("utf-8") for k, v in scope.get("headers", [])}
-        api_key = headers.get("x-tavily-key") or headers.get("x-auth-token")
+        api_key = headers.get("x-auth-token")
         token = None
         if api_key:
             token = tavily_api_key_context.set(api_key)

@@ -18,7 +18,7 @@ def _get_env_api_key() -> str:
     if not key:
         raise RuntimeError(
             "Tavily API key not found. Set TAVILY_API_KEY env var "
-            "or provide 'x-tavily-key'/'x-auth-token' header to the server."
+            "or provide 'x-auth-token' header to the server."
         )
     return key
 
