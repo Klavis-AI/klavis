@@ -80,6 +80,7 @@
               "documentation/mcp-server/google_docs",
               "documentation/mcp-server/google_drive",
               "documentation/mcp-server/google_sheets",
+              "documentation/mcp-server/hacker_news",
               "documentation/mcp-server/hubspot",
               "documentation/mcp-server/jira",
               "documentation/mcp-server/klavis-reportgen",
@@ -93,6 +94,7 @@
               "documentation/mcp-server/perplexity",
               "documentation/mcp-server/plai",
               "documentation/mcp-server/postgres",
+              "documentation/mcp-server/quickbooks",
               "documentation/mcp-server/resend",
               "documentation/mcp-server/salesforce",
               "documentation/mcp-server/slack",
@@ -259,6 +261,10 @@
               {
                 "group": "Dropbox OAuth",
                 "pages": ["api-reference/dropbox-oauth/authorize-dropbox"]
+              },
+              {
+                "group": "QuickBooks OAuth",
+                "pages": ["api-reference/quickbooks-oauth/authorize-quickbooks"]
               }
             ]
           }
@@ -282,7 +288,7 @@
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox"]
+            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox", "knowledge-base/oauth_app/quickbooks"]
           }
         ]
       }
