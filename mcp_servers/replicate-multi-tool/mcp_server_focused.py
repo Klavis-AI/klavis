@@ -1,53 +1,81 @@
 #!/usr/bin/env python3
 """
-Focused MCP Server with essential tools only
+Focused MCP Server with essential tools only.
+
+Design notes (aligned with Klavis AI guidelines):
+- Tools are atomic and clearly named.
+- Descriptions explicitly state purpose, inputs, and outputs to aid LLM usage.
+- External API errors are handled and surfaced in a structured shape the AI can self-correct from.
 """
 
 import json
 import sys
 from typing import Dict, List, Any
 
-# Import essential tools only
-from tools.elevenlabs_voice import generate_voice_from_text
-from tools.serpapi_search import search_web_query
-from tools.tavily_search import search_with_tavily, summarize_webpage
-from tools.generate_image import generate_image
+# Import essential tools only (via tools package public API)
+from tools import (
+    generate_voice_from_text,
+    search_web_query,
+    search_with_tavily,
+    summarize_webpage,
+    generate_image,
+)
 
 class FocusedMCPServer:
     def __init__(self):
         # Due to cursor's limit of 40 tools (35 from replicate's direct API, 5 here), I only included the most essential tools for this server, although in the respective code files, there are more tools available.
         self.tools = {
             "generate_voice": {
-                "description": "Generate speech from text using ElevenLabs",
+                "description": (
+                    "Convert text into speech using ElevenLabs. "
+                    "Inputs: text (required), voice_id (optional, default '21m00Tcm4TlvDq8ikWAM'). "
+                    "Returns: JSON with {success: bool, audio_path: string if success, error: string if failure}."
+                ),
                 "parameters": {
-                    "text": {"type": "string", "description": "Text to convert to speech"},
-                    "voice_id": {"type": "string", "description": "Voice ID to use", "default": "21m00Tcm4TlvDq8ikWAM"}
+                    "text": {"type": "string", "description": "Text to convert to speech (required)"},
+                    "voice_id": {"type": "string", "description": "Voice ID to use (optional)", "default": "21m00Tcm4TlvDq8ikWAM"}
                 }
             },
             "search_web": {
-                "description": "Search the web using SerpAPI",
+                "description": (
+                    "Search the web using SerpAPI's Google engine. "
+                    "Inputs: query (required), num_results (optional, default 10). "
+                    "Returns: JSON {success: bool, organic_results: list, total_results: int, error?: string}."
+                ),
                 "parameters": {
-                    "query": {"type": "string", "description": "Search query"},
-                    "num_results": {"type": "integer", "description": "Number of results", "default": 10}
+                    "query": {"type": "string", "description": "Search query text (required)"},
+                    "num_results": {"type": "integer", "description": "Max results to return (optional)", "default": 10}
                 }
             },
             "search_tavily": {
-                "description": "Advanced web search using Tavily",
+                "description": (
+                    "Perform an AI-powered web search using Tavily. "
+                    "Inputs: query (required), search_depth (optional, 'basic'|'advanced', default 'basic'). "
+                    "Returns: JSON {success: bool, results: list, total_results: int, error?: string}."
+                ),
                 "parameters": {
-                    "query": {"type": "string", "description": "Search query"},
-                    "search_depth": {"type": "string", "description": "Search depth", "default": "basic"}
+                    "query": {"type": "string", "description": "Search query text (required)"},
+                    "search_depth": {"type": "string", "description": "Search depth: 'basic' or 'advanced' (optional)", "default": "basic"}
                 }
             },
             "summarize_webpage": {
-                "description": "Summarize a webpage using Tavily",
+                "description": (
+                    "Summarize the content of a webpage using Tavily. "
+                    "Inputs: url (required). "
+                    "Returns: JSON {success: bool, url: string, title: string, summary: string, error?: string}."
+                ),
                 "parameters": {
-                    "url": {"type": "string", "description": "URL to summarize"}
+                    "url": {"type": "string", "description": "URL to summarize (required)"}
                 }
             },
             "generate_image": {
-                "description": "Generate an image using Replicate",
+                "description": (
+                    "Generate an image using a Replicate model (Flux Schnell). "
+                    "Inputs: prompt (required). "
+                    "Returns: JSON {image_url: string|null}; may return null if generation fails."
+                ),
                 "parameters": {
-                    "prompt": {"type": "string", "description": "Image generation prompt"}
+                    "prompt": {"type": "string", "description": "Image generation prompt (required)"}
                 }
             }
         }

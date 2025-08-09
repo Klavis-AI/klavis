@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "replicate": {
+      "command": "npx",
+      "args": ["-y", "replicate-mcp"],
+      "env": {
+        "REPLICATE_API_TOKEN": "${env:REPLICATE_API_TOKEN}"
+      }
+    },
+    "focused-tools": {
+      "command": "python3",
+      "args": ["mcp_servers/replicate-multi-tool/mcp_server_focused.py"],
+      "workingDirectory": "${workspaceRoot}"
+    }
+  }
+}

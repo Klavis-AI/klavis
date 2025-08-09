@@ -1,8 +1,11 @@
 import replicate
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from the server root so this works regardless of CWD
+SERVER_ROOT_ENV = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=SERVER_ROOT_ENV, override=False)
 
 def generate_image(prompt: str) -> str:
     replicate_api_token = os.getenv("REPLICATE_API_TOKEN")

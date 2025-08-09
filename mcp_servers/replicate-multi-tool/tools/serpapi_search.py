@@ -1,10 +1,12 @@
 import os
 import requests
 import json
+from pathlib import Path
 from dotenv import load_dotenv
 from typing import Dict, List, Optional
 
-load_dotenv()
+SERVER_ROOT_ENV = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=SERVER_ROOT_ENV, override=False)
 
 class SerpAPISearch:
     def __init__(self):
