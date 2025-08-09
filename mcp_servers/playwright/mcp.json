@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "url": "http://localhost:5050",
+      "description": "Playwright MCP Server (HTTP/SSE)"
+    }
+  }
+}
