@@ -22,53 +22,53 @@ from tools.album import (
 mcp = FastMCP("spotify")
 
 @mcp.tool()
-async def search_track_tool(track_id: str) -> str:
+async def spotify_search_track_tool(track_id: str) -> str:
     return await search_tracks(track_id)
 
 @mcp.tool()
-async def get_track_details_tool(track_id: str) -> str:
+async def spotify_get_track_details_tool(track_id: str) -> str:
     return await get_track_details(track_id)
 
 @mcp.tool()
-async def get_tracks_by_artist_name_tool(artist_name: str, market: str = "US") -> str:
+async def spotify_get_tracks_by_artist_name_tool(artist_name: str, market: str = "US") -> str:
     return await get_tracks_by_artist_name(artist_name, market)
 
 # Artist tools
 @mcp.tool()
-async def get_artist_info_tool(artist_id: str) -> str:
+async def spotify_get_artist_info_tool(artist_id: str) -> str:
     return await get_artist_info(artist_id)
 
 @mcp.tool()
-async def get_artist_top_tracks_tool(artist_id: str, market: str = "US") -> str:
+async def spotify_get_artist_top_tracks_tool(artist_id: str, market: str = "US") -> str:
     return await get_artist_top_tracks(artist_id, market)
 
 @mcp.tool()
-async def get_artist_albums_tool(artist_id: str) -> str:
+async def spotify_get_artist_albums_tool(artist_id: str) -> str:
     return await get_artist_albums(artist_id)
 
 @mcp.tool()
-async def get_artist_info_by_artist_name_tool(artist_name: str) -> str:
+async def spotify_get_artist_info_by_artist_name_tool(artist_name: str) -> str:
     return await get_artist_info_by_artist_name(artist_name)
 
 @mcp.tool()
-async def get_artist_top_tracks_by_artist_name_tool(artist_name: str, market: str = "US") -> str:
+async def spotify_get_artist_top_tracks_by_artist_name_tool(artist_name: str, market: str = "US") -> str:
     return await get_artist_top_tracks_by_artist_name(artist_name, market)
 
 @mcp.tool()
-async def get_artist_albums_by_artist_name_tool(artist_name: str) -> str:
+async def spotify_get_artist_albums_by_artist_name_tool(artist_name: str) -> str:
     return await get_artist_albums_by_artist_name(artist_name)
 
 # Album tools
 @mcp.tool()
-async def get_album_details_tool(album_id: str) -> str:
+async def spotify_get_album_details_tool(album_id: str) -> str:
     return await get_album_details(album_id)
 
 @mcp.tool()
-async def get_album_tracks_tool(album_id: str) -> str:
+async def spotify_get_album_tracks_tool(album_id: str) -> str:
     return await get_album_tracks(album_id)
 
 @mcp.tool()
-async def get_albums_by_artist_name_tool(artist_name: str) -> str:
+async def spotify_get_albums_by_artist_name_tool(artist_name: str) -> str:
     return await get_albums_by_artist_name(artist_name)
 
 
