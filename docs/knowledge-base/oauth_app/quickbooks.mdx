@@ -1,0 +1,130 @@
+---
+title: "Setting Up QuickBooks OAuth App"
+description: "Complete guide to creating and configuring a QuickBooks OAuth application"
+---
+
+## Prerequisites
+
+- Intuit Developer account (free to sign up)
+- Access to Intuit Developer Platform
+
+## Step 1: Create Intuit Developer Account & Workspace
+
+1. Visit [https://developer.intuit.com](https://developer.intuit.com) and sign in with your Intuit credentials
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step1_homepage.png" alt="Intuit Developer Platform Homepage" />
+
+2. Click **"Create a workspace"** to set up your development environment
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step2_workspaces.png" alt="Workspaces Overview" />
+
+3. Fill out the workspace creation form with three steps:
+   - **Step 1 - Basic Information**: Enter workspace name and description
+   - **Step 2 - Company Information**: Provide your company details
+   - **Step 3 - Contact Information**: Add your contact information
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step3_create_workspace_dialog.png" alt="Create Workspace Dialog" />
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step5-company-info-form.png" alt="Company Information Form" />
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step7-contact-info-form.png" alt="Contact Information Form" />
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step8-contact-info-filled.png" alt="Contact Information Filled" />
+
+4. Click **"Create workspace"** to complete the setup
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step9_workspace_dashboard.png" alt="Workspace Dashboard" />
+
+## Step 2: Create QuickBooks OAuth Application
+
+1. After workspace creation, click **"Create an app"** to start building your QuickBooks integration
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step10_create_app_dialog.png" alt="Create App Dialog" />
+
+2. In the app creation dialog, select app type and configure basic information:
+   - **Choose "QuickBooks Online"** as your app type
+   - **Enter your app name** (avoid using "Intuit" or "QuickBooks" in the name)
+   - **Provide app description**
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step11_app_basic_info.png" alt="App Basic Information" />
+
+## Step 3: Configure OAuth Permissions
+
+<Note>
+Klavis QuickBooks MCP Server uses the following OAuth scopes: `com.intuit.quickbooks.accounting` (for full accounting data access) and `com.intuit.quickbooks.payment` (for payment processing)
+</Note>
+
+1. In the permissions configuration step, select the required QuickBooks scopes:
+   - **com.intuit.quickbooks.accounting** - For accessing accounting data (customers, invoices, items, etc.)
+   - **com.intuit.quickbooks.payment** - For payment processing capabilities
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step13_permissions_setup.png" alt="Permissions Setup" />
+
+2. Review and confirm the permissions by clicking **"Confirm"**
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step14_permissions_confirmed.png" alt="Permissions Confirmed" />
+
+## Step 4: Access Your OAuth Credentials
+
+1. Once your app is created, you'll see the success page with your development credentials
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step15_app_created_success.png" alt="App Created Successfully" />
+
+2. Navigate to **"Keys and credentials"** in the left sidebar to view your OAuth credentials:
+   - **Client ID**: Your OAuth application identifier
+   - **Client Secret**: Your OAuth application secret (keep this secure)
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step16_keys_and_credentials.png" alt="Keys and Credentials Page" />
+
+3. Configure your redirect URIs:
+   - For Klavis integration: `https://api.klavis.ai/oauth/quickbooks/callback`
+   - For local development: `http://localhost:3000/oauth/quickbooks/callback`
+
+<Check>
+You have successfully created a QuickBooks OAuth application! You now have your Client ID and Client Secret ready for integration with Klavis AI.
+</Check>
+
+<Tip>
+**Klavis handles all token management automatically** - we securely store and manage your OAuth tokens so you maintain seamless access to your QuickBooks data without any interruption.
+</Tip>
+
+## (Local Testing) Step 5: Testing Your Integration
+
+1. Open the Intuit API Playground: https://developer.intuit.com/app/developer/playground
+2. Select your app and environment (Development)
+3. Click "Get Access Token" to authorize and retrieve the token
+4. Copy both the Access Token and the Realm ID for testing API calls
+
+<img src="/images/knowledge-base/quickbooks_oauth_app/step17_test_api_playground.png" alt="Intuit API Playground - Get Access Token and Realm ID" />
+
+<Tip>
+Use the Access Token as the Bearer token in Authorization header and the Realm ID as the companyId for API requests.
+</Tip>
+
+## (Optional) Step 6: White Labeling 
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own QuickBooks OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your QuickBooks **Client ID** and **Client Secret** from Step 4
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/quickbooks/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/quickbooks/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
+</Tip>
+
+## Resources
+- [QuickBooks Online API Documentation](https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/account)
+- [QuickBooks OAuth 2.0 Guide](https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth_2.0)
+- [Intuit Developer Platform](https://developer.intuit.com)
+- [QuickBooks API Explorer](https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/account)
+- [Klavis OAuth & White Labeling Guide](/documentation/klavis-oauth-white-label)
+- [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)
