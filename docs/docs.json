@@ -150,7 +150,10 @@
           },
           {
             "group": "User",
-            "pages": ["api-reference/user/get-user-instances"]
+            "pages": [
+              "api-reference/user/get-user-instances",
+              "api-reference/user/delete-user"
+            ]
           },
           {
             "group": "White Labeling",

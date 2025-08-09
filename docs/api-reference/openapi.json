@@ -82,7 +82,7 @@
     "/mcp-server/instance/create": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Create a Server Instance",
+        "summary": "Create Server Instance",
         "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
         "operationId": "createServerInstance",
         "requestBody": {
@@ -119,7 +119,7 @@
     "/mcp-server/unified/instance/create": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Create a Unified MCP Server Instance",
+        "summary": "Create Unified MCP Server Instance",
         "description": "Creates a URL for the Unified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.",
         "operationId": "createUnifiedMCPServerInstance",
         "requestBody": {
@@ -199,7 +199,7 @@
     "/mcp-server/instance/delete-auth/{instance_id}": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete Auth data for a Server Instance",
+        "summary": "Delete Auth data for Server Instance",
         "description": "Deletes authentication metadata for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [{ "HTTPBearer": [] }],
@@ -240,7 +240,7 @@
     "/mcp-server/instance/delete/{instance_id}": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete a Server Instance",
+        "summary": "Delete Server Instance",
         "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
         "operationId": "deleteServerInstance",
         "security": [{ "HTTPBearer": [] }],
@@ -454,7 +454,7 @@
     "/white-labeling/create": {
       "post": {
         "tags": ["white-labeling"],
-        "summary": "Create",
+        "summary": "Create White Label",
         "description": "Saves OAuth white labeling information, or updates existing information if the `client_id` matches.",
         "operationId": "createWhiteLabeling",
         "requestBody": {
@@ -493,7 +493,7 @@
     "/white-labeling/get/{client_id}": {
       "get": {
         "tags": ["white-labeling"],
-        "summary": "Get",
+        "summary": "Get White Label",
         "description": "Retrieves white labeling information for a specific OAuth client ID.",
         "operationId": "getWhiteLabelingByClientId",
         "security": [{ "HTTPBearer": [] }],
@@ -530,7 +530,7 @@
     "/user/instances": {
       "get": {
         "tags": ["user"],
-        "summary": "Get user instances",
+        "summary": "Get User Instances",
         "description": "Get all MCP server instances information by user ID and platform name.",
         "operationId": "getServerInstancesByUser",
         "security": [{ "HTTPBearer": [] }],
@@ -583,7 +583,7 @@
     "/user/delete/{user_id}": {
       "delete": {
         "tags": ["user"],
-        "summary": "Delete a user by user_id",
+        "summary": "Delete User",
         "description": "Delete a user and all associated data by user_id.\nUsers cannot delete their own accounts.\nThis operation will permanently remove all user data.",
         "operationId": "deleteUserByUserId",
         "security": [{ "HTTPBearer": [] }],
