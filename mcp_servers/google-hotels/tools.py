@@ -7,8 +7,8 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
-from .api_client import GoogleHotelsApiClient, SerpApiError
-from .schemas import HotelSearchRequest, HotelSummary, ToolResult
+from api_client import GoogleHotelsApiClient, SerpApiError
+from schemas import HotelSearchRequest, HotelSummary, ToolResult
 
 logger = logging.getLogger(__name__)
 
