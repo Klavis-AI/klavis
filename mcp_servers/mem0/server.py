@@ -1,184 +1,305 @@
-import argparse
-import json
+import os
 import logging
-import uvicorn
-from mcp.server.fastmcp import FastMCP
-from starlette.applications import Starlette
-from starlette.requests import Request
-from starlette.routing import Mount, Route
+import contextlib
+import json
+from collections.abc import AsyncIterator
+
+import click
+from dotenv import load_dotenv
+import mcp.types as types
+from mcp.server.lowlevel import Server
 from mcp.server.sse import SseServerTransport
-from mcp.server import Server
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
 
 from tools import (
+    mem0_api_key_context,
     add_memory,
     get_all_memories,
-    search_memories
+    search_memories,
 )
+
+load_dotenv()
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("mem0-mcp-server")
 
-# Initialize FastMCP server for mem0 tools
-mcp = FastMCP("mem0-mcp")
+MEM0_API_KEY = os.getenv("MEM0_API_KEY") or ""
+MEM0_MCP_SERVER_PORT = int(os.getenv("MEM0_MCP_SERVER_PORT", "5000"))
 
-@mcp.tool(
-    description="""Add a new memory to mem0 for long-term storage. This tool stores code snippets, implementation details,
-    and programming knowledge for future reference. When storing information, you should include:
-    - Complete code with all necessary imports and dependencies
-    - Language/framework version information (e.g., "Python 3.9", "React 18")
-    - Full implementation context and any required setup/configuration
-    - Detailed comments explaining the logic, especially for complex sections
-    - Example usage or test cases demonstrating the code
-    - Any known limitations, edge cases, or performance considerations
-    - Related patterns or alternative approaches
-    - Links to relevant documentation or resources
-    - Environment setup requirements (if applicable)
-    - Error handling and debugging tips
-    The memory will be indexed for semantic search and can be retrieved later using natural language queries."""
+@click.command()
+@click.option("--port", default=MEM0_MCP_SERVER_PORT, help="Port to listen on for HTTP")
+@click.option(
+    "--log-level",
+    default="INFO",
+    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
 )
-async def mem0_add_memory(content: str, user_id: str = None) -> str:
-    """Add a new memory to mem0 for persistent storage.
-
-    This tool stores code snippets, implementation patterns, programming knowledge, and technical information.
-    When storing information, it's recommended to include:
-    - Complete code with imports and dependencies
-    - Language/framework information
-    - Setup instructions if needed
-    - Documentation and comments
-    - Example usage
-
-    Args:
-        content: The content to store in memory, including code, documentation, and context
-        user_id: Optional user ID. If not provided, uses the default user ID.
-    """
-    try:
-        result = await add_memory(content, user_id)
-        return json.dumps(result, indent=2)
-    except Exception as e:
-        logger.exception(f"Error adding memory: {e}")
-        return f"Error adding memory: {str(e)}"
-
-@mcp.tool(
-    description="""Retrieve all stored memories for the user. Call this tool when you need 
-    complete context of all previously stored information. This is useful when:
-    - You need to analyze all available code patterns and knowledge
-    - You want to check all stored implementation examples
-    - You need to review the full history of stored solutions
-    - You want to ensure no relevant information is missed
-    Returns a comprehensive list of:
-    - Code snippets and implementation patterns
-    - Programming knowledge and best practices
-    - Technical documentation and examples
-    - Setup and configuration guides
-    Results are returned in JSON format with metadata."""
+@click.option(
+    "--json-response",
+    is_flag=True,
+    default=False,
+    help="Enable JSON responses for StreamableHTTP instead of SSE streams",
 )
-async def mem0_get_all_memories(user_id: str = None, page: int = 1, page_size: int = 50) -> str:
-    """Get all memories for a user.
-
-    Returns a JSON formatted list of all stored memories, including:
-    - Code implementations and patterns
-    - Technical documentation
-    - Programming best practices
-    - Setup guides and examples
-    Each memory includes metadata about when it was created and its content type.
-    
-    Args:
-        user_id: Optional user ID. If not provided, uses the default user ID.
-        page: Page number for pagination (default: 1).
-        page_size: Number of memories per page (default: 50).
-    """
-    try:
-        result = await get_all_memories(user_id, page, page_size)
-        return json.dumps(result, indent=2)
-    except Exception as e:
-        logger.exception(f"Error getting memories: {e}")
-        return f"Error getting memories: {str(e)}"
-
-@mcp.tool(
-    description="""Search through stored memories using semantic search. This tool should be called 
-    for user queries to find relevant code and implementation details. It helps find:
-    - Specific code implementations or patterns
-    - Solutions to programming problems
-    - Best practices and coding standards
-    - Setup and configuration guides
-    - Technical documentation and examples
-    The search uses natural language understanding to find relevant matches, so you can
-    describe what you're looking for in plain English. Search the memories to 
-    leverage existing knowledge before providing answers."""
-)
-async def mem0_search_memories(query: str, user_id: str = None, limit: int = 20) -> str:
-    """Search memories using semantic search.
-
-    The search is powered by natural language understanding, allowing you to find:
-    - Code implementations and patterns
-    - Programming solutions and techniques
-    - Technical documentation and guides
-    - Best practices and standards
-    Results are ranked by relevance to your query.
-
-    Args:
-        query: Search query string describing what you're looking for. Can be natural language
-              or specific technical terms.
-        user_id: Optional user ID. If not provided, uses the default user ID.
-        limit: Maximum number of results to return (default: 20).
-    """
-    try:
-        result = await search_memories(query, user_id, limit)
-        return json.dumps(result, indent=2)
-    except Exception as e:
-        logger.exception(f"Error searching memories: {e}")
-        return f"Error searching memories: {str(e)}"
-
-def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlette:
-    """Create a Starlette application that can serve the provided mcp server with SSE."""
-    sse = SseServerTransport("/messages/")
-
-    async def handle_sse(request: Request) -> None:
-        async with sse.connect_sse(
-                request.scope,
-                request.receive,
-                request._send,  # noqa: SLF001
-        ) as (read_stream, write_stream):
-            await mcp_server.run(
-                read_stream,
-                write_stream,
-                mcp_server.create_initialization_options(),
-            )
-
-    return Starlette(
-        debug=debug,
-        routes=[
-            Route("/sse", endpoint=handle_sse),
-            Mount("/messages/", app=sse.handle_post_message),
-        ],
-    )
-
-def main():
-    """Main entry point for the mem0 MCP server."""
-    
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Run mem0 MCP SSE-based server')
-    parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
-    parser.add_argument('--port', type=int, default=8080, help='Port to listen on')
-    parser.add_argument('--log-level', default='INFO', help='Logging level')
-    args = parser.parse_args()
-    
+def main(
+    port: int,
+    log_level: str,
+    json_response: bool,
+) -> int:
     # Configure logging
     logging.basicConfig(
-        level=getattr(logging, args.log_level.upper()),
+        level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    # Get the MCP server instance from FastMCP
-    mcp_server = mcp._mcp_server
+    # Create the MCP server instance
+    app = Server("mem0-mcp-server")
 
-    # Bind SSE request handling to MCP server
-    starlette_app = create_starlette_app(mcp_server, debug=True)
+    @app.list_tools()
+    async def list_tools() -> list[types.Tool]:
+        return [
+            types.Tool(
+                name="mem0_add_memory",
+                description="Add a new memory to mem0 for long-term storage. This tool stores code snippets, implementation details, and programming knowledge for future reference. When storing information, you should include: complete code with all necessary imports and dependencies, language/framework version information, full implementation context and any required setup/configuration, detailed comments explaining the logic, example usage or test cases, any known limitations or performance considerations, related patterns or alternative approaches, links to relevant documentation or resources, environment setup requirements, and error handling tips. The memory will be indexed for semantic search and can be retrieved later using natural language queries.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["content"],
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "description": "The content to store in memory, including code, documentation, and context."
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="mem0_get_all_memories",
+                description="Retrieve all stored memories for the user. Call this tool when you need complete context of all previously stored information. This is useful when you need to analyze all available code patterns and knowledge, check all stored implementation examples, review the full history of stored solutions, or ensure no relevant information is missed. Returns a comprehensive list of code snippets and implementation patterns, programming knowledge and best practices, technical documentation and examples, and setup and configuration guides. Results are returned in JSON format with metadata.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        },
+                        "page": {
+                            "type": "integer",
+                            "description": "Page number for pagination (default: 1).",
+                            "default": 1
+                        },
+                        "page_size": {
+                            "type": "integer",
+                            "description": "Number of memories per page (default: 50).",
+                            "default": 50
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="mem0_search_memories",
+                description="Search through stored memories using semantic search. This tool should be called for user queries to find relevant code and implementation details. It helps find specific code implementations or patterns, solutions to programming problems, best practices and coding standards, setup and configuration guides, and technical documentation and examples. The search uses natural language understanding to find relevant matches, so you can describe what you're looking for in plain English. Search the memories to leverage existing knowledge before providing answers.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["query"],
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Search query string describing what you're looking for. Can be natural language or specific technical terms."
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return (default: 20).",
+                            "default": 20
+                        }
+                    }
+                }
+            ),
+        ]
 
-    logger.info(f"Server starting on port {args.port}")
-    logger.info(f"  - SSE endpoint: http://localhost:{args.port}/sse")
+    @app.call_tool()
+    async def call_tool(
+        name: str, arguments: dict
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        
+        if name == "mem0_add_memory":
+            content = arguments.get("content")
+            user_id = arguments.get("user_id")
+            if not content:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: content parameter is required",
+                    )
+                ]
+            try:
+                result = await add_memory(content, user_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mem0_get_all_memories":
+            user_id = arguments.get("user_id")
+            page = arguments.get("page", 1)
+            page_size = arguments.get("page_size", 50)
+            try:
+                result = await get_all_memories(user_id, page, page_size)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mem0_search_memories":
+            query = arguments.get("query")
+            user_id = arguments.get("user_id")
+            limit = arguments.get("limit", 20)
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: query parameter is required",
+                    )
+                ]
+            try:
+                result = await search_memories(query, user_id, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        else:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Unknown tool: {name}",
+                )
+            ]
 
-    uvicorn.run(starlette_app, host=args.host, port=args.port)
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
+        
+        # Extract mem0 API key from headers (fallback to environment)
+        mem0_api_key = request.headers.get('x-mem0-api-key') or MEM0_API_KEY
+        
+        # Set the mem0 API key in context for this request
+        token = mem0_api_key_context.set(mem0_api_key or "")
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            mem0_api_key_context.reset(token)
+        
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        logger.info("Handling StreamableHTTP request")
+        
+        # Extract auth token from headers (fallback to environment)
+        headers = dict(scope.get("headers", []))
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
+        else:
+            auth_token = MEM0_API_KEY
+        
+        # Set the mem0 API key in context for this request
+        token = mem0_api_key_context.set(auth_token or "")
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            mem0_api_key_context.reset(token)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
+
+    # Create an ASGI application with routes for both transports
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
+    import uvicorn
+
+    uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+
+    return 0
 
 if __name__ == "__main__":
     main()

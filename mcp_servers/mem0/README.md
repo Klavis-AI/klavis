@@ -45,7 +45,7 @@ uv run server.py
   "mcpServers": {
     "mem0": {
       "transport": "sse",
-      "url": "http://localhost:8080/sse"
+      "url": "http://localhost:5000/mcp"
     }
   }
 }
@@ -53,24 +53,24 @@ uv run server.py
 
 ## Features
 
-The server provides three main tools for managing persistent memories using mem0:
+This server provides the following capabilities through MCP tools:
 
-1. `mem0_add_memory`: Store any information in long-term memory with semantic indexing
-
-2. `mem0_get_all_memories`: Retrieve all stored memories for comprehensive context 
-
-3. `mem0_search_memories`: Semantically search through stored memories using natural language queries.
+| Tool | Description |
+|------|-------------|
+| `mem0_add_memory` | Store code snippets, implementation details, and programming knowledge for future reference |
+| `mem0_get_all_memories` | Retrieve all stored memories for comprehensive context analysis |
+| `mem0_search_memories` | Semantically search through stored memories using natural language queries |
 
 ## Why?
 
-This implementation allows for a persistent preferences system that can be accessed via MCP. The SSE-based server can run as a process that agents connect to, use, and disconnect from whenever needed. This pattern fits well with "cloud-native" use cases where the server and clients can be decoupled processes on different nodes.
+This implementation allows for a persistent preferences system that can be accessed via MCP. The streamable-HTTP based server can run as a process that agents connect to, use, and disconnect from whenever needed. This pattern fits well with "cloud-native" use cases where the server and clients can be decoupled processes on different nodes.
 
 ### Server
 
-By default, the server runs on 0.0.0.0:8080 but is configurable with command line arguments like:
+By default, the server runs on 0.0.0.0:5000 but is configurable with command line arguments like:
 
 ```
 uv run main.py --host <your host> --port <your port>
 ```
 
-The server exposes an SSE endpoint at `/sse` that MCP clients can connect to for accessing the preferences management tools.
+The server exposes an Streamable HTTP endpoint at `/mcp` that MCP clients can connect to for accessing the preferences management tools.

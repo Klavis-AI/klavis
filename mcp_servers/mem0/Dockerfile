@@ -7,17 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only the requirements first to leverage Docker cache
-COPY requirements.txt .
+COPY mcp_servers/mem0/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the MCP server files
-COPY server.py .
-COPY tools/ ./tools/
-COPY .env.example .env
+COPY mcp_servers/mem0/server.py .
+COPY mcp_servers/mem0/tools/ ./tools/
 
 # Expose the port the server runs on
-EXPOSE 8080
+EXPOSE 5000
 
 # Command to run the MCP server
 CMD ["uv", "run",  "server.py"]

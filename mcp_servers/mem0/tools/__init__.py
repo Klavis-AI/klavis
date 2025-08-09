@@ -6,7 +6,7 @@ from .memories import (
     get_all_memories,
     search_memories
 )
-from .base import get_user_id, mem0_client
+from .base import get_user_id, mem0_api_key_context
 
 __all__ = [
     # Memories
@@ -16,5 +16,5 @@ __all__ = [
     
     # Base
     "get_user_id",
-    "mem0_client",
+    "mem0_api_key_context",
 ]

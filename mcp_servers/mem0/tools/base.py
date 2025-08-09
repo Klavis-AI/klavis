@@ -1,15 +1,13 @@
 import logging
 import os
+from contextvars import ContextVar
 from mem0 import MemoryClient
 from dotenv import load_dotenv
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
-# Default configuration
 DEFAULT_USER_ID = os.getenv("DEFAULT_USER_ID", "mem0_mcp")
 CUSTOM_INSTRUCTIONS = """
 Extract the Following Information:  
@@ -21,21 +19,31 @@ Extract the Following Information:
 - Usage Context: Document how and when the code should be used, including any prerequisites or constraints.
 """
 
+mem0_api_key_context: ContextVar[str] = ContextVar('mem0_api_key')
+
+def get_mem0_api_key() -> str:
+    """Get the mem0 API key from context or environment."""
+    try:
+        return mem0_api_key_context.get()
+    except LookupError:
+        api_key = os.getenv("MEM0_API_KEY")
+        if not api_key:
+            raise RuntimeError("mem0 API key not found in request context or environment")
+        return api_key
+
 def get_user_id() -> str:
     """Get the current user identifier for memory operations."""
     logger.debug(f"DEFAULT_USER_ID: {DEFAULT_USER_ID}")
     return DEFAULT_USER_ID
 
-def initialize_mem0_client() -> MemoryClient:
-    """Initialize and configure the mem0 client with custom instructions for AI-assisted development."""
+def get_mem0_client() -> MemoryClient:
+    """Get a configured mem0 client with current API key from context."""
     try:
-        client = MemoryClient()
+        api_key = get_mem0_api_key()
+        client = MemoryClient(api_key=api_key)
         client.update_project(custom_instructions=CUSTOM_INSTRUCTIONS)
-        logger.info("mem0 client initialized successfully")
+        logger.debug("mem0 client initialized successfully")
         return client
     except Exception as e:
         logger.error(f"Failed to initialize mem0 client: {e}")
         raise
-
-# Global client instance for memory operations
-mem0_client = initialize_mem0_client()

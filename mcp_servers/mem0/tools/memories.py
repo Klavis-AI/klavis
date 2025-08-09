@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict
-from .base import mem0_client, get_user_id
+from .base import get_mem0_client, get_user_id
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -12,6 +12,7 @@ async def add_memory(content: str, user_id: str = None) -> Dict[str, Any]:
     
     logger.info(f"Adding memory for user: {user_id}")
     try:
+        mem0_client = get_mem0_client()
         messages = [{"role": "user", "content": content}]
         result = mem0_client.add(messages, user_id=user_id, output_format="v1.1")
         logger.info(f"Successfully added memory for user {user_id}")
@@ -32,6 +33,7 @@ async def get_all_memories(user_id: str = None, page: int = 1, page_size: int = 
         
     logger.info(f"Getting all memories for user: {user_id}")
     try:
+        mem0_client = get_mem0_client()
         memories = mem0_client.get_all(user_id=user_id, page=page, page_size=page_size)
         flattened_memories = [memory["memory"] for memory in memories["results"]]
         
@@ -55,6 +57,7 @@ async def search_memories(query: str, user_id: str = None, limit: int = 20) -> D
         
     logger.info(f"Searching memories for user {user_id} with query: {query}")
     try:
+        mem0_client = get_mem0_client()
         memories = mem0_client.search(query, user_id=user_id, output_format="v1.1")
         flattened_memories = [memory["memory"] for memory in memories["results"][:limit]]
         
