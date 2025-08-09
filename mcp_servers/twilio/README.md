@@ -25,7 +25,7 @@ Set the following environment variables:
 TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_PHONE_NUMBER=your_twilio_phone_number
-TWILIO_MCP_SERVER_PORT=5001  # Optional, defaults to 5001
+TWILIO_MCP_SERVER_PORT=5000  # Optional, defaults to 5000
 ```
 
 ## Installation
@@ -59,7 +59,7 @@ TWILIO_MCP_SERVER_PORT=5001  # Optional, defaults to 5001
 
 2. Run the container:
    ```bash
-   docker run -p 5001:5001 \
+   docker run -p 5000:5000 \
      -e TWILIO_ACCOUNT_SID=your_account_sid \
      -e TWILIO_AUTH_TOKEN=your_auth_token \
      -e TWILIO_PHONE_NUMBER=your_twilio_phone_number \
@@ -107,7 +107,8 @@ List phone numbers available in your account.
 The server runs on port 5001 by default and provides:
 
 - `/sse` - Server-Sent Events transport
-- `/http` - StreamableHTTP transport
+- `/messages/` - SSE message handling
+- `/mcp` - StreamableHTTP transport
 
 ## Error Handling
 

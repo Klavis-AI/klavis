@@ -10,9 +10,11 @@ from contextvars import ContextVar
 import click
 import mcp.types as types
 from mcp.server.lowlevel import Server
+from mcp.server.sse import SseServerTransport
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
 from starlette.responses import Response
+from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
@@ -31,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-TWILIO_MCP_SERVER_PORT = int(os.getenv("TWILIO_MCP_SERVER_PORT", "5001"))
+TWILIO_MCP_SERVER_PORT = int(os.getenv("TWILIO_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=TWILIO_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -167,140 +169,200 @@ def main(
         
         # SMS
         if name == "twilio_send_sms":
-            result = await send_sms(arguments["to"], arguments["body"])
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                result = await send_sms(arguments["to"], arguments["body"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         # MMS
         elif name == "twilio_send_mms":
-            body = arguments.get("body", "")
-            result = await send_mms(arguments["to"], arguments["media_url"], body)
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                body = arguments.get("body", "")
+                result = await send_mms(arguments["to"], arguments["media_url"], body)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         # List Messages
         elif name == "twilio_list_messages":
-            limit = arguments.get("limit", 20)
-            result = await list_messages(limit)
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                limit = arguments.get("limit", 20)
+                result = await list_messages(limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         # Get Message Details
         elif name == "twilio_get_message_details":
-            result = await get_message_details(arguments["sid"])
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                result = await get_message_details(arguments["sid"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         # Redact Message
         elif name == "twilio_redact_message":
-            result = await redact_message(arguments["sid"])
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                result = await redact_message(arguments["sid"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         # List Phone Numbers
         elif name == "twilio_list_phone_numbers":
-            result = await list_phone_numbers()
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                result = await list_phone_numbers()
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
         
         else:
             raise ValueError(f"Unknown tool: {name}")
 
-    # Create Starlette app for HTTP transport
-    starlette_app = Starlette()
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
 
-    @starlette_app.middleware("http")
-    async def auth_middleware(request, call_next):
-        """Extract auth token from headers and set in context."""
-        auth_token = request.headers.get("x-auth-token")
-        if auth_token:
-            auth_token_context.set(auth_token)
-        else:
-            # For Twilio, we'll use environment variables as fallback
-            auth_token_context.set("env")
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
         
-        response = await call_next(request)
-        return response
-
-    async def handle_http_request(request):
-        """Handle HTTP requests for MCP tool calls."""
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
+        
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
         try:
-            # Parse the JSON request
-            data = await request.json()
-            
-            # Extract the tool call information
-            method = data.get("method")
-            params = data.get("params", {})
-            
-            if method == "tools/call":
-                tool_name = params.get("name")
-                arguments = params.get("arguments", {})
-                
-                # Call the appropriate tool
-                if tool_name == "twilio_send_sms":
-                    result = await send_sms(arguments["to"], arguments["body"])
-                elif tool_name == "twilio_send_mms":
-                    body = arguments.get("body", "")
-                    result = await send_mms(arguments["to"], arguments["media_url"], body)
-                elif tool_name == "twilio_list_messages":
-                    limit = arguments.get("limit", 20)
-                    result = await list_messages(limit)
-                elif tool_name == "twilio_get_message_details":
-                    result = await get_message_details(arguments["sid"])
-                elif tool_name == "twilio_redact_message":
-                    result = await redact_message(arguments["sid"])
-                elif tool_name == "twilio_list_phone_numbers":
-                    result = await list_phone_numbers()
-                else:
-                    return Response(
-                        json.dumps({"error": f"Unknown tool: {tool_name}"}),
-                        status_code=400,
-                        media_type="application/json"
-                    )
-                
-                # Return the result
-                return Response(
-                    json.dumps({
-                        "jsonrpc": "2.0",
-                        "id": data.get("id", 1),
-                        "result": result
-                    }),
-                    media_type="application/json"
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
                 )
-            else:
-                return Response(
-                    json.dumps({"error": f"Unknown method: {method}"}),
-                    status_code=400,
-                    media_type="application/json"
-                )
-                
-        except Exception as e:
-            return Response(
-                json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": data.get("id", 1) if 'data' in locals() else 1,
-                    "error": {"message": str(e)}
-                }),
-                status_code=500,
-                media_type="application/json"
-            )
+        finally:
+            auth_token_context.reset(token)
+        
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+    )
 
     async def handle_streamable_http(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         """Handle StreamableHTTP transport."""
-        async with StreamableHTTPSessionManager(
-            scope, receive, send, json_response=json_response
-        ) as session:
-            await session.run_session(app)
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = None
+        for name, value in scope.get("headers", []):
+            if name == b"x-auth-token":
+                auth_token = value.decode("utf-8")
+                break
+        
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
-    # Add routes
-    starlette_app.add_route("/http", handle_http_request, methods=["POST"])
-    starlette_app.add_route("/streamable", handle_streamable_http)
+
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
-        # Startup
-        logger.info(f"Starting Twilio MCP server on port {port}")
-        yield
-        # Shutdown
-        logger.info("Shutting down Twilio MCP server")
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
 
-    starlette_app.router.lifespan_context = lifespan
+    # Create an ASGI application with routes for both transports
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
 
     # Run the server
     import uvicorn

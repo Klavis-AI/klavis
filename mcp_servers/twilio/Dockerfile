@@ -15,7 +15,7 @@ COPY mcp_servers/twilio/server.py .
 COPY mcp_servers/twilio/tools/ ./tools/
 
 # Expose the port the server runs on
-EXPOSE 5001
+EXPOSE 5000
 
 # Command to run the server
 CMD ["python", "server.py"] 
