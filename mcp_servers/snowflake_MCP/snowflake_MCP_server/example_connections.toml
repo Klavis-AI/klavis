@@ -1,0 +1,135 @@
+# Snowflake MCP Server - Connection Configuration Examples
+#
+# This file demonstrates different authentication methods and environment setups
+# for the Snowflake MCP Server. Copy this file and customize for your environment.
+#
+# Usage: mcp_snowflake_server --connections-file ./connections.toml --connection-name production
+
+# Production Environment - Password Authentication
+[production]
+account = "abc12345.us-east-1"              # Your Snowflake account identifier
+user = "analytics_user"                     # Snowflake username
+password = "secure_production_password"     # User password (consider using env vars)
+warehouse = "PROD_ANALYTICS_WH"            # Warehouse for query execution
+database = "ANALYTICS_DB"                  # Default database
+schema = "PUBLIC"                          # Default schema
+role = "ANALYTICS_ROLE"                    # Snowflake role to assume
+# Optional: client_session_keep_alive = true  # Keep connection alive
+
+# Staging Environment - Browser Authentication
+[staging]
+account = "abc12345.us-east-1"
+user = "staging_user"
+authenticator = "externalbrowser"          # Use browser-based SSO authentication
+warehouse = "STAGING_WH"
+database = "STAGING_DB"
+schema = "PUBLIC"
+role = "STAGING_ROLE"
+
+# Development Environment - Key Pair Authentication
+[development]
+account = "abc12345.us-east-1"
+user = "dev_user"
+private_key_path = "/Users/developer/.ssh/snowflake_dev_key.pem"  # Path to private key
+warehouse = "DEV_WH"
+database = "DEV_DB"
+schema = "DEVELOPMENT"
+role = "DEVELOPER"
+
+# Analytics Environment - Service Account
+[analytics]
+account = "abc12345.us-east-1"
+user = "analytics_service"
+password = "service_account_password"
+warehouse = "ANALYTICS_WH"
+database = "DATA_WAREHOUSE"
+schema = "MARTS"
+role = "ANALYST"
+# Additional connection parameters
+client_session_keep_alive = true          # Keep sessions alive longer
+query_timeout = 300                       # Query timeout in seconds
+
+# Reporting Environment - Read-Only Access
+[reporting]
+account = "abc12345.us-east-1"
+user = "reporting_service"
+private_key_path = "/etc/snowflake/reporting_key.pem"
+warehouse = "REPORTING_WH"
+database = "REPORTING_DB"
+schema = "DASHBOARDS"
+role = "REPORTER"
+# Custom parameters
+login_timeout = 60                        # Login timeout in seconds
+
+# Multi-Cloud Example - AWS Account
+[aws_production]
+account = "organization-account_name"      # Organization-style account name
+user = "aws_analytics_user"
+password = "aws_password"
+warehouse = "AWS_COMPUTE_WH"
+database = "AWS_DATA_LAKE"
+schema = "REFINED"
+role = "AWS_DATA_ANALYST"
+region = "us-east-1"                      # Explicit region
+
+# Multi-Cloud Example - Azure Account  
+[azure_production]
+account = "organization-azure_account.central-us.azure"
+user = "azure_user"
+authenticator = "externalbrowser"
+warehouse = "AZURE_WH"
+database = "AZURE_SYNAPSE_DB"
+schema = "PROCESSED"
+role = "AZURE_ANALYST"
+
+# Testing Environment - Local Development
+[testing]
+account = "abc12345.us-east-1"
+user = "test_user"
+password = "test_password"
+warehouse = "DEV_WH"
+database = "TEST_DB"
+schema = "SANDBOX"
+role = "TESTER"
+# Testing-specific settings
+application = "mcp_snowflake_server_test"  # Application identifier
+
+# High-Security Environment - MFA Required
+[secure]
+account = "secure-org-account"
+user = "secure_user"
+authenticator = "username_password_mfa"    # Multi-factor authentication
+password = "secure_password"
+warehouse = "SECURE_WH"
+database = "SENSITIVE_DATA"
+schema = "PROTECTED"
+role = "SECURITY_ANALYST"
+
+#
+# Configuration Notes:
+#
+# Account Formats:
+# - Legacy: account_name (deprecated)
+# - Standard: account_name.region.cloud
+# - Organization: organization-account_name
+#
+# Authentication Methods:
+# - password: Standard username/password
+# - externalbrowser: SSO via web browser
+# - private_key_path: Key pair authentication (most secure)
+# - username_password_mfa: Password + MFA
+#
+# Connection Security:
+# - Never commit passwords in version control
+# - Use environment variables for sensitive data:
+#   password = "${SNOWFLAKE_PROD_PASSWORD}"
+# - Store private keys securely with restricted permissions
+#
+# Performance Settings:
+# - client_session_keep_alive: Keep connections alive longer
+# - query_timeout: Set appropriate timeouts for your use case
+# - warehouse: Choose appropriate warehouse size for workload
+#
+# Example Usage:
+# mcp_snowflake_server --connections-file ./my_connections.toml --connection-name production
+#
