@@ -133,6 +133,8 @@ def update_task(list_id: str, task_id: str, title: Optional[str] = None, notes: 
     resp = _call_api(client.service.tasks().patch(tasklist=list_id, task=task_id, body=patch_body))
     return {"ok": True, "task": resp}
 
-def mark_task_completed(list_id: str, task_id: str) -> Dict[str, Any]:
-    """A convenience tool to mark a task as completed."""
-    return update_task(list_id=list_id, task_id=task_id, status="completed")
+def delete_task(list_id: str, task_id: str) -> Dict[str, Any]:
+    """Deletes a task by its ID."""
+    # The Google API returns an empty response on successful deletion.
+    _call_api(client.service.tasks().delete(tasklist=list_id, task=task_id))
+    return {"ok": True, "deleted": True, "task_id": task_id}

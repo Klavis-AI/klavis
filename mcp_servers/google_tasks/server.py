@@ -5,30 +5,25 @@ This script sets up and runs the Starlette web server, defines the tool
 menu for the MCP client, and dispatches tool calls to the implementations
 located in the 'tools' module.
 """
-# --- Core Python Libraries ---
 import contextlib
 import json
 import logging
 import os
 from collections.abc import AsyncIterator
 
-# --- Third-Party Libraries ---
 import click
 import mcp.types as types
 from dotenv import load_dotenv
-
-# --- MCP and Starlette Framework Libraries ---
 from mcp.server.lowlevel import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 
-# --- Local Application Imports ---
-# Contains all the functions that interact with the Google Tasks API.
+# Import the tool implementations from our tools file
 import tools
 
-# Load .env file for configuration
+# Load environment variables from .env file
 load_dotenv()
 
 # --- Configuration ---
@@ -43,20 +38,14 @@ PORT = int(os.getenv("PORT", "8000"))
 @click.option("--port", default=PORT, help="Port to listen on for HTTP")
 def main(port: int) -> int:
     """Main function to configure and run the MCP server."""
-    # The 'instructions' parameter gives the AI agent its primary goal.
     app = Server(
         "google-tasks-mcp-server",
         instructions="An agent for managing Google Tasks. You can manage task lists and the tasks within them.",
     )
 
     # --- Tool Menu Definition ---
-    # This decorator registers the function that provides the list of available tools to the AI.
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
-        """
-        This function defines the "vocabulary" the AI can use.
-        The tool 'description' is the most critical part, as it's how the AI decides what to do.
-        """
         logger.info("Client requested tool list")
         return [
             types.Tool(
@@ -103,77 +92,70 @@ def main(port: int) -> int:
                 }},
             ),
             types.Tool(
-                name="mark_task_completed",
-                description="A simple way to mark a task as completed.",
+                name="delete_task",
+                description="Delete a task by its list ID and task ID.",
                 inputSchema={"type": "object", "required": ["list_id", "task_id"], "properties": {
-                    "list_id": {"type": "string", "description": "ID of the task's list."},
-                    "task_id": {"type": "string", "description": "ID of the task to mark as complete."}
+                    "list_id": {"type": "string", "description": "The ID of the list containing the task."},
+                    "task_id": {"type": "string", "description": "The ID of the task to delete."}
                 }},
             ),
         ]
 
     # --- Tool Dispatcher ---
-    # Maps tool names to the functions that execute them.
     tool_implementations = {
         "list_task_lists": tools.list_task_lists,
         "create_task_list": tools.create_task_list,
         "list_tasks": tools.list_tasks,
         "create_task": tools.create_task,
         "update_task": tools.update_task,
-        "mark_task_completed": tools.mark_task_completed,
+        "delete_task": tools.delete_task,
     }
 
-    # This decorator registers the function that executes a tool call from the AI.
     @app.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-        """Receives a tool call, finds the right function, and runs it."""
         logger.info(f"Tool call: {name} with args: {arguments}")
-        
         tool_func = tool_implementations.get(name)
         if not tool_func:
             result = tools._error_response(f"Unknown tool name: '{name}'")
         else:
-            # Try to run the tool and catch any potential errors.
             try:
+                # Call the function from the tools module
                 result = tool_func(**arguments)
             except (TypeError, FileNotFoundError, ConnectionError) as e:
-                # Handle known, common errors.
                 logger.error(f"Error executing tool '{name}': {e}")
                 result = tools._error_response(str(e), 500)
             except Exception:
-                # Catch any other unexpected errors so the server doesn't crash.
                 logger.exception(f"An unexpected error occurred in tool '{name}'")
                 result = tools._error_response("An unexpected internal error occurred.", 500)
         
-        # Return the result as a JSON string.
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
     # --- Starlette Server Setup ---
     session_manager = StreamableHTTPSessionManager(app=app, stateless=True)
 
-    # Manages server startup and shutdown logic.
     @contextlib.asynccontextmanager
     async def lifespan(app_instance: Starlette) -> AsyncIterator[None]:
         async with session_manager.run():
             logger.info("MCP Session Manager started.")
             yield
         logger.info("MCP Session Manager stopped.")
+    
+    async def healthz(request):
+        return JSONResponse({"ok": True})
 
-    # This creates the actual web server application.
     starlette_app = Starlette(
         debug=True,
         routes=[
-            Mount("/mcp", app=session_manager.handle_request)
+            Mount("/mcp", app=session_manager.handle_request),
+            Route("/healthz", healthz),
         ],
         lifespan=lifespan,
     )
 
     logger.info(f"Starting Google Tasks MCP server on http://localhost:{port}")
-    # Starts the Uvicorn web server.
     import uvicorn
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
     return 0
 
-# Standard Python entry point.
 if __name__ == "__main__":
     main()

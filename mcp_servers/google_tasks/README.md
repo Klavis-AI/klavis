@@ -13,7 +13,7 @@ This server supports **Service Account** or **OAuth** authentication and is desi
 * **List Tasks** – View all tasks within a specific list, with options to show or hide completed items.
 * **Create Tasks** – Add new tasks with titles and optional notes to any list.
 * **Update Tasks** – Modify existing tasks, including changing their title, notes, or status.
-* **Mark Tasks as Complete** – A simple, dedicated tool for completing a task.
+* **Delete Tasks** – Delete an existing task.
 
 ---
 
