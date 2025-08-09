@@ -1,11 +1,21 @@
 import asyncio
 import functools
 import logging
-import os
 import time
 
 from typing import Any, Callable, Optional
 from contextlib import asynccontextmanager
+
+from tools.constants import (
+    COINBASE_DEFAULT_RATE_LIMIT,
+    COINBASE_MARKET_DATA_RATE_LIMIT,
+    COINBASE_ACCOUNTS_RATE_LIMIT,
+    COINBASE_PRODUCTS_RATE_LIMIT,
+    COINBASE_MAX_RETRY_ATTEMPTS,
+    COINBASE_INITIAL_DELAY,
+    COINBASE_MAX_DELAY,
+    COINBASE_BACKOFF_FACTOR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,35 +28,23 @@ class RateLimitConfig:
 
     def __init__(self):
         # Default rate limit for Coinbase API
-        self.default_max_requests_per_second = int(
-            os.getenv("COINBASE_DEFAULT_RATE_LIMIT", "2")
-        )
+        self.default_max_requests_per_second = COINBASE_DEFAULT_RATE_LIMIT
 
         # API-specific rate limits with smart defaults
         # Market API: 10,000 per hour = 2.78 per second, rounded down to 2 for safety
-        self.market_data_rate_limit = int(
-            os.getenv("COINBASE_MARKET_DATA_RATE_LIMIT", "2")
-        )
+        self.market_data_rate_limit = COINBASE_MARKET_DATA_RATE_LIMIT
 
         # Accounts API: 10,000 per hour = 2.78 per second, rounded down to 2 for safety
-        self.accounts_rate_limit = int(
-            os.getenv("COINBASE_ACCOUNTS_RATE_LIMIT", "2")
-        )
+        self.accounts_rate_limit = COINBASE_ACCOUNTS_RATE_LIMIT
 
         # Products API: 10 per second
-        self.products_rate_limit = int(
-            os.getenv("COINBASE_PRODUCTS_RATE_LIMIT", "10")
-        )
+        self.products_rate_limit = COINBASE_PRODUCTS_RATE_LIMIT
 
         # Retry settings
-        self.max_retry_attempts = int(
-            os.getenv("COINBASE_MAX_RETRY_ATTEMPTS", "3")
-        )
-        self.initial_delay = float(os.getenv("COINBASE_INITIAL_DELAY", "1.0"))
-        self.max_delay = float(os.getenv("COINBASE_MAX_DELAY", "10.0"))
-        self.backoff_factor = float(
-            os.getenv("COINBASE_BACKOFF_FACTOR", "2.0")
-        )
+        self.max_retry_attempts = COINBASE_MAX_RETRY_ATTEMPTS
+        self.initial_delay = COINBASE_INITIAL_DELAY
+        self.max_delay = COINBASE_MAX_DELAY
+        self.backoff_factor = COINBASE_BACKOFF_FACTOR
 
 
 class TokenBucketRateLimiter:
