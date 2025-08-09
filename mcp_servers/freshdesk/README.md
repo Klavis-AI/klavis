@@ -109,6 +109,18 @@ docker run -p 5000:5000 \
 | `FRESHDESK_DOMAIN` | Your Freshdesk domain | Yes | - |
 | `FRESHDESK_MCP_SERVER_PORT` | Server port | No | 5000 |
 
+
+### Freshdesk Domain
+
+The Freshdesk domain is the unique identifier for your Freshdesk account. It is used to make API requests to the Freshdesk API. The domain is typically in the format `your_domain.freshdesk.com`. You can read more here: [Freshdesk API Documentation](https://developers.freshdesk.com/api/#getting-started):
+
+<img width="912" height="567" alt="Screenshot 2025-08-08 at 18 31 56" src="https://github.com/user-attachments/assets/4bbb2d3f-1243-4a01-99af-69482b1c7cb5" />
+
+You can find your Freshdesk domain in the Freshdesk settings:
+
+<img width="427" height="289" alt="Screenshot 2025-08-08 at 18 29 17" src="https://github.com/user-attachments/assets/f3c12afb-aaad-4104-8eeb-668347e6d1ab" />
+
+
 ### Server Options
 
 ```bash
