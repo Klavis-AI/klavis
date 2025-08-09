@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "PlaywrightMCP": {
+      "url": "http://localhost:8000",
+      "description": "Playwright MCP REST server"
+    }
+  }
+}
