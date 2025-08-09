@@ -27,7 +27,7 @@ export const getMiroMcpServer = () => {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     mcpServerInstance.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -45,7 +45,7 @@ export const getMiroMcpServer = () => {
       };
     });
 
-    mcpServerInstance.setRequestHandler(CallToolRequestSchema, async request => {
+    mcpServerInstance.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
       try {
@@ -195,7 +195,7 @@ export const getMiroMcpServer = () => {
             const result = await handlers.member.updateBoardMemberRole(
               (args as any)?.board_id,
               (args as any)?.user_id,
-              (args as any)?.role || 'editor'
+              (args as any)?.role || 'editor',
             );
 
             return {
@@ -211,7 +211,7 @@ export const getMiroMcpServer = () => {
           case 'miro_remove_board_member': {
             const result = await handlers.member.removeBoardMember(
               (args as any)?.board_id,
-              (args as any)?.user_id
+              (args as any)?.user_id,
             );
 
             return {
@@ -231,7 +231,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_board_items': {
             const result = await handlers.item.getBoardItems(
               (args as any)?.board_id,
-              (args?.limit as number) || 50
+              (args?.limit as number) || 50,
             );
 
             return {
@@ -247,7 +247,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_specific_board_item': {
             const result = await handlers.item.getSpecificBoardItem(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -282,7 +282,7 @@ export const getMiroMcpServer = () => {
             const result = await handlers.item.updateItemPosition(
               (args as any)?.board_id,
               (args as any)?.item_id,
-              updateData
+              updateData,
             );
 
             return {
@@ -298,7 +298,7 @@ export const getMiroMcpServer = () => {
           case 'miro_delete_board_item': {
             const result = await handlers.item.deleteBoardItem(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -343,7 +343,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_app_card_item': {
             const result = await handlers.appCard.getAppCard(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -372,7 +372,7 @@ export const getMiroMcpServer = () => {
                 rotation: (args as any)?.rotation,
                 fillColor: (args as any)?.fill_color,
                 parentId: (args as any)?.parent_id,
-              }
+              },
             );
 
             return {
@@ -386,10 +386,7 @@ export const getMiroMcpServer = () => {
           }
 
           case 'miro_delete_app_card_item': {
-            await handlers.appCard.deleteAppCard(
-              (args as any)?.board_id,
-              (args as any)?.item_id
-            );
+            await handlers.appCard.deleteAppCard((args as any)?.board_id, (args as any)?.item_id);
 
             return {
               content: [
@@ -433,7 +430,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_card_item': {
             const result = await handlers.card.getCard(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -462,7 +459,7 @@ export const getMiroMcpServer = () => {
                 rotation: (args as any)?.rotation,
                 cardTheme: (args as any)?.card_theme,
                 parentId: (args as any)?.parent_id,
-              }
+              },
             );
 
             return {
@@ -476,10 +473,7 @@ export const getMiroMcpServer = () => {
           }
 
           case 'miro_delete_card_item': {
-            await handlers.card.deleteCard(
-              (args as any)?.board_id,
-              (args as any)?.item_id
-            );
+            await handlers.card.deleteCard((args as any)?.board_id, (args as any)?.item_id);
 
             return {
               content: [
@@ -531,7 +525,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_shape': {
             const result = await handlers.shape.getShape(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -568,7 +562,7 @@ export const getMiroMcpServer = () => {
                 height: (args as any)?.height,
                 rotation: (args as any)?.rotation,
                 parentId: (args as any)?.parent_id,
-              }
+              },
             );
 
             return {
@@ -582,10 +576,7 @@ export const getMiroMcpServer = () => {
           }
 
           case 'miro_delete_shape': {
-            await handlers.shape.deleteShape(
-              (args as any)?.board_id,
-              (args as any)?.item_id
-            );
+            await handlers.shape.deleteShape((args as any)?.board_id, (args as any)?.item_id);
 
             return {
               content: [
@@ -628,7 +619,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_sticky_note': {
             const result = await handlers.stickyNote.getStickyNote(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -656,7 +647,7 @@ export const getMiroMcpServer = () => {
                 width: (args as any)?.width,
                 height: (args as any)?.height,
                 parentId: (args as any)?.parent_id,
-              }
+              },
             );
 
             return {
@@ -672,7 +663,7 @@ export const getMiroMcpServer = () => {
           case 'miro_delete_sticky_note': {
             await handlers.stickyNote.deleteStickyNote(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -718,7 +709,7 @@ export const getMiroMcpServer = () => {
           case 'miro_get_text_item': {
             const result = await handlers.text.getText(
               (args as any)?.board_id,
-              (args as any)?.item_id
+              (args as any)?.item_id,
             );
 
             return {
@@ -748,7 +739,7 @@ export const getMiroMcpServer = () => {
                 width: (args as any)?.width,
                 rotation: (args as any)?.rotation,
                 parentId: (args as any)?.parent_id,
-              }
+              },
             );
 
             return {
@@ -762,10 +753,7 @@ export const getMiroMcpServer = () => {
           }
 
           case 'miro_delete_text_item': {
-            await handlers.text.deleteText(
-              (args as any)?.board_id,
-              (args as any)?.item_id
-            );
+            await handlers.text.deleteText((args as any)?.board_id, (args as any)?.item_id);
 
             return {
               content: [

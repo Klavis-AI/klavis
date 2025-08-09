@@ -90,7 +90,7 @@ export class BoardHandler {
           sharingAccess?: 'team_members_with_editing_rights' | 'owner_and_coowners';
         };
       };
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

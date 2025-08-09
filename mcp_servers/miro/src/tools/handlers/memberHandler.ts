@@ -12,7 +12,7 @@ export class MemberHandler {
   async updateBoardMemberRole(
     boardId: string,
     userId: string,
-    role: 'viewer' | 'commenter' | 'editor' | 'coowner' | 'owner'
+    role: 'viewer' | 'commenter' | 'editor' | 'coowner' | 'owner',
   ): Promise<any> {
     return this.miroClient.makeRequest(`/boards/${boardId}/members/${userId}`, {
       method: 'PATCH',

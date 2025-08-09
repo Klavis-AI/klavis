@@ -21,7 +21,7 @@ export class AppCardHandler {
       rotation?: number;
       fillColor?: string;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {
       data: {
@@ -89,7 +89,7 @@ export class AppCardHandler {
       rotation?: number;
       fillColor?: string;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

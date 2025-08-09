@@ -17,7 +17,7 @@ export class CardHandler {
       rotation?: number;
       cardTheme?: string;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {
       data: {
@@ -79,7 +79,7 @@ export class CardHandler {
       rotation?: number;
       cardTheme?: string;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

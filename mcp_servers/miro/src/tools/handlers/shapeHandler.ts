@@ -46,7 +46,7 @@ export class ShapeHandler {
       height?: number;
       rotation?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {
       data: {
@@ -154,7 +154,7 @@ export class ShapeHandler {
       height?: number;
       rotation?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

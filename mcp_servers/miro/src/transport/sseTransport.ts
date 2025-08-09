@@ -41,7 +41,7 @@ export class SSETransport {
         }
       });
 
-      res.on('error', error => {
+      res.on('error', (error) => {
         console.error(`SSE connection error for session ${transport.sessionId}:`, error);
         this.transports.delete(transport.sessionId);
       });

@@ -18,7 +18,7 @@ export class TextHandler {
       width?: number;
       rotation?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {
       data: {
@@ -91,7 +91,7 @@ export class TextHandler {
       width?: number;
       rotation?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

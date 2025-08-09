@@ -56,7 +56,7 @@ function getMiroClient() {
 
 function safeLog(
   level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency',
-  data: any
+  data: any,
 ): void {
   try {
     const logData = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;

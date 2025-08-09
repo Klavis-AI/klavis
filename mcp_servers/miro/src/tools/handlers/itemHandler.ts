@@ -25,7 +25,7 @@ export class ItemHandler {
     data: {
       position?: { x: number; y: number };
       parentId?: string | null;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 

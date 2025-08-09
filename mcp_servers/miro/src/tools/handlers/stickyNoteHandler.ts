@@ -32,7 +32,7 @@ export class StickyNoteHandler {
       width?: number;
       height?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {
       data: {
@@ -107,7 +107,7 @@ export class StickyNoteHandler {
       width?: number;
       height?: number;
       parentId?: string;
-    }
+    },
   ): Promise<any> {
     const payload: any = {};
 
