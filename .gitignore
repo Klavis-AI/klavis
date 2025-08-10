@@ -83,3 +83,8 @@ dist/
 # Playwright MCP
 mcp_servers/playwright/test_samples/
 .DS_Store
+
+# Playwright MCP
+mcp_servers/playwright/__pycache__/
+mcp_servers/playwright/tools/__pycache__/
+mcp_servers/playwright/.DS_Store
