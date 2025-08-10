@@ -15,25 +15,24 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 
 type RunReportRequest = protos.google.analytics.data.v1beta.RunReportRequest;
 
-
-function validateEnvironment() {
-  const requiredVars = [
-    'GOOGLE_CLIENT_EMAIL',
-    'GOOGLE_PRIVATE_KEY',
-    'GA_PROPERTY_ID',
+function validateEnvironment(): void {
+  const requiredEnvVars = [
+    "GOOGLE_CLIENT_EMAIL",
+    "GOOGLE_PRIVATE_KEY",
+    "GA_PROPERTY_ID",
   ];
 
-  const missingVars = requiredVars.filter((v) => !process.env[v]);
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName],
+  );
 
-  // if (missingVars.length > 0) {
-  //   console.error(
-  //     `Missing required environment variables: ${missingVars.join(', ')}`
-  //   );
-  //   process.exit(1); // Exit cleanly so Claude logs it in stderr
-  // }
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(", ")}`,
+    );
+  }
 }
 
-// (async () => {
 //   try {
 //     validateEnvironment();
 
@@ -452,8 +451,8 @@ app.delete('/mcp', async (req: Request, res: Response) => {
   }));
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Google Analytics MCP server running on port ${PORT}`);
-});
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Google Analytics MCP server running on port ${PORT}`);
+  });
 
