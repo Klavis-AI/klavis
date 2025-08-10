@@ -1,0 +1,233 @@
+---
+title: 'QuickBooks'
+description: 'Learn how to use Klavis to connect your AI application to QuickBooks MCP Server'
+---
+
+import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+
+<NoCodeSnippet />
+
+---
+
+## For Developer
+
+Follow the instructions below to integrate QuickBooks MCP server to your AI application using our API or SDK.
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a QuickBooks MCP Server
+
+Use the following endpoint to create a new remote QuickBooks MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a QuickBooks MCP server instance
+quickbooks_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.QUICKBOOKS,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a QuickBooks MCP server instance
+const quickbooksServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.QuickBooks,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "QuickBooks",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"QuickBooks\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"QuickBooks\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json SDK Response
+{
+  "serverUrl": "https://quickbooks-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
+  "instanceId": "<instance-id>",
+  "oauthUrl": "https://api.klavis.ai/oauth/quickbooks/authorize?instance_id=<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check> **serverUrl** specifies the endpoint of the QuickBooks MCP server, which you can connect with the MCP client of your application.</Check>
+<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private QuickBooks information.</Note>
+
+### 2. Implement OAuth Authorization
+
+Redirect users to the OAuth authorization flow:
+
+<CodeGroup>
+```python Python
+import webbrowser
+
+webbrowser.open(quickbooks_server.oauth_url)
+```
+
+```javascript TypeScript
+// The OAuth URL is provided in the server response
+console.log('OAuth URL:', quickbooksServer.oauthUrl);
+
+// Redirect user to authorize
+window.location.href = quickbooksServer.oauthUrl;
+```
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "net/url"
+)
+
+func main() {
+    instanceId := "<your-instance-id>"
+    baseUrl := "https://api.klavis.ai/oauth/quickbooks/authorize"
+    
+    params := url.Values{}
+    params.Add("instance_id", instanceId)
+    
+    authUrl := baseUrl + "?" + params.Encode()
+    fmt.Printf("Redirect to: %s\n", authUrl)
+    
+    // In a web application, you would redirect the user:
+    // http.Redirect(w, r, authUrl, http.StatusFound)
+}
+```
+
+```java Java
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class QuickBooksOAuth {
+    public static void main(String[] args) {
+        String instanceId = "<your-instance-id>";
+        String authUrl = "https://api.klavis.ai/oauth/quickbooks/authorize?instance_id=" + 
+                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+        
+        System.out.println("Redirect to: " + authUrl);
+        
+        // In a web application, you would redirect the user:
+        // response.sendRedirect(authUrl);
+    }
+}
+```
+</CodeGroup>
+
+<Tip>
+You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
+</Tip>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                    | Description                                                                 |
+|------------------------------|-----------------------------------------------------------------------------|
+| **Account Management**       |                                                                             |
+| create_account               | Create a new account in QuickBooks                                          |
+| get_account                  | Get a specific account by ID from QuickBooks                               |
+| list_accounts                | List all chart of accounts from QuickBooks                                 |
+| update_account               | Update an existing account in QuickBooks                                   |
+| search_accounts              | Advanced Account Search with powerful filters including name, type, classification, status, and other criteria |
+| **Invoice Management**       |                                                                             |
+| create_invoice               | Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line |
+| get_invoice                  | Retrieve a specific invoice by ID with all its details including line items, amounts, and status |
+| list_invoices                | Retrieve all invoices from QuickBooks with pagination support              |
+| search_invoices              | Advanced Invoice Search with powerful filters including dates, amounts, addresses, customer info, and status |
+| update_invoice               | Modify an existing invoice in QuickBooks with automatic sync token handling |
+| delete_invoice               | Permanently delete an invoice from QuickBooks (use with caution)           |
+| send_invoice                 | Send an invoice to customer via email with delivery tracking               |
+| void_invoice                 | Void an existing invoice while keeping the record for audit trail          |
+| **Customer Management**      |                                                                             |
+| create_customer              | Create a new customer in QuickBooks                                         |
+| get_customer                 | Get a specific customer by ID from QuickBooks                              |
+| list_customers               | List all customers from QuickBooks                                          |
+| update_customer              | Update an existing customer in QuickBooks                                  |
+| search_customers             | Advanced Customer Search with powerful filters including name, contact info, address, balance, and status |
+| activate_customer            | Activate a customer in QuickBooks (set Active to true)                     |
+| deactivate_customer          | Deactivate a customer from QuickBooks (set Active to false)                |
+| **Payment Management**       |                                                                             |
+| create_payment               | Create a new payment in QuickBooks. Can be applied to specific invoices or created as unapplied credit |
+| get_payment                  | Retrieve a specific payment by ID with all its details and linked transactions |
+| list_payments                | Retrieve all payments from QuickBooks with pagination support              |
+| search_payments              | Advanced Payment Search with powerful filters including dates, amounts, customer info, and status |
+| update_payment               | Modify an existing payment in QuickBooks with automatic sync token handling |
+| delete_payment               | Permanently delete a payment from QuickBooks (use with caution)            |
+| send_payment                 | Send a payment receipt to customer via email                               |
+| void_payment                 | Void an existing payment while keeping the record for audit trail          |
+| **Vendor Management**        |                                                                             |
+| create_vendor                | Create a new vendor in QuickBooks. Requires DisplayName or name components |
+| get_vendor                   | Get a specific vendor by ID from QuickBooks                                |
+| list_vendors                 | List all vendors from QuickBooks                                           |
+| search_vendors               | Search vendors with various filters including name, company, contact info, and status |
+| update_vendor                | Update an existing vendor in QuickBooks                                    |
+| activate_vendor              | Activate a vendor in QuickBooks (set Active to true)                       |
+| deactivate_vendor            | Deactivate a vendor from QuickBooks (set Active to false)                  |
+
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
