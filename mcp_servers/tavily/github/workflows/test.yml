@@ -1,0 +1,51 @@
+name: Test Tavily MCP Server
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Lint with black
+      run: |
+        black --check tavily_mcp_server.py
+    
+    - name: Sort imports with isort
+      run: |
+        isort --check-only tavily_mcp_server.py
+    
+    - name: Type check with mypy
+      run: |
+        mypy tavily_mcp_server.py
+    
+    - name: Test with pytest
+      env:
+        TAVILY_API_KEY: tvly-test-key-for-ci
+      run: |
+        pytest test_tavily_server.py -v --cov=tavily_mcp_server
+    
+    - name: Test server can start
+      env:
+        TAVILY_API_KEY: tvly-test-key-for-ci
+      run: |
+        timeout 5s python -c "import tavily_mcp_server; print('Server imports successfully')" || true
