@@ -1,6 +1,6 @@
 # Spotify MCP Server
 
-## 📌 Purpose
+##  Purpose
 The **Spotify MCP Server** provides an interface to interact with Spotify through the Model Context Protocol (MCP).  
 It allows you to:
 - Search for tracks, artists, albums, playlists, shows, and episodes.
@@ -11,7 +11,7 @@ It allows you to:
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 
 1️) Create a Python Virtual Environment
