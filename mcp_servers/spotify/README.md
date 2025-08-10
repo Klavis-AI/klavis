@@ -14,11 +14,11 @@ It allows you to:
 ##  Installation & Setup
 
 
-1️) Create a Python Virtual Environment
+1) Create a Python Virtual Environment
 
 python -m venv venv
 
-### Activate the virtual environment
+2) Activate the virtual environment
 
 ### macOS / Linux:
 source venv/bin/activate
@@ -26,7 +26,7 @@ source venv/bin/activate
 ### Windows:
 venv\Scripts\activate
 
-2️) Install Dependencies
+3) Install Dependencies
 
 pip install -r requirements.txt
 
