@@ -16,19 +16,19 @@ It allows you to:
 
 1) Create a Python Virtual Environment
 
-python -m venv venv
+    python -m venv venv
 
 2) Activate the virtual environment
 
-### macOS / Linux:
-source venv/bin/activate
+    ### macOS / Linux:
+    source venv/bin/activate
 
-### Windows:
-venv\Scripts\activate
+    ### Windows:
+    venv\Scripts\activate
 
 3) Install Dependencies
 
-pip install -r requirements.txt
+    pip install -r requirements.txt
 
 
 ## API Credentials Setup
