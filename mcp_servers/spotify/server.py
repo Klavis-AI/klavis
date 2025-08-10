@@ -75,18 +75,20 @@ SPOTIFY_MCP_SERVER_PORT = int(os.getenv("SPOTIFY_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option(
-    "--port", default=SPOTIFY_MCP_SERVER_PORT, help="Port to listen on for HTTP"
+    "--port", 
+    default=SPOTIFY_MCP_SERVER_PORT, 
+    help="Port to listen on for HTTP"
 )
 @click.option(
     "--log-level",
     default="INFO",
-    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)"
 )
 @click.option(
     "--json-response",
     is_flag=True,
     default=False,
-    help="Enable JSON responses for StreamableHTTP instead of SSE streams",
+    help="Enable JSON responses for StreamableHTTP instead of SSE streams"
 )
 def main(
     port: int,
@@ -117,17 +119,16 @@ def main(
                         },
                         "type": {
                             "type": "string",
-                            "description": "Type of search  a track or album or artist or playlist or show or episode",
-                            "enum": ["track", "album", "artist", "playlist", "show", "episode","audiobook"],
+                            "description": "Type of search: track, album, artist, playlist, show, episode, or audiobook",
+                            "enum": ["track", "album", "artist", "playlist", "show", "episode", "audiobook"]
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Number of results to return (default: 10)",
                             "default": 10
-                        },
-                        
+                        }
                     },
-                    "required": ["query","type"]
+                    "required": ["query", "type"]
                 }
             ),
             types.Tool(
@@ -140,7 +141,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify track IDs to retrieve information for"
-                        },
+                        }
                     },
                     "required": ["ids"]
                 }
@@ -175,7 +176,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify track IDs to check"
-                        },
+                        }
                     },
                     "required": ["track_ids"]
                 }
@@ -190,7 +191,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify track IDs to save"
-                        },
+                        }
                     },
                     "required": ["track_ids"]
                 }
@@ -205,7 +206,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify track IDs to remove"
-                        },
+                        }
                     },
                     "required": ["track_ids"]
                 }
@@ -220,7 +221,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify album IDs to retrieve information for"
-                        },
+                        }
                     },
                     "required": ["album_ids"]
                 }
@@ -234,7 +235,7 @@ def main(
                         "album_id": {
                             "type": "string",
                             "description": "Spotify album ID to retrieve tracks for"
-                        },
+                        }
                     },
                     "required": ["album_id"]
                 }
@@ -269,7 +270,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify album IDs to save"
-                        },
+                        }
                     },
                     "required": ["album_ids"]
                 }
@@ -284,7 +285,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify album IDs to remove"
-                        },
+                        }
                     },
                     "required": ["album_ids"]
                 }
@@ -299,7 +300,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify album IDs to check"
-                        },
+                        }
                     },
                     "required": ["album_ids"]
                 }
@@ -314,7 +315,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify artist IDs to retrieve information for"
-                        },
+                        }
                     },
                     "required": ["artist_ids"]
                 }
@@ -328,7 +329,7 @@ def main(
                         "artist_id": {
                             "type": "string",
                             "description": "Spotify artist ID to retrieve albums for"
-                        },
+                        }
                     },
                     "required": ["artist_id"]
                 }
@@ -346,7 +347,7 @@ def main(
                         "country": {
                             "type": "string",
                             "description": "2-letter country code (e.g., 'US', 'GB', 'IN')"
-                        },
+                        }
                     },
                     "required": ["artist_id"]
                 }
@@ -381,7 +382,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify episode IDs to save"
-                        },
+                        }
                     },
                     "required": ["episode_ids"]
                 }
@@ -416,7 +417,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify episode IDs to remove"
-                        },
+                        }
                     },
                     "required": ["episode_ids"]
                 }
@@ -431,7 +432,7 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "List of Spotify episode IDs to check"
-                        },
+                        }
                     },
                     "required": ["episode_ids"]
                 }
@@ -641,7 +642,6 @@ def main(
                             "enum": ["artist", "user"],
                             "default": "artist"
                         }
-
                     },
                     "required": ["ids"]
                 }
@@ -846,16 +846,17 @@ def main(
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         logger.info(f"Tool called: {name}")
         logger.debug(f"Tool arguments: {json.dumps(arguments, indent=2)}")
-        
-        
-        token =  get_spotify_access_token()
-        sp= get_spotify_client()
-        spOauth,user_token = get_user_spotify_client()
+
+        token = get_spotify_access_token()
+        sp = get_spotify_client()
+        sp_oauth, user_token = get_user_spotify_client()
+
         if name == "spotify_search_tracks":
             query = arguments.get("query", "")
-            type= arguments.get("type","")
+            search_type = arguments.get("type", "")
             limit = arguments.get("limit", 10)
-            logger.info(f"Searching tracks with query: {query}, type: {type}, limit: {limit}")
+            logger.info(f"Searching tracks with query: {query}, type: {search_type}, limit: {limit}")
+
             if not query:
                 return [
                     types.TextContent(
@@ -863,20 +864,19 @@ def main(
                         text="Query parameter is required for search.",
                     )
                 ]
-            
-            
-    
-            result = search_tracks(query, type,limit,sp)
-            result = [
+
+            result = search_tracks(query, search_type, limit, sp)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            return result
+
         elif name == "spotify_get_track_info":
             track_ids = arguments.get("ids", "")
             logger.info(f"Getting track info for track_id: {track_ids}")
+
             if not track_ids:
                 return [
                     types.TextContent(
@@ -884,34 +884,34 @@ def main(
                         text="ID parameter is required to get track information.",
                     )
                 ]
-    
+
             result = get_tracks_info(track_ids, sp)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_user_saved_tracks":
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             logger.info(f"Getting user saved tracks with limit: {limit}, offset: {offset}")
-            
-            result = get_user_saved_tracks(spOauth, limit, offset)
+
+            result = get_user_saved_tracks(sp_oauth, limit, offset)
             logger.info(f"User saved tracks result: {result}")
-            result = [
+
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_check_user_saved_tracks":
             track_ids = arguments.get("track_ids", [])
             logger.info(f"Checking user saved tracks for IDs: {track_ids}")
+
             if not track_ids:
                 return [
                     types.TextContent(
@@ -919,19 +919,19 @@ def main(
                         text="track_ids parameter is required to check saved tracks.",
                     )
                 ]
-    
-            result = check_user_saved_tracks(track_ids, spOauth)
-            result = [
+
+            result = check_user_saved_tracks(track_ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_save_tracks_for_current_user":
             track_ids = arguments.get("track_ids", [])
             logger.info(f"Saving tracks for current user: {track_ids}")
+
             if not track_ids:
                 return [
                     types.TextContent(
@@ -939,19 +939,19 @@ def main(
                         text="track_ids parameter is required to save tracks.",
                     )
                 ]
-    
-            result = save_tracks_for_current_user(track_ids, spOauth)
-            result = [
+
+            result = save_tracks_for_current_user(track_ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_remove_user_saved_tracks":
             track_ids = arguments.get("track_ids", [])
             logger.info(f"Removing tracks for current user: {track_ids}")
+
             if not track_ids:
                 return [
                     types.TextContent(
@@ -959,19 +959,19 @@ def main(
                         text="track_ids parameter is required to remove tracks.",
                     )
                 ]
-    
-            result = remove_user_saved_tracks(track_ids, spOauth)
-            result = [
+
+            result = remove_user_saved_tracks(track_ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_albums_info":
             album_ids = arguments.get("album_ids", [])
             logger.info(f"Getting albums info for IDs: {album_ids}")
+
             if not album_ids:
                 return [
                     types.TextContent(
@@ -979,19 +979,19 @@ def main(
                         text="album_ids parameter is required to get album information.",
                     )
                 ]
-    
+
             result = get_albums_info(album_ids, sp)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_album_tracks":
             album_id = arguments.get("album_id", "")
             logger.info(f"Getting album tracks for album_id: {album_id}")
+
             if not album_id:
                 return [
                     types.TextContent(
@@ -999,34 +999,34 @@ def main(
                         text="album_id parameter is required to get album tracks.",
                     )
                 ]
-    
+
             result = get_album_tracks(album_id, sp)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_user_saved_albums":
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             logger.info(f"Getting user saved albums with limit: {limit}, offset: {offset}")
-            
-            result = get_user_saved_albums(spOauth, limit, offset)
+
+            result = get_user_saved_albums(sp_oauth, limit, offset)
             logger.info(f"User saved albums result: {result}")
-            result = [
+
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_save_albums_for_current_user":
             album_ids = arguments.get("album_ids", [])
             logger.info(f"Saving albums for current user: {album_ids}")
+
             if not album_ids:
                 return [
                     types.TextContent(
@@ -1034,16 +1034,15 @@ def main(
                         text="album_ids parameter is required to save albums.",
                     )
                 ]
-    
-            result = save_albums_for_current_user(album_ids, spOauth)
-            result = [
+
+            result = save_albums_for_current_user(album_ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
             
         elif name == "spotify_remove_albums_for_current_user":
             album_ids = arguments.get("album_ids", [])
@@ -1056,7 +1055,7 @@ def main(
                     )
                 ]
     
-            result = remove_albums_for_current_user(album_ids, spOauth)
+            result = remove_albums_for_current_user(album_ids, sp_oauth)
             result = [
                 types.TextContent(
                     type="text",
@@ -1076,7 +1075,7 @@ def main(
                     )
                 ]
     
-            result = check_user_saved_albums(album_ids, spOauth)
+            result = check_user_saved_albums(album_ids, sp_oauth)
             result = [
                 types.TextContent(
                     type="text",
@@ -1173,7 +1172,7 @@ def main(
                         text="episode_ids parameter is required to save episodes.",
                     )
                 ]
-            result = save_episodes_for_current_user(episode_ids, spOauth)
+            result = save_episodes_for_current_user(episode_ids, sp_oauth)
             result = [
                 types.TextContent(
                     type="text",
@@ -1186,7 +1185,7 @@ def main(
             offset = arguments.get("offset", 0)
             logger.info(f"Getting user saved episodes with limit: {limit}, offset: {offset}")
             
-            result = get_user_saved_episodes(spOauth, limit, offset)
+            result = get_user_saved_episodes(sp_oauth, limit, offset)
             logger.info(f"User saved episodes result: {result}")
             result = [
                 types.TextContent(
@@ -1207,7 +1206,7 @@ def main(
                     )
                 ]
     
-            result = remove_episodes_for_current_user(episode_ids, spOauth)
+            result = remove_episodes_for_current_user(episode_ids, sp_oauth)
             result = [
                 types.TextContent(
                     type="text",
@@ -1227,7 +1226,7 @@ def main(
                     )
                 ]
     
-            result = check_user_saved_episodes(episode_ids, spOauth)
+            result = check_user_saved_episodes(episode_ids, sp_oauth)
             result = [
                 types.TextContent(
                     type="text",
@@ -1262,6 +1261,7 @@ def main(
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             logger.info(f"Getting user owned playlists for user_id: {user_id}, limit: {limit}, offset: {offset}")
+
             if not user_id:
                 return [
                     types.TextContent(
@@ -1269,22 +1269,25 @@ def main(
                         text="user_id parameter is required to get owned playlists.",
                     )
                 ]
-    
+
             result = get_user_owned_playlists(user_id, sp, limit, offset)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_update_playlist_details":
             playlist_id = arguments.get("playlist_id", "")
             name = arguments.get("name", None)
             public = arguments.get("public", None)
             description = arguments.get("description", None)
-            logger.info(f"Updating playlist details for playlist_id: {playlist_id}, name: {name}, public: {public}, description: {description}")
+            logger.info(
+                f"Updating playlist details for playlist_id: {playlist_id}, "
+                f"name: {name}, public: {public}, description: {description}"
+            )
+
             if not playlist_id:
                 return [
                     types.TextContent(
@@ -1292,50 +1295,48 @@ def main(
                         text="playlist_id parameter is required to update playlist details.",
                     )
                 ]
-    
-            result = update_playlist_details(playlist_id, name, public, description, spOauth)
-            result = [
+
+            result = update_playlist_details(playlist_id, name, public, description, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_current_user_profile":
             logger.info("Getting current user profile")
-            result = get_current_user_profile(spOauth)
-            result = [
+
+            result = get_current_user_profile(sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_current_user_top_items":
             item_type = arguments.get("item_type", "artists")
             time_range = arguments.get("time_range", "medium_term")
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
-            
-            logger.info(f"Getting current user top items: type={item_type}, time_range={time_range}, limit={limit}, offset={offset}")
-            
-        
-    
-            result = get_current_user_top_items(spOauth,item_type, time_range, limit, offset)
-            
-            result = [
+            logger.info(
+                f"Getting current user top items: type={item_type}, "
+                f"time_range={time_range}, limit={limit}, offset={offset}"
+            )
+
+            result = get_current_user_top_items(sp_oauth, item_type, time_range, limit, offset)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_spotify_user_public_profile":
             user_id = arguments.get("user_id", "")
             logger.info(f"Getting public profile for user_id: {user_id}")
+
             if not user_id:
                 return [
                     types.TextContent(
@@ -1343,20 +1344,20 @@ def main(
                         text="user_id parameter is required to get public profile.",
                     )
                 ]
-    
+
             result = get_spotify_user_public_profile(user_id, sp)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_follow_playlist":
             playlist_id = arguments.get("playlist_id", "")
             public = arguments.get("public", None)
             logger.info(f"Following playlist with ID: {playlist_id}, public: {public}")
+
             if not playlist_id:
                 return [
                     types.TextContent(
@@ -1364,20 +1365,19 @@ def main(
                         text="playlist_id parameter is required to follow a playlist.",
                     )
                 ]
-    
-            result = follow_playlist(playlist_id, public, spOauth)
-            result = [
+
+            result = follow_playlist(playlist_id, public, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_unfollow_playlist":
             playlist_id = arguments.get("playlist_id", "")
-            type= arguments.get("type", "artist")  
             logger.info(f"Unfollowing playlist with ID: {playlist_id}")
+
             if not playlist_id:
                 return [
                     types.TextContent(
@@ -1385,33 +1385,32 @@ def main(
                         text="playlist_id parameter is required to unfollow a playlist.",
                     )
                 ]
-    
-            result = unfollow_playlist(playlist_id, type,spOauth)
-            result = [
+
+            result = unfollow_playlist(playlist_id, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_current_user_followed_artists":
             limit = arguments.get("limit", 20)
             after = arguments.get("after", None)
             logger.info(f"Getting followed artists with limit: {limit}, after: {after}")
-            
-            result = get_current_user_followed_artists(spOauth, limit, after)
-            result = [
+
+            result = get_current_user_followed_artists(sp_oauth, limit, after)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_follow_artists_or_users":
             ids = arguments.get("ids", [])
             logger.info(f"Following artists/users with IDs: {ids}")
+
             if not ids:
                 return [
                     types.TextContent(
@@ -1419,20 +1418,20 @@ def main(
                         text="ids parameter is required to follow artists or users.",
                     )
                 ]
-    
-            result = follow_artists_or_users(ids, spOauth)
-            result = [
+
+            result = follow_artists_or_users(ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_unfollow_artists_or_users":
             ids = arguments.get("ids", [])
-            type = arguments.get("type", "artist")  # or "user"
+            type_ = arguments.get("type", "artist")  # or "user"
             logger.info(f"Unfollowing artists/users with IDs: {ids}")
+
             if not ids:
                 return [
                     types.TextContent(
@@ -1440,20 +1439,20 @@ def main(
                         text="ids parameter is required to unfollow artists or users.",
                     )
                 ]
-    
-            result = unfollow_artists_or_users(ids, type,spOauth)
-            result = [
+
+            result = unfollow_artists_or_users(ids, type_, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_check_user_follows":
             ids = arguments.get("ids", [])
-            type = arguments.get("type", "artist")  # or "user"
+            type_ = arguments.get("type", "artist")  # or "user"
             logger.info(f"Checking if user follows artists/users with IDs: {ids}")
+
             if not ids:
                 return [
                     types.TextContent(
@@ -1461,21 +1460,21 @@ def main(
                         text="ids parameter is required to check follows.",
                     )
                 ]
-    
-            result = check_user_follows(ids, type,spOauth)
-            result = [
+
+            result = check_user_follows(ids, type_, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_add_items_to_playlist":
             playlist_id = arguments.get("playlist_id", "")
             uris = arguments.get("uris", [])
             position = arguments.get("position", None)
             logger.info(f"Adding items to playlist: {playlist_id}, uris: {uris}, position: {position}")
+
             if not playlist_id or not uris:
                 return [
                     types.TextContent(
@@ -1483,20 +1482,20 @@ def main(
                         text="playlist_id and uris parameters are required to add items to a playlist.",
                     )
                 ]
-    
-            result = add_items_to_playlist(playlist_id, uris, spOauth, position)
-            result = [
+
+            result = add_items_to_playlist(playlist_id, uris, sp_oauth, position)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_remove_items_from_playlist":
             playlist_id = arguments.get("playlist_id", "")
             uris = arguments.get("uris", [])
             logger.info(f"Removing items from playlist: {playlist_id}, uris: {uris}")
+
             if not playlist_id or not uris:
                 return [
                     types.TextContent(
@@ -1504,33 +1503,32 @@ def main(
                         text="playlist_id and uris parameters are required to remove items from a playlist.",
                     )
                 ]
-    
-            result = remove_items_from_playlist(playlist_id, uris, spOauth)
-            result = [
+
+            result = remove_items_from_playlist(playlist_id, uris, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_current_user_playlists":
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             logger.info(f"Getting current user playlists with limit: {limit}, offset: {offset}")
-            
-            result = get_current_user_playlists(spOauth, limit, offset)
-            result = [
+
+            result = get_current_user_playlists(sp_oauth, limit, offset)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_multiple_shows":
             show_ids = arguments.get("show_ids", [])
             logger.info(f"Getting multiple shows for IDs: {show_ids}")
+
             if not show_ids:
                 return [
                     types.TextContent(
@@ -1538,22 +1536,25 @@ def main(
                         text="show_ids parameter is required to get multiple shows.",
                     )
                 ]
-    
+
             result = get_multiple_shows(show_ids, sp)
-            result = [
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_show_episodes":
             show_id = arguments.get("show_id", "")
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             market = arguments.get("market", "US")
-            logger.info(f"Getting episodes for show_id: {show_id}, limit: {limit}, offset: {offset}, market: {market}")
+            logger.info(
+                f"Getting episodes for show_id: {show_id}, limit: {limit}, "
+                f"offset: {offset}, market: {market}"
+            )
+
             if not show_id:
                 return [
                     types.TextContent(
@@ -1561,33 +1562,31 @@ def main(
                         text="show_id parameter is required to get show episodes.",
                     )
                 ]
-    
-            result = get_show_episodes(show_id,sp, limit, offset, market)
-            result = [
+
+            result = get_show_episodes(show_id, sp, limit, offset, market)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+
         elif name == "spotify_get_current_user_saved_shows":
             limit = arguments.get("limit", 20)
             offset = arguments.get("offset", 0)
             logger.info(f"Getting current user saved shows with limit: {limit}, offset: {offset}")
-            
-            result = get_current_user_saved_shows(spOauth, limit, offset)
-            result = [
+
+            result = get_current_user_saved_shows(sp_oauth, limit, offset)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
         elif name == "spotify_save_shows_to_user_library":
             show_ids = arguments.get("show_ids", [])
             logger.info(f"Saving shows to user library: {show_ids}")
+
             if not show_ids:
                 return [
                     types.TextContent(
@@ -1595,19 +1594,300 @@ def main(
                         text="show_ids parameter is required to save shows.",
                     )
                 ]
-    
-            result = save_shows_to_user_library(show_ids, spOauth)
-            result = [
+
+            result = save_shows_to_user_library(show_ids, sp_oauth)
+            return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2)
+                    text=json.dumps(result, indent=2),
                 )
             ]
-            
-            return result
+        elif name == "spotify_get_user_owned_playlists":
+            user_id = arguments.get("user_id", "")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(
+                f"Getting user owned playlists for user_id: {user_id}, "
+                f"limit: {limit}, offset: {offset}"
+            )
+
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="user_id parameter is required to get owned playlists.",
+                    )
+                ]
+
+            result = get_user_owned_playlists(user_id, sp, limit, offset)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_update_playlist_details":
+            playlist_id = arguments.get("playlist_id", "")
+            name = arguments.get("name", None)
+            public = arguments.get("public", None)
+            description = arguments.get("description", None)
+            logger.info(
+                f"Updating playlist details for playlist_id: {playlist_id}, "
+                f"name: {name}, public: {public}, description: {description}"
+            )
+
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to update playlist details.",
+                    )
+                ]
+
+            result = update_playlist_details(playlist_id, name, public, description, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_current_user_profile":
+            logger.info("Getting current user profile")
+
+            result = get_current_user_profile(sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_current_user_top_items":
+            item_type = arguments.get("item_type", "artists")
+            time_range = arguments.get("time_range", "medium_term")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(
+                f"Getting current user top items: type={item_type}, "
+                f"time_range={time_range}, limit={limit}, offset={offset}"
+            )
+
+            result = get_current_user_top_items(sp_oauth, item_type, time_range, limit, offset)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_spotify_user_public_profile":
+            user_id = arguments.get("user_id", "")
+            logger.info(f"Getting public profile for user_id: {user_id}")
+
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="user_id parameter is required to get public profile.",
+                    )
+                ]
+
+            result = get_spotify_user_public_profile(user_id, sp)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_follow_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            public = arguments.get("public", None)
+            logger.info(f"Following playlist with ID: {playlist_id}, public: {public}")
+
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to follow a playlist.",
+                    )
+                ]
+
+            result = follow_playlist(playlist_id, public, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_unfollow_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            type_ = arguments.get("type", "artist")
+            logger.info(f"Unfollowing playlist with ID: {playlist_id}")
+
+            if not playlist_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id parameter is required to unfollow a playlist.",
+                    )
+                ]
+
+            result = unfollow_playlist(playlist_id, type_, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_current_user_followed_artists":
+            limit = arguments.get("limit", 20)
+            after = arguments.get("after", None)
+            logger.info(f"Getting followed artists with limit: {limit}, after: {after}")
+
+            result = get_current_user_followed_artists(sp_oauth, limit, after)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_follow_artists_or_users":
+            ids = arguments.get("ids", [])
+            logger.info(f"Following artists/users with IDs: {ids}")
+
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to follow artists or users.",
+                    )
+                ]
+
+            result = follow_artists_or_users(ids, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_unfollow_artists_or_users":
+            ids = arguments.get("ids", [])
+            type_ = arguments.get("type", "artist")  # or "user"
+            logger.info(f"Unfollowing artists/users with IDs: {ids}")
+
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to unfollow artists or users.",
+                    )
+                ]
+
+            result = unfollow_artists_or_users(ids, type_, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_check_user_follows":
+            ids = arguments.get("ids", [])
+            type_ = arguments.get("type", "artist")  # or "user"
+            logger.info(f"Checking if user follows artists/users with IDs: {ids}")
+
+            if not ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="ids parameter is required to check follows.",
+                    )
+                ]
+
+            result = check_user_follows(ids, type_, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_add_items_to_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            uris = arguments.get("uris", [])
+            position = arguments.get("position", None)
+            logger.info(
+                f"Adding items to playlist: {playlist_id}, uris: {uris}, position: {position}"
+            )
+
+            if not playlist_id or not uris:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id and uris parameters are required to add items to a playlist.",
+                    )
+                ]
+
+            result = add_items_to_playlist(playlist_id, uris, sp_oauth, position)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_remove_items_from_playlist":
+            playlist_id = arguments.get("playlist_id", "")
+            uris = arguments.get("uris", [])
+            logger.info(f"Removing items from playlist: {playlist_id}, uris: {uris}")
+
+            if not playlist_id or not uris:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="playlist_id and uris parameters are required to remove items from a playlist.",
+                    )
+                ]
+
+            result = remove_items_from_playlist(playlist_id, uris, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_current_user_playlists":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting current user playlists with limit: {limit}, offset: {offset}")
+
+            result = get_current_user_playlists(sp_oauth, limit, offset)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_multiple_shows":
+            show_ids = arguments.get("show_ids", [])
+            logger.info(f"Getting multiple shows for IDs: {show_ids}")
+
+            if not show_ids:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_ids parameter is required to get multiple shows.",
+                    )
+                ]
+
+            result = get_multiple_shows(show_ids, sp)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_show_episodes":
+            show_id = arguments.get("show_id", "")
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            market = arguments.get("market", "US")
+            logger.info(
+                f"Getting episodes for show_id: {show_id}, limit: {limit}, "
+                f"offset: {offset}, market: {market}"
+            )
+
+            if not show_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="show_id parameter is required to get show episodes.",
+                    )
+                ]
+
+            result = get_show_episodes(show_id, sp, limit, offset, market)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
+
+        elif name == "spotify_get_current_user_saved_shows":
+            limit = arguments.get("limit", 20)
+            offset = arguments.get("offset", 0)
+            logger.info(f"Getting current user saved shows with limit: {limit}, offset: {offset}")
+
+            result = get_current_user_saved_shows(sp_oauth, limit, offset)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
         elif name == "spotify_remove_shows_from_user_library":
             show_ids = arguments.get("show_ids", [])
             logger.info(f"Removing shows from user library: {show_ids}")
+
             if not show_ids:
                 return [
                     types.TextContent(
@@ -1615,20 +1895,15 @@ def main(
                         text="show_ids parameter is required to remove shows.",
                     )
                 ]
-    
-            result = remove_shows_from_user_library(show_ids, spOauth)
-            result = [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2)
-                )
+
+            result = remove_shows_from_user_library(show_ids, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
             ]
-            
-            return result
-        
         elif name == "spotify_check_user_saved_shows":
             show_ids = arguments.get("show_ids", [])
             logger.info(f"Checking user saved shows for IDs: {show_ids}")
+
             if not show_ids:
                 return [
                     types.TextContent(
@@ -1636,17 +1911,11 @@ def main(
                         text="show_ids parameter is required to check saved shows.",
                     )
                 ]
-    
-            result = check_user_saved_shows(show_ids, spOauth)
-            result = [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2)
-                )
-            ]
-            
-            return result
 
+            result = check_user_saved_shows(show_ids, sp_oauth)
+            return [
+                types.TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
         return [
             types.TextContent(
                 type="text",
@@ -1654,15 +1923,18 @@ def main(
             )
         ]
 
+
+
+
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        
+
         # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
-        
+        auth_token = request.headers.get("x-auth-token")
+
         # Set the auth token in context for this request (can be None)
         token = auth_token_context.set(auth_token or "")
         try:
@@ -1674,8 +1946,9 @@ def main(
                 )
         finally:
             auth_token_context.reset(token)
-        
+
         return Response()
+
 
     # Set up StreamableHTTP transport
     session_manager = StreamableHTTPSessionManager(
@@ -1685,23 +1958,22 @@ def main(
         stateless=True,
     )
 
-    async def handle_streamable_http(
-        scope: Scope, receive: Receive, send: Send
-    ) -> None:
+    async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info("Handling StreamableHTTP request")
-        
+
         # Extract auth token from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
+        auth_token = headers.get(b"x-auth-token")
         if auth_token:
-            auth_token = auth_token.decode('utf-8')
-        
+            auth_token = auth_token.decode("utf-8")
+
         # Set the auth token in context for this request (can be None/empty)
         token = auth_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
             auth_token_context.reset(token)
+
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
@@ -1712,6 +1984,7 @@ def main(
                 yield
             finally:
                 logger.info("Application shutting down...")
+
 
     # Create an ASGI application with routes for both transports
     starlette_app = Starlette(
@@ -1735,6 +2008,7 @@ def main(
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
 
     return 0
+
 
 if __name__ == "__main__":
     main()

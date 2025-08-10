@@ -1,40 +1,31 @@
+from typing import List, Dict, Union, Optional
 from spotipy import Spotify
-from .base import get_user_spotify_client, get_spotify_client
-from typing import List, Dict, Union
-def get_current_user_profile(sp: Spotify = None) -> dict:
+from .base import get_user_spotify_client, get_spotify_client , process_top_artist_info
+
+
+def get_current_user_profile(sp: Optional[Spotify] = None) -> Dict:
     """
-    Get the current Spotify user's profile details (including username).
+    Get the current Spotify user's profile details.
 
     Parameters:
-        sp (spotipy.Spotify, optional): Authenticated Spotipy client.
-                                        If None, uses your own client creation logic.
+        sp (Spotify, optional): Authenticated Spotipy client. If None, a new one is created.
 
     Returns:
-        dict: Detailed user profile info as returned by Spotify.
+        dict: Detailed user profile info as returned by Spotify, or {"error": ...} on failure.
     """
     try:
         if not sp:
-            sp = get_user_spotify_client()  # Replace with your Spotipy client setup
+            sp, _ = get_user_spotify_client()
         return sp.current_user()
     except Exception as e:
         print(f"Error fetching user profile: {e}")
         return {"error": str(e)}
-    
-def process_top_artist_info(artist: dict) -> Dict:
-    """Extract relevant info from a Spotify artist object."""
-    return {
-        "id": artist.get("id"),
-        "name": artist.get("name"),
-        "genres": artist.get("genres", []),
-        "popularity": artist.get("popularity"),
-        "followers": artist.get("followers", {}).get("total"),
-        "external_url": artist.get("external_urls", {}).get("spotify"),
-        "images": artist.get("images", []),
-        "uri": artist.get("uri"),
-        "type": artist.get("type")
-    }
 
-def process_top_track_info(track: dict) -> Dict:
+
+
+
+
+def process_top_track_info(track: Dict) -> Dict:
     """Extract relevant info from a Spotify track object."""
     return {
         "id": track.get("id"),
@@ -42,7 +33,7 @@ def process_top_track_info(track: dict) -> Dict:
         "album": {
             "id": track.get("album", {}).get("id"),
             "name": track.get("album", {}).get("name"),
-            "images": track.get("album", {}).get("images", [])
+            "images": track.get("album", {}).get("images", []),
         },
         "artists": [{"id": a.get("id"), "name": a.get("name")} for a in track.get("artists", [])],
         "popularity": track.get("popularity"),
@@ -50,79 +41,83 @@ def process_top_track_info(track: dict) -> Dict:
         "explicit": track.get("explicit"),
         "external_url": track.get("external_urls", {}).get("spotify"),
         "uri": track.get("uri"),
-        "type": track.get("type")
+        "type": track.get("type"),
     }
 
+
 def get_current_user_top_items(
-    sp: Spotify = None,
-    item_type: str = "artists",    # or "tracks"
+    sp: Optional[Spotify] = None,
+    item_type: str = "artists",  # or "tracks"
     time_range: str = "medium_term",
     limit: int = 20,
-    offset: int = 0
+    offset: int = 0,
 ) -> List[Dict]:
-    """Returns a processed list of the current user's top artists or tracks (id, name, etc)."""
-    if not sp:
-        sp, _ = get_user_spotify_client(scope="user-top-read")
-    if item_type == "artists":
-        results = sp.current_user_top_artists(
-            time_range=time_range,
-            limit=limit,
-            offset=offset
-        )
-        return [process_top_artist_info(a) for a in results["items"]]
-    elif item_type == "tracks":
-        results = sp.current_user_top_tracks(
-            time_range=time_range,
-            limit=limit,
-            offset=offset
-        )
-        return [process_top_track_info(t) for t in results["items"]]
-    else:
-        raise ValueError(f"item_type must be 'artists' or 'tracks', got {item_type}")
-
-def get_spotify_user_public_profile(user_id: str, sp: Spotify = None) -> dict:
     """
-    Get public profile information about a Spotify user by their user ID.
+    Return the current user's top artists or tracks (processed).
 
     Parameters:
-        user_id (str): The Spotify User ID (username).
-        sp (spotipy.Spotify, optional): Spotipy client. If None, initialize with your client creation method.
+        sp (Spotify, optional): Authenticated client with 'user-top-read' scope.
+        item_type (str): "artists" or "tracks".
+        time_range (str): "short_term" | "medium_term" | "long_term".
+        limit (int): Items per page (1–50).
+        offset (int): Pagination offset.
 
     Returns:
-        dict: Public profile information as returned by Spotify or error dictionary.
+        List[Dict]: Processed items.
+    """
+    if not sp:
+        sp, _ = get_user_spotify_client()
+
+    if item_type == "artists":
+        results = sp.current_user_top_artists(time_range=time_range, limit=limit, offset=offset)
+        return [process_top_artist_info(a) for a in results.get("items", [])]
+    if item_type == "tracks":
+        results = sp.current_user_top_tracks(time_range=time_range, limit=limit, offset=offset)
+        return [process_top_track_info(t) for t in results.get("items", [])]
+    raise ValueError(f"item_type must be 'artists' or 'tracks', got {item_type}")
+
+
+def get_spotify_user_public_profile(user_id: str, sp: Optional[Spotify] = None) -> Dict:
+    """
+    Get public profile information for a Spotify user by user ID.
+
+    Parameters:
+        user_id (str): Spotify user ID.
+        sp (Spotify, optional): Spotipy client. If None, client-credentials is used.
+
+    Returns:
+        dict: Public profile information or {"error": ...} on failure.
     """
     try:
         if not sp:
-            sp = get_spotify_client()  # Replace with your Spotipy client setup function
-
-        profile = sp.user(user_id)
-        return profile
+            sp = get_spotify_client()
+        return sp.user(user_id)
     except Exception as e:
         print(f"Error fetching public profile for user {user_id}: {e}")
         return {"error": str(e)}
 
+
 def follow_playlist(
     playlist_id: str,
     public: bool = True,
-    sp: Spotify = None
-    
+    sp: Optional[Spotify] = None,
 ) -> str:
     """
-    Add the current authenticated user as a follower of a playlist.
+    Follow a playlist as the current authenticated user.
 
     Parameters:
-        playlist_id (str): Spotify ID of the playlist to follow.
-        sp (spotipy.Spotify, optional): An authenticated Spotipy client.
-        public (bool): If True, add as public follower; else, private. Defaults to True.
+        playlist_id (str): Spotify playlist ID.
+        public (bool): Add as public follower if True; else private.
+        sp (Spotify, optional): Authenticated client.
 
     Returns:
-        dict: Empty dict on success, or error dictionary on failure.
+        str: "Success" or error message.
     """
     try:
         if not sp:
-            sp = get_user_spotify_client()  # Replace with your Spotipy client setup
+            sp, _ = get_user_spotify_client()
         sp.current_user_follow_playlist(playlist_id, public=public)
-        return "Success"  # Success
+        return "Success"
     except Exception as e:
         print(f"Error following playlist: {e}")
         return f"error: {str(e)}"
@@ -130,69 +125,69 @@ def follow_playlist(
 
 def unfollow_playlist(
     playlist_id: str,
-    sp: Spotify = None
-) -> dict:
+    sp: Optional[Spotify] = None,
+) -> str:
     """
-    Remove the current authenticated user as a follower of a playlist.
+    Unfollow a playlist as the current authenticated user.
 
     Parameters:
-        playlist_id (str): Spotify ID of the playlist to unfollow.
-        sp (spotipy.Spotify, optional): Authenticated Spotipy client.
-                                        If None, provide one according to your setup.
+        playlist_id (str): Spotify playlist ID.
+        sp (Spotify, optional): Authenticated client.
 
     Returns:
-        dict: Empty dict {} on success, or error dictionary.
+        str: "Success" or error message.
     """
     try:
         if not sp:
-            sp = get_user_spotify_client()  # Replace with your Spotipy client setup
+            sp, _ = get_user_spotify_client()
         sp.current_user_unfollow_playlist(playlist_id)
-        return "Success"  # Success
+        return "Success"
     except Exception as e:
         print(f"Error unfollowing playlist: {e}")
         return f"error: {str(e)}"
 
+
 def get_current_user_followed_artists(
-    sp: Spotify = None,
+    sp: Optional[Spotify] = None,
     limit: int = 20,
-    after: str = None
-) -> list:
+    after: Optional[str] = None,
+) -> Union[List[Dict], Dict]:
     """
-    Retrieve the current user's followed artists.
+    Retrieve artists followed by the current user.
 
     Parameters:
-        sp (spotipy.Spotify, optional): An authenticated Spotipy client with 'user-follow-read' scope.
-        limit (int): Max number of artists per request (max 50).
-        after (str, optional): The last artist ID retrieved from a previous page (for pagination).
+        sp (Spotify, optional): Authenticated client with 'user-follow-read' scope.
+        limit (int): Max artists per request (1–50).
+        after (str, optional): Last artist ID from previous page (for pagination).
 
     Returns:
-        list: A list of artist objects with metadata.
+        list[dict] | dict: Artist objects (from Spotify) or error dict.
     """
     try:
         if not sp:
-            sp = get_user_spotify_client()
+            sp, _ = get_user_spotify_client()
         results = sp.current_user_followed_artists(limit=limit, after=after)
-        # 'artists' attribute contains paging info and the artists list
-        return results["artists"]["items"]
+        return results.get("artists", {}).get("items", [])
     except Exception as e:
         print(f"Error retrieving followed artists: {e}")
         return {"error": str(e)}
 
+
 def follow_artists_or_users(
     ids: List[str],
-    sp: Spotify = None,
-    type_: str = "artist"  # must be 'artist' or 'user'
+    sp: Optional[Spotify] = None,
+    type_: str = "artist",  # "artist" or "user"
 ) -> str:
     """
-    Add the current authenticated user as a follower of one or more artists or Spotify users.
+    Follow one or more artists or Spotify users.
 
     Parameters:
-        ids (List[str]): List of Spotify artist or user IDs to follow (max 50).
-        sp (spotipy.Spotify, optional): Authenticated Spotipy client.
-        type_ (str): 'artist' or 'user' indicating the type of IDs in the list.
+        ids (List[str]): Spotify IDs to follow (max 50 per call).
+        sp (Spotify, optional): Authenticated client.
+        type_ (str): "artist" or "user".
 
     Returns:
-        str: "Success" on success, or error message.
+        str: "Success" or error message.
     """
     try:
         if not sp:
@@ -207,31 +202,31 @@ def follow_artists_or_users(
                 sp.user_follow_users(chunk)
             else:
                 raise ValueError("type_ must be 'artist' or 'user'.")
-
         return "Success"
     except Exception as e:
         print(f"An error occurred while following artists/users: {e}")
         return f"error: {str(e)}"
 
+
 def unfollow_artists_or_users(
     ids: List[str],
-    type_: str = "artist",  # or "user"
-    sp: Spotify = None
+    type_: str = "artist",  # "artist" or "user"
+    sp: Optional[Spotify] = None,
 ) -> str:
     """
-    Remove the current authenticated user as a follower of one or more artists or Spotify users.
+    Unfollow one or more artists or Spotify users.
 
     Parameters:
-        ids (List[str]): List of Spotify artist or user IDs to unfollow (max 50).
-        sp (spotipy.Spotify, optional): Authenticated Spotipy client with 'user-follow-modify' scope.
-                                        If None, the function will create one with that scope.
+        ids (List[str]): Spotify IDs to unfollow (max 50 per call).
+        type_ (str): "artist" or "user".
+        sp (Spotify, optional): Authenticated client with 'user-follow-modify' scope.
 
     Returns:
-        dict: Empty dict on success, or dict with "error" key on failure.
+        str: "Success" or error message.
     """
     try:
         if not sp:
-            sp, _ = get_user_spotify_client()  # Your auth helper with that scope
+            sp, _ = get_user_spotify_client()
 
         MAX_IDS_PER_CALL = 50
         for i in range(0, len(ids), MAX_IDS_PER_CALL):
@@ -242,8 +237,7 @@ def unfollow_artists_or_users(
                 sp.user_unfollow_users(chunk)
             else:
                 raise ValueError("type_ must be 'artist' or 'user'.")
-
-        return "Success"  # Success
+        return "Success"
     except Exception as e:
         print(f"An error occurred while unfollowing artists/users: {e}")
         return f"error: {str(e)}"
@@ -251,34 +245,29 @@ def unfollow_artists_or_users(
 
 def check_user_follows(
     ids: List[str],
-    follow_type: str = "artist",  # or "user"
-    sp: Spotify = None
+    follow_type: str = "artist",  # "artist" or "user"
+    sp: Optional[Spotify] = None,
 ) -> Union[List[bool], Dict]:
     """
-    Check if the current Spotify user is following one or more artists or Spotify users.
+    Check if the current user follows given artists or users.
 
     Parameters:
-        ids (List[str]): List of Spotify artist or user IDs (max 50).
+        ids (List[str]): Spotify IDs to check (max 50).
         follow_type (str): "artist" or "user".
-        sp (spotipy.Spotify, optional): Authenticated Spotipy client with 'user-follow-read' scope if None, create one.
+        sp (Spotify, optional): Authenticated client with 'user-follow-read' scope.
 
     Returns:
-        List[bool]: Per-ID result, True if following, False if not.
-        Or
-        Dict: Error dictionary on failure.
+        list[bool] | dict: Per-ID boolean status, or error dict.
     """
     try:
         if not sp:
             sp, _ = get_user_spotify_client()
 
         if follow_type == "artist":
-            # Returns a list of booleans
             return sp.current_user_following_artists(ids)
-        elif follow_type == "user":
-            # Returns a list of booleans
+        if follow_type == "user":
             return sp.current_user_following_users(ids)
-        else:
-            raise ValueError('follow_type must be "artist" or "user"')
+        raise ValueError('follow_type must be "artist" or "user"')
     except Exception as e:
         print(f"An error occurred: {e}")
         return {"error": str(e)}
