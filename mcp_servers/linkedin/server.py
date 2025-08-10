@@ -20,6 +20,8 @@ from tools import (
     linkedin_token_context,
     get_profile_info,
     create_post,
+    format_rich_post,
+    create_url_share,
 )
 
 load_dotenv()
@@ -89,6 +91,86 @@ def main(
                             "type": "string",
                             "description": "Optional title for article-style posts. When provided, creates an article format."
                         },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of hashtags to add to the post (# will be added automatically)."
+                        },
+                        "visibility": {
+                            "type": "string",
+                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
+                            "default": "PUBLIC"
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="linkedin_format_rich_post",
+                description="Format rich text for LinkedIn posts with bold, italic, lists, mentions, and hashtags (utility function - doesn't post).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["text"],
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The base text content to format."
+                        },
+                        "bold_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make bold (will be wrapped with **)."
+                        },
+                        "italic_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make italic (will be wrapped with *)."
+                        },
+                        "bullet_points": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of bullet points to add."
+                        },
+                        "numbered_list": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of numbered items to add."
+                        },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of hashtags to add."
+                        },
+                        "mentions": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of usernames to mention (@ will be added automatically)."
+                        }
+                    }
+                }
+            ),
+            types.Tool(
+                name="linkedin_create_url_share",
+                description="Share URLs with metadata preview on LinkedIn.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["url", "text"],
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL to share (must be a valid URL)."
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Commentary text to accompany the shared URL."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Optional title for the shared URL content."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional description for the shared URL content."
+                        },
                         "visibility": {
                             "type": "string",
                             "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
@@ -107,6 +189,7 @@ def main(
         if name == "linkedin_create_post":
             text = arguments.get("text")
             title = arguments.get("title")
+            hashtags = arguments.get("hashtags")
             visibility = arguments.get("visibility", "PUBLIC")
             if not text:
                 return [
@@ -116,7 +199,86 @@ def main(
                     )
                 ]
             try:
-                result = await create_post(text, title, visibility)
+                result = await create_post(text, title, visibility, hashtags)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_format_rich_post":
+            text = arguments.get("text")
+            bold_text = arguments.get("bold_text")
+            italic_text = arguments.get("italic_text")
+            bullet_points = arguments.get("bullet_points")
+            numbered_list = arguments.get("numbered_list")
+            hashtags = arguments.get("hashtags")
+            mentions = arguments.get("mentions")
+            
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = format_rich_post(
+                    text=text,
+                    bold_text=bold_text,
+                    italic_text=italic_text,
+                    bullet_points=bullet_points,
+                    numbered_list=numbered_list,
+                    hashtags=hashtags,
+                    mentions=mentions
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_create_url_share":
+            url = arguments.get("url")
+            text = arguments.get("text")
+            title = arguments.get("title")
+            description = arguments.get("description")
+            visibility = arguments.get("visibility", "PUBLIC")
+            
+            if not url:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: url parameter is required",
+                    )
+                ]
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = await create_url_share(url, text, title, description, visibility)
                 return [
                     types.TextContent(
                         type="text",
@@ -150,7 +312,6 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
         
         else:
             return [

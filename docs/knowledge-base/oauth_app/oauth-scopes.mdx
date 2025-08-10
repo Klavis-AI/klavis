@@ -1,0 +1,331 @@
+---
+title: "OAuth Scopes Reference"
+---
+
+## Overview
+
+This page provides a comprehensive reference of OAuth scopes required for each supported app in Klavis AI.
+
+<Note>
+These are the minimum OAuth scopes required for all tools in each Klavis MCP server to function properly.
+</Note>
+
+## Supported OAuth App
+
+<AccordionGroup>
+  <Accordion title="Airtable">
+    ```
+    data.records:read
+    data.records:write
+    data.recordComments:read
+    data.recordComments:write
+    schema.bases:read
+    schema.bases:write
+    user.email:read
+    ```
+  </Accordion>
+
+  <Accordion title="Asana">
+    ```
+    goals:read
+    project_templates:read
+    projects:read
+    projects:write
+    projects:delete
+    stories:read
+    task_templates:read
+    tasks:read
+    tasks:write
+    tasks:delete
+    teams:read
+    users:read
+    workspaces:read
+    workspaces.typeahead:read
+    ```
+  </Accordion>
+
+  <Accordion title="Attio">
+    <Note>
+    Attio uses API key authentication rather than OAuth scopes. No specific scopes are required for this integration.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Canva">
+    ```
+    app:read
+    app:write
+    asset:read
+    asset:write
+    brandtemplate:content:read
+    brandtemplate:meta:read
+    comment:read
+    comment:write
+    design:content:read
+    design:content:write
+    design:meta:read
+    design:permission:read
+    design:permission:write
+    folder:read
+    folder:write
+    folder:permission:read
+    folder:permission:write
+    profile:read
+    ```
+  </Accordion>
+
+  <Accordion title="ClickUp">
+    <Note>
+    ClickUp uses OAuth 2.0 with client credentials. The specific scopes are managed through the ClickUp app configuration rather than explicit scope parameters.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Close">
+    ```
+    all.full_access
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Confluence">
+    ```
+    write:space.permission:confluence
+    write:space:confluence
+    read:attachment:confluence
+    read:page:confluence
+    write:page:confluence
+    search:confluence
+    read:space:confluence
+    read:hierarchical-content:confluence
+    write:confluence-content
+    read:confluence-content.all
+    read:confluence-content.summary
+    read:confluence-space.summary
+    write:confluence-space
+    write:confluence-file
+    read:confluence-props
+    write:confluence-props
+    manage:confluence-configuration
+    read:confluence-content.permission
+    read:confluence-user
+    read:confluence-groups
+    write:confluence-groups
+    readonly:content.attachment:confluence
+    read:me
+    read:account
+    report:personal-data
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Dropbox">
+    ```
+    account_info.read
+    files.metadata.read
+    files.metadata.write
+    files.content.read
+    files.content.write
+    file_requests.read
+    file_requests.write
+    sharing.read
+    sharing.write
+    contacts.read
+    contacts.write
+    ```
+  </Accordion>
+
+  <Accordion title="GitHub">
+    ```
+    repo
+    read:user
+    read:org
+    security_events
+    ```
+  </Accordion>
+
+  <Accordion title="Gmail">
+    ```
+    https://www.googleapis.com/auth/gmail.readonly
+    https://www.googleapis.com/auth/gmail.send
+    https://www.googleapis.com/auth/gmail.compose
+    https://www.googleapis.com/auth/gmail.modify
+    ```
+  </Accordion>
+
+  <Accordion title="Google Calendar">
+    ```
+    https://www.googleapis.com/auth/calendar.readonly
+    https://www.googleapis.com/auth/calendar.events
+    ```
+  </Accordion>
+
+  <Accordion title="Google Docs">
+    ```
+    https://www.googleapis.com/auth/drive.file
+    ```
+  </Accordion>
+
+  <Accordion title="Google Drive">
+    ```
+    https://www.googleapis.com/auth/drive.file
+    ```
+  </Accordion>
+
+  <Accordion title="Google Sheets">
+    ```
+    https://www.googleapis.com/auth/drive.file
+    ```
+  </Accordion>
+
+  <Accordion title="HubSpot">
+    ```
+    account-info.security.read
+    accounting
+    cms.domains.read
+    cms.domains.write
+    crm.export
+    crm.import
+    crm.lists.read
+    crm.lists.write
+    crm.objects.companies.read
+    crm.objects.companies.write
+    crm.objects.contacts.read
+    crm.objects.contacts.write
+    crm.objects.deals.read
+    crm.objects.deals.write
+    crm.objects.marketing_events.read
+    crm.objects.marketing_events.write
+    crm.objects.owners.read
+    crm.objects.quotes.read
+    crm.objects.quotes.write
+    crm.schemas.companies.read
+    crm.schemas.companies.write
+    crm.schemas.contacts.read
+    crm.schemas.contacts.write
+    oauth
+    settings.users.read
+    settings.users.write
+    tickets
+    timeline
+    e-commerce
+    crm.objects.custom.read
+    crm.schemas.custom.read
+    content
+    sales-email-read
+    ```
+  </Accordion>
+
+  <Accordion title="Jira">
+    ```
+    read:jira-user
+    read:jira-work
+    write:jira-work
+    manage:jira-configuration
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Linear">
+    ```
+    read
+    write
+    issues:create
+    comments:create
+    timeSchedule:write
+    ```
+  </Accordion>
+
+  <Accordion title="LinkedIn">
+    ```
+    openid
+    profile
+    email
+    w_member_social
+    ```
+  </Accordion>
+
+  <Accordion title="Notion">
+    ```
+    read_content
+    update_content
+    insert_content
+    read_comments
+    insert_comments
+    read_user_information_including_email_addresses
+    ```
+  </Accordion>
+
+  <Accordion title="Salesforce">
+    ```
+    api
+    refresh_token
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Slack">
+    **Bot Scopes:**
+    ```
+    app_mentions:read
+    channels:history
+    channels:read
+    chat:write
+    chat:write.customize
+    commands
+    files:read
+    groups:read
+    groups:write
+    im:history
+    im:read
+    mpim:read
+    reactions:read
+    reactions:write
+    team:read
+    users:read
+    ```
+    
+    **User Scopes:**
+    ```
+    channels:history
+    channels:read
+    channels:write
+    chat:write
+    groups:history
+    groups:read
+    groups:write
+    im:history
+    im:read
+    im:write
+    mpim:history
+    mpim:read
+    users:read
+    users:write
+    search:read
+    ```
+  </Accordion>
+
+  <Accordion title="Supabase">
+    <Note>
+    Supabase uses OAuth 2.0 with client credentials. The specific scopes are managed through the Supabase project configuration rather than explicit scope parameters.
+    </Note>
+  </Accordion>
+
+  <Accordion title="WordPress">
+    ```
+    global
+    ```
+  </Accordion>
+
+  <Accordion title="Xero">
+    ```
+    accounting.transactions.read
+    accounting.transactions
+    offline_access
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<Tip>
+If you need assistance with OAuth scope configuration for any specific application, please refer to the individual OAuth app setup guides or contact our support team.
+</Tip>

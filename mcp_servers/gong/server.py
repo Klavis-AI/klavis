@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-GONG_MCP_SERVER_PORT = int(os.getenv("GONG_MCP_SERVER_PORT", "5100"))
+GONG_MCP_SERVER_PORT = int(os.getenv("GONG_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=GONG_MCP_SERVER_PORT, help="Port to listen on for HTTP")
