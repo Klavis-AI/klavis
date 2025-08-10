@@ -14,21 +14,24 @@ It allows you to:
 ## ⚙️ Installation & Setup
 
 
-1️⃣ Create a Python Virtual Environment
+1️) Create a Python Virtual Environment
 
 python -m venv venv
-# Activate the virtual environment
-# macOS / Linux:
+
+### Activate the virtual environment
+
+### macOS / Linux:
 source venv/bin/activate
-# Windows:
+
+### Windows:
 venv\Scripts\activate
 
-2️⃣ Install Dependencies
+2️) Install Dependencies
 
 pip install -r requirements.txt
 
 
-🔑 API Credentials Setup
+## API Credentials Setup
 
 
 1) Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
@@ -37,14 +40,14 @@ pip install -r requirements.txt
 
 3) Set the Redirect URI to:
 https://www.google.com
-⚠️ This is an important step — without it, authentication will fail.
+NOTE: This is an important step — without it, authentication will fail.
 
 The first time you call a tool from this server, you will be asked to authorize Spotify.
 After logging in, copy the redirected URL from your browser and paste it into the terminal when prompted.
 
 Done! 🎉
 
-🌱 Environment Variables
+## Environment Variables
 
 Create a .env file in the project root with the following variables:
 
@@ -52,7 +55,7 @@ SPOTIFY_CLIENT_ID=your_client_id_here
 SPOTIFY_CLIENT_SECRET=your_client_secret_here
 Replace your_client_id_here and your_client_secret_here with the values from your Spotify Developer Dashboard.
 
-▶️ Running the Server
+## Running the Server
 
 python server.py
 
