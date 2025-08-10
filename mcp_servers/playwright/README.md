@@ -106,6 +106,54 @@ PORT=5050
 ```
 
 ---
+## Tools (arguments • returns • common errors)
+
+### launch_browser
+**Args:** `browser_type: "chromium" | "firefox" | "webkit"` (optional), `headless: bool` (optional)  
+**Returns:** `{ "browser_id": string, "browser_type": string, "headless": bool }`  
+**Errors:** 400 if invalid `browser_type`.
+
+### close_browser
+**Args:** `browser_id: string`  
+**Returns:** `{ "message": string }`  
+**Errors:** 400 if browser not found.
+
+### new_page
+**Args:** `browser_id: string`  
+**Returns:** `{ "page_id": string }`  
+**Errors:** 400 if browser not found.
+
+### close_page
+**Args:** `page_id: string`  
+**Returns:** `{ "message": string }`  
+**Errors:** 400 if page not found.
+
+### go_to_url
+**Args:** `page_id: string`, `url: string`, `wait_until: string = "domcontentloaded"`, `timeout_ms: number = 60000`  
+**Returns:** `{ "message": string }`  
+**Errors:** 400 if page not found or `url` missing.
+
+### click_selector
+**Args:** `page_id: string`, `selector: string`, `timeout_ms: number = 30000`  
+**Returns:** `{ "message": string }`  
+**Errors:** 400 if page/selector not found.
+
+### fill_selector
+**Args:** `page_id: string`, `selector: string`, `text: string`, `timeout_ms: number = 30000`  
+**Returns:** `{ "message": string }`  
+**Errors:** 400 if page/selector not found.
+
+### get_text
+**Args:** `page_id: string`, `selector: string`, `timeout_ms: number = 30000`  
+**Returns:** `{ "text": string }`  
+**Errors:** 400 if page/selector not found.
+
+### take_screenshot
+**Args:** `page_id: string`, `full_page: bool = false`  
+**Returns:** `{ "screenshot_base64": string }`  
+**Errors:** 400 if page not found.
+
+---
 
 ##  Tool Usage Examples
 

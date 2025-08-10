@@ -60,10 +60,14 @@ async def mcp_call(call: ToolCall):
     try:
         result = await TOOL_REGISTRY[call.name](**call.arguments)
         return JSONResponse({"ok": True, "data": result})
+    except ValueError as ve:
+        # user-fixable errors (bad IDs, missing args, selector not found, etc.)
+        raise HTTPException(status_code=400, detail=str(ve))
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(500, str(e))
+        # unexpected server errors
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/sse")
 async def sse():
