@@ -15,25 +15,36 @@ It allows you to:
 
 
 1) Create a Python Virtual Environment
-'''
+   
+
+```
     python -m venv venv
-'''
+```
 
 2) Activate the virtual environment
 
-    MacOS / Linux:
-'''
+MacOS / Linux:
+   
+```
     source venv/bin/activate
-'''
+```
 
-    Windows:
-'''
+
+
+
+
+
+Windows:
+    
+```
     venv\Scripts\activate
-'''
+```
+
 3) Install Dependencies
-'''
+   
+```
     pip install -r requirements.txt
-'''
+```
 
 ## API Credentials Setup
 
@@ -49,24 +60,25 @@ NOTE: This is an important step — without it, authentication will fail.
 The first time you call a tool from this server, you will be asked to authorize Spotify.
 After logging in, copy the redirected URL from your browser and paste it into the terminal when prompted.
 
-Done! 🎉
+Done!
 
 ## Environment Variables
 
 Create a .env file in the project root with the following variables:
-'''
+
+```
 SPOTIFY_CLIENT_ID=your_client_id_here
 
 SPOTIFY_CLIENT_SECRET=your_client_secret_here
+```
 
-'''
 Replace your_client_id_here and your_client_secret_here with the values from your Spotify Developer Dashboard.
 
 ## Running the Server
 
-'''
+```
 python server.py
-'''
+```
 
 Video Testing Demo :
 
