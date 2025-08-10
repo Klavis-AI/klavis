@@ -80,3 +80,6 @@ dist/
 
 # submodules
 .gitmodules
+# Playwright MCP
+mcp_servers/playwright/test_samples/
+.DS_Store
