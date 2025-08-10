@@ -8,29 +8,42 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import "dotenv/config";
+import dotenv from "dotenv"
+dotenv.config()
 import express, { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
 type RunReportRequest = protos.google.analytics.data.v1beta.RunReportRequest;
 
-// Validate environment variables
-function validateEnvironment(): void {
-  const EnvVariables = [
-    "GOOGLE_CLIENT_EMAIL",
-    "GOOGLE_PRIVATE_KEY",
-    "GA_PROPERTY_ID",
-  ];
-  const missingVars = EnvVariables.filter(
-    (varName) => !process.env[varName],
-  );
 
-  if (missingVars.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missingVars.join(", ")}`,
-    );
-  }
+function validateEnvironment() {
+  const requiredVars = [
+    'GOOGLE_CLIENT_EMAIL',
+    'GOOGLE_PRIVATE_KEY',
+    'GA_PROPERTY_ID',
+  ];
+
+  const missingVars = requiredVars.filter((v) => !process.env[v]);
+
+  // if (missingVars.length > 0) {
+  //   console.error(
+  //     `Missing required environment variables: ${missingVars.join(', ')}`
+  //   );
+  //   process.exit(1); // Exit cleanly so Claude logs it in stderr
+  // }
 }
+
+// (async () => {
+//   try {
+//     validateEnvironment();
+
+//     console.error('✅ Environment variables loaded.');
+//     console.error('🚀 Starting Google Analytics MCP server...');
+//   } catch (err) {
+//     console.error('❌ Server crashed:', err);
+//     process.exit(1);
+//   }
+// });
 
 // Validate date format (YYYY-MM-DD)
 function validateDateFormat(date: string): boolean {
@@ -439,33 +452,8 @@ app.delete('/mcp', async (req: Request, res: Response) => {
   }));
 });
 
-// Start the HTTP server if run directly
-// if (import.meta.url === `file://${process.argv[1]}`) {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Google Analytics MCP server running on port ${PORT}`);
-  });
-// }
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Google Analytics MCP server running on port ${PORT}`);
+});
 
-// // Error handling for server startup
-// process.on("uncaughtException", (error) => {
-//   console.error("Uncaught exception:", error);
-//   process.exit(1);
-// });
-
-// process.on("unhandledRejection", (reason, promise) => {
-//   console.error("Unhandled rejection at:", promise, "reason:", reason);
-//   process.exit(1);
-// });
-
-// // Start the server
-// async function main() {
-//   const transport = new StdioServerTransport();
-//   await server.connect(transport);
-//   console.error("Google Analytics MCP server running on stdio");
-// }
-
-// main().catch((error) => {
-//   console.error("Failed to start server:", error);
-//   process.exit(1);
-// });
