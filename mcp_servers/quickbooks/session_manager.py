@@ -85,7 +85,7 @@ class SessionManager:
     
     def extract_credentials_from_headers(self, headers: Dict[str, str]) -> Tuple[str, str, str]:
         """Extract QuickBooks credentials from HTTP headers."""
-        access_token = headers.get('x-qb-access-token') or headers.get('qb-access-token')
+        access_token = headers.get('x-auth-token') or headers.get('auth-token')
         realm_id = headers.get('x-qb-realm-id') or headers.get('qb-realm-id')
         environment = headers.get('x-qb-environment') or headers.get('qb-environment')
         
