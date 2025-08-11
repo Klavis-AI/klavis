@@ -19,9 +19,7 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
-    perplexity_search,
-    perplexity_research,
-    perplexity_reason
+    perplexity_search
 )
 
 # Configure logging
@@ -94,74 +92,6 @@ def main(
                     "required": ["messages"],
                 },
             ),
-            
-            # Perplexity Research Tool
-            types.Tool(
-                name="perplexity_research",
-                description=(
-                    "Performs deep research using the Perplexity API. "
-                    "Accepts an array of messages (each with a role and content) "
-                    "and returns a comprehensive research response with citations."
-                ),
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "messages": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "role": {
-                                        "type": "string",
-                                        "description": "Role of the message (e.g., system, user, assistant)",
-                                    },
-                                    "content": {
-                                        "type": "string",
-                                        "description": "The content of the message",
-                                    },
-                                },
-                                "required": ["role", "content"],
-                            },
-                            "description": "Array of conversation messages",
-                        },
-                    },
-                    "required": ["messages"],
-                },
-            ),
-            
-            # Perplexity Reason Tool
-            types.Tool(
-                name="perplexity_reason",
-                description=(
-                    "Performs reasoning tasks using the Perplexity API. "
-                    "Accepts an array of messages (each with a role and content) "
-                    "and returns a well-reasoned response using the sonar-reasoning-pro model."
-                ),
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "messages": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "role": {
-                                        "type": "string",
-                                        "description": "Role of the message (e.g., system, user, assistant)",
-                                    },
-                                    "content": {
-                                        "type": "string",
-                                        "description": "The content of the message",
-                                    },
-                                },
-                                "required": ["role", "content"],
-                            },
-                            "description": "Array of conversation messages",
-                        },
-                    },
-                    "required": ["messages"],
-                },
-            ),
         ]
 
     @app.call_tool()
@@ -176,22 +106,6 @@ def main(
                     return [types.TextContent(type="text", text="Error: 'messages' parameter is required and must be an array")]
                 
                 result = await perplexity_search(messages)
-                return [types.TextContent(type="text", text=result)]
-            
-            elif name == "perplexity_research":
-                messages = arguments.get("messages")
-                if not messages or not isinstance(messages, list):
-                    return [types.TextContent(type="text", text="Error: 'messages' parameter is required and must be an array")]
-                
-                result = await perplexity_research(messages)
-                return [types.TextContent(type="text", text=result)]
-            
-            elif name == "perplexity_reason":
-                messages = arguments.get("messages")
-                if not messages or not isinstance(messages, list):
-                    return [types.TextContent(type="text", text="Error: 'messages' parameter is required and must be an array")]
-                
-                result = await perplexity_reason(messages)
                 return [types.TextContent(type="text", text=result)]
             
             else:

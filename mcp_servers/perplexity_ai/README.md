@@ -1,6 +1,6 @@
 # Perplexity AI MCP Server
 
-A Model Context Protocol (MCP) server that provides conversational AI capabilities using Perplexity AI's powerful Sonar models. This server enables AI assistants to engage in conversations, perform deep research, and conduct reasoning tasks with automatic citation handling.
+A streamlined Model Context Protocol (MCP) server that provides web search capabilities using Perplexity AI's powerful Sonar models. This server enables AI assistants to perform web searches with automatic citation handling.
 
 ## 🚀 Quick Start for JavaScript Developers
 
@@ -97,9 +97,9 @@ perplexity_ai/
 
 ## 🛠 Available Tools
 
-The server provides three main conversation tools that match the JavaScript implementation:
+The server provides a streamlined web search tool:
 
-### 1. Perplexity Search (`perplexity_search`)
+### Perplexity Search (`perplexity_search`)
 Performs web search using the **sonar-pro** model. Accepts an array of messages and returns a search completion response with citations.
 
 ```python
@@ -112,33 +112,7 @@ result = await perplexity_search(messages)
 ```
 
 **Model Used:** `sonar-pro`  
-**Best For:** Web search and quick answers
-
-### 2. Perplexity Research (`perplexity_research`)
-Performs deep research using the **sonar-deep-research** model with comprehensive responses and citations.
-
-```python
-messages = [
-    {"role": "user", "content": "Research the latest developments in renewable energy technology"}
-]
-result = await perplexity_research(messages)
-```
-
-**Model Used:** `sonar-deep-research`  
-**Best For:** In-depth research requiring comprehensive analysis
-
-### 3. Perplexity Reason (`perplexity_reason`)
-Performs reasoning tasks using the **sonar-reasoning-pro** model for well-reasoned responses.
-
-```python
-messages = [
-    {"role": "user", "content": "Analyze the pros and cons of remote work for software development teams"}
-]
-result = await perplexity_reason(messages)
-```
-
-**Model Used:** `sonar-reasoning-pro`  
-**Best For:** Complex reasoning, analysis, and logical thinking tasks
+**Best For:** Web search, real-time information, and research with citations
 
 ### Message Format
 
@@ -167,27 +141,16 @@ Citations:
 [2] https://example.com/ai-overview
 ```
 
-### Model Comparison
+### Features
 
-| Tool | Model | Use Case | Response Time | Detail Level |
-|------|-------|----------|---------------|-------------|
-| `perplexity_search` | `sonar-pro` | Web search, quick questions | Fast | Moderate |
-| `perplexity_research` | `sonar-deep-research` | In-depth research, analysis | Slower | High |
-| `perplexity_reason` | `sonar-reasoning-pro` | Logic, reasoning, problem-solving | Moderate | High |
-
-### 🔄 JavaScript vs Python Versions
-
-This Python implementation is **functionally identical** to the JavaScript version:
-
-| Feature | JavaScript | Python | 
-|---------|------------|--------|
-| Tool Names | ✅ `perplexity_search`, `perplexity_research`, `perplexity_reason` | ✅ Same |
-| Models Used | ✅ `sonar-pro`, `sonar-deep-research`, `sonar-reasoning-pro` | ✅ Same |
-| Input Format | ✅ Array of message objects | ✅ Same |
-| Citation Handling | ✅ Auto-appended to response | ✅ Same |
-| API Compatibility | ✅ MCP Protocol | ✅ Same |
-
-You can switch between the JavaScript and Python versions seamlessly!
+| Feature | Status |
+|---------|--------|
+| Tool Name | ✅ `perplexity_search` |
+| Model Used | ✅ `sonar-pro` |
+| Input Format | ✅ Array of message objects |
+| Citation Handling | ✅ Auto-appended to response |
+| API Compatibility | ✅ MCP Protocol |
+| Web Search | ✅ Real-time information |
 
 ## 🌐 API Endpoints
 
@@ -235,26 +198,11 @@ You can test the server using curl (like testing an Express.js API):
 # Test the SSE endpoint
 curl -H "x-api-key: your_key" "http://localhost:5000/sse"
 
-# Test with different tools
-# 1. Web search
+# Test the web search tool
 curl -X POST \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_key" \
-  -d '{"method": "tools/call", "params": {"name": "perplexity_search", "arguments": {"messages": [{"role": "user", "content": "What are the differences between Python and JavaScript?"}]}}}' \
-  http://localhost:5000/mcp
-
-# 2. Deep research
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: your_key" \
-  -d '{"method": "tools/call", "params": {"name": "perplexity_research", "arguments": {"messages": [{"role": "user", "content": "Research the latest developments in quantum computing"}]}}}' \
-  http://localhost:5000/mcp
-
-# 3. Reasoning task
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: your_key" \
-  -d '{"method": "tools/call", "params": {"name": "perplexity_reason", "arguments": {"messages": [{"role": "user", "content": "Analyze the pros and cons of microservices vs monolithic architecture"}]}}}' \
+  -d '{"method": "tools/call", "params": {"name": "perplexity_search", "arguments": {"messages": [{"role": "user", "content": "What are the latest developments in AI technology?"}]}}}' \
   http://localhost:5000/mcp
 ```
 
@@ -266,7 +214,7 @@ curl -X POST \
 2. **Module Not Found**: Run `pip install -r requirements.txt`
 3. **Port Already in Use**: Change the port with `--port 8080`
 4. **API Key Issues**: Check your `.env` file and Perplexity AI account
-5. **Tool Not Found**: Ensure you're using the correct tool names (`perplexity_search`, `perplexity_research`, `perplexity_reason`)
+5. **Tool Not Found**: Ensure you're using the correct tool name (`perplexity_search`)
 6. **Message Format Error**: Make sure your messages array contains objects with `role` and `content` fields
 
 ### Debug Mode

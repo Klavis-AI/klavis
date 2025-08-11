@@ -57,31 +57,3 @@ async def perplexity_search(messages: List[Dict[str, str]]) -> str:
         Search completion response with citations if available
     """
     return await perform_chat_completion(messages, "sonar-pro")
-
-async def perplexity_research(messages: List[Dict[str, str]]) -> str:
-    """
-    Performs deep research using the Perplexity API.
-    Accepts an array of messages (each with a role and content)
-    and returns a comprehensive research response with citations.
-    
-    Args:
-        messages: Array of conversation messages with role and content
-    
-    Returns:
-        Comprehensive research response with citations
-    """
-    return await perform_chat_completion(messages, "sonar-deep-research")
-
-async def perplexity_reason(messages: List[Dict[str, str]]) -> str:
-    """
-    Performs reasoning tasks using the Perplexity API.
-    Accepts an array of messages (each with a role and content)
-    and returns a well-reasoned response using the sonar-reasoning-pro model.
-    
-    Args:
-        messages: Array of conversation messages with role and content
-    
-    Returns:
-        Well-reasoned response using reasoning model
-    """
-    return await perform_chat_completion(messages, "sonar-reasoning-pro")
