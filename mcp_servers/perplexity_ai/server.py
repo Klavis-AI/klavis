@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
-    perplexity_ask,
+    perplexity_search,
     perplexity_research,
     perplexity_reason
 )
@@ -61,13 +61,13 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
-            # Perplexity Ask Tool
+            # Perplexity Search Tool
             types.Tool(
-                name="perplexity_ask",
+                name="perplexity_search",
                 description=(
-                    "Engages in a conversation using the Sonar API. "
+                    "Performs web search using the Sonar API. "
                     "Accepts an array of messages (each with a role and content) "
-                    "and returns a chat completion response from the Perplexity model."
+                    "and returns a search completion response from the Perplexity model."
                 ),
                 inputSchema={
                     "type": "object",
@@ -170,12 +170,12 @@ def main(
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
         try:
-            if name == "perplexity_ask":
+            if name == "perplexity_search":
                 messages = arguments.get("messages")
                 if not messages or not isinstance(messages, list):
                     return [types.TextContent(type="text", text="Error: 'messages' parameter is required and must be an array")]
                 
-                result = await perplexity_ask(messages)
+                result = await perplexity_search(messages)
                 return [types.TextContent(type="text", text=result)]
             
             elif name == "perplexity_research":

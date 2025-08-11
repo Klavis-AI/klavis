@@ -99,8 +99,8 @@ perplexity_ai/
 
 The server provides three main conversation tools that match the JavaScript implementation:
 
-### 1. Perplexity Ask (`perplexity_ask`)
-Engages in a conversation using the **sonar-pro** model. Accepts an array of messages and returns a chat completion response with citations.
+### 1. Perplexity Search (`perplexity_search`)
+Performs web search using the **sonar-pro** model. Accepts an array of messages and returns a search completion response with citations.
 
 ```python
 # Example usage in Python
@@ -108,11 +108,11 @@ messages = [
     {"role": "system", "content": "You are a helpful assistant."},
     {"role": "user", "content": "What is machine learning?"}
 ]
-result = await perplexity_ask(messages)
+result = await perplexity_search(messages)
 ```
 
 **Model Used:** `sonar-pro`  
-**Best For:** General conversation and quick answers
+**Best For:** Web search and quick answers
 
 ### 2. Perplexity Research (`perplexity_research`)
 Performs deep research using the **sonar-deep-research** model with comprehensive responses and citations.
@@ -171,7 +171,7 @@ Citations:
 
 | Tool | Model | Use Case | Response Time | Detail Level |
 |------|-------|----------|---------------|-------------|
-| `perplexity_ask` | `sonar-pro` | Quick questions, general chat | Fast | Moderate |
+| `perplexity_search` | `sonar-pro` | Web search, quick questions | Fast | Moderate |
 | `perplexity_research` | `sonar-deep-research` | In-depth research, analysis | Slower | High |
 | `perplexity_reason` | `sonar-reasoning-pro` | Logic, reasoning, problem-solving | Moderate | High |
 
@@ -181,7 +181,7 @@ This Python implementation is **functionally identical** to the JavaScript versi
 
 | Feature | JavaScript | Python | 
 |---------|------------|--------|
-| Tool Names | ✅ `perplexity_ask`, `perplexity_research`, `perplexity_reason` | ✅ Same |
+| Tool Names | ✅ `perplexity_search`, `perplexity_research`, `perplexity_reason` | ✅ Same |
 | Models Used | ✅ `sonar-pro`, `sonar-deep-research`, `sonar-reasoning-pro` | ✅ Same |
 | Input Format | ✅ Array of message objects | ✅ Same |
 | Citation Handling | ✅ Auto-appended to response | ✅ Same |
@@ -236,11 +236,11 @@ You can test the server using curl (like testing an Express.js API):
 curl -H "x-api-key: your_key" "http://localhost:5000/sse"
 
 # Test with different tools
-# 1. General conversation
+# 1. Web search
 curl -X POST \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_key" \
-  -d '{"method": "tools/call", "params": {"name": "perplexity_ask", "arguments": {"messages": [{"role": "user", "content": "What are the differences between Python and JavaScript?"}]}}}' \
+  -d '{"method": "tools/call", "params": {"name": "perplexity_search", "arguments": {"messages": [{"role": "user", "content": "What are the differences between Python and JavaScript?"}]}}}' \
   http://localhost:5000/mcp
 
 # 2. Deep research
@@ -266,7 +266,7 @@ curl -X POST \
 2. **Module Not Found**: Run `pip install -r requirements.txt`
 3. **Port Already in Use**: Change the port with `--port 8080`
 4. **API Key Issues**: Check your `.env` file and Perplexity AI account
-5. **Tool Not Found**: Ensure you're using the correct tool names (`perplexity_ask`, `perplexity_research`, `perplexity_reason`)
+5. **Tool Not Found**: Ensure you're using the correct tool names (`perplexity_search`, `perplexity_research`, `perplexity_reason`)
 6. **Message Format Error**: Make sure your messages array contains objects with `role` and `content` fields
 
 ### Debug Mode

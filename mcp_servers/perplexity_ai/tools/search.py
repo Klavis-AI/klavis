@@ -44,17 +44,17 @@ async def perform_chat_completion(
         logger.error(f"Error in chat completion: {str(e)}")
         raise e
 
-async def perplexity_ask(messages: List[Dict[str, str]]) -> str:
+async def perplexity_search(messages: List[Dict[str, str]]) -> str:
     """
-    Engages in a conversation using the Sonar API.
+    Performs web search using the Sonar API.
     Accepts an array of messages (each with a role and content)
-    and returns a chat completion response from the Perplexity model.
+    and returns a search completion response from the Perplexity model.
     
     Args:
         messages: Array of conversation messages with role and content
     
     Returns:
-        Chat completion response with citations if available
+        Search completion response with citations if available
     """
     return await perform_chat_completion(messages, "sonar-pro")
 
