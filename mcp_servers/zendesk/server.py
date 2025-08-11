@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-ZENDESK_MCP_SERVER_PORT = int(os.getenv("ZENDESK_MCP_SERVER_PORT", "5002"))
+ZENDESK_MCP_SERVER_PORT = int(os.getenv("ZENDESK_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=ZENDESK_MCP_SERVER_PORT, help="Port to listen on for HTTP")

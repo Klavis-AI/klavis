@@ -1,25 +1,21 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
+# Copy only the requirements first to leverage Docker cache
+COPY mcp_servers/zendesk/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+COPY mcp_servers/zendesk/server.py .
+COPY mcp_servers/zendesk/tools/ ./tools/
 
-# Expose port
+# Expose the port the server runs on
 EXPOSE 5000
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-
-# Run the application
-CMD ["python", "server.py", "--port", "5000"]
+# Command to run the server
+CMD ["python", "server.py"]
