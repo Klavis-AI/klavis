@@ -1,4 +1,4 @@
-requests
+httpx
 python-dotenv
 starlette
 uvicorn[standard]
