@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("quickbooks-mcp-server")
 
 # Environment configuration
-QB_MCP_SERVER_PORT = int(os.getenv("QB_MCP_SERVER_PORT", "5001"))
+QB_MCP_SERVER_PORT = int(os.getenv("QB_MCP_SERVER_PORT", "5000"))
 
 # Context variable to store QB credentials for the current request
 qb_credentials_context: ContextVar[dict] = ContextVar(
