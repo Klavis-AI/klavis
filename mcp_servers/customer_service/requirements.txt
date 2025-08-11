@@ -1,0 +1,5 @@
+mcp
+dotenv
+FastMCP
+httpx
+mcp['cli']
