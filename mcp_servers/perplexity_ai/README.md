@@ -1,6 +1,6 @@
 # Perplexity AI MCP Server
 
-A streamlined Model Context Protocol (MCP) server that provides web search capabilities using Perplexity AI's powerful Sonar models. This server enables AI assistants to perform web searches with automatic citation handling.
+A focused Model Context Protocol (MCP) server that provides web search capabilities using Perplexity AI's powerful Sonar models. This streamlined server enables AI assistants to perform web searches with automatic citation handling through a single, optimized tool.
 
 ## 🚀 Quick Start for JavaScript Developers
 
@@ -88,16 +88,16 @@ perplexity_ai/
 ├── requirements.txt       # Dependencies (like package.json)
 ├── Dockerfile            # Container setup
 ├── README.md             # This file
-├── .env                  # Environment variables
+├── .env                  # Environment variables (create from .env.example)
 └── tools/                # Tool implementations
     ├── __init__.py       # Package exports (like index.js)
-    ├── base.py           # Base API client
-    └── search.py         # Search tool implementations
+    ├── base.py           # Base API client and authentication
+    └── search.py         # Perplexity search tool implementation
 ```
 
 ## 🛠 Available Tools
 
-The server provides a streamlined web search tool:
+The server provides a single, focused web search tool:
 
 ### Perplexity Search (`perplexity_search`)
 Performs web search using the **sonar-pro** model. Accepts an array of messages and returns a search completion response with citations.
@@ -114,9 +114,11 @@ result = await perplexity_search(messages)
 **Model Used:** `sonar-pro`  
 **Best For:** Web search, real-time information, and research with citations
 
+This is the only tool available in this streamlined MCP server implementation.
+
 ### Message Format
 
-All tools accept an array of message objects with the following structure:
+The tool accepts an array of message objects with the following structure:
 
 ```python
 {
@@ -127,7 +129,7 @@ All tools accept an array of message objects with the following structure:
 
 ### Response Format
 
-All tools return a string response that includes:
+The tool returns a string response that includes:
 - The main response content from the AI model
 - Automatically appended citations (when available)
 - Numbered citation format: `[1] source_url`
@@ -145,12 +147,13 @@ Citations:
 
 | Feature | Status |
 |---------|--------|
-| Tool Name | ✅ `perplexity_search` |
+| Single Tool | ✅ `perplexity_search` |
 | Model Used | ✅ `sonar-pro` |
 | Input Format | ✅ Array of message objects |
 | Citation Handling | ✅ Auto-appended to response |
 | API Compatibility | ✅ MCP Protocol |
 | Web Search | ✅ Real-time information |
+| Streamlined Design | ✅ Focused on web search only |
 
 ## 🌐 API Endpoints
 
@@ -198,7 +201,7 @@ You can test the server using curl (like testing an Express.js API):
 # Test the SSE endpoint
 curl -H "x-api-key: your_key" "http://localhost:5000/sse"
 
-# Test the web search tool
+# Test the perplexity_search tool
 curl -X POST \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_key" \
@@ -214,7 +217,7 @@ curl -X POST \
 2. **Module Not Found**: Run `pip install -r requirements.txt`
 3. **Port Already in Use**: Change the port with `--port 8080`
 4. **API Key Issues**: Check your `.env` file and Perplexity AI account
-5. **Tool Not Found**: Ensure you're using the correct tool name (`perplexity_search`)
+5. **Tool Not Found**: The server only provides the `perplexity_search` tool
 6. **Message Format Error**: Make sure your messages array contains objects with `role` and `content` fields
 
 ### Debug Mode
