@@ -53,7 +53,7 @@ A Python server for interacting with the Klaviyo API using MCP tools.
 
 ## Requirements
 
-- Python 3.13+
+- Python 3.10+
 - See [requirements.txt](requirements.txt) for dependencies
 
 ### IDEs to Install
@@ -85,6 +85,6 @@ A Python server for interacting with the Klaviyo API using MCP tools.
 
 ### Additional Notes
 
-- Ensure Python 3.9+ is installed.
+- Ensure Python 3.10+ is installed.
 - For development, use a virtual environment or `uv` for dependency management.
 - For any issues, please refer to the main project documentation or open an issue.
