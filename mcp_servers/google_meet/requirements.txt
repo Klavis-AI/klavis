@@ -1,0 +1,8 @@
+requests
+python-dotenv
+starlette
+uvicorn[standard]
+click
+mcp>=1.12.0
+pytest
+pytest-asyncio
