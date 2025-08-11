@@ -1,0 +1,3 @@
+mcp[cli] 
+tavily-python 
+python-dotenv
