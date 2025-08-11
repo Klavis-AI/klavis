@@ -8,56 +8,69 @@ export async function handleSearchMeetings(request: CallToolRequest) {
     const client = getFirefliesClient();
 
     const query = `
-      query SearchMeetings($searchQuery: String!, $limit: Int, $filters: SearchFilters) {
-        search(
-          query: $searchQuery
-          limit: $limit
-          filters: $filters
-        ) {
-          results {
-            transcript {
-              id
-              title
-              date
-              duration
-              summary {
-                overview
-                keywords
-              }
-            }
-            matches {
-              text
-              speaker_name
-              start_time
-              end_time
-              confidence_score
-            }
+      query SearchTranscripts($limit: Int, $title: String) {
+        transcripts(limit: $limit, title: $title) {
+          id
+          title
+          date
+          duration
+          host_email
+          participants
+          summary {
+            overview
+            action_items
+            keywords
           }
-          total_results
-          search_time_ms
+          sentences {
+            text
+            speaker_name
+            start_time
+            end_time
+          }
         }
       }
     `;
 
-    const variables = {
-      searchQuery: args.query,
-      limit: args.limit,
-      filters: args.filters
-        ? {
-            date_start: args.filters.start_date,
-            date_end: args.filters.end_date,
-            user_id: args.filters.user_id,
-            meeting_title: args.filters.meeting_title,
-          }
-        : null,
+    const variables: Record<string, any> = {
+      limit: args.limit || 50,
     };
 
-    const result = await client.query(query, variables);
+    if (args.filters?.meeting_title) {
+      variables.title = args.filters.meeting_title;
+    }
 
-    safeLog(
-      'info',
-      `Search completed: ${result.search?.total_results || 0} results found in ${result.search?.search_time_ms}ms`,
-    );
+    const result = await client.query(query, variables);
+    const transcripts = result.transcripts || [];
+
+    const searchResults = transcripts
+      .filter((transcript: any) => {
+        const searchQuery = args.query.toLowerCase();
+
+        if (transcript.title?.toLowerCase().includes(searchQuery)) return true;
+
+        if (transcript.summary?.overview?.toLowerCase().includes(searchQuery)) return true;
+
+        if (transcript.summary?.action_items?.toLowerCase().includes(searchQuery)) return true;
+
+        if (
+          transcript.summary?.keywords?.some((keyword: string) =>
+            keyword.toLowerCase().includes(searchQuery),
+          )
+        )
+          return true;
+
+        if (
+          transcript.sentences?.some((sentence: any) =>
+            sentence.text?.toLowerCase().includes(searchQuery),
+          )
+        )
+          return true;
+
+        return false;
+      })
+      .slice(0, args.limit || 10);
+
+    safeLog('info', `Search completed: ${searchResults.length} results found for "${args.query}"`);
 
     return {
       content: [
@@ -68,9 +81,9 @@ export async function handleSearchMeetings(request: CallToolRequest) {
               success: true,
               data: {
                 query: args.query,
-                results: result.search?.results || [],
-                total_results: result.search?.total_results || 0,
-                search_time_ms: result.search?.search_time_ms || 0,
+                results: searchResults,
+                total_results: searchResults.length,
+                note: 'Search performed client-side across transcript content',
               },
             },
             null,
@@ -89,7 +102,7 @@ export async function handleSearchMeetings(request: CallToolRequest) {
             {
               success: false,
               error: error instanceof Error ? error.message : 'Unknown error occurred',
-              tool: 'search_meetings',
+              tool: 'fireflies_search_meetings',
             },
             null,
             2,
@@ -107,48 +120,22 @@ export async function handleGetMeetingSummary(request: CallToolRequest) {
     const client = getFirefliesClient();
 
     const query = `
-      query GetMeetingSummary($transcriptId: String!, $summaryType: String!, $includeTimestamps: Boolean!) {
+      query GetTranscript($transcriptId: String!) {
         transcript(id: $transcriptId) {
           id
           title
           date
+          duration
           summary {
             overview
-            action_items {
-              text
-              assignee
-              due_date
-              timestamp @include(if: $includeTimestamps)
-            }
-            key_topics {
-              topic
-              mentions
-              timestamp @include(if: $includeTimestamps)
-            }
-            decisions {
-              text
-              decision_maker
-              timestamp @include(if: $includeTimestamps)
-            }
+            action_items
             keywords
-            sentiment_analysis
-          }
-          ai_filters {
-            sentiment
-            questions_asked
-            talk_time_percentage
           }
         }
       }
     `;
 
-    const variables = {
-      transcriptId: args.transcript_id,
-      summaryType: args.summary_type,
-      includeTimestamps: args.include_timestamps || false,
-    };
-
-    const result = await client.query(query, variables);
+    const result = await client.query(query, { transcriptId: args.transcript_id });
 
     if (!result.transcript) {
       throw new Error(`Transcript with ID ${args.transcript_id} not found`);
@@ -161,28 +148,29 @@ export async function handleGetMeetingSummary(request: CallToolRequest) {
       case 'action_items':
         formattedSummary = {
           type: 'action_items',
-          items: summary.action_items || [],
+          content: summary?.action_items || 'No action items found',
         };
         break;
       case 'key_topics':
         formattedSummary = {
           type: 'key_topics',
-          topics: summary.key_topics || [],
+          content: summary?.keywords || [],
         };
         break;
       case 'decisions':
+        const decisions =
+          summary?.overview?.match(/निर्णय|ठरवण्यात आले|निश्चित केले|([^।]*निर्णय[^।]*)/gi) || [];
         formattedSummary = {
           type: 'decisions',
-          decisions: summary.decisions || [],
+          content: decisions,
         };
         break;
-      default: 
+      default:
         formattedSummary = {
           type: 'overview',
-          overview: summary.overview,
-          keywords: summary.keywords,
-          sentiment: summary.sentiment_analysis,
-          ai_insights: result.transcript.ai_filters,
+          content: summary?.overview || 'No overview available',
+          keywords: summary?.keywords || [],
+          action_items: summary?.action_items || 'No action items found',
         };
     }
 
@@ -198,7 +186,7 @@ export async function handleGetMeetingSummary(request: CallToolRequest) {
               data: {
                 transcript_id: args.transcript_id,
                 meeting_title: result.transcript.title,
-                meeting_date: result.transcript.date,
+                meeting_date: new Date(result.transcript.date).toLocaleString(),
                 summary: formattedSummary,
               },
             },
@@ -218,7 +206,7 @@ export async function handleGetMeetingSummary(request: CallToolRequest) {
             {
               success: false,
               error: error instanceof Error ? error.message : 'Unknown error occurred',
-              tool: 'get_meeting_summary',
+              tool: 'fireflies_get_meeting_summary',
             },
             null,
             2,

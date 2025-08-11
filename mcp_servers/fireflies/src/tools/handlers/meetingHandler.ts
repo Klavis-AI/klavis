@@ -8,47 +8,57 @@ export async function handleListMeetings(request: CallToolRequest) {
     const client = getFirefliesClient();
 
     const query = `
-      query GetMeetings($limit: Int, $offset: Int, $startDate: String, $endDate: String, $userId: String) {
+      query Transcripts($limit: Int, $skip: Int, $userId: String, $hostEmail: String, $participantEmail: String, $title: String) {
         transcripts(
           limit: $limit
-          offset: $offset
-          date_start: $startDate
-          date_end: $endDate
+          skip: $skip
           user_id: $userId
+          host_email: $hostEmail
+          participant_email: $participantEmail
+          title: $title
         ) {
           id
           title
           date
           duration
-          meeting_url
+          host_email
+          participants
           summary {
             overview
             action_items
             keywords
           }
-          participants {
-            name
-            email
-          }
-          ai_filters {
-            sentiment
-            talk_time
-          }
         }
       }
     `;
 
-    const variables = {
-      limit: args.limit,
-      offset: args.offset,
-      startDate: args.start_date,
-      endDate: args.end_date,
-      userId: args.user_id,
-    };
+    const variables: Record<string, any> = {};
+
+    if (args.limit) variables.limit = args.limit;
+    if (args.offset) variables.skip = args.offset;
+    if (args.user_id) variables.userId = args.user_id;
 
     const result = await client.query(query, variables);
 
     safeLog('info', `Retrieved ${result.transcripts?.length || 0} meetings`);
+
+    let filteredTranscripts = result.transcripts || [];
+
+    if (args.start_date || args.end_date) {
+      filteredTranscripts = filteredTranscripts.filter((transcript: any) => {
+        const transcriptDate = new Date(transcript.date);
+
+        if (args.start_date && transcriptDate < new Date(args.start_date)) {
+          return false;
+        }
+
+        if (args.end_date && transcriptDate > new Date(args.end_date)) {
+          return false;
+        }
+
+        return true;
+      });
+    }
 
     return {
       content: [
@@ -58,12 +68,13 @@ export async function handleListMeetings(request: CallToolRequest) {
             {
               success: true,
               data: {
-                meetings: result.transcripts || [],
-                total_count: result.transcripts?.length || 0,
+                meetings: filteredTranscripts,
+                total_count: filteredTranscripts.length,
                 pagination: {
-                  limit: args.limit,
-                  offset: args.offset,
+                  limit: args.limit || 10,
+                  offset: args.offset || 0,
                 },
+                api_response: 'Successfully retrieved meetings from Fireflies API',
               },
             },
             null,
@@ -82,7 +93,7 @@ export async function handleListMeetings(request: CallToolRequest) {
             {
               success: false,
               error: error instanceof Error ? error.message : 'Unknown error occurred',
-              tool: 'list_meetings',
+              tool: 'fireflies_list_meetings',
             },
             null,
             2,

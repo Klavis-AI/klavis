@@ -8,32 +8,24 @@ export async function handleGetTranscript(request: CallToolRequest) {
     const client = getFirefliesClient();
 
     const query = `
-      query GetTranscript($transcriptId: String!, $includeSummary: Boolean!, $includeActionItems: Boolean!) {
+      query GetTranscript($transcriptId: String!) {
         transcript(id: $transcriptId) {
           id
           title
           date
           duration
+          host_email
+          participants
+          summary {
+            overview
+            action_items
+            keywords
+          }
           sentences {
             text
             speaker_name
             start_time
             end_time
-          }
-          summary @include(if: $includeSummary) {
-            overview
-            keywords
-            outline
-          }
-          action_items @include(if: $includeActionItems) {
-            text
-            assignee
-            due_date
-          }
-          participants {
-            name
-            email
-            talk_time
           }
         }
       }
@@ -41,14 +33,30 @@ export async function handleGetTranscript(request: CallToolRequest) {
 
     const variables = {
       transcriptId: args.transcript_id,
-      includeSummary: args.include_summary || false,
-      includeActionItems: args.include_action_items || false,
     };
 
     const result = await client.query(query, variables);
 
     if (!result.transcript) {
       throw new Error(`Transcript with ID ${args.transcript_id} not found`);
+    }
+
+    const response: any = {
+      id: result.transcript.id,
+      title: result.transcript.title,
+      date: result.transcript.date,
+      duration: result.transcript.duration,
+      host_email: result.transcript.host_email,
+      participants: result.transcript.participants,
+      sentences: result.transcript.sentences,
+    };
+
+    if (args.include_summary) {
+      response.summary = result.transcript.summary;
+    }
+
+    if (args.include_action_items) {
+      response.action_items = result.transcript.summary?.action_items;
     }
 
     safeLog('info', `Retrieved transcript: ${result.transcript.title}`);
@@ -60,7 +68,7 @@ export async function handleGetTranscript(request: CallToolRequest) {
           text: JSON.stringify(
             {
               success: true,
-              data: result.transcript,
+              data: response,
             },
             null,
             2,
@@ -78,7 +86,7 @@ export async function handleGetTranscript(request: CallToolRequest) {
             {
               success: false,
               error: error instanceof Error ? error.message : 'Unknown error occurred',
-              tool: 'get_transcript',
+              tool: 'fireflies_get_transcript',
             },
             null,
             2,
@@ -93,37 +101,52 @@ export async function handleGetTranscript(request: CallToolRequest) {
 export async function handleExportTranscript(request: CallToolRequest) {
   try {
     const args = exportTranscriptSchema.parse(request.params.arguments || {});
+
     const client = getFirefliesClient();
 
-    const mutation = `
-      mutation ExportTranscript($transcriptId: String!, $format: String!, $includeTimestamps: Boolean!, $includeSpeakerLabels: Boolean!) {
-        exportTranscript(
-          transcript_id: $transcriptId
-          format: $format
-          include_timestamps: $includeTimestamps
-          include_speaker_labels: $includeSpeakerLabels
-        ) {
-          download_url
-          file_name
-          format
-          expires_at
+    const query = `
+      query GetTranscript($transcriptId: String!) {
+        transcript(id: $transcriptId) {
+          id
+          title
+          date
+          duration
+          host_email
+          participants
+          sentences {
+            text
+            speaker_name
+            start_time
+            end_time
+          }
         }
       }
     `;
 
-    const variables = {
-      transcriptId: args.transcript_id,
-      format: args.format,
-      includeTimestamps: args.include_timestamps,
-      includeSpeakerLabels: args.include_speaker_labels,
-    };
+    const result = await client.query(query, { transcriptId: args.transcript_id });
 
-    const result = await client.mutate(mutation, variables);
+    if (!result.transcript) {
+      throw new Error(`Transcript with ID ${args.transcript_id} not found`);
+    }
 
-    safeLog(
-      'info',
-      `Generated export for transcript ${args.transcript_id} in ${args.format} format`,
-    );
+    let formattedContent = '';
+    const transcript = result.transcript;
+
+    if (args.format === 'txt') {
+      formattedContent = `Meeting: ${transcript.title}\nDate: ${new Date(transcript.date).toLocaleString()}\nDuration: ${transcript.duration}s\n\n`;
+
+      transcript.sentences.forEach((sentence: any) => {
+        if (args.include_timestamps) {
+          formattedContent += `[${sentence.start_time}s] `;
+        }
+        if (args.include_speaker_labels) {
+          formattedContent += `${sentence.speaker_name}: `;
+        }
+        formattedContent += `${sentence.text}\n`;
+      });
+    }
+
+    safeLog('info', `Exported transcript ${args.transcript_id} in ${args.format} format`);
 
     return {
       content: [
@@ -133,8 +156,11 @@ export async function handleExportTranscript(request: CallToolRequest) {
             {
               success: true,
               data: {
-                export_info: result.exportTranscript,
-                message: `Transcript exported successfully. Download URL will expire at ${result.exportTranscript?.expires_at}`,
+                transcript_id: args.transcript_id,
+                format: args.format,
+                content: formattedContent,
+                filename: `${transcript.title}_${new Date(transcript.date).toISOString().split('T')[0]}.${args.format}`,
+                note: 'Export functionality simulated - Fireflies API may not support direct file export',
               },
             },
             null,
@@ -153,7 +179,7 @@ export async function handleExportTranscript(request: CallToolRequest) {
             {
               success: false,
               error: error instanceof Error ? error.message : 'Unknown error occurred',
-              tool: 'export_transcript',
+              tool: 'fireflies_export_transcript',
             },
             null,
             2,
