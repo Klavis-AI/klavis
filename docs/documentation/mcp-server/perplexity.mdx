@@ -11,33 +11,23 @@ import NoCodeSnippet from "/snippets/mcp-server-card/no-code.mdx";
 
 ## For Developer
 
-The Perplexity MCP Server provides conversational AI capabilities using Perplexity AI's powerful Sonar models. It enables AI assistants to engage in conversations, perform deep research, and conduct reasoning tasks with automatic citation handling.
+The Perplexity MCP Server provides focused web search capabilities using Perplexity AI's powerful Sonar models. This streamlined server enables AI assistants to perform web searches with automatic citation handling through a single, optimized tool.
 
 ### Available Tools
 
-The server provides three main tools that leverage different Perplexity AI models:
+The server provides a single, focused tool:
 
-#### 1. `perplexity_search`
+#### `perplexity_search`
 
 - **Model**: `sonar-pro`
-- **Use Case**: Web search and quick answers
-- **Best For**: Fast responses for search queries
+- **Use Case**: Web search and quick answers with citations
+- **Best For**: Real-time information retrieval, research queries, and factual questions
 
-#### 2. `perplexity_research`
-
-- **Model**: `sonar-deep-research`
-- **Use Case**: In-depth research requiring comprehensive analysis
-- **Best For**: Academic research, detailed investigations
-
-#### 3. `perplexity_reason`
-
-- **Model**: `sonar-reasoning-pro`
-- **Use Case**: Complex reasoning, analysis, and logical thinking tasks
-- **Best For**: Problem-solving, decision analysis, logical reasoning
+This streamlined implementation focuses solely on web search capabilities to provide fast, reliable results with automatic citation handling.
 
 ### Input Format
 
-All tools accept an array of message objects:
+The tool accepts an array of message objects:
 
 ```json
 {
@@ -52,7 +42,7 @@ All tools accept an array of message objects:
 
 ### Response Format
 
-All tools return a string response that includes:
+The tool returns a string response that includes:
 
 - The main response content from the AI model
 - Automatically appended citations (when available)
@@ -63,32 +53,33 @@ All tools return a string response that includes:
 #### Using MCP Client
 
 ```python
-# Example: Web search
+# Example: Web search with conversation context
 response = await client.call_tool(
     "perplexity_search",
     {
         "messages": [
-            {"role": "user", "content": "What is machine learning?"}
+            {"role": "system", "content": "You are a helpful research assistant."},
+            {"role": "user", "content": "What are the latest developments in artificial intelligence?"}
         ]
     }
 )
 
-# Example: Deep research
+# Example: Quick factual query
 response = await client.call_tool(
-    "perplexity_research",
+    "perplexity_search",
     {
         "messages": [
-            {"role": "user", "content": "Research the latest developments in quantum computing"}
+            {"role": "user", "content": "What is the current population of Tokyo?"}
         ]
     }
 )
 
-# Example: Reasoning task
+# Example: Research query with specific focus
 response = await client.call_tool(
-    "perplexity_reason",
+    "perplexity_search",
     {
         "messages": [
-            {"role": "user", "content": "Analyze the pros and cons of microservices vs monolithic architecture"}
+            {"role": "user", "content": "Explain the environmental benefits of renewable energy sources"}
         ]
     }
 )
@@ -97,7 +88,7 @@ response = await client.call_tool(
 #### Direct HTTP Calls
 
 ```bash
-# Test web search
+# Test the perplexity_search tool
 curl -X POST \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_perplexity_key" \
@@ -113,13 +104,14 @@ The Perplexity MCP server requires a Perplexity AI API key. Pass it in the reque
 x-api-key: your_perplexity_api_key_here
 ```
 
-### Model Comparison
+### Tool Details
 
-| Tool                  | Model                 | Response Time | Detail Level | Best Use Case                     |
-| --------------------- | --------------------- | ------------- | ------------ | --------------------------------- |
-| `perplexity_search`   | `sonar-pro`           | Fast          | Moderate     | Web search, quick questions       |
-| `perplexity_research` | `sonar-deep-research` | Slower        | High         | In-depth research, analysis       |
-| `perplexity_reason`   | `sonar-reasoning-pro` | Moderate      | High         | Logic, reasoning, problem-solving |
+| Feature       | Value               | Description                            |
+| ------------- | ------------------- | -------------------------------------- |
+| **Tool Name** | `perplexity_search` | Single optimized web search tool       |
+| **Model**     | `sonar-pro`         | Perplexity's fast, web-search model    |
+| **Response**  | Fast                | Quick responses with citations         |
+| **Use Cases** | Web search          | Real-time information, research, facts |
 
 ### Error Handling
 
