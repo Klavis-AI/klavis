@@ -15,10 +15,12 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy server code
-COPY mcp_server_focused.py ./mcp_server_focused.py
+COPY server.py ./server.py
 COPY tools ./tools
+ 
+EXPOSE 8000
 
-# Default entrypoint runs the MCP server over stdio
-ENTRYPOINT ["python", "mcp_server_focused.py"]
+# Default entrypoint runs the MCP server over HTTP via uvicorn
+ENTRYPOINT ["python", "server.py"]
 
 
