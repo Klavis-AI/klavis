@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from spotipy import SpotifyException
 
-from . import spotify_api
-from .utils import normalize_redirect_uri
+from tools import spotify_api
+from tools.utils import normalize_redirect_uri
 
 load_dotenv()
 
@@ -49,7 +49,7 @@ if spotify_api.REDIRECT_URI:
 spotify_client = spotify_api.Client(logger)
 
 # -------------------------
-# MCP Server and tool models (unchanged logic)
+# MCP Server and tool models
 # -------------------------
 server = Server("spotify-mcp-server")
 
@@ -245,7 +245,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
     logger.info(f"Starting Spotify MCP server on port {port}")
 
     # Server instance is already set up via decorators above (server)
-    app = server  # name kept to match Affinity pattern
+    app = server 
 
     # SSE transport
     sse = SseServerTransport("/messages/")

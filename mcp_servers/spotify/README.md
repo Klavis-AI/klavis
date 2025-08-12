@@ -64,6 +64,13 @@ uv run spotify-mcp --port 5001
 python -m src.spotify_mcp.server --port 5001
 ```
 
+### Docker
+```bash
+docker build --network host -t spotify-mcp .  
+docker run -it --rm -p 5001:5001 spotify-mcp
+```
+
+
 When running, you’ll see:
 ```
 [INFO] Starting Spotify MCP server on port 5001
@@ -73,27 +80,6 @@ When running, you’ll see:
 
 ---
 
-## Claude / MCP Client Integration
-
-Add to your Claude MCP config (usually `claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "spotify": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "C:\ABSOLUTE\PATH\TO\mcp_servers\spotify",
-        "run",
-        "spotify-mcp",
-        "--port",
-        "5001"
-      ]
-    }
-  }
-}
-```
 
 Restart Claude Desktop, and you can run commands like:
 - “Search Spotify for the track ‘Blinding Lights’ and return the top 3 results.”
