@@ -1,0 +1,358 @@
+---
+title: 'Mem0'
+description: 'Learn how to use Klavis to connect your AI application to Mem0 MCP Server for persistent memory management'
+---
+
+import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+
+<NoCodeSnippet />
+
+---
+
+## For Developer
+
+Follow the instructions below to integrate Mem0 MCP server to your AI application using our API or SDK.
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+- [Get your Mem0 API key](https://mem0.ai) for memory management
+
+### 1. Create a Mem0 MCP Server
+
+Use the following endpoint to create a new remote Mem0 MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Mem0 MCP server instance
+mem0_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.MEM0,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Mem0 MCP server instance
+const mem0Server = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Mem0,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Mem0",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Mem0\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Mem0\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+```json
+{
+  "server_url": "https://api.klavis.ai/mcp-server/<SERVER_INSTANCE_ID>",
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "auth_url": "https://mem0.ai/auth/oauth?user_id=<YOUR_USER_ID>&server_instance_id=<SERVER_INSTANCE_ID>"
+}
+```
+
+### 2. Set Authentication Token
+
+After creating the server instance, you need to configure your Mem0 API key:
+
+#### Request
+<CodeGroup>
+```python Python
+# Set the Mem0 API key for authentication
+auth_response = klavis_client.mcp_server.set_auth_token(
+    server_instance_id="<SERVER_INSTANCE_ID>",
+    token="<MEM0_API_KEY>",
+    token_type="api_key"
+)
+```
+
+```javascript TypeScript
+// Set the Mem0 API key for authentication
+const authResponse = await klavisClient.mcpServer.setAuthToken({
+    serverInstanceId: "<SERVER_INSTANCE_ID>",
+    token: "<MEM0_API_KEY>",
+    tokenType: "api_key"
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/set-auth-token \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "token": "<MEM0_API_KEY>",
+  "token_type": "api_key"
+}'
+```
+</CodeGroup>
+
+### 3. List Available Tools
+
+Now you can list all the available Mem0 tools:
+
+#### Request
+<CodeGroup>
+```python Python
+# List all available tools for the Mem0 server
+tools = klavis_client.mcp_server.list_tools(
+    server_instance_id="<SERVER_INSTANCE_ID>",
+    format="openai"
+)
+```
+
+```javascript TypeScript
+// List all available tools for the Mem0 server
+const tools = await klavisClient.mcpServer.listTools({
+    serverInstanceId: "<SERVER_INSTANCE_ID>",
+    format: "openai"
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/list-tools \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "format": "openai"
+}'
+```
+</CodeGroup>
+
+### 4. Available Tools
+
+The Mem0 MCP server provides the following tools for persistent memory management:
+
+| Tool | Description |
+|------|-------------|
+| `mem0_add_memory` | Store code snippets, implementation details, and programming knowledge for future reference |
+| `mem0_get_all_memories` | Retrieve all stored memories for comprehensive context analysis |
+| `mem0_search_memories` | Semantically search through stored memories using natural language queries |
+| `mem0_update_memory` | Update an existing memory with new content while maintaining its unique identifier |
+| `mem0_delete_memory` | Delete a specific memory by ID or delete all memories for a user |
+
+### 5. Call Tools
+
+You can now call any of the available tools:
+
+#### Add Memory
+<CodeGroup>
+```python Python
+# Add a new memory
+result = klavis_client.mcp_server.call_tool(
+    server_instance_id="<SERVER_INSTANCE_ID>",
+    tool_name="mem0_add_memory",
+    arguments={
+        "content": "Python FastAPI CRUD example with SQLAlchemy ORM and Pydantic models for user management",
+        "user_id": "developer_123"
+    }
+)
+```
+
+```javascript TypeScript
+// Add a new memory
+const result = await klavisClient.mcpServer.callTool({
+    serverInstanceId: "<SERVER_INSTANCE_ID>",
+    toolName: "mem0_add_memory",
+    arguments: {
+        content: "Python FastAPI CRUD example with SQLAlchemy ORM and Pydantic models for user management",
+        user_id: "developer_123"
+    }
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/call-tool \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "tool_name": "mem0_add_memory",
+  "arguments": {
+    "content": "Python FastAPI CRUD example with SQLAlchemy ORM and Pydantic models for user management",
+    "user_id": "developer_123"
+  }
+}'
+```
+</CodeGroup>
+
+#### Search Memories
+<CodeGroup>
+```python Python
+# Search through stored memories
+result = klavis_client.mcp_server.call_tool(
+    server_instance_id="<SERVER_INSTANCE_ID>",
+    tool_name="mem0_search_memories",
+    arguments={
+        "query": "FastAPI CRUD operations",
+        "user_id": "developer_123",
+        "limit": 10
+    }
+)
+```
+
+```javascript TypeScript
+// Search through stored memories
+const result = await klavisClient.mcpServer.callTool({
+    serverInstanceId: "<SERVER_INSTANCE_ID>",
+    toolName: "mem0_search_memories",
+    arguments: {
+        query: "FastAPI CRUD operations",
+        user_id: "developer_123",
+        limit: 10
+    }
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/call-tool \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "tool_name": "mem0_search_memories",
+  "arguments": {
+    "query": "FastAPI CRUD operations",
+    "user_id": "developer_123",
+    "limit": 10
+  }
+}'
+```
+</CodeGroup>
+
+#### Get All Memories
+<CodeGroup>
+```python Python
+# Get all memories for a user
+result = klavis_client.mcp_server.call_tool(
+    server_instance_id="<SERVER_INSTANCE_ID>",
+    tool_name="mem0_get_all_memories",
+    arguments={
+        "user_id": "developer_123",
+        "page": 1,
+        "page_size": 50
+    }
+)
+```
+
+```javascript TypeScript
+// Get all memories for a user
+const result = await klavisClient.mcpServer.callTool({
+    serverInstanceId: "<SERVER_INSTANCE_ID>",
+    toolName: "mem0_get_all_memories",
+    arguments: {
+        user_id: "developer_123",
+        page: 1,
+        page_size: 50
+    }
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/call-tool \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "server_instance_id": "<SERVER_INSTANCE_ID>",
+  "tool_name": "mem0_get_all_memories",
+  "arguments": {
+    "user_id": "developer_123",
+    "page": 1,
+    "page_size": 50
+  }
+}'
+```
+</CodeGroup>
+
+## Use Cases
+
+The Mem0 MCP server is ideal for:
+
+- **AI Assistant Memory**: Store conversation context and learnings across sessions
+- **Code Knowledge Base**: Save implementation patterns and solutions for future reference
+- **Documentation System**: Build searchable technical knowledge repositories
+- **Learning Assistant**: Remember user preferences and past interactions
+- **Development Context**: Maintain persistent context about code patterns and best practices
+
+## Features
+
+- **Semantic Search**: Natural language querying of stored memories
+- **Persistent Storage**: Information survives across sessions and applications
+- **User-scoped**: Separate memory spaces for different users
+- **Rich Context**: Store code snippets with explanations and technical context
+- **CRUD Operations**: Full create, read, update, delete support for memories
+- **Pagination**: Efficient handling of large memory collections
+
+## Next Steps
+
+- Learn more about [Mem0](https://mem0.ai) memory management
+- Explore [other MCP servers](/documentation/introduction) available in Klavis
+- Check out [AI Platform Integrations](/documentation/ai-platform-integration/overview) to use Mem0 with your preferred LLM framework
