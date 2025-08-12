@@ -1,83 +1,168 @@
-# Spotify MCP Server
+# Spotify MCP Server 🎵
 
-A **Model Context Protocol (MCP)** server for Spotify, enabling access and play to music data such as artists, albums, tracks, and music playback through the Spotify Web API.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for controlling and querying Spotify via Claude or other MCP-compatible clients.  
+This server exposes tools for **searching, playing, pausing, queueing, and fetching Spotify content** over HTTP.
+
+---
 
 ## Features
+-  **Search Spotify** (tracks, albums, artists, playlists)
+-  **Play songs** by URI or resume playback
+-  **Pause** current playback
+-  **Skip** tracks
+-  **Manage queue** (view / add tracks)
+-  **Get detailed item info** (track, album, artist, playlist)
+-  **Manage playlists** (get, add, remove, update details)
+-  **HTTP MCP Orchestration** — fully compatible with Claude’s MCP client
 
-This server exposes the following Spotify functionalities as tools:
-
-* **`spotify_search`** – Search for tracks, albums, artists, or playlists by query term.  
-* **`spotify_get_info`** – Retrieve detailed information for a specific track, album, artist, or playlist using its Spotify URI.  
-* **`spotify_get_current_track`** – Get the currently playing track.  
-* **`spotify_start_playback`** – Start or resume Spotify playback for a specific track, album, or playlist.  
-* **`spotify_pause_playback`** – Pause the current playback.  
-* **`spotify_add_to_queue`** – Add a track to the playback queue.  
-* **`spotify_get_queue`** – Get the current queue of tracks.  
-* **`spotify_get_playlist_tracks`** – Retrieve tracks from a playlist.  
-
-## Prerequisites
-
-* **Python**: Version 3.10 or higher.  
-* **pip**: Python package manager (comes with Python).  
-* **Spotify Developer Account**: Create one at [Spotify for Developers](https://developer.spotify.com/dashboard).  
-* **Spotify Client ID and Client Secret**: Obtain from your Spotify Developer Dashboard.
-
-## Demo
-
-<details>
-  <summary>Video — turn on audio</summary>
-  <video src="media/video1.mp4" controls></video>
-</details>
-
-<details>
-  <summary>Video — turn on audio</summary>
-  <video src="media/video2.mp4" controls></video>
-</details>
-
-### Screenshots
-<p align="center">
-  <img src="media/1.png"/>
-  <img src="media/2.png"/><br>
-  <img src="media/3.png"/>
-  <img src="media/4.png"/>
-</p>
-
+---
 
 ## Installation
 
-1. Clone the repository and navigate to the Spotify MCP server directory:
-
+1. **Clone the repository**
 ```bash
-cd spotify
+git clone <repo-url>
+cd mcp_servers/spotify
 ```
 
-2. Install dependencies:
+2. **Create a virtual environment (optional but recommended)**
+```bash
+uv venv
+```
+
+3. **Install dependencies**
 ```bash
 uv pip install -e .
 ```
 
-3. Create a `.env` file in the project root with your Spotify credentials:
+---
+
+## Configuration
+
+Create a `.env` file in the project root:
+
 ```env
-SPOTIFY_CLIENT_ID=YOUR_SPOTIFY_CLIENT_ID
-SPOTIFY_CLIENT_SECRET="YOUR_SPOTIFY_CLIENT_SECRET"
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+SPOTIFY_ACCESS_TOKEN=your_valid_access_token
 ```
 
-### Run this project with uvx
+> ⚠️ Never commit `.env` to version control.  
+> For getting a Spotify access token, see [Spotify Developer Console](https://developer.spotify.com/console/).
 
-Add this snippet to your MCP Config.
+---
+
+## Running the Server
+
+### Option 1 — Directly with `uv`
+```bash
+uv run spotify-mcp --port 5001
+```
+
+### Option 2 — Module Execution
+```bash
+python -m src.spotify_mcp.server --port 5001
+```
+
+When running, you’ll see:
+```
+[INFO] Starting Spotify MCP server on port 5001
+[INFO]   - SSE endpoint: http://localhost:5001/sse
+[INFO]   - StreamableHTTP endpoint: http://localhost:5001/mcp
+```
+
+---
+
+## Claude / MCP Client Integration
+
+Add to your Claude MCP config (usually `claude_desktop_config.json`):
 
 ```json
-"spotify": {
-  "command": "uv",
-  "args": [
-    "--from",
-    "git+https://github.com/varunneal/spotify-mcp",
-    "spotify-mcp"
-  ],
-  "env": {
-    "SPOTIFY_CLIENT_ID": YOUR_CLIENT_ID,
-    "SPOTIFY_CLIENT_SECRET": YOUR_CLIENT_SECRET,
-    "SPOTIFY_REDIRECT_URI": "http://127.0.0.1:8080/callback"
+{
+  "mcpServers": {
+    "spotify": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:\ABSOLUTE\PATH\TO\mcp_servers\spotify",
+        "run",
+        "spotify-mcp",
+        "--port",
+        "5001"
+      ]
+    }
   }
 }
 ```
+
+Restart Claude Desktop, and you can run commands like:
+- “Search Spotify for the track ‘Blinding Lights’ and return the top 3 results.”
+- “Play ‘Shape of You’ on Spotify.”
+- “Pause the current playback.”
+
+---
+
+## Testing via Postman
+
+The MCP server speaks **JSON-RPC over HTTP**.
+
+**Example: List all tools**
+```http
+POST http://localhost:5001/mcp
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+```
+
+**Example: Search a song**
+```http
+POST http://localhost:5001/mcp
+Content-Type: application/json
+Accept: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": "2",
+  "method": "tools/call",
+  "params": {
+    "name": "SpotifySearch",
+    "arguments": {
+      "query": "Blinding Lights",
+      "limit": 3
+    }
+  }
+}
+```
+
+---
+
+## Available Tools
+
+| Tool Name         | Description |
+|-------------------|-------------|
+| **SpotifyPlayback** | Manage playback: get info, start, pause, skip |
+| **SpotifySearch**   | Search for tracks, albums, artists, playlists |
+| **SpotifyQueue**    | View or add to playback queue |
+| **SpotifyGetInfo**  | Get details about a track, album, artist, playlist |
+| **SpotifyPlaylist** | Manage playlists: get, add tracks, remove tracks, edit details |
+
+---
+
+## Error Handling
+- If the access token is **missing** → returns `"Missing Spotify access token"`
+- If the access token is **invalid/expired** → returns `"Invalid access token"` or `"401 Unauthorized"`
+- All errors are sent as JSON-RPC `error` objects for consistency.
+
+---
+
+## Development
+- Code is formatted with `ruff` / `black`
+- Python ≥ 3.12 required
+- Dependencies are managed with [uv](https://github.com/astral-sh/uv)
+
+---
