@@ -1,186 +1,237 @@
-# Tavily MCP Server
+# Tavily MCP Server for Klavis AI
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python: 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0+-00a393.svg)](https://fastapi.tiangolo.com/)
-[![Tavily API](https://img.shields.io/badge/Tavily_API-v1-4b9ce2.svg)](https://docs.tavily.com)
+A Model Context Protocol (MCP) server that provides web search, content extraction, and web crawling capabilities using the Tavily API. This server is designed to integrate seamlessly with Klavis AI as a custom MCP server.
 
-## 📖 Overview
+## Features
 
-Tavily MCP Server is a Model Context Protocol (MCP) implementation that connects language models and other applications with the Tavily API. It provides a standardized interface for executing web search, extraction, crawling, and mapping operations through MCP tools.
+### 🔍 Web Search (`tavily_search`)
+Search the web for current information and reputable sources with configurable depth and filtering options.
 
-## 🚀 Features
+**Capabilities:**
+- Basic and advanced search depth
+- Configurable result limits 
+- Optional synthesized answers
+- Freshness filtering 
+- Topic-based filtering
+- Intelligent caching for performance
+- Retry logic with exponential backoff
 
-This server provides the following capabilities through MCP tools:
+### 📄 Content Extraction (`tavily_extract`)
+Extract primary content from one or more URLs with optional image extraction.
 
-| Tool | Description |
-|------|-------------|
-| `tavily_search` | Search the web with filters like topic, date range, domains, images, and raw content |
-| `tavily_extract` | Extract and parse content from one or more web pages |
-| `tavily_crawl` | Crawl a website starting from a root URL with depth/breadth controls |
-| `tavily_map` | Generate a website map without heavy content extraction |
+**Capabilities:**
+- Extract content from multiple URLs simultaneously
+- Optional image extraction
+- Response normalization and caching
+- Robust error handling
 
-## 🔧 Prerequisites
+### 🕷️ Web Crawling (`tavily_crawl`)
+Crawl websites with configurable depth and breadth for comprehensive content collection.
 
-You'll need one of the following:
+**Capabilities:**
+- Graph-based traversal from a single start URL
+- Configurable depth (1-3 levels) and breadth limits
+- Domain-aware crawling with external link control
+- Path and domain filtering (include/exclude)
+- Natural language instructions for guided crawling
+- Multiple output formats (markdown/text)
+- Category-based filtering
 
-- **Docker:** Docker installed and running (recommended)
-- **Python:** Python 3.12+ with pip
-- **Tavily API Key:** Get one from [Tavily](https://app.tavily.com)
+## Installation
 
-## ⚙️ Setup & Configuration
+### Prerequisites
+- Python 3.10 or higher
+- Tavily API key
 
-### Environment Configuration
+### Setup
 
-1. **Create your environment file**:
+1. **Clone and navigate to the project:**
    ```bash
-   cp .env.example .env
+   cd tavily
    ```
 
-2. **Edit the `.env` file** with your Tavily API credentials:
+2. **Install dependencies:**
+
+   **Option A: Using pip with editable install (recommended):**
+   ```bash
+   pip install -e .
    ```
-   TAVILY_API_KEY=YOUR_ACTUAL_TAVILY_API_KEY
-   TAVILY_MCP_SERVER_PORT=5000
+
+   **Option B: Using uv (modern Python package manager):**
+   ```bash
+   uv sync
    ```
 
-## 🏃‍♂️ Running the Server
+3. **Set up environment variables:**
+   Create a `.env` file in the project root:
+   ```env
+   TAVILY_API_KEY=your_tavily_api_key_here
+   ```
 
-### Option 1: Docker (Recommended)
+## Configuration
 
-The Docker build must be run from the project root directory (`klavis/`):
+The server uses environment variables for configuration:
 
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TAVILY_API_KEY` | **Required** | Your Tavily API key |
+| `TAVILY_BASE_URL` | `https://api.tavily.com` | Tavily API base URL |
+| `TAVILY_TIMEOUT_S` | `20` | Request timeout in seconds |
+| `TAVILY_CONNECT_TIMEOUT_S` | `5` | Connection timeout in seconds |
+| `TAVILY_MAX_RETRIES` | `2-3` | Maximum retry attempts |
+| `TAVILY_CONCURRENCY` | `8` | Maximum concurrent requests |
+| `TAVILY_CACHE_TTL_S` | `120` | Cache TTL in seconds |
+| `TAVILY_MAX_RESULTS_CAP` | `10` | Maximum search results |
+| `TAVILY_CRAWL_MAX_PAGES` | `50` | Maximum pages for crawling |
+| `LOG_LEVEL` | `INFO` | Logging level |
+
+## Usage
+
+### Running the Server
+
+Start the MCP server using the MCP dev command:
 ```bash
-# Navigate to the root directory of the project
-cd /path/to/klavis
-
-# Build the Docker image
-docker build -t tavily-mcp-server -f mcp_servers/tavily/Dockerfile .
-
-# Run the container
-docker run -d -p 5000:5000 --env-file mcp_servers/tavily/.env --name tavily-mcp tavily-mcp-server
+mcp dev server.py
 ```
 
-### Option 2: Python Virtual Environment
+The server runs on stdio and is compatible with MCP clients.
 
+### Tool Descriptions
+
+#### `tavily_search`
+Search the web for a query and return summarized results. Use when you need current information or reputable sources.
+
+**Parameters:**
+- `query` (str): Search query text
+- `search_depth` (str): "basic" or "advanced"
+- `max_results` (int): 1-10 results
+- `include_answer` (bool): Include synthesized answer
+- `include_raw_content` (bool): Include raw content snippets
+- `days` (int, optional): Freshness filter (0-365)
+- `topic` (str, optional): Topic focus
+
+**Returns:** SearchResponse with answer, results, response time, and auto parameters.
+
+#### `tavily_extract`
+Extract the primary content from one or more URLs. Use when you already know the URL(s) and need cleaned text and optional images.
+
+**Parameters:**
+- `urls` (str or List[str]): URL(s) to extract from
+- `include_images` (bool): Include images in results
+
+**Returns:** ExtractResponse with extracted content and optional images.
+
+#### `tavily_crawl`
+Crawl from a single start URL up to max_depth/max_breadth/limit, returning extracted pages. Use for site exploration and content collection.
+
+**Parameters:**
+- `url` (str): Root URL to begin crawl
+- `max_depth` (int): Crawl depth (1-3)
+- `max_breadth` (int): Links per level (≥1)
+- `limit` (int): Maximum pages (1-500)
+- `instructions` (str, optional): Natural language guidance
+- `select_paths` (List[str], optional): Include path patterns
+- `select_domains` (List[str], optional): Include domain patterns
+- `exclude_paths` (List[str], optional): Exclude path patterns
+- `exclude_domains` (List[str], optional): Exclude domain patterns
+- `allow_external` (bool): Include external domains
+- `include_images` (bool): Include images in results
+- `categories` (List[str], optional): Content categories
+- `extract_depth` (str): "basic" or "advanced"
+- `format` (str): "markdown" or "text"
+- `include_favicon` (bool): Include favicon URLs
+
+**Returns:** CrawlResponse with crawled pages and metadata.
+
+## Error Handling
+
+The server provides standardized error messages for different scenarios:
+
+- `ERR_UNAUTHORIZED`: Check TAVILY_API_KEY
+- `ERR_RATE_LIMIT`: Rate limited, retry later
+- `ERR_UPSTREAM_<status>`: Upstream API errors with context
+- `ERR_BAD_REQUEST`: Invalid parameters
+- `ERR_PAYMENT_REQUIRED`: Billing or quota issues
+
+## Architecture
+
+### Project Structure
+```
+tavily/
+├── app.py                 # FastMCP application setup
+├── server.py             # Server entry point
+├── pyproject.toml        # Dependencies and configuration
+├── tools/                # Core functionality
+│   ├── client.py         # HTTP client configuration
+│   ├── search.py         # Web search implementation
+│   ├── extract.py        # Content extraction
+│   ├── crawl.py          # Web crawling
+│   ├── types.py          # Pydantic data models
+│   └── errors.py         # Error handling
+└── mcp_venv/             # Virtual environment
+```
+
+### Key Components
+
+#### HTTP Client (`tools/client.py`)
+- Centralized client factory with consistent configuration
+- Authentication via TAVILY_API_KEY
+- Configurable timeouts and retry logic
+- Request ID tracking for debugging
+
+#### Data Models (`tools/types.py`)
+- Pydantic models for type safety
+- Flexible field mapping for API compatibility
+- Response validation and normalization
+
+#### Error Handling (`tools/errors.py`)
+- Standardized error messages for HTTP status codes
+- AI-friendly error hints for debugging
+- Response body snippets for context
+
+## Dependencies
+
+- `mcp[cli]>=1.2.0`: MCP Python SDK
+- `httpx>=0.27.0`: HTTP client
+- `pydantic>=2.6.0`: Data validation
+- `python-dotenv>=1.0.1`: Environment variable loading
+- `tenacity>=8.2.3`: Retry logic
+
+## Development
+
+### Running Tests
 ```bash
-# Navigate to the Tavily server directory
-cd mcp_servers/tavily
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the server
-python server.py
+pytest
 ```
 
-Once running, the server will be accessible at `http://localhost:5000`.
+### Code Quality
+The project follows Python best practices with:
+- Type hints throughout
+- Comprehensive error handling
+- Logging for debugging
+- Caching for performance
+- Rate limiting and concurrency control
 
-## 🔌 API Usage
+## License
 
-The server implements the Model Context Protocol (MCP) standard. Here's an example of how to call a tool:
+This project is part of the Klavis AI ecosystem and follows the same licensing terms.
 
-```python
-import httpx
-
-async def call_tavily_tool():
-    url = "http://localhost:5000/mcp"
-    payload = {
-        "tool_name": "tavily_search",
-        "tool_args": {
-            "query": "multi-agent Retrieval-Augmented Generation",
-            "topic": "news",
-            "max_results": 5,
-            "include_images": True
-        }
-    }
-    
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload)
-        result = response.json()
-        return result
-```
-
-## 📋 Common Operations
-
-### Tavily Search
-
-```python
-payload = {
-    "tool_name": "tavily_search",
-    "tool_args": {
-        "query": "multi-agent RAG frameworks",
-        "topic": "news",
-        "max_results": 5,
-        "include_images": True
-    }
-}
-```
-
-### Tavily Extract
-
-```python
-payload = {
-    "tool_name": "tavily_extract",
-    "tool_args": {
-        "urls": ["https://www.python.org"],
-        "extract_depth": "advanced",
-        "include_images": True
-    }
-}
-```
-
-### Tavily Crawl
-
-```python
-payload = {
-    "tool_name": "tavily_crawl",
-    "tool_args": {
-        "url": "https://example.com",
-        "max_depth": 2,
-        "limit": 10
-    }
-}
-```
-
-### Tavily Map
-
-```python
-payload = {
-    "tool_name": "tavily_map",
-    "tool_args": {
-        "url": "https://example.com",
-        "max_depth": 1
-    }
-}
-```
-
-## 🛠️ Troubleshooting
-
-### Docker Build Issues
-
-- **File Not Found Errors**: Ensure you are building from the root project directory (`klavis/`), not from the server directory.
-
-### Common Runtime Issues
-
-- **Authentication Failures**: Verify your API key is correct and has not expired.
-- **API Errors**: Check the Tavily API documentation for error meanings.
-- **Rate Limiting**: Tavily may have usage limits depending on your plan.
-- **Invalid Arguments**: Make sure your payload matches the expected schema for each tool.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📜 License
+## Support
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+For issues related to:
+- **Tavily API**: Contact Tavily support
+- **MCP Integration**: Check MCP documentation
+- **Klavis AI**: Contact Klavis AI support
+- **This Project**: Open an issue on GitHub
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
