@@ -1,277 +1,299 @@
-# 🔍 Exa AI-Powered Search MCP Server
+# Exa AI-Powered Search MCP Server
 
-An advanced Model Context Protocol (MCP) server that provides AI-powered web search capabilities through Exa's sophisticated search engine. This server exposes Exa's full suite of search tools, enabling AI agents to perform semantic search, content retrieval, similarity finding, direct question answering, and comprehensive research.
+A high-quality Model Context Protocol (MCP) server that provides AI-powered web search capabilities through Exa's sophisticated search engine. This server exposes Exa's full suite of search tools, enabling AI agents to perform semantic search, content retrieval, similarity finding, direct question answering, and comprehensive research.
 
-## 🌟 Features
+## Purpose
 
-### Core Search Capabilities
-- **Neural Search**: AI-powered semantic search that understands meaning and context
-- **Keyword Search**: Traditional keyword-based search for precise term matching
-- **Content Retrieval**: Clean, parsed HTML content from search results
-- **Similarity Finding**: Discover pages similar in meaning to a given URL
-- **Direct Answers**: Get AI-generated answers with source citations
-- **Research Mode**: Comprehensive research with structured results
+This MCP server acts as an intelligent bridge between AI agents and Exa's advanced web search capabilities. It transforms natural language queries into powerful search operations, making web research and content discovery seamless for AI assistants.
 
-### Advanced Filtering
-- **Domain Control**: Include or exclude specific domains
-- **Date Filtering**: Filter by crawl date or published date
-- **Content Filtering**: Include or exclude specific text patterns
-- **Category Filtering**: Focus on specific content categories
-- **Autoprompt**: Automatic query optimization
+## Key Features
+
+- **AI-Powered Semantic Search**: Neural search that understands meaning and context
+- **Content Retrieval**: Clean, parsed HTML content from search results  
+- **Similarity Discovery**: Find pages similar to a given URL
+- **Direct Q&A**: Get focused answers with source citations
+- **Comprehensive Research**: Structured multi-source analysis
+- **Advanced Filtering**: Domain, date, and content-based filtering
 
 ---
 
-## 🛠️ Available Tools
-
-### `exa_search`
-**AI Prompt Words**: "search for", "find information about", "look up"
-
-Performs an Exa search query using neural embeddings or keyword search.
-
-**Parameters:**
-- `query` (str, required): The search query to find relevant web content
-- `num_results` (int): Number of results to return (max 1000, default 10)
-- `include_domains` (array): List of domains to include in search results
-- `exclude_domains` (array): List of domains to exclude from search results
-- `start_crawl_date` (str): Start date for crawl date filter (YYYY-MM-DD)
-- `end_crawl_date` (str): End date for crawl date filter (YYYY-MM-DD)
-- `start_published_date` (str): Start date for published date filter (YYYY-MM-DD)
-- `end_published_date` (str): End date for published date filter (YYYY-MM-DD)
-- `use_autoprompt` (bool): Whether to use Exa's autoprompt feature (default true)
-- `type` (str): Search type - 'neural' or 'keyword' (default 'neural')
-- `category` (str): Category filter for results
-- `include_text` (array): Text patterns that must be included in results
-- `exclude_text` (array): Text patterns to exclude from results
-
-**Example Usage:**
-```javascript
-{
-  "query": "latest developments in quantum computing",
-  "num_results": 15,
-  "type": "neural",
-  "include_domains": ["arxiv.org", "nature.com"],
-  "start_published_date": "2024-01-01"
-}
-```
-
----
-
-### `exa_get_contents`
-**AI Prompt Words**: "get content", "read full text", "retrieve page content"
-
-Retrieves clean, parsed HTML content for specific Exa search result IDs.
-
-**Parameters:**
-- `ids` (array, required): List of Exa result IDs to get contents for
-- `text` (bool): Whether to include text content (default true)
-- `highlights` (object): Highlighting options with query and num_sentences
-- `summary` (object): Summary options with query for generating summaries
-
-**Example Usage:**
-```javascript
-{
-  "ids": ["result_id_1", "result_id_2"],
-  "text": true,
-  "highlights": {
-    "query": "quantum computing",
-    "num_sentences": 3
-  }
-}
-```
-
----
-
-### `exa_find_similar`
-**AI Prompt Words**: "find similar pages", "discover related content", "what's similar to"
-
-Finds web pages that are similar in meaning to a given URL.
-
-**Parameters:**
-- `url` (str, required): The URL to find similar pages for
-- `num_results` (int): Number of similar results to return (max 1000, default 10)
-- `exclude_source_domain` (bool): Whether to exclude the source domain (default true)
-- Additional filtering parameters same as exa_search
-
-**Example Usage:**
-```javascript
-{
-  "url": "https://example.com/article-about-ai",
-  "num_results": 10,
-  "exclude_source_domain": true,
-  "include_domains": ["research.org", "university.edu"]
-}
-```
-
----
-
-### `exa_answer`
-**AI Prompt Words**: "answer the question", "what is", "explain", "define"
-
-Gets a direct, AI-generated answer to a specific question using Exa's Answer API.
-
-**Parameters:**
-- `query` (str, required): The question to get a direct answer for
-- All filtering parameters from exa_search apply
-
-**Example Usage:**
-```javascript
-{
-  "query": "What are the main applications of quantum computing?",
-  "include_domains": ["scholar.google.com", "arxiv.org"],
-  "type": "neural"
-}
-```
-
----
-
-### `exa_research`
-**AI Prompt Words**: "research", "comprehensive analysis", "in-depth study", "investigate"
-
-Conducts comprehensive, in-depth web research on a topic with structured results and citations.
-
-**Parameters:**
-- `query` (str, required): The research topic or question to investigate comprehensively
-- All parameters from exa_search apply
-
-**Example Usage:**
-```javascript
-{
-  "query": "Impact of artificial intelligence on healthcare diagnostics",
-  "num_results": 20,
-  "include_domains": ["pubmed.ncbi.nlm.nih.gov", "nature.com", "nejm.org"],
-  "start_published_date": "2023-01-01"
-}
-```
-
----
-
-## 🚀 Quick Start
+## Installation and Setup
 
 ### Prerequisites
-- Python 3.11+
-- Exa API key (get one at [exa.ai](https://exa.ai))
 
-### Installation
+- **Python 3.11 or higher**
+- **Exa API Key**: Sign up at [exa.ai](https://exa.ai) to get your API key
 
-1. **Install dependencies:**
+### Step 1: Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. **Set up environment variables:**
+### Step 2: Acquire and Configure API Credentials
+
+1. **Get Your Exa API Key**:
+   - Visit [exa.ai](https://exa.ai)
+   - Sign up for an account
+   - Navigate to your API settings
+   - Copy your API key
+
+2. **Configure Environment Variables**:
+
+   **Option A: Environment Variables (Recommended)**
 ```bash
 export EXA_API_KEY="your_exa_api_key_here"
 export EXA_MCP_SERVER_PORT=5001  # Optional, defaults to 5001
 ```
 
-3. **Run the server:**
+   **Option B: .env File**
+   Create a `.env` file in the project root:
+   ```
+   EXA_API_KEY=your_exa_api_key_here
+   EXA_MCP_SERVER_PORT=5001
+   ```
+
+   **Option C: Runtime Authentication**
+   You can also pass the API key via the `x-auth-token` header when making requests.
+
+### Step 3: Run the Server
+
 ```bash
 python server.py
 ```
 
-### Docker Setup
+The server will start on port 5001 (or your configured port) with dual transport support:
+- **SSE Endpoint**: `http://localhost:5001/sse`
+- **StreamableHTTP Endpoint**: `http://localhost:5001/mcp`
 
-1. **Build the container:**
+### Docker Setup (Alternative)
+
+1. **Build the container**:
 ```bash
 docker build -t exa-mcp-server .
 ```
 
-2. **Run with environment variables:**
+2. **Run with environment variables**:
 ```bash
 docker run -p 5001:5001 -e EXA_API_KEY="your_api_key" exa-mcp-server
 ```
 
 ---
 
-## 🔧 Configuration
+## Available Tools
 
-### Environment Variables
-- `EXA_API_KEY`: Your Exa API key (required)
-- `EXA_MCP_SERVER_PORT`: Server port (default: 5001)
-- Authentication can also be passed via `x-auth-token` header
+### `exa_search` - Web Search
+Search the web for content using AI-powered semantic search or traditional keyword search.
 
-### Server Endpoints
-- **SSE**: `http://localhost:5001/sse`
-- **StreamableHTTP**: `http://localhost:5001/mcp`
+**When to use**: Finding web pages, articles, or content related to a topic
+**Returns**: Search results with URLs, titles, scores, and optional content text
+
+**Required Parameters**:
+- `query` (string): The search query
+
+**Optional Parameters**:
+- `num_results` (integer): Number of results (max 1000, default 10)
+- `type` (string): "neural" (default) or "keyword" search
+- `include_domains` (array): Domains to include
+- `exclude_domains` (array): Domains to exclude
+- `start_crawl_date` (string): Start date filter (YYYY-MM-DD)
+- `end_crawl_date` (string): End date filter (YYYY-MM-DD)
+- `start_published_date` (string): Published start date (YYYY-MM-DD)
+- `end_published_date` (string): Published end date (YYYY-MM-DD)
+- `use_autoprompt` (boolean): Use query optimization (default true)
+- `category` (string): Category filter
+- `include_text` (array): Required text patterns
+- `exclude_text` (array): Excluded text patterns
+
+### `exa_get_contents` - Content Retrieval
+Get the full text content of web pages using their Exa search result IDs.
+
+**When to use**: After performing a search to read full content of specific results
+**Returns**: Clean, parsed content with optional highlighting and summarization
+
+**Required Parameters**:
+- `ids` (array): List of Exa result IDs
+
+**Optional Parameters**:
+- `text` (boolean): Include text content (default true)
+- `highlights` (object): Highlighting options with query and num_sentences
+- `summary` (object): Summary options with query
+
+### `exa_find_similar` - Similarity Discovery
+Discover web pages similar in meaning and content to a given URL.
+
+**When to use**: Finding related articles or expanding research around a specific source
+**Returns**: Semantically similar pages with relevance scores
+
+**Required Parameters**:
+- `url` (string): The URL to find similar pages for
+
+**Optional Parameters**:
+- Same filtering options as `exa_search`
+- `exclude_source_domain` (boolean): Exclude source domain (default true)
+
+### `exa_answer` - Direct Q&A
+Get a direct answer to a specific question by searching and analyzing web sources.
+
+**When to use**: Need focused answers to specific questions rather than general search results
+**Returns**: Structured response with answer and source citations
+
+**Required Parameters**:
+- `query` (string): The question to answer
+
+**Optional Parameters**:
+- Same filtering options as `exa_search`
+
+### `exa_research` - Comprehensive Research
+Conduct comprehensive research on a topic with multiple sources and structured analysis.
+
+**When to use**: In-depth research projects requiring multiple high-quality sources
+**Returns**: Structured results with detailed content, citations, and analysis
+
+**Required Parameters**:
+- `query` (string): The research topic
+
+**Optional Parameters**:
+- Same parameters as `exa_search`
 
 ---
 
-## 💡 Use Cases
+## Integration with MCP Clients
 
-### Content Discovery
-Perfect for finding relevant articles, research papers, and web content based on semantic meaning rather than just keywords.
+### Claude Desktop / Cursor IDE
 
-### Research & Analysis
-Conduct comprehensive research on any topic with automatic source gathering and citation.
+Add this configuration to your Claude Desktop/ Cursor settings:
 
-### Content Recommendation
-Find similar content to existing articles or web pages for content curation and recommendation systems.
-
-### Q&A Systems
-Get direct answers to questions with proper source attribution for chatbots and knowledge systems.
-
-### Competitive Intelligence
-Research competitors, market trends, and industry developments with advanced filtering capabilities.
-
----
-
-## 🔍 API Capabilities
-
-The Exa API excels at:
-- **Semantic Understanding**: Finds content by meaning, not just keywords
-- **High-Quality Sources**: Filters for authoritative and relevant content  
-- **Real-Time Data**: Access to recently crawled web content
-- **Flexible Filtering**: Comprehensive options for domain, date, and content filtering
-- **Content Analysis**: Automatic summarization and highlighting capabilities
-
----
-
-## 🧪 Testing
-
-Test the server with any MCP-compatible client:
-
-### Claude Desktop
-Configure in your Claude Desktop settings to connect to the local server.
-
-### Cursor IDE
-Add as a remote MCP server in your Cursor configuration.
-
-### Custom Testing
-Use the streamable HTTP client for direct API testing:
-```bash
-python -m mcp_clients.streamable_http_client http://localhost:5001/mcp
+```json
+{
+  "mcpServers": {
+    "exa-search": {
+      "command": "python",
+      "args": ["path/to/exa/server.py"],
+      "env": {
+        "EXA_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
 ```
 
----
+### Other MCP Clients
 
-## 📚 Example Queries
-
-**Research Query:**
-> "Research the latest developments in renewable energy storage technologies"
-
-**Semantic Search:**
-> "Find articles about machine learning applications in medical diagnosis"
-
-**Similarity Finding:**
-> "Find content similar to this Nature article about climate change"
-
-**Direct Answer:**
-> "What are the key benefits of edge computing over cloud computing?"
+The server supports both SSE and StreamableHTTP transports, making it compatible with any MCP client. Use the appropriate endpoint based on your client's capabilities.
 
 ---
 
-## 🤝 Contributing
+## Environment Variables Reference
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `EXA_API_KEY` | Yes | None | Your Exa API key from exa.ai |
+| `EXA_MCP_SERVER_PORT` | No | 5001 | Port for the MCP server |
+
+---
+
+## Error Handling
+
+The server provides robust error handling with clear, actionable error messages:
+
+- **Authentication Errors**: Clear guidance when API keys are missing or invalid
+- **API Limit Errors**: Informative messages about rate limiting
+- **Network Errors**: Helpful context for connectivity issues
+- **Validation Errors**: Specific feedback on parameter issues
+
+All errors are logged and returned in a format that AI agents can understand and potentially act upon.
+
+---
+
+## Testing and Validation
+
+### Basic Connectivity Test
+
+```bash
+# Test server is running
+curl http://localhost:5001/mcp
+
+# Test with SSE
+curl http://localhost:5001/sse
+```
+
+### Tool Testing with Natural Language
+
+The server has been tested with these natural language queries to validate tool triggering:
+
+**For exa_search**:
+- "Search for recent developments in quantum computing"
+- "Find articles about sustainable energy solutions"
+- "Look up information on machine learning trends"
+
+**For exa_get_contents**:
+- "Get the full content of these search results"
+- "Read the complete text from this article"
+- "Retrieve the content from these URLs"
+
+**For exa_find_similar**:
+- "Find pages similar to this research article"
+- "Discover related content to this blog post"
+- "What other articles are like this one?"
+
+**For exa_answer**:
+- "What are the main benefits of renewable energy?"
+- "How does machine learning improve healthcare?"
+- "Explain the impact of climate change on agriculture"
+
+**For exa_research**:
+- "Research the current state of artificial intelligence in education"
+- "Conduct comprehensive analysis on cryptocurrency adoption"
+- "Investigate trends in remote work technologies"
+
+---
+
+## Contributing
 
 When contributing to this MCP server:
 
-1. Ensure tool descriptions are clear and AI-friendly
-2. Test with multiple AI clients
-3. Document new features thoroughly
-4. Follow the atomic tool design principle
-5. Include proper error handling
+1. **Follow Atomic Design**: Each tool should perform one specific job
+2. **Clear Descriptions**: Tool descriptions must be AI-friendly and unambiguous
+3. **Robust Error Handling**: Provide clear, actionable error messages
+4. **Test Thoroughly**: Validate with multiple AI clients and natural language queries
+5. **Document Changes**: Update README and maintain comprehensive documentation
 
 ---
 
-## 📄 License
+## Security Notes
+
+- API keys are handled securely through environment variables
+- The server supports both environment-based and header-based authentication
+- No sensitive information is logged in production mode
+- All network requests use secure HTTPS connections to Exa's API
+
+---
+
+## Troubleshooting
+
+**Server won't start**:
+- Verify Python 3.11+ is installed
+- Check that all dependencies are installed: `pip install -r requirements.txt`
+- Ensure port 5001 is available
+
+**Authentication errors**:
+- Verify your Exa API key is correct and active
+- Check environment variable spelling: `EXA_API_KEY`
+- Confirm your Exa account has sufficient API credits
+
+**No search results**:
+- Try different search queries
+- Check domain filters aren't too restrictive
+- Verify date filters are reasonable
+
+**Connection issues**:
+- Confirm firewall settings allow the configured port
+- Test with curl commands above
+- Check server logs for detailed error information
+
+---
+
+## License
 
 This project follows the Klavis AI open-source licensing terms.

@@ -65,10 +65,11 @@ def main(
             types.Tool(
                 name="exa_search",
                 description="""
-                Perform an Exa search query using neural embeddings or keyword search.
+                Search the web for content using AI-powered semantic search or traditional keyword search.
                 
-                This tool finds webpages using Exa's AI-powered search that understands meaning and context,
-                not just keywords. Perfect for discovering relevant content based on semantic similarity.
+                Use this tool when you need to find web pages, articles, or content related to a topic.
+                Exa's neural search understands meaning and context, making it excellent for research and content discovery.
+                Returns search results with URLs, titles, scores, and optional content text.
                 """,
                 inputSchema={
                     "type": "object",
@@ -138,10 +139,11 @@ def main(
             types.Tool(
                 name="exa_get_contents",
                 description="""
-                Retrieve clean, parsed HTML content for specific Exa search result IDs.
+                Get the full text content of web pages using their Exa search result IDs.
                 
-                Use this after performing a search to get the full text content of specific results.
-                Perfect for reading the actual content of web pages found through search.
+                Use this tool after performing a search to retrieve the actual text content from specific results.
+                Returns clean, parsed content with optional highlighting and summarization features.
+                Essential for reading the full content of interesting search results.
                 """,
                 inputSchema={
                     "type": "object",
@@ -178,10 +180,11 @@ def main(
             types.Tool(
                 name="exa_find_similar",
                 description="""
-                Find web pages that are similar in meaning to a given URL.
+                Discover web pages similar in meaning and content to a given URL.
                 
-                This tool analyzes the content and context of a webpage and finds other pages
-                with similar topics, themes, or content. Great for content discovery and research.
+                Use this tool when you have a specific webpage and want to find other pages with similar topics,
+                themes, or content. Perfect for content discovery, finding related articles, or expanding research
+                around a specific source. Returns semantically similar pages with relevance scores.
                 """,
                 inputSchema={
                     "type": "object",
@@ -246,10 +249,11 @@ def main(
             types.Tool(
                 name="exa_answer",
                 description="""
-                Get a direct, AI-generated answer to a specific question using Exa's Answer API.
+                Get a direct answer to a specific question by searching and analyzing web sources.
                 
-                This tool searches the web and synthesizes information to provide a direct answer
-                to your question, along with source citations. Perfect for research and fact-finding.
+                Use this tool when you need a focused answer to a specific question rather than general search results.
+                The tool searches relevant sources and provides a structured response with citations.
+                Ideal for fact-finding, research questions, and getting quick, sourced answers.
                 """,
                 inputSchema={
                     "type": "object",
@@ -315,10 +319,11 @@ def main(
             types.Tool(
                 name="exa_research",
                 description="""
-                Conduct comprehensive, in-depth web research on a topic with structured results and citations.
+                Conduct comprehensive research on a topic with multiple sources and structured analysis.
                 
-                This tool performs extensive research by searching, analyzing, and structuring information
-                from multiple sources. Perfect for detailed research projects and comprehensive topic analysis.
+                Use this tool for in-depth research projects that require gathering information from multiple
+                high-quality sources. Returns structured results with detailed content, citations, and analysis.
+                Perfect for academic research, market analysis, or thorough investigation of complex topics.
                 """,
                 inputSchema={
                     "type": "object",
