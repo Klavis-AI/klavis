@@ -1,6 +1,6 @@
 # Reddit Search MCP Server
 
-A Model Context Protocol (MCP) server for searching and retrieving Reddit content. This server provides AI assistants with the ability to find relevant subreddits, search for posts, retrieve comments, and discover similar content across Reddit.
+This Model Context Protocol (MCP) server enables AI clients (e.g., Cursor, Claude Desktop) to search and retrieve Reddit content. It exposes tools to discover relevant subreddits, search posts with semantic-style ranking, fetch post comments, and find similar posts. The server authenticates with Reddit via OAuth2 client credentials and includes resilient request handling.
 
 ## Features
 
@@ -31,9 +31,16 @@ To use this server, you need Reddit API credentials:
 3. Choose "script" application type
 4. Note down your `client_id` and `client_secret`
 
-## Configuration
+## Acquire Reddit API Credentials
 
-Create a `.env` file in the `mcp_servers/reddit_search/` directory with the following content:
+1. Visit `https://www.reddit.com/prefs/apps`
+2. Click “Create App” (or “Create Another App”)
+3. Choose application type: `script`
+4. Save the generated `client_id` and `client_secret`
+
+## Installation & Configuration
+
+1) Create a `.env` file in `mcp_servers/reddit_search/` with:
 
 ```bash
 REDDIT_MCP_SERVER_PORT=5001
@@ -42,7 +49,7 @@ REDDIT_CLIENT_SECRET=your_client_secret_here
 REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
 ```
 
-Set the following environment variables:
+2) Environment variables reference:
 
 - `REDDIT_MCP_SERVER_PORT`: Port for the server (default: 5001)
 - `REDDIT_CLIENT_ID`: Reddit app client ID
@@ -51,7 +58,21 @@ Set the following environment variables:
 
 ## Running the Server
 
-### Direct Python
+### Direct Python (uv)
+From the repository root on Windows PowerShell:
+```bash
+cd mcp_servers/reddit_search; uv sync; uv run python main.py
+```
+Expected terminal output includes:
+- "Starting Reddit MCP Server..."
+- A log line indicating a Reddit token was obtained
+- Tool invocation logs when tools are used, e.g.:
+  - `Tool call: reddit_find_subreddits(query='...')`
+  - `Tool call: reddit_search_posts(subreddit='...', query='...')`
+  - `Tool call: reddit_get_post_comments(post_id='...', subreddit='...')`
+  - `Tool call: reddit_find_similar_posts(post_id='...', limit=...)`
+
+### Direct Python (standard)
 ```bash
 python main.py --port 5001 --json-response
 ```
@@ -98,10 +119,11 @@ To integrate this MCP server with Cursor IDE:
 }
 ```
 
-2. **Test the Integration**:
-   - Ask Cursor to search for relevant subreddits
-   - Search for posts within specific communities
-   - Retrieve detailed post information with comments
+2. **Test the Integration** (examples you can paste in chat):
+   - "Use reddit_find_subreddits to find subreddits related to machine learning"
+   - "Use reddit_search_posts in subreddit 'programming' for query 'Python vs JavaScript'"
+   - "Use reddit_get_post_comments for post_id '<paste_id>' in subreddit 'programming'"
+   - "Use reddit_find_similar_posts for post_id '<paste_id>' with limit 5"
 
 ## Example Usage
 
