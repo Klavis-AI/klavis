@@ -17,4 +17,4 @@ COPY mcp_servers/mem0/tools/ ./tools/
 EXPOSE 5000
 
 # Command to run the MCP server
-CMD ["uv", "run",  "server.py"]
+CMD ["python", "server.py"] 
