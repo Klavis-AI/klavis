@@ -1,245 +1,139 @@
 # Perplexity AI MCP Server
 
-A focused Model Context Protocol (MCP) server that provides web search capabilities using Perplexity AI's powerful Sonar models. This streamlined server enables AI assistants to perform web searches with automatic citation handling through a single, optimized tool.
+A Model Context Protocol (MCP) server for performing real-time web search using Perplexity AI's Sonar models. Provides a single focused tool with automatic citation handling.
 
-## 🚀 Quick Start for JavaScript Developers
+## Features
 
-As someone coming from a JavaScript background, this guide will help you understand Python and get the Perplexity AI MCP server running quickly.
+- **Web search**: Uses Perplexity `sonar-pro` for up-to-date results
+- **Citations**: Automatically extracts and appends numbered citations
+- **Conversation context**: Accepts `system`/`user`/`assistant` messages
+- **Dual transport**: Supports both SSE and StreamableHTTP
+- **MCP compatible**: Implements the standard MCP server interface
 
-### Prerequisites
+## Available Tools
 
-1. **Python 3.11 or higher** - Think of this like Node.js for JavaScript
-   - **macOS**: Use `brew install python` or download from [python.org](https://python.org)
-   - **Windows**: Download from [python.org](https://python.org) and check "Add Python to PATH"
-   - **Linux**: `sudo apt update && sudo apt install python3.11 python3.11-pip`
+### `perplexity_search`
+Performs a web search via Perplexity Sonar models.
 
-2. **Get a Perplexity AI API Key**
-   - Visit [Perplexity AI Settings](https://www.perplexity.ai/settings/api)
-   - Create an account and generate an API key
-   - Save this key - you'll need it later
+- **Model**: `sonar-pro`
+- **Parameters**:
+  - `messages` (array of objects, required): Each item has `role` and `content`
+- **Returns**: Text with result content and appended citations when available
+- **Best for**: Research queries, real-time facts, current events
 
-### Installation
+## Prerequisites
 
-```bash
-# 1. Navigate to the server directory
-cd mcp_servers/perplexity_ai
+- Python 3.11+
+- Perplexity AI API key (create in Perplexity settings)
+- Docker (optional)
 
-# 2. Create a virtual environment (like node_modules for Python)
-python -m venv venv
+## Configuration
 
-# 3. Activate the virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
-
-# 4. Install dependencies (like npm install)
-pip install -r requirements.txt
-```
-
-### Configuration
-
-Create a `.env` file in this directory (like environment variables in JavaScript):
+Create a `.env` file in `mcp_servers/perplexity_ai/` for server config:
 
 ```bash
-# Copy the example file and edit it
-cp .env.example .env
-
-# Edit the .env file with your API key
-# .env file
-PERPLEXITY_API_KEY=your_api_key_here
 PERPLEXITY_MCP_SERVER_PORT=5000
 ```
 
-### Running the Server
+API keys are provided via request header (see Authentication). The server does not read the API key from `.env`.
+
+## Authentication
+
+Provide your Perplexity API key in the request header:
+
+```
+x-api-key: YOUR_PERPLEXITY_API_KEY
+```
+
+## Running the Server
+
+### Direct Python
 
 ```bash
-# Start the server (like npm start)
-python server.py
-
-# Or with custom port
-python server.py --port 8080
-
-# With debug logging
-python server.py --log-level DEBUG
+cd mcp_servers/perplexity_ai
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python server.py --port 5000 --log-level INFO
 ```
 
-The server will start on `http://localhost:5000` by default.
-
-## 🔧 Understanding the Code Structure
-
-For JavaScript developers, here's how Python concepts map to what you know:
-
-| JavaScript | Python | Purpose |
-|------------|--------|---------|
-| `package.json` | `requirements.txt` | Dependencies |
-| `import/export` | `import/from` | Module system |
-| `async/await` | `async/await` | Same! Asynchronous code |
-| `npm install` | `pip install` | Package installation |
-| `node_modules` | `venv` | Dependency isolation |
-| `function()` | `def function():` | Function definition |
-| `const obj = {}` | `obj = {}` | Object creation |
-
-### Project Structure
-
-```
-perplexity_ai/
-├── server.py              # Main server file (like app.js)
-├── requirements.txt       # Dependencies (like package.json)
-├── Dockerfile            # Container setup
-├── README.md             # This file
-├── .env                  # Environment variables (create from .env.example)
-└── tools/                # Tool implementations
-    ├── __init__.py       # Package exports (like index.js)
-    ├── base.py           # Base API client and authentication
-    └── search.py         # Perplexity search tool implementation
-```
-
-## 🛠 Available Tools
-
-The server provides a single, focused web search tool:
-
-### Perplexity Search (`perplexity_search`)
-Performs web search using the **sonar-pro** model. Accepts an array of messages and returns a search completion response with citations.
-
-```python
-# Example usage in Python
-messages = [
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is machine learning?"}
-]
-result = await perplexity_search(messages)
-```
-
-**Model Used:** `sonar-pro`  
-**Best For:** Web search, real-time information, and research with citations
-
-This is the only tool available in this streamlined MCP server implementation.
-
-### Message Format
-
-The tool accepts an array of message objects with the following structure:
-
-```python
-{
-    "role": "system|user|assistant",  # Role of the message sender
-    "content": "The message content"   # The actual message text
-}
-```
-
-### Response Format
-
-The tool returns a string response that includes:
-- The main response content from the AI model
-- Automatically appended citations (when available)
-- Numbered citation format: `[1] source_url`
-
-Example response:
-```
-Machine learning is a subset of artificial intelligence...
-
-Citations:
-[1] https://example.com/ml-definition
-[2] https://example.com/ai-overview
-```
-
-### Features
-
-| Feature | Status |
-|---------|--------|
-| Single Tool | ✅ `perplexity_search` |
-| Model Used | ✅ `sonar-pro` |
-| Input Format | ✅ Array of message objects |
-| Citation Handling | ✅ Auto-appended to response |
-| API Compatibility | ✅ MCP Protocol |
-| Web Search | ✅ Real-time information |
-| Streamlined Design | ✅ Focused on web search only |
-
-## 🌐 API Endpoints
-
-The server exposes two transport methods:
-
-1. **Server-Sent Events (SSE)**: `http://localhost:5000/sse`
-2. **HTTP Streaming**: `http://localhost:5000/mcp`
-
-## 🔑 Authentication
-
-Pass your Perplexity AI API key in the request headers:
+### Docker (from repo root)
 
 ```bash
-# For SSE
-curl -H "x-api-key: your_api_key_here" http://localhost:5000/sse
-
-# For HTTP requests
-curl -H "x-api-key: your_api_key_here" http://localhost:5000/mcp
+docker build -t perplexity-mcp-server -f mcp_servers/perplexity_ai/Dockerfile .
+docker run -p 5000:5000 perplexity-mcp-server
 ```
 
-## 🐳 Docker Deployment
+### Command line options
 
-If you're familiar with Docker from Node.js:
+- `--port`: Port to listen on (default: 5000)
+- `--log-level`: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+- `--json-response`: Return JSON for StreamableHTTP instead of SSE streams
 
-```bash
-# Build the image
-docker build -t perplexity-mcp-server .
+## API Endpoints
 
-# Run the container
-docker run -p 5000:5000 -e PERPLEXITY_API_KEY=your_key perplexity-mcp-server
-```
+- `/sse` — Server-Sent Events endpoint
+- `/messages/` — SSE message handling endpoint
+- `/mcp` — StreamableHTTP endpoint (JSON-RPC over HTTP)
 
-## 📝 Environment Variables
+## Usage
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PERPLEXITY_API_KEY` | Your Perplexity AI API key | Required |
-| `PERPLEXITY_MCP_SERVER_PORT` | Server port | 5000 |
-
-## 🔍 Testing the Server
-
-You can test the server using curl (like testing an Express.js API):
+### Call via HTTP
 
 ```bash
-# Test the SSE endpoint
-curl -H "x-api-key: your_key" "http://localhost:5000/sse"
-
-# Test the perplexity_search tool
 curl -X POST \
   -H "Content-Type: application/json" \
-  -H "x-api-key: your_key" \
-  -d '{"method": "tools/call", "params": {"name": "perplexity_search", "arguments": {"messages": [{"role": "user", "content": "What are the latest developments in AI technology?"}]}}}' \
+  -H "x-api-key: YOUR_PERPLEXITY_API_KEY" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"perplexity_search","arguments":{"messages":[{"role":"user","content":"What is quantum computing?"}]}}}' \
   http://localhost:5000/mcp
 ```
 
-## 🆘 Troubleshooting
+### Example (client-side tool call)
 
-### Common Issues for JavaScript Developers
-
-1. **Import Errors**: Make sure you've activated the virtual environment
-2. **Module Not Found**: Run `pip install -r requirements.txt`
-3. **Port Already in Use**: Change the port with `--port 8080`
-4. **API Key Issues**: Check your `.env` file and Perplexity AI account
-5. **Tool Not Found**: The server only provides the `perplexity_search` tool
-6. **Message Format Error**: Make sure your messages array contains objects with `role` and `content` fields
-
-### Debug Mode
-
-Run with debugging enabled:
-
-```bash
-python server.py --log-level DEBUG
+```python
+response = await client.call_tool(
+    "perplexity_search",
+    {
+        "messages": [
+            {"role": "system", "content": "You are a research assistant."},
+            {"role": "user", "content": "Latest developments in AI this week"}
+        ]
+    }
+)
 ```
 
-## 📚 Learning Resources
+## Response format
 
-To understand Python better coming from JavaScript:
+The tool returns text content. When citations are present, they are appended as numbered references:
 
-- [Python for JavaScript Developers](https://realpython.com/python-vs-javascript/)
-- [Async Programming in Python](https://realpython.com/async-io-python/)
-- [Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/)
+```
+...answer content...
 
-## 🤝 Contributing
+Citations:
+[1] https://example.com/source-1
+[2] https://example.com/source-2
+```
 
-Feel free to submit issues and PRs! The code structure should feel familiar if you've worked with Express.js or similar frameworks.
+## Error handling
 
-## 📄 License
+Common errors include:
 
-This project follows the same license as the main Klavis repository.
+- Invalid or missing `messages`
+- Missing/invalid API key
+- Upstream API rate limits or network failures
+
+All responses follow standard MCP error formatting.
+
+## Dependencies
+
+- mcp>=1.12.0
+- fastapi
+- starlette
+- uvicorn[standard]
+- httpx
+- click
+- python-dotenv
+
+## License
+
+This project follows the same license as the parent Klavis repository.
