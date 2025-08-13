@@ -205,7 +205,7 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_get_email_attachments",
-                description: "Returns attachments for an email by message ID (filename, mimeType, size, and base64 content)",
+                description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx/.xls); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
                 inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
             },
         ],
@@ -850,7 +850,7 @@ app.post("/messages", async (req: Request, res: Response) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
