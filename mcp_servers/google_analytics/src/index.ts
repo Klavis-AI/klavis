@@ -9,10 +9,9 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv"
-dotenv.config()
 import express, { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-
+dotenv.config()
 type RunReportRequest = protos.google.analytics.data.v1beta.RunReportRequest;
 
 function validateEnvironment(): void {
@@ -32,17 +31,6 @@ function validateEnvironment(): void {
     );
   }
 }
-
-//   try {
-//     validateEnvironment();
-
-//     console.error('✅ Environment variables loaded.');
-//     console.error('🚀 Starting Google Analytics MCP server...');
-//   } catch (err) {
-//     console.error('❌ Server crashed:', err);
-//     process.exit(1);
-//   }
-// });
 
 // Validate date format (YYYY-MM-DD)
 function validateDateFormat(date: string): boolean {
@@ -401,6 +389,8 @@ app.use(express.json());
 
 app.post('/mcp', async (req: Request, res: Response) => {
   // No access token required for service account, but you could add auth here if needed
+  res.setHeader('Content-Type','application/json')
+  res.setHeader('Accept','application-json,text/event-stream')
   try {
     const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
