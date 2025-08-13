@@ -137,7 +137,7 @@ vendor_properties = {
 
 # MCP Tool definitions
 create_vendor_tool = Tool(
-    name="create_vendor",
+    name="quickbooks_create_vendor",
     title="Create Vendor",
     description="Create a new vendor in QuickBooks. Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required.",
     inputSchema={
@@ -148,7 +148,7 @@ create_vendor_tool = Tool(
 )
 
 get_vendor_tool = Tool(
-    name="get_vendor",
+    name="quickbooks_get_vendor",
     title="Get Vendor",
     description="Get a specific vendor by ID from QuickBooks",
     inputSchema={
@@ -161,7 +161,7 @@ get_vendor_tool = Tool(
 )
 
 list_vendors_tool = Tool(
-    name="list_vendors",
+    name="quickbooks_list_vendors",
     title="List Vendors",
     description="List all vendors from QuickBooks",
     inputSchema={
@@ -175,7 +175,7 @@ list_vendors_tool = Tool(
 )
 
 search_vendors_tool = Tool(
-    name="search_vendors",
+    name="quickbooks_search_vendors",
     title="Search Vendors",
     description="Search vendors with various filters including name, company, contact info, and status",
     inputSchema={
@@ -202,7 +202,7 @@ search_vendors_tool = Tool(
 )
 
 update_vendor_tool = Tool(
-    name="update_vendor",
+    name="quickbooks_update_vendor",
     title="Update Vendor",
     description="Update an existing vendor in QuickBooks. Use activate_vendor/deactivate_vendor for status changes.",
     inputSchema={
@@ -216,7 +216,7 @@ update_vendor_tool = Tool(
 )
 
 activate_vendor_tool = Tool(
-    name="activate_vendor",
+    name="quickbooks_activate_vendor",
     title="Activate Vendor",
     description="Activate a vendor in QuickBooks (set Active to true)",
     inputSchema={
@@ -229,7 +229,7 @@ activate_vendor_tool = Tool(
 )
 
 deactivate_vendor_tool = Tool(
-    name="deactivate_vendor",
+    name="quickbooks_deactivate_vendor",
     title="Deactivate Vendor",
     description="Deactivate a vendor from QuickBooks (set Active to false)",
     inputSchema={

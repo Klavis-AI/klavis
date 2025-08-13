@@ -84,41 +84,41 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
     # Map tools to session managers
     tool_map = {
-        "list_accounts": session.account_manager.list_accounts,
-        "get_account": session.account_manager.get_account,
-        "create_account": session.account_manager.create_account,
-        "search_accounts": session.account_manager.search_accounts,
-        "update_account": session.account_manager.update_account,
-        "create_invoice": session.invoice_manager.create_invoice,
-        "get_invoice": session.invoice_manager.get_invoice,
-        "list_invoices": session.invoice_manager.list_invoices,
-        "update_invoice": session.invoice_manager.update_invoice,
-        "delete_invoice": session.invoice_manager.delete_invoice,
-        "send_invoice": session.invoice_manager.send_invoice,
-        "void_invoice": session.invoice_manager.void_invoice,
-        "search_invoices": session.invoice_manager.search_invoices,
-        "create_customer": session.customer_manager.create_customer,
-        "get_customer": session.customer_manager.get_customer,
-        "list_customers": session.customer_manager.list_customers,
-        "search_customers": session.customer_manager.search_customers,
-        "update_customer": session.customer_manager.update_customer,
-        "deactivate_customer": session.customer_manager.deactivate_customer,
-        "activate_customer": session.customer_manager.activate_customer,
-        "create_payment": session.payment_manager.create_payment,
-        "get_payment": session.payment_manager.get_payment,
-        "list_payments": session.payment_manager.list_payments,
-        "update_payment": session.payment_manager.update_payment,
-        "delete_payment": session.payment_manager.delete_payment,
-        "send_payment": session.payment_manager.send_payment,
-        "void_payment": session.payment_manager.void_payment,
-        "search_payments": session.payment_manager.search_payments,
-        "create_vendor": session.vendor_manager.create_vendor,
-        "get_vendor": session.vendor_manager.get_vendor,
-        "list_vendors": session.vendor_manager.list_vendors,
-        "update_vendor": session.vendor_manager.update_vendor,
-        "activate_vendor": session.vendor_manager.activate_vendor,
-        "deactivate_vendor": session.vendor_manager.deactivate_vendor,
-        "search_vendors": session.vendor_manager.search_vendors,
+        "quickbooks_list_accounts": session.account_manager.list_accounts,
+        "quickbooks_get_account": session.account_manager.get_account,
+        "quickbooks_create_account": session.account_manager.create_account,
+        "quickbooks_search_accounts": session.account_manager.search_accounts,
+        "quickbooks_update_account": session.account_manager.update_account,
+        "quickbooks_create_invoice": session.invoice_manager.create_invoice,
+        "quickbooks_get_invoice": session.invoice_manager.get_invoice,
+        "quickbooks_list_invoices": session.invoice_manager.list_invoices,
+        "quickbooks_update_invoice": session.invoice_manager.update_invoice,
+        "quickbooks_delete_invoice": session.invoice_manager.delete_invoice,
+        "quickbooks_send_invoice": session.invoice_manager.send_invoice,
+        "quickbooks_void_invoice": session.invoice_manager.void_invoice,
+        "quickbooks_search_invoices": session.invoice_manager.search_invoices,
+        "quickbooks_create_customer": session.customer_manager.create_customer,
+        "quickbooks_get_customer": session.customer_manager.get_customer,
+        "quickbooks_list_customers": session.customer_manager.list_customers,
+        "quickbooks_search_customers": session.customer_manager.search_customers,
+        "quickbooks_update_customer": session.customer_manager.update_customer,
+        "quickbooks_deactivate_customer": session.customer_manager.deactivate_customer,
+        "quickbooks_activate_customer": session.customer_manager.activate_customer,
+        "quickbooks_create_payment": session.payment_manager.create_payment,
+        "quickbooks_get_payment": session.payment_manager.get_payment,
+        "quickbooks_list_payments": session.payment_manager.list_payments,
+        "quickbooks_update_payment": session.payment_manager.update_payment,
+        "quickbooks_delete_payment": session.payment_manager.delete_payment,
+        "quickbooks_send_payment": session.payment_manager.send_payment,
+        "quickbooks_void_payment": session.payment_manager.void_payment,
+        "quickbooks_search_payments": session.payment_manager.search_payments,
+        "quickbooks_create_vendor": session.vendor_manager.create_vendor,
+        "quickbooks_get_vendor": session.vendor_manager.get_vendor,
+        "quickbooks_list_vendors": session.vendor_manager.list_vendors,
+        "quickbooks_update_vendor": session.vendor_manager.update_vendor,
+        "quickbooks_activate_vendor": session.vendor_manager.activate_vendor,
+        "quickbooks_deactivate_vendor": session.vendor_manager.deactivate_vendor,
+        "quickbooks_search_vendors": session.vendor_manager.search_vendors,
     }
 
     if name not in tool_map:
@@ -129,17 +129,21 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
 
     try:
         result = await tool_map[name](**arguments)
-        if name in ["create_account", "get_account", "update_account",
-                    "create_customer", "get_customer", "update_customer", "deactivate_customer", "activate_customer",
-                    "create_payment", "get_payment", "update_payment", "delete_payment", "send_payment", "void_payment",
-                    "create_vendor", "get_vendor", "update_vendor", "activate_vendor", "deactivate_vendor"]:
+        if name in [
+            "quickbooks_create_account", "quickbooks_get_account", "quickbooks_update_account",
+            "quickbooks_create_customer", "quickbooks_get_customer", "quickbooks_update_customer", "quickbooks_deactivate_customer", "quickbooks_activate_customer",
+            "quickbooks_create_payment", "quickbooks_get_payment", "quickbooks_update_payment", "quickbooks_delete_payment", "quickbooks_send_payment", "quickbooks_void_payment",
+            "quickbooks_create_vendor", "quickbooks_get_vendor", "quickbooks_update_vendor", "quickbooks_activate_vendor", "quickbooks_deactivate_vendor"
+        ]:
             if isinstance(result, dict):
                 return [types.TextContent(
                     type="text",
                     text="\n".join(f"{k}: {v}" for k, v in result.items())
                 )]
-        elif name in ["list_accounts", "search_accounts", "list_invoices", "search_invoices",
-                      "list_customers", "search_customers", "list_payments", "search_payments", "list_vendors", "search_vendors"]:
+        elif name in [
+            "quickbooks_list_accounts", "quickbooks_search_accounts", "quickbooks_list_invoices", "quickbooks_search_invoices",
+            "quickbooks_list_customers", "quickbooks_search_customers", "quickbooks_list_payments", "quickbooks_search_payments", "quickbooks_list_vendors", "quickbooks_search_vendors"
+        ]:
             # Handle list results
             if isinstance(result, list):
                 if not result:
