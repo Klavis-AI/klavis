@@ -460,21 +460,21 @@ export async function handleFileOperation(request: CallToolRequest): Promise<Cal
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "upload_file":
+        case "dropbox_upload_file":
             return await handleUploadFile(args) as CallToolResult;
-        case "download_file":
+        case "dropbox_download_file":
             return await handleDownloadFile(args) as CallToolResult;
-        case "get_thumbnail":
+        case "dropbox_get_thumbnail":
             return await handleGetThumbnail(args) as CallToolResult;
-        case "list_revisions":
+        case "dropbox_list_revisions":
             return await handleListRevisions(args) as CallToolResult;
-        case "restore_file":
+        case "dropbox_restore_file":
             return await handleRestoreFile(args) as CallToolResult;
-        case "save_url":
+        case "dropbox_save_url":
             return await handleSaveUrl(args) as CallToolResult;
-        case "save_url_check_job_status":
+        case "dropbox_save_url_check_job_status":
             return await handleSaveUrlCheckJobStatus(args) as CallToolResult;
-        case "get_temporary_link":
+        case "dropbox_get_temporary_link":
             return await handleGetTemporaryLink(args) as CallToolResult;
         default:
             throw new Error(`Unknown file operation: ${name}`);
