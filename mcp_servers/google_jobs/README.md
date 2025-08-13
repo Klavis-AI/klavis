@@ -105,7 +105,6 @@ google-jobs-mcp-server/
 - Verify your SerpApi account has sufficient credits
 - Ensure your API key has access to Google Jobs API
 
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
