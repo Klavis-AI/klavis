@@ -284,3 +284,4 @@ async def get_job_search_suggestions(query: str) -> Dict[str, Any]:
             "query": query,
             "exception": str(e)
         }
+        
