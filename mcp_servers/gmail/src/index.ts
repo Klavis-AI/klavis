@@ -205,7 +205,7 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_get_email_attachments",
-                description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx/.xls); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
+                description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
                 inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
             },
         ],
@@ -645,17 +645,24 @@ const getGmailMcpServer = () => {
                                 };
                             }
 
-                            // Handle Excel XLSX files using xlsx
+                            // Handle Excel XLSX files using exceljs; legacy .xls is not supported
                             if (
                                 mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                                mime === 'application/vnd.ms-excel' ||
-                                meta.filename.toLowerCase().endsWith('.xlsx') ||
-                                meta.filename.toLowerCase().endsWith('.xls')
+                                meta.filename.toLowerCase().endsWith('.xlsx')
                             ) {
                                 const xlsxText = await extractXlsxText(base64, meta.filename);
                                 return {
                                     type: 'text' as const,
                                     text: xlsxText,
+                                };
+                            }
+                            if (
+                                mime === 'application/vnd.ms-excel' ||
+                                meta.filename.toLowerCase().endsWith('.xls')
+                            ) {
+                                return {
+                                    type: 'text' as const,
+                                    text: `[Info] Attachment ${meta.filename}: legacy .xls format is not supported for text extraction. Please convert to .xlsx and retry.`,
                                 };
                             }
                             
