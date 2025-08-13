@@ -61,7 +61,7 @@ REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
 ### Direct Python (uv)
 From the repository root on Windows PowerShell:
 ```bash
-cd mcp_servers/reddit_search; uv sync; uv run python main.py
+cd mcp_servers/reddit_search; uv sync; uv run python server.py
 ```
 Expected terminal output includes:
 - "Starting Reddit MCP Server..."
@@ -74,7 +74,7 @@ Expected terminal output includes:
 
 ### Direct Python (standard)
 ```bash
-python main.py --port 5001 --json-response
+python server.py --port 5001 --json-response
 ```
 
 ### Docker
@@ -108,7 +108,7 @@ To integrate this MCP server with Cursor IDE:
   "mcpServers": {
     "reddit-search": {
       "command": "python",
-      "args": ["mcp_servers/reddit_search/main.py", "--port", "5001"],
+      "args": ["mcp_servers/reddit_search/server.py", "--port", "5001"],
       "env": {
         "REDDIT_CLIENT_ID": "your_client_id",
         "REDDIT_CLIENT_SECRET": "your_client_secret",

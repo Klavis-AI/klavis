@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY mcp_servers/reddit_search/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY mcp_servers/reddit_search/main.py .
-COPY mcp_servers/reddit_search/tools.py .
+COPY mcp_servers/reddit_search/server.py .
+COPY mcp_servers/reddit_search/tools/ ./tools/
 
 # Expose the port the server runs on
 EXPOSE 5001
 
 # Command to run the server
-CMD ["python", "main.py", "--port", "5001"] 
+CMD ["python", "server.py", "--port", "5001"] 
