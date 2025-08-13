@@ -30,7 +30,7 @@
     "express": "^5.1.0",
     "pdf-parse": "^1.1.1",
     "mammoth": "^1.8.0",
-    "xlsx": "^0.18.5"
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

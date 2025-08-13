@@ -92,7 +92,7 @@ Add the following configuration to your `.env` file:
 
 ```env
 # === Required API Credentials (for account features) ===
-COINBASE_API_KEY=organizations/12345678-1234-5678-9abc-123456789012/apiKeys/abcd1234-5678-90ef-ghij-klmnopqrstuv
+COINBASE_API_KEY=organizations/1234/apiKeys/abcd1234
 COINBASE_API_SECRET="-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIExample123PrivateKey456Content789\nA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC...\n-----END EC PRIVATE KEY-----"
 
 # === Server Configuration ===
