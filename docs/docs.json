@@ -292,7 +292,7 @@
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox", "knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs", "knowledge-base/oauth_app/google_drive"]
+            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox", "knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs", "knowledge-base/oauth_app/google_drive", "knowledge-base/oauth_app/asana"]
           }
         ]
       }
