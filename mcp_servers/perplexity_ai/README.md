@@ -1,10 +1,11 @@
 # Perplexity AI MCP Server
 
-A Model Context Protocol (MCP) server for performing real-time web search using Perplexity AI's Sonar models. Provides a single focused tool with automatic citation handling.
+A Model Context Protocol (MCP) server for performing real-time web search and reasoning using Perplexity AI's Sonar models. Provides focused tools with automatic citation handling.
 
 ## Features
 
 - **Web search**: Uses Perplexity `sonar-pro` for up-to-date results
+- **Reasoning**: Uses Perplexity `sonar-reasoning-pro` for structured analysis
 - **Citations**: Automatically extracts and appends numbered citations
 - **Conversation context**: Accepts `system`/`user`/`assistant` messages
 - **Dual transport**: Supports both SSE and StreamableHTTP
@@ -20,6 +21,15 @@ Performs a web search via Perplexity Sonar models.
   - `messages` (array of objects, required): Each item has `role` and `content`
 - **Returns**: Text with result content and appended citations when available
 - **Best for**: Research queries, real-time facts, current events
+
+### `perplexity_reason`
+Performs reasoning tasks using Perplexity's reasoning-optimized model.
+
+- **Model**: `sonar-reasoning-pro`
+- **Parameters**:
+  - `messages` (array of objects, required): Each item has `role` and `content`
+- **Returns**: Well-reasoned response with citations when available
+- **Best for**: Multi-step reasoning and structured analysis
 
 ## Prerequisites
 
@@ -83,6 +93,7 @@ docker run -p 5000:5000 perplexity-mcp-server
 ```bash
 curl -X POST \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "x-api-key: YOUR_PERPLEXITY_API_KEY" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"perplexity_search","arguments":{"messages":[{"role":"user","content":"What is quantum computing?"}]}}}' \
   http://localhost:5000/mcp
@@ -97,6 +108,15 @@ response = await client.call_tool(
         "messages": [
             {"role": "system", "content": "You are a research assistant."},
             {"role": "user", "content": "Latest developments in AI this week"}
+        ]
+    }
+)
+
+response = await client.call_tool(
+    "perplexity_reason",
+    {
+        "messages": [
+            {"role": "user", "content": "Reason step by step: pros and cons of nuclear vs solar for baseload"}
         ]
     }
 )
@@ -123,6 +143,8 @@ Common errors include:
 - Upstream API rate limits or network failures
 
 All responses follow standard MCP error formatting.
+
+Note: For the StreamableHTTP endpoint, clients must set the `Accept` header to include both `application/json` and `text/event-stream`.
 
 ## Dependencies
 
