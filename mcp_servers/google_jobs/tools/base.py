@@ -11,6 +11,7 @@ SERPAPI_BASE_URL = "https://serpapi.com/search"
 
 serpapi_token_context: ContextVar[str] = ContextVar('serpapi_token')
 
+
 def get_serpapi_access_token() -> str:
     """Get the SerpApi access token from context or environment."""
     try:
