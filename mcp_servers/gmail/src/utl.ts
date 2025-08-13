@@ -90,3 +90,106 @@ export function createEmailMessage(validatedArgs: any): string {
 
     return emailParts.join('\r\n');
 }
+
+/**
+ * Extracts text content from a PDF file encoded in base64
+ * @param base64Data - The base64 encoded PDF data
+ * @param filename - The filename for better error messages
+ * @returns The extracted text content or an error message
+ */
+export async function extractPdfText(base64Data: string, filename: string): Promise<string> {
+    try {
+        // Dynamically import internal implementation to avoid debug harness in index.js
+        // @ts-ignore - no type declarations for internal path
+        const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default as any;
+        
+        // Convert base64 to buffer
+        const buffer = Buffer.from(base64Data, 'base64');
+     
+        // Parse PDF and extract text
+        const data = await pdfParse(buffer);
+        
+        // Return extracted text with metadata
+        const result = [
+            `=== PDF Content from ${filename} ===`,
+            `Pages: ${data.numpages}`,
+            ``,
+            `--- Text Content ---`,
+            data.text,
+            ``,
+            `=== End of PDF Content ===`
+        ].join('\n');
+        
+        return result;
+    } catch (error) {
+        console.error(`Error extracting text from PDF ${filename}:`, error);
+        return `[Error: Unable to extract text from PDF "${filename}". The file may be corrupted, password-protected, or contain only images without text.]`;
+    }
+}
+
+/**
+ * Extracts text content from a DOCX Word document encoded in base64
+ * Uses the mammoth library to extract raw text
+ */
+export async function extractDocxText(base64Data: string, filename: string): Promise<string> {
+    try {
+        // Dynamically import to avoid loading cost unless needed
+        const mammoth = await import('mammoth');
+
+        const buffer = Buffer.from(base64Data, 'base64');
+        const result = await mammoth.extractRawText({ buffer });
+
+        const messages = (result.messages || []).map((m: any) => `- ${m.message || m.value || JSON.stringify(m)}`).join('\n');
+        const text = result.value || '';
+
+        return [
+            `=== Word (DOCX) Content from ${filename} ===`,
+            messages ? `Messages:\n${messages}\n` : '',
+            `--- Text Content ---`,
+            text,
+            '',
+            `=== End of Word Content ===`
+        ].filter(Boolean).join('\n');
+    } catch (error) {
+        console.error(`Error extracting text from DOCX ${filename}:`, error);
+        return `[Error: Unable to extract text from Word file "${filename}". Ensure it is a .docx file. Legacy .doc format is not supported by mammoth.]`;
+    }
+}
+
+/**
+ * Extracts text/CSV-like content from an Excel file encoded in base64
+ * Supports .xlsx and (best-effort) .xls via the xlsx library
+ */
+export async function extractXlsxText(base64Data: string, filename: string): Promise<string> {
+    try {
+        const XLSX = await import('xlsx');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+        const sheetTexts: string[] = [];
+        for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            // Prefer CSV for compactness; falls back to JSON if needed
+            let csv = '';
+            try {
+                csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false });
+            } catch {
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false }) as any[];
+                csv = rows.map(r => (r as any[]).join(',')).join('\n');
+            }
+            sheetTexts.push([
+                `Sheet: ${sheetName}`,
+                csv.trim()
+            ].join('\n'));
+        }
+
+        return [
+            `=== Excel Content from ${filename} ===`,
+            ...sheetTexts,
+            `=== End of Excel Content ===`
+        ].join('\n\n');
+    } catch (error) {
+        console.error(`Error extracting text from Excel ${filename}:`, error);
+        return `[Error: Unable to extract content from Excel file "${filename}". The file may be corrupted or in an unsupported format.]`;
+    }
+}
