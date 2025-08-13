@@ -62,7 +62,7 @@ description: "Complete guide to creating and configuring a Gmail OAuth applicati
 <img src="/images/knowledge-base/gmail/WebApplication.png" alt="Web application OAuth settings" />
 
 14. Add redirect URLs:
-    `https://api.klavis.ai/oauth/gcalendar/callback`
+    `https://api.klavis.ai/oauth/gmail/`
     Then click **Create**.
 
 <img src="/images/knowledge-base/gmail/redirect_uri.png" alt="Add redirect URIs" />
@@ -76,8 +76,10 @@ description: "Complete guide to creating and configuring a Gmail OAuth applicati
 
 <Note>
 Klavis Gmail MCP Server uses the following OAuth scopes:
-`https://www.googleapis.com/auth/calendar.readonly`
-`https://www.googleapis.com/auth/calendar.events`
+`https://www.googleapis.com/auth/gmail.readonly`
+`https://www.googleapis.com/auth/gmail.send`
+`https://www.googleapis.com/auth/gmail.compose`
+`https://www.googleapis.com/auth/gmail.modify`
 </Note>
 
 1. Go to **OAuth consent screen**.
@@ -108,10 +110,10 @@ If you want to use your own Gmail OAuth application with custom branding:
 
 1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
 2. **Add Your Credentials**: Enter your Gmail **Client ID** and **Client Secret** from Step 1.
-3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/gcalendar/callback` or your custom callback URL.
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/gmail/callback` or your custom callback URL.
 4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
    ```javascript
-   const authUrl = `https://api.klavis.ai/oauth/gcalendar/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   const authUrl = `https://api.klavis.ai/oauth/gmail/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
    ```
 <Tip>
 For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
