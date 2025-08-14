@@ -1,0 +1,79 @@
+---
+title: "Setting Up Asana OAuth App"
+description: "Complete guide to creating and configuring a Asana OAuth application"
+---
+
+## Prerequisites
+
+- Asana account (personal or business)
+- Access to Asana Developer Portal
+
+## Step 1: Create Asana Developer Account
+
+1. Visit [https://asana.com/developers/](https://asana.com/developers)
+2. Click **"Get started"** or **"Login"** if you already have an account
+3. Sign in with your Asana account or create a new developer account
+
+<img src="/images/knowledge-base/asana_oauth_app/asana_step1_login.png" alt="Asana Developer Login" />
+
+## Step 2: Create a New App
+
+1. Once logged in, go to your settings -> **Apps**, and click [https://app.asana.com/0/my-apps](Build new apps)
+2. Click **"Create new app"** under **"My apps"** section
+3. Fill in the app details:
+   - **App name**: Your application name (e.g., your brand name)
+   - **Which best describes what your app will do?**: (Choose your preference)
+   - **Asana API Terms**: Agree to the terms and conditions
+
+<img src="/images/knowledge-base/asana_oauth_app/asana_step2_create_app.png" alt="Asana App Creation Form" />
+
+## Step 3: Configure OAuth Settings
+
+1. After creating the app, you'll see:
+- **Client ID**: Copy this value
+- **Client Secret**: Copy this value (keep it secure!)
+
+2. **Redirect URIs**: Add your callback URL:
+   - `https://api.klavis.ai/oauth/asana/callback`
+
+<img src="/images/knowledge-base/asana_oauth_app/asana_step3_oauth_and_redirect_url.png" alt="OAuth Settings Configuration" />
+
+## Step 4: Request Scopes
+
+<Note>
+Klavis Asana MCP Server uses the following OAuth scopes: `goals:read,project_templates:read,projects:read,projects:write,projects:delete,stories:read,task_templates:read,tasks:read,tasks:write,tasks:delete,teams:read,users:read,workspaces:read,workspaces.typeahead:read`
+</Note>
+
+1. Scroll to **"Permission scopes"** tab from **"Oauth"** menu
+2. **Scopes**: Select the scopes your application needs:
+
+<img src="/images/knowledge-base/asana_oauth_app/asana_step4_request_scopes.png" alt="Request Scopes" />
+
+<Check>
+You have successfully created an Asana OAuth application! You now have your Client ID, Client Secret, and Redirect Url ready for integration with Klavis AI.
+</Check>
+
+## (Optional) Step 5: White Labeling 
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own Asana OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your Asana **Client ID** and **Client Secret** from Step 3
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/asana/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/asana/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
+</Tip>
+
+## Resources
+- [Asana OAuth Documentation](https://developers.asana.com/docs/oauth)
+- [Klavis OAuth & White Labeling Guide](/documentation/klavis-oauth-white-label)
+- [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)
