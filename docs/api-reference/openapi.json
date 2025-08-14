@@ -224,7 +224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateServerResponse"
+                  "$ref": "#/components/schemas/CreateSelfHostedServerResponse"
                 }
               }
             }
@@ -3355,6 +3355,32 @@
           "userId"
         ],
         "title": "CreateSelfHostedServerRequest"
+      },
+      "CreateSelfHostedServerResponse": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid",
+            "description": "The unique identifier for this specific server connection instance."
+          },
+          "oauthUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oauthurl",
+            "description": "The OAuth authorization URL for the specified server, if OAuth is configured."
+          }
+        },
+        "type": "object",
+        "required": [
+          "instanceId"
+        ],
+        "title": "CreateSelfHostedServerResponse"
       },
       "CreateServerRequest": {
         "properties": {
