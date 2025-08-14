@@ -60,12 +60,14 @@ python server.py
 
 ### Docker Deployment
 
-1. Build the Docker image:
+1.  Navigate to the root of the `mcp_servers` project.
+
+2.  Build the Docker image:
 ```bash
-docker build -t freshdesk-mcp-server .
+docker build -t freshdesk-mcp-server -f freshdesk/Dockerfile .
 ```
 
-2. Run the container:
+3.  Run the container:
 ```bash
 docker run -p 5000:5000 \
   -e FRESHDESK_API_KEY=your_api_key \
