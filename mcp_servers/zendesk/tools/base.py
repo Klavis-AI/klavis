@@ -4,6 +4,7 @@ from contextvars import ContextVar
 from typing import Optional, Dict, Any
 import httpx
 from dotenv import load_dotenv
+import base64
 
 load_dotenv()
 
@@ -31,7 +32,6 @@ def get_auth_headers() -> Dict[str, str]:
             raise ZendeskToolExecutionError("Authentication credentials not provided")
         
         # Zendesk uses Basic Auth with email/token:token format
-        import base64
         credentials = f"{auth_email}/token:{auth_token}"
         encoded_credentials = base64.b64encode(credentials.encode()).decode()
         
