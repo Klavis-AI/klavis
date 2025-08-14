@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exa MCP Server - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .api-status {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-connected { background: #2ecc71; }
+        .status-disconnected { background: #e74c3c; }
+        .status-checking { background: #f39c12; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .query-section {
+            padding: 30px;
+            background: white;
+        }
+
+        .query-input-group {
+            margin-bottom: 20px;
+        }
+
+        .query-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .tool-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tool-option {
+            padding: 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .tool-option:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .tool-option.selected {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, #f8fffa 0%, #e8f8f5 100%);
+        }
+
+        .tool-option h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .tool-option p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .tool-hint {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #3498db;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .execute-button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .execute-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .execute-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-area {
+            margin: 30px;
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            font-family: 'Monaco', 'Consolas', monospace;
+            min-height: 400px;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .results-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+
+        .execution-status {
+            margin-left: auto;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-idle { background: #95a5a6; color: white; }
+        .status-running { background: #f39c12; color: white; animation: pulse 2s infinite; }
+        .status-success { background: #27ae60; color: white; }
+        .status-error { background: #e74c3c; color: white; }
+
+        .results-content {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            max-height: 500px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .preset-queries {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .preset-queries h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .preset-button {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .preset-button:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .log-timestamp {
+            color: #95a5a6;
+            font-size: 0.8rem;
+        }
+
+        .log-info { color: #3498db; }
+        .log-success { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .log-warning { color: #f39c12; }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .input-hint.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Exa MCP Server - LIVE DEMO</h1>
+            <p>Real AI-Powered Search • Live API Calls</p>
+            <div class="api-status">
+                <span class="status-indicator status-checking" id="status-indicator"></span>
+                <span id="connection-status">Checking server connection...</span>
+            </div>
+        </div>
+
+        <div class="query-section">
+            <div class="query-input-group">
+                <label for="query-input">Enter Your Search Query:</label>
+                <input 
+                    type="text" 
+                    id="query-input" 
+                    class="query-input" 
+                    placeholder="e.g., Find recent AI research papers on large language models"
+                    value="Find recent quantum computing research breakthroughs"
+                >
+                <div class="input-hint" id="input-hint">
+                    💡 This tool searches for content using keywords or phrases
+                </div>
+            </div>
+
+            <div class="query-input-group">
+                <label>Select Tool:</label>
+                <div class="tool-selector" id="tool-selector">
+                    <!-- Tools will be loaded dynamically -->
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button class="execute-button" id="execute-btn" onclick="executeQuery()" style="flex: 1;">
+                    🚀 Execute Live Search
+                </button>
+                <button class="execute-button" id="auto-execute-btn" onclick="autoExecuteQuery()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+                    🤖 Auto-Select & Execute
+                </button>
+            </div>
+
+            <div class="preset-queries">
+                <h3>💡 Try These Preset Queries:</h3>
+                <div style="margin-bottom: 15px; padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 0.9rem;">
+                    <strong>🤖 Auto Mode:</strong> Click "Auto-Select" to let the system choose the best tool based on your query!<br>
+                    <strong>🔄 Workflow Tip:</strong> First run a search, then copy the result IDs to use "Extract Contents" for full text
+                </div>
+                <button class="preset-button" onclick="setQuery('search_web', 'Find recent AI safety research papers')">AI Safety Research</button>
+                <button class="preset-button" onclick="setQuery('search_web', 'Latest developments in quantum computing')">Quantum Computing</button>
+                <button class="preset-button" onclick="setQuery('search_academic_content', 'Machine learning bias and fairness studies')">ML Bias Studies</button>
+                <button class="preset-button" onclick="setQuery('find_similar_content', 'https://openai.com/blog/gpt-4')">Similar to GPT-4</button>
+                <button class="preset-button" onclick="setQuery('search_recent_content', 'AI regulation news this week')">Recent AI News</button>
+                <div style="margin-top: 10px; font-style: italic; color: #666;">
+                    Or try typing natural language queries and use Auto-Select: "recent papers on quantum computing", "find similar sites to https://arxiv.org", "academic studies on climate change"
+                </div>
+            </div>
+        </div>
+
+        <div class="results-area">
+            <div class="results-header">
+                <div class="results-title">🔥 LIVE Execution Results</div>
+                <div class="execution-status status-idle" id="execution-status">Ready</div>
+            </div>
+            <div class="results-content" id="results-content">
+🚀 Welcome to the LIVE Exa MCP Server Demo!
+
+This demo makes REAL API calls to your Exa MCP server:
+• No mock data or simulated responses
+• Real AI-powered semantic search via Exa API
+• Live neural similarity detection
+• Actual time-filtered content discovery
+• Genuine academic source filtering
+
+🔧 Connecting to server...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTool = 'search_web';
+        let isExecuting = false;
+        let serverConnected = false;
+        let autoMode = false;
+        
+        // Auto tool selection function
+        function autoSelectTool(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Check for URL patterns first
+            if (query.startsWith('https://') || query.startsWith('http://')) {
+                return 'find_similar_content';
+            }
+            
+            // Check for similarity keywords
+            if (lowerQuery.includes('similar') || lowerQuery.includes('like') || lowerQuery.includes('related')) {
+                return 'find_similar_content';
+            }
+            
+            // Check for content extraction keywords (result IDs)
+            if (lowerQuery.includes('extract') || lowerQuery.includes('content') || lowerQuery.includes('full text') || 
+                query.match(/^[a-zA-Z0-9-_,\s]+$/) && query.includes(',')) {
+                return 'get_page_contents';
+            }
+            
+            // Check for recent/news keywords
+            if (lowerQuery.includes('recent') || lowerQuery.includes('news') || lowerQuery.includes('latest') || 
+                lowerQuery.includes('new') || lowerQuery.includes('today') || lowerQuery.includes('this week')) {
+                return 'search_recent_content';
+            }
+            
+            // Check for academic keywords
+            if (lowerQuery.includes('academic') || lowerQuery.includes('research') || lowerQuery.includes('papers') ||
+                lowerQuery.includes('study') || lowerQuery.includes('scholar') || lowerQuery.includes('journal') ||
+                lowerQuery.includes('peer-reviewed') || lowerQuery.includes('arxiv') || lowerQuery.includes('publication')) {
+                return 'search_academic_content';
+            }
+            
+            // Default to web search
+            return 'search_web';
+        }
+        
+        // Tool input requirements
+        const toolInputHints = {
+            'search_web': {
+                hint: '💡 Enter search terms or phrases (e.g., "AI research", "climate change solutions")',
+                placeholder: 'e.g., Find recent AI research papers on large language models',
+                type: 'SEARCH'
+            },
+            'find_similar_content': {
+                hint: '🔗 Enter a complete URL starting with https:// (e.g., "https://openai.com/blog/gpt-4")',
+                placeholder: 'https://example.com/article-url',
+                type: 'URL'
+            },
+            'search_recent_content': {
+                hint: '📅 Enter search terms for recent content (searches last 7 days by default)',
+                placeholder: 'e.g., What\'s new in AI regulation this week?',
+                type: 'SEARCH'
+            },
+            'search_academic_content': {
+                hint: '🎓 Enter academic search terms (searches scholarly sources and papers)',
+                placeholder: 'e.g., Find peer-reviewed papers on machine learning bias',
+                type: 'SEARCH'
+            },
+            'get_page_contents': {
+                hint: '📄 Enter result IDs from previous searches, separated by commas (e.g., from search results above)',
+                placeholder: 'abc123xyz, def456uvw, ghi789rst',
+                type: 'IDS'
+            }
+        };
+        
+        // Check server status on load
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                const indicator = document.getElementById('status-indicator');
+                const status = document.getElementById('connection-status');
+                
+                if (data.status === 'connected') {
+                    indicator.className = 'status-indicator status-connected';
+                    status.textContent = `Connected • ${data.tools_available.length} tools ready`;
+                    serverConnected = true;
+                    addLog('✅ Connected to live MCP server', 'success');
+                    addLog(`🔧 Available tools: ${data.tools_available.join(', ')}`, 'info');
+                } else {
+                    indicator.className = 'status-indicator status-disconnected';
+                    status.textContent = 'Server offline';
+                    serverConnected = false;
+                    addLog('❌ MCP server is offline', 'error');
+                }
+            } catch (error) {
+                const indicator = document.getElementById('status-indicator');
+                const status = document.getElementById('connection-status');
+                indicator.className = 'status-indicator status-disconnected';
+                status.textContent = 'Connection failed';
+                serverConnected = false;
+                addLog('❌ Failed to connect to web bridge', 'error');
+            }
+        }
+
+        // Load available tools
+        async function loadTools() {
+            try {
+                const response = await fetch('/api/tools');
+                const data = await response.json();
+                
+                const toolSelector = document.getElementById('tool-selector');
+                toolSelector.innerHTML = '';
+                
+                data.tools.forEach((tool, index) => {
+                    const toolDiv = document.createElement('div');
+                    toolDiv.className = `tool-option ${index === 0 ? 'selected' : ''}`;
+                    toolDiv.dataset.tool = tool.name;
+                    
+                    const hint = toolInputHints[tool.name];
+                    const hintBadge = hint ? `<div class="tool-hint">${hint.type}</div>` : '';
+                    
+                    toolDiv.innerHTML = `
+                        ${hintBadge}
+                        <h4>${tool.title}</h4>
+                        <p>${tool.description}</p>
+                    `;
+                    toolDiv.addEventListener('click', () => selectTool(tool.name, toolDiv));
+                    toolSelector.appendChild(toolDiv);
+                });
+                
+                // Set first tool as selected
+                if (data.tools.length > 0) {
+                    selectedTool = data.tools[0].name;
+                    updateInputForTool(selectedTool);
+                }
+                
+            } catch (error) {
+                addLog('❌ Failed to load tools', 'error');
+            }
+        }
+
+        function updateInputForTool(toolName) {
+            const input = document.getElementById('query-input');
+            const hint = document.getElementById('input-hint');
+            
+            const toolInfo = toolInputHints[toolName];
+            if (toolInfo) {
+                input.placeholder = toolInfo.placeholder;
+                hint.textContent = toolInfo.hint;
+                hint.classList.add('show');
+            } else {
+                hint.classList.remove('show');
+            }
+        }
+
+        function selectTool(toolName, element) {
+            document.querySelectorAll('.tool-option').forEach(o => o.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTool = toolName;
+            
+            updateInputForTool(toolName);
+        }
+
+        function setQuery(tool, query) {
+            document.getElementById('query-input').value = query;
+            
+            // Select the appropriate tool
+            const toolElement = document.querySelector(`[data-tool="${tool}"]`);
+            if (toolElement) {
+                selectTool(tool, toolElement);
+            }
+        }
+
+        function updateExecutionStatus(status, text) {
+            const statusEl = document.getElementById('execution-status');
+            statusEl.className = `execution-status status-${status}`;
+            statusEl.textContent = text;
+        }
+
+        function addLog(message, type = 'info') {
+            const results = document.getElementById('results-content');
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = `[${timestamp}] ${message}\n`;
+            
+            results.textContent += logLine;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results-content').textContent = '';
+        }
+
+        async function autoExecuteQuery() {
+            if (isExecuting) return;
+            
+            if (!serverConnected) {
+                alert('❌ Server is not connected. Please check if web_bridge.py is running.');
+                return;
+            }
+            
+            const query = document.getElementById('query-input').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            // Auto-select the best tool
+            autoMode = true;
+            const autoSelectedTool = autoSelectTool(query);
+            
+            // Visually select the auto-chosen tool
+            const toolElement = document.querySelector(`[data-tool="${autoSelectedTool}"]`);
+            if (toolElement) {
+                document.querySelectorAll('.tool-option').forEach(o => o.classList.remove('selected'));
+                toolElement.classList.add('selected');
+                selectedTool = autoSelectedTool;
+                updateInputForTool(autoSelectedTool);
+            }
+
+            // Execute with auto-selected tool
+            await executeQueryInternal(true);
+        }
+
+        async function executeQuery() {
+            autoMode = false;
+            await executeQueryInternal(false);
+        }
+
+        async function executeQueryInternal(isAutoMode) {
+            if (isExecuting) return;
+            
+            if (!serverConnected) {
+                alert('❌ Server is not connected. Please check if web_bridge.py is running.');
+                return;
+            }
+            
+            const query = document.getElementById('query-input').value.trim();
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            // Validate input based on tool type (only for manual mode)
+            if (!isAutoMode) {
+                const toolInfo = toolInputHints[selectedTool];
+                if (toolInfo && toolInfo.type === 'URL' && !query.startsWith('https://') && !query.startsWith('http://')) {
+                    alert(`⚠️ ${selectedTool} requires a complete URL starting with https:// or http://\n\nExample: https://openai.com/blog/gpt-4`);
+                    return;
+                }
+            }
+
+            isExecuting = true;
+            const executeBtn = document.getElementById('execute-btn');
+            const autoBtn = document.getElementById('auto-execute-btn');
+            executeBtn.disabled = true;
+            autoBtn.disabled = true;
+            
+            if (isAutoMode) {
+                autoBtn.innerHTML = '<div class="loading-spinner"></div>AI Executing...';
+                executeBtn.innerHTML = '🚀 Execute Live Search';
+            } else {
+                executeBtn.innerHTML = '<div class="loading-spinner"></div>Executing Live Search...';
+                autoBtn.innerHTML = '🤖 Auto-Select & Execute';
+            }
+            
+            updateExecutionStatus('running', 'Executing');
+            clearResults();
+            
+            if (isAutoMode) {
+                addLog(`🤖 AI MODE: Analyzing query for best tool selection...`, 'info');
+                addLog(`🧠 Query analysis: "${query}"`, 'info');
+                addLog(`✨ AI selected tool: ${selectedTool}`, 'success');
+                addLog(`📤 Reasoning: ${getToolSelectionReason(query, selectedTool)}`, 'info');
+            }
+            
+            addLog(`🚀 Starting LIVE execution of ${selectedTool}`, 'info');
+            addLog(`📤 Query: "${query}"`, 'info');
+            addLog(`🔧 Tool: ${selectedTool}`, 'info');
+            addLog('⚡ Making real API call to Exa...', 'warning');
+            
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tool: selectedTool,
+                        query: query,
+                        num_results: 5
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateExecutionStatus('success', 'Complete');
+                    addLog('✅ API call successful!', 'success');
+                    addLog('📊 Processing results...', 'info');
+                    addLog('', 'info');
+                    addLog('🎯 LIVE RESULTS FROM EXA API:', 'success');
+                    addLog('═'.repeat(50), 'info');
+                    addLog(data.result, 'info');
+                    addLog('═'.repeat(50), 'info');
+                    if (isAutoMode) {
+                        addLog('🤖 AI successfully selected the optimal tool and executed the query!', 'success');
+                    }
+                    addLog('✨ Results are 100% real from Exa API - no mock data!', 'success');
+                } else {
+                    updateExecutionStatus('error', 'Error');
+                    addLog(`❌ Execution failed: ${data.error}`, 'error');
+                    
+                    // Show helpful hints for common errors
+                    if (data.error.includes('URL must include protocol')) {
+                        addLog('💡 Tip: For "Find Similar Content", use a complete URL like https://example.com', 'warning');
+                    }
+                }
+                
+            } catch (error) {
+                updateExecutionStatus('error', 'Error');
+                addLog(`❌ Network error: ${error.message}`, 'error');
+            } finally {
+                isExecuting = false;
+                executeBtn.disabled = false;
+                autoBtn.disabled = false;
+                executeBtn.textContent = '🚀 Execute Live Search';
+                autoBtn.textContent = '🤖 Auto-Select & Execute';
+            }
+        }
+
+        function getToolSelectionReason(query, tool) {
+            const lowerQuery = query.toLowerCase();
+            switch(tool) {
+                case 'find_similar_content':
+                    if (query.startsWith('http')) return 'Detected URL input';
+                    return 'Contains similarity keywords (similar, like, related)';
+                case 'search_recent_content':
+                    return 'Contains temporal keywords (recent, news, latest, new)';
+                case 'search_academic_content':
+                    return 'Contains academic keywords (research, papers, academic, study)';
+                case 'get_page_contents':
+                    return 'Detected content extraction request or comma-separated IDs';
+                case 'search_web':
+                default:
+                    return 'General web search - no specific tool indicators detected';
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', async () => {
+            addLog('🌐 Initializing live demo interface...', 'info');
+            await checkServerStatus();
+            await loadTools();
+        });
+
+        // Auto-refresh server status every 10 seconds
+        setInterval(checkServerStatus, 10000);
+    </script>
+</body>
+</html>
