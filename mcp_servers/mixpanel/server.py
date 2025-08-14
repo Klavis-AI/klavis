@@ -25,6 +25,11 @@ from tools import (
     get_user_profile,
     query_events,
     track_batch_events,
+    get_event_count,
+    get_top_events,
+    list_saved_funnels,
+    get_todays_top_events,
+    get_profile_event_activity,
 )
 
 logger = logging.getLogger(__name__)
@@ -196,6 +201,105 @@ def main(
                     },
                 },
             ),
+            types.Tool(
+                name="mixpanel_get_event_count",
+                title="Get Event Count",
+                description="Get total event count for a specific date range from Mixpanel analytics. Provides comprehensive statistics including total events, unique users, and event breakdown by type for analysis and reporting.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["from_date", "to_date"],
+                    "properties": {
+                        "from_date": {
+                            "type": "string",
+                            "description": "Start date for count query in YYYY-MM-DD format (e.g., '2024-01-01')",
+                        },
+                        "to_date": {
+                            "type": "string",
+                            "description": "End date for count query in YYYY-MM-DD format (e.g., '2024-01-31')",
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "Optional specific event name to count (e.g., 'Page View', 'Purchase'). If not provided, counts all events.",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_get_top_events",
+                title="Get Top Events",
+                description="Get a list of the most common events over a specified time period from Mixpanel analytics. Provides event rankings with counts and percentages for identifying popular user actions and behaviors.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["from_date", "to_date"],
+                    "properties": {
+                        "from_date": {
+                            "type": "string",
+                            "description": "Start date for analysis in YYYY-MM-DD format (e.g., '2024-01-01')",
+                        },
+                        "to_date": {
+                            "type": "string",
+                            "description": "End date for analysis in YYYY-MM-DD format (e.g., '2024-01-31')",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "default": 10,
+                            "description": "Maximum number of top events to return (default: 10, max: 100)",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_list_saved_funnels",
+                title="List Saved Funnels",
+                description="Get a list of all saved funnels from Mixpanel with their names, funnel IDs, and metadata. Retrieve funnel information including creation dates, creators, step counts, and descriptions for analysis and reporting.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+            ),
+            types.Tool(
+                name="mixpanel_get_todays_top_events",
+                title="Get Today's Top Events",
+                description="Get the most common events from today's date from Mixpanel analytics. Provides real-time insights into current user activity and popular actions happening right now with event rankings and counts.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "default": 10,
+                            "description": "Maximum number of top events to return (default: 10, max: 100)",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_get_profile_event_activity",
+                title="Get Profile Event Activity",
+                description="Get event activity feed for a specific user from Mixpanel analytics. Retrieve chronological list of all events performed by a user with timestamps, properties, and activity summary for user behavior analysis.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["distinct_id"],
+                    "properties": {
+                        "distinct_id": {
+                            "type": "string",
+                            "description": "Unique identifier for the user (e.g., user ID, email address)",
+                        },
+                        "from_date": {
+                            "type": "string",
+                            "description": "Start date for activity search in YYYY-MM-DD format (e.g., '2024-01-01'). Defaults to 30 days ago if not provided.",
+                        },
+                        "to_date": {
+                            "type": "string",
+                            "description": "End date for activity search in YYYY-MM-DD format (e.g., '2024-01-31'). Defaults to today if not provided.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "default": 100,
+                            "description": "Maximum number of events to return (default: 100, max: 1000)",
+                        },
+                    },
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -353,6 +457,137 @@ def main(
                         )
                     ]
                 
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_get_event_count":
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            
+            if not from_date or not to_date:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_date and to_date parameters are required",
+                    )
+                ]
+            
+            event = arguments.get("event")
+            
+            try:
+                result = await get_event_count(from_date, to_date, event)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_get_top_events":
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            
+            if not from_date or not to_date:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_date and to_date parameters are required",
+                    )
+                ]
+            
+            limit = arguments.get("limit", 10)
+            
+            try:
+                result = await get_top_events(from_date, to_date, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_list_saved_funnels":
+            try:
+                result = await list_saved_funnels()
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_get_todays_top_events":
+            limit = arguments.get("limit", 10)
+            
+            try:
+                result = await get_todays_top_events(limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_get_profile_event_activity":
+            distinct_id = arguments.get("distinct_id")
+            if not distinct_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: distinct_id parameter is required",
+                    )
+                ]
+            
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            limit = arguments.get("limit", 100)
+            
+            try:
+                result = await get_profile_event_activity(distinct_id, from_date, to_date, limit)
                 return [
                     types.TextContent(
                         type="text",

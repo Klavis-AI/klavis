@@ -101,22 +101,22 @@ class MixpanelQueryClient:
         params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Make an HTTP request to Mixpanel Query API."""
-        # Try service account first, then API secret
+        # Try API secret first (more reliable), then service account
         auth = None
         
         try:
-            username = get_service_account_username()
-            secret = get_service_account_secret()
-            if username and secret:
-                auth = httpx.BasicAuth(username, secret)
-                logger.info("Using service account authentication for query")
+            api_secret = get_api_secret()
+            if api_secret:
+                auth = httpx.BasicAuth(api_secret, "")
+                logger.info("Using API secret authentication for query")
         except RuntimeError:
-            # Fall back to API secret
+            # Fall back to service account
             try:
-                api_secret = get_api_secret()
-                if api_secret:
-                    auth = httpx.BasicAuth(api_secret, "")
-                    logger.info("Using API secret authentication for query")
+                username = get_service_account_username()
+                secret = get_service_account_secret()
+                if username and secret:
+                    auth = httpx.BasicAuth(username, secret)
+                    logger.info("Using service account authentication for query")
             except RuntimeError:
                 pass
         
