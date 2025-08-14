@@ -1,0 +1,35 @@
+{
+  "name": "my-mcp-server",
+  "version": "0.1.0",
+  "description": "Custom MCP Server",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "my-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "test-mock": "tsx src/test-mock.ts"
+  },
+  "keywords": [
+    "mcp",
+    "server"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@e2b/code-interpreter": "^1.5.1",
+    "@modelcontextprotocol/sdk": "^1.17.1",
+    "tsx": "^4.20.3",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
+  }
+}
