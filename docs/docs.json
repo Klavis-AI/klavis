@@ -164,6 +164,12 @@
             ]
           },
           {
+            "group": "Self Hosted MCP Server",
+            "pages": [
+              "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
+            ]
+          },
+          {
             "group": "Auth / OAuth",
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
