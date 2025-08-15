@@ -161,22 +161,6 @@ The server provides endpoints for both transport methods:
 }
 ```
 
-### Set User Profile
-```json
-{
-  "name": "mixpanel_set_user_profile",
-  "arguments": {
-    "distinct_id": "user123",
-    "properties": {
-      "name": "John Doe",
-      "email": "john@example.com",
-      "plan": "premium"
-    },
-    "operation": "$set"
-  }
-}
-```
-
 ### Get Event Count
 ```json
 {
@@ -201,19 +185,6 @@ The server provides endpoints for both transport methods:
 }
 ```
 
-### Get User Event Activity
-```json
-{
-  "name": "mixpanel_get_profile_event_activity",
-  "arguments": {
-    "distinct_id": "user123",
-    "from_date": "2024-01-01",
-    "to_date": "2024-01-31",
-    "limit": 50
-  }
-}
-```
-
 ## Available Tools
 
 The server provides the following tools:
@@ -221,13 +192,10 @@ The server provides the following tools:
 | Tool Name | Description | Required Parameters |
 |-----------|-------------|-------------------|
 | `mixpanel_import_events` | Import events using /import endpoint | `project_id`, `events` |
-| `mixpanel_set_user_profile` | Set/update user profile properties | `project_id`, `distinct_id` |
-| `mixpanel_get_user_profile` | Retrieve user profile data | `distinct_id` |
 | `mixpanel_query_events` | Query raw event data with filtering | `from_date`, `to_date` |
 | `mixpanel_get_event_count` | Get total event counts for date range | `from_date`, `to_date` |
 | `mixpanel_get_top_events` | Get most popular events by count | `from_date`, `to_date` |
 | `mixpanel_get_todays_top_events` | Get today's most popular events | None |
-| `mixpanel_get_profile_event_activity` | Get user's event activity timeline | `distinct_id` |
 | `mixpanel_list_saved_funnels` | List all saved funnels with metadata | None |
 | `mixpanel_get_projects` | Get all accessible projects | None |
 | `mixpanel_get_project_info` | Get detailed project information | `project_id` |

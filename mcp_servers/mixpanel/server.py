@@ -20,14 +20,11 @@ from dotenv import load_dotenv
 from tools import (
     auth_token_context,
     import_events,
-    set_user_profile,
-    get_user_profile,
     query_events,
     get_event_count,
     get_top_events,
     list_saved_funnels,
     get_todays_top_events,
-    get_profile_event_activity,
     get_projects,
     get_project_info,
 )
@@ -104,51 +101,6 @@ def main(
                             },
                             "minItems": 1,
                             "maxItems": 2000,
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="mixpanel_set_user_profile",
-                title="Set User Profile",
-                description="Set user profile properties in Mixpanel People. Create or update user profiles with demographic information, preferences, subscription details, and other user attributes for advanced segmentation and personalization.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["project_id", "distinct_id"],
-                    "properties": {
-                        "project_id": {
-                            "type": "string",
-                            "description": "The Mixpanel project ID. Use get_projects tool to find available project IDs.",
-                        },
-                        "distinct_id": {
-                            "type": "string",
-                            "description": "Unique identifier for the user (e.g., user ID, email address)",
-                        },
-                        "properties": {
-                            "type": "object",
-                            "description": "User profile properties to set (e.g., name, email, age, plan_type, signup_date)",
-                            "additionalProperties": True,
-                        },
-                        "operation": {
-                            "type": "string",
-                            "enum": ["$set", "$set_once", "$add", "$append", "$union", "$remove", "$unset", "$delete"],
-                            "default": "$set",
-                            "description": "Mixpanel operation type: $set (update), $set_once (only if not exists), $add (increment), $append (add to list), $union (merge lists), $remove (remove from list), $unset (remove property), $delete (delete profile)",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="mixpanel_get_user_profile",
-                title="Get User Profile",
-                description="Retrieve user profile data from Mixpanel People. Get demographic information, preferences, subscription details, and other user attributes for a specific user to analyze their profile and behavior patterns.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["distinct_id"],
-                    "properties": {
-                        "distinct_id": {
-                            "type": "string",
-                            "description": "Unique identifier for the user to retrieve (e.g., user ID, email address)",
                         },
                     },
                 },
@@ -280,34 +232,6 @@ def main(
                     },
                 },
             ),
-            types.Tool(
-                name="mixpanel_get_profile_event_activity",
-                title="Get Profile Event Activity",
-                description="Get event activity feed for a specific user from Mixpanel analytics. Retrieve chronological list of all events performed by a user with timestamps, properties, and activity summary for user behavior analysis.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["distinct_id"],
-                    "properties": {
-                        "distinct_id": {
-                            "type": "string",
-                            "description": "Unique identifier for the user (e.g., user ID, email address)",
-                        },
-                        "from_date": {
-                            "type": "string",
-                            "description": "Start date for activity search in YYYY-MM-DD format (e.g., '2024-01-01'). Defaults to 30 days ago if not provided.",
-                        },
-                        "to_date": {
-                            "type": "string",
-                            "description": "End date for activity search in YYYY-MM-DD format (e.g., '2024-01-31'). Defaults to today if not provided.",
-                        },
-                        "limit": {
-                            "type": "integer",
-                            "default": 100,
-                            "description": "Maximum number of events to return (default: 100, max: 1000)",
-                        },
-                    },
-                },
-            ),
         ]
 
     @app.call_tool()
@@ -337,73 +261,6 @@ def main(
             
             try:
                 result = await import_events(project_id, events)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "mixpanel_set_user_profile":
-            project_id = arguments.get("project_id")
-            distinct_id = arguments.get("distinct_id")
-            
-            if not project_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: project_id parameter is required",
-                    )
-                ]
-                
-            if not distinct_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: distinct_id parameter is required",
-                    )
-                ]
-            
-            properties = arguments.get("properties")
-            operation = arguments.get("operation", "$set")
-            
-            try:
-                result = await set_user_profile(project_id, distinct_id, properties, operation)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "mixpanel_get_user_profile":
-            distinct_id = arguments.get("distinct_id")
-            if not distinct_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: distinct_id parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await get_user_profile(distinct_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -583,37 +440,6 @@ def main(
             
             try:
                 result = await get_todays_top_events(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "mixpanel_get_profile_event_activity":
-            distinct_id = arguments.get("distinct_id")
-            if not distinct_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: distinct_id parameter is required",
-                    )
-                ]
-            
-            from_date = arguments.get("from_date")
-            to_date = arguments.get("to_date")
-            limit = arguments.get("limit", 100)
-            
-            try:
-                result = await get_profile_event_activity(distinct_id, from_date, to_date, limit)
                 return [
                     types.TextContent(
                         type="text",

@@ -12,7 +12,7 @@ async def get_projects() -> Dict[str, Any]:
     allowing users to select a project for operations that require a project_id.
     
     Returns:
-        Dict containing list of accessible projects with their details
+        Dict containing accessible projects in format: {"project_id": {"id": project_id, "name": "project_name"}}
     """
     try:
         # Use the app API endpoint to get projects
@@ -23,62 +23,57 @@ async def get_projects() -> Dict[str, Any]:
         
         if isinstance(result, dict):
             # Extract projects information
-            projects = []
-            if "results" in result:
-                # Handle paginated response
+            projects = {}
+            
+            # Check if response has results.projects structure
+            if "results" in result and "projects" in result.get("results", {}):
+                # Handle /me endpoint response where projects is a dict
+                projects_dict = result["results"]["projects"]
+                for project_id, project in projects_dict.items():
+                    projects[project_id] = {
+                        "id": int(project_id) if project_id.isdigit() else project_id,
+                        "name": project.get("name", "")
+                    }
+            elif "results" in result and isinstance(result.get("results"), list):
+                # Handle paginated list response
                 for item in result.get("results", []):
-                    projects.append({
-                        "project_id": item.get("id"),
-                        "name": item.get("name"),
-                        "timezone": item.get("timezone"),
-                        "created": item.get("created"),
-                        "organization_id": item.get("organization_id"),
-                        "organization_name": item.get("organization_name"),
-                    })
-            elif "projects" in result:
-                # Handle direct projects response
+                    pid = str(item.get("id"))
+                    projects[pid] = {
+                        "id": item.get("id"),
+                        "name": item.get("name", "")
+                    }
+            elif "projects" in result and isinstance(result.get("projects"), list):
+                # Handle direct projects list response
                 for project in result.get("projects", []):
-                    projects.append({
-                        "project_id": project.get("id"),
-                        "name": project.get("name"),
-                        "timezone": project.get("timezone"),
-                        "created": project.get("created"),
-                        "organization_id": project.get("organization_id"),
-                        "organization_name": project.get("organization_name"),
-                    })
+                    pid = str(project.get("id"))
+                    projects[pid] = {
+                        "id": project.get("id"),
+                        "name": project.get("name", "")
+                    }
+            elif "projects" in result and isinstance(result.get("projects"), dict):
+                # Handle projects as dict response
+                projects_dict = result["projects"]
+                for project_id, project in projects_dict.items():
+                    projects[project_id] = {
+                        "id": int(project_id) if project_id.isdigit() else project_id,
+                        "name": project.get("name", "")
+                    }
             else:
                 # Try to extract project info from the response directly
                 if result.get("id"):
-                    projects.append({
-                        "project_id": result.get("id"),
-                        "name": result.get("name"),
-                        "timezone": result.get("timezone"),
-                        "created": result.get("created"),
-                        "organization_id": result.get("organization_id"),
-                        "organization_name": result.get("organization_name"),
-                    })
+                    pid = str(result.get("id"))
+                    projects[pid] = {
+                        "id": result.get("id"),
+                        "name": result.get("name", "")
+                    }
             
-            return {
-                "success": True,
-                "projects": projects,
-                "total_projects": len(projects),
-                "message": f"Found {len(projects)} accessible projects",
-                "raw_response": result
-            }
+            return projects
         else:
-            return {
-                "success": False,
-                "projects": [],
-                "error": f"Unexpected response format: {result}"
-            }
+            return {}
             
     except Exception as e:
         logger.exception(f"Error getting projects: {e}")
-        return {
-            "success": False,
-            "projects": [],
-            "error": f"Failed to get projects: {str(e)}"
-        }
+        return {}
 
 async def get_project_info(
     project_id: str
