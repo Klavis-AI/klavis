@@ -32,8 +32,9 @@ This MCP server provides tools to interact with Mixpanel analytics, including:
 
 ### Prerequisites
 - Python 3.12 or higher
-- A Mixpanel account with API access
-- Mixpanel project token and API secret
+- A Mixpanel account with Service Account API access (Owner or Admin role for event tracking)
+- Mixpanel Service Account credentials (username and secret)
+- Mixpanel Project ID
 
 ### Installation
 
@@ -45,6 +46,10 @@ pip install -r requirements.txt
 2. Set up your environment variables:
 ```bash
 export MIXPANEL_MCP_SERVER_PORT=5000  # Optional, defaults to 5000
+export MIXPANEL_PROJECT_ID=your_project_id  # Required - your Mixpanel project ID
+export MIXPANEL_SERVICE_ACCOUNT_USERNAME=your_service_account_username  # Optional, can be provided via header
+export MIXPANEL_SERVICE_ACCOUNT_SECRET=your_service_account_secret  # Optional, can be provided via header
+export MIXPANEL_PROJECT_TOKEN=your_project_token  # Optional, legacy token support
 ```
 
 3. Run the server:
@@ -66,20 +71,70 @@ docker run -p 5000:5000 mixpanel-mcp-server
 
 ## Authentication
 
-The server uses custom authentication headers with your Mixpanel credentials. You can find these in your Mixpanel project settings:
+The server uses unified Mixpanel Service Account API authentication for all operations. Service accounts provide secure access to both data querying and event ingestion endpoints using Basic Authentication.
 
+### Service Account Credentials
+
+You can provide Service Account credentials and Project ID in two ways:
+
+1. **Via HTTP Header** (recommended for per-request authentication):
 ```
-x-project-token: your_project_token_here
-x-api-secret: your_api_secret_here
+x-auth-token: serviceaccount_username:serviceaccount_secret:project_id
+```
+Example:
+```
+x-auth-token: sa_abc123.mixpanel:def456ghi789:12345
 ```
 
-- **Project Token**: Required for event tracking and user profile operations
-- **API Secret**: Required for data querying, user profile retrieval, and analytics
+Or without project_id (will use environment variable):
+```
+x-auth-token: sa_abc123.mixpanel:def456ghi789
+```
 
-**Alternative Authentication (Service Account):**
-For some operations, you can also use service account credentials:
-- Service Account Username
-- Service Account Secret
+2. **Via Environment Variables** (fallback if not provided in header):
+```bash
+export MIXPANEL_SERVICE_ACCOUNT_USERNAME=sa_abc123.mixpanel
+export MIXPANEL_SERVICE_ACCOUNT_SECRET=def456ghi789
+export MIXPANEL_PROJECT_ID=12345
+```
+
+### Requirements
+
+- **Service Account Role**: Must be Owner or Admin for event tracking operations (/import endpoint)
+- **Project ID**: Required for all operations to identify which project to work with
+- **Legacy Token Support**: If `MIXPANEL_PROJECT_TOKEN` is set, it will be used for /track endpoint compatibility
+
+### API Organization
+
+Based on the [Mixpanel API documentation](https://developer.mixpanel.com/reference/overview), the server uses 4 distinct API endpoints:
+
+1. **Ingestion API** (`api.mixpanel.com`): For importing events and updating user profiles
+2. **Raw Data Export API** (`data.mixpanel.com/api/2.0/export`): For exporting raw event data
+3. **Query API** (`mixpanel.com/api`): For calculated data (Insights, Funnels, Retention)
+4. **App Management API** (`mixpanel.com/api/app`): For project management and administrative operations
+
+### Client Architecture
+
+The server uses 4 dedicated clients, one for each API endpoint:
+
+- **`MixpanelIngestionClient`**: Handles Ingestion API (events & profiles)
+- **`MixpanelExportClient`**: Handles Raw Data Export API (raw event export)
+- **`MixpanelQueryClient`**: Handles Query API (calculated metrics, user profile queries)
+- **`MixpanelAppAPIClient`**: Handles App Management API (projects, GDPR, schemas)
+
+### API Usage Examples
+
+```bash
+# Test authentication (App Management API)
+curl https://mixpanel.com/api/app/me \
+  --user "serviceaccount_username:serviceaccount_secret"
+
+# Import events (Ingestion API)
+curl https://api.mixpanel.com/import?project_id=12345 \
+  --user "serviceaccount_username:serviceaccount_secret" \
+  -H "Content-Type: application/json" \
+  -d '[{"event": "Test", "properties": {"time": 1618716477000, "distinct_id": "user123", "$insert_id": "unique-id"}}]'
+```
 
 ## API Endpoints
 
@@ -165,26 +220,28 @@ The server provides the following tools:
 
 | Tool Name | Description | Required Parameters |
 |-----------|-------------|-------------------|
-| `mixpanel_track_event` | Track custom events with properties | `event` |
-| `mixpanel_set_user_profile` | Set/update user profile properties | `distinct_id` |
+| `mixpanel_import_events` | Import events using /import endpoint | `project_id`, `events` |
+| `mixpanel_set_user_profile` | Set/update user profile properties | `project_id`, `distinct_id` |
 | `mixpanel_get_user_profile` | Retrieve user profile data | `distinct_id` |
 | `mixpanel_query_events` | Query raw event data with filtering | `from_date`, `to_date` |
-| `mixpanel_track_batch_events` | Track multiple events in batch | `events` |
 | `mixpanel_get_event_count` | Get total event counts for date range | `from_date`, `to_date` |
 | `mixpanel_get_top_events` | Get most popular events by count | `from_date`, `to_date` |
 | `mixpanel_get_todays_top_events` | Get today's most popular events | None |
 | `mixpanel_get_profile_event_activity` | Get user's event activity timeline | `distinct_id` |
 | `mixpanel_list_saved_funnels` | List all saved funnels with metadata | None |
+| `mixpanel_get_projects` | Get all accessible projects | None |
+| `mixpanel_get_project_info` | Get detailed project information | `project_id` |
 
 ## Error Handling
 
 The server provides detailed error messages for common issues:
-- Missing required parameters (project token, API secret, distinct_id, etc.)
-- Authentication failures (invalid credentials)
+- Missing required parameters (service account credentials, project_id, distinct_id, etc.)
+- Authentication failures (invalid service account credentials or insufficient permissions)
 - API rate limiting (automatic handling with appropriate error messages)
 - Network connectivity issues
 - Invalid data formats and malformed requests
 - Mixpanel-specific errors (quota exceeded, plan limitations)
+- Service Account role errors (Owner/Admin required for event ingestion)
 
 ## Rate Limiting
 

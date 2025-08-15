@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict
 import httpx
 
-from .base import get_api_secret, get_service_account_username, get_service_account_secret
+from .base import get_service_account_credentials
 
 logger = logging.getLogger(__name__)
 
@@ -12,26 +12,11 @@ async def list_saved_funnels() -> Dict[str, Any]:
         # Use the correct base URL for funnels API
         base_url = "https://mixpanel.com/api/query/funnels/list"
         
-        # Get authentication
-        auth = None
-        try:
-            api_secret = get_api_secret()
-            if api_secret:
-                auth = httpx.BasicAuth(api_secret, "")
-                logger.info("Using API secret authentication for funnels")
-        except RuntimeError:
-            # Fall back to service account
-            try:
-                username = get_service_account_username()
-                secret = get_service_account_secret()
-                if username and secret:
-                    auth = httpx.BasicAuth(username, secret)
-                    logger.info("Using service account authentication for funnels")
-            except RuntimeError:
-                pass
+        # Get service account credentials
+        username, secret = get_service_account_credentials()
         
-        if not auth:
-            raise RuntimeError("No authentication provided. Please set either service account credentials or API secret.")
+        # Use Basic Auth with service account credentials
+        auth = httpx.BasicAuth(username, secret)
         
         headers = {
             "Content-Type": "application/json"

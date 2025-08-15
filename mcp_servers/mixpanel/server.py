@@ -18,18 +18,18 @@ from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
 from tools import (
-    project_token_context,
-    api_secret_context,
-    track_event,
+    auth_token_context,
+    import_events,
     set_user_profile,
     get_user_profile,
     query_events,
-    track_batch_events,
     get_event_count,
     get_top_events,
     list_saved_funnels,
     get_todays_top_events,
     get_profile_event_activity,
+    get_projects,
+    get_project_info,
 )
 
 logger = logging.getLogger(__name__)
@@ -69,25 +69,41 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="mixpanel_track_event",
-                title="Track Event",
-                description="Track custom events to Mixpanel analytics platform. Capture user interactions, page views, button clicks, purchases, and other meaningful actions with custom properties for detailed behavioral analysis.",
+                name="mixpanel_import_events",
+                title="Import Events",
+                description="Import events to Mixpanel using the /import endpoint with Service Account authentication. Send batches of events with automatic deduplication support. Each event requires time, distinct_id, and $insert_id for proper processing.",
                 inputSchema={
                     "type": "object",
-                    "required": ["event"],
+                    "required": ["project_id", "events"],
                     "properties": {
-                        "event": {
+                        "project_id": {
                             "type": "string",
-                            "description": "The name of the event to track (e.g., 'Page View', 'Button Click', 'Purchase')",
+                            "description": "The Mixpanel project ID to import events to. Use get_projects tool to find available project IDs.",
                         },
-                        "properties": {
-                            "type": "object",
-                            "description": "Optional properties to include with the event (e.g., page name, button text, product ID)",
-                            "additionalProperties": True,
-                        },
-                        "distinct_id": {
-                            "type": "string",
-                            "description": "Optional unique identifier for the user performing the event",
+                        "events": {
+                            "type": "array",
+                            "description": "Array of event objects to import",
+                            "items": {
+                                "type": "object",
+                                "required": ["event"],
+                                "properties": {
+                                    "event": {
+                                        "type": "string",
+                                        "description": "The name of the event (e.g., 'Page View', 'Button Click', 'Purchase')",
+                                    },
+                                    "properties": {
+                                        "type": "object",
+                                        "description": "Event properties. Will auto-generate time and $insert_id if not provided.",
+                                        "additionalProperties": True,
+                                    },
+                                    "distinct_id": {
+                                        "type": "string",
+                                        "description": "Unique identifier for the user performing the event (empty string if anonymous)",
+                                    },
+                                },
+                            },
+                            "minItems": 1,
+                            "maxItems": 2000,
                         },
                     },
                 },
@@ -98,8 +114,12 @@ def main(
                 description="Set user profile properties in Mixpanel People. Create or update user profiles with demographic information, preferences, subscription details, and other user attributes for advanced segmentation and personalization.",
                 inputSchema={
                     "type": "object",
-                    "required": ["distinct_id"],
+                    "required": ["project_id", "distinct_id"],
                     "properties": {
+                        "project_id": {
+                            "type": "string",
+                            "description": "The Mixpanel project ID. Use get_projects tool to find available project IDs.",
+                        },
                         "distinct_id": {
                             "type": "string",
                             "description": "Unique identifier for the user (e.g., user ID, email address)",
@@ -166,37 +186,25 @@ def main(
                 },
             ),
             types.Tool(
-                name="mixpanel_track_batch_events",
-                title="Track Batch Events",
-                description="Track multiple events in a single batch request to Mixpanel analytics platform. Efficiently send multiple user interactions, page views, purchases, and other events together for better performance and reduced API calls.",
+                name="mixpanel_get_projects",
+                title="Get Projects",
+                description="Get all projects that are accessible to the current service account user. Use this tool to discover available projects and their IDs, which are required for event tracking and user profile operations.",
                 inputSchema={
                     "type": "object",
-                    "required": ["events"],
+                    "properties": {},
+                },
+            ),
+            types.Tool(
+                name="mixpanel_get_project_info",
+                title="Get Project Info",
+                description="Get detailed information about a specific project including workspaces and metadata. Useful when a user specifies a project ID to get more details about that project.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["project_id"],
                     "properties": {
-                        "events": {
-                            "type": "array",
-                            "description": "Array of event objects to track in batch",
-                            "items": {
-                                "type": "object",
-                                "required": ["event"],
-                                "properties": {
-                                    "event": {
-                                        "type": "string",
-                                        "description": "The name of the event to track (e.g., 'Page View', 'Button Click', 'Purchase')",
-                                    },
-                                    "properties": {
-                                        "type": "object",
-                                        "description": "Optional properties to include with the event (e.g., page name, button text, product ID)",
-                                        "additionalProperties": True,
-                                    },
-                                    "distinct_id": {
-                                        "type": "string",
-                                        "description": "Optional unique identifier for the user performing the event",
-                                    },
-                                },
-                            },
-                            "minItems": 1,
-                            "maxItems": 50,
+                        "project_id": {
+                            "type": "string",
+                            "description": "The Mixpanel project ID to get information for",
                         },
                     },
                 },
@@ -307,21 +315,28 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
-        if name == "mixpanel_track_event":
-            event = arguments.get("event")
-            if not event:
+        if name == "mixpanel_import_events":
+            project_id = arguments.get("project_id")
+            events = arguments.get("events")
+            
+            if not project_id:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: event parameter is required",
+                        text="Error: project_id parameter is required",
+                    )
+                ]
+                
+            if not events:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: events parameter is required",
                     )
                 ]
             
-            properties = arguments.get("properties")
-            distinct_id = arguments.get("distinct_id")
-            
             try:
-                result = await track_event(event, properties, distinct_id)
+                result = await import_events(project_id, events)
                 return [
                     types.TextContent(
                         type="text",
@@ -338,7 +353,17 @@ def main(
                 ]
         
         elif name == "mixpanel_set_user_profile":
+            project_id = arguments.get("project_id")
             distinct_id = arguments.get("distinct_id")
+            
+            if not project_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: project_id parameter is required",
+                    )
+                ]
+                
             if not distinct_id:
                 return [
                     types.TextContent(
@@ -351,7 +376,7 @@ def main(
             operation = arguments.get("operation", "$set")
             
             try:
-                result = await set_user_profile(distinct_id, properties, operation)
+                result = await set_user_profile(project_id, distinct_id, properties, operation)
                 return [
                     types.TextContent(
                         type="text",
@@ -427,36 +452,37 @@ def main(
                     )
                 ]
         
-        elif name == "mixpanel_track_batch_events":
-            events = arguments.get("events")
-            
-            if not events:
+        elif name == "mixpanel_get_projects":
+            try:
+                result = await get_projects()
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: events parameter is required",
+                        text=json.dumps(result, indent=2),
                     )
                 ]
-            
-            if not isinstance(events, list) or len(events) == 0:
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: events must be a non-empty array",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "mixpanel_get_project_info":
+            project_id = arguments.get("project_id")
+            
+            if not project_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: project_id parameter is required",
                     )
                 ]
             
             try:
-                result = await track_batch_events(events)
-                
-                if isinstance(result, dict) and "error" in result:
-                    return [
-                        types.TextContent(
-                            type="text",
-                            text=f"API Error: {result.get('error', 'Unknown error occurred')}",
-                        )
-                    ]
-                
+                result = await get_project_info(project_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -617,14 +643,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth tokens from headers (allow None - will be handled at tool level)
-        project_token = request.headers.get('x-project-token')
-        api_secret = request.headers.get('x-api-secret')
+        # Extract auth token from headers (allow None - will be handled at tool level)
+        auth_token = request.headers.get('x-auth-token')
         
-        # Set the tokens in context for this request (can be None)
-        project_token_ctx = project_token_context.set(project_token or "")
-        api_secret_ctx = api_secret_context.set(api_secret or "")
-        
+        # Set the auth token in context for this request (can be None)
+        token = auth_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -633,8 +656,7 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            project_token_context.reset(project_token_ctx)
-            api_secret_context.reset(api_secret_ctx)
+            auth_token_context.reset(token)
         
         return Response()
 
@@ -651,25 +673,18 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth tokens from headers (allow None - will be handled at tool level)
+        # Extract auth token from headers (allow None - will be handled at tool level)
         headers = dict(scope.get("headers", []))
-        project_token = headers.get(b'x-project-token')
-        api_secret = headers.get(b'x-api-secret')
+        auth_token = headers.get(b'x-auth-token')
+        if auth_token:
+            auth_token = auth_token.decode('utf-8')
         
-        if project_token:
-            project_token = project_token.decode('utf-8')
-        if api_secret:
-            api_secret = api_secret.decode('utf-8')
-        
-        # Set the tokens in context for this request (can be None/empty)
-        project_token_ctx = project_token_context.set(project_token or "")
-        api_secret_ctx = api_secret_context.set(api_secret or "")
-        
+        # Set the auth token in context for this request (can be None/empty)
+        token = auth_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            project_token_context.reset(project_token_ctx)
-            api_secret_context.reset(api_secret_ctx)
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
