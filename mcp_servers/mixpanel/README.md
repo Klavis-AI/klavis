@@ -198,7 +198,6 @@ The server provides the following tools:
 | `mixpanel_get_todays_top_events` | Get today's most popular events | None |
 | `mixpanel_list_saved_funnels` | List all saved funnels with metadata | None |
 | `mixpanel_get_projects` | Get all accessible projects | None |
-| `mixpanel_get_project_info` | Get detailed project information | `project_id` |
 
 ## Error Handling
 

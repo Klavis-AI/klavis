@@ -19,14 +19,15 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
-    import_events,
-    query_events,
-    get_event_count,
-    get_top_events,
-    list_saved_funnels,
-    get_todays_top_events,
+    send_events,
     get_projects,
-    get_project_info,
+    get_events,
+    get_event_properties,
+    get_event_property_values,
+    run_funnels_query,
+    run_frequency_query,
+    run_retention_query,
+    run_segmentation_query,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,9 +67,8 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="mixpanel_import_events",
-                title="Import Events",
-                description="Import events to Mixpanel using the /import endpoint with Service Account authentication. Send batches of events with automatic deduplication support. Each event requires time, distinct_id, and $insert_id for proper processing.",
+                name="mixpanel_send_events",
+                description="Send events to Mixpanel using the /import endpoint with Service Account authentication. Send batches of events with automatic deduplication support. Each event requires time, distinct_id, and $insert_id for proper processing.",
                 inputSchema={
                     "type": "object",
                     "required": ["project_id", "events"],
@@ -106,132 +106,285 @@ def main(
                 },
             ),
             types.Tool(
-                name="mixpanel_query_events",
-                title="Query Events",
-                description="Query raw event data from Mixpanel. Retrieve historical events with optional filtering by event name, date range, and custom properties for detailed analysis and reporting.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["from_date", "to_date"],
-                    "properties": {
-                        "from_date": {
-                            "type": "string",
-                            "description": "Start date for query in YYYY-MM-DD format (e.g., '2024-01-01')",
-                        },
-                        "to_date": {
-                            "type": "string", 
-                            "description": "End date for query in YYYY-MM-DD format (e.g., '2024-01-31')",
-                        },
-                        "event": {
-                            "type": "string",
-                            "description": "Optional specific event name to filter results (e.g., 'Page View', 'Purchase')",
-                        },
-                        "where": {
-                            "type": "string",
-                            "description": "Optional JSON where clause for advanced filtering (e.g., '{\"properties\":{\"$browser\":\"Chrome\"}}')",
-                        },
-                        "limit": {
-                            "type": "integer",
-                            "default": 1000,
-                            "description": "Maximum number of events to return (default: 1000, max: 10000)",
-                        },
-                    },
-                },
-            ),
-            types.Tool(
-                name="mixpanel_get_projects",
-                title="Get Projects",
-                description="Get all projects that are accessible to the current service account user. Use this tool to discover available projects and their IDs, which are required for event tracking and user profile operations.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
-            ),
-            types.Tool(
-                name="mixpanel_get_project_info",
-                title="Get Project Info",
-                description="Get detailed information about a specific project including workspaces and metadata. Useful when a user specifies a project ID to get more details about that project.",
+                name="mixpanel_get_events",
+                description="Get event names for the given Mixpanel project. Retrieves all event names that have been tracked in the specified project, useful for discovering what events are available for analysis.",
                 inputSchema={
                     "type": "object",
                     "required": ["project_id"],
                     "properties": {
                         "project_id": {
                             "type": "string",
-                            "description": "The Mixpanel project ID to get information for",
+                            "description": "The Mixpanel project ID to get event names for",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="mixpanel_get_event_count",
-                title="Get Event Count",
-                description="Get total event count for a specific date range from Mixpanel analytics. Provides comprehensive statistics including total events, unique users, and event breakdown by type for analysis and reporting.",
+                name="mixpanel_get_event_properties",
+                description=(
+                    "Get event properties for the given event and Mixpanel project. "
+                    "These are the properties available when filtering and aggregating in queries."
+                ),
                 inputSchema={
                     "type": "object",
-                    "required": ["from_date", "to_date"],
+                    "required": ["project_id", "event"],
                     "properties": {
-                        "from_date": {
-                            "type": "string",
-                            "description": "Start date for count query in YYYY-MM-DD format (e.g., '2024-01-01')",
-                        },
-                        "to_date": {
-                            "type": "string",
-                            "description": "End date for count query in YYYY-MM-DD format (e.g., '2024-01-31')",
+                        "project_id": {
+                            "type": ["string", "integer"],
+                            "description": "The Mixpanel project ID",
                         },
                         "event": {
                             "type": "string",
-                            "description": "Optional specific event name to count (e.g., 'Page View', 'Purchase'). If not provided, counts all events.",
+                            "description": "Event name (e.g., 'AI Prompt Sent')",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="mixpanel_get_top_events",
-                title="Get Top Events",
-                description="Get a list of the most common events over a specified time period from Mixpanel analytics. Provides event rankings with counts and percentages for identifying popular user actions and behaviors.",
+                name="mixpanel_get_event_property_values",
+                description=(
+                    "Get event property values for the given event name, Mixpanel project, and property name. "
+                    "These are the values that are available for the given event property."
+                ),
                 inputSchema={
                     "type": "object",
-                    "required": ["from_date", "to_date"],
+                    "required": ["project_id", "event", "property"],
                     "properties": {
+                        "project_id": {
+                            "type": ["string", "integer"],
+                            "description": "The Mixpanel project ID",
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "Event name (e.g., 'AI Prompt Sent')",
+                        },
+                        "property": {
+                            "type": "string",
+                            "description": "Property name (e.g., 'utm_source')",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_run_funnels_query",
+                description=(
+                    "Run a funnel query. This measures the conversion rate of a user journey."
+                ),
+                inputSchema={
+                    "type": "object",
+                    "required": ["events", "from_date", "to_date", "count_type", "project_id"],
+                    "properties": {
+                        "events": {
+                            "type": ["array", "string"],
+                            "description": "Ordered steps of the funnel. Either an array of step objects or a JSON-encoded string.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "event": {"type": "string"},
+                                    "step_label": {"type": "string"}
+                                },
+                                "required": ["event"],
+                                "additionalProperties": True
+                            }
+                        },
+                        "from_date": {"type": "string", "description": "YYYY-MM-DD"},
+                        "to_date": {"type": "string", "description": "YYYY-MM-DD"},
+                        "count_type": {"type": "string", "enum": ["unique", "general"], "default": "unique"},
+                        "project_id": {"type": ["string", "integer"]}
+                    }
+                },
+            ),
+            types.Tool(
+                name="mixpanel_run_segmentation_query",
+                description=(
+                    "The segmentation tool is a flexible way to slice and dice your event stream. "
+                    "It lets you choose events (or $any_event), specify a time window (defaults to last 30 days), "
+                    "bucket results by day/hour/month, choose metric (general or unique), filter with boolean expressions (where), "
+                    "segment by any property or computed key (on), and apply numerical aggregations when grouping on a numeric field "
+                    "(sum, average, buckets)."
+                ),
+                inputSchema={
+                    "type": "object",
+                    "required": ["project_id", "event"],
+                    "properties": {
+                        "project_id": {
+                            "type": ["string", "integer"],
+                            "description": "The Mixpanel project ID",
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "Event name to analyze.",
+                        },
                         "from_date": {
                             "type": "string",
-                            "description": "Start date for analysis in YYYY-MM-DD format (e.g., '2024-01-01')",
+                            "description": "Start date in YYYY-MM-DD. Defaults to 30 days ago.",
                         },
                         "to_date": {
                             "type": "string",
-                            "description": "End date for analysis in YYYY-MM-DD format (e.g., '2024-01-31')",
+                            "description": "End date in YYYY-MM-DD. Defaults to today.",
                         },
-                        "limit": {
-                            "type": "integer",
-                            "default": 10,
-                            "description": "Maximum number of top events to return (default: 10, max: 100)",
+                        "unit": {
+                            "type": "string",
+                            "enum": ["hour", "day", "month"],
+                            "default": "day",
+                            "description": "Granularity of time buckets.",
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": ["general", "unique"],
+                            "default": "general",
+                            "description": "Metric for counts (raw vs distinct users).",
+                        },
+                        "where": {
+                            "type": "string",
+                            "description": "Optional boolean expression filter",
+                        },
+                        "on": {
+                            "type": "string",
+                            "description": "Optional segmentation property or computed key",
+                        },
+                        "numerical_aggregation": {
+                            "type": "string",
+                            "enum": ["sum", "average", "buckets"],
+                            "description": "Optional numeric aggregation when grouping by a numeric field.",
                         },
                     },
                 },
             ),
             types.Tool(
-                name="mixpanel_list_saved_funnels",
-                title="List Saved Funnels",
-                description="Get a list of all saved funnels from Mixpanel with their names, funnel IDs, and metadata. Retrieve funnel information including creation dates, creators, step counts, and descriptions for analysis and reporting.",
+                name="mixpanel_run_retention_query",
+                description=(
+                    "The retention tool tracks user engagement over time and supports cohort analysis. "
+                    "It lets you select a born event ('born_event') and a retention event ('event'), specify a time window, "
+                    "choose retention type (birth or compounded), bucket by day/week/month, choose a metric (general or unique), "
+                    "filter the data with boolean expressions ('where'), and segment results by any property ('on')."
+                ),
+                inputSchema={
+                    "type": "object",
+                    "required": ["project_id", "event"],
+                    "properties": {
+                        "project_id": {
+                            "type": ["string", "integer"],
+                            "description": "The Mixpanel project ID",
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "The retention event to analyze",
+                        },
+                        "born_event": {
+                            "type": "string",
+                            "description": "The born/cohort event. Defaults to event if not provided",
+                        },
+                        "from_date": {
+                            "type": "string",
+                            "description": "Start date in YYYY-MM-DD. Defaults to 30 days ago.",
+                        },
+                        "to_date": {
+                            "type": "string",
+                            "description": "End date in YYYY-MM-DD. Defaults to today.",
+                        },
+                        "unit": {
+                            "type": "string",
+                            "enum": ["day", "week", "month"],
+                            "default": "day",
+                            "description": "Granularity of cohorts/time buckets.",
+                        },
+                        "retention_type": {
+                            "type": "string",
+                            "enum": ["birth", "compounded"],
+                            "default": "birth",
+                            "description": "Retention analysis type.",
+                        },
+                        "interval_count": {
+                            "type": "integer",
+                            "description": "Number of intervals to include.",
+                        },
+                        "metric": {
+                            "type": "string",
+                            "enum": ["general", "unique"],
+                            "default": "unique",
+                            "description": "Metric for counts (raw vs distinct users).",
+                        },
+                        "where": {
+                            "type": "string",
+                            "description": "Optional boolean expression filter",
+                        },
+                        "on": {
+                            "type": "string",
+                            "description": "Optional segmentation property or computed key",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_run_frequency_query",
+                description=(
+                    "The frequency tool tracks user engagement over time and supports cohort analysis. "
+                    "It lets you select a born event ('born_event') and a retention event ('event'), specify a time window, "
+                    "choose a unit (day, week, month), choose an addiction_unit (hour, day, week), choose a metric (general or unique), "
+                    "filter the data with boolean expressions ('where'), and segment results by any property ('on')."
+                ),
+                inputSchema={
+                    "type": "object",
+                    "required": ["project_id", "event"],
+                    "properties": {
+                        "project_id": {
+                            "type": ["string", "integer"],
+                            "description": "The Mixpanel project ID",
+                        },
+                        "event": {
+                            "type": "string",
+                            "description": "The retention event to analyze",
+                        },
+                        "born_event": {
+                            "type": "string",
+                            "description": "The born/cohort event. Defaults to event if not provided",
+                        },
+                        "from_date": {
+                            "type": "string",
+                            "description": "Start date in YYYY-MM-DD. Defaults to 30 days ago.",
+                        },
+                        "to_date": {
+                            "type": "string",
+                            "description": "End date in YYYY-MM-DD. Defaults to today.",
+                        },
+                        "unit": {
+                            "type": "string",
+                            "enum": ["day", "week", "month"],
+                            "default": "day",
+                            "description": "Granularity of cohorts/time buckets.",
+                        },
+                        "addiction_unit": {
+                            "type": "string",
+                            "enum": ["hour", "day", "week"],
+                            "default": "hour",
+                            "description": "Sub-interval used for frequency bins.",
+                        },
+                        "metric": {
+                            "type": "string",
+                            "enum": ["general", "unique"],
+                            "default": "unique",
+                            "description": "Metric for counts (raw vs distinct users).",
+                        },
+                        "where": {
+                            "type": "string",
+                            "description": "Optional boolean expression filter",
+                        },
+                        "on": {
+                            "type": "string",
+                            "description": "Optional segmentation property or computed key",
+                        },
+                    },
+                },
+            ),
+            types.Tool(
+                name="mixpanel_get_projects",
+                description="Get all projects that are accessible to the current service account user. Use this tool to discover available projects and their IDs, which are required for event tracking and user profile operations.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
                 },
-            ),
-            types.Tool(
-                name="mixpanel_get_todays_top_events",
-                title="Get Today's Top Events",
-                description="Get the most common events from today's date from Mixpanel analytics. Provides real-time insights into current user activity and popular actions happening right now with event rankings and counts.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "limit": {
-                            "type": "integer",
-                            "default": 10,
-                            "description": "Maximum number of top events to return (default: 10, max: 100)",
-                        },
-                    },
-                },
-            ),
+            )
         ]
 
     @app.call_tool()
@@ -239,7 +392,7 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
-        if name == "mixpanel_import_events":
+        if name == "mixpanel_send_events":
             project_id = arguments.get("project_id")
             events = arguments.get("events")
             
@@ -260,40 +413,7 @@ def main(
                 ]
             
             try:
-                result = await import_events(project_id, events)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "mixpanel_query_events":
-            from_date = arguments.get("from_date")
-            to_date = arguments.get("to_date")
-            
-            if not from_date or not to_date:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_date and to_date parameters are required",
-                    )
-                ]
-            
-            event = arguments.get("event")
-            where = arguments.get("where")
-            limit = arguments.get("limit", 1000)
-            
-            try:
-                result = await query_events(from_date, to_date, event, where, limit)
+                result = await send_events(project_id, events)
                 return [
                     types.TextContent(
                         type="text",
@@ -327,7 +447,101 @@ def main(
                     )
                 ]
         
-        elif name == "mixpanel_get_project_info":
+
+        elif name == "mixpanel_get_event_properties":
+            project_id = arguments.get("project_id")
+            event = arguments.get("event")
+
+            if not project_id:
+                return [types.TextContent(type="text", text="Error: project_id parameter is required")]
+            if not event:
+                return [types.TextContent(type="text", text="Error: event parameter is required")]
+
+            try:
+                result = await get_event_properties(str(project_id), event)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "mixpanel_get_event_property_values":
+            project_id = arguments.get("project_id")
+            event = arguments.get("event")
+            property_name = arguments.get("property")
+
+            if not project_id:
+                return [types.TextContent(type="text", text="Error: project_id parameter is required")]
+            if not event:
+                return [types.TextContent(type="text", text="Error: event parameter is required")]
+            if not property_name:
+                return [types.TextContent(type="text", text="Error: property parameter is required")]
+
+            try:
+                result = await get_event_property_values(str(project_id), event, property_name)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "mixpanel_run_funnels_query":
+            project_id = arguments.get("project_id")
+            events = arguments.get("events")
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            count_type = arguments.get("count_type", "unique")
+
+            if not project_id:
+                return [types.TextContent(type="text", text="Error: project_id parameter is required")]
+            if not events:
+                return [types.TextContent(type="text", text="Error: events parameter is required")]
+            if not from_date or not to_date:
+                return [types.TextContent(type="text", text="Error: from_date and to_date are required")]
+
+            try:
+                result = await run_funnels_query(
+                    project_id=str(project_id),
+                    events=events,
+                    from_date=from_date,
+                    to_date=to_date,
+                    count_type=count_type,
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        
+        elif name == "mixpanel_get_events":
             project_id = arguments.get("project_id")
             
             if not project_id:
@@ -339,7 +553,7 @@ def main(
                 ]
             
             try:
-                result = await get_project_info(project_id)
+                result = await get_events(project_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -355,53 +569,40 @@ def main(
                     )
                 ]
         
-        elif name == "mixpanel_get_event_count":
-            from_date = arguments.get("from_date")
-            to_date = arguments.get("to_date")
-            
-            if not from_date or not to_date:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_date and to_date parameters are required",
-                    )
-                ]
-            
+        elif name == "mixpanel_run_frequency_query":
+            project_id = arguments.get("project_id")
             event = arguments.get("event")
-            
-            try:
-                result = await get_event_count(from_date, to_date, event)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "mixpanel_get_top_events":
+            born_event = arguments.get("born_event")
             from_date = arguments.get("from_date")
             to_date = arguments.get("to_date")
-            
-            if not from_date or not to_date:
+            unit = arguments.get("unit", "day")
+            addiction_unit = arguments.get("addiction_unit", "hour")
+            metric = arguments.get("metric", "unique")
+            where = arguments.get("where")
+            on = arguments.get("on")
+
+            if not project_id:
                 return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_date and to_date parameters are required",
-                    )
+                    types.TextContent(type="text", text="Error: project_id parameter is required")
                 ]
-            
-            limit = arguments.get("limit", 10)
-            
+            if not event:
+                return [
+                    types.TextContent(type="text", text="Error: event parameter is required")
+                ]
+
             try:
-                result = await get_top_events(from_date, to_date, limit)
+                result = await run_frequency_query(
+                    project_id=project_id,
+                    event=event,
+                    born_event=born_event,
+                    from_date=from_date,
+                    to_date=to_date,
+                    unit=unit,
+                    addiction_unit=addiction_unit,
+                    metric=metric,
+                    where=where,
+                    on=on,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -416,10 +617,57 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
-        elif name == "mixpanel_list_saved_funnels":
+
+        elif name == "mixpanel_run_retention_query":
+            project_id = arguments.get("project_id")
+            event = arguments.get("event")
+            born_event = arguments.get("born_event")
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            unit = arguments.get("unit", "day")
+            retention_type = arguments.get("retention_type", "birth")
+            interval_count = arguments.get("interval_count")
+            metric = arguments.get("metric", "unique")
+            where = arguments.get("where")
+            on = arguments.get("on")
+
+            if not project_id:
+                return [
+                    types.TextContent(type="text", text="Error: project_id parameter is required")
+                ]
+
+        elif name == "mixpanel_run_segmentation_query":
+            project_id = arguments.get("project_id")
+            event = arguments.get("event")
+            from_date = arguments.get("from_date")
+            to_date = arguments.get("to_date")
+            unit = arguments.get("unit", "day")
+            metric_type = arguments.get("type", "general")
+            where = arguments.get("where")
+            on = arguments.get("on")
+            numerical_aggregation = arguments.get("numerical_aggregation")
+
+            if not project_id:
+                return [
+                    types.TextContent(type="text", text="Error: project_id parameter is required")
+                ]
+            if not event:
+                return [
+                    types.TextContent(type="text", text="Error: event parameter is required")
+                ]
+
             try:
-                result = await list_saved_funnels()
+                result = await run_segmentation_query(
+                    project_id=str(project_id),
+                    event=event,
+                    from_date=from_date,
+                    to_date=to_date,
+                    unit=unit,
+                    type=metric_type,
+                    where=where,
+                    on=on,
+                    numerical_aggregation=numerical_aggregation,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -434,27 +682,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
-        elif name == "mixpanel_get_todays_top_events":
-            limit = arguments.get("limit", 10)
-            
-            try:
-                result = await get_todays_top_events(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
+
         else:
             return [
                 types.TextContent(
