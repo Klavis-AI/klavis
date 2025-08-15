@@ -304,7 +304,7 @@
           "mcp-server"
         ],
         "summary": "Delete Auth data for Server Instance",
-        "description": "Deletes authentication metadata for a specific server connection instance.",
+        "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [
           {
@@ -528,9 +528,9 @@
         "tags": [
           "mcp-server"
         ],
-        "summary": "Get Authentication Metadata",
-        "description": "Retrieves the auth metadata for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication metadata.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
-        "operationId": "getInstanceAuthMetadata",
+        "summary": "Get Authentication Data",
+        "description": "Retrieves the auth data for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthData",
         "security": [
           {
             "HTTPBearer": []
@@ -544,10 +544,10 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "description": "The ID of the connection instance to get auth metadata for.",
+              "description": "The ID of the connection instance to get auth data for.",
               "title": "Instance Id"
             },
-            "description": "The ID of the connection instance to get auth metadata for."
+            "description": "The ID of the connection instance to get auth data for."
           }
         ],
         "responses": {
@@ -556,7 +556,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAuthMetadataResponse"
+                  "$ref": "#/components/schemas/GetAuthDataResponse"
                 }
               }
             }
@@ -3594,7 +3594,7 @@
         ],
         "title": "ExtendedMcpServer"
       },
-      "GetAuthMetadataResponse": {
+      "GetAuthDataResponse": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -3612,7 +3612,7 @@
               }
             ],
             "title": "Authdata",
-            "description": "Complete authentication metadata including access token, refresh token, scope, expiration, and platform-specific data"
+            "description": "Complete authentication data including access token, refresh token, scope, expiration, and platform-specific data"
           },
           "error": {
             "anyOf": [
@@ -3631,7 +3631,7 @@
         "required": [
           "success"
         ],
-        "title": "GetAuthMetadataResponse"
+        "title": "GetAuthDataResponse"
       },
       "GetInstanceResponse": {
         "properties": {
