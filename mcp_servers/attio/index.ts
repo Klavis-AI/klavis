@@ -22,18 +22,18 @@ const asyncLocalStorage = new AsyncLocalStorage<{
 
 // Attio API Client
 class AttioClient {
-    private apiKey: string;
+    private accessToken: string;
     private baseUrl: string;
 
-    constructor(apiKey: string, baseUrl: string = ATTIO_API_URL) {
-        this.apiKey = apiKey;
+    constructor(accessToken: string, baseUrl: string = ATTIO_API_URL) {
+        this.accessToken = accessToken;
         this.baseUrl = baseUrl;
     }
 
     private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
         const url = `${this.baseUrl}${endpoint}`;
         const headers = {
-            'Authorization': `Bearer ${this.apiKey}`,
+            'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
             ...options.headers,
         };
@@ -601,6 +601,26 @@ function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'cri
     }
 }
 
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = req.headers['x-auth-data'] as string;
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Attio access token is missing. Provide it via ACCESS_TOKEN env var or x-auth-data header with access_token field.');
+        authData = '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
+}
+
 // Main server function
 const getAttioMcpServer = () => {
     const server = new Server(
@@ -936,13 +956,8 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const apiKey = process.env.ATTIO_API_KEY || req.headers['x-auth-token'] as string;
-
-    if (!apiKey) {
-        console.error('Error: Attio API key is missing. Provide it via ATTIO_API_KEY env var or x-auth-token header.');
-    }
-
-    const attioClient = new AttioClient(apiKey);
+    const accessToken = extractAccessToken(req);
+    const attioClient = new AttioClient(accessToken);
 
     const server = getAttioMcpServer();
     try {
@@ -1029,13 +1044,8 @@ app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const transport = transports.get(sessionId);
     if (transport) {
-        const apiKey = process.env.ATTIO_API_KEY || req.headers['x-auth-token'] as string;
-
-        if (!apiKey) {
-            console.error('Error: Attio API key is missing. Provide it via ATTIO_API_KEY env var or x-auth-token header.');
-        }
-
-        const attioClient = new AttioClient(apiKey);
+        const accessToken = extractAccessToken(req);
+        const attioClient = new AttioClient(accessToken);
 
         asyncLocalStorage.run({ attioClient }, async () => {
             await transport.handlePostMessage(req, res);

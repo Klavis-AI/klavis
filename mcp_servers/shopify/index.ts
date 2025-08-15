@@ -420,6 +420,26 @@ const getShopifyMcpServer = (): Server => {
 
 const asyncLocalStorage = new AsyncLocalStorage<AsyncLocalStorageState>();
 
+function extractApiKey(req: Request): string {
+  let authData = process.env.API_KEY;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = req.headers['x-auth-data'] as string;
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Shopify API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.token ?? '';
+}
+
 function getShopifyCredentials(): ShopifyCredentials {
   if (process.env.SHOPIFY_ACCESS_TOKEN && process.env.SHOPIFY_SHOP_DOMAIN) {
     return {
@@ -438,12 +458,8 @@ const app = express();
 app.use(express.json());
 
 app.post('/mcp', async (req: Request, res: ExpressResponse) => {
-  const accessToken = req.headers['x-shopify-access-token'] as string;
+  const accessToken = extractApiKey(req);
   const shopDomain = req.headers['x-shopify-shop-domain'] as string;
-
-  if (!accessToken || !shopDomain) {
-    console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-  }
 
   const server = getShopifyMcpServer();
   try {
@@ -528,12 +544,8 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const accessToken = req.headers['x-shopify-access-token'] as string;
+    const accessToken = extractApiKey(req);
     const shopDomain = req.headers['x-shopify-shop-domain'] as string;
-
-    if (!accessToken || !shopDomain) {
-      console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-    }
 
     asyncLocalStorage.run({ 
       shopify_access_token: accessToken, 
