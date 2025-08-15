@@ -46,18 +46,22 @@ def extract_auth_credentials(request_or_scope) -> tuple[str, str]:
     Returns:
         tuple: (access_token, instance_url)
     """
-    # Get headers based on input type
-    if hasattr(request_or_scope, 'headers'):
-        # SSE request object
-        headers = request_or_scope.headers
-    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-        # StreamableHTTP scope object
-        headers = dict(request_or_scope.get("headers", []))
-    else:
-        return "", ""
+    auth_data = os.getenv("AUTH_DATA")
     
-    # Extract auth data from x-auth-data header
-    auth_data = headers.get(b'x-auth-data')
+    if not auth_data:
+        # Get headers based on input type
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            headers = request_or_scope.headers
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+        else:
+            return "", ""
+    
+        # Extract auth data from x-auth-data header
+        auth_data = headers.get(b'x-auth-data')
+
     if not auth_data:
         return "", ""
     

@@ -6,7 +6,7 @@ Allows clients to provide QB credentials via headers or initialization.
 import json
 import logging
 from typing import Dict, Any, Optional, Tuple
-from contextlib import asynccontextmanager
+import os
 
 from tools.http_client import QuickBooksHTTPClient
 from tools.accounts import AccountManager
@@ -90,18 +90,22 @@ class SessionManager:
         Returns:
             tuple: (access_token, realm_id, environment)
         """
-        # Get headers based on input type
-        if hasattr(request_or_scope, 'headers'):
-            # SSE request object
-            headers = request_or_scope.headers
-        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-            # StreamableHTTP scope object
-            headers = dict(request_or_scope.get("headers", []))
-        else:
-            return "", "", ""
+        auth_data = os.getenv("AUTH_DATA")
         
-        # Extract auth data from x-auth-data header
-        auth_data = headers.get(b'x-auth-data')
+        if not auth_data:
+            # Get headers based on input type
+            if hasattr(request_or_scope, 'headers'):
+                # SSE request object
+                headers = request_or_scope.headers
+            elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+                # StreamableHTTP scope object
+                headers = dict(request_or_scope.get("headers", []))
+            else:
+                return "", "", ""
+            
+            # Extract auth data from x-auth-data header
+            auth_data = headers.get(b'x-auth-data')
+
         if not auth_data:
             return "", "", ""
         

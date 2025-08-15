@@ -59,20 +59,21 @@ HUBSPOT_MCP_SERVER_PORT = int(os.getenv("HUBSPOT_MCP_SERVER_PORT", "5000"))
 
 def extract_access_token(request_or_scope) -> str:
     """Extract access token from x-auth-data header."""
-    auth_data = None
+    auth_data = os.getenv("AUTH_DATA")
     
-    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-    if hasattr(request_or_scope, 'headers'):
-        # SSE request object
-        auth_data = request_or_scope.headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = auth_data.decode('utf-8')
-    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-        # StreamableHTTP scope object
-        headers = dict(request_or_scope.get("headers", []))
-        auth_data = headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = auth_data.decode('utf-8')
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
     
     if not auth_data:
         return ""
