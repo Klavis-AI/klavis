@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements first to leverage Docker cache
-COPY requirements.txt .
+COPY /mcp_servers/tavily/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code
-COPY server.py .
-COPY tools/ ./tools/
+COPY /mcp_servers/tavily/server.py .
+COPY /mcp_servers/tavily/tools/ ./tools/
 
 # Expose the port the server runs on
 EXPOSE 5000
