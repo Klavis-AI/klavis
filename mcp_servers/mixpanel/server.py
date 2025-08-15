@@ -197,11 +197,20 @@ def main(
             types.Tool(
                 name="mixpanel_run_segmentation_query",
                 description=(
-                    "The segmentation tool is a flexible way to slice and dice your event stream. "
-                    "It lets you choose events (or $any_event), specify a time window (defaults to last 30 days), "
-                    "bucket results by day/hour/month, choose metric (general or unique), filter with boolean expressions (where), "
-                    "segment by any property or computed key (on), and apply numerical aggregations when grouping on a numeric field "
-                    "(sum, average, buckets)."
+                    "The segmentation tool (run_segmentation_query) is a flexible way to slice and dice your event stream for deeper insights. "
+                    "At a high level, it lets you: "
+                    "• Select which events to analyze (e.g. a single event name or all events via \"$any_event\"). "
+                    "• Specify a time window, defaulting to the last 30 days unless you override from_date/to_date. "
+                    "• Bucket your results into time intervals (day, hour, or month) so you can see trends over time. "
+                    "• Choose your metric: "
+                    "general: raw event counts, i.e. how many times the event fired. "
+                    "unique: unique user counts, i.e. how many distinct users triggered the event. "
+                    "• Filter the data with arbitrary boolean expressions (where)—for example, only count purchases above $100 or sessions where plan == \"Pro\". "
+                    "• Segment (group) the results by any property or computed key (on), from simple string or numeric properties to math‐ or typecast‐based buckets. "
+                    "• Apply numerical aggregations when grouping on a numeric field: "
+                    "sum: total up the values in each segment (e.g. total revenue per day). "
+                    "average: compute the mean value in each segment (e.g. average session length by plan). "
+                    "buckets: build a histogram of value ranges (e.g. count of purchases falling into each revenue bracket)."
                 ),
                 inputSchema={
                     "type": "object",
@@ -319,10 +328,23 @@ def main(
             types.Tool(
                 name="mixpanel_run_frequency_query",
                 description=(
-                    "The frequency tool tracks user engagement over time and supports cohort analysis. "
-                    "It lets you select a born event ('born_event') and a retention event ('event'), specify a time window, "
-                    "choose a unit (day, week, month), choose an addiction_unit (hour, day, week), choose a metric (general or unique), "
-                    "filter the data with boolean expressions ('where'), and segment results by any property ('on')."
+                    "The frequency tool (run_frequency_query) is a powerful way to track user engagement over time and do cohort analysis. "
+                    "It lets you:\n"
+                    "• Select which events to analyze both for born event \"born_event\" param and retention event \"event\" param.\n"
+                    "• Specify a time window, defaulting to the last 30 days unless user specifies otherwise.\n"
+                    "• Choose your unit:\n"
+                    "  - day\n"
+                    "  - week\n"
+                    "  - month\n"
+                    "• Choose your addiction_unit:\n"
+                    "  - hour\n"
+                    "  - day\n"
+                    "  - week\n"
+                    "• Choose your metric:\n"
+                    "  - general: raw event counts, i.e. how many times the event fired.\n"
+                    "  - unique: unique user counts, i.e. how many distinct users triggered the event.\n"
+                    "• Filter the data with arbitrary boolean expressions (where)—for example, only count purchases above $100 or sessions where properties[\"plan\"] == \"Pro\".\n"
+                    "• Segment (group) the results by any property or computed key (on), from simple string or numeric properties to math‐ or typecast‐based buckets."
                 ),
                 inputSchema={
                     "type": "object",
@@ -634,6 +656,39 @@ def main(
             if not project_id:
                 return [
                     types.TextContent(type="text", text="Error: project_id parameter is required")
+                ]
+            if not event:
+                return [
+                    types.TextContent(type="text", text="Error: event parameter is required")
+                ]
+
+            try:
+                result = await run_retention_query(
+                    project_id=str(project_id),
+                    event=event,
+                    born_event=born_event,
+                    from_date=from_date,
+                    to_date=to_date,
+                    unit=unit,
+                    retention_type=retention_type,
+                    interval_count=interval_count,
+                    metric=metric,
+                    where=where,
+                    on=on,
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
                 ]
 
         elif name == "mixpanel_run_segmentation_query":

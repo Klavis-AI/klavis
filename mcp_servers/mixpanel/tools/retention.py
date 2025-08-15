@@ -53,9 +53,6 @@ async def run_retention_query(
     allowed_units = {"day", "week", "month"}
     allowed_metrics = {"general", "unique"}
     allowed_retention_types = {"birth", "compounded"}
-    
-    print("---- from_date", from_date)
-    print("---- to_date", to_date)
 
     if unit not in allowed_units:
         raise ValueError(f"unit must be one of {sorted(allowed_units)}")
@@ -86,8 +83,6 @@ async def run_retention_query(
 
     # Remove any Nones from params
     params = {k: v for k, v in params.items() if v is not None}
-    
-    print("---- params", params)
 
     try:
         endpoint = "/query/retention"

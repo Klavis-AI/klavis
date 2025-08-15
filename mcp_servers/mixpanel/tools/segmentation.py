@@ -72,6 +72,8 @@ async def run_segmentation_query(
     # Remove any Nones from params
     params = {k: v for k, v in params.items() if v is not None}
     
+    print("---- params", params)
+    
     try:
         # Use Query API segmentation endpoint under https://mixpanel.com/api
         endpoint = "/query/segmentation"
