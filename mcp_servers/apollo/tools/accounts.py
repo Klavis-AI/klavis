@@ -8,7 +8,7 @@ async def apollo_create_account(
     account_stage_id: str = None,
     phone: str = None,
     raw_address: str = None
-):
+) -> dict:
     """
     Create a new account in Apollo.
 
@@ -66,7 +66,7 @@ async def apollo_update_account(
     account_stage_id: str = None,
     raw_address: str = None,
     phone: str = None
-):
+) -> dict:
     """
     Update an existing account in Apollo.
 
@@ -122,9 +122,9 @@ async def apollo_search_accounts(
     account_stage_ids: list = None,
     sort_by_field: str = None,
     sort_ascending: bool = False,
-    page: int = None,
-    per_page: int = None
-):
+    page: int = 1,
+    per_page: int = 50
+)->dict:
     """
     Search for accounts in your team's Apollo database.
 
@@ -151,7 +151,7 @@ async def apollo_search_accounts(
     url = "https://api.apollo.io/api/v1/accounts/search"
     params = {
         "q_organization_name": q_organization_name,
-        "account_stage_ids[]": account_stage_ids,
+        "account_stage_ids": account_stage_ids,
         "sort_by_field": sort_by_field,
         "sort_ascending": sort_ascending,
         "page": page,
@@ -162,7 +162,7 @@ async def apollo_search_accounts(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -172,7 +172,7 @@ async def apollo_search_accounts(
     except Exception as e:
         return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_view_account(account_id: str):
+async def apollo_view_account(account_id: str)->dict:
     """
     Retrieve details of an existing account in Apollo.
 
@@ -201,7 +201,7 @@ async def apollo_view_account(account_id: str):
 async def apollo_update_account_stage_bulk(
     account_ids: list,
     account_stage_id: str
-):
+)->dict:
     """
     Update the account stage for multiple accounts in Apollo.
 
@@ -221,15 +221,14 @@ async def apollo_update_account_stage_bulk(
 
     url = "https://api.apollo.io/api/v1/accounts/bulk_update"
     params = {
-        "account_ids[]": account_ids,
+        "account_ids": account_ids,
         "account_stage_id": account_stage_id
     }
-
     headers = get_apollo_client()  # Needs master API key
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
@@ -237,7 +236,7 @@ async def apollo_update_account_stage_bulk(
 async def apollo_update_account_owner_bulk(
     account_ids: list,
     owner_id: str
-):
+)->dict:
     """
     Assign multiple accounts to a different owner in Apollo.
 
@@ -257,7 +256,7 @@ async def apollo_update_account_owner_bulk(
 
     url = "https://api.apollo.io/api/v1/accounts/update_owners"
     params = {
-        "account_ids[]": account_ids,
+        "account_ids": account_ids,
         "owner_id": owner_id
     }
 
@@ -265,12 +264,12 @@ async def apollo_update_account_owner_bulk(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
 
-async def apollo_list_account_stages():
+async def apollo_list_account_stages()->dict:
     """
     Retrieve all account stage IDs in your Apollo team.
 

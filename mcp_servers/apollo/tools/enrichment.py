@@ -2,7 +2,7 @@ import httpx
 from .base import get_apollo_client
 
 
-async def apollo_organisation_enrichment(domain: str):
+async def apollo_organisation_enrichment(domain: str) -> dict:
     """
     Enrich data for a single organization by domain.
 
@@ -24,7 +24,7 @@ async def apollo_organisation_enrichment(domain: str):
     headers = get_apollo_client()
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -35,7 +35,7 @@ async def apollo_organisation_enrichment(domain: str):
         return {"error": f"Unexpected error: {str(e)}"}
 
 
-async def apollo_bulk_organisation_enrichment(domains: list):
+async def apollo_bulk_organisation_enrichment(domains: list) -> dict:
     """
     Enrich data for up to 10 organizations in one call.
 
@@ -66,11 +66,11 @@ async def apollo_bulk_organisation_enrichment(domains: list):
     #-------------------------------
 
     headers = get_apollo_client()
-    params = {"domains[]": new_domains}
+    params = {"domains": new_domains}
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:

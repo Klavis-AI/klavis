@@ -8,7 +8,7 @@ async def apollo_create_deal(
     amount: str = None,
     opportunity_stage_id: str = None,
     closed_date: str = None
-):
+) -> dict:
     """
     Create a new deal for an Apollo account.
 
@@ -45,7 +45,7 @@ async def apollo_create_deal(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -58,9 +58,9 @@ async def apollo_create_deal(
 
 async def apollo_list_all_deals(
     sort_by_field: str = None,
-    page: int = None,
-    per_page: int = None
-):
+    page: int = 1,
+    per_page: int = 50
+) -> dict:
     """
     Retrieve all deals created for your team's Apollo account.
 
@@ -92,7 +92,7 @@ async def apollo_list_all_deals(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -194,7 +194,7 @@ async def apollo_update_deal(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.patch(url, headers=headers, params=params)
+            response = await client.patch(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:

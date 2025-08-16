@@ -2,22 +2,22 @@ import httpx
 from .base import get_apollo_client
 
 async def apollo_create_contact(
-    first_name=None,
-    last_name=None,
-    organization_name=None,
-    title=None,
-    account_id=None,
-    email=None,
-    website_url=None,
-    label_names=None,
-    contact_stage_id=None,
-    present_raw_address=None,
-    direct_phone=None,
-    corporate_phone=None,
-    mobile_phone=None,
-    home_phone=None,
-    other_phone=None
-):
+    first_name: str = None,
+    last_name: str = None,
+    organization_name: str = None,
+    title: str = None,
+    account_id: str = None,
+    email: str = None,
+    website_url: str = None,
+    label_names: list[str] = None,
+    contact_stage_id: str = None,
+    present_raw_address: str = None,
+    direct_phone: str = None,
+    corporate_phone: str = None,
+    mobile_phone: str = None,
+    home_phone: str = None,
+    other_phone: str = None,
+) -> dict:
     """
     Create a new contact in Apollo.
 
@@ -58,7 +58,7 @@ async def apollo_create_contact(
         "account_id": account_id,
         "email": email,
         "website_url": website_url,
-        "label_names[]": label_names,
+        "label_names": label_names,
         "contact_stage_id": contact_stage_id,
         "present_raw_address": present_raw_address,
         "direct_phone": direct_phone,
@@ -70,37 +70,37 @@ async def apollo_create_contact(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
 
 async def apollo_update_contact(
-    contact_id,
-    first_name=None,
-    last_name=None,
-    organization_name=None,
-    title=None,
-    account_id=None,
-    email=None,
-    website_url=None,
-    label_names=None,
-    contact_stage_id=None,
-    present_raw_address=None,
-    direct_phone=None,
-    corporate_phone=None,
-    mobile_phone=None,
-    home_phone=None,
-    other_phone=None
-):
+    contact_id: str,
+    first_name: str = None,
+    last_name: str = None,
+    organization_name: str = None,
+    title: str = None,
+    account_id: str = None,
+    email: str = None,
+    website_url: str = None,
+    label_names: list[str] = None,
+    contact_stage_id: str = None,
+    present_raw_address: str = None,
+    direct_phone: str = None,
+    corporate_phone: str = None,
+    mobile_phone: str = None,
+    home_phone: str = None,
+    other_phone: str = None,
+) -> dict:
     """
     Update an existing contact in Apollo.
 
-    This function calls the Update a Contact endpoint to modify contact details in your team's Apollo database.
+    Calls the "Update a Contact" endpoint to modify details of a contact in your team's Apollo database.
 
-    Note:
-    - Use the Create a Contact endpoint to add new contacts.
-    - Use the Update Contact Stage for Multiple Contacts endpoint to update stages in bulk.
+    Notes:
+    - Use "Create a Contact" to add new contacts.
+    - Use "Update Contact Stage for Multiple Contacts" to update stages in bulk.
     - Requires a master API key; unauthorized calls return 403.
 
     Parameters:
@@ -112,7 +112,7 @@ async def apollo_update_contact(
         account_id (str, optional): Updated Apollo account ID.
         email (str, optional): Updated email address.
         website_url (str, optional): Updated corporate website URL (full URL).
-        label_names (list[str], optional): Lists the contact belongs to (replaces existing lists).
+        label_names (list[str], optional): Updated list memberships (replaces existing lists).
         contact_stage_id (str, optional): Updated contact stage ID.
         present_raw_address (str, optional): Updated personal location (city, state, country).
         direct_phone (str, optional): Updated primary phone number.
@@ -122,7 +122,7 @@ async def apollo_update_contact(
         other_phone (str, optional): Updated alternative or unknown phone number.
 
     Returns:
-        Response text from Apollo API or error details.
+        dict: Response from Apollo API or error details.
     """
 
     url = f"https://api.apollo.io/api/v1/contacts/{contact_id}"
@@ -135,7 +135,7 @@ async def apollo_update_contact(
         "account_id": account_id,
         "email": email,
         "website_url": website_url,
-        "label_names[]": label_names,
+        "label_names": label_names,
         "contact_stage_id": contact_stage_id,
         "present_raw_address": present_raw_address,
         "direct_phone": direct_phone,
@@ -147,55 +147,56 @@ async def apollo_update_contact(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.put(url, headers=headers, params=params)
+            response = await client.put(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
 
 
 async def apollo_search_contacts(
-    q_keywords=None,
-    contact_stage_ids=None,
-    sort_by_field=None,
-    sort_ascending=None,
-    per_page=None,
-    page=None
-):
+    q_keywords: str = None,
+    contact_stage_ids: list[str] = None,
+    sort_by_field: str = None,
+    sort_ascending: bool = None,
+    per_page: int = 50,
+    page: int = 1,
+) -> dict:
     """
     Search for contacts in your team's Apollo account.
 
-    Calls the Search for Contacts endpoint to find contacts explicitly added to your Apollo database.
+    Calls the "Search for Contacts" endpoint to find contacts explicitly added to your Apollo database.
 
     Notes:
-    - Returns only contacts, not general people in Apollo's database.
-    - Limited to 50,000 records (100 per page, max 500 pages).
+    - Returns only contacts saved in your Apollo database (not the global Apollo directory).
+    - Limited to 50,000 records (max 100 per page, 500 pages).
     - Not available on free Apollo plans.
-    - Use filters to narrow down results.
+    - Filtering recommended for faster, more targeted results.
     - Requires a master API key; unauthorized calls return 403.
 
     Parameters:
-        q_keywords (str, optional): Keywords to search contact names, titles, companies, or emails.
+        q_keywords (str, optional): Keywords to match against contact name, title, company, or email.
         contact_stage_ids (list[str], optional): Filter by one or more contact stage IDs.
-        sort_by_field (str, optional): Field to sort results by. Options:
+        sort_by_field (str, optional): Field to sort results. Options:
             - contact_last_activity_date
             - contact_email_last_opened_at
             - contact_email_last_clicked_at
             - contact_created_at
             - contact_updated_at
         sort_ascending (bool, optional): True for ascending order (requires sort_by_field).
-        per_page (int, optional): Number of results per page.
-        page (int, optional): Page number of results to retrieve.
+        per_page (int, optional): Number of results per page (default 50, max 100).
+        page (int, optional): Page number to fetch (default 1, max 500).
 
     Returns:
-        Response text from Apollo API or error details.
+        dict: Response from Apollo API or error details.
     """
+
 
     url = "https://api.apollo.io/api/v1/contacts/search"
     headers = get_apollo_client()  # Needs master API key
 
     params = {
         "q_keywords": q_keywords,
-        "contact_stage_ids[]": contact_stage_ids,
+        "contact_stage_ids": contact_stage_ids,
         "sort_by_field": sort_by_field,
         "sort_ascending": sort_ascending,
         "per_page": per_page,
@@ -204,7 +205,7 @@ async def apollo_search_contacts(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
@@ -212,7 +213,7 @@ async def apollo_search_contacts(
 async def apollo_update_contact_stages(
     contact_ids=None,
     contact_stage_id=None
-):
+) -> dict:
     """
     Update the contact stage for multiple contacts in your team's Apollo account.
 
@@ -235,56 +236,57 @@ async def apollo_update_contact_stages(
     headers = get_apollo_client()  # Needs master API key
 
     params = {
-        "contact_ids[]": contact_ids,
+        "contact_ids": contact_ids,
         "contact_stage_id": contact_stage_id
     }
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
 
 
 async def apollo_update_contact_owners(
-    contact_ids=None,
-    owner_id=None
-):
+    contact_ids: list[str],
+    owner_id: str,
+) -> dict:
     """
     Assign multiple contacts to a different owner in your team's Apollo account.
 
-    Calls the Update Contact Owner for Multiple Contacts endpoint to batch update contact owners.
+    Calls the "Update Contact Owner for Multiple Contacts" endpoint to batch update contact ownership.
 
     Notes:
-    - Only updates contact ownership.
-    - To update other contact details, use the Update a Contact endpoint.
+    - Only updates the owner field of contacts.
+    - To update other details, use `apollo_update_contact`.
     - Requires a master API key; unauthorized calls return 403.
 
     Parameters:
-        contact_ids (list[str]): List of Apollo contact IDs to update.
-        owner_id (str): Apollo user ID to assign as the new owner.
+        contact_ids (list[str]): List of Apollo contact IDs to reassign.
+        owner_id (str): Apollo user ID of the new owner.
 
     Returns:
-        Response text from Apollo API or error details.
+        dict: Response from Apollo API or error details.
     """
+
 
     url = "https://api.apollo.io/api/v1/contacts/update_owners"
     headers = get_apollo_client()  # Needs master API key
 
     params = {
-        "contact_ids[]": contact_ids,
+        "contact_ids": contact_ids,
         "owner_id": owner_id
     }
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             return response.text
     except Exception as e:
         return {"error": str(e)}
 
-async def apollo_list_contact_stages():
+async def apollo_list_contact_stages() -> dict:
     """
     Retrieve all available contact stage IDs in your team's Apollo account.
 

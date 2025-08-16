@@ -349,7 +349,7 @@ def main(
                             "description": "Additional note for the call record."
                         }
                     },
-                    "required": ["logged", "user_ids", "contact_id"]
+                    "required": []
                 }
             ),
             types.Tool(
@@ -895,16 +895,7 @@ def main(
                 description="Retrieve the list of all users (teammates) in your Apollo account.",
                 inputSchema={
                     "type": "object",
-                    "properties": {
-                        "page": {
-                            "type": "integer",
-                            "description": "Page number of results to retrieve."
-                        },
-                        "per_page": {
-                            "type": "integer",
-                            "description": "Number of results per page."
-                        }
-                    },
+                    "properties": {},
                     "required": []
                 }
             ),
@@ -1280,7 +1271,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1314,7 +1305,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1392,7 +1383,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1419,7 +1410,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1451,21 +1442,11 @@ def main(
 
         #calls.py--------------------------------------
         elif name == "apollo_create_call_record":
-            logged = arguments.get("logged")
-            user_ids = arguments.get("user_ids")
-            contact_id = arguments.get("contact_id")
-            if logged is None or not user_ids or not contact_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Missing required parameters: logged, user_ids, contact_id.",
-                    )
-                ]
             try:
                 result = await apollo_create_call_record(
-                    logged=logged,
-                    user_ids=user_ids,
-                    contact_id=contact_id,
+                    logged=arguments.get("logged"),
+                    user_ids = arguments.get("user_ids"),
+                    contact_id = arguments.get("contact_id"),
                     account_id=arguments.get("account_id"),
                     to_number=arguments.get("to_number"),
                     from_number=arguments.get("from_number"),
@@ -1480,7 +1461,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1552,7 +1533,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1587,7 +1568,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1630,7 +1611,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1682,7 +1663,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1709,7 +1690,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1761,7 +1742,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1846,7 +1827,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1951,8 +1932,6 @@ def main(
         elif name == "apollo_list_users":
             try:
                 result = await apollo_list_users(
-                    page=arguments.get("page"),
-                    per_page=arguments.get("per_page"),
                 )
                 return [
                     types.TextContent(
@@ -2033,16 +2012,30 @@ def main(
                         text="Missing required parameter: organization_id.",
                     )
                 ]
+
             try:
+                kwargs = {}
+                if arguments.get("page") is not None:
+                    kwargs["page"] = arguments.get("page")
+                if arguments.get("per_page") is not None:
+                    kwargs["per_page"] = arguments.get("per_page")
+
                 result = await apollo_organization_job_postings(
                     organization_id=organization_id,
-                    page=arguments.get("page"),
-                    per_page=arguments.get("per_page"),
+                    **kwargs
                 )
                 return [
                     types.TextContent(
                         type="text",
                         text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
                     )
                 ]
             except Exception as e:

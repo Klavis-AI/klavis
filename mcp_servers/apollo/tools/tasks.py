@@ -9,7 +9,7 @@ async def apollo_create_tasks(
     task_type: str,
     status: str,
     note: str = None
-):
+) -> dict:
     """
     Create tasks for multiple contacts in Apollo to track upcoming actions.
 
@@ -43,7 +43,7 @@ async def apollo_create_tasks(
 
     params = {
         "user_id": user_id,
-        "contact_ids[]": contact_ids,
+        "contact_ids": contact_ids,
         "priority": priority,
         "due_at": due_at,
         "type": task_type,
@@ -55,7 +55,7 @@ async def apollo_create_tasks(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text  # should return "true"
     except httpx.HTTPStatusError as e:
@@ -69,9 +69,9 @@ async def apollo_create_tasks(
 async def apollo_search_tasks(
         sort_by_field: str = None,
         open_factor_names: list = None,
-        page: int = None,
-        per_page: int = None
-):
+        page: int = 1,
+        per_page: int = 50
+) -> dict:
     """
     Search for tasks created by your team in Apollo with filtering and sorting options.
 
@@ -101,13 +101,13 @@ async def apollo_search_tasks(
     }
 
     if open_factor_names:
-        params["open_factor_names[]"] = open_factor_names
+        params["open_factor_names"] = open_factor_names
 
     headers = get_apollo_client()  # Needs master API key
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:

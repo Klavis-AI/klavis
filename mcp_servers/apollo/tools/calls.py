@@ -3,8 +3,8 @@ from .base import get_apollo_client
 
 async def apollo_create_call_record(
     logged: bool,
-    user_ids: list,
-    contact_id: str,
+    user_ids: list = None,
+    contact_id: str = None,
     account_id: str = None,
     to_number: str = None,
     from_number: str = None,
@@ -15,7 +15,7 @@ async def apollo_create_call_record(
     phone_call_purpose_id: str = None,
     phone_call_outcome_id: str = None,
     note: str = None
-):
+) -> dict:
     """
     Create a call record in Apollo.
 
@@ -47,7 +47,7 @@ async def apollo_create_call_record(
     url = "https://api.apollo.io/api/v1/phone_calls"
     params = {
         "logged": str(logged).lower(),
-        "user_id[]": user_ids,
+        "user_ids": user_ids,
         "contact_id": contact_id,
         "account_id": account_id,
         "to_number": to_number,
@@ -65,7 +65,7 @@ async def apollo_create_call_record(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -87,9 +87,9 @@ async def apollo_search_calls(
     phone_call_purpose_ids: list = None,
     phone_call_outcome_ids: list = None,
     q_keywords: str = None,
-    page: int = None,
-    per_page: int = None
-):
+    page: int = 1,
+    per_page: int = 50
+) -> dict:
     """
     Search for calls made or received by your team in Apollo.
 
@@ -123,10 +123,10 @@ async def apollo_search_calls(
         "duration[max]": duration_max,
         "duration[min]": duration_min,
         "inbound": inbound,
-        "user_ids[]": user_ids,
-        "contact_label_ids[]": contact_label_ids,
-        "phone_call_purpose_ids[]": phone_call_purpose_ids,
-        "phone_call_outcome_ids[]": phone_call_outcome_ids,
+        "user_ids": user_ids,
+        "contact_label_ids": contact_label_ids,
+        "phone_call_purpose_ids": phone_call_purpose_ids,
+        "phone_call_outcome_ids": phone_call_outcome_ids,
         "q_keywords": q_keywords,
         "page": page,
         "per_page": per_page
@@ -135,7 +135,7 @@ async def apollo_search_calls(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -160,7 +160,7 @@ async def apollo_update_call(
     phone_call_purpose_id: str = None,
     phone_call_outcome_id: str = None,
     note: str = None
-):
+)->dict:
     """
     Update an existing call record in Apollo.
 
@@ -192,7 +192,7 @@ async def apollo_update_call(
     url = f"https://api.apollo.io/api/v1/phone_calls/{call_id}"
     params = {
         "logged": logged,
-        "user_id[]": user_ids,
+        "user_ids": user_ids,
         "contact_id": contact_id,
         "account_id": account_id,
         "to_number": to_number,
@@ -209,7 +209,7 @@ async def apollo_update_call(
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.put(url, headers=headers, params=params)
+            response = await client.put(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
         except httpx.HTTPStatusError as e:

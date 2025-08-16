@@ -3,9 +3,9 @@ from .base import get_apollo_client
 
 async def apollo_search_sequences(
     q_name: str = None,
-    page: int = None,
-    per_page: int = None
-):
+    page: int = 1,
+    per_page: int = 50
+) -> dict:
     """
     Search for sequences created in your team's Apollo account.
 
@@ -32,7 +32,7 @@ async def apollo_search_sequences(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -53,7 +53,7 @@ async def apollo_add_contacts_to_sequence(
     sequence_active_in_other_campaigns: bool = False,
     sequence_finished_in_other_campaigns: bool = False,
     user_id: str = None
-):
+) -> dict:
     """
     Add contacts to an existing sequence in your Apollo account.
 
@@ -85,7 +85,7 @@ async def apollo_add_contacts_to_sequence(
 
     params = {
         "emailer_campaign_id": emailer_campaign_id,
-        "contact_ids[]": contact_ids,
+        "contact_ids": contact_ids,
         "send_email_from_email_account_id": send_email_from_email_account_id,
         "sequence_no_email": sequence_no_email,
         "sequence_unverified_email": sequence_unverified_email,
@@ -99,7 +99,7 @@ async def apollo_add_contacts_to_sequence(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -114,7 +114,7 @@ async def apollo_update_contact_status_in_sequence(
     emailer_campaign_ids: list,
     contact_ids: list,
     mode: str
-):
+) -> dict:
     """
     Update contact status in one or more sequences.
 
@@ -138,14 +138,14 @@ async def apollo_update_contact_status_in_sequence(
     headers = get_apollo_client()  # Needs master API key
 
     params = {
-        "emailer_campaign_ids[]": emailer_campaign_ids,
-        "contact_ids[]": contact_ids,
+        "emailer_campaign_ids": emailer_campaign_ids,
+        "contact_ids": contact_ids,
         "mode": mode  # must be 'mark_as_finished', 'remove', or 'stop'
     }
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -167,9 +167,9 @@ async def apollo_search_outreach_emails(
     emailerMessageDateRange_min: str = None,
     not_sent_reason_cds: list = None,
     q_keywords: str = None,
-    page: int = None,
-    per_page: int = None
-):
+    page: int = 1,
+    per_page: int = 50
+) -> dict:
     """
     Search for outreach emails sent as part of Apollo sequences.
 
@@ -198,16 +198,16 @@ async def apollo_search_outreach_emails(
 
     url = "https://api.apollo.io/api/v1/emailer_messages/search"
     params = {
-        "emailer_message_stats[]": emailer_message_stats,
-        "emailer_message_reply_classes[]": emailer_message_reply_classes,
-        "user_ids[]": user_ids,
+        "emailer_message_stats": emailer_message_stats,
+        "emailer_message_reply_classes": emailer_message_reply_classes,
+        "user_ids": user_ids,
         "email_account_id_and_aliases": email_account_id_and_aliases,
-        "emailer_campaign_ids[]": emailer_campaign_ids,
-        "not_emailer_campaign_ids[]": not_emailer_campaign_ids,
+        "emailer_campaign_ids": emailer_campaign_ids,
+        "not_emailer_campaign_ids": not_emailer_campaign_ids,
         "emailer_message_date_range_mode": emailer_message_date_range_mode,
         "emailerMessageDateRange[max]": emailerMessageDateRange_max,
         "emailerMessageDateRange[min]": emailerMessageDateRange_min,
-        "not_sent_reason_cds[]": not_sent_reason_cds,
+        "not_sent_reason_cds": not_sent_reason_cds,
         "q_keywords": q_keywords,
         "page": page,
         "per_page": per_page,
@@ -216,7 +216,7 @@ async def apollo_search_outreach_emails(
 
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, params=params)
+            response = await client.post(url, headers=headers, json=params)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
@@ -226,7 +226,7 @@ async def apollo_search_outreach_emails(
     except Exception as e:
         return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_check_email_stats(email_id: str):
+async def apollo_check_email_stats(email_id: str) -> dict:
     """
     Retrieve detailed statistics and information for a specific outreach email sent via an Apollo sequence.
 

@@ -1,7 +1,7 @@
 import httpx
 from .base import get_apollo_client
 
-async def apollo_view_api_usage_stats():
+async def apollo_view_api_usage_stats() -> dict:
     """
     Retrieve your team's Apollo API usage statistics and rate limits.
 
@@ -31,7 +31,7 @@ async def apollo_view_api_usage_stats():
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_list_users():
+async def apollo_list_users() -> dict:
     """
     Retrieve the list of all users (teammates) in your Apollo account.
 
@@ -40,10 +40,6 @@ async def apollo_list_users():
     Requirements:
     - Master API key required (403 error if missing).
     - Not available for free Apollo plans.
-
-    Query Parameters:
-    - page (int): Page number of results to retrieve. Example: 4
-    - per_page (int): Number of results per page. Example: 10
 
     Returns:
     - User IDs and details usable in other endpoints like Create Deal, Create Account, Create Task.
@@ -64,7 +60,7 @@ async def apollo_list_users():
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_list_email_accounts():
+async def apollo_list_email_accounts() -> dict:
     """
     Retrieve information about linked email inboxes used by teammates in your Apollo account.
 
@@ -94,7 +90,7 @@ async def apollo_list_email_accounts():
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_get_all_lists_and_tags():
+async def apollo_get_all_lists_and_tags() -> dict:
     """
     Retrieve all lists and tags created in your Apollo account.
 
@@ -124,7 +120,7 @@ async def apollo_get_all_lists_and_tags():
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
 
-async def apollo_list_all_custom_fields():
+async def apollo_list_all_custom_fields() -> dict:
     """
     Retrieve all custom fields created in your Apollo account.
 
