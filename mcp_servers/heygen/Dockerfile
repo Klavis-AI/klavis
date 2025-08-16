@@ -1,19 +1,21 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Copy only the requirements first to leverage Docker cache
+COPY mcp_servers/hubspot/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
-COPY . .
+COPY mcp_servers/heygen/server.py .
+COPY mcp_servers/heygen/tools/ ./tools/
 
-# Expose the default port
+# Expose the port the server runs on
 EXPOSE 5000
 
 # Command to run the server
-CMD ["python", "server.py"]
+CMD ["python", "server.py"] 
