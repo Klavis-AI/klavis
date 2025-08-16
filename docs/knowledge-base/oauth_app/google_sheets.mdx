@@ -1,0 +1,121 @@
+---
+title: "Setting Up Google Sheets OAuth App"
+description: "Complete guide to creating and configuring a Google Sheets OAuth application"
+---
+
+## Prerequisites
+
+- Google account
+
+## Step 1: Create a Project
+
+1. Visit [https://console.cloud.google.com/home/dashboard](https://console.cloud.google.com/home/dashboard) and select the project dropdown at the top.
+
+<img src="/images/knowledge-base/google_sheets/step1_box.png" alt="Google Cloud project dropdown" />
+
+2. Click **New Project**.
+
+<img src="/images/knowledge-base/google_sheets/step2_new_project.png" alt="Google Cloud new project button" />
+
+3. Enter the project details and click **Create**.
+
+<img src="/images/knowledge-base/google_sheets/step3_create.png" alt="Google Cloud create project form" />
+
+4. Select your newly created project.
+
+<img src="/images/knowledge-base/google_sheets/step4_select_project.png" alt="Google Cloud select project" />
+
+5. Go to **APIs & Services**.
+
+<img src="/images/knowledge-base/google_sheets/step5_apis_and_services.png" alt="Google Cloud APIs & Services menu" />
+
+6. Click **Enable APIs and Services**.
+
+<img src="/images/knowledge-base/google_sheets/step6_enable_api_services.png" alt="Enable APIs and Services button" />
+
+7. Search for and select **Google Sheets API**.
+
+<img src="/images/knowledge-base/google_sheets/step7_select_sheets.png" alt="Search Google Sheets API" />
+
+8. Click **Enable**.
+
+<img src="/images/knowledge-base/google_sheets/step8_enable.png" alt="Enable Google Sheets API" />
+
+9. Go back to **APIs & Services** and select **OAuth consent screen**.
+
+<img src="/images/knowledge-base/google_sheets/step9_oauth_screen.png" alt="OAuth consent screen menu" />
+
+10. Enter the required information and save.
+
+<img src="/images/knowledge-base/google_sheets/step10_info.png" alt="OAuth consent screen form" />
+
+11. Go to **Credentials** in APIs & Services and click **Create Credentials**.
+
+<img src="/images/knowledge-base/google_sheets/step11_CreateCredentials.png" alt="Create credentials button" />
+
+12. Select **OAuth Client ID**.
+
+<img src="/images/knowledge-base/google_sheets/step12_OAuthClientID.png" alt="OAuth Client ID selection" />
+
+13. Choose **Web Application** and enter the required details.
+
+<img src="/images/knowledge-base/google_sheets/step13_WebApplication.png" alt="Web application OAuth settings" />
+
+14. Add redirect URLs:
+    `https://api.klavis.ai/oauth/gsheets/callback`
+    Then click **Create**.
+
+<img src="/images/knowledge-base/google_sheets/step14_redirect_uri.png" alt="Add redirect URIs" />
+
+15. Your **Client ID** and **Client Secret** will be displayed.
+
+<img src="/images/knowledge-base/google_sheets/step15_credentials.png" alt="OAuth credentials screen" />
+
+
+## Step 2: Request Scopes
+
+<Note>
+Klavis Google Sheets MCP Server uses the following OAuth scopes:
+`https://www.googleapis.com/auth/drive.file`
+</Note>
+
+1. Go to **OAuth consent screen**.
+
+<img src="/images/knowledge-base/google_sheets/scope1_oauth.png" alt="OAuth consent screen" />
+
+2. Click **Data Access**.
+
+<img src="/images/knowledge-base/google_sheets/scope2_data_access.png" alt="Data access settings" />
+
+3. Click **Add or Remove Scopes**.
+
+<img src="/images/knowledge-base/google_sheets/scope3_add_scopes.png" alt="Add or remove scopes" />
+
+4. Enter the needed scopes and click **Update**.
+
+<Check>
+You have successfully created a Google Sheets OAuth application! You now have your Client ID and Client Secret ready for integration with Klavis AI.
+</Check>
+
+## (Optional) Step 3: White Labeling
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own Google Sheets OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your Google Sheets **Client ID** and **Client Secret** from Step 1.
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/gsheets/callback` or your custom callback URL.
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/gsheets/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
+</Tip>
+
+## Resources
+- [Klavis OAuth & White Labeling Guide](/documentation/klavis-oauth-white-label)
+- [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)

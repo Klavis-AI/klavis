@@ -1,0 +1,119 @@
+name: Build and Publish MCP Servers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mcp_servers/**'
+  workflow_dispatch:
+    inputs:
+      servers:
+        description: 'Comma-separated list of MCP servers to build (e.g., mem0,openai,github)'
+        required: true
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}
+
+jobs:
+  detect-changes:
+    name: Detect Changed MCP Servers
+    runs-on: ubuntu-latest
+    outputs:
+      changed-servers: ${{ steps.changes.outputs.changed-servers }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed MCP servers
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use input servers
+            CHANGED_SERVERS="${{ github.event.inputs.servers }}"
+            echo "Manual build requested for: $CHANGED_SERVERS"
+          else
+            # Auto trigger - detect changed files
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            
+            # Extract unique MCP server directories that have changes
+            CHANGED_SERVERS=""
+            for file in $CHANGED_FILES; do
+              if [[ $file == mcp_servers/* ]]; then
+                # Extract server folder path (mcp_servers/server_name/)
+                server_path=$(echo "$file" | cut -d'/' -f1-2)
+                server_name=$(echo "$file" | cut -d'/' -f2)
+                
+                # Check if Dockerfile exists in the server path
+                if [ -f "${server_path}/Dockerfile" ]; then
+                  # Add to list if not already present
+                  if [[ "$CHANGED_SERVERS" != *"$server_name"* ]]; then
+                    CHANGED_SERVERS="$CHANGED_SERVERS$server_name,"
+                  fi
+                fi
+              fi
+            done
+            
+            # Remove trailing comma
+            CHANGED_SERVERS=${CHANGED_SERVERS%,}
+          fi
+          
+          echo "Changed servers: $CHANGED_SERVERS"
+          
+          if [ -n "$CHANGED_SERVERS" ]; then
+            # Convert comma-separated to JSON array
+            SERVERS_JSON=$(echo "[$CHANGED_SERVERS]" | sed 's/,/","/g' | sed 's/\[/["/' | sed 's/\]/"]/')
+          else
+            SERVERS_JSON="[]"
+          fi
+          
+          echo "changed-servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
+          echo "Servers to build: $SERVERS_JSON"
+
+  build-and-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    strategy:
+      fail-fast: false
+      matrix:
+        server: ${{ fromJson(needs.detect-changes.outputs.changed-servers) }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and tag image
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.server }}-mcp-server
+          tags: |
+            latest
+            ${{ github.sha }}
+          context: .
+          containerfiles: |
+            mcp_servers/${{ matrix.server }}/Dockerfile
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      - name: Login and push to registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.server }}-mcp-server
+          tags: |
+            ${{ github.sha }}
+            latest
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

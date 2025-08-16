@@ -136,9 +136,9 @@ export async function handleAccountOperation(request: CallToolRequest): Promise<
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "get_current_account":
+        case "dropbox_get_current_account":
             return await handleGetCurrentAccount(args) as CallToolResult;
-        case "get_space_usage":
+        case "dropbox_get_space_usage":
             return await handleGetSpaceUsage(args) as CallToolResult;
         default:
             throw new Error(`Unknown account operation: ${name}`);

@@ -157,31 +157,43 @@ export async function extractDocxText(base64Data: string, filename: string): Pro
 }
 
 /**
- * Extracts text/CSV-like content from an Excel file encoded in base64
- * Supports .xlsx and (best-effort) .xls via the xlsx library
+ * Extracts text/CSV-like content from an Excel (.xlsx) file encoded in base64
+ * Uses exceljs (actively maintained) and intentionally does not process legacy .xls
  */
 export async function extractXlsxText(base64Data: string, filename: string): Promise<string> {
     try {
-        const XLSX = await import('xlsx');
+        const ExcelJSImport = await import('exceljs');
+        const ExcelJS: any = (ExcelJSImport as any).default ?? ExcelJSImport;
         const buffer = Buffer.from(base64Data, 'base64');
-        const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
 
         const sheetTexts: string[] = [];
-        for (const sheetName of workbook.SheetNames) {
-            const sheet = workbook.Sheets[sheetName];
-            // Prefer CSV for compactness; falls back to JSON if needed
-            let csv = '';
-            try {
-                csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false });
-            } catch {
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false }) as any[];
-                csv = rows.map(r => (r as any[]).join(',')).join('\n');
-            }
+        workbook.worksheets.forEach((worksheet: any) => {
+            const rowsOut: string[] = [];
+            worksheet.eachRow({ includeEmpty: false }, (row: any) => {
+                const values: any[] = Array.isArray(row.values) ? row.values.slice(1) : [];
+                const cells = values.map((v) => {
+                    if (v === null || v === undefined) return '';
+                    if (typeof v === 'object') {
+                        // Cell objects can be rich text, formulas, etc.
+                        if (typeof v.text === 'string') return v.text;
+                        if (typeof v.result !== 'undefined') return String(v.result);
+                        if (typeof v.richText !== 'undefined') {
+                            try { return v.richText.map((rt: any) => rt.text).join(''); } catch { return ''; }
+                        }
+                        return String(v.toString?.() ?? '');
+                    }
+                    return String(v);
+                });
+                rowsOut.push(cells.join(','));
+            });
             sheetTexts.push([
-                `Sheet: ${sheetName}`,
-                csv.trim()
+                `Sheet: ${worksheet.name}`,
+                rowsOut.join('\n')
             ].join('\n'));
-        }
+        });
 
         return [
             `=== Excel Content from ${filename} ===`,
