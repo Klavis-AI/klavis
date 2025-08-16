@@ -302,6 +302,26 @@ const getFirecrawlDeepResearchMcpServer = () => {
     return server;
 }
 
+function extractApiKey(req: Request): string {
+    let authData = process.env.API_KEY;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = req.headers['x-auth-data'] as string;
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Firecrawl API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.token ?? '';
+}
+
 const app = express();
 
 
@@ -312,11 +332,7 @@ const app = express();
 app.post('/mcp', async (req: Request, res: Response) => {
 
     // Added: Get API key from env or header
-    const apiKey = req.headers['x-auth-token'] as string;
-
-    if (!apiKey && !FIRECRAWL_API_URL) {
-        console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
-    }
+    const apiKey = extractApiKey(req);
 
     // Added: Instantiate client within request context
     const firecrawlClient = new FirecrawlApp({
@@ -399,11 +415,7 @@ app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const transport = transports.get(sessionId);
     if (transport) {
-        const apiKey = req.headers['x-auth-token'] as string;
-
-        if (!apiKey && !FIRECRAWL_API_URL) {
-            console.error('Error: Firecrawl API key is missing. Provide it via x-auth-token header.');
-        }
+        const apiKey = extractApiKey(req);
 
         const firecrawlClient = new FirecrawlApp({
             apiKey: apiKey || '',

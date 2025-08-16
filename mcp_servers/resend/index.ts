@@ -680,6 +680,26 @@ const getResendMcpServer = () => {
   return server;
 }
 
+function extractApiKey(req: Request): string {
+  let authData = process.env.API_KEY;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = req.headers['x-auth-data'] as string;
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Resend API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.token ?? '';
+}
+
 const app = express();
 
 
@@ -688,10 +708,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
-  if (!apiKey) {
-    console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
-  }
+  const apiKey = extractApiKey(req);
 
   const server = getResendMcpServer();
   try {
@@ -777,11 +794,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    // Use environment variable for API key if available, otherwise use header
-    const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
-    if (!apiKey) {
-      console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
-    }
+    const apiKey = extractApiKey(req);
 
     asyncLocalStorage.run({ apiKey }, async () => {
       await transport!.handlePostMessage(req, res);

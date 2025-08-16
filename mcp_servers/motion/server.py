@@ -31,6 +31,37 @@ load_dotenv()
 
 MOTION_MCP_SERVER_PORT = int(os.getenv("MOTION_MCP_SERVER_PORT", "5000"))
 
+def extract_api_key(request_or_scope) -> str:
+    """Extract API key from headers or environment."""
+    api_key = os.getenv("API_KEY")
+    
+    if not api_key:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get('x-auth-data')
+            if auth_data and isinstance(auth_data, bytes):
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        else:
+            auth_data = None
+        
+        if auth_data:
+            try:
+                # Parse the JSON auth data to extract token
+                auth_json = json.loads(auth_data)
+                api_key = auth_json.get('token', '')
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Failed to parse auth data JSON: {e}")
+                api_key = ""
+    
+    return api_key or ""
+
 @click.command()
 @click.option("--port", default=MOTION_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -694,74 +725,93 @@ def main(
                 )
             ]
 
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+    
     async def handle_sse(request):
         """Handle SSE-based MCP connections."""
-        async with SseServerTransport("/message") as transport:
-            try:
-                # Set authentication token from Authorization header
-                auth_header = request.headers.get("Authorization", "")
-                if auth_header.startswith("Bearer "):
-                    token = auth_header[7:]  # Remove "Bearer " prefix
-                    auth_token_context.set(token)
-                else:
-                    raise ValueError("Authorization header must be in format 'Bearer <token>'")
-                
-                await app.run(transport, types.RequestMessage, types.NotificationMessage, request)
-            except Exception as e:
-                logger.exception("Error in SSE handler: %s", e)
-                raise
+        logger.info("Handling SSE connection")
+        
+        # Extract API key from headers
+        api_key = extract_api_key(request)
+        
+        # Set the API key in context for this request
+        token = auth_token_context.set(api_key or "")
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
+        return Response()
 
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=app,
+        event_store=None,  # Stateless mode - can be changed to use an event store
+        json_response=json_response,
+        stateless=True,
+    )
+    
     async def handle_streamable_http(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         """Handle StreamableHTTP-based MCP connections."""
-        manager = StreamableHTTPSessionManager()
+        logger.info("Handling StreamableHTTP request")
         
-        # Extract authentication token from Authorization header
-        headers = dict(scope.get("headers", []))
-        auth_header = headers.get(b"authorization", b"").decode()
+        # Extract API key from headers
+        api_key = extract_api_key(scope)
         
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]  # Remove "Bearer " prefix
-            auth_token_context.set(token)
-        else:
-            # Return 401 Unauthorized if no valid token provided
-            response = Response(
-                content=json.dumps({"error": "Authorization header required"}),
-                status_code=401,
-                headers={"content-type": "application/json"}
-            )
-            await response(scope, receive, send)
-            return
-
-        async def _run_server():
-            async with manager.create_session() as session:
-                return await app.run(
-                    session,
-                    types.RequestMessage,
-                    types.NotificationMessage,
-                    json_response=json_response,
-                )
-
-        await manager.handle_request(scope, receive, send, _run_server)
+        # Fallback to Authorization header for compatibility
+        if not api_key:
+            headers = dict(scope.get("headers", []))
+            auth_header = headers.get(b"authorization", b"").decode()
+            if auth_header.startswith("Bearer "):
+                api_key = auth_header[7:]  # Remove "Bearer " prefix
+        
+        # Set the API key in context for this request
+        token = auth_token_context.set(api_key or "")
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
-        yield
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
 
-    # Create the Starlette application
+    # Create an ASGI application with routes for both transports
     starlette_app = Starlette(
-        lifespan=lifespan,
+        debug=True,
         routes=[
-            Route("/sse", handle_sse, methods=["GET"]),
-            Mount("/", handle_streamable_http),
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
         ],
+        lifespan=lifespan,
     )
 
-    # Start the server
+    logger.info(f"Server starting on port {port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
     import uvicorn
-    logger.info(f"Starting Motion MCP Server on port {port}")
+
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
+
     return 0
 
 if __name__ == "__main__":

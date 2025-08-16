@@ -97,7 +97,43 @@ from tools import (
 logger = logging.getLogger(__name__)
 load_dotenv()
 FRESHDESK_MCP_SERVER_PORT = int(os.getenv("FRESHDESK_MCP_SERVER_PORT", "5000"))
-FRESHDESK_API_KEY = os.getenv("FRESHDESK_API_KEY")
+
+def extract_credentials(request_or_scope) -> Dict[str, str]:
+    """Extract API key and domain from headers or environment."""
+    api_key = os.getenv("API_KEY")
+    domain = os.getenv("DOMAIN")
+    
+    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object
+        auth_data = request_or_scope.headers.get('x-auth-data')
+        if auth_data and isinstance(auth_data, bytes):
+            auth_data = auth_data.decode('utf-8')
+            
+    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        auth_data = headers.get(b'x-auth-data')
+        if auth_data:
+            auth_data = auth_data.decode('utf-8')
+    else:
+        auth_data = None
+    
+    # If no API key from environment, try to parse from auth_data
+    if not api_key and auth_data:
+        try:
+            # Parse the JSON auth data to extract token
+            auth_json = json.loads(auth_data)
+            api_key = auth_json.get('token', '')
+            domain = auth_json.get('domain', '')
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to parse auth data JSON: {e}")
+            api_key = ""
+    
+    return {
+        'api_key': api_key or "",
+        'domain': domain or "",
+    }
 
 
 attachment_schema = {
@@ -1927,19 +1963,18 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-
-          # Extract auth credentials from headers
-        auth_token = request.headers.get('x-auth-token')
-        domain = request.headers.get('x-domain')
         
-        # Set the auth token and domain in context for this request
-        auth_token_token = auth_token_context.set(auth_token or "")
-        domain_token = domain_context.set(domain or "")
+        # Extract credentials (API key, domain, auth token) from headers
+        credentials = extract_credentials(request)
+        
+        # Set the API key, auth token and domain in context for this request
+        auth_token = auth_token_context.set(credentials['api_key'])
+        domain_token = domain_context.set(credentials['domain'])
         try:
             async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
                 await app.run(streams[0], streams[1], app.create_initialization_options())
         finally:
-            auth_token_context.reset(auth_token_token)
+            auth_token_context.reset(auth_token)
             domain_context.reset(domain_token)
         return Response()
 
@@ -1953,28 +1988,21 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info("Handling StreamableHTTP request")
-
-          # Extract auth credentials from headers
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        domain = headers.get(b'x-domain')
         
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
-        if domain:
-            domain = domain.decode('utf-8')
+        # Extract credentials (API key, domain, auth token) from headers
+        credentials = extract_credentials(scope)
         
-        # Set the auth token and domain in context for this request
-        auth_token_token = auth_token_context.set(auth_token or "")
-        domain_token = domain_context.set(domain or "")
+         # Set the API key, auth token and domain in context for this request
+        auth_token = auth_token_context.set(credentials['api_key'])
+        domain_token = domain_context.set(credentials['domain'])
 
         try:
             await session_manager.handle_request(scope, receive, send)
         except Exception as e:
             logger.exception(f"Error handling StreamableHTTP request: {e}")
         finally:
-            auth_token_context.reset(auth_token_token)
-            domain_context.reset(domain_token)
+           auth_token_context.reset(auth_token)
+           domain_context.reset(domain_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:

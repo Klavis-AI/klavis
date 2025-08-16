@@ -742,6 +742,26 @@ function getSlackToken() {
   return asyncLocalStorage.getStore()!.slack_token;
 }
 
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = req.headers['x-auth-data'] as string;
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Slack access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
+
 const app = express();
 
 
@@ -750,11 +770,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const slack_token = req.headers['x-auth-token'] as string;
-
-  if (!slack_token) {
-    console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-  }
+  const slack_token = extractAccessToken(req);
 
     const server = getSlackMcpServer();
     try {
@@ -840,11 +856,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const slack_token = req.headers['x-auth-token'] as string;
-
-    if (!slack_token) {
-      console.error('Error: Slack token is missing. Provide it via x-auth-token header.');
-    }
+    const slack_token = extractAccessToken(req);
 
     asyncLocalStorage.run({ slack_token }, async () => {
       await transport.handlePostMessage(req, res);

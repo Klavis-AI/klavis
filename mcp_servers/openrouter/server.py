@@ -32,6 +32,38 @@ load_dotenv()
 OPENROUTER_MCP_SERVER_PORT = int(os.getenv("OPENROUTER_MCP_SERVER_PORT", "5000"))
 
 
+def extract_api_key(request_or_scope) -> str:
+    """Extract API key from headers or environment."""
+    api_key = os.getenv("API_KEY")
+    
+    if not api_key:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get('x-auth-data')
+            if auth_data and isinstance(auth_data, bytes):
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        else:
+            auth_data = None
+        
+        if auth_data:
+            try:
+                # Parse the JSON auth data to extract token
+                auth_json = json.loads(auth_data)
+                api_key = auth_json.get('token', '')
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Failed to parse auth data JSON: {e}")
+                api_key = ""
+    
+    return api_key or ""
+
+
 @click.command()
 @click.option("--port", default=OPENROUTER_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -571,9 +603,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        auth_token = request.headers.get('x-auth-token')
+        # Extract API key from headers
+        api_key = extract_api_key(request)
         
-        token = auth_token_context.set(auth_token or "")
+        # Set the API key in context for this request
+        token = auth_token_context.set(api_key)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -599,12 +633,11 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract API key from headers
+        api_key = extract_api_key(scope)
         
-        token = auth_token_context.set(auth_token or "")
+        # Set the API key in context for this request
+        token = auth_token_context.set(api_key)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

@@ -9,6 +9,7 @@ Supports both Server-Sent Events (SSE) and Streamable HTTP transport modes.
 import os
 import logging
 import contextlib
+import json
 from collections.abc import AsyncIterator
 from typing import Any
 from contextvars import ContextVar
@@ -191,15 +192,9 @@ def main(
         """Handle SSE connections with QuickBooks credential extraction."""
         logger.info("Handling SSE connection")
 
-        # Extract headers and check for QB credentials
-        headers = dict(request.scope.get('headers', []))
-        # Convert bytes to string for header values
-        str_headers = {k.decode('utf-8'): v.decode('utf-8')
-                       for k, v in headers.items()}
-
         # Extract QB credentials from headers
         qb_access_token, qb_realm_id, qb_environment = session_manager_instance.extract_credentials_from_headers(
-            str_headers)
+            request)
 
         # Store credentials in scope for later use
         if any([qb_access_token, qb_realm_id, qb_environment]):
@@ -234,15 +229,9 @@ def main(
         """Handle Streamable HTTP requests with QuickBooks credential extraction."""
         logger.info("Handling StreamableHTTP request")
 
-        # Extract headers and check for QB credentials
-        headers = dict(scope.get('headers', []))
-        # Convert bytes to string for header values
-        str_headers = {k.decode('utf-8'): v.decode('utf-8')
-                       for k, v in headers.items()}
-
         # Extract QB credentials from headers
         qb_access_token, qb_realm_id, qb_environment = session_manager_instance.extract_credentials_from_headers(
-            str_headers)
+            scope)
 
         # Store credentials in scope for later use
         if any([qb_access_token, qb_realm_id, qb_environment]):

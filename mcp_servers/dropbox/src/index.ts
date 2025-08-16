@@ -14,7 +14,6 @@ import { Dropbox } from 'dropbox';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const DROPBOX_ACCESS_TOKEN = process.env.DROPBOX_ACCESS_TOKEN;
 
 // Import utilities
 import { patchFetchResponse } from './utils/fetch-polyfill.js';
@@ -37,6 +36,26 @@ import {
 
 // Apply the fetch polyfill immediately
 patchFetchResponse();
+
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = req.headers['x-auth-data'] as string;
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Dropbox access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
+}
 
 /**
  * Create Dropbox client with access token
@@ -160,7 +179,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleMcpRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         // Initialize Dropbox client only if access token is available
         const dropboxClient = accessToken ? createDropboxClient(accessToken as string) : null;
@@ -227,7 +246,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleSseRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         const transport = new SSEServerTransport(`/messages`, res);
 
@@ -253,7 +272,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     async function handleMessagesRequest(req: Request, res: Response) {
         const sessionId = req.query.sessionId as string;
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         let transport: SSEServerTransport | undefined;
         transport = sessionId ? transports.get(sessionId) : undefined;

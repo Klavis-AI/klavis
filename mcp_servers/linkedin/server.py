@@ -33,6 +33,35 @@ logger = logging.getLogger("linkedin-mcp-server")
 LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN") or "" # for local use
 LINKEDIN_MCP_SERVER_PORT = int(os.getenv("LINKEDIN_MCP_SERVER_PORT", "5000"))
 
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
 @click.command()
 @click.option("--port", default=LINKEDIN_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -327,11 +356,13 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract LinkedIn access token from headers (fallback to environment)
-        linkedin_token = request.headers.get('x-linkedin-token') or LINKEDIN_ACCESS_TOKEN
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
+        if not auth_token:
+            auth_token = LINKEDIN_ACCESS_TOKEN  # Fallback to environment
         
         # Set the LinkedIn token in context for this request
-        token = linkedin_token_context.set(linkedin_token or "")
+        token = linkedin_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -357,16 +388,13 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (fallback to environment)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
-        else:
-            auth_token = LINKEDIN_ACCESS_TOKEN
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
+        if not auth_token:
+            auth_token = LINKEDIN_ACCESS_TOKEN  # Fallback to environment
         
         # Set the LinkedIn token in context for this request
-        token = linkedin_token_context.set(auth_token or "")
+        token = linkedin_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

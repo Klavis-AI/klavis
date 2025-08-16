@@ -5,6 +5,7 @@ import logging
 import contextlib
 from collections.abc import AsyncIterator
 from typing import List, Optional, Dict, Any
+from contextvars import ContextVar
 
 import click
 from dotenv import load_dotenv
@@ -32,11 +33,67 @@ logger = logging.getLogger("google-slides-mcp-server")
 SCOPES = ['https://www.googleapis.com/auth/presentations', 'https://www.googleapis.com/auth/drive.readonly']
 GOOGLE_SLIDES_MCP_SERVER_PORT = int(os.getenv("GOOGLE_SLIDES_MCP_SERVER_PORT", "5000"))
 
+# Context variable to store the access token for each request
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
+def get_auth_token() -> str:
+    """Get the authentication token from context."""
+    try:
+        return auth_token_context.get()
+    except LookupError:
+        raise RuntimeError("Authentication token not found in request context")
+
+def get_slides_service(access_token: str):
+    """Create Google Slides service with access token."""
+    credentials = Credentials(token=access_token)
+    return build('slides', 'v1', credentials=credentials)
+
+def get_drive_service(access_token: str):
+    """Create Google Drive service with access token."""
+    credentials = Credentials(token=access_token)
+    return build('drive', 'v3', credentials=credentials)
+
 def get_credentials():
     """
     Gets Google API credentials from service account or OAuth2 flow.
     Returns credentials object for use with Google APIs.
     """
+    # Try to get token from context first
+    try:
+        access_token = get_auth_token()
+        if access_token:
+            return Credentials(token=access_token)
+    except RuntimeError:
+        pass  # No token in context, fall back to other methods
     creds = None
     # Check if we have service account credentials
     if os.path.exists('service-account.json'):
@@ -682,12 +739,22 @@ def main(
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        async with sse.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await app.run(
-                streams[0], streams[1], app.create_initialization_options()
-            )
+        
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
+        
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await app.run(
+                    streams[0], streams[1], app.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        
         return Response()
 
     # Set up StreamableHTTP transport
@@ -702,7 +769,16 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        await session_manager.handle_request(scope, receive, send)
+        
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
+        
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
