@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-EXA_MCP_SERVER_PORT = int(os.getenv("EXA_MCP_SERVER_PORT", "5001"))
+EXA_MCP_SERVER_PORT = int(os.getenv("EXA_MCP_SERVER_PORT", "5000"))
 
 @click.command()
 @click.option("--port", default=EXA_MCP_SERVER_PORT, help="Port to listen on for HTTP")
