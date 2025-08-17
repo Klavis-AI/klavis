@@ -83,22 +83,47 @@ def main(
         return [
             types.Tool(
                 name="notion_create_page",
-                description="Create a new page in Notion",
+                description="Create a new page in Notion. If parent is not specified, a private page will be created in the workspace",
                 inputSchema={
                     "type": "object",
                     "properties": {
+                        "page": {
+                            "type": "object",
+                            "description": "Page configuration",
+                            "properties": {
+                                "content": {
+                                    "type": "string",
+                                    "description": "Markdown content for the page",
+                                },
+                                "properties": {
+                                    "type": "object",
+                                    "description": "Page properties",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string",
+                                            "description": "Page title",
+                                        }
+                                    }
+                                },
+                            },
+                        },
                         "parent": {
                             "type": "object",
-                            "description": "Parent object (page_id or database_id)",
-                        },
-                        "properties": {
-                            "type": "object",
-                            "description": "Page properties",
-                        },
-                        "children": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Optional array of block objects",
+                            "description": "Optional parent object with page_id, database_id, or workspace. If not specified, a private page will be created",
+                            "properties": {
+                                "page_id": {
+                                    "type": "string",
+                                    "description": "Parent page ID",
+                                },
+                                "database_id": {
+                                    "type": "string",
+                                    "description": "Parent database ID",
+                                },
+                                "workspace": {
+                                    "type": "boolean",
+                                    "description": "Whether parent is workspace",
+                                },
+                            },
                         },
                         "icon": {
                             "type": "object",
@@ -109,7 +134,7 @@ def main(
                             "description": "Optional page cover",
                         },
                     },
-                    "required": ["parent", "properties"],
+                    "required": ["page"],
                 },
             ),
             types.Tool(
@@ -582,9 +607,10 @@ def main(
         if name == "notion_create_page":
             try:
                 result = await create_page(
+                    page=arguments.get("page"),
                     parent=arguments.get("parent"),
-                    properties=arguments.get("properties"),
-                    children=arguments.get("children"),
+                    properties=arguments.get("properties"),  # Support old format
+                    children=arguments.get("children"),  # Support old format
                     icon=arguments.get("icon"),
                     cover=arguments.get("cover"),
                 )

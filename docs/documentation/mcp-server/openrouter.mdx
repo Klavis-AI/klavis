@@ -1,0 +1,263 @@
+---
+title: 'OpenRouter'
+description: 'Learn how to use Klavis to connect your AI application to OpenRouter MCP Server'
+---
+
+import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+
+<NoCodeSnippet />
+
+---
+
+## For Developer
+
+Follow the instructions below to integrate OpenRouter MCP server to your AI application using our API or SDK.
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create an OpenRouter MCP Server
+
+Use the following endpoint to create a new remote OpenRouter MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create an OpenRouter MCP server instance
+openrouter_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.OPENROUTER,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create an OpenRouter MCP server instance
+const openrouterServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.OpenRouter,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "OpenRouter",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>",
+}'
+```
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "strings"
+    "net/http"
+    "io/ioutil"
+)
+
+func main() {
+
+    url := "https://api.klavis.ai/mcp-server/instance/create"
+
+    payload := strings.NewReader("{\n  \"serverName\": \"OpenRouter\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+
+    req, _ := http.NewRequest("POST", url, payload)
+
+    req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+    req.Header.Add("Content-Type", "application/json")
+
+    res, _ := http.DefaultClient.Do(req)
+
+    defer res.Body.Close()
+    body, _ := ioutil.ReadAll(res.Body)
+
+    fmt.Println(res)
+    fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"OpenRouter\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "serverUrl": "https://openrouter-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>**serverUrl** specifies the endpoint of the OpenRouter MCP server. You can connect with your MCP client using SSE or the StreamableHTTP endpoint.</Check>
+<Note>**instanceId** is used for authentication and identification of your server instance.</Note>
+
+### 2. Configure OpenRouter API Key
+
+To use the OpenRouter MCP Server, configure it with your OpenRouter API key. The server expects this key in the `x-auth-token` header at runtime. You can store it using the Set Auth Token API:
+
+#### Setting up OpenRouter API Key
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authToken": "<YOUR_OPENROUTER_API_KEY>"
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the OpenRouter API key for your instance
+response = klavis_client.mcp_server.set_instance_auth_token(
+    instance_id="<YOUR_INSTANCE_ID>",
+    auth_token="<YOUR_OPENROUTER_API_KEY>",
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the OpenRouter API key for your instance
+const response = await klavisClient.mcpServer.setInstanceAuthToken({
+    instanceId: "<YOUR_INSTANCE_ID>",
+    authToken: "<YOUR_OPENROUTER_API_KEY>"
+});
+
+console.log(response);
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+    
+    payload := map[string]string{
+        "instanceId": "<YOUR_INSTANCE_ID>",
+        "authToken": "<YOUR_OPENROUTER_API_KEY>",
+    }
+    
+    jsonPayload, _ := json.Marshal(payload)
+    
+    req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+    req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+    req.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    
+    fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authToken\":\"<YOUR_OPENROUTER_API_KEY>\"}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name                                  | Description |
+|--------------------------------------------|-------------|
+| openrouter_list_models                     | List available models on OpenRouter |
+| openrouter_search_models                   | Search for models based on query, category, or provider |
+| openrouter_get_model_pricing               | Get pricing information for a specific model |
+| openrouter_create_chat_completion          | Create a chat completion using a selected model |
+| openrouter_create_chat_completion_stream   | Create a streaming chat completion |
+| openrouter_create_completion               | Create a text completion (legacy completion endpoint) |
+| openrouter_get_usage                       | Get usage statistics for the authenticated user |
+| openrouter_get_user_profile                | Get the current user's profile information |
+| openrouter_get_credits                     | Get the current user's credit balance |
+| openrouter_get_api_key_info                | Get information about the current API key |
+| openrouter_get_cost_estimate               | Estimate cost for a model given input/output tokens |
+| openrouter_compare_models                  | Run the same prompt across multiple models and compare |
+| openrouter_analyze_model_performance       | Analyze one model over multiple prompts |
+| openrouter_get_model_recommendations       | Get model recommendations based on use case and constraints |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+

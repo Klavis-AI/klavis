@@ -38,7 +38,7 @@ account_properties = {
 
 # MCP Tool definitions
 create_account_tool = Tool(
-    name="create_account",
+    name="quickbooks_create_account",
     title="Create Account",
     description="Create a new account in QuickBooks",
     inputSchema={
@@ -49,7 +49,7 @@ create_account_tool = Tool(
 )
 
 get_account_tool = Tool(
-    name="get_account",
+    name="quickbooks_get_account",
     title="Get Account",
     description="Get a specific account by ID from QuickBooks",
     inputSchema={
@@ -62,7 +62,7 @@ get_account_tool = Tool(
 )
 
 list_accounts_tool = Tool(
-    name="list_accounts",
+    name="quickbooks_list_accounts",
     title="List Accounts",
     description="List all chart of accounts from QuickBooks",
     inputSchema={
@@ -77,7 +77,7 @@ list_accounts_tool = Tool(
 )
 
 update_account_tool = Tool(
-    name="update_account",
+    name="quickbooks_update_account",
     title="Update Account",
     description="Update an existing account in QuickBooks",
     inputSchema={
@@ -88,7 +88,7 @@ update_account_tool = Tool(
 )
 
 search_accounts_tool = Tool(
-    name="search_accounts",
+    name="quickbooks_search_accounts",
     title="Search Accounts",
     description="Advanced Account Search - Search accounts with powerful filters including name, type, classification, status, and other criteria. Perfect for finding specific accounts based on various parameters",
     inputSchema={
