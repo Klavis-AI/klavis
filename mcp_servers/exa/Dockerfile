@@ -1,16 +1,21 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy only the requirements first to leverage Docker cache
+COPY mcp_servers/exa/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the server code
-COPY . .
+COPY mcp_servers/exa/server.py .
+COPY mcp_servers/exa/tools/ ./tools/
 
-# Expose the default port
-EXPOSE 5001
+# Expose the port the server runs on
+EXPOSE 5000
 
-# Run the server
-CMD ["python", "server.py"]
+# Command to run the server
+CMD ["python", "server.py"] 
