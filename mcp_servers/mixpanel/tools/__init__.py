@@ -1,33 +1,35 @@
-from .events import track_event, query_events, track_batch_events, get_event_count, get_top_events, get_todays_top_events
-from .users import set_user_profile, get_user_profile, get_profile_event_activity
-from .funnels import list_saved_funnels
-from .base import (
-    project_token_context, 
-    api_secret_context,
-    service_account_username_context,
-    service_account_secret_context
-)
+from .events import send_events, get_events, get_event_properties, get_event_property_values
+from .funnels import run_funnels_query
+from .projects import get_projects
+from .base import auth_token_context
+from .frequency import run_frequency_query
+from .retention import run_retention_query
+from .segmentation import run_segmentation_query
 
 __all__ = [
     # Events
-    "track_event",
-    "query_events", 
-    "track_batch_events",
-    "get_event_count",
-    "get_top_events",
-    "get_todays_top_events",
+    "send_events",
+    "get_events",
+    "get_event_properties",
+    "get_event_property_values",
     
-    # Users
-    "set_user_profile",
-    "get_user_profile",
-    "get_profile_event_activity",
+    # Frequency
+    "run_frequency_query",
+    
+    # Retention
+    "run_retention_query",
+    
+    # Segmentation
+    "run_segmentation_query",
     
     # Funnels
-    "list_saved_funnels",
+    "run_funnels_query",
+    
+    # Projects
+    "get_projects",
     
     # Base
-    "project_token_context",
-    "api_secret_context",
-    "service_account_username_context", 
-    "service_account_secret_context",
+    "auth_token_context",
 ]
+
+ 

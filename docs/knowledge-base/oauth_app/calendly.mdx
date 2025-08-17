@@ -1,0 +1,74 @@
+---
+title: "Setting Up Calendly OAuth App"
+description: "Complete guide to creating and configuring a Calendly OAuth application"
+---
+
+## Prerequisites
+
+- Calendly account (personal or business)
+- Access to Calendly Developer Portal
+
+## Step 1: Create Calendly Developer Account
+
+1. Visit [https://developer.calendly.com/](https://developer.calendly.com/)
+2. Click **"Sign In"** or **"Log In"** if you already have an account
+3. Sign in with your Calendly account or create a new developer account
+
+<img src="/images/knowledge-base/calendly_oauth_app/calendly_step1_login.png" alt="Calendly Developer Login" />
+
+## Step 2: Create a New App
+
+1. Once logged in, go to **"Accounts"** -> **"My Apps"**
+2. Click **"Create a new app"**
+3. Choose **"Web App"** as the integration type
+4. Fill in the app details:
+   - **Name of app**: Your application name (e.g., your brand name)
+   - **Kind of app**: Web/Native (depending on your need)
+   - **Environment Type**: Sandbox/Production (**Production** recommended)
+   - **Redirect URIs**: Add your callback URL:
+     - `https://api.klavis.ai/oauth/calendly/callback`
+
+<img src="/images/knowledge-base/calendly_oauth_app/calendly_step2_create_app.png" alt="Calendly App Creation Form" />
+
+<Note>
+Normally, the redirect URI should be set to: `https://api.klavis.ai/oauth/calendly/callback`
+</Note>
+
+## Step 3: Get Your Credentials
+
+After creating the app, you'll see:
+- **Client ID**: Copy this value
+- **Client Secret**: Generate and copy this value (keep it secure!)
+
+<img src="/images/knowledge-base/calendly_oauth_app/calendly_step3_client_id_and_secret.png" alt="Get the Credentials" />
+
+<Note>
+Calendly does not use traditional OAuth scopes. Once authenticated, your application has access to all API endpoints permitted by the user's subscription and role.
+</Note>
+
+## (Optional) Step 4: White Labeling 
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own Calendly OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your Calendly **Client ID** and **Client Secret** from Step 3
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/calendly/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/calendly/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
+</Tip>
+
+## Resources
+- [Calendly Developer Documentation](https://developer.calendly.com/getting-started)
+- [Calendly OAuth 2.0 Authentication Guide](https://developer.calendly.com/create-a-developer-account)
+- [Klavis OAuth & White Labeling Guide](/documentation/klavis-oauth-white-label)
+- [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)
+- [Calendly API Reference](https://developer.calendly.com/getting-started#access-requirements)

@@ -1,49 +1,39 @@
 import logging
 import json
-import base64
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
+import time
+import uuid
 
-from .base import get_project_token, MixpanelIngestionClient, MixpanelQueryClient
+from .base import (
+    MixpanelIngestionClient,
+    MixpanelExportClient,
+    MixpanelQueryClient
+)
 
 logger = logging.getLogger(__name__)
 
-async def track_event(
-    event: str,
-    properties: Optional[Dict[str, Any]] = None,
-    distinct_id: Optional[str] = None
+async def send_events(
+    project_id: str,
+    events: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
-    """Track an event to Mixpanel."""
-    project_token = get_project_token()
+    """Send events to Mixpanel using the /import endpoint with Service Account authentication.
+    Use this API to send batches of events from your servers to Mixpanel.
     
-    event_data = {
-        "event": event,
-        "properties": {
-            "token": project_token,
-            **(properties or {})
-        }
-    }
-    
-    if distinct_id:
-        event_data["properties"]["distinct_id"] = distinct_id
-    
-    # Encode the event data as base64 (Mixpanel requirement)
-    encoded_data = base64.b64encode(json.dumps(event_data).encode()).decode()
-    
-    params = {"data": encoded_data}
-    
-    return await MixpanelIngestionClient.make_request("POST", "/track", params=params)
-
-async def track_batch_events(
-    events: list[Dict[str, Any]]
-) -> Dict[str, Any]:
-    """Track multiple events in a single batch request to Mixpanel."""
+    Args:
+        project_id: The Mixpanel project ID to import events to
+        events: List of event objects to import
+        
+    Returns:
+        Dict with import results
+    """
     try:
         if not events or not isinstance(events, list):
             raise ValueError("Events must be a non-empty list")
         
-        project_token = get_project_token()
+        if not project_id:
+            raise ValueError("project_id is required")
         
-        # Prepare batch event data
+        # Prepare batch event data for /import endpoint
         batch_events = []
         for i, event_data in enumerate(events):
             if not isinstance(event_data, dict):
@@ -54,42 +44,51 @@ async def track_batch_events(
                 raise ValueError(f"Event {i} missing required 'event' field")
             
             properties = event_data.get("properties", {})
-            distinct_id = event_data.get("distinct_id")
+            distinct_id = event_data.get("distinct_id", "")
             
-            # Build event object
+            # Ensure required fields for /import endpoint
+            if "time" not in properties:
+                # Use current time in milliseconds if not specified
+                properties["time"] = int(time.time() * 1000)
+            
+            if "$insert_id" not in properties:
+                # Generate a unique insert_id for deduplication
+                properties["$insert_id"] = str(uuid.uuid4())
+            
+            # Ensure distinct_id is in properties
+            properties["distinct_id"] = distinct_id or ""
+            
+            # Build event object for /import endpoint
             event_obj = {
                 "event": event_name,
-                "properties": {
-                    "token": project_token,
-                    **properties
-                }
+                "properties": properties
             }
-            
-            if distinct_id:
-                event_obj["properties"]["distinct_id"] = distinct_id
             
             batch_events.append(event_obj)
         
-        # Encode the batch data as base64 (Mixpanel requirement)
-        encoded_data = base64.b64encode(json.dumps(batch_events).encode()).decode()
-        
-        params = {"data": encoded_data}
-        
-        result = await MixpanelIngestionClient.make_request("POST", "/track", params=params)
+        # Use Service Account auth with /import endpoint
+        result = await MixpanelIngestionClient.make_request(
+            "POST", 
+            "/import",
+            data=batch_events,
+            project_id=project_id
+        )
         
         # Add batch info to result
         if isinstance(result, dict):
             result["batch_size"] = len(batch_events)
-            result["events_processed"] = len(batch_events) if result.get("success") else 0
+            result["events_processed"] = len(batch_events) if result.get("success", True) else 0
+            result["project_id"] = project_id
             
         return result
         
     except Exception as e:
         return {
             "success": False,
-            "error": f"Failed to track batch events: {str(e)}",
+            "error": f"Failed to send events: {str(e)}",
             "batch_size": len(events) if isinstance(events, list) else 0,
-            "events_processed": 0
+            "events_processed": 0,
+            "project_id": project_id
         }
 
 async def query_events(
@@ -115,7 +114,8 @@ async def query_events(
         if limit:
             params["limit"] = str(limit)
         
-        result = await MixpanelQueryClient.make_request("GET", "/2.0/export", params=params)
+        # The export endpoint is already included in MIXPANEL_EXPORT_ENDPOINT
+        result = await MixpanelExportClient.make_request("GET", "", params=params)
         
         if isinstance(result, dict) and "events" in result:
             return {
@@ -155,7 +155,8 @@ async def get_event_count(
             params["event"] = f'["{event}"]'
         
         # Query events and count them
-        result = await MixpanelQueryClient.make_request("GET", "/2.0/export", params=params)
+        # The export endpoint is already included in MIXPANEL_EXPORT_ENDPOINT
+        result = await MixpanelExportClient.make_request("GET", "", params=params)
         
         if isinstance(result, dict) and "events" in result:
             event_count = len(result["events"])
@@ -212,7 +213,8 @@ async def get_top_events(
         }
         
         # Query all events for the time period
-        result = await MixpanelQueryClient.make_request("GET", "/2.0/export", params=params)
+        # The export endpoint is already included in MIXPANEL_EXPORT_ENDPOINT
+        result = await MixpanelExportClient.make_request("GET", "", params=params)
         
         if isinstance(result, dict) and "events" in result:
             events = result["events"]
@@ -328,3 +330,165 @@ async def get_todays_top_events(
             "is_today": True,
             "error": f"Failed to get today's top events: {str(e)}"
         }
+
+async def get_events(
+    project_id: str
+) -> List[str]:
+    """Get event names for the given Mixpanel project.
+    
+    This tool retrieves all event names that have been tracked in the specified project.
+    Useful for discovering what events are available for analysis.
+    
+    Args:
+        project_id: The Mixpanel project ID to get event names for
+        
+    Returns:
+        List of event names (strings) for the project
+    """
+    try:
+        if not project_id:
+            raise ValueError("project_id is required")
+        
+        # Use the Query API endpoint to get event names
+        params = {
+            "project_id": project_id,
+            "type": "general"  # Default type for event names
+        }
+        
+        result = await MixpanelQueryClient.make_request(
+            "GET",
+            "/query/events/names",
+            params=params
+        )
+        
+        # The API returns a list of event names directly
+        if isinstance(result, list):
+            return result
+        elif isinstance(result, dict) and "data" in result:
+            # Sometimes the response might be wrapped
+            data = result["data"]
+            if isinstance(data, list):
+                return data
+            else:
+                logger.warning(f"Unexpected data format: {data}")
+                return []
+        else:
+            logger.warning(f"Unexpected response format: {result}")
+            return []
+            
+    except Exception as e:
+        logger.exception(f"Error getting event names: {e}")
+        raise
+
+async def get_event_properties(
+    project_id: str,
+    event: str
+) -> List[str]:
+    """Get available properties for a specific event in a Mixpanel project.
+
+    This returns the list of event property keys that can be used for filtering
+    or aggregation in queries for the provided event name and project.
+
+    Args:
+        project_id: Mixpanel project ID
+        event: Event name (e.g., "AI Prompt Sent")
+
+    Returns:
+        List of property names (strings)
+    """
+    try:
+        if not project_id:
+            raise ValueError("project_id is required")
+        if not event:
+            raise ValueError("event is required")
+
+        params = {
+            "project_id": project_id,
+            "event": event,
+        }
+
+        # Query API endpoint for event properties, mirroring naming used for events/names
+        result = await MixpanelQueryClient.make_request(
+            "GET",
+            "/query/events/properties",
+            params=params,
+        )
+
+        # The API commonly returns a bare list; handle wrapped responses too
+        if isinstance(result, list):
+            return result
+        if isinstance(result, dict):
+            # Some responses may be wrapped like { "data": [...] }
+            data = result.get("data")
+            if isinstance(data, list):
+                return data
+            # Or keyed by the event name
+            by_event = result.get(event)
+            if isinstance(by_event, list):
+                return by_event
+            logger.warning(f"Unexpected event properties response format: {result}")
+            return []
+
+        logger.warning(f"Unexpected response type for event properties: {type(result)}")
+        return []
+
+    except Exception as e:
+        logger.exception(f"Error getting event properties: {e}")
+        raise
+
+async def get_event_property_values(
+    project_id: str,
+    event: str,
+    property_name: str
+) -> List[str]:
+    """Get distinct values for a specific event property in a Mixpanel project.
+
+    This returns the list of unique values that have been seen for the given
+    event's property, useful for building filters and understanding taxonomy.
+
+    Args:
+        project_id: Mixpanel project ID
+        event: Event name (e.g., "AI Prompt Sent")
+        property_name: Property name (e.g., "utm_source")
+
+    Returns:
+        List of property values (strings)
+    """
+    try:
+        if not project_id:
+            raise ValueError("project_id is required")
+        if not event:
+            raise ValueError("event is required")
+        if not property_name:
+            raise ValueError("property is required")
+
+        params = {
+            "project_id": project_id,
+            "event": event,
+            # Mixpanel expects the property key under the `name` query param
+            "name": property_name,
+        }
+
+        # Query API endpoint for property values of an event
+        result = await MixpanelQueryClient.make_request(
+            "GET",
+            "/query/events/properties/values",
+            params=params,
+        )
+
+        # API typically returns a list of strings; handle wrapped responses too
+        if isinstance(result, list):
+            return result
+        if isinstance(result, dict):
+            data = result.get("data")
+            if isinstance(data, list):
+                return data
+            logger.warning(f"Unexpected event property values response format: {result}")
+            return []
+
+        logger.warning(f"Unexpected response type for event property values: {type(result)}")
+        return []
+
+    except Exception as e:
+        logger.exception(f"Error getting event property values: {e}")
+        raise
