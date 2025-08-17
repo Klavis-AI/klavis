@@ -2,9 +2,10 @@ mcp>=1.12.0
 pydantic
 fastapi
 uvicorn[standard]
-aiohttp
 python-dotenv
 typing-extensions
+requests
+httpx
 click
 starlette
-stripe>=7.0.0 
+stripe-agent-toolkit 
