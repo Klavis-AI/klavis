@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { FastMCP } from 'fastmcp';
-import { Request } from 'express';
+import { IncomingMessage } from 'http';
 import { getUsersByName, getUsersToolSchema } from './tools';
 import {
   createBoard,
@@ -32,7 +32,7 @@ import {
 
 dotenv.config();
 
-function extractAccessToken(req: Request): string {
+function extractAccessToken(req: IncomingMessage): string {
   let authData = process.env.AUTH_DATA;
   
   if (!authData && req.headers['x-auth-data']) {
