@@ -13,7 +13,6 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { createEmailMessage, extractPdfText, extractDocxText, extractXlsxText } from "./utl.js";
 import { AsyncLocalStorage } from 'async_hooks';
-import { Request } from 'express';
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
