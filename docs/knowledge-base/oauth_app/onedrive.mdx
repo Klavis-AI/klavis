@@ -1,0 +1,83 @@
+---
+title: "Setting Up OneDrive OAuth App"
+description: "Complete guide to creating and configuring a OneDrive OAuth application"
+---
+
+## Prerequisites
+
+- Microsoft account (personal or organizational)
+- Access to [Azure Portal](https://portal.azure.com/)
+
+## Step 1: Create Microsoft App Registration
+
+1. Visit [https://portal.azure.com/](https://portal.azure.com/) and sign in
+2. Search **App registrations** → click **New registration**
+3. Fill out the form:
+
+   * **Name**: Choose a descriptive app name
+   * **Supported account types**: Select **Accounts in any organizational directory and personal Microsoft accounts**
+   * **Redirect URI**: `https://api.klavis.ai/oauth/onedrive/callback`
+4. Click **Register**
+
+<img src="/images/knowledge-base/onedrive_oauth_app/onedrive_step1_register.png" alt="OneDrive App Registration Form" />
+
+## Step 2: Configure API Permissions
+
+<Note>
+Klavis OneDrive MCP Server uses the following OAuth scopes:`openid, profile, email, offline_access, Files.ReadWrite.All, User.Read`
+</Note>
+
+1. Go to your app → **API Permissions**
+2. Click **Add a permission** → **Microsoft Graph** → **Delegated permissions**
+3. Select:
+
+   * `openid`, `profile`, `email`, `offline_access`
+   * `Files.ReadWrite.All`
+   * `User.Read`
+4. Click **Add permissions**
+5. (Optional) Click **Grant admin consent** if you want to approve for all org users
+
+<img src="/images/knowledge-base/onedrive_oauth_app/onedrive_step2_scopes.png" alt="Graph API Permissions" />
+
+## Step 3: Collect Client ID & Secret
+
+1. Go to **Certificates & Secrets** tab
+2. Click **New client secret** → set description + expiry → **Add**
+3. Copy the **Client Secret Value** (shown only once)
+4. From **Overview** tab, copy **Application (client) ID**
+
+<img src="/images/knowledge-base/onedrive_oauth_app/onedrive_step3_clientID.png" alt="Client ID"/>
+
+<img src="/images/knowledge-base/onedrive_oauth_app/onedrive_step3_secret.png" alt="Secret"/>
+
+<Check>
+You have successfully created a OneDrive OAuth application! You now have your Client ID and Client Secret ready for integration with Klavis AI.
+</Check>
+
+## (Optional) Step 4: White Labeling
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own OneDrive OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your OneDrive **Client ID** and **Client Secret** from Step 3
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/onedrive/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
+
+   ```javascript
+   const authUrl = `https://api.klavis.ai/oauth/onedrive/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   ```
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
+</Tip>
+
+## Resources
+
+* [Microsoft Identity Platform Docs](https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow)
+* [Microsoft Graph API – OneDrive](https://learn.microsoft.com/en-us/graph/onedrive-concept-overview)
+* [Klavis OAuth & White Labeling Guide](/documentation/klavis-oauth-white-label)
+* [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)
