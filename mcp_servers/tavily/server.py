@@ -32,6 +32,36 @@ logging.basicConfig(level=logging.INFO)
 
 TAVILY_MCP_SERVER_PORT = int(os.getenv("TAVILY_MCP_SERVER_PORT", "5000"))
 
+def extract_api_key(request_or_scope) -> str:
+    """Extract API key from headers or environment."""
+    api_key = os.getenv("API_KEY")
+    
+    if not api_key:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get('x-auth-data')
+            if auth_data and isinstance(auth_data, bytes):
+                auth_data = auth_data.decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = auth_data.decode('utf-8')
+        else:
+            auth_data = None
+        
+        if auth_data:
+            try:
+                # Parse the JSON auth data to extract token
+                auth_json = json.loads(auth_data)
+                api_key = auth_json.get('token', '')
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Failed to parse auth data JSON: {e}")
+                api_key = ""
+    
+    return api_key or ""
 
 @click.command()
 @click.option("--port", default=TAVILY_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -235,7 +265,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         If header 'x-auth-token' is present, bind it for the request via ContextVar.
         """
         logger.info("Handling SSE connection")
-        api_key = request.headers.get("x-auth-token")
+        
+        # Extract API key from headers
+        api_key = extract_api_key(request)
+        
         token = None
         if api_key:
             token = tavily_api_key_context.set(api_key)
@@ -261,8 +294,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         Accepts 'x-auth-token' header for per-request auth.
         """
         logger.info("Handling StreamableHTTP request")
-        headers = {k.decode("utf-8"): v.decode("utf-8") for k, v in scope.get("headers", [])}
-        api_key = headers.get("x-auth-token")
+        
+        # Extract API key from headers
+        api_key = extract_api_key(scope)
+
         token = None
         if api_key:
             token = tavily_api_key_context.set(api_key)

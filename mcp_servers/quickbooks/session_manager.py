@@ -3,9 +3,10 @@ Session-based QuickBooks configuration management for MCP server.
 Allows clients to provide QB credentials via headers or initialization.
 """
 
+import json
 import logging
 from typing import Dict, Any, Optional, Tuple
-from contextlib import asynccontextmanager
+import os
 
 from tools.http_client import QuickBooksHTTPClient
 from tools.accounts import AccountManager
@@ -83,13 +84,41 @@ class SessionManager:
         except ValueError as e:
             raise ValueError(f"Failed to create QuickBooks session: {str(e)}")
     
-    def extract_credentials_from_headers(self, headers: Dict[str, str]) -> Tuple[str, str, str]:
-        """Extract QuickBooks credentials from HTTP headers."""
-        access_token = headers.get('x-auth-token') or headers.get('auth-token')
-        realm_id = headers.get('x-qb-realm-id') or headers.get('qb-realm-id')
-        environment = headers.get('x-qb-environment') or headers.get('qb-environment')
+    def extract_credentials_from_headers(self, request_or_scope) -> Tuple[str, str, str]:
+        """Extract QuickBooks credentials from request headers.
         
-        return access_token, realm_id, environment
+        Returns:
+            tuple: (access_token, realm_id, environment)
+        """
+        auth_data = os.getenv("AUTH_DATA")
+        
+        if not auth_data:
+            # Get headers based on input type
+            if hasattr(request_or_scope, 'headers'):
+                # SSE request object
+                headers = request_or_scope.headers
+            elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+                # StreamableHTTP scope object
+                headers = dict(request_or_scope.get("headers", []))
+            else:
+                return "", "", ""
+            
+            # Extract auth data from x-auth-data header
+            auth_data = headers.get(b'x-auth-data')
+
+        if not auth_data:
+            return "", "", ""
+        
+        try:
+            auth_json = json.loads(auth_data.decode('utf-8'))
+            return (
+                auth_json.get('access_token', ''),
+                auth_json.get('realm_id', ''),
+                auth_json.get('environment', '')
+            )
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to parse auth data JSON: {e}")
+            return "", "", ""
     
     async def cleanup(self):
         """Cleanup all sessions."""

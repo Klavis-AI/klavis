@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { FastMCP } from 'fastmcp';
+import { Request } from 'express';
 import { getUsersByName, getUsersToolSchema } from './tools';
 import {
   createBoard,
@@ -31,14 +32,34 @@ import {
 
 dotenv.config();
 
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = req.headers['x-auth-data'] as string;
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Monday access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
+
 const server = new FastMCP({
   name: 'monday',
   version: '1.0.0',
   authenticate: async (request) => {
-    const token = process.env.MONDAY_API_KEY || (request.headers['x-auth-token'] as string);
+    const token = extractAccessToken(request);
     if (!token) {
       throw new Error(
-        'Error: Monday API token is missing. Provide it via MONDAY_API_KEY env var or x-auth-token header.',
+        'Error: Monday API token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.',
       );
     }
     return { token };
