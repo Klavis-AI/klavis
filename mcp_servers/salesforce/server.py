@@ -40,6 +40,38 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 SALESFORCE_MCP_SERVER_PORT = int(os.getenv("SALESFORCE_MCP_SERVER_PORT", "5000"))
 
+def extract_auth_credentials(request_or_scope) -> tuple[str, str]:
+    """Extract access token and instance URL from request headers.
+    
+    Returns:
+        tuple: (access_token, instance_url)
+    """
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Get headers based on input type
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            headers = request_or_scope.headers
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+        else:
+            return "", ""
+    
+        # Extract auth data from x-auth-data header
+        auth_data = headers.get(b'x-auth-data')
+
+    if not auth_data:
+        return "", ""
+    
+    try:
+        auth_json = json.loads(auth_data.decode('utf-8'))
+        return auth_json.get('access_token', ''), auth_json.get('instance_url', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return "", ""
+
 @click.command()
 @click.option("--port", default=SALESFORCE_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option("--log-level", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
@@ -540,8 +572,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         logger.info("Handling SSE connection")
         
         # Extract auth credentials from headers
-        access_token = request.headers.get('x-auth-token')
-        instance_url = request.headers.get('x-instance-url')
+        access_token, instance_url = extract_auth_credentials(request)
         
         # Set the access token and instance URL in context for this request
         access_token_token = access_token_context.set(access_token or "")
@@ -567,14 +598,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         logger.info("Handling StreamableHTTP request")
         
         # Extract auth credentials from headers
-        headers = dict(scope.get("headers", []))
-        access_token = headers.get(b'x-auth-token')
-        instance_url = headers.get(b'x-instance-url')
-        
-        if access_token:
-            access_token = access_token.decode('utf-8')
-        if instance_url:
-            instance_url = instance_url.decode('utf-8')
+        access_token, instance_url = extract_auth_credentials(scope)
         
         # Set the access token and instance URL in context for this request
         access_token_token = access_token_context.set(access_token or "")

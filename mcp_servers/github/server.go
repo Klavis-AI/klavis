@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -21,6 +22,34 @@ type contextKey string
 
 const tokenContextKey contextKey = "auth_token"
 
+func extractAccessToken(r *http.Request) string {
+	// First try AUTH_DATA environment variable
+	authData := os.Getenv("AUTH_DATA")
+
+	if authData == "" {
+		// Extract from x-auth-data header
+		authData = r.Header.Get("x-auth-data")
+	}
+
+	if authData == "" {
+		return ""
+	}
+
+	// Try to parse as JSON
+	var authJSON map[string]interface{}
+	if err := json.Unmarshal([]byte(authData), &authJSON); err != nil {
+		log.WithError(err).Warn("Failed to parse auth data JSON")
+		return ""
+	}
+
+	// Extract access_token field
+	if accessToken, ok := authJSON["access_token"].(string); ok {
+		return accessToken
+	}
+
+	return ""
+}
+
 func runServer() error {
 	// Create app context
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -28,24 +57,14 @@ func runServer() error {
 
 	t, _ := translations.TranslationHelper()
 
-	// Get auth token from environment variable
-	envAuthToken := os.Getenv("GITHUB_AUTH_TOKEN")
-	if envAuthToken != "" {
-		log.Info("Using auth token from environment variable")
-	}
-
 	// Create a context function to extract the token from request headers
 	contextFunc := func(ctx context.Context, r *http.Request) context.Context {
-		// If env auth token is set, use it directly
-		if envAuthToken != "" {
-			return context.WithValue(ctx, tokenContextKey, envAuthToken)
-		}
-
-		// Otherwise fall back to header token
-		token := r.Header.Get("x-auth-token")
+		// Extract from x-auth-data header
+		token := extractAccessToken(r)
 		if token != "" {
 			return context.WithValue(ctx, tokenContextKey, token)
 		}
+
 		return ctx
 	}
 

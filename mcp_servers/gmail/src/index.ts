@@ -13,6 +13,7 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { createEmailMessage, extractPdfText, extractDocxText, extractXlsxText } from "./utl.js";
 import { AsyncLocalStorage } from 'async_hooks';
+import { Request } from 'express';
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
@@ -61,6 +62,26 @@ function base64UrlToBase64(input: string): string {
 // Helper function to get Gmail client from context
 function getGmailClient() {
     return asyncLocalStorage.getStore()!.gmailClient;
+}
+
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = req.headers['x-auth-data'] as string;
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Gmail access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
 }
 
 /**
@@ -737,10 +758,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     // Initialize Gmail client with the access token
     const auth = new google.auth.OAuth2();
@@ -808,10 +826,7 @@ app.delete('/mcp', async (req: Request, res: Response) => {
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req: Request, res: Response) => {
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     const transport = new SSEServerTransport(`/messages`, res);
 
@@ -834,10 +849,7 @@ app.get("/sse", async (req: Request, res: Response) => {
 
 app.post("/messages", async (req: Request, res: Response) => {
     const sessionId = req.query.sessionId as string;
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     let transport: SSEServerTransport | undefined;
     transport = sessionId ? transports.get(sessionId) : undefined;

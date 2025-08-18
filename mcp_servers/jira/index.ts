@@ -177,6 +177,26 @@ const asyncLocalStorage = new AsyncLocalStorage<{
   authToken: string;
 }>();
 
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = req.headers['x-auth-data'] as string;
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Jira access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
+
 // Helper function to get Jira client from async local storage
 async function getJiraClient(): Promise<JiraClient> {
   const store = asyncLocalStorage.getStore();
@@ -1394,11 +1414,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const authToken = req.headers['x-auth-token'] as string;
-
-  if (!authToken) {
-    console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-  }
+  const authToken = extractAccessToken(req);
 
   const server = getJiraMcpServer();
   try {
@@ -1481,11 +1497,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const authToken = req.headers['x-auth-token'] as string;
-
-    if (!authToken) {
-      console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-    }
+    const authToken = extractAccessToken(req);
 
     asyncLocalStorage.run({ authToken }, async () => {
       await transport!.handlePostMessage(req, res);
