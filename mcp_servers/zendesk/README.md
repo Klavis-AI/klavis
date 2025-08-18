@@ -19,15 +19,20 @@ Tool Name
 ## 🧱 Folder Structure
 
 ```
-customer-service/
-├── main.py
-├── tools/
+mcp_servers/zendesk/
+│── server.py          
+│── tools/
 │   ├── create_ticket.py
 │   ├── get_ticket_status.py
 │   ├── list_recent_tickets.py
-│   └── add_comment_to_ticket.py
-├── .env
-└── README.md
+│   └── add_comment.py
+│── tests/
+│   └── smoke.py
+│── requirements.txt
+│── Dockerfile
+│── README.md
+│── .env.example
+
 
 ```
 ---
