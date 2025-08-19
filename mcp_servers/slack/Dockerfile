@@ -1,25 +1,22 @@
-# Use the official Python image as a base
 FROM python:3.12-slim
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies if needed
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-
-# Install Python dependencies
+# Copy only the requirements first to leverage Docker cache
+COPY mcp_servers/slack/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
-COPY . .
+COPY mcp_servers/slack/server.py .
+COPY mcp_servers/slack/bot_tools/ ./bot_tools/
+COPY mcp_servers/slack/user_tools/ ./user_tools/
 
-# Expose the port the app runs on
+# Expose the port the server runs on
 EXPOSE 5000
 
-# Run the server
-CMD ["python", "server.py", "--port", "5000"]
+# Command to run the server
+CMD ["python", "server.py"] 

@@ -12,8 +12,23 @@ async def list_channels(
     cursor: Optional[str] = None,
     types: Optional[str] = None
 ) -> Dict[str, Any]:
-    """List channels in the workspace with pagination."""
-    logger.info("Executing tool: slack_list_channels")
+    """List all channels the authenticated user has access to.
+    
+    This uses the user token to list channels, which means it can access:
+    - Public channels in the workspace
+    - Private channels the user is a member of
+    - Direct messages (DMs)
+    - Multi-party direct messages (group DMs)
+    
+    Args:
+        limit: Maximum number of channels to return (default 100, max 200)
+        cursor: Pagination cursor for next page of results
+        types: Channel types to include (public_channel, private_channel, mpim, im)
+    
+    Returns:
+        Dictionary containing the list of channels and pagination metadata
+    """
+    logger.info("Executing tool: slack_user_list_channels")
     
     params = {
         "exclude_archived": "true",
@@ -35,5 +50,5 @@ async def list_channels(
     try:
         return await make_slack_user_request("GET", "conversations.list", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool slack_list_channels: {e}")
+        logger.exception(f"Error executing tool slack_user_list_channels: {e}")
         raise e

@@ -115,8 +115,8 @@ def main(
         return [
             # Channels
             types.Tool(
-                name="slack_list_channels",
-                description="List channels in the workspace with pagination",
+                name="slack_user_list_channels",
+                description="List all channels the authenticated user has access to. This includes public channels, private channels the user is a member of, direct messages, and multi-party direct messages.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -491,7 +491,7 @@ def main(
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
         # Channels
-        if name == "slack_list_channels":
+        if name == "slack_user_list_channels":
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
             types_param = arguments.get("types")
