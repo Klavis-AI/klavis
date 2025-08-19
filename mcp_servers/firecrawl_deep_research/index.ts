@@ -307,7 +307,7 @@ function extractApiKey(req: Request): string {
     
     if (!authData && req.headers['x-auth-data']) {
         try {
-            authData = req.headers['x-auth-data'] as string;
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
         } catch (error) {
             console.error('Error parsing x-auth-data JSON:', error);
         }

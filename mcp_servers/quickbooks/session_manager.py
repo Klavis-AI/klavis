@@ -7,6 +7,7 @@ import json
 import logging
 from typing import Dict, Any, Optional, Tuple
 import os
+import base64
 
 from tools.http_client import QuickBooksHTTPClient
 from tools.accounts import AccountManager
@@ -104,7 +105,7 @@ class SessionManager:
                 return "", "", ""
             
             # Extract auth data from x-auth-data header
-            auth_data = headers.get(b'x-auth-data')
+            auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
 
         if not auth_data:
             return "", "", ""
