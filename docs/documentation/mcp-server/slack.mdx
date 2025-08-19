@@ -197,15 +197,19 @@ public class SlackOAuth {
 <Accordion title="Tools Information">
 | Tool Name              | Description                                                                 |
 |------------------------|-----------------------------------------------------------------------------|
-| slack_list_channels    | List channels in the workspace with pagination                       |
-| slack_post_message     | Post a new message to a Slack channel                                       |
-| slack_reply_to_thread  | Reply to a specific message thread in Slack                                 |
-| slack_add_reaction     | Add a reaction emoji to a message                                           |
+| **User Tools (using user token)** |                                                              |
+| slack_user_list_channels | List all channels the authenticated user has access to (public, private, DMs, multi-party DMs) |
 | slack_get_channel_history | Get recent messages from a channel                                       |
-| slack_get_thread_replies | Get all replies in a message thread                                       |
-| slack_get_users        | Get a list of all users in the workspace with their basic profile information |
-| slack_get_user_profile | Get detailed profile information for a specific user                        |
-| slack_search_messages  | Search for messages in channels or across the workspace                     |
+| slack_list_users       | Lists all users in a Slack team                                           |
+| slack_user_get_info    | Gets information about a specific user                                     |
+| slack_user_search_messages | Searches for messages matching a query with user permissions            |
+| slack_user_post_message | Post a new message to a Slack channel as a user                          |
+| slack_user_reply_to_thread | Reply to a specific message thread in Slack as a user                |
+| slack_user_add_reaction | Add a reaction emoji to a message as a user                              |
+| **Bot Tools (using bot token)** |                                                                |
+| slack_bot_post_message | Post a new message to a Slack channel as a bot                            |
+| slack_bot_reply_to_thread | Reply to a specific message thread in Slack as a bot                   |
+| slack_bot_add_reaction | Add a reaction emoji to a message as a bot                                |
 </Accordion>
 
 <Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
