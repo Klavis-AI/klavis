@@ -54,7 +54,7 @@ This directory provides OAuth authentication support for MCP servers that requir
 2. **Check OAuth Requirements** - Query `server_name.json`
 3. **Extract Container Commands** - Use `podman inspect` to get original entry point
 4. **Build OAuth Image** - If OAuth needed, build wrapper version
-5. **Push Images** - Push `*-mcp-server-oauth` image
+5. **Push Images** - Push `*-mcp-server:*-oauth` image
 
 #### Conditional Building:
 - Only servers listed in `server_name.json` get OAuth versions built
@@ -70,7 +70,7 @@ This directory provides OAuth authentication support for MCP servers that requir
 ```bash
 # Run OAuth version of GitHub MCP server
 docker run -it -e KLAVIS_API_KEY=your_key_here \
-  ghcr.io/org/github-mcp-server-oauth:latest
+  ghcr.io/klavis-ai/github-mcp-server:latest-oauth
 ```
 
 Users will see the authentication URL, and after completing authentication, the MCP server will start automatically with GitHub API access.

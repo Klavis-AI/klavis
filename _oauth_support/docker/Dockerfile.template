@@ -18,8 +18,8 @@ RUN if command -v apt-get >/dev/null 2>&1; then \
     fi
 
 # Copy OAuth support scripts and server name mapping
-COPY ../oauth_acquire.sh /klavis_oauth/oauth_acquire.sh
-COPY ./entrypoint_wrapper.sh /klavis_oauth/entrypoint_wrapper.sh
+COPY ./oauth_acquire.sh /klavis_oauth/oauth_acquire.sh
+COPY ./docker/entrypoint_wrapper.sh /klavis_oauth/entrypoint_wrapper.sh
 
 # Make scripts executable
 RUN chmod +x /klavis_oauth/oauth_acquire.sh && \
