@@ -14,8 +14,9 @@ MIXPANEL_EXPORT_ENDPOINT = "https://data.mixpanel.com/api/2.0/export"  # Raw Dat
 MIXPANEL_QUERY_ENDPOINT = "https://mixpanel.com/api"  # Query API
 MIXPANEL_APP_ENDPOINT = "https://mixpanel.com/api/app"  # App Management APIs (projects, GDPR, etc.)
 
-# Context variable to store the auth token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
+# Context variables to store the credentials for each request
+username_context: ContextVar[str] = ContextVar('serviceaccount_username')
+secret_context: ContextVar[str] = ContextVar('serviceaccount_secret')
 
 def get_service_account_credentials() -> Tuple[str, str]:
     """Get the service account credentials from context or environment.
@@ -23,13 +24,12 @@ def get_service_account_credentials() -> Tuple[str, str]:
     Returns:
         Tuple of (service_account_username, service_account_secret)
     """
-    # First try to get from context
+    # First try to get from context variables
     try:
-        auth_token = auth_token_context.get()
-        if auth_token:
-            parts = auth_token.split(':', 1)
-            if len(parts) == 2:
-                return parts[0], parts[1]
+        username = username_context.get()
+        secret = secret_context.get()
+        if username and secret:
+            return username, secret
     except LookupError:
         pass
     
@@ -39,8 +39,9 @@ def get_service_account_credentials() -> Tuple[str, str]:
     
     if not username or not secret:
         raise RuntimeError(
-            "Service account credentials not found. Please provide them via x-auth-token header "
-            "(format: 'username:secret') or set MIXPANEL_SERVICE_ACCOUNT_USERNAME and "
+            "Service account credentials not found. Please provide them via x-auth-data header "
+            "with 'serviceaccount_username' and 'serviceaccount_secret' fields, "
+            "or set MIXPANEL_SERVICE_ACCOUNT_USERNAME and "
             "MIXPANEL_SERVICE_ACCOUNT_SECRET environment variables."
         )
     
