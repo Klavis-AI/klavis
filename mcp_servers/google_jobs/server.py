@@ -32,7 +32,6 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("google-jobs-mcp-server")
 
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY") or ""  # for local use
 GOOGLE_JOBS_MCP_SERVER_PORT = int(os.getenv("GOOGLE_JOBS_MCP_SERVER_PORT", "5000"))
 
 def extract_api_key(request_or_scope) -> str:
@@ -419,9 +418,9 @@ def main(
         """Handle SSE connections."""
         logger.info("Handling SSE connection")
         
-        serpapi_key = request.headers.get('x-serpapi-key', SERPAPI_API_KEY)
+        auth_token = extract_api_key(request)
         
-        token = serpapi_token_context.set(serpapi_key or "")
+        token = serpapi_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -467,12 +466,7 @@ def main(
             })
             return
         
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
-        else:
-            auth_token = SERPAPI_API_KEY
+        auth_token = extract_api_key(scope)
         
         token = serpapi_token_context.set(auth_token or "")
         try:

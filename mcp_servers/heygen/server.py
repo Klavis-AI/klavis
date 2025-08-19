@@ -529,10 +529,7 @@ def main(
     async def handle_sse(request):
         async def sse_handler(scope: Scope, receive: Receive, send: Send) -> None:
             # Extract auth token from headers (allow None - will be handled at tool level)
-            headers = dict(scope.get("headers", []))
-            auth_token = headers.get(b'x-api-key')
-            if auth_token:
-                auth_token = auth_token.decode('utf-8')
+            auth_token = extract_api_key(request)
             
             # Set the auth token in context for this request (can be None/empty)
             token = auth_token_context.set(auth_token or "")
@@ -551,10 +548,7 @@ def main(
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-api-key')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        auth_token = extract_api_key(scope)
         
         # Set the auth token in context for this request (can be None/empty)
         token = auth_token_context.set(auth_token or "")
