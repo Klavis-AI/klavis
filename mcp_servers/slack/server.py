@@ -19,25 +19,27 @@ from dotenv import load_dotenv
 
 # Import bot tools
 from bot_tools import (
-    bot_token_context,
-    post_message as bot_post_message, 
-    reply_to_thread as bot_reply_to_thread, 
-    add_reaction as bot_add_reaction, 
-    get_thread_replies as bot_get_thread_replies,
-    get_users as bot_get_users, 
-    get_user_profile as bot_get_user_profile,
-    search_messages as bot_search_messages
+    bot_token_context
+)
+from bot_tools.bot_messages import (
+    bot_post_message, 
+    bot_reply_to_thread, 
+    bot_add_reaction
 )
 
 # Import user tools
 from user_tools import (
     user_token_context,
     list_channels as user_list_channels,
-    get_channel_history as user_get_channel_history,
-    set_user_status, get_user_profile as user_get_profile, set_user_presence,
-    search_user_messages, search_user_files,
-    open_direct_message, post_direct_message, post_ephemeral_message
+    get_channel_history as user_get_channel_history
 )
+from user_tools.user_messages import (
+    user_post_message,
+    user_reply_to_thread,
+    user_add_reaction
+)
+from user_tools.search import user_search_messages
+from user_tools.users import list_users, user_get_info
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -113,7 +115,9 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
-            # Channels
+            # ============= USER TOOLS (using user token) =============
+
+            # User Channels
             types.Tool(
                 name="slack_user_list_channels",
                 description="List all channels the authenticated user has access to. This includes public channels, private channels the user is a member of, direct messages, and multi-party direct messages.",
@@ -156,124 +160,57 @@ def main(
                     "required": ["channel_id"],
                 },
             ),
-            # Messages
+            
+            # User Info
             types.Tool(
-                name="slack_post_message",
-                description="Post a new message to a Slack channel",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "channel_id": {
-                            "type": "string",
-                            "description": "The ID of the channel to post to",
-                        },
-                        "text": {
-                            "type": "string",
-                            "description": "The message text to post",
-                        },
-                    },
-                    "required": ["channel_id", "text"],
-                },
-            ),
-            types.Tool(
-                name="slack_reply_to_thread",
-                description="Reply to a specific message thread in Slack",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "channel_id": {
-                            "type": "string",
-                            "description": "The ID of the channel containing the thread",
-                        },
-                        "thread_ts": {
-                            "type": "string",
-                            "description": "The timestamp of the parent message in the format '1234567890.123456'. Timestamps in the format without the period can be converted by adding the period such that 6 numbers come after it.",
-                        },
-                        "text": {
-                            "type": "string",
-                            "description": "The reply text",
-                        },
-                    },
-                    "required": ["channel_id", "thread_ts", "text"],
-                },
-            ),
-            types.Tool(
-                name="slack_add_reaction",
-                description="Add a reaction emoji to a message",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "channel_id": {
-                            "type": "string",
-                            "description": "The ID of the channel containing the message",
-                        },
-                        "timestamp": {
-                            "type": "string",
-                            "description": "The timestamp of the message to react to",
-                        },
-                        "reaction": {
-                            "type": "string",
-                            "description": "The name of the emoji reaction (without ::)",
-                        },
-                    },
-                    "required": ["channel_id", "timestamp", "reaction"],
-                },
-            ),
-            types.Tool(
-                name="slack_get_thread_replies",
-                description="Get all replies in a message thread",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "channel_id": {
-                            "type": "string",
-                            "description": "The ID of the channel containing the thread",
-                        },
-                        "thread_ts": {
-                            "type": "string",
-                            "description": "The timestamp of the parent message in the format '1234567890.123456'. Timestamps in the format without the period can be converted by adding the period such that 6 numbers come after it.",
-                        },
-                    },
-                    "required": ["channel_id", "thread_ts"],
-                },
-            ),
-            # Users
-            types.Tool(
-                name="slack_get_users",
-                description="Get a list of all users in the workspace with their basic profile information",
+                name="list_users",
+                description="Lists all users in a Slack team using user token",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "cursor": {
                             "type": "string",
-                            "description": "Pagination cursor for next page of results",
+                            "description": "Pagination cursor for getting more results",
                         },
                         "limit": {
-                            "type": "number",
+                            "type": "integer",
                             "description": "Maximum number of users to return (default 100, max 200)",
-                            "default": 100,
+                        },
+                        "team_id": {
+                            "type": "string",
+                            "description": "Team ID to list users from (for Enterprise Grid)",
+                        },
+                        "include_locale": {
+                            "type": "boolean",
+                            "description": "Whether to include locale information for each user",
                         },
                     },
+                    "required": [],
                 },
             ),
             types.Tool(
-                name="slack_get_user_profile",
-                description="Get detailed profile information for a specific user",
+                name="user_get_info",
+                description="Gets information about a user",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "user_id": {
                             "type": "string",
-                            "description": "The ID of the user",
+                            "description": "The ID of the user to get information for (e.g., 'U1234567890')",
+                        },
+                        "include_locale": {
+                            "type": "boolean",
+                            "description": "Whether to include locale information for the user",
                         },
                     },
                     "required": ["user_id"],
                 },
             ),
-            # Search
+            
+            # User Search
             types.Tool(
-                name="slack_search_messages",
-                description="Search for messages in the workspace based on a query",
+                name="user_search_messages",
+                description="Searches for messages matching a query.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -319,168 +256,133 @@ def main(
                 },
             ),
             
-            # ============= USER TOOLS (using user token) =============
-            
-            # User Profile Management
+            # User Messages
             types.Tool(
-                name="slack_user_set_status",
-                description="Set the authenticated user's custom status (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "status_text": {
-                            "type": "string",
-                            "description": "The status text to display",
-                        },
-                        "status_emoji": {
-                            "type": "string",
-                            "description": "The emoji to display (e.g., ':coffee:', ':calendar:')",
-                        },
-                        "status_expiration": {
-                            "type": "number",
-                            "description": "Unix timestamp when the status should expire",
-                        },
-                    },
-                    "required": ["status_text"],
-                },
-            ),
-            types.Tool(
-                name="slack_user_get_profile",
-                description="Get the authenticated user's profile information (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                },
-            ),
-            types.Tool(
-                name="slack_user_set_presence",
-                description="Set the user's presence status to auto or away (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "presence": {
-                            "type": "string",
-                            "enum": ["auto", "away"],
-                            "description": "The presence status to set",
-                        },
-                    },
-                    "required": ["presence"],
-                },
-            ),
-            
-            # User Search (with access to private content)
-            types.Tool(
-                name="slack_user_search_messages",
-                description="Search messages with user permissions (includes private channels and DMs)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The search query string",
-                        },
-                        "sort": {
-                            "type": "string",
-                            "enum": ["score", "timestamp"],
-                            "description": "Sort results by relevance (score) or date (timestamp)",
-                            "default": "score",
-                        },
-                        "sort_dir": {
-                            "type": "string",
-                            "enum": ["asc", "desc"],
-                            "description": "Sort direction",
-                            "default": "desc",
-                        },
-                        "count": {
-                            "type": "number",
-                            "description": "Number of results to return (default 20, max 100)",
-                            "default": 20,
-                        },
-                        "cursor": {
-                            "type": "string",
-                            "description": "Pagination cursor for next page of results",
-                        },
-                    },
-                    "required": ["query"],
-                },
-            ),
-            types.Tool(
-                name="slack_user_search_files",
-                description="Search files with user permissions (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The search query string",
-                        },
-                        "count": {
-                            "type": "number",
-                            "description": "Number of results to return (default 20, max 100)",
-                            "default": 20,
-                        },
-                        "cursor": {
-                            "type": "string",
-                            "description": "Pagination cursor for next page of results",
-                        },
-                    },
-                    "required": ["query"],
-                },
-            ),
-            
-            # Direct Messages
-            types.Tool(
-                name="slack_user_open_dm",
-                description="Open a direct message channel with one or more users (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "users": {
-                            "type": "string",
-                            "description": "Comma-separated list of user IDs to open a DM with",
-                        },
-                    },
-                    "required": ["users"],
-                },
-            ),
-            types.Tool(
-                name="slack_user_post_dm",
-                description="Send a direct message to a user (requires user token)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "The user ID to send a DM to",
-                        },
-                        "text": {
-                            "type": "string",
-                            "description": "The message text to send",
-                        },
-                    },
-                    "required": ["user_id", "text"],
-                },
-            ),
-            types.Tool(
-                name="slack_user_post_ephemeral",
-                description="Post an ephemeral message visible only to a specific user (requires user token)",
+                name="user_post_message",
+                description="Post a new message to a Slack channel as a user.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "channel_id": {
                             "type": "string",
-                            "description": "The channel ID where the ephemeral message will appear",
-                        },
-                        "user_id": {
-                            "type": "string",
-                            "description": "The user ID who will see the ephemeral message",
+                            "description": "The ID of the Slack channel (e.g., 'C1234567890')",
                         },
                         "text": {
                             "type": "string",
-                            "description": "The message text",
+                            "description": "The message text to post",
                         },
                     },
-                    "required": ["channel_id", "user_id", "text"],
+                    "required": ["channel_id", "text"],
+                },
+            ),
+            types.Tool(
+                name="user_reply_to_thread",
+                description="Reply to a specific message thread in Slack as a user.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the Slack channel (e.g., 'C1234567890')",
+                        },
+                        "thread_ts": {
+                            "type": "string",
+                            "description": "The timestamp of the parent message to reply to",
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "The message text to post as a reply",
+                        },
+                    },
+                    "required": ["channel_id", "thread_ts", "text"],
+                },
+            ),
+            types.Tool(
+                name="user_add_reaction",
+                description="Add a reaction emoji to a message as a user.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the Slack channel (e.g., 'C1234567890')",
+                        },
+                        "timestamp": {
+                            "type": "string",
+                            "description": "The timestamp of the message to react to",
+                        },
+                        "reaction": {
+                            "type": "string",
+                            "description": "The name of the emoji reaction (without colons, e.g., 'thumbsup', 'heart')",
+                        },
+                    },
+                    "required": ["channel_id", "timestamp", "reaction"],
+                },
+            ),
+            
+            # ============= BOT TOOLS (using bot token) =============
+            
+            # Bot Messages
+            types.Tool(
+                name="bot_post_message",
+                description="Post a new message to a Slack channel as a bot.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the channel to post to",
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "The message text to post",
+                        },
+                    },
+                    "required": ["channel_id", "text"],
+                },
+            ),
+            types.Tool(
+                name="bot_reply_to_thread",
+                description="Reply to a specific message thread in Slack as a bot.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the channel containing the thread",
+                        },
+                        "thread_ts": {
+                            "type": "string",
+                            "description": "The timestamp of the parent message in the format '1234567890.123456'. Timestamps in the format without the period can be converted by adding the period such that 6 numbers come after it.",
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "The reply text",
+                        },
+                    },
+                    "required": ["channel_id", "thread_ts", "text"],
+                },
+            ),
+            types.Tool(
+                name="bot_add_reaction",
+                description="Add a reaction emoji to a message as a bot.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the channel containing the message",
+                        },
+                        "timestamp": {
+                            "type": "string",
+                            "description": "The timestamp of the message to react to",
+                        },
+                        "reaction": {
+                            "type": "string",
+                            "description": "The name of the emoji reaction (without ::)",
+                        },
+                    },
+                    "required": ["channel_id", "timestamp", "reaction"],
                 },
             ),
         ]
@@ -490,7 +392,9 @@ def main(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
-        # Channels
+        # ============= USER TOOLS (using user token) =============
+        
+        # User Channels
         if name == "slack_user_list_channels":
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
@@ -542,8 +446,185 @@ def main(
                     )
                 ]
         
-        # Messages
-        elif name == "slack_post_message":
+        # User Info
+        elif name == "list_users":
+            cursor = arguments.get("cursor")
+            limit = arguments.get("limit")
+            team_id = arguments.get("team_id")
+            include_locale = arguments.get("include_locale")
+            
+            try:
+                result = await list_users(cursor, limit, team_id, include_locale)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "user_get_info":
+            user_id = arguments.get("user_id")
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: user_id parameter is required",
+                    )
+                ]
+            
+            include_locale = arguments.get("include_locale")
+            
+            try:
+                result = await user_get_info(user_id, include_locale)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # User Search
+        elif name == "user_search_messages":
+            query = arguments.get("query")
+            if not query:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: query parameter is required",
+                    )
+                ]
+            
+            channel_ids = arguments.get("channel_ids")
+            sort = arguments.get("sort")
+            sort_dir = arguments.get("sort_dir")
+            count = arguments.get("count")
+            cursor = arguments.get("cursor")
+            highlight = arguments.get("highlight")
+            
+            try:
+                result = await user_search_messages(query, channel_ids, sort, sort_dir, count, cursor, highlight)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # User Messages
+        elif name == "user_post_message":
+            channel_id = arguments.get("channel_id")
+            text = arguments.get("text")
+            if not channel_id or not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: channel_id and text parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await user_post_message(channel_id, text)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "user_reply_to_thread":
+            channel_id = arguments.get("channel_id")
+            thread_ts = arguments.get("thread_ts")
+            text = arguments.get("text")
+            if not channel_id or not thread_ts or not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: channel_id, thread_ts, and text parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await user_reply_to_thread(channel_id, thread_ts, text)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "user_add_reaction":
+            channel_id = arguments.get("channel_id")
+            timestamp = arguments.get("timestamp")
+            reaction = arguments.get("reaction")
+            if not channel_id or not timestamp or not reaction:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: channel_id, timestamp, and reaction parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await user_add_reaction(channel_id, timestamp, reaction)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # ============= BOT TOOLS (using bot token) =============
+        
+        # Bot Messages
+        elif name == "bot_post_message":
             channel_id = arguments.get("channel_id")
             text = arguments.get("text")
             if not channel_id or not text:
@@ -571,7 +652,7 @@ def main(
                     )
                 ]
         
-        elif name == "slack_reply_to_thread":
+        elif name == "bot_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
             text = arguments.get("text")
@@ -600,7 +681,7 @@ def main(
                     )
                 ]
         
-        elif name == "slack_add_reaction":
+        elif name == "bot_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
             reaction = arguments.get("reaction")
@@ -614,344 +695,6 @@ def main(
             
             try:
                 result = await bot_add_reaction(channel_id, timestamp, reaction)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_get_thread_replies":
-            channel_id = arguments.get("channel_id")
-            thread_ts = arguments.get("thread_ts")
-            if not channel_id or not thread_ts:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: channel_id and thread_ts parameters are required",
-                    )
-                ]
-            
-            try:
-                result = await bot_get_thread_replies(channel_id, thread_ts)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Users
-        elif name == "slack_get_users":
-            cursor = arguments.get("cursor")
-            limit = arguments.get("limit")
-            
-            try:
-                result = await bot_get_users(cursor, limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_get_user_profile":
-            user_id = arguments.get("user_id")
-            if not user_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: user_id parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await bot_get_user_profile(user_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Search
-        elif name == "slack_search_messages":
-            query = arguments.get("query")
-            if not query:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: query parameter is required",
-                    )
-                ]
-            
-            channel_ids = arguments.get("channel_ids")
-            sort = arguments.get("sort")
-            sort_dir = arguments.get("sort_dir")
-            count = arguments.get("count")
-            cursor = arguments.get("cursor")
-            highlight = arguments.get("highlight")
-            
-            try:
-                result = await bot_search_messages(query, channel_ids, sort, sort_dir, count, cursor, highlight)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # ============= USER TOOLS =============
-        
-        # User Profile Management
-        elif name == "slack_user_set_status":
-            status_text = arguments.get("status_text")
-            if not status_text:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: status_text parameter is required",
-                    )
-                ]
-            
-            status_emoji = arguments.get("status_emoji")
-            status_expiration = arguments.get("status_expiration")
-            
-            try:
-                result = await set_user_status(status_text, status_emoji, status_expiration)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_user_get_profile":
-            try:
-                result = await user_get_profile()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_user_set_presence":
-            presence = arguments.get("presence")
-            if not presence:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: presence parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await set_user_presence(presence)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # User Search
-        elif name == "slack_user_search_messages":
-            query = arguments.get("query")
-            if not query:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: query parameter is required",
-                    )
-                ]
-            
-            sort = arguments.get("sort")
-            sort_dir = arguments.get("sort_dir")
-            count = arguments.get("count")
-            cursor = arguments.get("cursor")
-            
-            try:
-                result = await search_user_messages(query, sort, sort_dir, count, cursor)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_user_search_files":
-            query = arguments.get("query")
-            if not query:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: query parameter is required",
-                    )
-                ]
-            
-            count = arguments.get("count")
-            cursor = arguments.get("cursor")
-            
-            try:
-                result = await search_user_files(query, count, cursor)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Direct Messages
-        elif name == "slack_user_open_dm":
-            users = arguments.get("users")
-            if not users:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: users parameter is required",
-                    )
-                ]
-            
-            try:
-                result = await open_direct_message(users)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_user_post_dm":
-            user_id = arguments.get("user_id")
-            text = arguments.get("text")
-            if not user_id or not text:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: user_id and text parameters are required",
-                    )
-                ]
-            
-            try:
-                result = await post_direct_message(user_id, text)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "slack_user_post_ephemeral":
-            channel_id = arguments.get("channel_id")
-            user_id = arguments.get("user_id")
-            text = arguments.get("text")
-            if not channel_id or not user_id or not text:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: channel_id, user_id, and text parameters are required",
-                    )
-                ]
-            
-            try:
-                result = await post_ephemeral_message(channel_id, user_id, text)
                 return [
                     types.TextContent(
                         type="text",

@@ -1,11 +1,13 @@
 import logging
 from typing import Any, Dict, Optional, List
-from .base import make_slack_bot_request
+from .base import make_slack_user_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def search_messages(
+# user_search_messages searches for messages in the workspace using user token (includes private channels and DMs)
+# User tokens: search:read
+async def user_search_messages(
     query: str,
     channel_ids: Optional[List[str]] = None,
     sort: Optional[str] = None,
@@ -14,8 +16,8 @@ async def search_messages(
     cursor: Optional[str] = None,
     highlight: Optional[bool] = None
 ) -> Dict[str, Any]:
-    """Search for messages in the workspace based on a query."""
-    logger.info(f"Executing tool: slack_search_messages with query: {query}")
+    """Search for messages in the workspace using user token (includes private channels and DMs)."""
+    logger.info(f"Executing tool: user_search_messages with query: {query}")
     
     # Construct the query with channel filters if provided
     search_query = query
@@ -52,7 +54,7 @@ async def search_messages(
         params["cursor"] = cursor
     
     try:
-        return await make_slack_bot_request("GET", "search.messages", params=params)
+        return await make_slack_user_request("GET", "search.messages", params=params)
     except Exception as e:
-        logger.exception(f"Error executing tool slack_search_messages: {e}")
+        logger.exception(f"Error executing tool user_search_messages: {e}")
         raise e
