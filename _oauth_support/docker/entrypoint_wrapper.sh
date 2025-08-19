@@ -41,8 +41,14 @@ if ! source ./oauth_acquire.sh "$SERVER_NAME"; then
     echo "OAuth token acquisition failed"
     exit $oauth_exit_code
 fi
+
 cd - > /dev/null && echo "Back to work folder: $(pwd)"
 
+# Add AUTH_DATA to .env if it exists
+if [[ -n "$AUTH_DATA" ]]; then
+    echo "AUTH_DATA=$AUTH_DATA" >> .env
+    echo "Added AUTH_DATA to .env file"
+fi
 echo "Executing command: ${EXEC_COMMAND[*]}"
 echo "========================================="
 
