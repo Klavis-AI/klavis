@@ -22,9 +22,13 @@
     "jira": "Jira",
     "linear": "Linear",
     "linkedin": "LinkedIn",
+    "monday": "Monday",
+    "moneybird": "Moneybird",
     "notion": "Notion",
+    "onedrive": "Onedrive",
     "quickbooks": "QuickBooks",
     "salesforce": "Salesforce",
+    "shopify": "Shopify",
     "slack": "Slack",
     "supabase": "Supabase",
     "wordpress": "WordPress"
