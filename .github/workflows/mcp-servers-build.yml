@@ -176,6 +176,12 @@ jobs:
           # Set outputs for next step
           echo "final-command=$FINAL_COMMAND" >> $GITHUB_OUTPUT
 
+      - name: Prepare OAuth Dockerfile
+        if: steps.get-command.outputs.oauth-server-name != ''
+        run: |
+          sed -i 's|\${MCP_SERVER_NAME}|${{ steps.get-command.outputs.oauth-server-name }}|g' _oauth_support/docker/Dockerfile.template
+          sed -i 's|\${ENTRYPOINT_COMMAND}|${{ steps.get-command.outputs.final-command }}|g' _oauth_support/docker/Dockerfile.template
+
       - name: Build OAuth wrapper image
         id: build
         if: steps.get-command.outputs.oauth-server-name != ''
@@ -191,8 +197,6 @@ jobs:
           archs: ${{ env.BUILD_ARCHS }}
           build-args: |
             BASE_IMAGE=${{ steps.get-image-url.outputs.BASE_IMAGE }}:${{ github.sha }}
-            MCP_SERVER_NAME=${{ steps.get-command.outputs.oauth-server-name }}
-            ENTRYPOINT_COMMAND=${{ steps.get-command.outputs.final-command }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 

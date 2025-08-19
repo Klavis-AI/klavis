@@ -25,9 +25,6 @@ COPY ./docker/entrypoint_wrapper.sh /klavis_oauth/entrypoint_wrapper.sh
 RUN chmod +x /klavis_oauth/oauth_acquire.sh && \
     chmod +x /klavis_oauth/entrypoint_wrapper.sh
 
-ARG MCP_SERVER_NAME
-ARG ENTRYPOINT_COMMAND
-
 # Set our wrapper as the new entrypoint
 ENTRYPOINT ["/klavis_oauth/entrypoint_wrapper.sh", "--server-name", "${MCP_SERVER_NAME}", "--exec"]
 CMD ${ENTRYPOINT_COMMAND}
