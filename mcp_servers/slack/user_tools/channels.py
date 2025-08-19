@@ -52,3 +52,27 @@ async def list_channels(
     except Exception as e:
         logger.exception(f"Error executing tool slack_user_list_channels: {e}")
         raise e
+
+# get_channel_history returns the most recent messages from a channel
+# User tokens: channels:history, groups:history, im:history, mpim:history
+async def get_channel_history(
+    channel_id: str,
+    limit: Optional[int] = None
+) -> Dict[str, Any]:
+    """Get recent messages from a channel."""
+    logger.info(f"Executing tool: slack_get_channel_history for channel {channel_id}")
+    
+    params = {
+        "channel": channel_id,
+    }
+    
+    if limit:
+        params["limit"] = str(limit)
+    else:
+        params["limit"] = "10"
+    
+    try:
+        return await make_slack_user_request("GET", "conversations.history", params=params)
+    except Exception as e:
+        logger.exception(f"Error executing tool slack_get_channel_history: {e}")
+        raise e

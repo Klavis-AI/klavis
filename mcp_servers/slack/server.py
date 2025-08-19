@@ -20,7 +20,6 @@ from dotenv import load_dotenv
 # Import bot tools
 from bot_tools import (
     bot_token_context,
-    get_channel_history as bot_get_channel_history,
     post_message as bot_post_message, 
     reply_to_thread as bot_reply_to_thread, 
     add_reaction as bot_add_reaction, 
@@ -34,6 +33,7 @@ from bot_tools import (
 from user_tools import (
     user_token_context,
     list_channels as user_list_channels,
+    get_channel_history as user_get_channel_history,
     set_user_status, get_user_profile as user_get_profile, set_user_presence,
     search_user_messages, search_user_files,
     open_direct_message, post_direct_message, post_ephemeral_message
@@ -526,7 +526,7 @@ def main(
             limit = arguments.get("limit")
             
             try:
-                result = await bot_get_channel_history(channel_id, limit)
+                result = await user_get_channel_history(channel_id, limit)
                 return [
                     types.TextContent(
                         type="text",
