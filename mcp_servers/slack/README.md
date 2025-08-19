@@ -4,42 +4,32 @@ A Model Context Protocol (MCP) server implementation for Slack integration using
 
 ## Features
 
-### Bot Tools (Using Bot Token)
-These tools use the bot token for general workspace operations:
-
-#### Channel Management
-- **List Channels**: Browse workspace channels with pagination support
-- **Get Channel History**: Retrieve recent messages from channels
-
-#### Messaging
-- **Post Message**: Send new messages to channels
-- **Reply to Thread**: Respond to existing message threads
-- **Add Reaction**: React to messages with emojis
-- **Get Thread Replies**: Fetch all replies in a thread
-
-#### User Management
-- **List Users**: Get workspace users with profile information
-- **Get User Profile**: Retrieve detailed profile for specific users
-
-#### Search
-- **Search Messages**: Search across public workspace messages
-
 ### User Tools (Using User Token)
 These tools use the user token for user-specific operations:
 
-#### User Profile Management
-- **Set Status**: Update the authenticated user's custom status
-- **Get Profile**: Get the authenticated user's profile
-- **Set Presence**: Set user presence to auto or away
+#### Channel Management
+- **List Channels**: List all channels the authenticated user has access to (public, private, DMs, multi-party DMs)
+- **Get Channel History**: Retrieve recent messages from channels
 
-#### User Search
-- **Search Messages**: Search messages with user permissions (includes private channels and DMs)
-- **Search Files**: Search files accessible to the user
+#### Messaging
+- **Post Message**: Send new messages to channels as a user
+- **Reply to Thread**: Respond to existing message threads as a user
+- **Add Reaction**: React to messages with emojis as a user
 
-#### Direct Messages
-- **Open DM**: Open a direct message channel with users
-- **Send DM**: Send direct messages to users
-- **Post Ephemeral**: Post ephemeral messages visible only to specific users
+#### User Management
+- **List Users**: Get workspace users with profile information
+- **Get User Info**: Retrieve detailed information for specific users
+
+#### Search
+- **Search Messages**: Search messages with user permissions across all accessible channels
+
+### Bot Tools (Using Bot Token)
+These tools use the bot token for bot-specific operations:
+
+#### Messaging
+- **Post Message**: Send new messages to channels as a bot
+- **Reply to Thread**: Respond to existing message threads as a bot
+- **Add Reaction**: React to messages with emojis as a bot
 
 ## Installation
 
@@ -60,11 +50,13 @@ docker run -p 5000:5000 slack-mcp-server
 
 ### Environment Variables
 
-Copy the `.env.example` file to `.env` and update with your values:
+Create a `.env` file in the slack directory with your Slack credentials:
 
 ```bash
-cp .env.example .env
-# Edit .env with your Slack credentials
+# .env
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_USER_TOKEN=xoxp-your-user-token
+SLACK_MCP_SERVER_PORT=5000  # Optional, defaults to 5000
 ```
 
 - `SLACK_BOT_TOKEN`: Your Slack bot token (xoxb-...) for bot operations
@@ -118,10 +110,10 @@ The server provides two transport endpoints:
 
 ## Tools Reference
 
-### Bot Tools (Require Bot Token)
+### User Tools (Require User Token)
 
-### slack_list_channels
-List channels in the workspace with pagination support.
+### slack_user_list_channels
+List all channels the authenticated user has access to.
 
 **Parameters:**
 - `limit` (optional): Maximum channels to return (default: 100, max: 200)
@@ -135,54 +127,27 @@ Get recent messages from a channel.
 - `channel_id` (required): The channel ID
 - `limit` (optional): Number of messages to retrieve (default: 10)
 
-### slack_post_message
-Post a new message to a channel.
+### list_users
+Lists all users in a Slack team.
 
 **Parameters:**
-- `channel_id` (required): The channel ID
-- `text` (required): Message text to post
+- `cursor` (optional): Pagination cursor for getting more results
+- `limit` (optional): Maximum number of users to return (default: 100, max: 200)
+- `team_id` (optional): Team ID to list users from (for Enterprise Grid)
+- `include_locale` (optional): Whether to include locale information for each user
 
-### slack_reply_to_thread
-Reply to a message thread.
-
-**Parameters:**
-- `channel_id` (required): The channel ID
-- `thread_ts` (required): Parent message timestamp
-- `text` (required): Reply text
-
-### slack_add_reaction
-Add an emoji reaction to a message.
+### user_get_info
+Gets information about a specific user.
 
 **Parameters:**
-- `channel_id` (required): The channel ID
-- `timestamp` (required): Message timestamp
-- `reaction` (required): Emoji name (without colons)
+- `user_id` (required): The ID of the user to get information for
+- `include_locale` (optional): Whether to include locale information for the user
 
-### slack_get_thread_replies
-Get all replies in a thread.
-
-**Parameters:**
-- `channel_id` (required): The channel ID
-- `thread_ts` (required): Parent message timestamp
-
-### slack_get_users
-List workspace users.
+### user_search_messages
+Searches for messages matching a query with user permissions.
 
 **Parameters:**
-- `cursor` (optional): Pagination cursor
-- `limit` (optional): Maximum users to return (default: 100, max: 200)
-
-### slack_get_user_profile
-Get detailed user profile.
-
-**Parameters:**
-- `user_id` (required): The user ID
-
-### slack_search_messages
-Search workspace messages (public channels only with bot token).
-
-**Parameters:**
-- `query` (required): Search query (supports Slack search operators)
+- `query` (required): Search query (supports Slack search operators like 'in:#channel', 'from:@user', etc.)
 - `channel_ids` (optional): List of channel IDs to search within
 - `sort` (optional): Sort by 'score' or 'timestamp' (default: score)
 - `sort_dir` (optional): Sort direction 'asc' or 'desc' (default: desc)
@@ -190,65 +155,53 @@ Search workspace messages (public channels only with bot token).
 - `cursor` (optional): Pagination cursor
 - `highlight` (optional): Include match highlighting (default: true)
 
-### User Tools (Require User Token)
-
-### slack_user_set_status
-Set the authenticated user's custom status.
+### user_post_message
+Post a new message to a Slack channel as a user.
 
 **Parameters:**
-- `status_text` (required): The status text to display
-- `status_emoji` (optional): The emoji to display (e.g., ':coffee:')
-- `status_expiration` (optional): Unix timestamp when status expires
+- `channel_id` (required): The channel ID
+- `text` (required): Message text to post
 
-### slack_user_get_profile
-Get the authenticated user's profile information.
-
-**Parameters:** None
-
-### slack_user_set_presence
-Set the user's presence status.
+### user_reply_to_thread
+Reply to a message thread as a user.
 
 **Parameters:**
-- `presence` (required): Either 'auto' or 'away'
+- `channel_id` (required): The channel ID
+- `thread_ts` (required): Parent message timestamp
+- `text` (required): Reply text
 
-### slack_user_search_messages
-Search messages with user permissions (includes private channels and DMs).
-
-**Parameters:**
-- `query` (required): Search query string
-- `sort` (optional): Sort by 'score' or 'timestamp' (default: score)
-- `sort_dir` (optional): Sort direction 'asc' or 'desc' (default: desc)
-- `count` (optional): Results per page (default: 20, max: 100)
-- `cursor` (optional): Pagination cursor
-
-### slack_user_search_files
-Search files accessible to the user.
+### user_add_reaction
+Add an emoji reaction to a message as a user.
 
 **Parameters:**
-- `query` (required): Search query string
-- `count` (optional): Results per page (default: 20, max: 100)
-- `cursor` (optional): Pagination cursor
+- `channel_id` (required): The channel ID
+- `timestamp` (required): Message timestamp
+- `reaction` (required): Emoji name (without colons)
 
-### slack_user_open_dm
-Open a direct message channel with one or more users.
+### Bot Tools (Require Bot Token)
 
-**Parameters:**
-- `users` (required): Comma-separated list of user IDs
-
-### slack_user_post_dm
-Send a direct message to a user.
+### bot_post_message
+Post a new message to a Slack channel as a bot.
 
 **Parameters:**
-- `user_id` (required): The user ID to send a DM to
-- `text` (required): The message text
+- `channel_id` (required): The channel ID
+- `text` (required): Message text to post
 
-### slack_user_post_ephemeral
-Post an ephemeral message visible only to a specific user.
+### bot_reply_to_thread
+Reply to a message thread as a bot.
 
 **Parameters:**
-- `channel_id` (required): The channel where the message appears
-- `user_id` (required): The user who will see the message
-- `text` (required): The message text
+- `channel_id` (required): The channel ID
+- `thread_ts` (required): Parent message timestamp
+- `text` (required): Reply text
+
+### bot_add_reaction
+Add an emoji reaction to a message as a bot.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `timestamp` (required): Message timestamp
+- `reaction` (required): Emoji name (without colons)
 
 ## Development
 
@@ -260,30 +213,17 @@ slack/
 ├── bot_tools/          # Bot token operations
 │   ├── __init__.py     # Module exports
 │   ├── base.py         # Bot client and authentication
-│   ├── channels.py     # Channel-related tools
-│   ├── messages.py     # Message-related tools
-│   ├── users.py        # User-related tools
-│   └── search.py       # Search functionality
+│   └── bot_messages.py # Bot messaging tools
 ├── user_tools/         # User token operations
 │   ├── __init__.py     # Module exports
 │   ├── base.py         # User client and authentication
-│   ├── user_profile.py # User profile management
-│   ├── user_search.py  # User-scoped search
-│   └── direct_messages.py # DM operations
+│   ├── channels.py     # Channel-related tools
+│   ├── user_messages.py # User messaging tools
+│   ├── search.py       # User search functionality
+│   └── users.py        # User information tools
 ├── requirements.txt    # Python dependencies
-├── env.example         # Example environment configuration
 ├── Dockerfile          # Docker configuration
 └── README.md           # Documentation
-```
-
-### Running Tests
-
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-pytest tests/
 ```
 
 ## Error Handling
