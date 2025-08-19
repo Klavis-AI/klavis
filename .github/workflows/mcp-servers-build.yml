@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'mcp_servers/**'
+      - '_oauth_support/**'
   workflow_dispatch:
     inputs:
       servers:
@@ -44,23 +45,44 @@ jobs:
             echo "Changed files:"
             echo "$CHANGED_FILES"
             
-            # Extract unique MCP server directories that have changes
-            CHANGED_SERVERS=""
+            # Check if _oauth_support changed - if so, build all OAuth-supported servers
+            OAUTH_CHANGED=false
             for file in $CHANGED_FILES; do
-              if [[ $file == mcp_servers/* ]]; then
-                # Extract server folder path (mcp_servers/server_name/)
-                server_path=$(echo "$file" | cut -d'/' -f1-2)
-                server_name=$(echo "$file" | cut -d'/' -f2)
-                
-                # Check if Dockerfile exists in the server path
-                if [ -f "${server_path}/Dockerfile" ]; then
-                  # Add to list if not already present
-                  if [[ "$CHANGED_SERVERS" != *"$server_name"* ]]; then
-                    CHANGED_SERVERS="$CHANGED_SERVERS$server_name,"
-                  fi
-                fi
+              if [[ $file == _oauth_support/* ]]; then
+                OAUTH_CHANGED=true
+                break
               fi
             done
+            
+            # Extract unique MCP server directories that have changes
+            CHANGED_SERVERS=""
+            if [ "$OAUTH_CHANGED" = "true" ]; then
+              # _oauth_support changed - build all OAuth-supported servers
+              echo "_oauth_support changed, building all OAuth-supported servers"
+              OAUTH_SERVERS=$(jq -r 'keys[]' _oauth_support/server_name.json)
+              for server in $OAUTH_SERVERS; do
+                if [ -f "mcp_servers/${server}/Dockerfile" ]; then
+                  CHANGED_SERVERS="$CHANGED_SERVERS$server,"
+                fi
+              done
+            else
+              # Normal change detection for individual servers
+              for file in $CHANGED_FILES; do
+                if [[ $file == mcp_servers/* ]]; then
+                  # Extract server folder path (mcp_servers/server_name/)
+                  server_path=$(echo "$file" | cut -d'/' -f1-2)
+                  server_name=$(echo "$file" | cut -d'/' -f2)
+                  
+                  # Check if Dockerfile exists in the server path
+                  if [ -f "${server_path}/Dockerfile" ]; then
+                    # Add to list if not already present
+                    if [[ "$CHANGED_SERVERS" != *"$server_name"* ]]; then
+                      CHANGED_SERVERS="$CHANGED_SERVERS$server_name,"
+                    fi
+                  fi
+                fi
+              done
+            fi
             
             # Remove trailing comma
             CHANGED_SERVERS=${CHANGED_SERVERS%,}
@@ -128,7 +150,7 @@ jobs:
         id: get-command
         run: |
           # Check if this server needs OAuth support
-          OAUTH_SERVER_NAME=$(jq -r --arg name "${{ matrix.server }}" '.[$name] // empty' mcp_servers/_oauth_support/server_name.json)
+          OAUTH_SERVER_NAME=$(jq -r --arg name "${{ matrix.server }}" '.[$name] // empty' _oauth_support/server_name.json)
           
           if [ -z "$OAUTH_SERVER_NAME" ]; then
             echo "Server ${{ matrix.server }} does not need OAuth support, skipping..."
@@ -163,7 +185,7 @@ jobs:
           tags: |
             ${{ github.sha }}-oauth
             latest-oauth
-          context: mcp_servers/_oauth_support/docker
+          context: _oauth_support/docker
           containerfiles: |
             ./Dockerfile.template
           archs: ${{ env.BUILD_ARCHS }}
