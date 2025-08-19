@@ -5,6 +5,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
 from contextvars import ContextVar
+import base64
 
 import click
 import mcp.types as types
@@ -60,7 +61,7 @@ def extract_auth_credentials(request_or_scope) -> tuple[str, str]:
             return "", ""
     
         # Extract auth data from x-auth-data header
-        auth_data = headers.get(b'x-auth-data')
+        auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
 
     if not auth_data:
         return "", ""
