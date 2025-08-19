@@ -127,7 +127,7 @@ Get recent messages from a channel.
 - `channel_id` (required): The channel ID
 - `limit` (optional): Number of messages to retrieve (default: 10)
 
-### list_users
+### slack_list_users
 Lists all users in a Slack team.
 
 **Parameters:**
@@ -136,14 +136,14 @@ Lists all users in a Slack team.
 - `team_id` (optional): Team ID to list users from (for Enterprise Grid)
 - `include_locale` (optional): Whether to include locale information for each user
 
-### user_get_info
+### slack_user_get_info
 Gets information about a specific user.
 
 **Parameters:**
 - `user_id` (required): The ID of the user to get information for
 - `include_locale` (optional): Whether to include locale information for the user
 
-### user_search_messages
+### slack_user_search_messages
 Searches for messages matching a query with user permissions.
 
 **Parameters:**
@@ -155,14 +155,14 @@ Searches for messages matching a query with user permissions.
 - `cursor` (optional): Pagination cursor
 - `highlight` (optional): Include match highlighting (default: true)
 
-### user_post_message
+### slack_user_post_message
 Post a new message to a Slack channel as a user.
 
 **Parameters:**
 - `channel_id` (required): The channel ID
 - `text` (required): Message text to post
 
-### user_reply_to_thread
+### slack_user_reply_to_thread
 Reply to a message thread as a user.
 
 **Parameters:**
@@ -170,7 +170,7 @@ Reply to a message thread as a user.
 - `thread_ts` (required): Parent message timestamp
 - `text` (required): Reply text
 
-### user_add_reaction
+### slack_user_add_reaction
 Add an emoji reaction to a message as a user.
 
 **Parameters:**
@@ -180,14 +180,14 @@ Add an emoji reaction to a message as a user.
 
 ### Bot Tools (Require Bot Token)
 
-### bot_post_message
+### slack_bot_post_message
 Post a new message to a Slack channel as a bot.
 
 **Parameters:**
 - `channel_id` (required): The channel ID
 - `text` (required): Message text to post
 
-### bot_reply_to_thread
+### slack_bot_reply_to_thread
 Reply to a message thread as a bot.
 
 **Parameters:**
@@ -195,7 +195,7 @@ Reply to a message thread as a bot.
 - `thread_ts` (required): Parent message timestamp
 - `text` (required): Reply text
 
-### bot_add_reaction
+### slack_bot_add_reaction
 Add an emoji reaction to a message as a bot.
 
 **Parameters:**

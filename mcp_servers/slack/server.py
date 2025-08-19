@@ -163,7 +163,7 @@ def main(
             
             # User Info
             types.Tool(
-                name="list_users",
+                name="slack_list_users",
                 description="Lists all users in a Slack team using user token",
                 inputSchema={
                     "type": "object",
@@ -189,7 +189,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="user_get_info",
+                name="slack_user_get_info",
                 description="Gets information about a user",
                 inputSchema={
                     "type": "object",
@@ -209,7 +209,7 @@ def main(
             
             # User Search
             types.Tool(
-                name="user_search_messages",
+                name="slack_user_search_messages",
                 description="Searches for messages matching a query.",
                 inputSchema={
                     "type": "object",
@@ -258,7 +258,7 @@ def main(
             
             # User Messages
             types.Tool(
-                name="user_post_message",
+                name="slack_user_post_message",
                 description="Post a new message to a Slack channel as a user.",
                 inputSchema={
                     "type": "object",
@@ -276,7 +276,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="user_reply_to_thread",
+                name="slack_user_reply_to_thread",
                 description="Reply to a specific message thread in Slack as a user.",
                 inputSchema={
                     "type": "object",
@@ -298,7 +298,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="user_add_reaction",
+                name="slack_user_add_reaction",
                 description="Add a reaction emoji to a message as a user.",
                 inputSchema={
                     "type": "object",
@@ -324,7 +324,7 @@ def main(
             
             # Bot Messages
             types.Tool(
-                name="bot_post_message",
+                name="slack_bot_post_message",
                 description="Post a new message to a Slack channel as a bot.",
                 inputSchema={
                     "type": "object",
@@ -342,7 +342,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="bot_reply_to_thread",
+                name="slack_bot_reply_to_thread",
                 description="Reply to a specific message thread in Slack as a bot.",
                 inputSchema={
                     "type": "object",
@@ -364,7 +364,7 @@ def main(
                 },
             ),
             types.Tool(
-                name="bot_add_reaction",
+                name="slack_bot_add_reaction",
                 description="Add a reaction emoji to a message as a bot.",
                 inputSchema={
                     "type": "object",
@@ -447,7 +447,7 @@ def main(
                 ]
         
         # User Info
-        elif name == "list_users":
+        elif name == "slack_list_users":
             cursor = arguments.get("cursor")
             limit = arguments.get("limit")
             team_id = arguments.get("team_id")
@@ -470,7 +470,7 @@ def main(
                     )
                 ]
         
-        elif name == "user_get_info":
+        elif name == "slack_user_get_info":
             user_id = arguments.get("user_id")
             if not user_id:
                 return [
@@ -500,7 +500,7 @@ def main(
                 ]
         
         # User Search
-        elif name == "user_search_messages":
+        elif name == "slack_user_search_messages":
             query = arguments.get("query")
             if not query:
                 return [
@@ -535,7 +535,7 @@ def main(
                 ]
         
         # User Messages
-        elif name == "user_post_message":
+        elif name == "slack_user_post_message":
             channel_id = arguments.get("channel_id")
             text = arguments.get("text")
             if not channel_id or not text:
@@ -563,7 +563,7 @@ def main(
                     )
                 ]
         
-        elif name == "user_reply_to_thread":
+        elif name == "slack_user_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
             text = arguments.get("text")
@@ -592,7 +592,7 @@ def main(
                     )
                 ]
         
-        elif name == "user_add_reaction":
+        elif name == "slack_user_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
             reaction = arguments.get("reaction")
@@ -624,7 +624,7 @@ def main(
         # ============= BOT TOOLS (using bot token) =============
         
         # Bot Messages
-        elif name == "bot_post_message":
+        elif name == "slack_bot_post_message":
             channel_id = arguments.get("channel_id")
             text = arguments.get("text")
             if not channel_id or not text:
@@ -652,7 +652,7 @@ def main(
                     )
                 ]
         
-        elif name == "bot_reply_to_thread":
+        elif name == "slack_bot_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
             text = arguments.get("text")
@@ -681,7 +681,7 @@ def main(
                     )
                 ]
         
-        elif name == "bot_add_reaction":
+        elif name == "slack_bot_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
             reaction = arguments.get("reaction")
