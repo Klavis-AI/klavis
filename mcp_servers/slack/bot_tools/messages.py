@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional
-from .base import make_slack_request
+from .base import make_slack_bot_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ async def post_message(
     }
     
     try:
-        return await make_slack_request("POST", "chat.postMessage", data=data)
+        return await make_slack_bot_request("POST", "chat.postMessage", data=data)
     except Exception as e:
         logger.exception(f"Error executing tool slack_post_message: {e}")
         raise e
@@ -38,7 +38,7 @@ async def reply_to_thread(
     }
     
     try:
-        return await make_slack_request("POST", "chat.postMessage", data=data)
+        return await make_slack_bot_request("POST", "chat.postMessage", data=data)
     except Exception as e:
         logger.exception(f"Error executing tool slack_reply_to_thread: {e}")
         raise e
@@ -58,7 +58,7 @@ async def add_reaction(
     }
     
     try:
-        return await make_slack_request("POST", "reactions.add", data=data)
+        return await make_slack_bot_request("POST", "reactions.add", data=data)
     except Exception as e:
         logger.exception(f"Error executing tool slack_add_reaction: {e}")
         raise e
@@ -76,7 +76,7 @@ async def get_thread_replies(
     }
     
     try:
-        return await make_slack_request("GET", "conversations.replies", params=params)
+        return await make_slack_bot_request("GET", "conversations.replies", params=params)
     except Exception as e:
         logger.exception(f"Error executing tool slack_get_thread_replies: {e}")
         raise e

@@ -8,18 +8,18 @@ logger = logging.getLogger(__name__)
 
 SLACK_API_ENDPOINT = "https://slack.com/api"
 
-# Context variable to store the API token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
+# Context variable to store user token for each request
+user_token_context: ContextVar[str] = ContextVar('user_token')
 
-def get_auth_token() -> str:
-    """Get the authentication token from context."""
+def get_user_token() -> str:
+    """Get the user authentication token from context."""
     try:
-        return auth_token_context.get()
+        return user_token_context.get()
     except LookupError:
-        raise RuntimeError("Authentication token not found in request context")
+        raise RuntimeError("User authentication token not found in request context")
 
-class SlackClient:
-    """Client for Slack API using Bearer Authentication."""
+class SlackUserClient:
+    """Client for Slack API using User Bearer Authentication."""
     
     @staticmethod
     async def make_request(
@@ -28,11 +28,11 @@ class SlackClient:
         data: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Make an HTTP request to Slack API."""
-        api_token = get_auth_token()
+        """Make an HTTP request to Slack API using user token."""
+        api_token = get_user_token()
         
         if not api_token:
-            raise RuntimeError("No API token provided. Please set the authentication header.")
+            raise RuntimeError("No user API token provided. Please set the authentication header.")
         
         # Slack uses Bearer Authentication
         headers = {
@@ -77,14 +77,14 @@ class SlackClient:
                 logger.error(f"Response content: {response.content}")
                 return {"error": "Invalid JSON response", "content": response.text}
 
-async def make_slack_request(
+async def make_slack_user_request(
     method: str, 
     endpoint: str, 
     data: Optional[Dict[str, Any]] = None,
     params: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    """Make an HTTP request to Slack API."""
-    return await SlackClient.make_request(method, endpoint, data, params)
+    """Make an HTTP request to Slack API using user token."""
+    return await SlackUserClient.make_request(method, endpoint, data, params)
 
 class SlackAPIError(Exception):
     """Custom exception for Slack API errors."""

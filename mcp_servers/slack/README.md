@@ -1,119 +1,314 @@
-# Slack MCP Server
+# Slack MCP Server (Python)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-This server implements the Model Context Protocol (MCP) to provide access to various Slack API functionalities as tools for language models or other MCP clients. It allows interacting with Slack workspaces programmatically through a standardized interface.
-
-This server is based on the reference implementation from [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers/tree/main/src/slack).
+A Model Context Protocol (MCP) server implementation for Slack integration using Python. This server provides comprehensive tools for interacting with Slack workspaces using both bot and user tokens, enabling both general workspace operations and user-specific actions.
 
 ## Features
 
-The server exposes the following Slack API functions as MCP tools:
+### Bot Tools (Using Bot Token)
+These tools use the bot token for general workspace operations:
 
-*   `slack_list_channels`: List public channels in the workspace.
-*   `slack_post_message`: Post a new message to a channel.
-*   `slack_reply_to_thread`: Reply to a specific message thread.
-*   `slack_add_reaction`: Add a reaction emoji to a message.
-*   `slack_get_channel_history`: Get recent messages from a channel.
-*   `slack_get_thread_replies`: Get all replies in a message thread.
-*   `slack_get_users`: Get a list of users in the workspace.
-*   `slack_get_user_profile`: Get detailed profile information for a user.
+#### Channel Management
+- **List Channels**: Browse workspace channels with pagination support
+- **Get Channel History**: Retrieve recent messages from channels
 
-## Prerequisites
+#### Messaging
+- **Post Message**: Send new messages to channels
+- **Reply to Thread**: Respond to existing message threads
+- **Add Reaction**: React to messages with emojis
+- **Get Thread Replies**: Fetch all replies in a thread
 
-Before you begin, ensure you have the following:
+#### User Management
+- **List Users**: Get workspace users with profile information
+- **Get User Profile**: Retrieve detailed profile for specific users
 
-*   **Node.js and npm:** Required for local development (check versions with `node -v` and `npm -v`).
-*   **Docker:** Required for running the server in a container (Recommended).
-*   **Slack Bot Token:** A Slack Bot token with the necessary permissions (scopes) to perform the actions listed in the Features section (e.g., `channels:read`, `chat:write`, `reactions:write`, `groups:read`, `users:read`, `users:read.email`). You can create a Slack App and obtain a Bot User OAuth Token from the "OAuth & Permissions" page in your Slack App settings.
-*   **Slack Team ID:** The ID of your Slack workspace (starts with `T`). You can often find this in URLs or by using Slack API methods.
+#### Search
+- **Search Messages**: Search across public workspace messages
 
-## Setup
+### User Tools (Using User Token)
+These tools use the user token for user-specific operations:
 
-You can run the server using Docker (recommended) or locally.
+#### User Profile Management
+- **Set Status**: Update the authenticated user's custom status
+- **Get Profile**: Get the authenticated user's profile
+- **Set Presence**: Set user presence to auto or away
 
-### Docker (Recommended)
+#### User Search
+- **Search Messages**: Search messages with user permissions (includes private channels and DMs)
+- **Search Files**: Search files accessible to the user
 
-1.  **Create Environment File:**
-    Create a file named `.env` in the `mcp_servers/slack` directory with the following content:
-    ```env
-    # Required: Your Slack Workspace/Team ID
-    SLACK_TEAM_ID=TXXXXXXXXXX 
-    
-    # Optional: Your Slack Bot OAuth Token
-    # If provided, this takes precedence over the x-auth-token header
-    SLACK_AUTH_TOKEN=xoxb-your-token-here
-    ```
-    Replace `TXXXXXXXXXX` with your actual Slack Team ID. If `SLACK_AUTH_TOKEN` is not set, 
-    the Slack Bot Token must be provided via the `x-auth-token` header with each request (see Configuration).
+#### Direct Messages
+- **Open DM**: Open a direct message channel with users
+- **Send DM**: Send direct messages to users
+- **Post Ephemeral**: Post ephemeral messages visible only to specific users
 
-2.  **Build Docker Image:**
-    Navigate to the root `klavis` directory (one level above `mcp_servers`) in your terminal and run the build command:
-    ```bash
-    docker build -t slack-mcp-server -f mcp_servers/slack/Dockerfile .
-    ```
-    *(Make sure the path to the Dockerfile is correct relative to your current directory.)*
+## Installation
 
-3.  **Run Docker Container:**
-    Run the container, mapping the server's port (5000) to a port on your host machine (e.g., 5000):
-    ```bash
-    # Note: The .env file created in step 1 is copied into the image during the build process specified in the Dockerfile.
-    docker run -p 5000:5000 --name slack-mcp slack-mcp-server 
-    ```
-    The server will start and listen on port 5000 inside the container.
+### Using pip
 
-### Local Development
+```bash
+pip install -r requirements.txt
+```
 
-1.  **Clone Repository:** (If you haven't already)
-    ```bash
-    # git clone <repository-url>
-    # cd <repository-directory>
-    ```
+### Using Docker
 
-2.  **Navigate to Directory:**
-    ```bash
-    cd mcp_servers/slack
-    ```
-
-3.  **Create Environment File:**
-    Create a file named `.env` in this directory as described in Step 1 of the Docker setup:
-    ```env
-    # Required: Your Slack Workspace/Team ID
-    SLACK_TEAM_ID=TXXXXXXXXXX 
-    
-    # Optional: Your Slack Bot OAuth Token
-    # If provided, this takes precedence over the x-auth-token header
-    SLACK_AUTH_TOKEN=xoxb-your-token-here
-    ```
-
-4.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
-
-5.  **Build and Run:**
-    This command compiles the TypeScript code and starts the server:
-    ```bash
-    npm start
-    ```
-    The server will start and listen on `http://localhost:5000`.
+```bash
+docker build -t slack-mcp-server .
+docker run -p 5000:5000 slack-mcp-server
+```
 
 ## Configuration
 
-*   **`SLACK_TEAM_ID` (Environment Variable):** This is required for certain API calls (`getChannels`, `getUsers`) and must be set in the `.env` file (both for Docker build and local run).
-*   **`SLACK_AUTH_TOKEN` (Environment Variable):** Optional. If set, this Bot Token will be used for all Slack API calls. This takes precedence over the token provided in request headers.
-*   **Slack Bot Token (Request Header):** If `SLACK_AUTH_TOKEN` is not set, the server expects the Slack Bot Token to be provided in the `x-auth-token` HTTP header for every request made to the `/messages` endpoint. The server uses this token to authenticate with the Slack API for the requested operation.
+### Environment Variables
+
+Copy the `.env.example` file to `.env` and update with your values:
+
+```bash
+cp .env.example .env
+# Edit .env with your Slack credentials
+```
+
+- `SLACK_BOT_TOKEN`: Your Slack bot token (xoxb-...) for bot operations
+- `SLACK_USER_TOKEN`: Your Slack user token (xoxp-...) for user-specific operations
+- `SLACK_MCP_SERVER_PORT`: Server port (default: 5000)
+
+### Authentication
+
+The server supports dual-token authentication for different operation types:
+
+#### For Local Development
+Set environment variables:
+- `SLACK_BOT_TOKEN`: Bot token for workspace operations
+- `SLACK_USER_TOKEN`: User token for user-specific operations
+
+#### For Klavis Cloud Deployment
+Tokens are provided via `x-auth-data` header containing base64-encoded JSON:
+```json
+{
+  "access_token": "xoxb-...",  // Bot token
+  "authed_user": {
+    "access_token": "xoxp-..."  // User token
+  }
+}
+```
 
 ## Usage
 
-MCP clients can connect to this server via Server-Sent Events (SSE) and interact with it:
+### Starting the Server
 
-1.  **Establish SSE Connection:** Clients connect to the `/sse` endpoint (e.g., `http://localhost:5000/sse`).
-2.  **Send Messages:** Clients send MCP requests (like `call_tool`) as JSON payloads via POST requests to the `/messages?sessionId=<session_id>` endpoint.
-3.  **Authentication:** Each POST request to `/messages` **must** include the Slack Bot Token in the `x-auth-token` header.
+```bash
+# Basic usage
+python server.py
 
-Refer to the [MCP SDK documentation](https://github.com/modelcontextprotocol) for details on client implementation.
+# With custom port
+python server.py --port 8080
+
+# With debug logging
+python server.py --log-level DEBUG
+
+# With JSON responses for StreamableHTTP
+python server.py --json-response
+```
+
+### Endpoints
+
+The server provides two transport endpoints:
+
+- **SSE Transport**: `http://localhost:5000/sse` (legacy)
+- **StreamableHTTP Transport**: `http://localhost:5000/mcp` (recommended)
+
+## Tools Reference
+
+### Bot Tools (Require Bot Token)
+
+### slack_list_channels
+List channels in the workspace with pagination support.
+
+**Parameters:**
+- `limit` (optional): Maximum channels to return (default: 100, max: 200)
+- `cursor` (optional): Pagination cursor for next page
+- `types` (optional): Channel types (public_channel, private_channel, mpim, im)
+
+### slack_get_channel_history
+Get recent messages from a channel.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `limit` (optional): Number of messages to retrieve (default: 10)
+
+### slack_post_message
+Post a new message to a channel.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `text` (required): Message text to post
+
+### slack_reply_to_thread
+Reply to a message thread.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `thread_ts` (required): Parent message timestamp
+- `text` (required): Reply text
+
+### slack_add_reaction
+Add an emoji reaction to a message.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `timestamp` (required): Message timestamp
+- `reaction` (required): Emoji name (without colons)
+
+### slack_get_thread_replies
+Get all replies in a thread.
+
+**Parameters:**
+- `channel_id` (required): The channel ID
+- `thread_ts` (required): Parent message timestamp
+
+### slack_get_users
+List workspace users.
+
+**Parameters:**
+- `cursor` (optional): Pagination cursor
+- `limit` (optional): Maximum users to return (default: 100, max: 200)
+
+### slack_get_user_profile
+Get detailed user profile.
+
+**Parameters:**
+- `user_id` (required): The user ID
+
+### slack_search_messages
+Search workspace messages (public channels only with bot token).
+
+**Parameters:**
+- `query` (required): Search query (supports Slack search operators)
+- `channel_ids` (optional): List of channel IDs to search within
+- `sort` (optional): Sort by 'score' or 'timestamp' (default: score)
+- `sort_dir` (optional): Sort direction 'asc' or 'desc' (default: desc)
+- `count` (optional): Results per page (default: 20, max: 100)
+- `cursor` (optional): Pagination cursor
+- `highlight` (optional): Include match highlighting (default: true)
+
+### User Tools (Require User Token)
+
+### slack_user_set_status
+Set the authenticated user's custom status.
+
+**Parameters:**
+- `status_text` (required): The status text to display
+- `status_emoji` (optional): The emoji to display (e.g., ':coffee:')
+- `status_expiration` (optional): Unix timestamp when status expires
+
+### slack_user_get_profile
+Get the authenticated user's profile information.
+
+**Parameters:** None
+
+### slack_user_set_presence
+Set the user's presence status.
+
+**Parameters:**
+- `presence` (required): Either 'auto' or 'away'
+
+### slack_user_search_messages
+Search messages with user permissions (includes private channels and DMs).
+
+**Parameters:**
+- `query` (required): Search query string
+- `sort` (optional): Sort by 'score' or 'timestamp' (default: score)
+- `sort_dir` (optional): Sort direction 'asc' or 'desc' (default: desc)
+- `count` (optional): Results per page (default: 20, max: 100)
+- `cursor` (optional): Pagination cursor
+
+### slack_user_search_files
+Search files accessible to the user.
+
+**Parameters:**
+- `query` (required): Search query string
+- `count` (optional): Results per page (default: 20, max: 100)
+- `cursor` (optional): Pagination cursor
+
+### slack_user_open_dm
+Open a direct message channel with one or more users.
+
+**Parameters:**
+- `users` (required): Comma-separated list of user IDs
+
+### slack_user_post_dm
+Send a direct message to a user.
+
+**Parameters:**
+- `user_id` (required): The user ID to send a DM to
+- `text` (required): The message text
+
+### slack_user_post_ephemeral
+Post an ephemeral message visible only to a specific user.
+
+**Parameters:**
+- `channel_id` (required): The channel where the message appears
+- `user_id` (required): The user who will see the message
+- `text` (required): The message text
+
+## Development
+
+### Project Structure
+
+```
+slack/
+├── server.py           # Main server implementation
+├── bot_tools/          # Bot token operations
+│   ├── __init__.py     # Module exports
+│   ├── base.py         # Bot client and authentication
+│   ├── channels.py     # Channel-related tools
+│   ├── messages.py     # Message-related tools
+│   ├── users.py        # User-related tools
+│   └── search.py       # Search functionality
+├── user_tools/         # User token operations
+│   ├── __init__.py     # Module exports
+│   ├── base.py         # User client and authentication
+│   ├── user_profile.py # User profile management
+│   ├── user_search.py  # User-scoped search
+│   └── direct_messages.py # DM operations
+├── requirements.txt    # Python dependencies
+├── env.example         # Example environment configuration
+├── Dockerfile          # Docker configuration
+└── README.md           # Documentation
+```
+
+### Running Tests
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest tests/
+```
+
+## Error Handling
+
+The server includes comprehensive error handling:
+
+- **Authentication Errors**: When token is missing or invalid
+- **API Errors**: When Slack API returns error responses
+- **Validation Errors**: When required parameters are missing
+- **Network Errors**: When connection to Slack fails
+
+All errors are logged and returned with descriptive messages.
+
+## Security Considerations
+
+- Always use HTTPS in production environments
+- Store tokens securely and never commit them to version control
+- Use environment variables or secure secret management systems
+- Implement rate limiting for production deployments
+- Regularly rotate API tokens
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file (you might need to add one) for details. 
+MIT License
+
+## Support
+
+For issues or questions, please refer to the main Klavis documentation or create an issue in the repository.

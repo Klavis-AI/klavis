@@ -8,16 +8,8 @@ logger = logging.getLogger(__name__)
 
 SLACK_API_ENDPOINT = "https://slack.com/api"
 
-# Context variables to store the API tokens for each request
-user_token_context: ContextVar[str] = ContextVar('user_token')
+# Context variable to store the bot token for each request
 bot_token_context: ContextVar[str] = ContextVar('bot_token')
-
-def get_user_token() -> str:
-    """Get the user authentication token from context."""
-    try:
-        return user_token_context.get()
-    except LookupError:
-        raise RuntimeError("User authentication token not found in request context")
 
 def get_bot_token() -> str:
     """Get the bot authentication token from context."""
@@ -26,31 +18,21 @@ def get_bot_token() -> str:
     except LookupError:
         raise RuntimeError("Bot authentication token not found in request context")
 
-class SlackClient:
-    """Client for Slack API using Bearer Authentication."""
+class SlackBotClient:
+    """Client for Slack API using Bot Bearer Authentication."""
     
     @staticmethod
     async def make_request(
         method: str, 
         endpoint: str, 
         data: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        use_user_token: bool = True
+        params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Make an HTTP request to Slack API.
-        
-        Args:
-            method: HTTP method
-            endpoint: API endpoint
-            data: Request body data
-            params: Query parameters
-            use_user_token: If True, use user token; if False, use bot token
-        """
-        api_token = get_user_token() if use_user_token else get_bot_token()
+        """Make an HTTP request to Slack API using bot token."""
+        api_token = get_bot_token()
         
         if not api_token:
-            token_type = "user" if use_user_token else "bot"
-            raise RuntimeError(f"No {token_type} API token provided. Please set the authentication header.")
+            raise RuntimeError("No bot API token provided. Please set the authentication header.")
         
         # Slack uses Bearer Authentication
         headers = {
@@ -95,23 +77,14 @@ class SlackClient:
                 logger.error(f"Response content: {response.content}")
                 return {"error": "Invalid JSON response", "content": response.text}
 
-async def make_user_slack_request(
-    method: str, 
-    endpoint: str, 
-    data: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
-    """Make an HTTP request to Slack API using user token."""
-    return await SlackClient.make_request(method, endpoint, data, params, use_user_token=True)
-
-async def make_bot_slack_request(
+async def make_slack_bot_request(
     method: str, 
     endpoint: str, 
     data: Optional[Dict[str, Any]] = None,
     params: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Make an HTTP request to Slack API using bot token."""
-    return await SlackClient.make_request(method, endpoint, data, params, use_user_token=False)
+    return await SlackBotClient.make_request(method, endpoint, data, params)
 
 class SlackAPIError(Exception):
     """Custom exception for Slack API errors."""

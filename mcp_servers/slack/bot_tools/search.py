@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional, List
-from .base import make_slack_request
+from .base import make_slack_bot_request
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -51,14 +51,8 @@ async def search_messages(
     if cursor:
         params["cursor"] = cursor
     
-    # Add team_id if available from environment
-    import os
-    team_id = os.getenv("SLACK_TEAM_ID")
-    if team_id:
-        params["team_id"] = team_id
-    
     try:
-        return await make_slack_request("GET", "search.messages", params=params)
+        return await make_slack_bot_request("GET", "search.messages", params=params)
     except Exception as e:
         logger.exception(f"Error executing tool slack_search_messages: {e}")
         raise e

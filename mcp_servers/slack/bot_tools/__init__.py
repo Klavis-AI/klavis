@@ -1,12 +1,11 @@
-from .channels import list_channels, get_channel_history
+from .channels import get_channel_history
 from .messages import post_message, reply_to_thread, add_reaction, get_thread_replies
 from .users import get_users, get_user_profile
 from .search import search_messages
-from .base import auth_token_context
+from .base import bot_token_context
 
 __all__ = [
     # Channels
-    "list_channels",
     "get_channel_history",
     
     # Messages
@@ -23,5 +22,5 @@ __all__ = [
     "search_messages",
     
     # Base
-    "auth_token_context",
+    "bot_token_context",
 ]
