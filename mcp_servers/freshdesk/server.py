@@ -5,6 +5,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
 from contextvars import ContextVar
+import base64
 
 import click
 import mcp.types as types
@@ -106,16 +107,12 @@ def extract_credentials(request_or_scope) -> Dict[str, str]:
     # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
     if hasattr(request_or_scope, 'headers'):
         # SSE request object
-        auth_data = request_or_scope.headers.get('x-auth-data')
-        if auth_data and isinstance(auth_data, bytes):
-            auth_data = auth_data.decode('utf-8')
+        auth_data = base64.b64decode(request_or_scope.headers.get(b'x-auth-data')).decode('utf-8')
             
     elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
         # StreamableHTTP scope object
         headers = dict(request_or_scope.get("headers", []))
-        auth_data = headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = auth_data.decode('utf-8')
+        auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
     else:
         auth_data = None
     

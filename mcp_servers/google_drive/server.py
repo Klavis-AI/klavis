@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json

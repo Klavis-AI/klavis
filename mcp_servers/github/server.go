@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -28,7 +29,16 @@ func extractAccessToken(r *http.Request) string {
 
 	if authData == "" {
 		// Extract from x-auth-data header
-		authData = r.Header.Get("x-auth-data")
+		headerData := r.Header.Get("x-auth-data")
+		if headerData != "" {
+			// Decode base64
+			decoded, err := base64.StdEncoding.DecodeString(headerData)
+			if err != nil {
+				log.WithError(err).Warn("Failed to decode base64 auth data")
+				return ""
+			}
+			authData = string(decoded)
+		}
 	}
 
 	if authData == "" {

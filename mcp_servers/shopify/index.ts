@@ -420,24 +420,24 @@ const getShopifyMcpServer = (): Server => {
 
 const asyncLocalStorage = new AsyncLocalStorage<AsyncLocalStorageState>();
 
-function extractApiKey(req: Request): string {
-  let authData = process.env.API_KEY;
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
   
   if (!authData && req.headers['x-auth-data']) {
     try {
-      authData = req.headers['x-auth-data'] as string;
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
     } catch (error) {
       console.error('Error parsing x-auth-data JSON:', error);
     }
   }
 
   if (!authData) {
-    console.error('Error: Shopify API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+    console.error('Error: Shopify access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
     return '';
   }
 
   const authDataJson = JSON.parse(authData);
-  return authDataJson.token ?? '';
+  return authDataJson.access_token ?? '';
 }
 
 function getShopifyCredentials(): ShopifyCredentials {
@@ -458,7 +458,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/mcp', async (req: Request, res: ExpressResponse) => {
-  const accessToken = extractApiKey(req);
+  const accessToken = extractAccessToken(req);
   const shopDomain = req.headers['x-shopify-shop-domain'] as string;
 
   const server = getShopifyMcpServer();
@@ -544,7 +544,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const accessToken = extractApiKey(req);
+    const accessToken = extractAccessToken(req);
     const shopDomain = req.headers['x-shopify-shop-domain'] as string;
 
     asyncLocalStorage.run({ 

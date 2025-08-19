@@ -3,11 +3,31 @@
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createSupabaseMcpServer, asyncLocalStorage } from './server.js';
-import express from 'express';
+import express, { type Request } from 'express';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
+
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Supabase access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
 
 const getSupabaseMcpServer = () => {
   const server = createSupabaseMcpServer({
@@ -25,10 +45,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req, res) => {
-  const accessToken = req.headers['x-auth-token'] as string;
-  if (!accessToken) {
-    console.error('Error: Supabase Access Token is missing. Provide it via x-auth-token header.');
-  }
+  const accessToken = extractAccessToken(req);
 
   const server = getSupabaseMcpServer();
   try {
@@ -105,12 +122,7 @@ app.post("/messages", async (req, res) => {
   const sessionId = req.query.sessionId as string;
   const transport = transports[sessionId];
   if (transport) {
-    // Use environment variable for auth token if set, otherwise use header
-    const envAuthToken = process.env.SUPABASE_AUTH_TOKEN;
-    const accessToken = envAuthToken || req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-      console.error('Error: Supabase Access Token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
     asyncLocalStorage.run({ accessToken }, async () => {
       await transport.handlePostMessage(req, res);
     });

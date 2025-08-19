@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json
@@ -31,6 +32,37 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 HEYGEN_MCP_SERVER_PORT = int(os.getenv("HEYGEN_MCP_SERVER_PORT", "5000"))
+
+def extract_api_key(request_or_scope) -> str:
+    """Extract API key from headers or environment."""
+    api_key = os.getenv("API_KEY")
+    
+    if not api_key:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data and isinstance(auth_data, bytes):
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        else:
+            auth_data = None
+        
+        if auth_data:
+            try:
+                # Parse the JSON auth data to extract token
+                auth_json = json.loads(auth_data)
+                api_key = auth_json.get('token', '')
+            except (json.JSONDecodeError, TypeError) as e:
+                logger.warning(f"Failed to parse auth data JSON: {e}")
+                api_key = ""
+    
+    return api_key or ""
 
 @click.command()
 @click.option("--port", default=HEYGEN_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -497,10 +529,7 @@ def main(
     async def handle_sse(request):
         async def sse_handler(scope: Scope, receive: Receive, send: Send) -> None:
             # Extract auth token from headers (allow None - will be handled at tool level)
-            headers = dict(scope.get("headers", []))
-            auth_token = headers.get(b'x-api-key')
-            if auth_token:
-                auth_token = auth_token.decode('utf-8')
+            auth_token = extract_api_key(request)
             
             # Set the auth token in context for this request (can be None/empty)
             token = auth_token_context.set(auth_token or "")
@@ -519,10 +548,7 @@ def main(
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-api-key')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        auth_token = extract_api_key(scope)
         
         # Set the auth token in context for this request (can be None/empty)
         token = auth_token_context.set(auth_token or "")
