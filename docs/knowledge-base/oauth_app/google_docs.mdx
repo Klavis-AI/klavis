@@ -11,65 +11,65 @@ description: "Complete guide to creating and configuring a Google Docs OAuth app
 
 1. Visit [https://console.cloud.google.com/home/dashboard](https://console.cloud.google.com/home/dashboard) and select the project dropdown at the top.
 
-<img src="/images/knowledge-base/google_docs/step1_box.png" alt="Google Cloud project dropdown" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step1_box.png" alt="Google Cloud project dropdown" />
 
 2. Click **New Project**.
 
-<img src="/images/knowledge-base/google_docs/step2_new_project.png" alt="Google Cloud new project button" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step2_new_project.png" alt="Google Cloud new project button" />
 
 3. Enter the project details and click **Create**.
 
-<img src="/images/knowledge-base/google_docs/step3_create.png" alt="Google Cloud create project form" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step3_create.png" alt="Google Cloud create project form" />
 
 4. Select your newly created project.
 
-<img src="/images/knowledge-base/google_docs/step4_select_project.png" alt="Google Cloud select project" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step4_select_project.png" alt="Google Cloud select project" />
 
 5. Go to **APIs & Services**.
 
-<img src="/images/knowledge-base/google_docs/step5_apis_and_services.png" alt="Google Cloud APIs & Services menu" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step5_apis_and_services.png" alt="Google Cloud APIs & Services menu" />
 
 6. Click **Enable APIs and Services**.
 
-<img src="/images/knowledge-base/google_docs/step6_enable_api_services.png" alt="Enable APIs and Services button" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step6_enable_api_services.png" alt="Enable APIs and Services button" />
 
 7. Search for and select **Google Docs API**.
 
-<img src="/images/knowledge-base/google_docs/step7_select_docs.png" alt="Search Google Docs API" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step7_select_docs.png" alt="Search Google Docs API" />
 
 8. Click **Enable**.
 
-<img src="/images/knowledge-base/google_docs/step8_enable.png" alt="Enable Google Docs API" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step8_enable.png" alt="Enable Google Docs API" />
 
 9. Go back to **APIs & Services** and select **OAuth consent screen**.
 
-<img src="/images/knowledge-base/google_docs/step9_oauth_screen.png" alt="OAuth consent screen menu" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step9_oauth_screen.png" alt="OAuth consent screen menu" />
 
 10. Enter the required information and save.
 
-<img src="/images/knowledge-base/google_docs/step10_info.png" alt="OAuth consent screen form" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step10_info.png" alt="OAuth consent screen form" />
 
 11. Go to **Credentials** in APIs & Services and click **Create Credentials**.
 
-<img src="/images/knowledge-base/google_docs/step11_CreateCredentials.png" alt="Create credentials button" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step11_CreateCredentials.png" alt="Create credentials button" />
 
 12. Select **OAuth Client ID**.
 
-<img src="/images/knowledge-base/google_docs/step12_OAuthClientID.png" alt="OAuth Client ID selection" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step12_OAuthClientID.png" alt="OAuth Client ID selection" />
 
 13. Choose **Web Application** and enter the required details.
 
-<img src="/images/knowledge-base/google_docs/step13_WebApplication.png" alt="Web application OAuth settings" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step13_WebApplication.png" alt="Web application OAuth settings" />
 
 14. Add redirect URLs:
     `https://api.klavis.ai/oauth/gdocs/callback`
     Then click **Create**.
 
-<img src="/images/knowledge-base/google_docs/step14_redirect_uri.png" alt="Add redirect URIs" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step14_redirect_uri.png" alt="Add redirect URIs" />
 
 15. Your **Client ID** and **Client Secret** will be displayed.
 
-<img src="/images/knowledge-base/google_docs/step15_credentials.png" alt="OAuth credentials screen" />
+<img src="/images/knowledge-base/google_docs_oauth_app/step15_credentials.png" alt="OAuth credentials screen" />
 
 
 ## Step 2: Request Scopes
@@ -81,15 +81,15 @@ Klavis Google Docs MCP Server uses the following OAuth scopes:
 
 1. Go to **OAuth consent screen**.
 
-<img src="/images/knowledge-base/google_docs/scope1_oauth.png" alt="OAuth consent screen" />
+<img src="/images/knowledge-base/google_docs_oauth_app/scope1_oauth.png" alt="OAuth consent screen" />
 
 2. Click **Data Access**.
 
-<img src="/images/knowledge-base/google_docs/scope2_data_access.png" alt="Data access settings" />
+<img src="/images/knowledge-base/google_docs_oauth_app/scope2_data_access.png" alt="Data access settings" />
 
 3. Click **Add or Remove Scopes**.
 
-<img src="/images/knowledge-base/google_docs/scope3_add_scopes.png" alt="Add or remove scopes" />
+<img src="/images/knowledge-base/google_docs_oauth_app/scope3_add_scopes.png" alt="Add or remove scopes" />
 
 4. Enter the needed scopes and click **Update**.
 
