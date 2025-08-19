@@ -52,28 +52,18 @@ docker run -it -e KLAVIS_API_KEY=your_key \
 docker run -p 5000:5000 ghcr.io/klavis-ai/youtube-mcp-server:latest
 ```
 
-## 🖥️ Claude Desktop Configuration
+### 🖥️ Cursor Configuration
 
-**For Claude Desktop, use our hosted service URLs directly - no Docker setup needed:**
+**For Cursor, use our hosted service URLs directly - no Docker setup needed:**
 
 ```json
 {
   "mcpServers": {
     "klavis-gmail": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-http",
-        "https://gmail-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
-      ]
+      "url": "https://gmail-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
     },
     "klavis-github": {
-      "command": "npx", 
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-http",
-        "https://github-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
-      ]
+      "url": "https://github-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
     }
   }
 }
@@ -95,7 +85,7 @@ docker run -p 5000:5000 ghcr.io/klavis-ai/youtube-mcp-server:latest
 - **🏢 Enterprise Ready**: SOC2 compliant, GDPR ready, with dedicated support
 - **📖 Open Source**: Full source code available for customization and self-hosting
 
-## 🎯 Choose Your Integration Method
+## 🎯 Self Hosting Instructions
 
 ### 1. 🐳 Docker Images (Fastest Way to Start)
 
@@ -165,7 +155,9 @@ pip install klavis  # or npm install klavis
 | **Notion** | `ghcr.io/klavis-ai/notion-mcp-server-oauth` | ✅ | Database and page operations |
 | **Salesforce** | `ghcr.io/klavis-ai/salesforce-mcp-server-oauth` | ✅ | CRM data management |
 | **Postgres** | `ghcr.io/klavis-ai/postgres-mcp-server` | ❌ | Database operations |
+| ... | ... | ...| ... |
 
+And more! 
 [**🔍 View All 50+ Servers →**](https://docs.klavis.ai/documentation/introduction#mcp-server-quickstart) | [**🐳 Browse Docker Images →**](https://github.com/orgs/Klavis-AI/packages?repo_name=klavis)
 
 ## 💡 Usage Examples
@@ -252,36 +244,6 @@ print(f"Gmail MCP server ready: {gmail_server.server_url}")
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)** | **📖 [Complete Documentation →](https://docs.klavis.ai)**
 
-## 🔧 Using with Other AI Tools & VS Code
-
-### ⚡ **For Other MCP Clients (SSE/HTTP Support)**
-
-Our MCP servers use **SSE (Server-Sent Events)** and **HTTP** protocols:
-
-```bash
-# Start any MCP server
-docker run -p 5000:5000 -e GITHUB_AUTH_TOKEN=your_token \
-  ghcr.io/klavis-ai/github-mcp-server:latest
-
-# Available endpoints:
-# - HTTP/POST: http://localhost:5000/mcp
-# - SSE: http://localhost:5000/sse
-```
-
-**Compatible with:**
-- VS Code MCP extensions  
-- Web-based MCP clients
-- Custom applications using SSE/HTTP
-- Any MCP client supporting HTTP transport
-
-### 💡 **Protocol Support**
-
-- ✅ **SSE (Server-Sent Events)**: Real-time bidirectional communication
-- ✅ **HTTP**: Standard request/response for tool calls
-- ✅ **Claude Desktop**: Works with `@modelcontextprotocol/server-http` adapter
-
-**📖 [View all MCP server configurations →](https://docs.klavis.ai/documentation/mcp-server)**
-
 ## 🔐 OAuth Authentication (For OAuth-Enabled Servers)
 
 Some servers require OAuth authentication (Google, GitHub, Slack, etc.). OAuth implementation requires significant setup and code complexity:
@@ -304,35 +266,6 @@ docker run -it -e KLAVIS_API_KEY=your_free_key \
 Our OAuth wrapper simplifies this by handling all the complex OAuth implementation details, so you can focus on using the MCP servers directly.
 
 **Alternative**: For advanced users, you can implement OAuth yourself by creating apps with each service provider. Check individual server READMEs for technical details.
-
-
-## 🏗️ Self-Hosting & Customization (For Advanced Users)
-
-Want to modify servers, add custom features, or run everything on your own infrastructure? All MCP servers are fully open source:
-
-### 🔧 **When to Self-Host:**
-- **Custom Business Logic**: Add your own tools or modify existing ones
-- **Enterprise Security**: Run on your own infrastructure with full control
-- **Offline Usage**: No internet dependency for sensitive environments  
-- **Custom Integrations**: Connect to internal APIs or databases
-
-### 🚀 **Quick Self-Host:**
-```bash
-# Clone and customize any server
-git clone https://github.com/klavis-ai/klavis.git
-cd klavis/mcp_servers/github
-
-# Modify the code as needed, then run
-docker build -t my-custom-github-server .
-docker run -p 5000:5000 my-custom-github-server
-```
-
-**🛠️ Each server is production-ready:**
-- ✅ Full source code with clear structure
-- ✅ Docker support for easy deployment  
-- ✅ Comprehensive documentation
-- ✅ Environment-based configuration
-- ✅ Multiple language support (Python, Go, TypeScript)
 
 ## 📚 Resources & Community
 
