@@ -41,7 +41,7 @@ if ! source ./oauth_acquire.sh "$SERVER_NAME"; then
     echo "OAuth token acquisition failed"
     exit $oauth_exit_code
 fi
-cd -
+cd - > /dev/null && echo "Back to work folder: $(pwd)"
 
 echo "Executing command: ${EXEC_COMMAND[*]}"
 echo "========================================="
