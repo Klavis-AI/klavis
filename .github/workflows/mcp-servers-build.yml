@@ -17,7 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository_owner }}
-  BUILD_ARCHS: amd64, arm64, riscv64
+  BUILD_ARCHS: amd64
 
 jobs:
   detect-changes:
