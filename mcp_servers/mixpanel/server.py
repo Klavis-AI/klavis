@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json
@@ -18,7 +19,8 @@ from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
 from tools import (
-    auth_token_context,
+    username_context,
+    secret_context,
     send_events,
     get_projects,
     get_events,
@@ -35,6 +37,40 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 MIXPANEL_MCP_SERVER_PORT = int(os.getenv("MIXPANEL_MCP_SERVER_PORT", "5000"))
+
+def extract_credentials(request_or_scope) -> Dict[str, str]:
+    """Extract service account credentials from x-auth-data header."""
+    username = os.getenv("MIXPANEL_SERVICE_ACCOUNT_USERNAME")
+    secret = os.getenv("MIXPANEL_SERVICE_ACCOUNT_SECRET")
+    
+    auth_data = None
+    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object
+        auth_data_header = request_or_scope.headers.get(b'x-auth-data')
+        if auth_data_header:
+            auth_data = base64.b64decode(auth_data_header).decode('utf-8')
+    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        auth_data_header = headers.get(b'x-auth-data')
+        if auth_data_header:
+            auth_data = base64.b64decode(auth_data_header).decode('utf-8')
+    
+    # If no credentials from environment, try to parse from auth_data (from prod)
+    if auth_data and (not username or not secret):
+        try:
+            # Parse the JSON auth data to extract credentials
+            auth_json = json.loads(auth_data)
+            username = auth_json.get('serviceaccount_username', '') or username
+            secret = auth_json.get('serviceaccount_secret', '') or secret
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to parse auth data JSON: {e}")
+    
+    return {
+        'username': username or "",
+        'secret': secret or "",
+    }
 
 @click.command()
 @click.option("--port", default=MIXPANEL_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -752,11 +788,12 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
+        # Extract credentials from headers
+        credentials = extract_credentials(request)
         
-        # Set the auth token in context for this request (can be None)
-        token = auth_token_context.set(auth_token or "")
+        # Set the credentials in context for this request
+        username_token = username_context.set(credentials['username'])
+        secret_token = secret_context.set(credentials['secret'])
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -765,7 +802,8 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            auth_token_context.reset(token)
+            username_context.reset(username_token)
+            secret_context.reset(secret_token)
         
         return Response()
 
@@ -782,18 +820,17 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract credentials from headers
+        credentials = extract_credentials(scope)
         
-        # Set the auth token in context for this request (can be None/empty)
-        token = auth_token_context.set(auth_token or "")
+        # Set the credentials in context for this request
+        username_token = username_context.set(credentials['username'])
+        secret_token = secret_context.set(credentials['secret'])
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            auth_token_context.reset(token)
+            username_context.reset(username_token)
+            secret_context.reset(secret_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
