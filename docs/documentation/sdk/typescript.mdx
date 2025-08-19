@@ -159,7 +159,9 @@ For services that require API keys:
 // Set authentication token for API key services
 await klavisClient.mcpServer.setAuthToken({
     instanceId: server.instanceId,
-    authToken: "your-service-api-key"
+    authData: {
+        token: "your-service-api-key"
+    }
 });
 ```
 

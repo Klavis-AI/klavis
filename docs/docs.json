@@ -174,7 +174,7 @@
             "group": "Auth / OAuth",
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
-              "api-reference/mcp-server/set-auth-token",
+              "api-reference/mcp-server/set-authentication-data",
               "api-reference/mcp-server/get-authentication-data",
               "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
