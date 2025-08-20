@@ -189,12 +189,14 @@ To use the Motion MCP Server, you need to configure it with your Motion API key.
 <CodeGroup>
 ```bash cURL
 curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth \
   --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{
   "instanceId": "<YOUR_INSTANCE_ID>",
-  "authToken": "<YOUR_MOTION_API_KEY>"
+  "authData": {
+    "token": "<YOUR_MOTION_API_KEY>"
+  }
 }'
 ```
 
@@ -220,7 +222,9 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
 // Set the Motion API key for your instance
 const response = await klavisClient.mcpServer.setInstanceAuthToken({
     instanceId: "<YOUR_INSTANCE_ID>",
-    authToken: "<YOUR_MOTION_API_KEY>"
+    authData: {
+        token: "<YOUR_MOTION_API_KEY>"
+    }
 });
 
 console.log(response);
@@ -235,11 +239,13 @@ const options = {
   },
   body: JSON.stringify({
     instanceId: '<YOUR_INSTANCE_ID>',
-    authToken: '<YOUR_MOTION_API_KEY>'
+    authData: {
+        token: '<YOUR_MOTION_API_KEY>'
+    }
   })
 };
 
-fetch('https://api.klavis.ai/mcp-server/instance/set-auth-token', options)
+fetch('https://api.klavis.ai/mcp-server/instance/set-auth', options)
   .then(response => response.json())
   .then(data => console.log(data))
   .catch(err => console.error(err));
@@ -247,10 +253,12 @@ fetch('https://api.klavis.ai/mcp-server/instance/set-auth-token', options)
 
 ```php PHP
 <?php
-$url = 'https://api.klavis.ai/mcp-server/instance/set-auth-token';
+$url = 'https://api.klavis.ai/mcp-server/instance/set-auth';
 $data = array(
     'instanceId' => '<YOUR_INSTANCE_ID>',
-    'authToken' => '<YOUR_MOTION_API_KEY>'
+    'authData' => array(
+        'token' => '<YOUR_MOTION_API_KEY>'
+    )
 );
 
 $options = array(
@@ -279,12 +287,14 @@ import (
 )
 
 func main() {
-	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
 	
-	payload := map[string]string{
-		"instanceId": "<YOUR_INSTANCE_ID>",
-		"authToken": "<YOUR_MOTION_API_KEY>",
-	}
+	    payload := map[string]interface{}{
+        "instanceId": "<YOUR_INSTANCE_ID>",
+		"authData": map[string]string{
+            "token": "<YOUR_MOTION_API_KEY>",
+        },
+    }
 	
 	jsonPayload, _ := json.Marshal(payload)
 	
@@ -313,11 +323,11 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class SetAuthToken {
     public static void main(String[] args) {
         try {
-            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authToken\":\"<YOUR_MOTION_API_KEY>\"}";
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"token\":\"<YOUR_MOTION_API_KEY>\"}}";
             
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth"))
                 .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))

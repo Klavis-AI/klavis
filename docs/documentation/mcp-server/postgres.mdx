@@ -126,12 +126,14 @@ They are usually in the form of `postgresql://<user>:<password>@<host>:<port>/<d
 <CodeGroup>
 ```bash cURL
 curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/set-auth-token \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
   "instanceId": "<string>",
-  "authToken": "<string>"
+  "authData": {
+    "token": "<string>"
+  }
 }'
 ```
 
@@ -157,7 +159,9 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
 // Set the PostgreSQL connection string for your instance
 const response = await klavisClient.mcpServer.setInstanceAuthToken({
     instanceId: "<YOUR_INSTANCE_ID>",
-    authToken: "<YOUR_POSTGRES_CONNECTION_STRING>"
+    authData: {
+        token: "<YOUR_POSTGRES_CONNECTION_STRING>"
+    }
 });
 
 console.log(response);
@@ -175,12 +179,14 @@ import (
 )
 
 func main() {
-	url := "https://api.klavis.ai/mcp-server/instance/set-auth-token"
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
 	
-	payload := map[string]string{
-		"instanceId": "<string>",
-		"authToken": "<string>",
-	}
+	    payload := map[string]interface{}{
+        "instanceId": "<string>",
+		"authData": map[string]string{
+            "token": "<string>",
+        },
+    }
 	
 	jsonPayload, _ := json.Marshal(payload)
 	
@@ -209,11 +215,11 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class SetAuthToken {
     public static void main(String[] args) {
         try {
-            String requestBody = "{\"instanceId\":\"<string>\",\"authToken\":\"<string>\"}";
+            String requestBody = "{\"instanceId\":\"<string>\",\"authData\":{\"token\":\"<string>\"}}";
             
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth-token"))
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth"))
                 .header("Authorization", "Bearer <token>")
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
