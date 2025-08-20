@@ -31,7 +31,8 @@ from bot_tools.bot_messages import (
 from user_tools import (
     user_token_context,
     list_channels as user_list_channels,
-    get_channel_history as user_get_channel_history
+    get_channel_history as user_get_channel_history,
+    invite_users_to_channel
 )
 from user_tools.user_messages import (
     user_post_message,
@@ -158,6 +159,27 @@ def main(
                         },
                     },
                     "required": ["channel_id"],
+                },
+            ),
+            types.Tool(
+                name="slack_invite_users_to_channel",
+                description="Invite one or more users (including bot users) to a Slack channel. Both regular users and bot users can be invited using their respective user IDs.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the channel to invite users to (e.g., 'C1234567890')",
+                        },
+                        "user_ids": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                            },
+                            "description": "A list of user IDs to invite to the channel. Can include both regular user IDs and bot user IDs",
+                        },
+                    },
+                    "required": ["channel_id", "user_ids"],
                 },
             ),
             
@@ -431,6 +453,43 @@ def main(
             
             try:
                 result = await user_get_channel_history(channel_id, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "slack_invite_users_to_channel":
+            channel_id = arguments.get("channel_id")
+            user_ids = arguments.get("user_ids")
+            
+            if not channel_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: channel_id parameter is required",
+                    )
+                ]
+            
+            if not user_ids or not isinstance(user_ids, list) or len(user_ids) == 0:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: user_ids parameter is required and must be a non-empty list",
+                    )
+                ]
+            
+            try:
+                result = await invite_users_to_channel(channel_id, user_ids)
                 return [
                     types.TextContent(
                         type="text",

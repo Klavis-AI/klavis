@@ -76,3 +76,39 @@ async def get_channel_history(
     except Exception as e:
         logger.exception(f"Error executing tool slack_get_channel_history: {e}")
         raise e
+
+# invite_users_to_channel invites users to a channel
+# User tokens: channels:write.invites, groups:write.invites, im:write.invites, mpim:write.invites
+async def invite_users_to_channel(
+    channel_id: str,
+    user_ids: list[str]
+) -> Dict[str, Any]:
+    """Invite one or more users (including bot users) to a channel.
+    
+    This uses the user token to invite users to a channel. The authenticated user must have
+    permission to invite users to the specified channel. Both regular users and bot users
+    can be invited using their respective user IDs.
+    
+    Args:
+        channel_id: The ID of the channel to invite users to (e.g., 'C1234567890')
+        user_ids: A list of user IDs to invite (e.g., ['U1234567890', 'U9876543210'])
+    
+    Returns:
+        Dictionary containing the updated channel information
+    """
+    logger.info(f"Executing tool: slack_invite_users_to_channel for channel {channel_id}")
+    
+    if not user_ids:
+        raise ValueError("At least one user ID must be provided")
+    
+    # Slack API expects comma-separated user IDs
+    data = {
+        "channel": channel_id,
+        "users": ",".join(user_ids)
+    }
+    
+    try:
+        return await make_slack_user_request("POST", "conversations.invite", data=data)
+    except Exception as e:
+        logger.exception(f"Error executing tool slack_invite_users_to_channel: {e}")
+        raise e
