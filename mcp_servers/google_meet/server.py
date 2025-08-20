@@ -22,9 +22,7 @@ from tools import (
     get_past_meeting_details,
     get_past_meeting_participants,
 )
-
 from tools import auth_token_context
-from utils import list_tools, call_tool
 
 logger = logging.getLogger(__name__)
 
