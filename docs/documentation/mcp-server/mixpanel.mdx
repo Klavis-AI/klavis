@@ -1,6 +1,6 @@
 ---
-title: 'Brave Search'
-description: 'Learn how to use Klavis to connect your AI application to Brave Search MCP Server'
+title: 'Mixpanel'
+description: 'Learn how to use Klavis to connect your AI application to Mixpanel MCP Server'
 ---
 
 import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
@@ -11,15 +11,15 @@ import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
 
 ## For Developer
 
-Follow the instructions below to integrate Brave Search MCP server to your AI application using our API or SDK.
+Follow the instructions below to integrate Mixpanel MCP server to your AI application using our API or SDK.
 
 ### Prerequisites
 
 - [Create an API key](https://www.klavis.ai/home/api-keys)
 
-### 1. Create a Brave Search MCP Server
+### 1. Create a Mixpanel MCP Server
 
-Use the following endpoint to create a new remote Brave Search MCP server instance:
+Use the following endpoint to create a new remote Mixpanel MCP server instance:
 
 #### Request
 <CodeGroup>
@@ -29,9 +29,9 @@ from klavis.types import McpServerName
 
 klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
-# Create a Brave Search MCP server instance
-brave_search_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.BRAVE_SEARCH,
+# Create a Mixpanel MCP server instance
+mixpanel_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.MIXPANEL,
     user_id="<YOUR_USER_ID>",
     platform_name="<YOUR_PLATFORM_NAME>",
 )
@@ -42,9 +42,9 @@ import { KlavisClient, Klavis } from 'klavis';
 
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 
-// Create a Brave Search MCP server instance
-const braveSearchServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.BraveSearch,
+// Create a Mixpanel MCP server instance
+const mixpanelServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Mixpanel,
     userId: "<YOUR_USER_ID>",
     platformName: "<YOUR_PLATFORM_NAME>",
 });
@@ -56,7 +56,7 @@ curl --request POST \
   --header 'Authorization: Bearer <YOUR_API_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{
-  "serverName": "BraveSearch",
+  "serverName": "Mixpanel",
   "userId": "<YOUR_USER_ID>",
   "platformName": "<YOUR_PLATFORM_NAME>"
 }'
@@ -77,7 +77,7 @@ func main() {
 
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
-	payload := strings.NewReader("{\n  \"serverName\": \"BraveSearch\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	payload := strings.NewReader("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -99,7 +99,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"BraveSearch\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
   .asString();
 ```
 </CodeGroup>
@@ -108,20 +108,20 @@ HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/i
 <CodeGroup>
 ```json Response
 {
-  "serverUrl": "https://brave-search-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "serverUrl": "https://mixpanel-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
   "instanceId": "<instance-id>"
 }
 ```
 </CodeGroup>
 
-<Check>**serverUrl** specifies the endpoint of the Brave Search MCP server, which allows you to perform web, image, news, and video searches through the Brave Search API.</Check>
+<Check>**serverUrl** specifies the endpoint of the Mixpanel MCP server, which allows you to track events and analyze user behavior through the Mixpanel analytics platform.</Check>
 <Note>**instanceId** is used for authentication and identification of your server instance.</Note>
 
-### 2. Configure Brave Search API Key
+### 2. Configure Mixpanel Service Account Credentials
 
-To use the Brave Search MCP Server, you need to configure it with your Brave Search API key.
+To use the Mixpanel MCP Server, you need to configure it with your Mixpanel service account credentials.
 
-#### Setting up Brave Search API Key
+#### Setting up Mixpanel Service Account
 
 <CodeGroup>
 ```bash cURL
@@ -132,7 +132,10 @@ curl --request POST \
   --data '{
   "instanceId": "<YOUR_INSTANCE_ID>",
   "authData": {
-    "token": "<YOUR_BRAVE_SEARCH_API_KEY>"
+    "data": {
+      "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+      "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+    }
   }
 }'
 ```
@@ -142,10 +145,15 @@ from klavis import Klavis
 
 klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
 
-# Set the Brave Search API key for your instance
-response = klavis_client.mcp_server.set_instance_auth_token(
-    instance_id="<YOUR_INSTANCE_ID>",
-    auth_token="<YOUR_BRAVE_SEARCH_API_KEY>",
+# Set the Mixpanel service account credentials for your instance
+response = klavis_client.mcp_server.set_instance_auth(
+    instance_id=mixpanel_server.instance_id,
+    auth_data={
+        "data": {
+            "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
+    }
 )
 
 print(response)
@@ -156,11 +164,14 @@ import { KlavisClient } from 'klavis';
 
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
 
-// Set the Brave Search API key for your instance
-const response = await klavisClient.mcpServer.setInstanceAuthToken({
-    instanceId: "<YOUR_INSTANCE_ID>",
+// Set the Mixpanel service account credentials for your instance
+const response = await klavisClient.mcpServer.setInstanceAuth({
+    instanceId: mixpanelServer.instanceId,
     authData: {
-        token: "<YOUR_BRAVE_SEARCH_API_KEY>"
+        data: {
+            serviceaccount_username: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            serviceaccount_secret: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
     }
 });
 
@@ -180,10 +191,13 @@ import (
 func main() {
 	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
 	
-	    payload := map[string]interface{}{
+	payload := map[string]interface{}{
         "instanceId": "<YOUR_INSTANCE_ID>",
-		"authData": map[string]string{
-            "token": "<YOUR_BRAVE_SEARCH_API_KEY>",
+		"authData": map[string]interface{}{
+            "data": map[string]string{
+                "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+                "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>",
+            },
         },
     }
 	
@@ -214,7 +228,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class SetAuthToken {
     public static void main(String[] args) {
         try {
-            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"token\":\"<YOUR_BRAVE_SEARCH_API_KEY>\"}}";
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"data\":{\"serviceaccount_username\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>\",\"serviceaccount_secret\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>\"}}}";
             
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -249,10 +263,15 @@ public class SetAuthToken {
 <Accordion title="Tools Information">
 | Tool Name   | Description                                                              |
 |-------------|--------------------------------------------------------------------------|
-| brave_web_search  | Perform a Brave web search with rich filtering and personalization options including country, language, safesearch, and pagination |
-| brave_image_search | Search for images on Brave with support for safesearch filtering, language and country localization, and pagination |
-| brave_news_search | Search for news articles with safesearch filtering, language and country localization, pagination, and freshness filter to get recent news |
-| brave_video_search | Search for videos with safesearch filtering, language and country localization, pagination, and freshness filter to get recent videos |
+| mixpanel_send_events  | Send events to Mixpanel using the /import endpoint with Service Account authentication |
+| mixpanel_get_projects | Get all projects that are accessible to the current service account user |
+| mixpanel_get_events | Get event names for the given Mixpanel project |
+| mixpanel_get_event_properties | Get event properties for the given event and Mixpanel project |
+| mixpanel_get_event_property_values | Get event property values for the given event name, project, and property name |
+| mixpanel_run_funnels_query | Run a funnel query to measure the conversion rate of a user journey |
+| mixpanel_run_segmentation_query | Run a segmentation query to slice and dice your event stream for deeper insights |
+| mixpanel_run_retention_query | Run a retention query to track user engagement over time and perform cohort analysis |
+| mixpanel_run_frequency_query | Run a frequency query to analyze user engagement patterns and cohort behavior |
 </Accordion>
 
 <Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
