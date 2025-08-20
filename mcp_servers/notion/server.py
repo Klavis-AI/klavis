@@ -56,11 +56,15 @@ def extract_access_token(request_or_scope) -> str:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
         if hasattr(request_or_scope, 'headers'):
             # SSE request object
-            auth_data = base64.b64decode(request_or_scope.headers.get(b'x-auth-data')).decode('utf-8')
+            header_value = request_or_scope.headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
         elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
             # StreamableHTTP scope object
             headers = dict(request_or_scope.get("headers", []))
-            auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
+            header_value = headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
     
     if not auth_data:
         return ""
