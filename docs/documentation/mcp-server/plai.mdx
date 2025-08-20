@@ -142,9 +142,11 @@ from klavis import Klavis
 klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
 
 # Set the Plai API key for your instance
-response = klavis_client.mcp_server.set_instance_auth_token(
+response = klavis_client.mcp_server.set_instance_auth(
     instance_id="<YOUR_INSTANCE_ID>",
-    auth_token="<YOUR_PLAI_API_KEY>",
+    auth_data={
+        "token": "<YOUR_PLAI_API_KEY>"
+    }
 )
 
 print(response)
@@ -156,7 +158,7 @@ import { KlavisClient } from 'klavis';
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
 
 // Set the Plai API key for your instance
-const response = await klavisClient.mcpServer.setInstanceAuthToken({
+const response = await klavisClient.mcpServer.setInstanceAuth({
     instanceId: "<YOUR_INSTANCE_ID>",
     authData: {
         token: "<YOUR_PLAI_API_KEY>"
