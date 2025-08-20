@@ -9,6 +9,9 @@ set -e
 SERVER_NAME=""
 EXEC_COMMAND=()
 
+# Check environment variable to skip OAuth (default: false)
+SKIP_OAUTH="${SKIP_OAUTH:-false}"
+
 while [[ $# -gt 0 ]]; do
     case $1 in
     --server-name)
@@ -32,17 +35,29 @@ echo "OAuth Support Layer - Entrypoint Wrapper"
 echo "========================================="
 echo "Server Name: $SERVER_NAME"
 echo "Exec Command: ${EXEC_COMMAND[*]}"
+echo "Skip OAuth: $SKIP_OAUTH"
 
-# Execute OAuth token acquisition if needed
-echo "Executing OAuth token acquisition..."
-cd /klavis_oauth
-if ! source ./oauth_acquire.sh "$SERVER_NAME"; then
-    oauth_exit_code=$?
-    echo "OAuth token acquisition failed"
-    exit $oauth_exit_code
+if [[ "$SKIP_OAUTH" == "true" ]]; then
+    echo "Skipping OAuth authentication - executing command directly"
+    echo "========================================="
+else
+    # Execute OAuth token acquisition if needed
+    echo "Executing OAuth token acquisition..."
+    cd /klavis_oauth
+    if ! source ./oauth_acquire.sh "$SERVER_NAME"; then
+        oauth_exit_code=$?
+        echo "OAuth token acquisition failed"
+        exit $oauth_exit_code
+    fi
+
+    cd - >/dev/null && echo "Back to work folder: $(pwd)"
 fi
-cd -
 
+# Add AUTH_DATA to .env if it exists
+if [[ -n "$AUTH_DATA" ]]; then
+    echo "AUTH_DATA=$AUTH_DATA" >> .env
+    echo "Added AUTH_DATA to .env file"
+fi
 echo "Executing command: ${EXEC_COMMAND[*]}"
 echo "========================================="
 

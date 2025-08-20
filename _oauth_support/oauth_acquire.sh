@@ -69,6 +69,7 @@ if [ -z "${AUTH_DATA:-}" ]; then
     "
 
     AUTH_DATA=$(cat "$MSG_FILE")
+    AUTH_DATA=$(echo $AUTH_DATA | jq -c)
     rm -f "$MSG_FILE"
     TIMEOUT_EXIT_CODE=$?
 
