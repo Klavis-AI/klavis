@@ -1,6 +1,6 @@
 from .search import user_search_messages
 from .user_messages import user_post_message, user_reply_to_thread, user_add_reaction
-from .channels import list_channels, get_channel_history
+from .channels import list_channels, get_channel_history, invite_users_to_channel
 from .users import list_users, user_get_info
 from .base import user_token_context
 
@@ -16,6 +16,7 @@ __all__ = [
     # Channels
     "list_channels",
     "get_channel_history",
+    "invite_users_to_channel",
     
     # Users
     "list_users",
