@@ -11,8 +11,8 @@ async def create_meeting(args: Dict[str, Any]) -> Dict[str, Any]:
     We send an empty body because Meet doesn't need extra details for basic creation.
     """
     access_token = get_auth_token()
-    async with httpx.AsyncClient() as client:
-        try:
+    try:
+        async with httpx.AsyncClient() as client:
             response = await client.post(
                 'https://meet.googleapis.com/v2/spaces',
                 headers={
@@ -30,10 +30,10 @@ async def create_meeting(args: Dict[str, Any]) -> Dict[str, Any]:
                 'meet_link': space['meetingUri'],
                 'space': space
             }
-        except httpx.HTTPStatusError as e:
-            raise RuntimeError(f"Failed to create meeting space: {e.response.status_code} {e.response.text}")
-        except httpx.RequestError as e:
-            raise RuntimeError(f"Failed to create meeting space: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Failed to create meeting space: {e.response.status_code} {e.response.text}")
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Failed to create meeting space: {str(e)}")
 
 
 async def get_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -43,8 +43,8 @@ async def get_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
     if not space_id or not isinstance(space_id, str) or len(space_id) < 1 or len(space_id) > 1000 or not bool(re.match(r'^spaces/[a-zA-Z0-9\-_]+$', space_id)):
         raise ValueError('Invalid space_id')
     
-    async with httpx.AsyncClient() as client:
-        try:
+    try:  
+        async with httpx.AsyncClient() as client:
             response = await client.get(
                 f'https://meet.googleapis.com/v2/{quote(space_id)}',
                 headers={'Authorization': f'Bearer {access_token}'}
@@ -58,7 +58,7 @@ async def get_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
                 'meet_link': space['meetingUri'],
                 'space': space
             }
-        except httpx.HTTPStatusError as e:
-            raise RuntimeError(f"Failed to get meeting space: {e.response.status_code} {e.response.text}")
-        except httpx.RequestError as e:
-            raise RuntimeError(f"Failed to get meeting space: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Failed to get meeting space: {e.response.status_code} {e.response.text}")
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Failed to get meeting space: {str(e)}")

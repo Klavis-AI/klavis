@@ -26,8 +26,8 @@ async def get_past_meetings(args: Dict[str, Any]) -> Dict[str, Any]:
         else:
             raise ValueError('Invalid filter')
     
-    async with httpx.AsyncClient() as client:
-        try:
+    try:
+        async with httpx.AsyncClient() as client:
             response = await client.get(
                 'https://meet.googleapis.com/v2/conferenceRecords',
                 params=params,
@@ -40,10 +40,10 @@ async def get_past_meetings(args: Dict[str, Any]) -> Dict[str, Any]:
                 'conference_records': conference_records,
                 'next_page_token': data.get('nextPageToken')
             }
-        except httpx.HTTPStatusError as e:
-            raise RuntimeError(f"Failed to list conference records: {e.response.status_code} {e.response.text}")
-        except httpx.RequestError as e:
-            raise RuntimeError(f"Failed to list conference records: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Failed to list conference records: {e.response.status_code} {e.response.text}")
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Failed to list conference records: {str(e)}")
 
 
 async def get_past_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -53,8 +53,8 @@ async def get_past_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
     if not conference_record_id or not isinstance(conference_record_id, str) or len(conference_record_id) < 1 or len(conference_record_id) > 1000 or not bool(re.match(r'^conferenceRecords/[a-zA-Z0-9\-_]+$', conference_record_id)):
         raise ValueError('Invalid conference_record_id')
     
-    async with httpx.AsyncClient() as client:
-        try:
+    try:
+        async with httpx.AsyncClient() as client:
             response = await client.get(
                 f'https://meet.googleapis.com/v2/{quote(conference_record_id)}',
                 headers={'Authorization': f'Bearer {access_token}'}
@@ -67,10 +67,10 @@ async def get_past_meeting_details(args: Dict[str, Any]) -> Dict[str, Any]:
                 'conference_record_id': record['name'],
                 'record': record
             }
-        except httpx.HTTPStatusError as e:
-            raise RuntimeError(f"Failed to get conference record: {e.response.status_code} {e.response.text}")
-        except httpx.RequestError as e:
-            raise RuntimeError(f"Failed to get conference record: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Failed to get conference record: {e.response.status_code} {e.response.text}")
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Failed to get conference record: {str(e)}")
 
 
 async def get_past_meeting_participants(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -97,8 +97,8 @@ async def get_past_meeting_participants(args: Dict[str, Any]) -> Dict[str, Any]:
         else:
             raise ValueError('Invalid filter')
     
-    async with httpx.AsyncClient() as client:
-        try:
+    try:
+        async with httpx.AsyncClient() as client:
             response = await client.get(
                 f'https://meet.googleapis.com/v2/{quote(conference_record_id)}/participants',
                 params=params,
@@ -112,7 +112,7 @@ async def get_past_meeting_participants(args: Dict[str, Any]) -> Dict[str, Any]:
                 'next_page_token': data.get('nextPageToken'),
                 'participant_count': len(participants)
             }
-        except httpx.HTTPStatusError as e:
-            raise RuntimeError(f"Failed to list participants: {e.response.status_code} {e.response.text}")
-        except httpx.RequestError as e:
-            raise RuntimeError(f"Failed to list participants: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise RuntimeError(f"Failed to list participants: {e.response.status_code} {e.response.text}")
+    except httpx.RequestError as e:
+        raise RuntimeError(f"Failed to list participants: {str(e)}")
