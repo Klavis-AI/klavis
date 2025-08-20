@@ -113,9 +113,55 @@ If you want to use your own QuickBooks OAuth application with custom branding:
 2. **Add Your Credentials**: Enter your QuickBooks **Client ID** and **Client Secret** from Step 4
 3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/quickbooks/callback` or your custom callback URL
 4. **Initiate OAuth**: Use your client ID when starting the OAuth flow:
-   ```javascript
+
+   <CodeGroup>
+   
+   ```javascript without SDK
+   // Example: Initiating QuickBooks OAuth with white-label
    const authUrl = `https://api.klavis.ai/oauth/quickbooks/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   window.location.href = authUrl;
    ```
+   
+   ```typescript TypeScript SDK
+   import { Klavis } from "@klavis/sdk";
+   
+   const klavis = new Klavis({
+     apiKey: "YOUR_API_KEY"
+   });
+   
+   // Example: Initiating QuickBooks OAuth with white-label
+   const oauthUrl = await klavis.mcpServer.getOAuthUrl({
+     serverName: Klavis.McpServerName.Quickbooks,
+     instanceId: instanceId,
+     clientId: yourClientId,
+     // redirectUri: YOUR_REDIRECT_URI,
+     // scope: "YOUR_SCOPES", 
+   });
+   
+   window.location.href = oauthUrl;
+   ```
+   
+   ```python Python SDK
+   import webbrowser
+   from klavis import Klavis
+   from klavis.types import McpServerName
+   
+   klavis = Klavis(api_key="YOUR_API_KEY")
+   
+   # Example: Initiating QuickBooks OAuth with white-label
+   oauth_url = klavis.mcp_server.get_oauth_url(
+       server_name=McpServerName.QUICKBOOKS,
+       instance_id=instance_id,
+       client_id=your_client_id,
+       # redirect_uri="YOUR_REDIRECT_URI",
+       # scope="YOUR_SCOPES"
+   )
+   
+   # Open OAuth URL in user's default browser
+   webbrowser.open(oauth_url)
+   ```
+   
+   </CodeGroup>
 
 <Tip>
 For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/documentation/klavis-oauth-white-label).
