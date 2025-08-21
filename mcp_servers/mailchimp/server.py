@@ -1,20 +1,14 @@
 import os
 import json
 import logging
-import contextlib
-from collections.abc import AsyncIterator
+import asyncio
 from typing import Any, Dict
 
 import click
 from dotenv import load_dotenv
 import mcp.types as types
 from mcp.server.lowlevel import Server
-from mcp.server.sse import SseServerTransport
-from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
-from starlette.applications import Starlette
-from starlette.responses import Response
-from starlette.routing import Mount, Route
-from starlette.types import Receive, Scope, Send
+from mcp.server.stdio import stdio_server
 
 from tools import (
     mailchimp_token_context,
@@ -49,23 +43,24 @@ logger = logging.getLogger("mailchimp-mcp-server")
 logging.basicConfig(level=logging.INFO)
 
 MAILCHIMP_API_KEY = os.getenv("MAILCHIMP_API_KEY") or ""
-MAILCHIMP_MCP_SERVER_PORT = int(os.getenv("MAILCHIMP_MCP_SERVER_PORT", "5001"))
 
-
-@click.command()
-@click.option("--port", default=MAILCHIMP_MCP_SERVER_PORT, help="Port to listen on for HTTP")
-@click.option("--log-level", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
-@click.option("--json-response", is_flag=True, default=True, help="Enable JSON responses for StreamableHTTP")
-def main(port: int, log_level: str, json_response: bool) -> int:
-    """Mailchimp MCP server with SSE + StreamableHTTP transports."""
+async def run_server(log_level: str = "INFO"):
+    """Run the Mailchimp MCP server with stdio transport for Claude Desktop."""
     logging.getLogger().setLevel(getattr(logging, log_level.upper(), logging.INFO))
+    
+    # Set the API key in context
+    if MAILCHIMP_API_KEY:
+        mailchimp_token_context.set(MAILCHIMP_API_KEY)
+        logger.info("Mailchimp API key configured")
+    else:
+        logger.warning("No Mailchimp API key found in environment")
+    
     app = Server("mailchimp-mcp-server")
 
     # ----------------------------- Tool Registry -----------------------------#
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         """List all available Mailchimp tools."""
-        logger.info("=== LISTING TOOLS ===")
         tools = [
             # Auth/Account tools
             types.Tool(
@@ -402,35 +397,27 @@ def main(port: int, log_level: str, json_response: bool) -> int:
         ]
         
         logger.info(f"Returning {len(tools)} tools")
-        for tool in tools:
-            logger.debug(f"  - {tool.name}: {tool.description[:50]}...")
-        
         return tools
 
     # ---------------------------- Tool Dispatcher ----------------------------#
     @app.call_tool()
     async def call_tool(name: str, arguments: Dict[str, Any]) -> list[types.TextContent]:
-        logger.info(f"=== CALLING TOOL: {name} ===")
-        logger.info(f"Arguments: {json.dumps(arguments, indent=2)}")
-
+        logger.info(f"Calling tool: {name}")
+        
         try:
             # Auth/Account tools
             if name == "mailchimp_ping":
-                logger.info("Executing ping_mailchimp")
                 result = await ping_mailchimp()
             elif name == "mailchimp_get_account_info":
-                logger.info("Executing get_account_info")
                 result = await get_account_info()
             
             # Audience tools
             elif name == "mailchimp_get_all_audiences":
-                logger.info("Executing get_all_audiences")
                 result = await get_all_audiences(
                     count=arguments.get("count", 10),
                     offset=arguments.get("offset", 0)
                 )
             elif name == "mailchimp_create_audience":
-                logger.info("Executing create_audience")
                 required_args = ["name", "contact", "permission_reminder", "from_name", "from_email", "subject"]
                 for arg in required_args:
                     if arg not in arguments:
@@ -448,12 +435,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     has_welcome=arguments.get("has_welcome", False)
                 )
             elif name == "mailchimp_get_audience_info":
-                logger.info("Executing get_audience_info")
                 if not arguments.get("list_id"):
                     raise ValueError("Missing required argument: list_id")
                 result = await get_audience_info(arguments["list_id"])
             elif name == "mailchimp_update_audience":
-                logger.info("Executing update_audience")
                 if not arguments.get("list_id"):
                     raise ValueError("Missing required argument: list_id")
                 result = await update_audience(
@@ -470,14 +455,12 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     has_welcome=arguments.get("has_welcome")
                 )
             elif name == "mailchimp_delete_audience":
-                logger.info("Executing delete_audience")
                 if not arguments.get("list_id"):
                     raise ValueError("Missing required argument: list_id")
                 result = await delete_audience(arguments["list_id"])
             
             # Member tools
             elif name == "mailchimp_get_audience_members":
-                logger.info("Executing get_audience_members")
                 if not arguments.get("list_id"):
                     raise ValueError("Missing required argument: list_id")
                 result = await get_audience_members(
@@ -488,7 +471,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     since_timestamp_opt=arguments.get("since_timestamp_opt")
                 )
             elif name == "mailchimp_add_member_to_audience":
-                logger.info("Executing add_member_to_audience")
                 if not arguments.get("list_id") or not arguments.get("email_address"):
                     raise ValueError("Missing required arguments: list_id and email_address")
                 result = await add_member_to_audience(
@@ -506,12 +488,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     timestamp_opt=arguments.get("timestamp_opt")
                 )
             elif name == "mailchimp_get_member_info":
-                logger.info("Executing get_member_info")
                 if not arguments.get("list_id") or not arguments.get("email_address"):
                     raise ValueError("Missing required arguments: list_id and email_address")
                 result = await get_member_info(arguments["list_id"], arguments["email_address"])
             elif name == "mailchimp_update_member":
-                logger.info("Executing update_member")
                 if not arguments.get("list_id") or not arguments.get("email_address"):
                     raise ValueError("Missing required arguments: list_id and email_address")
                 result = await update_member(
@@ -526,29 +506,24 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     timestamp_opt=arguments.get("timestamp_opt")
                 )
             elif name == "mailchimp_delete_member":
-                logger.info("Executing delete_member")
                 if not arguments.get("list_id") or not arguments.get("email_address"):
                     raise ValueError("Missing required arguments: list_id and email_address")
                 result = await delete_member(arguments["list_id"], arguments["email_address"])
             elif name == "mailchimp_add_member_tags":
-                logger.info("Executing add_member_tags")
                 if not all([arguments.get("list_id"), arguments.get("email_address"), arguments.get("tags")]):
                     raise ValueError("Missing required arguments: list_id, email_address, and tags")
                 result = await add_member_tags(arguments["list_id"], arguments["email_address"], arguments["tags"])
             elif name == "mailchimp_remove_member_tags":
-                logger.info("Executing remove_member_tags")
                 if not all([arguments.get("list_id"), arguments.get("email_address"), arguments.get("tags")]):
                     raise ValueError("Missing required arguments: list_id, email_address, and tags")
                 result = await remove_member_tags(arguments["list_id"], arguments["email_address"], arguments["tags"])
             elif name == "mailchimp_get_member_activity":
-                logger.info("Executing get_member_activity")
                 if not arguments.get("list_id") or not arguments.get("email_address"):
                     raise ValueError("Missing required arguments: list_id and email_address")
                 result = await get_member_activity(arguments["list_id"], arguments["email_address"], arguments.get("count", 10))
             
             # Campaign tools
             elif name == "mailchimp_get_all_campaigns":
-                logger.info("Executing get_all_campaigns")
                 result = await get_all_campaigns(
                     count=arguments.get("count", 10),
                     offset=arguments.get("offset", 0),
@@ -564,7 +539,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     sort_dir=arguments.get("sort_dir")
                 )
             elif name == "mailchimp_create_campaign":
-                logger.info("Executing create_campaign")
                 required_args = ["type", "list_id", "subject_line", "from_name", "reply_to"]
                 for arg in required_args:
                     if arg not in arguments:
@@ -587,12 +561,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     drag_and_drop=arguments.get("drag_and_drop", True)
                 )
             elif name == "mailchimp_get_campaign_info":
-                logger.info("Executing get_campaign_info")
                 if not arguments.get("campaign_id"):
                     raise ValueError("Missing required argument: campaign_id")
                 result = await get_campaign_info(arguments["campaign_id"])
             elif name == "mailchimp_set_campaign_content":
-                logger.info("Executing set_campaign_content")
                 if not arguments.get("campaign_id"):
                     raise ValueError("Missing required argument: campaign_id")
                 result = await set_campaign_content(
@@ -605,12 +577,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     variate_contents=arguments.get("variate_contents")
                 )
             elif name == "mailchimp_send_campaign":
-                logger.info("Executing send_campaign")
                 if not arguments.get("campaign_id"):
                     raise ValueError("Missing required argument: campaign_id")
                 result = await send_campaign(arguments["campaign_id"])
             elif name == "mailchimp_schedule_campaign":
-                logger.info("Executing schedule_campaign")
                 if not arguments.get("campaign_id") or not arguments.get("schedule_time"):
                     raise ValueError("Missing required arguments: campaign_id and schedule_time")
                 result = await schedule_campaign(
@@ -620,7 +590,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     batch_delay=arguments.get("batch_delay")
                 )
             elif name == "mailchimp_delete_campaign":
-                logger.info("Executing delete_campaign")
                 if not arguments.get("campaign_id"):
                     raise ValueError("Missing required argument: campaign_id")
                 result = await delete_campaign(arguments["campaign_id"])
@@ -631,8 +600,6 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 return [types.TextContent(type="text", text=json.dumps({"error": error_msg}))]
 
             logger.info(f"Tool {name} executed successfully")
-            logger.debug(f"Result: {json.dumps(result, indent=2)}")
-            
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
         except Exception as e:
@@ -644,213 +611,25 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             }
             return [types.TextContent(type="text", text=json.dumps(error_response, indent=2))]
 
-    # ------------------------------- Transports ------------------------------#
-    sse = SseServerTransport("/messages/")
+    # Run with stdio transport for Claude Desktop
+    logger.info("Starting Mailchimp MCP server with stdio transport")
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(read_stream, write_stream, app.create_initialization_options())
 
-    async def handle_sse(request):
-        """SSE transport endpoint with proper auth handling."""
-        logger.info("=== SSE CONNECTION ===")
-        
-        # Extract API key from headers
-        api_key = (
-            request.headers.get("x-auth-token") or 
-            request.headers.get("x-mailchimp-api-key") or 
-            MAILCHIMP_API_KEY
-        )
-        
-        logger.info(f"API key found: {bool(api_key)}")
-        
-        token = None
-        if api_key:
-            token = mailchimp_token_context.set(api_key)
-            logger.info("API key context set")
 
-        try:
-            async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
-                logger.info("SSE streams connected, running MCP app")
-                await app.run(streams[0], streams[1], app.create_initialization_options())
-        except Exception as e:
-            logger.exception(f"Error in SSE handler: {e}")
-            raise
-        finally:
-            if token:
-                mailchimp_token_context.reset(token)
-                logger.info("API key context reset")
-        
-        return Response()
-
-    # StreamableHTTP setup
-    session_manager = StreamableHTTPSessionManager(
-        app=app,
-        event_store=None,
-        json_response=json_response,
-        stateless=True,
-    )
-
-    async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
-        """StreamableHTTP transport with proper auth handling."""
-        logger.info("=== STREAMABLE HTTP REQUEST ===")
-        
-        # Extract headers
-        headers = {k.decode("utf-8"): v.decode("utf-8") for k, v in scope.get("headers", [])}
-        api_key = (
-            headers.get("x-auth-token") or 
-            headers.get("x-mailchimp-api-key") or 
-            MAILCHIMP_API_KEY
-        )
-        
-        logger.info(f"HTTP API key found: {bool(api_key)}")
-        
-        token = None
-        if api_key:
-            token = mailchimp_token_context.set(api_key)
-            logger.info("HTTP API key context set")
-        
-        try:
-            await session_manager.handle_request(scope, receive, send)
-        except Exception as e:
-            logger.exception(f"Error in StreamableHTTP handler: {e}")
-            raise
-        finally:
-            if token:
-                mailchimp_token_context.reset(token)
-                logger.info("HTTP API key context reset")
-
-    @contextlib.asynccontextmanager
-    async def lifespan(_app: Starlette) -> AsyncIterator[None]:
-        """Application lifespan manager."""
-        async with session_manager.run():
-            logger.info("=== MAILCHIMP MCP SERVER STARTED ===")
-            tools = await list_tools()
-            logger.info(f"Available tools: {len(tools)}")
-            for tool in tools:
-                logger.info(f"  ✓ {tool.name}")
-            try:
-                yield
-            finally:
-                logger.info("=== MAILCHIMP MCP SERVER SHUTTING DOWN ===")
-
-    # Health check endpoint
-    async def health_check(request):
-        """Health check with tool count."""
-        api_configured = bool(MAILCHIMP_API_KEY and 'your_mailchimp' not in MAILCHIMP_API_KEY)
-        datacenter = None
-        if MAILCHIMP_API_KEY and '-' in MAILCHIMP_API_KEY:
-            datacenter = MAILCHIMP_API_KEY.split('-')[-1]
-        
-        tools = await list_tools()
-        
-        return Response(
-            content=json.dumps({
-                "status": "healthy",
-                "service": "mailchimp-mcp-server",
-                "api_configured": api_configured,
-                "datacenter": datacenter,
-                "tools_available": len(tools),
-                "tool_names": [tool.name for tool in tools]
-            }, indent=2),
-            media_type="application/json"
-        )
-
-    # Debug endpoint to list tools
-    async def debug_tools(request):
-        """Debug endpoint to see all tools."""
-        logger.info("=== DEBUG TOOLS ENDPOINT CALLED ===")
-        tools = await list_tools()
-        return Response(
-            content=json.dumps({
-                "total_tools": len(tools),
-                "tools": [{"name": tool.name, "description": tool.description} for tool in tools]
-            }, indent=2),
-            media_type="application/json"
-        )
-
-    # Test endpoint to call a tool directly
-    async def test_tool(request):
-        """Test endpoint to call tools directly via HTTP."""
-        logger.info("=== TEST TOOL ENDPOINT CALLED ===")
-        try:
-            body = await request.body()
-            data = json.loads(body) if body else {}
-            
-            tool_name = data.get("tool_name", "mailchimp_ping")
-            tool_args = data.get("tool_args", {})
-            
-            logger.info(f"Testing tool: {tool_name} with args: {tool_args}")
-            
-            # Set API key context
-            api_key = (
-                request.headers.get("x-mailchimp-api-key") or 
-                data.get("api_key") or 
-                MAILCHIMP_API_KEY
-            )
-            
-            if api_key:
-                token = mailchimp_token_context.set(api_key)
-                try:
-                    result = await call_tool(tool_name, tool_args)
-                    return Response(
-                        content=json.dumps({
-                            "status": "success",
-                            "tool": tool_name,
-                            "result": [content.text for content in result]
-                        }, indent=2),
-                        media_type="application/json"
-                    )
-                finally:
-                    mailchimp_token_context.reset(token)
-            else:
-                return Response(
-                    content=json.dumps({"error": "No API key provided"}, indent=2),
-                    status_code=400,
-                    media_type="application/json"
-                )
-                
-        except Exception as e:
-            logger.exception(f"Error in test tool endpoint: {e}")
-            return Response(
-                content=json.dumps({"error": str(e)}, indent=2),
-                status_code=500,
-                media_type="application/json"
-            )
-
-    # Create Starlette app
-    starlette_app = Starlette(
-        debug=True,
-        routes=[
-            Route("/health", endpoint=health_check, methods=["GET"]),
-            Route("/debug/tools", endpoint=debug_tools, methods=["GET"]),
-            Route("/test/tool", endpoint=test_tool, methods=["POST"]),
-            Route("/sse", endpoint=handle_sse, methods=["GET"]),
-            Mount("/messages/", app=sse.handle_post_message),
-            Mount("/mcp", app=handle_streamable_http),
-        ],
-        lifespan=lifespan,
-    )
-
-    # Server startup info
-    api_configured = bool(MAILCHIMP_API_KEY and 'your_mailchimp' not in MAILCHIMP_API_KEY)
-    datacenter = None
-    if MAILCHIMP_API_KEY and '-' in MAILCHIMP_API_KEY:
-        datacenter = MAILCHIMP_API_KEY.split('-')[-1]
-
-    logger.info("=" * 60)
-    logger.info("🚀 STARTING MAILCHIMP MCP SERVER")
-    logger.info("=" * 60)
-    logger.info(f"📡 Port: {port}")
-    logger.info(f"🏥 Health: http://localhost:{port}/health")
-    logger.info(f"🔧 Debug: http://localhost:{port}/debug/tools")
-    logger.info(f"🧪 Test: http://localhost:{port}/test/tool")
-    logger.info(f"📨 SSE: http://localhost:{port}/sse")
-    logger.info(f"🌐 HTTP: http://localhost:{port}/mcp")
-    logger.info(f"🔑 API Key: {'✓ Configured' if api_configured else '✗ Missing'}")
-    if datacenter:
-        logger.info(f"🌍 Datacenter: {datacenter}")
-    logger.info("=" * 60)
-
-    import uvicorn
-    uvicorn.run(starlette_app, host="0.0.0.0", port=port, log_level="info")
-    return 0
+@click.command()
+@click.option("--log-level", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
+def main(log_level: str) -> int:
+    """Mailchimp MCP server with stdio transport for Claude Desktop."""
+    try:
+        asyncio.run(run_server(log_level))
+        return 0
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user")
+        return 0
+    except Exception as e:
+        logger.error(f"Server error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
