@@ -193,5 +193,3 @@ def remove_items_from_playlist(
     except Exception as e:
         print(f"Error removing items from playlist: {e}")
         return {"error": f"{str(e)} - {playlist_id} - {item_uris}"}
-
-

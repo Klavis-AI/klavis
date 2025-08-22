@@ -32,10 +32,3 @@ def search_tracks(
     except Exception as e:
         print(f"An error occurred while searching for {type}s: {e}")
         return {"error": str(e)}
-
-
-
-
-
-
-
