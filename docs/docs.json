@@ -300,7 +300,7 @@
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/airtable","knowledge-base/oauth_app/asana","knowledge-base/oauth_app/calendly","knowledge-base/oauth_app/canva","knowledge-base/oauth_app/dropbox","knowledge-base/oauth_app/figma","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs","knowledge-base/oauth_app/google_drive","knowledge-base/oauth_app/google_sheets","knowledge-base/oauth_app/hubspot","knowledge-base/oauth_app/linkedin","knowledge-base/oauth_app/onedrive","knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/salesforce","knowledge-base/oauth_app/slack","knowledge-base/oauth_app/xero"]
+            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/airtable","knowledge-base/oauth_app/asana","knowledge-base/oauth_app/calendly","knowledge-base/oauth_app/canva","knowledge-base/oauth_app/dropbox","knowledge-base/oauth_app/figma","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs","knowledge-base/oauth_app/google_drive","knowledge-base/oauth_app/google_sheets","knowledge-base/oauth_app/hubspot","knowledge-base/oauth_app/linkedin","knowledge-base/oauth_app/monday","knowledge-base/oauth_app/onedrive","knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/salesforce","knowledge-base/oauth_app/slack","knowledge-base/oauth_app/xero"]
           }
         ]
       }
