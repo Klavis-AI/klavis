@@ -109,7 +109,7 @@ def main(
         return [
             types.Tool(
                 name="spotify_search_tracks",
-                description="Search on Spotify",
+                description="Search for tracks, albums, artists, playlists, shows or episodes on Spotify",
                 inputSchema={
                     "type": "object",
                     "properties": {
