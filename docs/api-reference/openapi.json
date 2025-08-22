@@ -377,16 +377,16 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
-    "/mcp-server/instance/set-auth-token": {
+    "/mcp-server/instance/set-auth": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Set Auth Token",
-        "description": "Sets an authentication token for a specific instance.\nThis updates the auth_metadata for the specified instance.",
-        "operationId": "setInstanceAuthToken",
+        "summary": "Set Authentication Data",
+        "description": "Sets authentication data for a specific instance.\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified instance.",
+        "operationId": "setInstanceAuth",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SetAuthTokenRequest" }
+              "schema": { "$ref": "#/components/schemas/SetAuthRequest" }
             }
           },
           "required": true
@@ -2350,6 +2350,19 @@
   },
   "components": {
     "schemas": {
+      "ApiKeyAuth": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "The API key to save"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["token"],
+        "title": "Option 1: API Key"
+      },
       "CallToolRequest": {
         "properties": {
           "serverUrl": {
@@ -2607,6 +2620,19 @@
         "type": "object",
         "required": ["id", "name"],
         "title": "ExtendedMcpServer"
+      },
+      "GeneralAuth": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data",
+            "description": "Any other general authentication data to save"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Option 2: General Auth Data"
       },
       "GetAuthDataResponse": {
         "properties": {
@@ -2923,6 +2949,7 @@
           "Notion",
           "Onedrive",
           "Salesforce",
+          "Shopify",
           "Slack",
           "Supabase",
           "Xero",
@@ -2941,22 +2968,25 @@
         "required": ["name", "description"],
         "title": "ServerTool"
       },
-      "SetAuthTokenRequest": {
+      "SetAuthRequest": {
         "properties": {
           "instanceId": {
             "type": "string",
             "title": "Instanceid",
             "description": "The unique identifier for the connection instance"
           },
-          "authToken": {
-            "type": "string",
-            "title": "Authtoken",
-            "description": "The authentication token to save"
+          "authData": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
+            ],
+            "title": "Authdata",
+            "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": ["instanceId", "authToken"],
-        "title": "SetAuthTokenRequest"
+        "required": ["instanceId", "authData"],
+        "title": "SetAuthRequest"
       },
       "StatusResponse": {
         "properties": {

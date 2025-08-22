@@ -109,12 +109,13 @@ To set up white-label for your OAuth integrations:
     ```python Python SDK
     import webbrowser
     from klavis import Klavis
+    from klavis.types import McpServerName
     
     klavis = Klavis(api_key="YOUR_API_KEY")
     
     # Example: Initiating GitHub OAuth with white-label
     oauth_url = klavis.mcp_server.get_oauth_url(
-        server_name="github",
+        server_name=McpServerName.GITHUB,
         instance_id=instance_id,
         client_id=your_client_id,
         # redirect_uri="YOUR_REDIRECT_URI",

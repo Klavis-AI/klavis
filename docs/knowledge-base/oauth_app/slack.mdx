@@ -33,9 +33,9 @@ Here is an example of Klavis AI OAuth app configuration:
 <Note>
 Klavis Slack MCP Server uses the following OAuth scopes:
 
-    **Bot Scopes:** `app_mentions:read, channels:history, channels:read, chat:write, chat:write.customize, commands, files:read, groups:read, groups:write, im:history, im:read, mpim:read, reactions:read, reactions:write, team:read, users:read `
+    **Bot Scopes:** `app_mentions:read, channels:join, chat:write, im:history, reactions:read, reactions:write`
 
-    **User Scopes:** ` channels:history ,channels:read, channels:write, chat:write, groups:history, groups:read, groups:write, im:history, im:read, im:write, mpim:history, mpim:read, users:read, users:write, search:read `
+    **User Scopes:** `channels:history, channels:read, channels:write.invites, chat:write, groups:history, groups:read, groups:write.invites, im:history, im:read, im:write, mpim:history, mpim:read, mpim:write, search:read, users:read`
 </Note>
 
 1. Go to the **"OAuth & Permissions"** tab in your application dashboard.
@@ -46,7 +46,14 @@ Klavis Slack MCP Server uses the following OAuth scopes:
 You have successfully created a Slack OAuth application! You now have your Client ID and Client Secret ready for integration with Klavis AI.
 </Check>
 
-## (Optional) Step 4: White Labeling
+## Step 4: Configure App Distribution
+
+1. Go to the **"Manage Distribution"** tab in your application dashboard
+2. Configure your app's public distribution settings as needed
+
+<img src="/images/knowledge-base/slack_oauth_app/step4_distribution.png" alt="Slack App Distribution Settings" />
+
+## (Optional) Step 5: White Labeling
 
 <Note>
 White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.

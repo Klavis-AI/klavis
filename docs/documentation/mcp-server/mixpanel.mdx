@@ -1,0 +1,277 @@
+---
+title: 'Mixpanel'
+description: 'Learn how to use Klavis to connect your AI application to Mixpanel MCP Server'
+---
+
+import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+
+<NoCodeSnippet />
+
+---
+
+## For Developer
+
+Follow the instructions below to integrate Mixpanel MCP server to your AI application using our API or SDK.
+
+### Prerequisites
+
+- [Create an API key](https://www.klavis.ai/home/api-keys)
+
+### 1. Create a Mixpanel MCP Server
+
+Use the following endpoint to create a new remote Mixpanel MCP server instance:
+
+#### Request
+<CodeGroup>
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis_client = Klavis(api_key="<YOUR_API_KEY>")
+
+# Create a Mixpanel MCP server instance
+mixpanel_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.MIXPANEL,
+    user_id="<YOUR_USER_ID>",
+    platform_name="<YOUR_PLATFORM_NAME>",
+)
+```
+
+```javascript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
+
+// Create a Mixpanel MCP server instance
+const mixpanelServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Mixpanel,
+    userId: "<YOUR_USER_ID>",
+    platformName: "<YOUR_PLATFORM_NAME>",
+});
+```
+
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/create \
+  --header 'Authorization: Bearer <YOUR_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "serverName": "Mixpanel",
+  "userId": "<YOUR_USER_ID>",
+  "platformName": "<YOUR_PLATFORM_NAME>"
+}'
+```
+
+
+```go Go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"net/http"
+	"io/ioutil"
+)
+
+func main() {
+
+	url := "https://api.klavis.ai/mcp-server/instance/create"
+
+	payload := strings.NewReader("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
+	req.Header.Add("Content-Type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+}
+```
+
+```java Java
+HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
+  .header("Authorization", "Bearer <YOUR_API_KEY>")
+  .header("Content-Type", "application/json")
+  .body("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .asString();
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "serverUrl": "https://mixpanel-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "instanceId": "<instance-id>"
+}
+```
+</CodeGroup>
+
+<Check>**serverUrl** specifies the endpoint of the Mixpanel MCP server, which allows you to track events and analyze user behavior through the Mixpanel analytics platform.</Check>
+<Note>**instanceId** is used for authentication and identification of your server instance.</Note>
+
+### 2. Configure Mixpanel Service Account Credentials
+
+To use the Mixpanel MCP Server, you need to configure it with your Mixpanel service account credentials.
+
+#### Setting up Mixpanel Service Account
+
+<CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authData": {
+    "data": {
+      "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+      "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+    }
+  }
+}'
+```
+
+```python Python
+from klavis import Klavis
+
+klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
+
+# Set the Mixpanel service account credentials for your instance
+response = klavis_client.mcp_server.set_instance_auth(
+    instance_id=mixpanel_server.instance_id,
+    auth_data={
+        "data": {
+            "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
+    }
+)
+
+print(response)
+```
+
+```javascript TypeScript
+import { KlavisClient } from 'klavis';
+
+const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
+
+// Set the Mixpanel service account credentials for your instance
+const response = await klavisClient.mcpServer.setInstanceAuth({
+    instanceId: mixpanelServer.instanceId,
+    authData: {
+        data: {
+            serviceaccount_username: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            serviceaccount_secret: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
+    }
+});
+
+console.log(response);
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
+	
+	payload := map[string]interface{}{
+        "instanceId": "<YOUR_INSTANCE_ID>",
+		"authData": map[string]interface{}{
+            "data": map[string]string{
+                "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+                "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>",
+            },
+        },
+    }
+	
+	jsonPayload, _ := json.Marshal(payload)
+	
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+	req.Header.Set("Content-Type", "application/json")
+	
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	
+	fmt.Println("Response Status:", resp.Status)
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+
+public class SetAuthToken {
+    public static void main(String[] args) {
+        try {
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"data\":{\"serviceaccount_username\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>\",\"serviceaccount_secret\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>\"}}}";
+            
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth"))
+                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+                
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            System.out.println("Response: " + response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+</CodeGroup>
+
+#### Response
+<CodeGroup>
+```json Response
+{
+  "success": true,
+  "message": "<string>"
+}
+```
+</CodeGroup>
+
+### Explore MCP Server Tools
+
+<Accordion title="Tools Information">
+| Tool Name   | Description                                                              |
+|-------------|--------------------------------------------------------------------------|
+| mixpanel_send_events  | Send events to Mixpanel using the /import endpoint with Service Account authentication |
+| mixpanel_get_projects | Get all projects that are accessible to the current service account user |
+| mixpanel_get_events | Get event names for the given Mixpanel project |
+| mixpanel_get_event_properties | Get event properties for the given event and Mixpanel project |
+| mixpanel_get_event_property_values | Get event property values for the given event name, project, and property name |
+| mixpanel_run_funnels_query | Run a funnel query to measure the conversion rate of a user journey |
+| mixpanel_run_segmentation_query | Run a segmentation query to slice and dice your event stream for deeper insights |
+| mixpanel_run_retention_query | Run a retention query to track user engagement over time and perform cohort analysis |
+| mixpanel_run_frequency_query | Run a frequency query to analyze user engagement patterns and cohort behavior |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>

@@ -89,6 +89,7 @@
               "documentation/mcp-server/linear",
               "documentation/mcp-server/linkedin",
               "documentation/mcp-server/markdown2doc",
+              "documentation/mcp-server/mixpanel",
               "documentation/mcp-server/motion",
               "documentation/mcp-server/notion",
               "documentation/mcp-server/onedrive",
@@ -174,7 +175,7 @@
             "group": "Auth / OAuth",
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
-              "api-reference/mcp-server/set-auth-token",
+              "api-reference/mcp-server/set-authentication-data",
               "api-reference/mcp-server/get-authentication-data",
               "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
