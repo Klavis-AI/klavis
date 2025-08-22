@@ -101,7 +101,7 @@ def main(
         return [
             types.Tool(
                 name="asana_create_task",
-                description="Create a new task in Asana",
+                description="Create a new task in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the task.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -143,7 +143,7 @@ def main(
                             "description": "List of tag names or IDs",
                         },
                     },
-                    "required": ["name"],
+                    "required": ["name", "workspace_id"],
                 },
             ),
             types.Tool(
@@ -168,7 +168,7 @@ def main(
             ),
             types.Tool(
                 name="asana_search_tasks",
-                description="Search for tasks in Asana",
+                description="Search for tasks in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the task.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -242,7 +242,7 @@ def main(
                             "description": "Sort order (default: descending)",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -357,7 +357,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_projects",
-                description="Get projects from Asana",
+                description="Get projects from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the project.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -380,7 +380,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -433,7 +433,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_users",
-                description="Get users from Asana",
+                description="Get users from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the user.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -452,7 +452,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -471,7 +471,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_teams",
-                description="Get teams from Asana",
+                description="Get teams from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the team.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -490,7 +490,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -533,7 +533,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_tags",
-                description="Get tags from Asana",
+                description="Get tags from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the tag.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -552,7 +552,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -571,7 +571,7 @@ def main(
             ),
             types.Tool(
                 name="asana_create_tag",
-                description="Create a tag in Asana",
+                description="Create a tag in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the tag.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -593,7 +593,7 @@ def main(
                             "description": "The workspace ID to create the tag in",
                         },
                     },
-                    "required": ["name"],
+                    "required": ["name", "workspace_id"],
                 },
             ),
         ]
