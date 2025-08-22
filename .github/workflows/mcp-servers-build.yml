@@ -190,7 +190,7 @@ jobs:
           image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
           tags: |
             ${{ github.sha }}-oauth
-            latest-oauth
+            latest
           context: _oauth_support
           containerfiles: |
             _oauth_support/docker/Dockerfile.template
@@ -207,7 +207,7 @@ jobs:
           image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
           tags: |
             ${{ github.sha }}-oauth
-            latest-oauth
+            latest
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}

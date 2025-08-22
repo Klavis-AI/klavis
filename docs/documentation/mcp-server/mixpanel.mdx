@@ -1,6 +1,6 @@
 ---
-title: 'Affinity'
-description: 'Learn how to use Klavis to connect your AI application to Affinity MCP Server'
+title: 'Mixpanel'
+description: 'Learn how to use Klavis to connect your AI application to Mixpanel MCP Server'
 ---
 
 import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
@@ -11,15 +11,15 @@ import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
 
 ## For Developer
 
-Follow the instructions below to integrate Affinity MCP server to your AI application using our API or SDK.
+Follow the instructions below to integrate Mixpanel MCP server to your AI application using our API or SDK.
 
 ### Prerequisites
 
 - [Create an API key](https://www.klavis.ai/home/api-keys)
 
-### 1. Create an Affinity MCP Server
+### 1. Create a Mixpanel MCP Server
 
-Use the following endpoint to create a new remote Affinity MCP server instance:
+Use the following endpoint to create a new remote Mixpanel MCP server instance:
 
 #### Request
 <CodeGroup>
@@ -29,9 +29,9 @@ from klavis.types import McpServerName
 
 klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
-# Create an Affinity MCP server instance
-affinity_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.AFFINITY,
+# Create a Mixpanel MCP server instance
+mixpanel_server = klavis_client.mcp_server.create_server_instance(
+    server_name=McpServerName.MIXPANEL,
     user_id="<YOUR_USER_ID>",
     platform_name="<YOUR_PLATFORM_NAME>",
 )
@@ -42,9 +42,9 @@ import { KlavisClient, Klavis } from 'klavis';
 
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 
-// Create an Affinity MCP server instance
-const affinityServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Affinity,
+// Create a Mixpanel MCP server instance
+const mixpanelServer = await klavisClient.mcpServer.createServerInstance({
+    serverName: Klavis.McpServerName.Mixpanel,
     userId: "<YOUR_USER_ID>",
     platformName: "<YOUR_PLATFORM_NAME>",
 });
@@ -56,11 +56,12 @@ curl --request POST \
   --header 'Authorization: Bearer <YOUR_API_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{
-  "serverName": "Affinity",
+  "serverName": "Mixpanel",
   "userId": "<YOUR_USER_ID>",
   "platformName": "<YOUR_PLATFORM_NAME>"
 }'
 ```
+
 
 ```go Go
 package main
@@ -76,7 +77,7 @@ func main() {
 
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
-	payload := strings.NewReader("{\n  \"serverName\": \"Affinity\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	payload := strings.NewReader("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -98,7 +99,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Affinity\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"Mixpanel\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
   .asString();
 ```
 </CodeGroup>
@@ -107,32 +108,51 @@ HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/i
 <CodeGroup>
 ```json Response
 {
-  "serverUrl": "https://affinity-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
+  "serverUrl": "https://mixpanel-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
   "instanceId": "<instance-id>"
 }
 ```
 </CodeGroup>
 
-<Check>**serverUrl** specifies the endpoint of the Affinity MCP server, which allows you to interact with your Affinity CRM data.</Check>
+<Check>**serverUrl** specifies the endpoint of the Mixpanel MCP server, which allows you to track events and analyze user behavior through the Mixpanel analytics platform.</Check>
 <Note>**instanceId** is used for authentication and identification of your server instance.</Note>
 
-### 2. Configure Affinity API Key
+### 2. Configure Mixpanel Service Account Credentials
 
-To use the Affinity MCP Server, you need to configure it with your Affinity API key.
+To use the Mixpanel MCP Server, you need to configure it with your Mixpanel service account credentials.
 
-#### Setting up Affinity API Key
+#### Setting up Mixpanel Service Account
 
 <CodeGroup>
+```bash cURL
+curl --request POST \
+  --url https://api.klavis.ai/mcp-server/instance/set-auth \
+  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "instanceId": "<YOUR_INSTANCE_ID>",
+  "authData": {
+    "data": {
+      "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+      "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+    }
+  }
+}'
+```
+
 ```python Python
 from klavis import Klavis
 
 klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
 
-# Set the Affinity API key for your instance
+# Set the Mixpanel service account credentials for your instance
 response = klavis_client.mcp_server.set_instance_auth(
-    instance_id="<YOUR_INSTANCE_ID>",
+    instance_id=mixpanel_server.instance_id,
     auth_data={
-        "token": "<YOUR_AFFINITY_API_KEY>"
+        "data": {
+            "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
     }
 )
 
@@ -144,28 +164,18 @@ import { KlavisClient } from 'klavis';
 
 const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
 
-// Set the Affinity API key for your instance
+// Set the Mixpanel service account credentials for your instance
 const response = await klavisClient.mcpServer.setInstanceAuth({
-    instanceId: "<YOUR_INSTANCE_ID>",
+    instanceId: mixpanelServer.instanceId,
     authData: {
-        token: "<YOUR_AFFINITY_API_KEY>"
+        data: {
+            serviceaccount_username: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+            serviceaccount_secret: "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>"
+        }
     }
 });
 
 console.log(response);
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/set-auth \
-  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "instanceId": "<YOUR_INSTANCE_ID>",
-  "authData": {
-    "token": "<YOUR_AFFINITY_API_KEY>"
-  }
-}'
 ```
 
 ```go Go
@@ -181,10 +191,13 @@ import (
 func main() {
 	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
 	
-	    payload := map[string]interface{}{
+	payload := map[string]interface{}{
         "instanceId": "<YOUR_INSTANCE_ID>",
-		"authData": map[string]string{
-            "token": "<YOUR_AFFINITY_API_KEY>",
+		"authData": map[string]interface{}{
+            "data": map[string]string{
+                "serviceaccount_username": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>",
+                "serviceaccount_secret": "<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>",
+            },
         },
     }
 	
@@ -215,7 +228,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class SetAuthToken {
     public static void main(String[] args) {
         try {
-            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"token\":\"<YOUR_AFFINITY_API_KEY>\"}}";
+            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"data\":{\"serviceaccount_username\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME>\",\"serviceaccount_secret\":\"<YOUR_MIXPANEL_SERVICE_ACCOUNT_SECRET>\"}}}";
             
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -250,29 +263,15 @@ public class SetAuthToken {
 <Accordion title="Tools Information">
 | Tool Name   | Description                                                              |
 |-------------|--------------------------------------------------------------------------|
-| affinity_get_current_user | Get current user information from Affinity |
-| affinity_get_all_list_entries_on_a_list | Get all List Entries on a List |
-| affinity_get_metadata_on_all_lists | Get metadata on all Lists |
-| affinity_get_metadata_on_a_single_list | Get metadata on a single List |
-| affinity_get_metadata_on_a_single_list_fields | Get metadata on a single List's Fields |
-| affinity_get_a_single_list_entry_on_a_list | Get a single List Entry on a List |
-| affinity_get_all_persons | Get all Persons in Affinity |
-| affinity_get_single_person | Get a single Person by ID |
-| affinity_get_person_fields_metadata | Get metadata on Person Fields |
-| affinity_get_person_lists | Get a Person's Lists |
-| affinity_get_person_list_entries | Get a Person's List Entries |
-| affinity_get_all_companies | Get all Companies in Affinity with basic information and field data |
-| affinity_get_single_company | Get a single Company by ID with basic information and field data |
-| affinity_get_company_fields_metadata | Get metadata on Company Fields |
-| affinity_get_company_lists | Get all Lists that contain the specified Company |
-| affinity_get_company_list_entries | Get List Entries for a Company across all Lists with field data |
-| affinity_get_all_opportunities | Get all Opportunities in Affinity |
-| affinity_get_single_opportunity | Get a single Opportunity by ID |
-| affinity_search_persons | Search for persons in Affinity. Search term can be part of an email address, first name, or last name |
-| affinity_search_organizations | Search for organizations / companies in Affinity. Search term can be part of organization name or domain |
-| affinity_search_opportunities | Search for opportunities in Affinity. Search term can be part of opportunity name |
-| affinity_get_all_notes | Get all Notes in Affinity |
-| affinity_get_specific_note | Get a specific note by ID |
+| mixpanel_send_events  | Send events to Mixpanel using the /import endpoint with Service Account authentication |
+| mixpanel_get_projects | Get all projects that are accessible to the current service account user |
+| mixpanel_get_events | Get event names for the given Mixpanel project |
+| mixpanel_get_event_properties | Get event properties for the given event and Mixpanel project |
+| mixpanel_get_event_property_values | Get event property values for the given event name, project, and property name |
+| mixpanel_run_funnels_query | Run a funnel query to measure the conversion rate of a user journey |
+| mixpanel_run_segmentation_query | Run a segmentation query to slice and dice your event stream for deeper insights |
+| mixpanel_run_retention_query | Run a retention query to track user engagement over time and perform cohort analysis |
+| mixpanel_run_frequency_query | Run a frequency query to analyze user engagement patterns and cohort behavior |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>

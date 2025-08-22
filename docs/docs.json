@@ -89,6 +89,7 @@
               "documentation/mcp-server/linear",
               "documentation/mcp-server/linkedin",
               "documentation/mcp-server/markdown2doc",
+              "documentation/mcp-server/mixpanel",
               "documentation/mcp-server/motion",
               "documentation/mcp-server/notion",
               "documentation/mcp-server/onedrive",
