@@ -1,0 +1,9 @@
+click==8.2.1
+httpx==0.28.1
+httpx-sse==0.4.1
+mcp==1.12.4
+sse-starlette==3.0.2
+starlette==0.47.2
+typing-inspection==0.4.1
+typing_extensions==4.14.1
+uvicorn==0.35.0
