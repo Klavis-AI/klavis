@@ -5,51 +5,70 @@ from .base import make_graphql_request
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_issues(team_id: str = None, limit: int = 50) -> Dict[str, Any]:
-    """Get issues, optionally filtered by team."""
-    logger.info(f"Executing tool: get_issues with team_id: {team_id}, limit: {limit}")
+async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Get issues with optional filtering by team and timestamps."""
+    logger.info(f"Executing tool: get_issues with team_id: {team_id}, limit: {limit}, filter: {filter}")
     try:
+        # Build the filter object
+        issue_filter = {}
+        
+        # Add team filter if specified
         if team_id:
+            issue_filter["team"] = {"id": {"eq": team_id}}
+        
+        # Add timestamp filters if provided
+        if filter:
+            if "updatedAt" in filter:
+                issue_filter["updatedAt"] = filter["updatedAt"]
+            if "createdAt" in filter:
+                issue_filter["createdAt"] = filter["createdAt"]
+        
+        # Use filtered query if we have any filters
+        if issue_filter:
             query = """
-            query TeamIssues($teamId: String!, $first: Int) {
-              team(id: $teamId) {
-                issues(first: $first) {
-                  nodes {
+            query FilteredIssues($filter: IssueFilter, $first: Int) {
+              issues(filter: $filter, first: $first) {
+                nodes {
+                  id
+                  identifier
+                  title
+                  description
+                  priority
+                  priorityLabel
+                  state {
                     id
-                    identifier
-                    title
-                    description
-                    priority
-                    priorityLabel
-                    state {
-                      id
-                      name
-                      type
-                    }
-                    assignee {
-                      id
-                      name
-                      email
-                    }
-                    creator {
-                      id
-                      name
-                      email
-                    }
-                    project {
-                      id
-                      name
-                    }
-                    createdAt
-                    updatedAt
-                    url
+                    name
+                    type
                   }
+                  assignee {
+                    id
+                    name
+                    email
+                  }
+                  creator {
+                    id
+                    name
+                    email
+                  }
+                  team {
+                    id
+                    name
+                    key
+                  }
+                  project {
+                    id
+                    name
+                  }
+                  createdAt
+                  updatedAt
+                  url
                 }
               }
             }
             """
-            variables = {"teamId": team_id, "first": limit}
+            variables = {"filter": issue_filter, "first": limit}
         else:
+            # No filters, use simple query
             query = """
             query Issues($first: Int) {
               issues(first: $first) {
