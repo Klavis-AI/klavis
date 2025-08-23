@@ -102,7 +102,7 @@ def main(
             ),
             types.Tool(
                 name="linear_get_issues",
-                description="Get issues, optional filtering by team or timestamps",
+                description="Get issues, optionally filtering by team or timestamps",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -122,6 +122,17 @@ def main(
                                 "updatedAt": {
                                     "type": "object",
                                     "description": "Filter by update timestamp for issues.",
+                                    "properties": {
+                                        "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
+                                        "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},
+                                        "lte": {"type": "string", "description": "Less than or equal to timestamp (ISO 8601)"},
+                                        "lt": {"type": "string", "description": "Less than timestamp (ISO 8601)"},
+                                        "eq": {"type": "string", "description": "Equal to timestamp (ISO 8601)"},
+                                    },
+                                },
+                                "createdAt": {
+                                    "type": "object",
+                                    "description": "Filter by creation timestamp for issues.",
                                     "properties": {
                                         "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
                                         "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},
@@ -227,7 +238,7 @@ def main(
             ),
             types.Tool(
                 name="linear_get_projects",
-                description="Get projects, optional filtering by team or timestamps",
+                description="Get projects, optionally filtering by team or timestamps",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -247,6 +258,17 @@ def main(
                                 "updatedAt": {
                                     "type": "object",
                                     "description": "Filter by update timestamp for projects.",
+                                    "properties": {
+                                        "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
+                                        "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},
+                                        "lte": {"type": "string", "description": "Less than or equal to timestamp (ISO 8601)"},
+                                        "lt": {"type": "string", "description": "Less than timestamp (ISO 8601)"},
+                                        "eq": {"type": "string", "description": "Equal to timestamp (ISO 8601)"},
+                                    },
+                                },
+                                "createdAt": {
+                                    "type": "object",
+                                    "description": "Filter by creation timestamp for projects.",
                                     "properties": {
                                         "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
                                         "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},

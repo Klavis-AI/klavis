@@ -6,7 +6,7 @@ from .base import make_graphql_request
 logger = logging.getLogger(__name__)
 
 async def get_projects(team_id: str = None, limit: int = 50, filter: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Get projects with optional filtering by team and update timestamp."""
+    """Get projects with optional filtering by team and timestamps."""
     logger.info(f"Executing tool: get_projects with team_id: {team_id}, limit: {limit}, filter: {filter}")
     try:
         # Build the filter object
@@ -17,9 +17,12 @@ async def get_projects(team_id: str = None, limit: int = 50, filter: Dict[str, A
             # For projects, we need to filter by teams relation
             project_filter["teams"] = {"some": {"id": {"eq": team_id}}}
         
-        # Add updatedAt filter if provided
-        if filter and "updatedAt" in filter:
-            project_filter["updatedAt"] = filter["updatedAt"]
+        # Add timestamp filters if provided
+        if filter:
+            if "updatedAt" in filter:
+                project_filter["updatedAt"] = filter["updatedAt"]
+            if "createdAt" in filter:
+                project_filter["createdAt"] = filter["createdAt"]
         
         # Use filtered query if we have any filters
         if project_filter:
