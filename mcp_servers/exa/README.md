@@ -1,6 +1,6 @@
 # Exa AI-Powered Search MCP Server
 
-A high-quality Model Context Protocol (MCP) server that provides AI-powered web search capabilities through Exa's sophisticated search engine. This server exposes Exa's full suite of search tools, enabling AI agents to perform semantic search, content retrieval, similarity finding, direct question answering, and comprehensive research.
+ high-quality Model Context Protocol (MCP) server that provides AI-powered web search capabilities through Exa's sophisticated search engine. This server exposes Exa's full suite of search tools, enabling AI agents to perform semantic search, content retrieval, similarity finding, direct question answering, and comprehensive research.
 
 ## Purpose
 
