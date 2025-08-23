@@ -46,7 +46,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_her
   ghcr.io/klavis-ai/github-mcp-server:latest
 
 # Run Gmail MCP Server with OAuth
-docker run -it -e KLAVIS_API_KEY=your_key \
+docker run -p 8000:5000 -e KLAVIS_API_KEY=your_key \
   ghcr.io/klavis-ai/gmail-mcp-server:latest
 ```
 
