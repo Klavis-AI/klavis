@@ -1,0 +1,7 @@
+datadog-api-client[async]==2.41.0
+click==8.1.7
+python-dotenv==1.0.0
+mcp>=1.12.0
+fastapi
+uvicorn==0.24.0
+pydantic>=2.5.0
