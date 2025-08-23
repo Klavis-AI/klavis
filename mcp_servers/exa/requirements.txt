@@ -1,7 +1,7 @@
-mcp==1.12.2
-exa_py==1.0.12
-python-dotenv==1.0.0
-httpx>=0.24.0
-click>=8.0.0
-starlette>=0.27.0
-uvicorn>=0.23.1
+mcp==1.13.1
+exa_py==1.15.1
+python-dotenv==1.1.1
+httpx>=0.28.1
+click>=8.2.1
+starlette>=0.47.2
+uvicorn>=0.35.0
