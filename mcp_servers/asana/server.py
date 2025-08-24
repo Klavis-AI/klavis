@@ -357,7 +357,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_projects",
-                description="Get projects from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the project.",
+                description="Get projects from Asana with optional filtering by timestamps. You MUST call asana_get_workspaces first to get the workspace_id for the project.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -378,6 +378,56 @@ def main(
                         "next_page_token": {
                             "type": "string",
                             "description": "Token for pagination",
+                        },
+                        "filter": {
+                            "type": "object",
+                            "description": "Optional filters for projects",
+                            "properties": {
+                                "created_at": {
+                                    "type": "object",
+                                    "description": "Filter by creation date",
+                                    "properties": {
+                                        "gt": {
+                                            "type": "string",
+                                            "description": "Greater than timestamp (ISO 8601 format)",
+                                        },
+                                        "gte": {
+                                            "type": "string",
+                                            "description": "Greater than or equal timestamp (ISO 8601 format)",
+                                        },
+                                        "lt": {
+                                            "type": "string",
+                                            "description": "Less than timestamp (ISO 8601 format)",
+                                        },
+                                        "lte": {
+                                            "type": "string",
+                                            "description": "Less than or equal timestamp (ISO 8601 format)",
+                                        },
+                                    },
+                                },
+                                "modified_at": {
+                                    "type": "object",
+                                    "description": "Filter by modification date",
+                                    "properties": {
+                                        "gt": {
+                                            "type": "string",
+                                            "description": "Greater than timestamp (ISO 8601 format)",
+                                        },
+                                        "gte": {
+                                            "type": "string",
+                                            "description": "Greater than or equal timestamp (ISO 8601 format)",
+                                        },
+                                        "lt": {
+                                            "type": "string",
+                                            "description": "Less than timestamp (ISO 8601 format)",
+                                        },
+                                        "lte": {
+                                            "type": "string",
+                                            "description": "Less than or equal timestamp (ISO 8601 format)",
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
                     "required": ["workspace_id"],
