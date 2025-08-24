@@ -3,3 +3,4 @@ python-dotenv>=0.21.0
 pytest>=8.4.1
 mock>=4.0.3
 amplitude-analytics
+mcp[cli]>=1.12.0

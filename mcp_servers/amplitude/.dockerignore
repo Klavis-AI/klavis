@@ -1,0 +1,11 @@
+# amplitude/.dockerignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.DS_Store
+.venv/
+.env
+test/__pycache__/
+proof/
