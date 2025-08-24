@@ -67,7 +67,7 @@ def extract_auth_credentials(request_or_scope) -> tuple[str, str]:
         return "", ""
     
     try:
-        auth_json = json.loads(auth_data.decode('utf-8'))
+        auth_json = json.loads(auth_data)
         return auth_json.get('access_token', ''), auth_json.get('instance_url', '')
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
