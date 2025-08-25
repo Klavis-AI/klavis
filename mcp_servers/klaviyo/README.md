@@ -1,12 +1,16 @@
 
+# Klaviyo 
+Klaviyo is a marketing automation platform that helps businesses deliver personalized email, SMS, and push notification campaigns. It provides tools for customer segmentation, campaign management, analytics, and integrations with e-commerce platforms like Shopify, WooCommerce, and Magento.
+
 # Klaviyo MCP Server
+
 A Python server for interacting with the Klaviyo API using MCP tools.
 
 ## Features
 
 - Create and retrieve Klaviyo profiles
 - Manage lists and campaigns
-- Fetch and render templates
+- Fetch and render email templates
 - Access account and flow information
 - Built-in retry, pagination, and error handling
 
@@ -43,15 +47,14 @@ A Python server for interacting with the Klaviyo API using MCP tools.
 ### Account Tools
 
 - **get_account_details**: Fetch account-level details and settings from Klaviyo.
-- **list_accounts**: List all accounts accessible via the current credentials (if applicable).
 
-### Flows and Forms Tools
+### Flows Tools
 
 - **get_flows**: Retrieve all flows (automated sequences) configured in the Klaviyo account.
 
 ## Project Setup Instructions
 
-## Requirements
+### Requirements
 
 - Python 3.10+
 - See [requirements.txt](requirements.txt) for dependencies
@@ -80,7 +83,7 @@ A Python server for interacting with the Klaviyo API using MCP tools.
    ```
 5. Start the MCP server:
    ```bash
-   uv run mcp install main.py
+   python3 server.py
    ```
 
 ### Additional Notes
