@@ -140,7 +140,7 @@ customer_properties = {
 
 # MCP Tool definitions
 create_customer_tool = Tool(
-    name="create_customer",
+    name="quickbooks_create_customer",
     description="Create a new customer in QuickBooks",
     inputSchema={
         "type": "object",
@@ -149,7 +149,7 @@ create_customer_tool = Tool(
 )
 
 get_customer_tool = Tool(
-    name="get_customer",
+    name="quickbooks_get_customer",
     description="Get a specific customer by ID from QuickBooks",
     inputSchema={
         "type": "object",
@@ -161,7 +161,7 @@ get_customer_tool = Tool(
 )
 
 list_customers_tool = Tool(
-    name="list_customers",
+    name="quickbooks_list_customers",
     description="List all customers from QuickBooks",
     inputSchema={
         "type": "object",
@@ -173,7 +173,7 @@ list_customers_tool = Tool(
 )
 
 update_customer_tool = Tool(
-    name="update_customer",
+    name="quickbooks_update_customer",
     description="Update an existing customer in QuickBooks",
     inputSchema={
         "type": "object",
@@ -183,7 +183,7 @@ update_customer_tool = Tool(
 )
 
 deactivate_customer_tool = Tool(
-    name="deactivate_customer",
+    name="quickbooks_deactivate_customer",
     description="Deactivate a customer from QuickBooks (set Active to false)",
     inputSchema={
         "type": "object",
@@ -195,7 +195,7 @@ deactivate_customer_tool = Tool(
 )
 
 activate_customer_tool = Tool(
-    name="activate_customer",
+    name="quickbooks_activate_customer",
     description="Activate a customer in QuickBooks (set Active to true)",
     inputSchema={
         "type": "object",
@@ -207,7 +207,7 @@ activate_customer_tool = Tool(
 )
 
 search_customers_tool = Tool(
-    name="search_customers",
+    name="quickbooks_search_customers",
     title="Search Customers",
     description="Advanced Customer Search - Search customers with powerful filters including name, contact info, address, balance, status, and other criteria. Perfect for finding specific customers based on various parameters",
     inputSchema={

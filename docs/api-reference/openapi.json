@@ -155,6 +155,45 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
+    "/mcp-server/self-hosted/instance/create": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Create a Self-Hosted MCP Server Instance",
+        "description": "Creates an instance id for a self-hosted MCP server,\nvalidating the request with an API key and user details.\nThe main purpose of this endpoint is to create an instance id for a self-hosted MCP server.\nThe instance id is used to identify and store the auth metadata in the database.\nReturns the existing instance id if it already exists for the user.",
+        "operationId": "createSelfHostedServerInstance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSelfHostedServerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSelfHostedServerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
     "/mcp-server/instance/get/{instance_id}": {
       "get": {
         "tags": ["mcp-server"],
@@ -200,7 +239,7 @@
       "delete": {
         "tags": ["mcp-server"],
         "summary": "Delete Auth data for Server Instance",
-        "description": "Deletes authentication metadata for a specific server connection instance.",
+        "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
@@ -338,16 +377,16 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
-    "/mcp-server/instance/set-auth-token": {
+    "/mcp-server/instance/set-auth": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Set Auth Token",
-        "description": "Sets an authentication token for a specific instance.\nThis updates the auth_metadata for the specified instance.",
-        "operationId": "setInstanceAuthToken",
+        "summary": "Set Authentication Data",
+        "description": "Sets authentication data for a specific instance.\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified instance.",
+        "operationId": "setInstanceAuth",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SetAuthTokenRequest" }
+              "schema": { "$ref": "#/components/schemas/SetAuthRequest" }
             }
           },
           "required": true
@@ -376,9 +415,9 @@
     "/mcp-server/instance/get-auth/{instance_id}": {
       "get": {
         "tags": ["mcp-server"],
-        "summary": "Get Authentication Metadata",
-        "description": "Retrieves the auth metadata for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication metadata.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
-        "operationId": "getInstanceAuthMetadata",
+        "summary": "Get Authentication Data",
+        "description": "Retrieves the auth data for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthData",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
@@ -388,10 +427,10 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "description": "The ID of the connection instance to get auth metadata for.",
+              "description": "The ID of the connection instance to get auth data for.",
               "title": "Instance Id"
             },
-            "description": "The ID of the connection instance to get auth metadata for."
+            "description": "The ID of the connection instance to get auth data for."
           }
         ],
         "responses": {
@@ -399,9 +438,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthMetadataResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
               }
             }
           },
@@ -2313,6 +2350,19 @@
   },
   "components": {
     "schemas": {
+      "ApiKeyAuth": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "The API key to save"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["token"],
+        "title": "Option 1: API Key"
+      },
       "CallToolRequest": {
         "properties": {
           "serverUrl": {
@@ -2389,6 +2439,40 @@
         "type": "string",
         "enum": ["SSE", "StreamableHttp"],
         "title": "ConnectionType"
+      },
+      "CreateSelfHostedServerRequest": {
+        "properties": {
+          "serverName": {
+            "$ref": "#/components/schemas/McpServerName",
+            "description": "The name of the target MCP server. Case-insensitive (e.g., 'google calendar', 'GOOGLE_CALENDAR', 'Google Calendar' are all valid)."
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Userid",
+            "description": "The identifier for the user requesting the server URL."
+          }
+        },
+        "type": "object",
+        "required": ["serverName", "userId"],
+        "title": "CreateSelfHostedServerRequest"
+      },
+      "CreateSelfHostedServerResponse": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid",
+            "description": "The unique identifier for this specific server connection instance."
+          },
+          "oauthUrl": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Oauthurl",
+            "description": "The OAuth authorization URL for the specified server, if OAuth is configured."
+          }
+        },
+        "type": "object",
+        "required": ["instanceId"],
+        "title": "CreateSelfHostedServerResponse"
       },
       "CreateServerRequest": {
         "properties": {
@@ -2537,7 +2621,20 @@
         "required": ["id", "name"],
         "title": "ExtendedMcpServer"
       },
-      "GetAuthMetadataResponse": {
+      "GeneralAuth": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data",
+            "description": "Any other general authentication data to save"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Option 2: General Auth Data"
+      },
+      "GetAuthDataResponse": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -2550,7 +2647,7 @@
               { "type": "null" }
             ],
             "title": "Authdata",
-            "description": "Complete authentication metadata including access token, refresh token, scope, expiration, and platform-specific data"
+            "description": "Complete authentication data including access token, refresh token, scope, expiration, and platform-specific data"
           },
           "error": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
@@ -2560,7 +2657,7 @@
         },
         "type": "object",
         "required": ["success"],
-        "title": "GetAuthMetadataResponse"
+        "title": "GetAuthDataResponse"
       },
       "GetInstanceResponse": {
         "properties": {
@@ -2779,33 +2876,48 @@
           "Brave Search",
           "ClickUp",
           "Close",
+          "Coinbase",
           "Confluence",
           "Discord",
+          "Dropbox",
           "Doc2markdown",
+          "Exa",
           "Firecrawl Deep Research",
           "Firecrawl Web Search",
+          "Freshdesk",
           "GitHub",
           "Gmail",
           "Gong",
           "Google Calendar",
           "Google Docs",
           "Google Drive",
+          "Google Jobs",
           "Google Sheets",
+          "Hacker News",
+          "Heygen",
           "HubSpot",
           "Jira",
           "Klavis ReportGen",
           "Linear",
           "LinkedIn",
           "Markdown2doc",
+          "Mem0",
+          "Mixpanel",
+          "Monday",
+          "Moneybird",
           "Motion",
           "Notion",
+          "Onedrive",
+          "Openrouter",
           "Plai",
           "Postgres",
           "QuickBooks",
           "Resend",
           "Salesforce",
+          "Shopify",
           "Slack",
           "Supabase",
+          "Tavily",
           "WhatsApp",
           "WordPress",
           "YouTube"
@@ -2832,8 +2944,12 @@
           "Jira",
           "Linear",
           "LinkedIn",
+          "Monday",
+          "Moneybird",
           "Notion",
+          "Onedrive",
           "Salesforce",
+          "Shopify",
           "Slack",
           "Supabase",
           "Xero",
@@ -2852,22 +2968,25 @@
         "required": ["name", "description"],
         "title": "ServerTool"
       },
-      "SetAuthTokenRequest": {
+      "SetAuthRequest": {
         "properties": {
           "instanceId": {
             "type": "string",
             "title": "Instanceid",
             "description": "The unique identifier for the connection instance"
           },
-          "authToken": {
-            "type": "string",
-            "title": "Authtoken",
-            "description": "The authentication token to save"
+          "authData": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
+            ],
+            "title": "Authdata",
+            "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": ["instanceId", "authToken"],
-        "title": "SetAuthTokenRequest"
+        "required": ["instanceId", "authData"],
+        "title": "SetAuthRequest"
       },
       "StatusResponse": {
         "properties": {

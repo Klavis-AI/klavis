@@ -22,18 +22,18 @@ const asyncLocalStorage = new AsyncLocalStorage<{
 
 // Attio API Client
 class AttioClient {
-    private apiKey: string;
+    private accessToken: string;
     private baseUrl: string;
 
-    constructor(apiKey: string, baseUrl: string = ATTIO_API_URL) {
-        this.apiKey = apiKey;
+    constructor(accessToken: string, baseUrl: string = ATTIO_API_URL) {
+        this.accessToken = accessToken;
         this.baseUrl = baseUrl;
     }
 
     private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
         const url = `${this.baseUrl}${endpoint}`;
         const headers = {
-            'Authorization': `Bearer ${this.apiKey}`,
+            'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
             ...options.headers,
         };
@@ -253,6 +253,46 @@ class AttioClient {
             }),
         });
     }
+
+    async createTask(data: {
+        content_plaintext: string;
+        deadline_at?: string;
+        assignee_emails: string[];
+    }): Promise<any> {
+        const taskData: any = {
+            content: data.content_plaintext,
+            format: 'plaintext',
+            is_completed: false,
+        };
+
+        if (data.deadline_at) {
+            taskData.deadline_at = data.deadline_at;
+        }
+
+        taskData.assignees = data.assignee_emails.map(email => ({
+            workspace_member_email_address: email
+        }));
+
+        // Add linked_records for each assignee email to connect to people records
+        taskData.linked_records = data.assignee_emails.map(email => ({
+            target_object: "people",
+            email_addresses: [
+                {
+                    email_address: email
+                }
+            ]
+        }));
+
+        console.log(JSON.stringify({
+            data: taskData
+        }));
+        return this.makeRequest('/tasks', {
+            method: 'POST',
+            body: JSON.stringify({
+                data: taskData
+            }),
+        });
+    }
 }
 
 // Getter function for the client
@@ -279,6 +319,10 @@ const SEARCH_PEOPLE_TOOL: Tool = {
                 type: 'string',
                 description: 'Filter by email address',
             },
+            record_id: {
+                type: 'string',
+                description: 'Filter by specific person record ID',
+            },
             limit: {
                 type: 'number',
                 description: 'Maximum number of results to return (default: 25, max: 50)',
@@ -301,6 +345,10 @@ const SEARCH_COMPANIES_TOOL: Tool = {
             domain: {
                 type: 'string',
                 description: 'Filter by company domain',
+            },
+            record_id: {
+                type: 'string',
+                description: 'Filter by specific company record ID',
             },
             limit: {
                 type: 'number',
@@ -332,6 +380,10 @@ const SEARCH_DEALS_TOOL: Tool = {
             maxValue: {
                 type: 'number',
                 description: 'Maximum deal value',
+            },
+            record_id: {
+                type: 'string',
+                description: 'Filter by specific deal record ID',
             },
             limit: {
                 type: 'number',
@@ -515,6 +567,30 @@ const UPDATE_COMPANY_TOOL: Tool = {
     },
 };
 
+const CREATE_TASK_TOOL: Tool = {
+    name: 'attio_create_task',
+    description: 'Create a new task in your Attio workspace. Tasks must be assigned to workspace members and can have optional deadlines.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            content_plaintext: {
+                type: 'string',
+                description: 'The plaintext content of the task (e.g., "Follow up on current software solutions")',
+            },
+            deadline_at: {
+                type: 'string',
+                description: 'Optional deadline for the task as an ISO 8601 timestamp (e.g., "2023-01-01T15:00:00.000000000Z")',
+            },
+            assignee_emails: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of workspace member email addresses to assign the task to (e.g., ["alice@attio.com", "bob@attio.com"])',
+            },
+        },
+        required: ['content_plaintext', 'assignee_emails'],
+    },
+};
+
 // Utility functions
 function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency', data: any): void {
     try {
@@ -523,6 +599,26 @@ function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'cri
     } catch (error) {
         console.log(`[${level.toUpperCase()}] [LOG_ERROR] Could not serialize log data`);
     }
+}
+
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Attio access token is missing. Provide it via ACCESS_TOKEN env var or x-auth-data header with access_token field.');
+        authData = '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
 }
 
 // Main server function
@@ -551,6 +647,7 @@ const getAttioMcpServer = () => {
                 CREATE_COMPANY_TOOL,
                 UPDATE_PERSON_TOOL,
                 UPDATE_COMPANY_TOOL,
+                CREATE_TASK_TOOL,
             ],
         };
     });
@@ -564,35 +661,39 @@ const getAttioMcpServer = () => {
                     const client = getAttioClient();
                     const filters: any = {};
 
-                    if (args?.query) {
-                        filters.$or = [
-                            { name: { $contains: args.query } },
-                            { email_addresses: { $contains: args.query } },
-                            { description: { $contains: args.query } },
-                            { job_title: { $contains: args.query } },
-                            {
-                                path: [
-                                    ["people", "company"],
-                                    ["companies", "name"]
-                                ],
-                                constraints: {
-                                    $contains: args.query
-                                }
-                            },
-                            {
-                                path: [
-                                    ["people", "company"],
-                                    ["companies", "description"]
-                                ],
-                                constraints: {
-                                    $contains: args.query
-                                }
-                            },
-                            { primary_location: { locality: { $contains: args.query } } },
-                        ];
-                    }
-                    if (args?.email) {
-                        filters.email_addresses = args.email;
+                    if (args?.record_id) {
+                        filters.record_id = { $eq: args.record_id };
+                    } else {
+                        if (args?.query) {
+                            filters.$or = [
+                                { name: { $contains: args.query } },
+                                { email_addresses: { $contains: args.query } },
+                                { description: { $contains: args.query } },
+                                { job_title: { $contains: args.query } },
+                                {
+                                    path: [
+                                        ["people", "company"],
+                                        ["companies", "name"]
+                                    ],
+                                    constraints: {
+                                        $contains: args.query
+                                    }
+                                },
+                                {
+                                    path: [
+                                        ["people", "company"],
+                                        ["companies", "description"]
+                                    ],
+                                    constraints: {
+                                        $contains: args.query
+                                    }
+                                },
+                                { primary_location: { locality: { $contains: args.query } } },
+                            ];
+                        }
+                        if (args?.email) {
+                            filters.email_addresses = args.email;
+                        }
                     }
 
                     const result = await client.searchPeople(filters, (args?.limit as number) || 25);
@@ -611,34 +712,38 @@ const getAttioMcpServer = () => {
                     const client = getAttioClient();
                     const filters: any = {};
 
-                    if (args?.query) {
-                        filters.$or = [
-                            { name: { $contains: args.query } },
-                            { domains: { domain: { $contains: args.query } } },
-                            { description: { $contains: args.query } },
-                            { primary_location: { locality: { $contains: args.query } } },
-                            {
-                                path: [
-                                    ["companies", "team"],
-                                    ["people", "name"]
-                                ],
-                                constraints: {
-                                    $contains: args.query
-                                }
-                            },
-                            {
-                                path: [
-                                    ["companies", "team"],
-                                    ["people", "description"]
-                                ],
-                                constraints: {
-                                    $contains: args.query
-                                }
-                            },
-                        ];
-                    }
-                    if (args?.domain) {
-                        filters.domains = { domain: args.domain };
+                    if (args?.record_id) {
+                        filters.record_id = { $eq: args.record_id };
+                    } else {
+                        if (args?.query) {
+                            filters.$or = [
+                                { name: { $contains: args.query } },
+                                { domains: { domain: { $contains: args.query } } },
+                                { description: { $contains: args.query } },
+                                { primary_location: { locality: { $contains: args.query } } },
+                                {
+                                    path: [
+                                        ["companies", "team"],
+                                        ["people", "name"]
+                                    ],
+                                    constraints: {
+                                        $contains: args.query
+                                    }
+                                },
+                                {
+                                    path: [
+                                        ["companies", "team"],
+                                        ["people", "description"]
+                                    ],
+                                    constraints: {
+                                        $contains: args.query
+                                    }
+                                },
+                            ];
+                        }
+                        if (args?.domain) {
+                            filters.domains = { domain: args.domain };
+                        }
                     }
 
                     const result = await client.searchCompanies(filters, (args?.limit as number) || 25);
@@ -657,19 +762,23 @@ const getAttioMcpServer = () => {
                     const client = getAttioClient();
                     const filters: any = {};
 
-                    if (args?.name) {
-                        filters.name = { $contains: args.name };
-                    }
-                    if (args?.stage) {
-                        filters.stage = args.stage;
-                    }
-                    if (args?.minValue !== undefined || args?.maxValue !== undefined) {
-                        filters.value = {};
-                        if (args?.minValue !== undefined) {
-                            filters.value.$gte = args.minValue;
+                    if (args?.record_id) {
+                        filters.record_id = { $eq: args.record_id };
+                    } else {
+                        if (args?.name) {
+                            filters.name = { $contains: args.name };
                         }
-                        if (args?.maxValue !== undefined) {
-                            filters.value.$lte = args.maxValue;
+                        if (args?.stage) {
+                            filters.stage = args.stage;
+                        }
+                        if (args?.minValue !== undefined || args?.maxValue !== undefined) {
+                            filters.value = {};
+                            if (args?.minValue !== undefined) {
+                                filters.value.$gte = args.minValue;
+                            }
+                            if (args?.maxValue !== undefined) {
+                                filters.value.$lte = args.maxValue;
+                            }
                         }
                     }
 
@@ -800,6 +909,25 @@ const getAttioMcpServer = () => {
                     };
                 }
 
+                case 'attio_create_task': {
+                    const client = getAttioClient();
+
+                    const result = await client.createTask({
+                        content_plaintext: (args as any)?.content_plaintext,
+                        deadline_at: (args as any)?.deadline_at,
+                        assignee_emails: (args as any)?.assignee_emails,
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: 'text',
+                                text: JSON.stringify(result, null, 2),
+                            },
+                        ],
+                    };
+                }
+
                 default:
                     throw new Error(`Unknown tool: ${name}`);
             }
@@ -828,13 +956,8 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const apiKey = process.env.ATTIO_API_KEY || req.headers['x-auth-token'] as string;
-
-    if (!apiKey) {
-        console.error('Error: Attio API key is missing. Provide it via ATTIO_API_KEY env var or x-auth-token header.');
-    }
-
-    const attioClient = new AttioClient(apiKey);
+    const accessToken = extractAccessToken(req);
+    const attioClient = new AttioClient(accessToken);
 
     const server = getAttioMcpServer();
     try {
@@ -921,13 +1044,8 @@ app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const transport = transports.get(sessionId);
     if (transport) {
-        const apiKey = process.env.ATTIO_API_KEY || req.headers['x-auth-token'] as string;
-
-        if (!apiKey) {
-            console.error('Error: Attio API key is missing. Provide it via ATTIO_API_KEY env var or x-auth-token header.');
-        }
-
-        const attioClient = new AttioClient(apiKey);
+        const accessToken = extractAccessToken(req);
+        const attioClient = new AttioClient(accessToken);
 
         asyncLocalStorage.run({ attioClient }, async () => {
             await transport.handlePostMessage(req, res);

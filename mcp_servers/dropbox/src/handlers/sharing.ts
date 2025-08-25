@@ -491,33 +491,33 @@ export async function handleSharingOperation(request: CallToolRequest): Promise<
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "add_file_member":
+        case "dropbox_add_file_member":
             return await handleAddFileMember(args);
-        case "list_file_members":
+        case "dropbox_list_file_members":
             return await handleListFileMembers(args);
-        case "remove_file_member":
+        case "dropbox_remove_file_member":
             return await handleRemoveFileMember(args);
-        case "share_folder":
+        case "dropbox_share_folder":
             return await handleShareFolder(args);
-        case "list_folder_members":
+        case "dropbox_list_folder_members":
             return await handleListFolderMembers(args);
-        case "add_folder_member":
+        case "dropbox_add_folder_member":
             return await handleAddFolderMember(args);
-        case "remove_folder_member":
+        case "dropbox_remove_folder_member":
             return await handleRemoveFolderMember(args);
-        case "share_file":
+        case "dropbox_share_file":
             return await handleShareFile(args);
-        case "get_shared_links":
+        case "dropbox_get_shared_links":
             return await handleGetSharedLinks(args);
-        case "unshare_file":
+        case "dropbox_unshare_file":
             return await handleUnshareFile(args);
-        case "unshare_folder":
+        case "dropbox_unshare_folder":
             return await handleUnshareFolder(args);
-        case "list_shared_folders":
+        case "dropbox_list_shared_folders":
             return await handleListSharedFolders(args);
-        case "list_received_files":
+        case "dropbox_list_received_files":
             return await handleListReceivedFiles(args);
-        case "check_job_status":
+        case "dropbox_check_job_status":
             return await handleCheckJobStatus(args);
         default:
             throw new Error(`Unknown sharing operation: ${name}`);

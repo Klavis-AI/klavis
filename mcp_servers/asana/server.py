@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json
@@ -39,6 +40,35 @@ load_dotenv()
 
 ASANA_MCP_SERVER_PORT = int(os.getenv("ASANA_MCP_SERVER_PORT", "5000"))
 
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
 @click.command()
 @click.option("--port", default=ASANA_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -71,7 +101,7 @@ def main(
         return [
             types.Tool(
                 name="asana_create_task",
-                description="Create a new task in Asana",
+                description="Create a new task in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the task.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -113,7 +143,7 @@ def main(
                             "description": "List of tag names or IDs",
                         },
                     },
-                    "required": ["name"],
+                    "required": ["name", "workspace_id"],
                 },
             ),
             types.Tool(
@@ -138,7 +168,7 @@ def main(
             ),
             types.Tool(
                 name="asana_search_tasks",
-                description="Search for tasks in Asana",
+                description="Search for tasks in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the task.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -212,7 +242,7 @@ def main(
                             "description": "Sort order (default: descending)",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -327,7 +357,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_projects",
-                description="Get projects from Asana",
+                description="Get projects from Asana with optional filtering by timestamps. You MUST call asana_get_workspaces first to get the workspace_id for the project.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -349,8 +379,58 @@ def main(
                             "type": "string",
                             "description": "Token for pagination",
                         },
+                        "filter": {
+                            "type": "object",
+                            "description": "Optional filters for projects",
+                            "properties": {
+                                "created_at": {
+                                    "type": "object",
+                                    "description": "Filter by creation date",
+                                    "properties": {
+                                        "gt": {
+                                            "type": "string",
+                                            "description": "Greater than timestamp (ISO 8601 format)",
+                                        },
+                                        "gte": {
+                                            "type": "string",
+                                            "description": "Greater than or equal timestamp (ISO 8601 format)",
+                                        },
+                                        "lt": {
+                                            "type": "string",
+                                            "description": "Less than timestamp (ISO 8601 format)",
+                                        },
+                                        "lte": {
+                                            "type": "string",
+                                            "description": "Less than or equal timestamp (ISO 8601 format)",
+                                        },
+                                    },
+                                },
+                                "modified_at": {
+                                    "type": "object",
+                                    "description": "Filter by modification date",
+                                    "properties": {
+                                        "gt": {
+                                            "type": "string",
+                                            "description": "Greater than timestamp (ISO 8601 format)",
+                                        },
+                                        "gte": {
+                                            "type": "string",
+                                            "description": "Greater than or equal timestamp (ISO 8601 format)",
+                                        },
+                                        "lt": {
+                                            "type": "string",
+                                            "description": "Less than timestamp (ISO 8601 format)",
+                                        },
+                                        "lte": {
+                                            "type": "string",
+                                            "description": "Less than or equal timestamp (ISO 8601 format)",
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -403,7 +483,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_users",
-                description="Get users from Asana",
+                description="Get users from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the user.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -422,7 +502,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -441,7 +521,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_teams",
-                description="Get teams from Asana",
+                description="Get teams from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the team.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -460,7 +540,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -503,7 +583,7 @@ def main(
             ),
             types.Tool(
                 name="asana_get_tags",
-                description="Get tags from Asana",
+                description="Get tags from Asana. You MUST call asana_get_workspaces first to get the workspace_id for the tag.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -522,7 +602,7 @@ def main(
                             "description": "Token for pagination",
                         },
                     },
-                    "required": [],
+                    "required": ["workspace_id"],
                 },
             ),
             types.Tool(
@@ -541,7 +621,7 @@ def main(
             ),
             types.Tool(
                 name="asana_create_tag",
-                description="Create a tag in Asana",
+                description="Create a tag in Asana. You MUST call asana_get_workspaces first to get the workspace_id for the tag.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -563,7 +643,7 @@ def main(
                             "description": "The workspace ID to create the tag in",
                         },
                     },
-                    "required": ["name"],
+                    "required": ["name", "workspace_id"],
                 },
             ),
         ]
@@ -687,11 +767,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
         
-        # Set the auth token in context for this request (can be None)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -717,14 +797,11 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
         
-        # Set the auth token in context for this request (can be None/empty)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

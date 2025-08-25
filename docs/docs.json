@@ -65,6 +65,7 @@
               "documentation/mcp-server/attio",
               "documentation/mcp-server/openrouter",
               "documentation/mcp-server/brave_search",
+              "documentation/mcp-server/cal_com",
               "documentation/mcp-server/calendly",
               "documentation/mcp-server/clickup",
               "documentation/mcp-server/close",
@@ -72,6 +73,7 @@
               "documentation/mcp-server/discord",
               "documentation/mcp-server/doc2markdown",
               "documentation/mcp-server/dropbox",
+              "documentation/mcp-server/exa",
               "documentation/mcp-server/firecrawl-deep-research",
               "documentation/mcp-server/firecrawl-web-search",
               "documentation/mcp-server/github",
@@ -88,6 +90,7 @@
               "documentation/mcp-server/linear",
               "documentation/mcp-server/linkedin",
               "documentation/mcp-server/markdown2doc",
+              "documentation/mcp-server/mixpanel",
               "documentation/mcp-server/motion",
               "documentation/mcp-server/notion",
               "documentation/mcp-server/onedrive",
@@ -164,11 +167,17 @@
             ]
           },
           {
+            "group": "Self Hosted MCP Server",
+            "pages": [
+              "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
+            ]
+          },
+          {
             "group": "Auth / OAuth",
             "pages": [
               "api-reference/mcp-server/get-oauth-url",
-              "api-reference/mcp-server/set-auth-token",
-              "api-reference/mcp-server/get-authentication-metadata",
+              "api-reference/mcp-server/set-authentication-data",
+              "api-reference/mcp-server/get-authentication-data",
               "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
                 "group": "GitHub OAuth",
@@ -292,7 +301,7 @@
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/linkedin", "knowledge-base/oauth_app/canva", "knowledge-base/oauth_app/xero", "knowledge-base/oauth_app/dropbox", "knowledge-base/oauth_app/quickbooks"]
+            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/airtable","knowledge-base/oauth_app/asana","knowledge-base/oauth_app/calendly","knowledge-base/oauth_app/canva","knowledge-base/oauth_app/dropbox","knowledge-base/oauth_app/figma","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs","knowledge-base/oauth_app/google_drive","knowledge-base/oauth_app/google_sheets","knowledge-base/oauth_app/hubspot","knowledge-base/oauth_app/linkedin","knowledge-base/oauth_app/monday", "knowledge-base/oauth_app/moneybird","knowledge-base/oauth_app/onedrive","knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/salesforce","knowledge-base/oauth_app/slack","knowledge-base/oauth_app/xero"]
           }
         ]
       }
