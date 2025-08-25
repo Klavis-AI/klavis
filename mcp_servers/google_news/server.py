@@ -25,10 +25,10 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 # ──────────────────────────────  local business logic  ───────────────────────── #
-from klavis_google_news.errors import ToolExecutionError
-from klavis_google_news.tools.search_news import run as search_news, ArticleSearchIn
+from google_news.tools.base import ToolExecutionError
+from google_news.tools.search_news import run as search_news, ArticleSearchIn
 
-from klavis_google_news.utils import schema_from_model
+from google_news.tools.utils import schema_from_model
 
 # ──────────────────────────────────────────────────────────────────────────────── #
 

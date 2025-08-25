@@ -2,14 +2,14 @@
 from typing import List
 from mcp import Tool
 from dateutil import parser as date_parser
-from klavis_google_news.client import SerpApiClient
-from klavis_google_news.models.articles import (
+from google_news.tools.base import SerpApiClient
+from google_news.tools.articles import (
     Article,
     ArticleSearchIn,
     ArticleSearchOut,
     ArticleCluster,
 )
-from klavis_google_news.utils import remove_none_values, iso8601, schema_from_model
+from google_news.tools.utils import remove_none_values, iso8601, schema_from_model
 
 spec = Tool(
     name="search_news",
