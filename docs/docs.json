@@ -69,6 +69,7 @@
               "documentation/mcp-server/calendly",
               "documentation/mcp-server/clickup",
               "documentation/mcp-server/close",
+              "documentation/mcp-server/coinbase",
               "documentation/mcp-server/confluence",
               "documentation/mcp-server/discord",
               "documentation/mcp-server/doc2markdown",
@@ -209,27 +210,19 @@
               },
               {
                 "group": "Google Calendar OAuth",
-                "pages": [
-                  "api-reference/gcalendar-oauth/authorize-gcalendar"
-                ]
+                "pages": ["api-reference/gcalendar-oauth/authorize-gcalendar"]
               },
               {
                 "group": "Google Drive OAuth",
-                "pages": [
-                  "api-reference/gdrive-oauth/authorize-gdrive"
-                ]
+                "pages": ["api-reference/gdrive-oauth/authorize-gdrive"]
               },
               {
                 "group": "Google Docs OAuth",
-                "pages": [
-                  "api-reference/gdocs-oauth/authorize-gdocs"
-                ]
+                "pages": ["api-reference/gdocs-oauth/authorize-gdocs"]
               },
               {
                 "group": "Google Sheets OAuth",
-                "pages": [
-                  "api-reference/gsheets-oauth/authorize-gsheets"
-                ]
+                "pages": ["api-reference/gsheets-oauth/authorize-gsheets"]
               },
               {
                 "group": "Airtable OAuth",
@@ -293,15 +286,43 @@
           },
           {
             "group": "Onboarding",
-            "pages": ["knowledge-base/onboarding/create-your-first-mcp-server", "knowledge-base/onboarding/use-your-first-mcp-server"]
+            "pages": [
+              "knowledge-base/onboarding/create-your-first-mcp-server",
+              "knowledge-base/onboarding/use-your-first-mcp-server"
+            ]
           },
           {
             "group": "Developer",
-            "pages": ["knowledge-base/developer/cursor", "knowledge-base/developer/kiro"]
+            "pages": [
+              "knowledge-base/developer/cursor",
+              "knowledge-base/developer/kiro"
+            ]
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/airtable","knowledge-base/oauth_app/asana","knowledge-base/oauth_app/calendly","knowledge-base/oauth_app/canva","knowledge-base/oauth_app/dropbox","knowledge-base/oauth_app/figma","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs","knowledge-base/oauth_app/google_drive","knowledge-base/oauth_app/google_sheets","knowledge-base/oauth_app/hubspot","knowledge-base/oauth_app/linkedin","knowledge-base/oauth_app/monday", "knowledge-base/oauth_app/moneybird","knowledge-base/oauth_app/onedrive","knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/salesforce","knowledge-base/oauth_app/slack","knowledge-base/oauth_app/xero"]
+            "pages": [
+              "knowledge-base/oauth_app/oauth-scopes",
+              "knowledge-base/oauth_app/airtable",
+              "knowledge-base/oauth_app/asana",
+              "knowledge-base/oauth_app/calendly",
+              "knowledge-base/oauth_app/canva",
+              "knowledge-base/oauth_app/dropbox",
+              "knowledge-base/oauth_app/figma",
+              "knowledge-base/oauth_app/gmail",
+              "knowledge-base/oauth_app/google_calendar",
+              "knowledge-base/oauth_app/google_docs",
+              "knowledge-base/oauth_app/google_drive",
+              "knowledge-base/oauth_app/google_sheets",
+              "knowledge-base/oauth_app/hubspot",
+              "knowledge-base/oauth_app/linkedin",
+              "knowledge-base/oauth_app/monday",
+              "knowledge-base/oauth_app/moneybird",
+              "knowledge-base/oauth_app/onedrive",
+              "knowledge-base/oauth_app/quickbooks",
+              "knowledge-base/oauth_app/salesforce",
+              "knowledge-base/oauth_app/slack",
+              "knowledge-base/oauth_app/xero"
+            ]
           }
         ]
       }
