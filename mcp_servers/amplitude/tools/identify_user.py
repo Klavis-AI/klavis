@@ -1,10 +1,12 @@
-import os, json
-import requests
+# stdlib-only Amplitude Identify API (form-encoded)
+import json
+import os
+import urllib.parse
+import urllib.request
 from typing import Dict, Optional
+from . import get_api_key, get_api_secret
 
-API_KEY = os.getenv("AMPLITUDE_API_KEY")
-IDENTIFY_URL = os.getenv("AMPLITUDE_IDENTIFY_URL", "https://api2.amplitude.com/identify")
-
+IDENTIFY_URL = os.environ.get("AMPLITUDE_IDENTIFY_URL", "https://api2.amplitude.com/identify")
 
 def identify_user(
     user_id: Optional[str] = None,
@@ -14,27 +16,25 @@ def identify_user(
 ) -> Dict:
     """
     Identify a user and set user properties.
-
-    Inputs:
-      user_id: str
-      device_id: str
-      user_properties: Plain properties to $set (e.g., {"plan":"free"}).
-      operations: Advanced ops dict (e.g., {"$set": {...}, "$add": {...}}). If provided, overrides user_properties.
-
-    Returns: {"status_code": int, "response": str}
+    If `operations` is provided, it is used as-is (e.g. {"$set": {...}}).
+    Otherwise, `user_properties` are wrapped under {"$set": ...}.
     """
-    if not API_KEY:
-        raise RuntimeError("AMPLITUDE_API_KEY not set")
+    api_key = get_api_key()
+    if not api_key:
+        return {"status_code": 0, "error": "AMPLITUDE_API_KEY missing"}
 
-    # Build identification object
+    if not user_id and not device_id:
+        return {"status_code": 0, "error": "Provide user_id or device_id (>=5 chars)"}
+    if user_id and len(str(user_id)) < 5:
+        return {"status_code": 0, "error": "user_id must be >= 5 chars"}
+    if device_id and len(str(device_id)) < 5:
+        return {"status_code": 0, "error": "device_id must be >= 5 chars"}
+
     ident: Dict = {}
     if user_id:
         ident["user_id"] = user_id
     if device_id:
         ident["device_id"] = device_id
-
-    if not ident:
-        raise ValueError("At least one of user_id or device_id must be provided")
 
     if operations is not None:
         ident["user_properties"] = operations
@@ -43,15 +43,23 @@ def identify_user(
     else:
         ident["user_properties"] = {}
 
-    # Identify API requires form-encoded body with identification as a JSON string
-    data = {
-        "api_key": API_KEY,
-        "identification": json.dumps([ident])
-    }
-    resp = requests.post(IDENTIFY_URL, data=data)
+    form = urllib.parse.urlencode({
+        "api_key": api_key,
+        "identification": json.dumps([ident]),
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        IDENTIFY_URL,
+        data=form,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+
     try:
-        resp.raise_for_status()
-        body = resp.text
-    except Exception:
-        body = resp.text
-    return {"status_code": resp.status_code, "response": body}
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read().decode("utf-8")
+            return {"status_code": resp.getcode(), "response": body}
+    except urllib.error.HTTPError as e:
+        return {"status_code": e.code, "error": e.read().decode("utf-8")[:1000]}
+    except Exception as e:
+        return {"status_code": 0, "error": str(e)}
