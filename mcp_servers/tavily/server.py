@@ -41,15 +41,15 @@ def extract_api_key(request_or_scope) -> str:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
         if hasattr(request_or_scope, 'headers'):
             # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data and isinstance(auth_data, bytes):
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+            header_value = request_or_scope.headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
         elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
             # StreamableHTTP scope object
             headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+            header_value = headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
         else:
             auth_data = None
         

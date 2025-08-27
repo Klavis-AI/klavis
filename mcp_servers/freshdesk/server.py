@@ -103,6 +103,7 @@ def extract_credentials(request_or_scope) -> Dict[str, str]:
     """Extract API key and domain from headers or environment."""
     api_key = os.getenv("API_KEY")
     domain = os.getenv("DOMAIN")
+    auth_data = None
     
     # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
     if hasattr(request_or_scope, 'headers'):
@@ -116,9 +117,7 @@ def extract_credentials(request_or_scope) -> Dict[str, str]:
         headers = dict(request_or_scope.get("headers", []))
         header_value = headers.get(b'x-auth-data')
         if header_value:
-            auth_data = base64.b64decode(header_value).decode('utf-8')
-    else:
-        auth_data = None
+            auth_data = base64.b64decode(header_value).decode('utf-8') 
     
     # If no API key from environment, try to parse from auth_data
     if not api_key and auth_data:
