@@ -106,9 +106,6 @@ class SessionManager:
                 header_value = headers.get(b'x-auth-data')
                 if header_value:
                     auth_data = base64.b64decode(header_value).decode('utf-8')
-            
-            # Extract auth data from x-auth-data header
-            auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
 
         if not auth_data:
             return "", "", ""
