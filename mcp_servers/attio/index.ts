@@ -614,7 +614,7 @@ function extractAccessToken(req: Request): string {
 
     if (!authData) {
         console.error('Error: Attio access token is missing. Provide it via ACCESS_TOKEN env var or x-auth-data header with access_token field.');
-        authData = '';
+        return '';
     }
 
     const authDataJson = JSON.parse(authData);
