@@ -5,6 +5,7 @@ import httpx
 
 # Context variable for storing OAuth access token per request
 zoom_access_token_context = contextvars.ContextVar("zoom_access_token", default=None)
+ZOOM_BASE_URL = "https://api.zoom.us/v2"
 
 def get_zoom_access_token() -> str:
     """Get Zoom OAuth access token from context."""
@@ -19,7 +20,7 @@ class ZoomClient:
     """Client for interacting with Zoom API using OAuth access tokens."""
     
     def __init__(self, access_token: str):
-        self.base_url = "https://api.zoom.us/v2"
+        self.base_url = ZOOM_BASE_URL
         self.headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
@@ -30,16 +31,17 @@ class ZoomClient:
         url = f"{self.base_url}{endpoint}"
         
         async with httpx.AsyncClient() as client:
-            if method.upper() == "GET":
-                response = await client.get(url, headers=self.headers)
-            elif method.upper() == "POST":
-                response = await client.post(url, headers=self.headers, json=data)
-            elif method.upper() == "PUT":
-                response = await client.put(url, headers=self.headers, json=data)
-            elif method.upper() == "DELETE":
-                response = await client.delete(url, headers=self.headers)
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
+            match method.upper():
+                case "GET":
+                    response = await client.get(url, headers=self.headers)
+                case "POST":
+                    response = await client.post(url, headers=self.headers, json=data)
+                case "PUT":
+                    response = await client.put(url, headers=self.headers, json=data)
+                case "DELETE":
+                    response = await client.delete(url, headers=self.headers)
+                case _:
+                    raise ValueError(f"Unsupported HTTP method: {method}")
             
             response.raise_for_status()
             return response.json() if response.content else {}

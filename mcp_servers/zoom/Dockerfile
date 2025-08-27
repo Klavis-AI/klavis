@@ -15,11 +15,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose port
-EXPOSE 5000
+EXPOSE 4999
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV ZOOM_MCP_SERVER_PORT=5000
 
 # Run the server
-CMD ["python", "server.py", "--port", "5000"]
+CMD ["python", "server.py", "--port", "4999"]
