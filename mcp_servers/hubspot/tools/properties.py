@@ -4,6 +4,7 @@ import ast
 from hubspot.crm.objects import Filter, FilterGroup, PublicObjectSearchRequest
 from hubspot.crm.properties import PropertyCreate
 from .base import get_hubspot_client
+from .deals import _build_dealstage_label_map
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -199,6 +200,18 @@ async def hubspot_search_by_property(
             raise ValueError(f"Unsupported object type: {object_type}")
 
         logger.info(f"hubspot_search_by_property: Found {len(results.results)} result(s)")
+        # Enrich deals with human-readable dealstage label
+        if object_type == "deals":
+            stage_label_map = _build_dealstage_label_map(client)
+            enriched: list[dict] = []
+            for obj in results.results:
+                props = (getattr(obj, "properties", {}) or {}).copy()
+                stage_id = props.get("dealstage")
+                if stage_id and stage_id in stage_label_map:
+                    props["dealstage_label"] = stage_label_map[stage_id]
+                enriched.append(props)
+            return enriched
+        # For other objects, return properties as-is
         return [obj.properties for obj in results.results]
 
     except Exception as e:
