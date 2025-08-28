@@ -1,0 +1,2 @@
+google-adk==1.12.0
+klavis==1.8.1
