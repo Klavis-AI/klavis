@@ -44,6 +44,14 @@ from .notes import (
     hubspot_create_note,
 )
 
+from .tasks import (
+    hubspot_get_tasks,
+    hubspot_get_task_by_id,
+    hubspot_create_task,
+    hubspot_update_task_by_id,
+    hubspot_delete_task_by_id,
+)
+
 __all__ = [
     # Base
     "auth_token_context",
@@ -83,4 +91,11 @@ __all__ = [
     
     # Notes
     "hubspot_create_note",
+
+    # Tasks
+    "hubspot_get_tasks",
+    "hubspot_get_task_by_id",
+    "hubspot_create_task",
+    "hubspot_update_task_by_id",
+    "hubspot_delete_task_by_id",
 ]
