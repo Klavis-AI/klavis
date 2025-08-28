@@ -1,7 +1,10 @@
 import logging
+import json
+import ast
 from hubspot.crm.objects import Filter, FilterGroup, PublicObjectSearchRequest
 from hubspot.crm.properties import PropertyCreate
 from .base import get_hubspot_client
+from .deals import _build_dealstage_label_map
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -121,10 +124,64 @@ async def hubspot_search_by_property(
     logger.info(f"Executing hubspot_search_by_property on {object_type}: {property_name} {operator} {value}")
 
     try:
+        # Build Filter with correct fields depending on operator
+        filter_kwargs = {"property_name": property_name, "operator": operator}
+
+        # Operators that require no value
+        if operator in {"HAS_PROPERTY", "NOT_HAS_PROPERTY"}:
+            pass
+
+        # Operators that require a list of values
+        elif operator in {"IN", "NOT_IN"}:
+            values_list: list[str] = []
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    values_list = [str(v) for v in parsed]
+            except Exception:
+                try:
+                    parsed = ast.literal_eval(value)
+                    if isinstance(parsed, list):
+                        values_list = [str(v) for v in parsed]
+                except Exception:
+                    # Fallback: split by comma
+                    values_list = [v.strip().strip('"\'') for v in value.split(',') if v.strip()]
+
+            if not values_list:
+                raise ValueError("Operator IN/NOT_IN requires a non-empty list of values")
+
+            filter_kwargs["values"] = values_list
+
+        # Between expects two endpoints: low and high
+        elif operator == "BETWEEN":
+            low = None
+            high = None
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list) and len(parsed) >= 2:
+                    low, high = str(parsed[0]), str(parsed[1])
+            except Exception:
+                try:
+                    parsed = ast.literal_eval(value)
+                    if isinstance(parsed, list) and len(parsed) >= 2:
+                        low, high = str(parsed[0]), str(parsed[1])
+                except Exception:
+                    pass
+
+            if low is None or high is None:
+                raise ValueError("Operator BETWEEN requires a list with two values [low, high]")
+
+            filter_kwargs["value"] = low
+            filter_kwargs["high_value"] = high
+
+        # All other operators use single value
+        else:
+            filter_kwargs["value"] = value
+
         search_request = PublicObjectSearchRequest(
             filter_groups=[
                 FilterGroup(filters=[
-                    Filter(property_name=property_name, operator=operator, value=value)
+                    Filter(**filter_kwargs)
                 ])
             ],
             properties=list(properties),
@@ -143,6 +200,18 @@ async def hubspot_search_by_property(
             raise ValueError(f"Unsupported object type: {object_type}")
 
         logger.info(f"hubspot_search_by_property: Found {len(results.results)} result(s)")
+        # Enrich deals with human-readable dealstage label
+        if object_type == "deals":
+            stage_label_map = _build_dealstage_label_map(client)
+            enriched: list[dict] = []
+            for obj in results.results:
+                props = (getattr(obj, "properties", {}) or {}).copy()
+                stage_id = props.get("dealstage")
+                if stage_id and stage_id in stage_label_map:
+                    props["dealstage_label"] = stage_label_map[stage_id]
+                enriched.append(props)
+            return enriched
+        # For other objects, return properties as-is
         return [obj.properties for obj in results.results]
 
     except Exception as e:
