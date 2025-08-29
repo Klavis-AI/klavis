@@ -1,6 +1,6 @@
 # Zoom MCP Server
 
-A Model Context Protocol (MCP) server that provides access to Zoom API functionality through various AI platforms using OAuth authentication.
+A Model Context Protocol (MCP) server that provides access to Zoom API functionality through various AI platforms using OAuth authentication with device flow support.
 
 ## Features
 
@@ -10,6 +10,7 @@ A Model Context Protocol (MCP) server that provides access to Zoom API functiona
 - **Recording Management**: Access and manage meeting recordings
 - **Real-time Communication**: Get live meeting status and participant information
 - **OAuth Authentication**: Secure authentication using OAuth access tokens
+- **Device Flow OAuth**: Easy authentication via URL and code entry
 
 ## Setup
 
@@ -18,38 +19,71 @@ A Model Context Protocol (MCP) server that provides access to Zoom API functiona
    pip install -r requirements.txt
    ```
 
-2. Run the server:
+2. Configure your Zoom App Client ID:
+   ```python
+   # In tools/auth.py, update the ZOOM_OAUTH_CONFIG
+   ZOOM_OAUTH_CONFIG = {
+       "client_id": "your_zoom_client_id_here",  # Replace with your actual Client ID
+       # ... other config
+   }
+   ```
+
+3. Run the server:
    ```bash
    python server.py
    ```
 
 ## Authentication
 
-**⚠️ IMPORTANT**: This server requires OAuth authentication for every request. The LLM client handles OAuth flow and provides access tokens.
+### **Option 1: Device Flow OAuth (Recommended)**
 
-### Required Header
+The easiest way to authenticate is using the built-in device flow OAuth:
 
-All requests must include this authentication header:
+#### **Using the Authentication Tool**
+```python
+import mcp.client
 
-- `x-zoom-access-token`: Your Zoom OAuth access token
+client = mcp.client.ClientSession("http://localhost:5000/mcp")
 
-### OAuth Flow (Handled by LLM Client)
+# Call the zoom_authenticate_device_flow tool
+result = await client.call_tool("zoom_authenticate_device_flow", {})
+# This will provide a URL and code for the user to visit
+```
 
-The LLM client should handle the OAuth flow:
+#### **Using the Test Script**
+```bash
+python auth_test.py
+```
+
+This will:
+1. Start the device flow
+2. Display a URL and code
+3. Wait for user authorization
+4. Return an access token
+
+### **Option 2: Manual OAuth Flow**
+
+The LLM client handles the OAuth flow:
 
 1. **Redirect User**: Send user to Zoom OAuth authorization URL
 2. **Get Authorization Code**: User authorizes and returns code
 3. **Exchange for Access Token**: Exchange code for access token
 4. **Use Access Token**: Include token in `x-zoom-access-token` header
 
-### OAuth Configuration
+### **Required Header**
 
-The LLM client needs to configure:
+All requests must include this authentication header:
 
-- **Client ID**: From your Zoom App
-- **Client Secret**: From your Zoom App  
-- **Redirect URI**: Your app's callback URL
-- **Scopes**: Required permissions (e.g., `meeting:write`, `user:read`)
+- `x-zoom-access-token`: Your Zoom OAuth access token
+
+### **Getting Zoom App Credentials**
+
+1. Go to [Zoom App Marketplace](https://marketplace.zoom.us/)
+2. Sign in with your Zoom account
+3. Click "Develop" → "Build App"
+4. Choose "OAuth" app type
+5. Fill in app information and create
+6. Copy the Client ID and configure it in the server
 
 ## API Endpoints
 
@@ -58,7 +92,19 @@ The LLM client needs to configure:
 
 ## Usage Examples
 
-### Using with curl (StreamableHTTP)
+### **Device Flow Authentication**
+
+```python
+import mcp.client
+
+client = mcp.client.ClientSession("http://localhost:5000/mcp")
+
+# Authenticate using device flow
+auth_result = await client.call_tool("zoom_authenticate_device_flow", {})
+print(auth_result)  # Will show URL and code to visit
+```
+
+### **Using with curl (StreamableHTTP)**
 
 ```bash
 curl -X POST http://localhost:5000/mcp \
@@ -72,14 +118,14 @@ curl -X POST http://localhost:5000/mcp \
   }'
 ```
 
-### Using with SSE
+### **Using with SSE**
 
 ```bash
 curl -N http://localhost:5000/sse \
   -H "x-zoom-access-token: YOUR_OAUTH_ACCESS_TOKEN"
 ```
 
-### Using with MCP Client
+### **Using with MCP Client**
 
 ```python
 import mcp.client
@@ -101,6 +147,7 @@ result = await client.call_tool("zoom_create_meeting", {
 
 ## Tools Available
 
+- `zoom_authenticate_device_flow`: Authenticate with Zoom using device flow OAuth
 - `zoom_create_meeting`: Create a new Zoom meeting
 - `zoom_get_meeting`: Retrieve meeting details
 - `zoom_update_meeting`: Update meeting settings
@@ -114,6 +161,7 @@ result = await client.call_tool("zoom_create_meeting", {
 ## Security Features
 
 - **OAuth Based**: Uses industry-standard OAuth 2.0 flow
+- **Device Flow**: Secure authentication without redirect URLs
 - **No Stored Credentials**: Access tokens are never stored on the server
 - **Per-Request Authentication**: Each request must provide valid access token
 - **Token Validation**: Access tokens are validated before processing requests
@@ -136,13 +184,17 @@ docker run -p 5000:5000 zoom-mcp-server
 
 ## Testing
 
-Run the test script to verify functionality:
+### **Test Device Flow Authentication**
+```bash
+python auth_test.py
+```
 
+### **Test Server Endpoints**
 ```bash
 python test_server.py
 ```
 
-**Note**: The test script requires a valid Zoom OAuth access token to be provided.
+**Note**: The test scripts require a valid Zoom OAuth access token to be provided.
 
 ## OAuth Scopes Required
 
@@ -156,31 +208,58 @@ For full functionality, the Zoom App should request these scopes:
 
 ## Client Integration
 
-### For LLM Platforms
+### **For LLM Platforms**
 
 The LLM client should:
 
-1. **Handle OAuth Flow**: Manage the complete OAuth authorization process
+1. **Handle OAuth Flow**: Use the `zoom_authenticate_device_flow` tool for easy authentication
 2. **Store Tokens Securely**: Store access tokens securely (encrypted, not in plain text)
 3. **Refresh Tokens**: Handle token refresh when they expire
 4. **Include in Headers**: Add `x-zoom-access-token` to all MCP requests
 
-### Example Client Flow
+### **Device Flow Process**
+
+1. **Start Flow**: Call `zoom_authenticate_device_flow` tool
+2. **Display Instructions**: Show user the URL and code
+3. **Wait for Authorization**: Poll for completion
+4. **Get Token**: Receive access token when authorized
+5. **Use Token**: Include in subsequent requests
+
+### **Example Client Flow**
 
 ```python
-# 1. Start OAuth flow
-auth_url = f"https://zoom.us/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
+import mcp.client
 
-# 2. User authorizes and returns code
-# 3. Exchange code for access token
-token_response = requests.post("https://zoom.us/oauth/token", data={
-    "grant_type": "authorization_code",
-    "code": auth_code,
-    "redirect_uri": REDIRECT_URI
-}, auth=(CLIENT_ID, CLIENT_SECRET))
+client = mcp.client.ClientSession("http://localhost:5000/mcp")
 
-access_token = token_response.json()["access_token"]
+# 1. Start device flow
+auth_result = await client.call_tool("zoom_authenticate_device_flow", {})
 
-# 4. Use with MCP server
+# 2. Display instructions to user
+print(f"Visit: {auth_result['verification_url']}")
+print(f"Enter code: {auth_result['user_code']}")
+
+# 3. Wait for authorization (handled automatically)
+# 4. Get access token
+access_token = auth_result['access_token']
+
+# 5. Use with MCP server
 mcp_headers = {"x-zoom-access-token": access_token}
+```
+
+## Configuration
+
+### **Zoom App Setup**
+
+1. **Create Zoom App**: Go to Zoom App Marketplace
+2. **Configure OAuth**: Set up OAuth app with device flow enabled
+3. **Set Scopes**: Configure required scopes
+4. **Get Client ID**: Copy the Client ID
+5. **Update Config**: Set Client ID in `tools/auth.py`
+
+### **Environment Variables**
+
+```bash
+export ZOOM_MCP_SERVER_PORT=5000
+export ZOOM_CLIENT_ID=your_client_id_here
 ```
