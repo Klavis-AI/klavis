@@ -16,7 +16,7 @@ COPY mcp_servers/mailchimp/server.py .
 COPY mcp_servers/mailchimp/tools/ ./tools/
 
 # Copy environment file (optional - can be overridden at runtime)
-COPY mcp_servers/mailchimp/.env .env
+#COPY mcp_servers/mailchimp/.env .env
 
 # Expose the port the server runs on
 EXPOSE 5001
