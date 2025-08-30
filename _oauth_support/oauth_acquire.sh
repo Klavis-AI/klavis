@@ -57,9 +57,14 @@ if [ -z "${AUTH_DATA:-}" ]; then
                 echo \"\$AUTH_DATA_JSON\" > \"$MSG_FILE\"
                 exit 0
             elif [ \"\$FIRST_CHECK\" = \"true\" ]; then
-                echo \"Please visit the following URL to authorize access:\"
-                printf \"🔗🔗️️🔗\n\"
-                echo \"$OAUTH_URL\"
+                echo \"\"
+                printf \"\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\"
+                printf \"\033[1;32m🔗 Please click the link below to authorize access:\033[0m\n\"
+                printf \"\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\"
+                echo \"\"
+                printf \"\033[1;36m%s\033[0m\n\" \"$OAUTH_URL\"
+                echo \"\"
+                printf \"\033[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n\"
                 echo \"\"
                 echo \"Waiting for authorization (timeout: 10 minutes)...\"
                 FIRST_CHECK=false
