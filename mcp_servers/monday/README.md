@@ -1,134 +1,73 @@
 # Monday.com MCP Server
 
-A Model Context Protocol (MCP) server for integrating with the Monday.com API. This server provides comprehensive tools to manage boards, items, columns, users, and more in Monday.com workspaces.
+A Model Context Protocol (MCP) server for Monday.com integration. Manage boards, items, and workflows using Monday.com's API with OAuth support.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Board Management**: Create, retrieve, and manage Monday.com boards
-- **Item Operations**: Create, update, delete, and move items between groups
-- **Column Management**: Create and delete board columns
-- **User Management**: Search and retrieve user information
-- **Updates & Comments**: Create updates and comments on items
-- **Advanced Operations**: Change column values, move items, and manage board schemas
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Prerequisites
+Get instant access to Monday.com with our managed infrastructure - **no setup required**:
 
-- Node.js 18.0.0 or higher
-- Monday.com API token (see [Authentication](#authentication))
-
-## Installation
-
-1. Navigate to the Monday.com MCP server directory:
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-cd mcp_servers/monday
+pip install klavis
+# or
+npm install klavis
 ```
 
-2. Install dependencies:
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("MONDAY", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-npm install
+# Run Monday.com MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/monday-mcp-server:latest
+
+# Run Monday.com MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_monday_api_token_here"}' \
+  ghcr.io/klavis-ai/monday-mcp-server:latest
 ```
 
-3. Build the project:
+**OAuth Setup:** Monday.com requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-```bash
-npm run build
-```
+## 🛠️ Available Tools
 
-## Configuration
+- **Board Management**: Create, read, update Monday.com boards
+- **Item Operations**: Manage board items and their properties
+- **Column Management**: Handle board columns and data types
+- **Team Collaboration**: Manage users and team assignments
+- **Workflow Automation**: Handle Monday.com automations and integrations
 
-Copy the .env.example file to .env
+## 📚 Documentation & Support
 
-```bash
-cp .env.example .env
-```
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-Set the following environment variable:
+## 🤝 Contributing
 
-- `MONDAY_API_KEY`: Your Monday.com API token
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-You can obtain your Monday.com API token from your Monday.com account settings under "Developers" → "My Access Tokens".
+## 📜 License
 
-## Usage
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-### Starting the Server
+---
 
-```bash
-npm start
-```
-
-The server will start on port 5000 and supports:
-
-- **Streamable HTTP Transport**: POST `/mcp`
-- **Server Sent Events Transport**: `/sse`
-
-### Available Tools
-
-| Category              | Tool Name                        | Description                                                     |
-| --------------------- | -------------------------------- | --------------------------------------------------------------- |
-| **User Management**   | monday_get_users_by_name         | Retrieve user information by name or partial name               |
-| **Board Management**  | monday_get_boards                | Get all Monday.com boards accessible to the authenticated user  |
-|                       | monday_create_board              | Create a new Monday.com board with specified configuration      |
-|                       | monday_get_board_schema          | Get board schema (columns and groups) by board ID               |
-| **Column Management** | monday_create_column             | Create a new column in a Monday.com board                       |
-|                       | monday_delete_column             | Delete a column from a Monday.com board                         |
-| **Item Management**   | monday_create_item               | Create a new item in a Monday.com board                         |
-|                       | monday_get_board_items_by_name   | Get items by name from a Monday.com board                       |
-|                       | monday_delete_item               | Delete an item from a Monday.com board                          |
-|                       | monday_change_item_column_values | Change the column values of an item in a Monday.com board       |
-|                       | monday_move_item_to_group        | Move an item to a different group within a Monday.com board     |
-|                       | monday_create_update             | Create a new update (comment) for an item in a Monday.com board |
-
-## Development
-
-### Scripts
-
-- `npm run build`: Build the TypeScript project
-- `npm start`: Start the server
-- `npm run lint`: Run ESLint
-- `npm run lint:fix`: Fix ESLint issues
-- `npm run format`: Format code with Prettier
-- `npm run prepare`: Build the project (runs automatically on install)
-
-### Project Structure
-
-```
-mcp_servers/monday/
-├── src/
-│   ├── index.ts              # Main server implementation
-│   └── tools/
-│       ├── base.ts           # API client configuration
-│       ├── users.ts          # User management tools
-│       ├── boards.ts         # Board management tools
-│       ├── columns.ts        # Column management tools
-│       ├── items.ts          # Item management tools
-│       ├── queries.graphql.ts # GraphQL queries
-│       └── index.ts          # Tool exports
-├── package.json              # Project configuration
-├── tsconfig.json             # TypeScript configuration
-├── .eslintrc.json            # ESLint configuration
-├── Dockerfile                # Docker configuration
-└── README.md                 # This file
-```
-
-## Technical Details
-
-- Uses Monday.com SDK
-- Built with FastMCP
-- Implements Zod schemas for parameter validation
-- Supports Monday.com's full feature set including boards, items, columns, and users
-- Uses TypeScript for type safety
-
-## Authentication
-
-The server requires a Monday.com API token which can be obtained from:
-
-1. Log into your Monday.com account
-2. Go to Avatar (top right) → Admin → API
-3. Generate a new API token
-4. Set the token as the `MONDAY_API_KEY` environment variable
-
-## License
-
-MIT License
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

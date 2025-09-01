@@ -41,13 +41,13 @@ server = klavis.mcp_server.create_server_instance("GMAIL", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Run Gmail MCP Server with OAuth Support through Klavis AI
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_key \
+  ghcr.io/klavis-ai/gmail-mcp-server:latest
+
 # Run GitHub MCP Server (no OAuth support)
 docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
   ghcr.io/klavis-ai/github-mcp-server:latest
-
-# Run Gmail MCP Server with OAuth
-docker run -p 8000:5000 -e KLAVIS_API_KEY=your_key \
-  ghcr.io/klavis-ai/gmail-mcp-server:latest
 ```
 
 ### 🖥️ Cursor Configuration

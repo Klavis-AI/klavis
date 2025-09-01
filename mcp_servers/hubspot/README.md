@@ -1,94 +1,73 @@
 # HubSpot MCP Server
 
-A robust server implementation that provides a comprehensive set of tools for interacting with HubSpot CRM through a Modular Control Protocol (MCP) interface. This server enables CRUD operations for HubSpot contacts, companies, deals, tickets, and custom properties.
+A Model Context Protocol (MCP) server for HubSpot CRM integration. Manage contacts, deals, companies, and marketing campaigns using HubSpot's API with OAuth support.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Full CRM Integration**: Manage HubSpot contacts, companies, deals, and tickets
-- **Advanced Search**: Search objects by property with 15+ filter operators
-- **Property Management**: List and create custom contact properties
-- **Dual Transport Support**: SSE and Streamable HTTP endpoints
-- **Detailed Logging**: Configurable logging with rich context
-- **Error Handling**: Comprehensive error handling with retry capabilities
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Tools Overview
+Get instant access to HubSpot with our managed infrastructure - **no setup required**:
 
-The server provides the following HubSpot operations:
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-### Core Functions
-- `hubspot_list_properties`: List properties for an object type
-- `hubspot_search_by_property`: Search objects with advanced filters
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
-### Contact Operations
-- `get_HubSpot_contacts`: List contacts
-- `get_HubSpot_contact_by_id`: Get contact by ID
-- `hubspot_create_property`: Create custom property
-- `hubspot_create_contact`: Create new contact
-- `hubspot_update_contact_by_id`: Update contact
-- `hubspot_delete_contact_by_id`: Delete contact
+```python
+from klavis import Klavis
 
-### Company Operations
-- `hubspot_create_companies`: Create company
-- `get_HubSpot_companies`: List companies
-- `get_HubSpot_companies_by_id`: Get company by ID
-- `hubspot_update_company_by_id`: Update company
-- `hubspot_delete_company_by_id`: Delete company
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("HUBSPOT", "user123")
+```
 
-### Deal Operations
-- `get_HubSpot_deals`: List deals
-- `get_HubSpot_deal_by_id`: Get deal by ID
-- `hubspot_create_deal`: Create deal
-- `hubspot_update_deal_by_id`: Update deal
-- `hubspot_delete_deal_by_id`: Delete deal
+### 🐳 Using Docker (For Self-Hosting)
 
-### Ticket Operations
-- `get_HubSpot_tickets`: List tickets
-- `get_HubSpot_ticket_by_id`: Get ticket by ID
-- `hubspot_create_ticket`: Create ticket
-- `hubspot_update_ticket_by_id`: Update ticket
-- `hubspot_delete_ticket_by_id`: Delete ticket
+```bash
+# Run HubSpot MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/hubspot-mcp-server:latest
 
-## Search Operators
+# Run HubSpot MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_hubspot_access_token_here"}' \
+  ghcr.io/klavis-ai/hubspot-mcp-server:latest
+```
 
-The `hubspot_search_by_property` tool supports these filter operators:
+**OAuth Setup:** HubSpot requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-| Operator | Description | Value Format | Example |
-|----------|-------------|--------------|---------|
-| `EQ` | Equal | String | `"lifecyclestage" EQ "customer"` |
-| `NEQ` | Not equal | String | `"country" NEQ "India"` |
-| `GT` | Greater than | String | `"numberofemployees" GT "100"` |
-| `GTE` | Greater than or equal | String | `"revenue" GTE "50000"` |
-| `LT` | Less than | String | `"score" LT "75"` |
-| `LTE` | Less than or equal | String | `"createdate" LTE "2023-01-01T00:00:00Z"` |
-| `BETWEEN` | Within range | JSON list | `"createdate" BETWEEN ["start", "end"]` |
-| `IN` | One of values | JSON list | `"industry" IN ["Tech", "Healthcare"]` |
-| `NOT_IN` | None of values | JSON list | `"state" NOT_IN ["CA", "NY"]` |
-| `CONTAINS_TOKEN` | Contains word | String | `"notes" CONTAINS_TOKEN "demo"` |
-| `NOT_CONTAINS_TOKEN` | Doesn't contain word | String | `"comments" NOT_CONTAINS_TOKEN "urgent"` |
-| `STARTS_WITH` | Starts with substring | String | `"firstname" STARTS_WITH "Jo"` |
-| `ENDS_WITH` | Ends with substring | String | `"email" ENDS_WITH "@gmail.com"` |
-| `ON_OR_AFTER` | Date same or after | ISO date | `"createdate" ON_OR_AFTER "2024-01-01"` |
-| `ON_OR_BEFORE` | Date same or before | ISO date | `"closedate" ON_OR_BEFORE "2024-12-31"` |
+## 🛠️ Available Tools
 
+- **Contact Management**: Create, read, update contacts and customer data
+- **Deal Operations**: Manage sales deals and pipeline stages
+- **Company Management**: Handle company records and relationships
+- **Marketing Tools**: Manage campaigns and marketing automation
+- **Custom Properties**: Work with custom fields and properties
 
-## Error Handling
+## 📚 Documentation & Support
 
-The server uses structured error responses with these components:
-- `message`: Human-readable error description
-- `additional_prompt_content`: Guidance for resolving the issue
-- `retry_after_ms`: Recommended retry delay in milliseconds
-- `developer_message`: Technical error details
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-## Logging
+## 🤝 Contributing
 
-Configure logging level with `--log-level` option:
-- `DEBUG`: Detailed operational insights
-- `INFO`: General operation tracking (default)
-- `WARNING`: Potential issues
-- `ERROR`: Operation failures
-- `CRITICAL`: Server-critical issues
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-## Security Note
+## 📜 License
 
-**Rotate your access token immediately** if you've ever committed it to version control. Always use environment variables for sensitive credentials.
+MIT License - see [LICENSE](../../LICENSE) for details.
 
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

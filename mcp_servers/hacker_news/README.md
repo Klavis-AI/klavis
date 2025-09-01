@@ -1,58 +1,69 @@
-# 📰 Hacker News Tools
+# Hacker News MCP Server
 
-Async tools for the official Hacker News API, perfect for building custom clients, data analysis scripts, or AI-powered applications.
+A Model Context Protocol (MCP) server for Hacker News integration. Access stories, comments, and user information from Hacker News using their public API.
 
-This library provides simple, high-level functions that wrap the official Hacker News API, returning clean Python dictionaries. This document covers both the tools themselves and the underlying API data structures you'll be working with.
+## 🚀 Quick Start - Run in 30 Seconds
+
+### 🌐 Using Hosted Service (Recommended for Production)
+
+Get instant access to Hacker News with our managed infrastructure - **no setup required**:
+
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
+
+```bash
+pip install klavis
+# or
+npm install klavis
+```
+
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("HACKER_NEWS", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
+
+```bash
+# Run Hacker News MCP Server (no authentication required)
+docker run -p 5000:5000 \
+  ghcr.io/klavis-ai/hacker_news-mcp-server:latest
+```
+
+**No Authentication:** Hacker News API is public and requires no authentication or API keys.
+
+## 🛠️ Available Tools
+
+- **Story Access**: Get top stories, new stories, and best stories
+- **Comment Retrieval**: Access story comments and discussion threads
+- **User Information**: Get user profiles and submission history
+- **Search**: Search stories and comments by keywords
+- **Live Data**: Access real-time Hacker News content
+
+## 📚 Documentation & Support
+
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
 
 ---
 
-## 📦 Available Tools
-
-These functions provide direct access to Hacker News data.
-
-### `hackerNews_item`
-Fetches a single Hacker News item (story, comment, job, etc.) by its unique ID.
-
-* **Parameters:**
-    * `item_id` (int): The unique numeric identifier for the item (e.g., `8863`).
-
----
-
-### `hackerNews_user`
-Retrieves a Hacker News user's profile information.
-
-* **Parameters:**
-    * `username` (str): The user's case-sensitive username (e.g., `'pg'`).
-
----
-
-### Story & Update Lists
-These tools retrieve the full details for items in a specific category.
-
-* **`hackerNews_topstories`**: Fetches the current top stories.
-* **`hackerNews_beststories`**: Fetches the all-time best stories.
-* **`hackerNews_newstories`**: Fetches the most recent stories.
-* **`hackerNews_showstories`**: Fetches the latest "Show HN" stories.
-* **`hackerNews_askstories`**: Fetches the latest "Ask HN" stories.
-* **`hackerNews_jobstories`**: Fetches the latest job postings.
-* **`hackerNews_updates`**: Fetches recent updates, including new items and changed profiles.
-
-* **Common Parameter:**
-    * `count` (int): The number of stories to fetch. (Default: `5`)
-
----
-
-## ⚙️ API Reference & Data Models
-
-The tools above are wrappers for the official Hacker News API. Understanding the underlying API can help you know what data to expect in return. For complete details, see the official [Hacker News API documentation](https://github.com/HackerNews/API).
-
-* **Base URL**: The tools make calls to `https://hacker-news.firebaseio.com/v0/`.
-* **Format**: All data is retrieved as **JSON** and parsed into Python dictionaries.
-* **Core Concept**: Nearly everything—stories, comments, jobs, and polls—is considered an **item**.
----
-
-## ✅ Common Features
-
--   **Asynchronous:** All tool functions are `async` and built for non-blocking I/O operations.
--   **Parsed Output:** Tools return ready-to-use Python dictionaries (`dict`) or lists of dictionaries (`list[dict]`), not raw JSON strings.
--   **Simplified Interface:** Complex API calls for fetching lists are simplified to a single function with a `count` parameter.
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

@@ -1,70 +1,69 @@
-# 🦁 Brave Search Tools
+# Brave Search MCP Server
 
-Async tools to access the Brave Search API for building AI assistants, dashboards, or apps.
+A Model Context Protocol (MCP) server for Brave Search integration. Perform web searches, news searches, image searches, and video searches using Brave's Search API.
 
-These tools cover web, image, news, and video search with essential filtering and pagination options.
+## 🚀 Quick Start - Run in 30 Seconds
 
----
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## 📦 Available Tools
+Get instant access to Brave Search with our managed infrastructure - **no setup required**:
 
-### `brave_web_search`
-Performs a general Brave web search.
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-* **Parameters:**
-    * `query` (str): The user's search query.
-    * `count` (int): Number of results. (Default: `5`, Max: `20`)
-    * `offset` (int): The number of results to skip for pagination.
-    * `country` (str): A 2-letter country code (e.g., `US`).
-    * `search_lang` (str): A 2-letter language code (e.g., `en`).
-    * `safesearch` (str): Safety filter (`off`, `moderate`, or `strict`).
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
----
+```python
+from klavis import Klavis
 
-### `brave_image_search`
-Searches for images on Brave.
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("BRAVE_SEARCH", "user123")
+```
 
-* **Parameters:**
-    * `query` (str): The image search query.
-    * `count` (int): Number of image results. (Default: `5`, Max: `200`)
-    * `offset` (int): The number of results to skip for pagination.
-    * `country` (str): A 2-letter country code (e.g., `US`).
-    * `search_lang` (str): A 2-letter language code (e.g., `en`).
-    * `safesearch` (str): Safety filter (`off` or `strict`).
+### 🐳 Using Docker (For Self-Hosting)
 
----
+```bash
+# Run Brave Search MCP Server
+docker run -p 5000:5000 -e API_KEY=your_brave_api_key \
+  ghcr.io/klavis-ai/brave_search-mcp-server:latest
+```
 
-### `brave_news_search`
-Searches for news articles.
+**API Key Setup:** Get your Brave Search API key from the [Brave Search API Dashboard](https://api.search.brave.com/).
 
-* **Parameters:**
-    * `query` (str): The news search query.
-    * `count` (int): Number of news articles. (Default: `5`, Max: `50`)
-    * `offset` (int): The number of results to skip for pagination.
-    * `country` (str): A 2-letter country code (e.g., `US`).
-    * `search_lang` (str): A 2-letter language code (e.g., `en`).
-    * `safesearch` (str): Safety filter (`off`, `moderate`, or `strict`).
-    * `freshness` (str): Filter by date: `pd` (day), `pw` (week), `pm` (month), or `py` (year).
+## 🛠️ Available Tools
 
----
+- **Web Search**: Comprehensive web search with ranking and snippets
+- **News Search**: Search for recent news articles and updates
+- **Image Search**: Find images with metadata and source information
+- **Video Search**: Search for videos across platforms
+- **Search Filters**: Apply various filters for refined results
 
-### `brave_video_search`
-Searches for videos.
+## 📚 Documentation & Support
 
-* **Parameters:**
-    * `query` (str): The video search query.
-    * `count` (int): Number of video results. (Default: `5`, Max: `50`)
-    * `offset` (int): The number of results to skip for pagination.
-    * `country` (str): A 2-letter country code (e.g., `US`).
-    * `search_lang` (str): A 2-letter language code (e.g., `en`).
-    * `safesearch` (str): Safety filter (`off`, `moderate`, or `strict`). Defaults to `off`.
-    * `freshness` (str): Filter by date: `pd` (day), `pw` (week), `pm` (month), or `py` (year).
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
 
 ---
 
-## ✅ Common Features
-
--   **Asynchronous:** All tool functions are `async` and designed for non-blocking I/O.
--   **JSON Output:** Each tool returns a `dict` parsed directly from the API's JSON response.
--   **Logging:** Built-in logging provides useful information about outgoing requests and incoming responses.
--   **Pagination:** All tools support pagination using a combination of the `offset` and `count` parameters.
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

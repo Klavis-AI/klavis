@@ -1,78 +1,69 @@
-# MCP Server with Mem0
+# Mem0 MCP Server
 
-This demonstrates a structured approach for using an [MCP](https://modelcontextprotocol.io/introduction) server with [mem0](https://mem0.ai) to manage memory for an AI application.
+A Model Context Protocol (MCP) server for Mem0 integration. Manage AI memory and context storage using Mem0's memory management API.
 
-## Installation
+## 🚀 Quick Start - Run in 30 Seconds
 
-1. Clone this repository
-2. Initialize the `uv` environment:
+### 🌐 Using Hosted Service (Recommended for Production)
 
-```bash
-uv venv
-```
+Get instant access to Mem0 with our managed infrastructure - **no setup required**:
 
-3. Activate the virtual environment:
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-source .venv/bin/activate
+pip install klavis
+# or
+npm install klavis
 ```
 
-4. Install the dependencies using `uv`:
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("MEM0", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Install in editable mode from pyproject.toml
-uv pip install -e .
+# Run Mem0 MCP Server
+docker run -p 5000:5000 -e API_KEY=your_mem0_api_key \
+  ghcr.io/klavis-ai/mem0-mcp-server:latest
 ```
 
-5. Update `.env` file in the root directory with your mem0 API key:
+**API Key Setup:** Get your Mem0 API key from the [Mem0 Dashboard](https://app.mem0.ai/).
 
-```bash
-MEM0_API_KEY=your_api_key_here
-```
+## 🛠️ Available Tools
 
-## Usage
+- **Memory Management**: Store and retrieve AI conversation memories
+- **Context Storage**: Manage long-term context and user preferences
+- **Memory Search**: Search through stored memories and contexts
+- **User Profiles**: Maintain user-specific memory profiles
+- **Memory Analytics**: Analyze memory usage and patterns
 
-1. Start the MCP server:
+## 📚 Documentation & Support
 
-```bash
-uv run server.py
-```
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-2. To configure Mem0 MCP using JSON configuration:
+## 🤝 Contributing
 
-```json
-{
-  "mcpServers": {
-    "mem0": {
-      "transport": "http",
-      "url": "http://localhost:5000/mcp"
-    }
-  }
-}
-```
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-## Features
+## 📜 License
 
-This server provides the following capabilities through MCP tools:
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-| Tool | Description |
-|------|-------------|
-| `mem0_add_memory` | Store code snippets, implementation details, and programming knowledge for future reference |
-| `mem0_get_all_memories` | Retrieve all stored memories for comprehensive context analysis |
-| `mem0_search_memories` | Semantically search through stored memories using natural language queries |
-| `mem0_update_memory` | Update an existing memory with new content while maintaining its unique identifier |
-| `mem0_delete_memory` | Delete a specific memory by ID or delete all memories for a user |
+---
 
-## Why?
-
-This implementation allows for a persistent preferences system that can be accessed via MCP. The streamable-HTTP based server can run as a process that agents connect to, use, and disconnect from whenever needed. This pattern fits well with "cloud-native" use cases where the server and clients can be decoupled processes on different nodes.
-
-### Server
-
-By default, the server runs on 0.0.0.0:5000 but is configurable with command line arguments like:
-
-```
-uv run main.py --host <your host> --port <your port>
-```
-
-The server exposes an Streamable HTTP endpoint at `/mcp` that MCP clients can connect to for accessing the preferences management tools.
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>
