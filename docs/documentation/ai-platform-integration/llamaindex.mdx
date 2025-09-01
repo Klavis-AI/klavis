@@ -11,7 +11,6 @@ LlamaIndex has officially showcased their integration with Klavis AI in [this Li
   <img src="/images/ai-platform/llamaindex-klavis.png" alt="LlamaIndex and Klavis Integration - Build AI agents that connect to MCP Servers" />
 </Frame>
 
-
 ## Prerequisites
 
 Before we begin, you'll need:
@@ -24,8 +23,6 @@ Before we begin, you'll need:
     Get your API key from Klavis AI
   </Card>
 </CardGroup>
-
-
 
 ## Installation
 
@@ -75,7 +72,7 @@ from llama_index.llms.openai import OpenAI
 from llama_index.tools.mcp import (
     BasicMCPClient,
     get_tools_from_mcp_url,
-    aget_tools_from_mcp_url,
+    aget_tools_from_mcp_url
 )
 
 # Initialize clients
@@ -107,8 +104,7 @@ Let's start with creating a simple AI agent that can summarize YouTube videos us
 # Create a YouTube MCP server and get the server URL
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 youtube_mcp_server_url = youtube_mcp_instance.server_url
@@ -119,8 +115,7 @@ print(f"🔗 YouTube MCP server created at: {youtube_mcp_server_url}")
 // Create a YouTube MCP server and get the server URL
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 const youtubeMcpServerUrl = youtubeMcpInstance.serverUrl;
@@ -158,7 +153,7 @@ print("🤖 YouTube AI agent created successfully!")
 // Create MCP server connection
 const youtubeServer = mcp({
     url: youtubeMcpServerUrl,
-    verbose: true,
+    verbose: true
 });
 
 // Get tools from MCP server
@@ -211,15 +206,13 @@ import webbrowser
 # Create YouTube MCP server
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # Create Gmail MCP server with OAuth authorization
 gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 print("✅ Created YouTube and Gmail MCP instances")
@@ -233,15 +226,13 @@ print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, p
 // Create YouTube MCP server
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // Create Gmail MCP server with OAuth authorization
 const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 console.log("✅ Created YouTube and Gmail MCP instances");
@@ -283,7 +274,7 @@ youtube_agent = FunctionAgent(
     tools=youtube_tools,
     llm=llm,
     system_prompt="You are a YouTube video summarization expert. Use MCP tools to analyze and summarize videos.",
-    can_handoff_to=["gmail_agent"],
+    can_handoff_to=["gmail_agent"]
 )
 
 gmail_agent = FunctionAgent(
@@ -297,7 +288,7 @@ gmail_agent = FunctionAgent(
 # Create multi-agent workflow
 workflow = AgentWorkflow(
     agents=[youtube_agent, gmail_agent],
-    root_agent="youtube_agent",
+    root_agent="youtube_agent"
 )
 
 print("🤖 Multi-agent workflow created with YouTube and Gmail agents!")
@@ -311,11 +302,11 @@ const gmailMcpServerUrl = gmailMcpInstance.serverUrl;
 // Create MCP server connections
 const youtubeServer = mcp({
     url: youtubeMcpServerUrl,
-    verbose: true,
+    verbose: true
 });
 const gmailServer = mcp({
     url: gmailMcpServerUrl,
-    verbose: true,
+    verbose: true
 });
 
 // Get tools from both MCP servers
@@ -327,7 +318,7 @@ const youtubeAgent = agent({
     name: "youtube_agent",
     llm: openai({ model: "gpt-4o" }),
     tools: youtubeTools,
-    systemPrompt: "You are a YouTube video summarization expert. Use MCP tools to analyze and summarize videos.",
+    systemPrompt: "You are a YouTube video summarization expert. Use MCP tools to analyze and summarize videos."
 });
 
 const gmailAgent = agent({
@@ -340,7 +331,7 @@ const gmailAgent = agent({
 // Create multi-agent workflow
 const agents = multiAgent({
     agents: [youtubeAgent, gmailAgent],
-    rootAgent: youtubeAgent,
+    rootAgent: youtubeAgent
 });
 
 console.log("🤖 Multi-agent workflow created with YouTube and Gmail agents!");

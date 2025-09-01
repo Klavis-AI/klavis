@@ -94,8 +94,7 @@ const klavisClient = new KlavisClient({ apiKey: klavisApiKey });
 ```python Python
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, and the instance id is {youtube_mcp_instance.instance_id}")
@@ -104,8 +103,7 @@ print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, a
 ```typescript TypeScript
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}, and the instance id is ${youtubeMcpInstance.instanceId}`);
@@ -122,7 +120,7 @@ def gemini_with_mcp_server(mcp_server_url: str, user_query: str):
     # Get tools from MCP server
     mcp_server_tools = klavis_client.mcp_server.list_tools(
         server_url=mcp_server_url,
-        format=ToolFormat.GEMINI,
+        format=ToolFormat.GEMINI
     )
     
     # Prepare conversation contents
@@ -150,7 +148,7 @@ def gemini_with_mcp_server(mcp_server_url: str, user_query: str):
                     function_result = klavis_client.mcp_server.call_tools(
                         server_url=mcp_server_url,
                         tool_name=part.function_call.name,
-                        tool_args=dict(part.function_call.args),
+                        tool_args=dict(part.function_call.args)
                     )
                     
                     # Create function response in the proper format
@@ -163,7 +161,7 @@ def gemini_with_mcp_server(mcp_server_url: str, user_query: str):
                 # Add function response to conversation
                 function_response_part = types.Part.from_function_response(
                     name=part.function_call.name,
-                    response=function_response,
+                    response=function_response
                 )
                 function_response_content = types.Content(
                     role='tool', 
@@ -211,7 +209,7 @@ async function geminiWithMcpServer(mcpServerUrl: string, userQuery: string) {
         config: {
             tools: [{
                 functionDeclarations: functionDeclarations
-            }],
+            }]
         }
     });
 
@@ -236,7 +234,7 @@ async function geminiWithMcpServer(mcpServerUrl: string, userQuery: string) {
                 const functionResult = await klavisClient.mcpServer.callTools({
                     serverUrl: mcpServerUrl,
                     toolName: functionCall.name || '',
-                    toolArgs: functionCall.args || {},
+                    toolArgs: functionCall.args || {}
                 });
                 
                 functionCallResults.push({
@@ -273,7 +271,7 @@ async function geminiWithMcpServer(mcpServerUrl: string, userQuery: string) {
                 tools: [{
                     functionDeclarations: functionDeclarations
                 }],
-                temperature: 0,
+                temperature: 0
             }
         });
         
@@ -325,8 +323,7 @@ console.log(result);
 # Create Gmail MCP server instance
 gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # Redirect to Gmail OAuth page for authorization
@@ -339,8 +336,7 @@ print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, p
 // Create Gmail MCP server instance
 const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // Handle OAuth if needed
