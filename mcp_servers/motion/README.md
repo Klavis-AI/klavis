@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("MOTION", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Motion MCP Server (OAuth required)
+# Run Motion MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/motion-mcp-server:latest
+
+# Run Motion MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_motion_api_key_here"}' \
   ghcr.io/klavis-ai/motion-mcp-server:latest
 ```
 

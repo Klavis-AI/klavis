@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("LINEAR", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Linear MCP Server (OAuth required)
+# Run Linear MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/linear-mcp-server:latest
+
+# Run Linear MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_linear_api_key_here"}' \
   ghcr.io/klavis-ai/linear-mcp-server:latest
 ```
 

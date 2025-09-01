@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("CLICKUP", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run ClickUp MCP Server (OAuth required)
+# Run ClickUp MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/clickup-mcp-server:latest
+
+# Run ClickUp MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_clickup_api_token_here"}' \
   ghcr.io/klavis-ai/clickup-mcp-server:latest
 ```
 

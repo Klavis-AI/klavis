@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("FRESHDESK", "user123")
 
 ```bash
 # Run Freshdesk MCP Server
-docker run -p 5000:5000 -e FRESHDESK_API_KEY=your_freshdesk_api_key \
+docker run -p 5000:5000 -e API_KEY=your_freshdesk_api_key \
   ghcr.io/klavis-ai/freshdesk-mcp-server:latest
 ```
 

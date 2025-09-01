@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("CLOSE", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Close MCP Server (OAuth required)
+# Run Close MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/close-mcp-server:latest
+
+# Run Close MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_close_api_key_here"}' \
   ghcr.io/klavis-ai/close-mcp-server:latest
 ```
 

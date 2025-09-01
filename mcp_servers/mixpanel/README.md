@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("MIXPANEL", "user123")
 
 ```bash
 # Run Mixpanel MCP Server
-docker run -p 5000:5000 -e MIXPANEL_API_SECRET=your_mixpanel_secret \
+docker run -p 5000:5000 -e API_KEY=your_mixpanel_secret \
   ghcr.io/klavis-ai/mixpanel-mcp-server:latest
 ```
 

@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("MONDAY", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Monday.com MCP Server (OAuth required)
+# Run Monday.com MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/monday-mcp-server:latest
+
+# Run Monday.com MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_monday_api_token_here"}' \
   ghcr.io/klavis-ai/monday-mcp-server:latest
 ```
 

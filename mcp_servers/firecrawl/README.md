@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("FIRECRAWL", "user123")
 
 ```bash
 # Run Firecrawl MCP Server
-docker run -p 5000:5000 -e FIRECRAWL_API_KEY=your_firecrawl_api_key \
+docker run -p 5000:5000 -e API_KEY=your_firecrawl_api_key \
   ghcr.io/klavis-ai/firecrawl-mcp-server:latest
 ```
 

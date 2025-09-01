@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("WHATSAPP", "user123")
 
 ```bash
 # Run WhatsApp MCP Server
-docker run -p 5000:5000 -e WHATSAPP_ACCESS_TOKEN=your_whatsapp_token \
+docker run -p 5000:5000 -e API_KEY=your_whatsapp_token \
   ghcr.io/klavis-ai/whatsapp-mcp-server:latest
 ```
 

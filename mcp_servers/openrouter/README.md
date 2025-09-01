@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("OPENROUTER", "user123")
 
 ```bash
 # Run OpenRouter MCP Server
-docker run -p 5000:5000 -e OPENROUTER_API_KEY=your_openrouter_api_key \
+docker run -p 5000:5000 -e API_KEY=your_openrouter_api_key \
   ghcr.io/klavis-ai/openrouter-mcp-server:latest
 ```
 

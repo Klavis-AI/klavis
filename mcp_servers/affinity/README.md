@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("AFFINITY", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Affinity MCP Server (OAuth required)
+# Run Affinity MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/affinity-mcp-server:latest
+
+# Run Affinity MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_affinity_api_key_here"}' \
   ghcr.io/klavis-ai/affinity-mcp-server:latest
 ```
 

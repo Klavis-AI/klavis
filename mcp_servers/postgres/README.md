@@ -28,11 +28,11 @@ server = klavis.mcp_server.create_server_instance("POSTGRES", "user123")
 ```bash
 # Run PostgreSQL MCP Server
 docker run -p 5000:5000 \
-  -e DATABASE_URL="postgresql://user:password@host:port/database" \
+  -e API_KEY="postgresql://user:password@host:port/database" \
   ghcr.io/klavis-ai/postgres-mcp-server:latest
 ```
 
-**Connection Setup:** Provide your PostgreSQL connection string via `DATABASE_URL`. The server automatically wraps all queries in read-only transactions for safety.
+**Connection Setup:** Provide your PostgreSQL connection string via `API_KEY`. The server automatically wraps all queries in read-only transactions for safety.
 
 ## 🛠️ Available Tools
 

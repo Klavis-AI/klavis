@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("TAVILY", "user123")
 
 ```bash
 # Run Tavily MCP Server
-docker run -p 5000:5000 -e TAVILY_API_KEY=your_tavily_api_key \
+docker run -p 5000:5000 -e API_KEY=your_tavily_api_key \
   ghcr.io/klavis-ai/tavily-mcp-server:latest
 ```
 

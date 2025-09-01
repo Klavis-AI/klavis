@@ -26,11 +26,11 @@ server = klavis.mcp_server.create_server_instance("GITHUB", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run GitHub MCP Server (OAuth required)
+# Run GitHub MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
   ghcr.io/klavis-ai/github-mcp-server:latest
 
-# Alternative: With personal access token
+# Run GitHub MCP Server (no OAuth support)
 docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
   ghcr.io/klavis-ai/github-mcp-server:latest
 ```

@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("GOOGLE_JOBS", "user123")
 
 ```bash
 # Run Google Jobs MCP Server
-docker run -p 5000:5000 -e GOOGLE_JOBS_API_KEY=your_google_api_key \
+docker run -p 5000:5000 -e API_KEY=your_google_api_key \
   ghcr.io/klavis-ai/google_jobs-mcp-server:latest
 ```
 

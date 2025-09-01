@@ -26,11 +26,11 @@ server = klavis.mcp_server.create_server_instance("SLACK", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Slack MCP Server (OAuth required)
+# Run Slack MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
   ghcr.io/klavis-ai/slack-mcp-server:latest
 
-# Alternative: With bot and user tokens
+# Run Slack MCP Server (no OAuth support)
 docker run -p 5000:5000 \
   -e SLACK_BOT_TOKEN=xoxb-your-bot-token \
   -e SLACK_USER_TOKEN=xoxp-your-user-token \

@@ -27,7 +27,7 @@ server = klavis.mcp_server.create_server_instance("MEM0", "user123")
 
 ```bash
 # Run Mem0 MCP Server
-docker run -p 5000:5000 -e MEM0_API_KEY=your_mem0_api_key \
+docker run -p 5000:5000 -e API_KEY=your_mem0_api_key \
   ghcr.io/klavis-ai/mem0-mcp-server:latest
 ```
 

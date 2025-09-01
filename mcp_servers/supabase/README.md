@@ -26,14 +26,20 @@ server = klavis.mcp_server.create_server_instance("SUPABASE", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Supabase MCP Server
+# Run Supabase MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/supabase-mcp-server:latest
+
+# Run Supabase MCP Server (no OAuth support)
 docker run -p 5000:5000 \
   -e SUPABASE_URL=your_supabase_url \
-  -e SUPABASE_KEY=your_supabase_anon_key \
+  -e AUTH_DATA='{"access_token":"your_supabase_anon_key_here"}' \
   ghcr.io/klavis-ai/supabase-mcp-server:latest
 ```
 
-**Setup:** Get your Supabase URL and anon key from your [Supabase project dashboard](https://app.supabase.com/).
+**OAuth Setup:** Supabase requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+
+**Manual Setup:** Alternatively, provide your Supabase URL and anon key directly.
 
 ## 🛠️ Available Tools
 
