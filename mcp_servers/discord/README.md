@@ -26,16 +26,10 @@ server = klavis.mcp_server.create_server_instance("DISCORD", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Discord MCP Server (OAuth support through Klavis AI)
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/discord-mcp-server:latest
-
-# Run Discord MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_discord_bot_token_here"}' \
+# Run Discord MCP Server
+docker run -p 5000:5000 -e DISCORD_TOKEN=your_discord_bot_token_here \
   ghcr.io/klavis-ai/discord-mcp-server:latest
 ```
-
-**OAuth Setup:** Discord requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
