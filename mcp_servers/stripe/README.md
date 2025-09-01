@@ -1,12 +1,12 @@
-# Dropbox MCP Server
+# Stripe MCP Server
 
-A Model Context Protocol (MCP) server for Dropbox integration. Manage files, folders, and sharing using Dropbox's API with OAuth support.
+A Model Context Protocol (MCP) server for Stripe integration. Manage payments, customers, and billing using Stripe's API.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Dropbox with our managed infrastructure - **no setup required**:
+Get instant access to Stripe with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,30 +20,32 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("DROPBOX", "user123")
+server = klavis.mcp_server.create_server_instance("STRIPE", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Dropbox MCP Server (OAuth support through Klavis AI)
+# Run Stripe MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+  ghcr.io/klavis-ai/stripe-mcp-server:latest
 
-# Run Dropbox MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_dropbox_access_token_here"}' \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+# Run Stripe MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_stripe_secret_key_here"}' \
+  ghcr.io/klavis-ai/stripe-mcp-server:latest
 ```
 
-**OAuth Setup:** Dropbox requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**OAuth Setup:** Stripe requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+
+**Manual Setup:** Alternatively, provide your Stripe secret key directly via `AUTH_DATA`.
 
 ## 🛠️ Available Tools
 
-- **File Management**: Upload, download, and manage Dropbox files
-- **Folder Operations**: Create, move, and organize folders
-- **Sharing**: Create and manage shared links and folder permissions
-- **Search**: Search files and folders by name and content
-- **Metadata**: Access file metadata and version history
+- **Payment Processing**: Create and manage payment intents and charges
+- **Customer Management**: Manage customer records and payment methods
+- **Subscription Handling**: Create and manage recurring subscriptions
+- **Invoice Operations**: Generate and manage invoices
+- **Financial Reporting**: Access transaction history and analytics
 
 ## 📚 Documentation & Support
 

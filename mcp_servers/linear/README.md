@@ -1,12 +1,12 @@
-# Dropbox MCP Server
+# Linear MCP Server
 
-A Model Context Protocol (MCP) server for Dropbox integration. Manage files, folders, and sharing using Dropbox's API with OAuth support.
+A Model Context Protocol (MCP) server for Linear integration. Manage issues, projects, and team workflows using Linear's API with OAuth support.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Dropbox with our managed infrastructure - **no setup required**:
+Get instant access to Linear with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,30 +20,30 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("DROPBOX", "user123")
+server = klavis.mcp_server.create_server_instance("LINEAR", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Dropbox MCP Server (OAuth support through Klavis AI)
+# Run Linear MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+  ghcr.io/klavis-ai/linear-mcp-server:latest
 
-# Run Dropbox MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_dropbox_access_token_here"}' \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+# Run Linear MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_linear_api_key_here"}' \
+  ghcr.io/klavis-ai/linear-mcp-server:latest
 ```
 
-**OAuth Setup:** Dropbox requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**OAuth Setup:** Linear requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
-- **File Management**: Upload, download, and manage Dropbox files
-- **Folder Operations**: Create, move, and organize folders
-- **Sharing**: Create and manage shared links and folder permissions
-- **Search**: Search files and folders by name and content
-- **Metadata**: Access file metadata and version history
+- **Issue Management**: Create, read, update, and manage Linear issues
+- **Project Operations**: Manage projects and project workflows
+- **Team Management**: Handle team assignments and permissions
+- **Status Tracking**: Update issue statuses and priorities
+- **Label Management**: Apply and manage issue labels and tags
 
 ## 📚 Documentation & Support
 

@@ -1,12 +1,12 @@
-# Dropbox MCP Server
+# Confluence MCP Server
 
-A Model Context Protocol (MCP) server for Dropbox integration. Manage files, folders, and sharing using Dropbox's API with OAuth support.
+A Model Context Protocol (MCP) server for Atlassian Confluence integration. Manage pages, spaces, and content using Confluence's API with OAuth support.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Dropbox with our managed infrastructure - **no setup required**:
+Get instant access to Confluence with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,30 +20,30 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("DROPBOX", "user123")
+server = klavis.mcp_server.create_server_instance("CONFLUENCE", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Dropbox MCP Server (OAuth support through Klavis AI)
+# Run Confluence MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+  ghcr.io/klavis-ai/confluence-mcp-server:latest
 
-# Run Dropbox MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_dropbox_access_token_here"}' \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+# Run Confluence MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_confluence_api_token_here"}' \
+  ghcr.io/klavis-ai/confluence-mcp-server:latest
 ```
 
-**OAuth Setup:** Dropbox requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**OAuth Setup:** Confluence requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
-- **File Management**: Upload, download, and manage Dropbox files
-- **Folder Operations**: Create, move, and organize folders
-- **Sharing**: Create and manage shared links and folder permissions
-- **Search**: Search files and folders by name and content
-- **Metadata**: Access file metadata and version history
+- **Page Management**: Create, read, update, and delete Confluence pages
+- **Space Operations**: Manage Confluence spaces and permissions
+- **Content Search**: Search content across pages and spaces
+- **Comments**: Add and manage page comments
+- **Attachments**: Handle file attachments and media
 
 ## 📚 Documentation & Support
 

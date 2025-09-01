@@ -1,116 +1,69 @@
 # YouTube MCP Server
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A Model Context Protocol (MCP) server for YouTube integration. Retrieve video transcripts, details, and metadata using YouTube's Data API.
 
-A Model Context Protocol (MCP) server that retrieves transcripts/subtitles for a given YouTube video and provides video details when transcripts are unavailable.
+## 🚀 Quick Start - Run in 30 Seconds
 
-This server utilizes the `FastMCP` framework for handling MCP requests and the YouTube API.
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Features
+Get instant access to YouTube with our managed infrastructure - **no setup required**:
 
-*   Provides a simple MCP endpoint to get YouTube video transcripts.
-*   Accepts a YouTube video URL as input.
-*   Returns the transcript/subtitles when available.
-*   Falls back to video details when transcript is unavailable.
-*   Supports proxy configuration for transcript retrieval.
-*   Built with Python using `FastMCP`.
-*   Can be run easily using Docker or a standard Python environment.
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-## Environment Variables
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
-The following environment variables are used by the server:
+```python
+from klavis import Klavis
 
-*   **Required**:
-    *   `YOUTUBE_API_KEY`: Your YouTube Data API key (required for fetching video details).
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("YOUTUBE", "user123")
+```
 
-*   **Optional**:
-    *   `YOUTUBE_MCP_SERVER_PORT`: Port for the MCP server (defaults to 5000).
-    *   `WEBSHARE_PROXY_USERNAME`: Username for Webshare proxy (optional, for circumventing regional restrictions).
-    *   `WEBSHARE_PROXY_PASSWORD`: Password for Webshare proxy (optional, for circumventing regional restrictions).
+### 🐳 Using Docker (For Self-Hosting)
 
-For more information on using Webshare with YouTube Transcript API, refer to: [YouTube Transcript API - Using Webshare](https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#using-webshare)
+```bash
+# Run YouTube MCP Server
+docker run -p 5000:5000 -e API_KEY=your_youtube_api_key \
+  ghcr.io/klavis-ai/youtube-mcp-server:latest
+```
 
-## Running Locally
+**API Key Setup:** Get your YouTube Data API key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and enable the YouTube Data API v3.
 
-You can run this server locally using either Docker (recommended) or a Python virtual environment. The instructions assume you are in the root directory of the `klavis` project (the parent directory of `mcp_servers`).
+## 🛠️ Available Tools
 
-### Prerequisites
+- **Video Transcripts**: Retrieve full video transcripts with timestamps
+- **Video Details**: Get video metadata including title, description, statistics
+- **Video Search**: Search for videos by keywords and filters
+- **Channel Information**: Get channel details and video listings
+- **Playlist Management**: Access playlist contents and metadata
 
-*   **Docker:** If using the Docker method.
-*   **Python:** Python 3.11+ if using the virtual environment method.
-*   **`.env` File:** Create a file named `.env` in the root of the `klavis` project directory with the required environment variables.
-    ```bash
-    # Required
-    YOUTUBE_API_KEY=your_youtube_api_key_here
-    
-    # Optional
-    YOUTUBE_MCP_SERVER_PORT=5000
-    WEBSHARE_PROXY_USERNAME=your_proxy_username
-    WEBSHARE_PROXY_PASSWORD=your_proxy_password
-    ```
+## 📚 Documentation & Support
 
-### Using Docker (Recommended)
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-1.  **Build the Docker Image:**
-    Open your terminal in the `mcp_servers/youtube` directory and run:
-    ```bash
-    docker build -t youtube-mcp-server .
-    ```
-    *   `-t youtube-mcp-server`: Assigns a tag (name) to the image.
-    *   `.`: Specifies the build context (the current directory, `mcp_servers/youtube`).
+## 🤝 Contributing
 
-2.  **Run the Docker Container:**
-    ```bash
-    docker run -p 5000:5000 --env-file .env youtube-mcp-server
-    ```
-    *   `-p 5000:5000`: Maps port 5000 on your host machine to port 5000 inside the container (where the server listens).
-    *   `--env-file .env`: Provides the environment variables from your `.env` file to the container.
-    *   `youtube-mcp-server`: The name of the image to run.
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-The server should now be running and accessible at `http://localhost:5000`.
+## 📜 License
 
-### Using Python Virtual Environment
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-1.  **Navigate to Project Root:**
-    Ensure your terminal is in the root directory of the `klavis` project.
+---
 
-2.  **Create Virtual Environment:**
-    ```bash
-    python -m venv venv
-    ```
-
-3.  **Activate Virtual Environment:**
-    *   **Linux/macOS:** `source venv/bin/activate`
-    *   **Windows:** `venv\Scripts\activate`
-
-4.  **Install Dependencies:**
-    The server relies on packages listed in `requirements.txt`:
-    ```bash
-    pip install -r mcp_servers/youtube/requirements.txt
-    ```
-
-5.  **Create `.env` File:**
-    Ensure you have created the `.env` file in the `klavis` root directory as mentioned in the prerequisites.
-
-6.  **Run the Server:**
-    ```bash
-    python mcp_servers/youtube/server.py
-    ```
-
-The server should now be running and accessible at `http://localhost:5000`.
-
-## Usage
-
-Once the server is running (either via Docker or Python environment), it listens for MCP requests on port 5000.
-
-You can interact with it using an MCP client or tool. The available tool is:
-
-* `get_youtube_video_transcript`:
-  * **Description:** Retrieve the transcript/subtitles for a given YouTube video. When transcripts are unavailable, it will automatically fall back to fetching video details.
-  * **Input Parameter:** `url` (string) - The URL of the YouTube video (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ).
-  * **Returns:** (Dict) - Contains the transcript data when available, or video details with an error message when transcript is unavailable.
-  * **Supported URL Formats:**
-    * Standard: `youtube.com/watch?v=VIDEO_ID`
-    * Short: `youtu.be/VIDEO_ID`
-    * Embedded: `youtube.com/embed/VIDEO_ID`
-    * Shorts: `youtube.com/shorts/VIDEO_ID`
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

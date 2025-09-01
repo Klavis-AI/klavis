@@ -1,12 +1,12 @@
-# Close MCP Server
+# Salesforce MCP Server
 
-A Model Context Protocol (MCP) server for Close CRM integration. Manage sales activities, leads, and opportunities using Close's API with OAuth support.
+A Model Context Protocol (MCP) server for Salesforce CRM integration. Manage leads, contacts, opportunities, and other Salesforce objects using the Salesforce API with OAuth support.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Close with our managed infrastructure - **no setup required**:
+Get instant access to Salesforce with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,30 +20,31 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("CLOSE", "user123")
+server = klavis.mcp_server.create_server_instance("SALESFORCE", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Close MCP Server (OAuth support through Klavis AI)
+# Run Salesforce MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/close-mcp-server:latest
+  ghcr.io/klavis-ai/salesforce-mcp-server:latest
 
-# Run Close MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_close_api_key_here"}' \
-  ghcr.io/klavis-ai/close-mcp-server:latest
+# Run Salesforce MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_salesforce_access_token_here"}' \
+  ghcr.io/klavis-ai/salesforce-mcp-server:latest
 ```
 
-**OAuth Setup:** Close requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**OAuth Setup:** Salesforce requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
-- **Lead Management**: Create, update, and manage sales leads
+- **Lead Management**: Create, read, update leads and lead conversion
+- **Contact Operations**: Manage contacts and customer relationships
 - **Opportunity Tracking**: Handle sales opportunities and pipeline
-- **Activity Management**: Track calls, emails, and sales activities
-- **Contact Operations**: Manage contact information and relationships
-- **Sales Analytics**: Access sales metrics and performance data
+- **Account Management**: Manage customer accounts and hierarchies
+- **Custom Objects**: Work with custom Salesforce objects and fields
+- **Reports & Analytics**: Access Salesforce reports and dashboards
 
 ## 📚 Documentation & Support
 

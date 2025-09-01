@@ -1,12 +1,12 @@
-# Dropbox MCP Server
+# Motion MCP Server
 
-A Model Context Protocol (MCP) server for Dropbox integration. Manage files, folders, and sharing using Dropbox's API with OAuth support.
+A Model Context Protocol (MCP) server for Motion integration. Manage calendar, tasks, and scheduling using Motion's API with OAuth support.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Dropbox with our managed infrastructure - **no setup required**:
+Get instant access to Motion with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,30 +20,30 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("DROPBOX", "user123")
+server = klavis.mcp_server.create_server_instance("MOTION", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Dropbox MCP Server (OAuth support through Klavis AI)
+# Run Motion MCP Server (OAuth support through Klavis AI)
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+  ghcr.io/klavis-ai/motion-mcp-server:latest
 
-# Run Dropbox MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_dropbox_access_token_here"}' \
-  ghcr.io/klavis-ai/dropbox-mcp-server:latest
+# Run Motion MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_motion_api_key_here"}' \
+  ghcr.io/klavis-ai/motion-mcp-server:latest
 ```
 
-**OAuth Setup:** Dropbox requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**OAuth Setup:** Motion requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
-- **File Management**: Upload, download, and manage Dropbox files
-- **Folder Operations**: Create, move, and organize folders
-- **Sharing**: Create and manage shared links and folder permissions
-- **Search**: Search files and folders by name and content
-- **Metadata**: Access file metadata and version history
+- **Task Management**: Create, update, and manage tasks with AI scheduling
+- **Calendar Integration**: Sync and manage calendar events
+- **Project Planning**: Handle project timelines and deadlines
+- **AI Scheduling**: Leverage Motion's AI-powered scheduling features
+- **Team Collaboration**: Manage team tasks and shared projects
 
 ## 📚 Documentation & Support
 

@@ -1,69 +1,73 @@
 # Asana MCP Server
 
-A Model Context Protocol (MCP) server for interacting with Asana tasks and projects.
+A Model Context Protocol (MCP) server for Asana integration. Manage tasks, projects, and team workflows using Asana's API with OAuth support.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Task Management**: Create, read, update, and search tasks
-- **Project Management**: List and filter projects
-- **Workspace Management**: Access user workspaces
-- **Tag Support**: Create and manage task tags
-- **Date Filtering**: Filter tasks by due dates and start dates
-- **Assignee Management**: Assign tasks to users
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Available Tools
+Get instant access to Asana with our managed infrastructure - **no setup required**:
 
-### Task Operations
-- `create_task`: Create a new task with optional project, assignee, dates, and tags
-- `get_task`: Retrieve a specific task by ID with optional subtasks
-- `search_tasks`: Search for tasks with various filters (keywords, dates, assignee, project, etc.)
-- `update_task`: Update task properties like name, completion status, dates, and assignee
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-### Project Operations
-- `get_projects`: List projects in a workspace or team
-
-### Workspace Operations
-- `get_workspaces`: List user's available workspaces
-
-## Configuration
-
-Set the following environment variables:
-
-- `ASANA_MCP_SERVER_PORT`: Port for the server (default: 5000)
-- `ASANA_MAX_CONCURRENT_REQUESTS`: Max concurrent API requests (default: 3)
-- `ASANA_MAX_TIMEOUT_SECONDS`: Request timeout in seconds (default: 20)
-
-## Authentication
-
-The server expects an Asana Personal Access Token to be provided in the Authorization header:
-
-```
-Authorization: Bearer YOUR_ASANA_TOKEN
-```
-
-## Running the Server
-
-### Direct Python
 ```bash
-python server.py --port 5000
+pip install klavis
+# or
+npm install klavis
 ```
 
-### Docker
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("ASANA", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
+
 ```bash
-docker build -t asana-mcp-server .
-docker run -p 5001:5000 asana-mcp-server
+# Run Asana MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/asana-mcp-server:latest
+
+# Run Asana MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_asana_api_key_here"}' \
+  ghcr.io/klavis-ai/asana-mcp-server:latest
 ```
 
-## API Endpoints
+**OAuth Setup:** Asana requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-- **SSE**: `GET /sse` - Server-Sent Events endpoint for MCP communication
-- **HTTP**: All other paths - StreamableHTTP endpoint for MCP communication
+## 🛠️ Available Tools
 
-## Dependencies
+- **Task Management**: Create, read, update, and complete tasks
+- **Project Operations**: Manage projects and project timelines
+- **Team Collaboration**: Handle team assignments and permissions
+- **Custom Fields**: Work with custom task and project fields
+- **Status Updates**: Track progress and project status
 
-- mcp>=1.8.1
-- httpx
-- starlette
-- uvicorn
-- click
-- python-dotenv 
+## 📚 Documentation & Support
+
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>
