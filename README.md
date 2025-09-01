@@ -59,9 +59,9 @@ Example running in Cursor
 
 ```bash
 # Run Github MCP Server with OAuth Support through Klavis AI
-docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
+docker pull ghcr.io/klavis-ai/github-mcp-server:latest
 docker run -p 5000:5000 -e KLAVIS_API_KEY=your_key \
-  ghcr.io/klavis-ai/gmail-mcp-server:latest
+  ghcr.io/klavis-ai/github-mcp-server:latest
 ```
 
 ```bash
