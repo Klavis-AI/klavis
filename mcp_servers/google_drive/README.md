@@ -1,12 +1,12 @@
-# Freshdesk MCP Server
+# Google Drive MCP Server
 
-A Model Context Protocol (MCP) server for Freshdesk integration. Manage tickets, contacts, and customer support using Freshdesk's API.
+A Model Context Protocol (MCP) server for Google Drive integration. Manage files, folders, and sharing using Google Drive API with OAuth support.
 
 ## 🚀 Quick Start - Run in 30 Seconds
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to Freshdesk with our managed infrastructure - **no setup required**:
+Get instant access to Google Drive with our managed infrastructure - **no setup required**:
 
 **🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
@@ -20,26 +20,26 @@ npm install klavis
 from klavis import Klavis
 
 klavis = Klavis(api_key="your-free-key")
-server = klavis.mcp_server.create_server_instance("FRESHDESK", "user123")
+server = klavis.mcp_server.create_server_instance("GOOGLE_DRIVE", "user123")
 ```
 
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Freshdesk MCP Server
-docker run -p 5000:5000 -e FRESHDESK_API_KEY=your_freshdesk_api_key \
-  ghcr.io/klavis-ai/freshdesk-mcp-server:latest
+# Run Google Drive MCP Server (OAuth required)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/google_drive-mcp-server:latest
 ```
 
-**API Key Setup:** Get your Freshdesk API key from your [Freshdesk admin settings](https://support.freshdesk.com/en/support/solutions/articles/215517).
+**OAuth Setup:** Google Drive requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
 ## 🛠️ Available Tools
 
-- **Ticket Management**: Create, read, update, and resolve support tickets
-- **Contact Management**: Manage customer contacts and information
-- **Agent Operations**: Handle agent assignments and ticket routing
-- **Knowledge Base**: Access and manage knowledge base articles
-- **Reporting**: Generate support metrics and analytics
+- **File Management**: Upload, download, and manage Drive files
+- **Folder Operations**: Create and organize folders and directory structure
+- **Sharing**: Manage file permissions and sharing settings
+- **Search**: Search files and folders by name, content, and metadata
+- **Collaboration**: Handle real-time collaboration and comments
 
 ## 📚 Documentation & Support
 

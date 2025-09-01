@@ -1,74 +1,69 @@
 # MarkItDown MCP Server
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A Model Context Protocol (MCP) server for MarkItDown integration. Convert documents and content to Markdown format using MarkItDown's conversion capabilities.
 
-This project provides a Model Context Protocol (MCP) server that utilizes the `markitdown` library to convert various document types hosted at a given URL into Markdown format.
+## 🚀 Quick Start - Run in 30 Seconds
 
-## Features
+### 🌐 Using Hosted Service (Recommended for Production)
 
-*   Accepts a URL (HTTP/HTTPS) pointing to a document.
-*   Supports conversion for:
-    *   PDF
-    *   Microsoft Office Documents (Word, PowerPoint, Excel)
-    *   HTML
-    *   Text-based formats (CSV, JSON, XML)
-    *   ZIP archives (extracts and converts contents)
-    *   EPub files
-*   Handles optional authentication tokens for accessing protected resources.
+Get instant access to MarkItDown with our managed infrastructure - **no setup required**:
 
-## Running Locally
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-There are two recommended ways to run this server locally: using Docker (recommended) or using a Python virtual environment.
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
-### Using Docker (Recommended)
+```python
+from klavis import Klavis
 
-This is the easiest way to get the server running without managing dependencies manually.
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("MARKITDOWN", "user123")
+```
 
-1.  **Ensure Docker is installed** on your system.
-2.  **Navigate to the root directory** of the `klavis` project in your terminal.
-3.  **Build the Docker image:**
-    ```bash
-    docker build -t markitdown-mcp -f mcp_servers/markitdown/Dockerfile .
-    ```
-    *(You can replace `markitdown-mcp` with any tag you prefer)*
-4.  **Run the Docker container:**
-    ```bash
-    docker run -p 5000:5000 markitdown-mcp
-    ```
-    This command maps port 5000 on your host machine to port 5000 inside the container, where the server listens.
+### 🐳 Using Docker (For Self-Hosting)
 
-The server should now be running and accessible at `http://localhost:5000`.
+```bash
+# Run MarkItDown MCP Server (no authentication required)
+docker run -p 5000:5000 \
+  ghcr.io/klavis-ai/markitdown-mcp-server:latest
+```
 
-### Using Python Virtual Environment
+**No Authentication:** MarkItDown conversion typically requires no external authentication.
 
-This method requires Python 3.12 and `pip` to be installed.
+## 🛠️ Available Tools
 
-1.  **Navigate to this directory** (`mcp_servers/markitdown`) in your terminal.
-2.  **Create a Python virtual environment:**
-    ```bash
-    python3 -m venv .venv
-    ```
-3.  **Activate the virtual environment:**
-    *   On macOS/Linux:
-        ```bash
-        source .venv/bin/activate
-        ```
-    *   On Windows:
-        ```bash
-        .\.venv\Scripts\activate
-        ```
-4.  **Install the required dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-5.  **Run the server:**
-    ```bash
-    python server.py
-    ```
+- **Document Conversion**: Convert various document formats to Markdown
+- **HTML to Markdown**: Convert HTML content to clean Markdown
+- **File Processing**: Process multiple document types and formats
+- **Content Cleaning**: Clean and optimize converted Markdown output
+- **Batch Processing**: Convert multiple documents efficiently
 
-The server should now be running and accessible at `http://localhost:5000`.
+## 📚 Documentation & Support
 
-6.  **Deactivate the virtual environment** when you are finished:
-    ```bash
-    deactivate
-    ``` 
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>
