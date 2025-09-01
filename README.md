@@ -21,9 +21,9 @@
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
-Get instant access to 50+ MCP servers with our managed infrastructure - **no setup required**:
+Get instant access to 50+ MCP servers with our managed infrastructure - **no setup required**
 
-**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
+[Get Free API Key →](https://www.klavis.ai/home/api-keys)
 
 ```bash
 pip install klavis
@@ -34,25 +34,11 @@ npm install klavis
 ```python
 from klavis import Klavis
 
-klavis = Klavis(api_key="your-free-key")
+klavis = Klavis(api_key="Your-Klavis-API-Key")
 server = klavis.mcp_server.create_server_instance("GMAIL", "user123")
 ```
 
-### 🐳 Using Docker (For Self-Hosting)
-
-```bash
-# Run Gmail MCP Server with OAuth Support through Klavis AI
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_key \
-  ghcr.io/klavis-ai/gmail-mcp-server:latest
-
-# Run GitHub MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
-  ghcr.io/klavis-ai/github-mcp-server:latest
-```
-
-### 🖥️ Cursor Configuration
-
-**For Cursor, use our hosted service URLs directly - no Docker setup needed:**
+Example running in Cursor 
 
 ```json
 {
@@ -62,6 +48,35 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_her
     },
     "klavis-github": {
       "url": "https://github-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
+    }
+  }
+}
+```
+
+
+### 🐳 Using Docker (For Self-Hosting)
+[Get Free API Key →](https://www.klavis.ai/home/api-keys)
+
+```bash
+# Run Github MCP Server with OAuth Support through Klavis AI
+docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_key \
+  ghcr.io/klavis-ai/gmail-mcp-server:latest
+```
+
+```bash
+# Or run GitHub MCP Server (manually add token)
+docker pull ghcr.io/klavis-ai/github-mcp-server:latest
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
+  ghcr.io/klavis-ai/github-mcp-server:latest
+```
+
+Example running in Cursor 
+```json
+{
+  "mcpServers": {
+    "github": {
+      "url": "http://localhost:5000/mcp/"
     }
   }
 }
@@ -97,9 +112,11 @@ Perfect for trying out MCP servers or integrating with AI tools like Claude Desk
 
 ```bash
 # Example: GitHub MCP Server
+docker pull ghcr.io/klavis-ai/github-mcp-server:latest
 docker run -p 5000:5000 ghcr.io/klavis-ai/github-mcp-server:latest
 
 # Example: Gmail with OAuth (requires API key)
+docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
 docker run -it -e KLAVIS_API_KEY=your_key \
   ghcr.io/klavis-ai/gmail-mcp-server:latest
 ```
@@ -226,7 +243,7 @@ response = openai.chat.completions.create(
 from klavis import Klavis
 
 # Get started with just an API key
-klavis = Klavis(api_key="your-free-key")
+klavis = Klavis(api_key="Your-Klavis-API-Key")
 
 # Create any MCP server instantly
 gmail_server = klavis.mcp_server.create_server_instance(
@@ -246,6 +263,7 @@ Some servers require OAuth authentication (Google, GitHub, Slack, etc.). OAuth i
 
 ```bash
 # Run with OAuth support (requires free API key)
+docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
 docker run -it -e KLAVIS_API_KEY=your_free_key \
   ghcr.io/klavis-ai/gmail-mcp-server:latest
 
