@@ -20,7 +20,7 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
             
         tools_info = klavis_client.mcp_server.list_tools(
             server_url=server_url,
-            format=ToolFormat.OPENAI,
+            format=ToolFormat.OPENAI
         )
         
         # Create streaming completion with function calling
@@ -84,7 +84,7 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
                     function_result = klavis_client.mcp_server.call_tools(
                         server_url=server_url,
                         tool_name=tool_call["function"]["name"],
-                        tool_args=json.loads(tool_call["function"]["arguments"]),
+                        tool_args=json.loads(tool_call["function"]["arguments"])
                     )
                     
                     # Add tool call to the assistant message already in messages
@@ -125,9 +125,7 @@ def main():
     # Create MCP server instance
     mcp_instance = klavis_client.mcp_server.create_server_instance(
         server_name=McpServerName.YOUTUBE,  # Close CRM as an example
-        user_id="1234",
-        platform_name="Klavis",
-    )
+        user_id="1234")
     
     # Open OAuth authorization if needed
     if hasattr(mcp_instance, 'oauth_url') and mcp_instance.oauth_url:

@@ -40,9 +40,7 @@ async function main() {
         // Create MCP server instance
         const mcpInstance = await klavisClient.mcpServer.createServerInstance({
             serverName: Klavis.McpServerName.Notion,
-            userId: "1234",
-            platformName: "Klavis",
-        });
+            userId: "1234"});
         
         console.log("--- mcp_instance ---", mcpInstance);
 
@@ -94,7 +92,7 @@ async function main() {
                     config: {
                         tools: [{
                             functionDeclarations: functionDeclarations
-                        }],
+                        }]
                     }
                 });
 
@@ -120,7 +118,7 @@ async function main() {
                             const functionResult = await klavisClient.mcpServer.callTools({
                                 serverUrl: mcpInstance.serverUrl,
                                 toolName: functionCall.name || '',
-                                toolArgs: functionCall.args || {},
+                                toolArgs: functionCall.args || {}
                             });
                             
                             functionCallResults.push({
@@ -157,7 +155,7 @@ async function main() {
                             tools: [{
                                 functionDeclarations: functionDeclarations
                             }],
-                            temperature: 0,
+                            temperature: 0
                         }
                     });
                     

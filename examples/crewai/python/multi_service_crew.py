@@ -22,17 +22,13 @@ def main():
         # Step 1: Create YouTube MCP Server
         youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
             server_name=McpServerName.YOUTUBE,
-            user_id="1234",
-            platform_name="Klavis",
-        )
+            user_id="1234")
         print(f"✅ YouTube MCP server created: {youtube_mcp_instance.server_url}")
         
         # Step 2: Create Gmail MCP Server (OAuth required)
         gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
             server_name=McpServerName.GMAIL,
-            user_id="1234",
-            platform_name="Klavis",
-        )
+            user_id="1234")
         webbrowser.open(gmail_mcp_instance.oauth_url)
         
         print(f"📱 If you are not redirected to the Gmail OAuth page, please open it manually: {gmail_mcp_instance.oauth_url}")
@@ -60,7 +56,7 @@ def main():
                 backstory="You are an expert at analyzing video content, extracting transcripts with precise timestamps, and creating professional summaries with key insights, takeaways, and time-coded references for easy navigation.",
                 tools=all_mcp_tools,
                 reasoning=False,
-                verbose=False,
+                verbose=False
             )
             
             # Create Email Agent
@@ -70,7 +66,7 @@ def main():
                 backstory="You are skilled at crafting professional emails and managing correspondence with clear, impactful messaging.",
                 tools=all_mcp_tools,
                 reasoning=True,
-                verbose=False,
+                verbose=False
             )
             
             # Define workflow tasks
