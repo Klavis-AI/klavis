@@ -4,6 +4,7 @@ go 1.23.7
 
 require (
 	github.com/google/go-github/v69 v69.2.0
+	github.com/joho/godotenv v1.5.1
 	github.com/mark3labs/mcp-go v0.31.0
 	github.com/migueleliasweb/go-github-mock v1.3.0
 	github.com/sirupsen/logrus v1.9.3
