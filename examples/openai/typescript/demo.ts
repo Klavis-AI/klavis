@@ -63,7 +63,7 @@ async function openaiWithMcpServer(mcpServerUrl: string, userQuery: string): Pro
             const result = await klavisClient.mcpServer.callTools({
                 serverUrl: mcpServerUrl,
                 toolName: functionName,
-                toolArgs: functionArgs,
+                toolArgs: functionArgs
             });
             
             messages.push({
@@ -93,9 +93,7 @@ async function demoGmailIntegration() {
     console.log("📨 Creating Gmail MCP server instance...");
     const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
         serverName: Klavis.McpServerName.Gmail,
-        userId: "1234", 
-        platformName: "Klavis",
-    });
+        userId: "1234"});
 
     // Step 2: Handle OAuth authentication
     if (gmailMcpServer.oauthUrl) {

@@ -169,8 +169,7 @@ from klavis import Klavis
 klavis = Klavis(api_key="your-key")
 server = klavis.mcp_server.create_server_instance(
     server_name="YOUTUBE",
-    user_id="user123",
-    platform_name="MyApp"
+    user_id="user123"
 )
 ```
 
@@ -232,8 +231,7 @@ klavis = Klavis(api_key="your-free-key")
 # Create any MCP server instantly
 gmail_server = klavis.mcp_server.create_server_instance(
     server_name="GMAIL",
-    user_id="your-user-id", 
-    platform_name="MyApp"
+    user_id="your-user-id"
 )
 
 # Server is ready to use immediately

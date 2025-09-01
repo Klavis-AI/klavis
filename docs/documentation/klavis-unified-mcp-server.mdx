@@ -37,7 +37,6 @@ graph LR
     end
 ```
 
-
 ## Prerequisites
 
 - You need a Klavis API key. If you don't have one, you can create one [here](https://www.klavis.ai/home/api-keys).
@@ -73,15 +72,13 @@ klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 # Create a GitHub MCP server instance
 github_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GITHUB,
-    user_id="<YOUR_USER_ID>",
-    platform_name="<YOUR_PLATFORM_NAME>",
+    user_id="<YOUR_USER_ID>"
 )
 
 # Create a Jira MCP server instance
 jira_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.JIRA,
     user_id="<YOUR_USER_ID>", # Same user_id
-    platform_name="<YOUR_PLATFORM_NAME>",
 )
 
 print("GitHub Server:", github_server)
@@ -96,15 +93,13 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 // Create a GitHub MCP server instance
 const githubServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Github,
-    userId: "<YOUR_USER_ID>",
-    platformName: "<YOUR_PLATFORM_NAME>",
+    userId: "<YOUR_USER_ID>"
 });
 
 // Create a Jira MCP server instance
 const jiraServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Jira,
     userId: "<YOUR_USER_ID>", // Same userId
-    platformName: "<YOUR_PLATFORM_NAME>",
 });
 
 console.log('GitHub Server:', githubServer);
@@ -119,8 +114,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
   "serverName": "GitHub",
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>"
+  "userId": "<YOUR_USER_ID>"
 }'
 
 # Create a Jira MCP server instance
@@ -130,8 +124,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
   "serverName": "Jira",
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>"
+  "userId": "<YOUR_USER_ID>"
 }'
 ```
 
@@ -149,7 +142,7 @@ func main() {
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
 	// Create a GitHub MCP server instance
-	githubPayload := strings.NewReader("{\n  \"serverName\": \"GitHub\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	githubPayload := strings.NewReader("{\n  \"serverName\": \"GitHub\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, githubPayload)
 	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
@@ -163,7 +156,7 @@ func main() {
 	fmt.Println(string(body))
 
 	// Create a Jira MCP server instance
-	jiraPayload := strings.NewReader("{\n  \"serverName\": \"Jira\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	jiraPayload := strings.NewReader("{\n  \"serverName\": \"Jira\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req2, _ := http.NewRequest("POST", url, jiraPayload)
 	req2.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
@@ -183,7 +176,7 @@ func main() {
 HttpResponse<String> githubResponse = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"GitHub\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"GitHub\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 
 System.out.println("GitHub Server Response: " + githubResponse.getBody());
@@ -192,7 +185,7 @@ System.out.println("GitHub Server Response: " + githubResponse.getBody());
 HttpResponse<String> jiraResponse = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Jira\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"Jira\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 
 System.out.println("Jira Server Response: " + jiraResponse.getBody());
@@ -226,7 +219,7 @@ You must guide your user through the `oauthUrl` for each server to grant access.
 </Step>
 
 <Step title="2. Create a Unified MCP Server Instance">
-Once the individual MCP servers are created and authorized, you can create a Unified MCP Server instance. You only need to provide the `user_id` and `platform_name` that you used in the previous step.
+Once the individual MCP servers are created and authorized, you can create a Unified MCP Server instance. You only need to provide the `user_id` that you used in the previous step.
 
 #### Request
 <CodeGroup>
@@ -237,8 +230,7 @@ klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
 # Create a Unified MCP server instance
 unified_server = klavis_client.mcp_server.create_unified_mcp_server_instance(
-    user_id="<YOUR_USER_ID>",
-    platform_name="<YOUR_PLATFORM_NAME>",
+    user_id="<YOUR_USER_ID>"
 )
 
 print(unified_server)
@@ -251,8 +243,7 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 
 // Create a Unified MCP server instance
 const unifiedServer = await klavisClient.mcpServer.createUnifiedMcpServerInstance({
-    userId: "<YOUR_USER_ID>",
-    platformName: "<YOUR_PLATFORM_NAME>",
+    userId: "<YOUR_USER_ID>"
 });
 
 console.log(unifiedServer);
@@ -264,8 +255,7 @@ curl --request POST \
   --header 'Authorization: Bearer <YOUR_API_KEY>' \
   --header 'Content-Type: application/json' \
   --data '{
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>"
+  "userId": "<YOUR_USER_ID>"
 }'
 ```
 
@@ -282,7 +272,7 @@ import (
 func main() {
 	url := "https://api.klavis.ai/mcp-server/unified/instance/create"
 
-	payload := strings.NewReader("{\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	payload := strings.NewReader("{\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -303,7 +293,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/unified/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 ```
 </CodeGroup>
