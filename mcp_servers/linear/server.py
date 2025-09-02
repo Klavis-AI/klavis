@@ -112,13 +112,17 @@ def main(
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of issues to return (default: 50).",
-                            "default": 50,
+                            "description": "Maximum number of issues to return (default: 10).",
+                            "default": 10,
                         },
                         "filter": {
                             "type": "object",
                             "description": "Filter object for issues",
                             "properties": {
+                                "priority": {
+                                    "type": "integer",
+                                    "description": "Filter by priority (0=No Priority, 1=Urgent, 2=High, 3=Medium, 4=Low)"
+                                },
                                 "updatedAt": {
                                     "type": "object",
                                     "description": "Filter by update timestamp for issues.",
@@ -447,7 +451,7 @@ def main(
         
         elif name == "linear_get_issues":
             team_id = arguments.get("team_id")
-            limit = arguments.get("limit", 50)
+            limit = arguments.get("limit", 10)
             filter_param = arguments.get("filter")
             try:
                 result = await get_issues(team_id, limit, filter_param)
