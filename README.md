@@ -60,7 +60,7 @@ Example running in Cursor
 ```bash
 # Run Github MCP Server with OAuth Support through Klavis AI
 docker pull ghcr.io/klavis-ai/github-mcp-server:latest
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_key \
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/github-mcp-server:latest
 ```
 
@@ -117,7 +117,7 @@ docker run -p 5000:5000 ghcr.io/klavis-ai/github-mcp-server:latest
 
 # Example: Gmail with OAuth (requires API key)
 docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
-docker run -it -e KLAVIS_API_KEY=your_key \
+docker run -it -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/gmail-mcp-server:latest
 ```
 
@@ -264,7 +264,7 @@ Some servers require OAuth authentication (Google, GitHub, Slack, etc.). OAuth i
 ```bash
 # Run with OAuth support (requires free API key)
 docker pull ghcr.io/klavis-ai/gmail-mcp-server:latest
-docker run -it -e KLAVIS_API_KEY=your_free_key \
+docker run -it -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/gmail-mcp-server:latest
 
 # Follow the displayed URL to authenticate
