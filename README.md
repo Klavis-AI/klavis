@@ -5,7 +5,7 @@
 </div>
 
 <h1 align="center">Klavis AI - Production-Ready MCP Servers</h1>
-<p align="center"><strong>🌐 Hosted MCP Service | 🐳 Self-Hosted Solutions | 🔐 Enterprise OAuth</strong></p>
+<p align="center"><strong>🐳 Self-Hosted Solutions | 🌐 Hosted MCP Service | 🔐 Enterprise OAuth</strong></p>
 
 <div align="center">
 
@@ -18,6 +18,36 @@
 </div>
 
 ## 🚀 Quick Start - Run Any MCP Server in 30 Seconds
+
+### 🐳 Using Docker (For Self-Hosting)
+[Get Free API Key →](https://www.klavis.ai/home/api-keys)
+
+```bash
+# Run Github MCP Server with OAuth Support through Klavis AI
+docker pull ghcr.io/klavis-ai/github-mcp-server:latest
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+  ghcr.io/klavis-ai/github-mcp-server:latest
+```
+
+```bash
+# Or run GitHub MCP Server (manually add token)
+docker pull ghcr.io/klavis-ai/github-mcp-server:latest
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
+  ghcr.io/klavis-ai/github-mcp-server:latest
+```
+
+**Note:** The MCP server runs on port 5000 and exposes the MCP protocol at the `/mcp` path.
+
+Example running in Cursor 
+```json
+{
+  "mcpServers": {
+    "github": {
+      "url": "http://localhost:5000/mcp/"
+    }
+  }
+}
+```
 
 ### 🌐 Using Hosted Service (Recommended for Production)
 
@@ -48,37 +78,6 @@ Example running in Cursor
     },
     "klavis-github": {
       "url": "https://github-mcp-server.klavis.ai/mcp/?instance_id=your-instance"
-    }
-  }
-}
-```
-
-
-### 🐳 Using Docker (For Self-Hosting)
-[Get Free API Key →](https://www.klavis.ai/home/api-keys)
-
-```bash
-# Run Github MCP Server with OAuth Support through Klavis AI
-docker pull ghcr.io/klavis-ai/github-mcp-server:latest
-docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
-  ghcr.io/klavis-ai/github-mcp-server:latest
-```
-
-```bash
-# Or run GitHub MCP Server (manually add token)
-docker pull ghcr.io/klavis-ai/github-mcp-server:latest
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_here"}' \
-  ghcr.io/klavis-ai/github-mcp-server:latest
-```
-
-**Note:** The MCP server runs on port 5000 and exposes the MCP protocol at the `/mcp` path.
-
-Example running in Cursor 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "url": "http://localhost:5000/mcp/"
     }
   }
 }
