@@ -71,6 +71,8 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_her
   ghcr.io/klavis-ai/github-mcp-server:latest
 ```
 
+**Note:** The MCP server runs on port 5000 and exposes the MCP protocol at the `/mcp` path.
+
 Example running in Cursor 
 ```json
 {
@@ -105,8 +107,8 @@ Example running in Cursor
 Perfect for trying out MCP servers or integrating with AI tools like Claude Desktop.
 
 **Available Images:**
-- `ghcr.io/klavis-ai/{server-name}-mcp-server:latest` - Basic server
-- `ghcr.io/klavis-ai/{server-name}-mcp-server:latest` - With OAuth support
+- `ghcr.io/klavis-ai/{server-name}-mcp-server:latest` - Server with OAuth support
+- `ghcr.io/klavis-ai/{server-name}-mcp-server:commit-id` - Server builld by selected commit ID
 
 [**🔍 Browse All Docker Images →**](https://github.com/orgs/Klavis-AI/packages?repo_name=klavis)
 
