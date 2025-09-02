@@ -71,6 +71,8 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"ghp_your_github_token_her
   ghcr.io/klavis-ai/github-mcp-server:latest
 ```
 
+**Note:** The MCP server runs on port 5000 and exposes the MCP protocol at the `/mcp` path.
+
 Example running in Cursor 
 ```json
 {
