@@ -22,6 +22,8 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
                 issue_filter["updatedAt"] = filter["updatedAt"]
             if "createdAt" in filter:
                 issue_filter["createdAt"] = filter["createdAt"]
+            if "priority" in filter:
+                issue_filter["priority"] = {"eq": filter["priority"]}
         
         # Use filtered query if we have any filters
         if issue_filter:
@@ -34,7 +36,6 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
                   title
                   description
                   priority
-                  priorityLabel
                   state {
                     id
                     name
@@ -78,7 +79,6 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
                   title
                   description
                   priority
-                  priorityLabel
                   state {
                     id
                     name
@@ -316,7 +316,6 @@ async def search_issues(query_text: str, team_id: str = None, limit: int = 20) -
                   title
                   description
                   priority
-                  priorityLabel
                   state {
                     id
                     name
@@ -360,7 +359,6 @@ async def search_issues(query_text: str, team_id: str = None, limit: int = 20) -
                   title
                   description
                   priority
-                  priorityLabel
                   state {
                     id
                     name
