@@ -1,188 +1,73 @@
-# Klavis Google Slides MCP Server, by Tazeem Mahashin
+# Google Slides MCP Server
 
-## Overview
-This MCP server provides an interface to the Google Slides API through Klavis, allowing AI agents to create and manipulate Google Slides presentations. The server implements the Model Context Protocol (MCP) specification, making it compatible with various AI applications.
+A Model Context Protocol (MCP) server for Google Slides integration. Create, edit, and manage presentations using Google Slides API with OAuth support.
 
-## Features
-- Create new Google Slides presentations
-- Add slides to existing presentations
-- List available presentations
-- Full MCP protocol compatibility with both SSE and StreamableHTTP transports
+## 🚀 Quick Start - Run in 30 Seconds
 
-## Prerequisites
-- Python 3.9 or higher
-- Google Cloud Platform account with Google Slides API enabled
-- Google API credentials (OAuth2 or Service Account)
-- Docker (recommended for deployment)
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Setup & Configuration
+Get instant access to Google Slides with our managed infrastructure - **no setup required**:
 
-### Google Cloud Setup
-1. Create a project in the [Google Cloud Console](https://console.cloud.google.com/)
-2. Enable the Google Slides API for your project
-3. Set up authentication:
-   - For service accounts: Create a service account, download the JSON key, and save it as `service-account.json` in the project directory
-   - For OAuth: Create OAuth credentials, download the JSON file, and save it as `credentials.json` in the project directory
-
-### Environment Configuration
-1. **Create your environment file**:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Edit the `.env` file** with your configuration:
-   ```
-   GOOGLE_SLIDES_MCP_SERVER_PORT=5000
-   GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json  # Optional
-   ```
-
-## Running the Server
-
-### Option 1: Docker (Recommended)
-The Docker build must be run from the project root directory (`klavis/`):
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-# Navigate to the root directory of the project
-cd /path/to/klavis
-
-# Build the Docker image
-docker build -t google-slides-mcp-server -f mcp_servers/google_slides/Dockerfile .
-
-# Run the container (with Google credentials mounted)
-docker run -p 5000:5000 --rm \
-  -v /path/to/credentials:/app/credentials.json \
-  -v /path/to/service-account.json:/app/service-account.json \
-  --env-file mcp_servers/google_slides/.env \
-  google-slides-mcp-server
+pip install klavis
+# or
+npm install klavis
 ```
 
-### Option 2: Python Virtual Environment
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("GOOGLE_SLIDES", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
+
 ```bash
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Run Google Slides MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/google_slides-mcp-server:latest
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the server
-python server.py
+# Run Google Slides MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_google_access_token_here"}' \
+  ghcr.io/klavis-ai/google_slides-mcp-server:latest
 ```
 
-Once running, the server will be accessible at `http://localhost:5000`
+**OAuth Setup:** Google Slides requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-## MCP Tools
-The server implements the Model Context Protocol (MCP) specification and provides the following tools:
+## 🛠️ Available Tools
 
-### Available MCP Tools
+- **Presentation Management**: Create, read, update Google Slides presentations
+- **Slide Operations**: Add, remove, and modify slides and layouts
+- **Content Editing**: Insert text, images, and shapes into presentations
+- **Formatting**: Apply themes, styles, and formatting to slides
+- **Collaboration**: Manage sharing and collaborative editing
 
-#### create_presentation
-Creates a new Google Slides presentation with the specified title.
+## 📚 Documentation & Support
 
-```json
-{
-  "title": "My New Presentation"
-}
-```
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-#### add_slide
-Adds a new slide to an existing presentation.
+## 🤝 Contributing
 
-```json
-{
-  "presentation_id": "your_presentation_id",
-  "title": "Slide Title",
-  "content": "Slide Content"
-}
-```
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-#### list_presentations
-Lists all available presentations in the user's Google Drive.
+## 📜 License
 
-```json
-{}
-```
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-#### get_presentation
-Retrieves detailed information about a specific presentation.
+---
 
-```json
-{
-  "presentation_id": "your_presentation_id",
-  "fields": "presentationId,title,revisionId,slides,pageSize"
-}
-```
-
-The `fields` parameter is optional and can be used to limit the returned data. If not provided, a default set of fields will be returned.
-
-#### batch_update_presentation
-Applies a series of updates to a presentation. This is the primary method for modifying slides (adding text, shapes, images, creating slides, etc.).
-
-```json
-{
-  "presentation_id": "your_presentation_id",
-  "requests": [
-    {
-      "createSlide": {
-        "objectId": "MyNewSlide",
-        "insertionIndex": 1,
-        "slideLayoutReference": {
-          "predefinedLayout": "TITLE_AND_BODY"
-        }
-      }
-    },
-    {
-      "insertText": {
-        "objectId": "MyNewSlide",
-        "insertionIndex": 0,
-        "text": "This is a slide title"
-      }
-    }
-  ]
-}
-```
-
-Refer to the [Google Slides API batchUpdate documentation](https://developers.google.com/slides/api/reference/rest/v1/presentations/batchUpdate) for details on request structure.
-
-#### summarize_presentation
-Extracts and formats all text content from a presentation for easier summarization.
-
-```json
-{
-  "presentation_id": "your_presentation_id",
-  "include_notes": false
-}
-```
-
-The `include_notes` parameter is optional (defaults to false) and determines whether speaker notes should be included in the summary.
-
-## Connection Methods
-
-This MCP server supports two connection methods:
-
-### SSE (Server-Sent Events)
-```
-GET http://localhost:5000/sse
-```
-
-### StreamableHTTP
-```
-POST http://localhost:5000/mcp
-```
-
-## Troubleshooting
-
-### Authentication Issues
-- Make sure your Google API credentials are correctly set up
-- For service accounts, verify that the service account has the necessary permissions
-- For OAuth, ensure the user has granted permission to access their Google Slides
-
-### API Access Problems
-- Check that the Google Slides API is enabled in your Google Cloud project
-- Verify your credentials have not expired
-
-## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-This project is licensed under the same terms as the main Klavis project.
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

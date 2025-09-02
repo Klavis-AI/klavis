@@ -5,44 +5,66 @@ from .base import make_graphql_request
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_projects(team_id: str = None, limit: int = 50) -> Dict[str, Any]:
-    """Get projects, optionally filtered by team."""
-    logger.info(f"Executing tool: get_projects with team_id: {team_id}")
+async def get_projects(team_id: str = None, limit: int = 50, filter: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Get projects with optional filtering by team and timestamps."""
+    logger.info(f"Executing tool: get_projects with team_id: {team_id}, limit: {limit}, filter: {filter}")
     try:
+        # Build the filter object
+        project_filter = {}
+        
+        # Add team filter if specified via team_id parameter (for backward compatibility)
         if team_id:
+            # For projects, we need to filter by teams relation
+            project_filter["teams"] = {"some": {"id": {"eq": team_id}}}
+        
+        # Add timestamp filters if provided
+        if filter:
+            if "updatedAt" in filter:
+                project_filter["updatedAt"] = filter["updatedAt"]
+            if "createdAt" in filter:
+                project_filter["createdAt"] = filter["createdAt"]
+        
+        # Use filtered query if we have any filters
+        if project_filter:
             query = """
-            query TeamProjects($teamId: String!, $first: Int) {
-              team(id: $teamId) {
-                projects(first: $first) {
-                  nodes {
+            query FilteredProjects($filter: ProjectFilter, $first: Int) {
+              projects(filter: $filter, first: $first) {
+                nodes {
+                  id
+                  name
+                  description
+                  state
+                  progress
+                  targetDate
+                  lead {
                     id
                     name
-                    description
-                    state
-                    progress
-                    targetDate
-                    lead {
+                    email
+                  }
+                  members {
+                    nodes {
                       id
                       name
                       email
                     }
-                    members {
-                      nodes {
-                        id
-                        name
-                        email
-                      }
-                    }
-                    createdAt
-                    updatedAt
-                    url
                   }
+                  teams {
+                    nodes {
+                      id
+                      name
+                      key
+                    }
+                  }
+                  createdAt
+                  updatedAt
+                  url
                 }
               }
             }
             """
-            variables = {"teamId": team_id, "first": limit}
+            variables = {"filter": project_filter, "first": limit}
         else:
+            # No filters, use simple query
             query = """
             query Projects($first: Int) {
               projects(first: $first) {

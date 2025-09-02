@@ -53,21 +53,21 @@ def extract_auth_credentials(request_or_scope) -> tuple[str, str]:
         # Get headers based on input type
         if hasattr(request_or_scope, 'headers'):
             # SSE request object
-            headers = request_or_scope.headers
+            header_value = request_or_scope.headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
         elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
             # StreamableHTTP scope object
             headers = dict(request_or_scope.get("headers", []))
-        else:
-            return "", ""
-    
-        # Extract auth data from x-auth-data header
-        auth_data = base64.b64decode(headers.get(b'x-auth-data')).decode('utf-8')
+            header_value = headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
 
     if not auth_data:
         return "", ""
     
     try:
-        auth_json = json.loads(auth_data.decode('utf-8'))
+        auth_json = json.loads(auth_data)
         return auth_json.get('access_token', ''), auth_json.get('instance_url', '')
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")

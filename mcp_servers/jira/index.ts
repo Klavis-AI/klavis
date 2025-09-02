@@ -780,8 +780,6 @@ const getJiraMcpServer = () => {
 
         const jira = await getJiraClient();
 
-        console.log("--- request.params.name", request.params.name);
-
         // Process the tool call based on the tool name
         switch (request.params.name) {
           case "jira_search": {
@@ -832,8 +830,6 @@ const getJiraMcpServer = () => {
             }
 
             const response = await jira.fetch<any>(`/rest/api/3/search?${searchParams.toString()}`);
-
-            console.log("--- response", JSON.stringify(response, null, 2));
 
             return {
               content: [

@@ -19,9 +19,7 @@ def multi_server_crew():
         # Step 1: Create Salesforce MCP Server
         salesforce_mcp_instance = klavis_client.mcp_server.create_server_instance(
             server_name=McpServerName.SALESFORCE,
-            user_id="1234",
-            platform_name="Klavis",
-        )
+            user_id="1234")
         webbrowser.open(salesforce_mcp_instance.oauth_url)
         
         input("Press Enter after OAuth...")
@@ -29,9 +27,7 @@ def multi_server_crew():
         # Step 2: Create Gmail MCP Server
         gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
             server_name=McpServerName.GMAIL,
-            user_id="1234",
-            platform_name="Klavis",
-        )
+            user_id="1234")
         webbrowser.open(gmail_mcp_instance.oauth_url)
 
         input("Press Enter after OAuth...")
@@ -54,7 +50,7 @@ def multi_server_crew():
                 goal="Find opportunities with pending next steps",
                 backstory="Expert at finding Salesforce opportunities that need follow-up actions",
                 tools=salesforce_mcp_server.tools,
-                verbose=False,
+                verbose=False
             )
             
             # Email Agent
@@ -63,7 +59,7 @@ def multi_server_crew():
                 goal="Draft follow-up emails based on Salesforce Opportunity next steps",
                 backstory="Expert at drafting complete, professional follow-up emails without placeholder content. Always writes proper signatures and complete email content.",
                 tools=gmail_mcp_server.tools,
-                verbose=False,
+                verbose=False
             )
             
             # Tasks
@@ -84,7 +80,7 @@ def multi_server_crew():
                 agents=[salesforce_agent, email_agent],
                 tasks=[salesforce_task, email_task],
                 process=Process.sequential,
-                verbose=True,
+                verbose=True
             )
             
             result = crew.kickoff()

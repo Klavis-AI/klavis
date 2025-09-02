@@ -76,8 +76,7 @@ klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
 
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, and the instance id is {youtube_mcp_instance.instance_id}")
@@ -88,8 +87,7 @@ const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis"
+    userId: "1234"
 });
 
 // console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}, and the instance id is ${youtubeMcpInstance.instanceId}`);
@@ -111,7 +109,7 @@ def claude_with_mcp_server(mcp_server_url: str, user_query: str):
     
     mcp_server_tools = klavis_client.mcp_server.list_tools(
         server_url=mcp_server_url,
-        format=ToolFormat.ANTHROPIC,
+        format=ToolFormat.ANTHROPIC
     )
     
     response = claude_client.messages.create(
@@ -137,7 +135,7 @@ def claude_with_mcp_server(mcp_server_url: str, user_query: str):
                 result = klavis_client.mcp_server.call_tools(
                     server_url=mcp_server_url,
                     tool_name=function_name,
-                    tool_args=function_args,
+                    tool_args=function_args
                 )
                 
                 tool_results.append({
@@ -171,7 +169,7 @@ async function claudeWithMcpServer(mcpServerUrl: string, userQuery: string) {
     
     const mcpServerTools = await klavisClient.mcpServer.listTools({
         serverUrl: mcpServerUrl,
-        format: Klavis.ToolFormat.Anthropic,
+        format: Klavis.ToolFormat.Anthropic
     });
     
     const response = await claudeClient.messages.create({
@@ -266,8 +264,7 @@ import webbrowser
 
 gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 webbrowser.open(gmail_mcp_server.oauth_url)
@@ -278,8 +275,7 @@ print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, p
 ```typescript TypeScript
 const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis"
+    userId: "1234"
 });
 
 // In a web environment, you might redirect the user

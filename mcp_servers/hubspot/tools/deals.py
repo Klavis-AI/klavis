@@ -6,6 +6,28 @@ from .base import get_hubspot_client
 # Configure logging
 logger = logging.getLogger(__name__)
 
+def _build_dealstage_label_map(client) -> dict:
+    """
+    Build a mapping from deal stage ID to its human-readable label across all deal pipelines.
+
+    Returns:
+    - dict mapping stage_id -> label (e.g., {"appointmentscheduled": "Appointment Scheduled", "1890285259": "POC"})
+    """
+    stage_id_to_label: dict = {}
+    try:
+        pipelines = client.crm.pipelines.pipelines_api.get_all("deals")
+        for pipeline in getattr(pipelines, "results", []) or []:
+            try:
+                stages = client.crm.pipelines.pipeline_stages_api.get_all("deals", pipeline.id)
+                for stage in getattr(stages, "results", []) or []:
+                    if getattr(stage, "id", None) and getattr(stage, "label", None):
+                        stage_id_to_label[stage.id] = stage.label
+            except Exception as inner_exc:
+                logger.debug(f"Failed to fetch stages for pipeline {getattr(pipeline, 'id', 'unknown')}: {inner_exc}")
+    except Exception as exc:
+        logger.debug(f"Failed to fetch pipelines for deals: {exc}")
+    return stage_id_to_label
+
 async def hubspot_get_deals(limit: int = 10):
     """
     Fetch a list of deals from HubSpot.
@@ -23,6 +45,14 @@ async def hubspot_get_deals(limit: int = 10):
     try:
         logger.info(f"Fetching up to {limit} deals...")
         result = client.crm.deals.basic_api.get_page(limit=limit)
+        # Enrich with human-readable dealstage label
+        stage_label_map = _build_dealstage_label_map(client)
+        for obj in getattr(result, "results", []) or []:
+            props = getattr(obj, "properties", {}) or {}
+            stage_id = props.get("dealstage")
+            if stage_id and stage_id in stage_label_map:
+                props["dealstage_label"] = stage_label_map[stage_id]
+                obj.properties = props
         logger.info(f"Fetched {len(result.results)} deals successfully.")
         return result
     except Exception as e:
@@ -46,6 +76,13 @@ async def hubspot_get_deal_by_id(deal_id: str):
     try:
         logger.info(f"Fetching deal ID: {deal_id}...")
         result = client.crm.deals.basic_api.get_by_id(deal_id)
+        # Enrich with human-readable dealstage label
+        stage_label_map = _build_dealstage_label_map(client)
+        props = getattr(result, "properties", {}) or {}
+        stage_id = props.get("dealstage")
+        if stage_id and stage_id in stage_label_map:
+            props["dealstage_label"] = stage_label_map[stage_id]
+            result.properties = props
         logger.info(f"Fetched deal ID: {deal_id} successfully.")
         return result
     except Exception as e:

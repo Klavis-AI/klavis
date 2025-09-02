@@ -24,7 +24,6 @@ klavis_client = Klavis(api_key="your-klavis-key")
 youtube_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
     user_id="user123", # Change to user id in your platform
-    platform_name="MyApp", # change to your platform
 )
 
 print(f"Server created: {youtube_server.server_url}")
@@ -43,8 +42,7 @@ klavis_client = Klavis(api_key="your-klavis-key")
 # Create a YouTube MCP server instance
 youtube_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="user123",
-    platform_name="MyApp",
+    user_id="user123"
 )
 
 print(f"Server created: {youtube_server.server_url}")
@@ -68,14 +66,13 @@ klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
 # Create server instance
 youtube_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="user123",
-    platform_name="MyApp",
+    user_id="user123"
 )
 
 # Get available tools in OpenAI format
 tools = klavis_client.mcp_server.list_tools(
     server_url=youtube_server.server_url,
-    format=ToolFormat.OPENAI,
+    format=ToolFormat.OPENAI
 )
 
 # Initial conversation
@@ -96,7 +93,7 @@ if response.choices[0].message.tool_calls:
         result = klavis_client.mcp_server.call_tools(
             server_url=youtube_server.server_url,
             tool_name=tool_call.function.name,
-            tool_args=json.loads(tool_call.function.arguments),
+            tool_args=json.loads(tool_call.function.arguments)
         )
         
         # Add tool result to conversation
@@ -125,8 +122,7 @@ For OAuth services like Gmail, Google Drive, etc.:
 # Create server instance for OAuth service
 server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="user123",
-    platform_name="MyApp"
+    user_id="user123"
 )
 
 # OAuth URL is provided in server.oauth_url
@@ -154,14 +150,12 @@ Combine multiple MCP servers for complex workflows:
 # Create multiple servers
 github_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GITHUB,
-    user_id="user123",
-    platform_name="MyApp"
+    user_id="user123"
 )
 
 slack_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.SLACK,
-    user_id="user123", 
-    platform_name="MyApp"
+    user_id="user123"
 )
 
 # Use tools from both servers in a single AI conversation
@@ -193,7 +187,7 @@ for iteration in range(max_iterations):
             result = klavis_client.mcp_server.call_tools(
                 server_url=server_url,
                 tool_name=tool_call.function.name,
-                tool_args=json.loads(tool_call.function.arguments),
+                tool_args=json.loads(tool_call.function.arguments)
             )
             
             # Add tool result to conversation
@@ -217,8 +211,7 @@ from klavis.exceptions import KlavisError
 try:
     server = klavis_client.mcp_server.create_server_instance(
         server_name=McpServerName.YOUTUBE,
-        user_id="user123",
-        platform_name="MyApp"
+        user_id="user123"
     )
 except KlavisError as e:
     print(f"Error creating server: {e}")

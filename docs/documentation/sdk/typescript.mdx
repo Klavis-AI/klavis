@@ -23,8 +23,7 @@ const klavisClient = new KlavisClient({ apiKey: 'your-klavis-key' });
 // Create Gmail MCP server with OAuth
 const gmailServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "user123",
-    platformName: "MyApp",
+    userId: "user123"
 });
 
 // Gmail needs OAuth flow
@@ -43,8 +42,7 @@ const klavisClient = new KlavisClient({ apiKey: 'your-klavis-key' });
 // Create Gmail MCP server with OAuth
 const gmailServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "user123",
-    platformName: "MyApp",
+    userId: "user123"
 });
 
 // Gmail needs OAuth flow
@@ -73,8 +71,7 @@ const klavisClient = new KlavisClient({ apiKey: 'your-klavis-key' });
 // Create server and get tools
 const gmailServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "user123",
-    platformName: "MyApp"
+    userId: "user123"
 });
 
 // Handle OAuth authentication for Gmail
@@ -109,7 +106,7 @@ if (response.choices[0].message.tool_calls) {
         const result = await klavisClient.mcpServer.callTools({
             serverUrl: gmailServer.serverUrl,
             toolName: toolCall.function.name,
-            toolArgs: JSON.parse(toolCall.function.arguments),
+            toolArgs: JSON.parse(toolCall.function.arguments)
         });
         
         // Add tool result to conversation
@@ -140,8 +137,7 @@ For OAuth services like Gmail, Google Drive, etc.:
 // Create server instance for OAuth service
 const server = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "user123",
-    platformName: "MyApp"
+    userId: "user123"
 });
 
 // Handle OAuth flow
@@ -173,14 +169,12 @@ Combine multiple MCP servers for complex workflows:
 // Create multiple servers
 const githubServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Github,
-    userId: "user123",
-    platformName: "MyApp"
+    userId: "user123"
 });
 
 const slackServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Slack,
-    userId: "user123",
-    platformName: "MyApp"
+    userId: "user123"
 });
 
 // Get tools from both servers
@@ -226,7 +220,7 @@ for (let iteration = 0; iteration < maxIterations; iteration++) {
             const result = await klavisClient.mcpServer.callTools({
                 serverUrl: serverUrl,
                 toolName: toolCall.function.name,
-                toolArgs: JSON.parse(toolCall.function.arguments),
+                toolArgs: JSON.parse(toolCall.function.arguments)
             });
             
             // Add tool result to conversation
@@ -253,8 +247,7 @@ import { KlavisError } from 'klavis';
 try {
     const server = await klavisClient.mcpServer.createServerInstance({
         serverName: Klavis.McpServerName.Youtube,
-        userId: "user123",
-        platformName: "MyApp"
+        userId: "user123"
     });
 } catch (error) {
     if (error instanceof KlavisError) {
@@ -282,8 +275,7 @@ const klavisClient = new KlavisClient({ apiKey: 'your-klavis-key' });
 // Type-safe server creation
 const server: ServerInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Github,
-    userId: "user123",
-    platformName: "MyApp",
+    userId: "user123"
 });
 
 // Type-safe tool listing
@@ -296,7 +288,7 @@ const tools: ToolsResponse = await klavisClient.mcpServer.listTools({
 const result: CallToolResponse = await klavisClient.mcpServer.callTools({
     serverUrl: server.serverUrl,
     toolName: "get_repository",
-    toolArgs: { owner: "octocat", repo: "Hello-World" },
+    toolArgs: { owner: "octocat", repo: "Hello-World" }
 });
 ```
 
