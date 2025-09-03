@@ -1,0 +1,67 @@
+# Logs and temporary files
+logs/*
+*.log
+*.tmp
+*.temp
+
+# Environment and configuration files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+
+# Python version management
+.python-version
+uv.lock
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+src/mcp_snowflake_server/__pycache__
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# OS specific
+**/.DS_Store
+Thumbs.db
+
+# Snowflake MCP Server specific files
+# Connection configuration files (keep example file)
+*.toml
+!example_connections.toml
+connections.toml
+snowflake_connections.toml
+
+# Private keys and certificates
+*.pem
+*.key
+*.p8
+
+# Claude Desktop config (may contain sensitive paths)
+claude_desktop_config.json
+
+# Runtime configuration with secrets
+runtime_config.json
