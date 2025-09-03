@@ -1,0 +1,11 @@
+{
+	"servers": {
+		"vercel": {
+			"type": "http",
+			"url": "http://0.0.0.0:5000/mcp",
+			"headers": {
+				"x-api-token": "2eucKUGga7NrZTlmYuBUlQfY"
+			}
+		}
+	}
+}
