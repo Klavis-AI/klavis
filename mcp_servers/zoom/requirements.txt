@@ -1,0 +1,7 @@
+pydantic
+mcp[cli]>=1.12.0
+starlette
+uvicorn[standard]
+click
+typing-extensions
+httpx
