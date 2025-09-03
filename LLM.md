@@ -227,6 +227,12 @@ Authorization: Bearer YOUR_API_KEY
 - **Purpose**: Presentation management
 - **Tools**: Slide creation, editing, presentation management
 
+#### Google Tasks
+- **Purpose**: Task and tasklist management
+- **Tools**: Tasklist and task management, subtasks, task positioning
+- **Key Functions**: `google_create_task`, `google_list_tasks`, `google_update_task`, `google_move_task`, `google_clear_completed_tasks`
+- **Implementation**: Python-based with OAuth 2.0 authentication
+
 ### Development & Documentation
 
 #### GitHub
