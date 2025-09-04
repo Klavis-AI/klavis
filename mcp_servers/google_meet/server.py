@@ -10,6 +10,7 @@ from contextvars import ContextVar
 import click
 import mcp.types as types
 from mcp.server.lowlevel import Server
+from mcp.server.stdio import stdio_server
 from mcp.server.sse import SseServerTransport
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
@@ -156,11 +157,22 @@ async def list_meetings(max_results: int = 10, start_after: str | None = None, e
             timeMax=end_before,
             maxResults=max_results,
             singleEvents=True,
-            orderBy='startTime',
-            q='hangoutsMeet'
+            orderBy='startTime'
         ).execute()
         events = events_result.get('items', [])
-        meetings = [shape_meeting(e) for e in events]
+        
+        # Filter for events that have Google Meet conferences
+        meet_events = []
+        for event in events:
+            conference_data = event.get('conferenceData', {})
+            if conference_data:
+                entry_points = conference_data.get('entryPoints', [])
+                for ep in entry_points:
+                    if ep.get('entryPointType') == 'video' and 'meet.google.com' in ep.get('uri', ''):
+                        meet_events.append(event)
+                        break
+        
+        meetings = [shape_meeting(e) for e in meet_events]
         logger.info(f"tool=list_meetings action=success count={len(meetings)}")
         return success({"meetings": meetings, "total_count": len(meetings)})
     except ValidationError as ve:
@@ -289,7 +301,8 @@ async def delete_meeting(event_id: str) -> Dict[str, Any]:
 @click.option("--port", default=GOOGLE_MEET_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option("--log-level", default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
 @click.option("--json-response", is_flag=True, default=False, help="Enable JSON responses for StreamableHTTP instead of SSE streams")
-def main(port: int, log_level: str, json_response: bool) -> int:
+@click.option("--stdio", is_flag=True, default=False, help="Run with stdio transport instead of HTTP")
+def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -406,6 +419,26 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             return [types.TextContent(type="text", text=json.dumps(result))]
         return [types.TextContent(type="text", text=json.dumps(failure(f"Unknown tool: {name}", code="unknown_tool")))]
     
+    if stdio:
+        logger.info("Starting Google Meet MCP server with stdio transport")
+        import asyncio
+        async def run_stdio():
+            # Extract access token from environment for stdio mode
+            auth_token = extract_access_token(None)
+            if not auth_token:
+                logger.error("No access token found in AUTH_DATA environment variable")
+                return
+            
+            # Set the auth token in context for stdio mode
+            token = auth_token_context.set(auth_token)
+            try:
+                async with stdio_server() as (read_stream, write_stream):
+                    await app.run(read_stream, write_stream, app.create_initialization_options())
+            finally:
+                auth_token_context.reset(token)
+        asyncio.run(run_stdio())
+        return 0
+
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
 
