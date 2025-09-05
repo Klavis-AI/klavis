@@ -104,7 +104,8 @@ def main(
                             "description": "The LinkedIn person ID to retrieve information for. Leave empty for current user."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_PROFILE"})
             ),
             types.Tool(
                 name="linkedin_create_post",
@@ -132,7 +133,8 @@ def main(
                             "default": "PUBLIC"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
             ),
             types.Tool(
                 name="linkedin_format_rich_post",
@@ -176,7 +178,8 @@ def main(
                             "description": "List of usernames to mention (@ will be added automatically)."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
             ),
             types.Tool(
                 name="linkedin_create_url_share",
@@ -207,7 +210,8 @@ def main(
                             "default": "PUBLIC"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
             ),
         ]
 

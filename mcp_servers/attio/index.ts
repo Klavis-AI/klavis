@@ -330,6 +330,9 @@ const SEARCH_PEOPLE_TOOL: Tool = {
             },
         },
     },
+    annotations: {
+        category: 'ATTIO_PERSON'
+    },
 };
 
 const SEARCH_COMPANIES_TOOL: Tool = {
@@ -356,6 +359,9 @@ const SEARCH_COMPANIES_TOOL: Tool = {
                 default: 25,
             },
         },
+    },
+    annotations: {
+        category: 'ATTIO_COMPANY'
     },
 };
 
@@ -392,6 +398,9 @@ const SEARCH_DEALS_TOOL: Tool = {
             },
         },
     },
+    annotations: {
+        category: 'ATTIO_DEAL'
+    },
 };
 
 const SEARCH_NOTES_TOOL: Tool = {
@@ -410,6 +419,9 @@ const SEARCH_NOTES_TOOL: Tool = {
                 default: 50,
             },
         },
+    },
+    annotations: {
+        category: 'ATTIO_NOTE'
     },
 };
 
@@ -445,6 +457,9 @@ const CREATE_NOTE_TOOL: Tool = {
         },
         required: ['parent_object', 'parent_record_id', 'title', 'content'],
     },
+    annotations: {
+        category: 'ATTIO_NOTE'
+    },
 };
 
 const CREATE_PERSON_TOOL: Tool = {
@@ -477,6 +492,9 @@ const CREATE_PERSON_TOOL: Tool = {
             },
         },
     },
+    annotations: {
+        category: 'ATTIO_PERSON'
+    },
 };
 
 const CREATE_COMPANY_TOOL: Tool = {
@@ -499,6 +517,9 @@ const CREATE_COMPANY_TOOL: Tool = {
                 description: 'Description of the company',
             },
         },
+    },
+    annotations: {
+        category: 'ATTIO_COMPANY'
     },
 };
 
@@ -537,6 +558,9 @@ const UPDATE_PERSON_TOOL: Tool = {
         },
         required: ['record_id'],
     },
+    annotations: {
+        category: 'ATTIO_PERSON'
+    },
 };
 
 const UPDATE_COMPANY_TOOL: Tool = {
@@ -565,6 +589,9 @@ const UPDATE_COMPANY_TOOL: Tool = {
         },
         required: ['record_id'],
     },
+    annotations: {
+        category: 'ATTIO_COMPANY'
+    },
 };
 
 const CREATE_TASK_TOOL: Tool = {
@@ -588,6 +615,9 @@ const CREATE_TASK_TOOL: Tool = {
             },
         },
         required: ['content_plaintext', 'assignee_emails'],
+    },
+    annotations: {
+        category: 'ATTIO_TASK'
     },
 };
 

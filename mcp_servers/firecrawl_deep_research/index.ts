@@ -54,6 +54,7 @@ const DEEP_RESEARCH_TOOL: Tool = {
         },
         required: ['query'],
     },
+    annotations: { category: 'FIRECRAWL_RESEARCH' },
 };
 
 // Get API config

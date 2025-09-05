@@ -274,7 +274,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     
                 },
                 "required": ["subject", "description", "email"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_get_ticket_by_id",
@@ -292,7 +293,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_update_ticket",
@@ -333,7 +335,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_delete_ticket",
@@ -347,7 +350,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_add_note_to_ticket",
@@ -383,7 +387,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "attachments": attachment_schema
                 },
                 "required": ["ticket_id", "body"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_NOTE"})
         ),
         types.Tool(
             name="freshdesk_reply_to_a_ticket",
@@ -420,7 +425,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "attachments": attachment_schema
                 },
                 "required": ["ticket_id", "body"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_update_note",
@@ -439,7 +445,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "attachments": attachment_schema
                 },
                 "required": ["note_id", "body"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_NOTE"})
         ),
         types.Tool(
             name="freshdesk_delete_note",
@@ -453,7 +460,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["note_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_NOTE"})
         ),
         types.Tool(
             name="freshdesk_forward_ticket",
@@ -490,7 +498,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id", "to_emails"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_get_archived_ticket",
@@ -504,7 +513,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_delete_archived_ticket",
@@ -518,7 +528,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_filter_tickets", 
@@ -540,7 +551,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 }
             },
             "required": ["query"]
-        }),
+        },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
+        ),
         types.Tool(
             name="freshdesk_create_ticket_with_attachments",
             description="Create a new ticket with attachments in Freshdesk.",
@@ -616,7 +629,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["subject", "description", "email"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_ATTACHMENT"})
         ),
         types.Tool(
             name="freshdesk_delete_multiple_tickets",
@@ -631,7 +645,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_ids"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_delete_attachment",
@@ -645,7 +660,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["attachment_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_ATTACHMENT"})
         ),
         types.Tool(
             name="freshdesk_list_tickets",
@@ -725,7 +741,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "description": "Number of results per page (max 100). Default is 30."
                     }
                 }
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_merge_tickets",
@@ -747,7 +764,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["primary_ticket_id", "ticket_ids"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_restore_ticket",
@@ -761,7 +779,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_watch_ticket",
@@ -779,7 +798,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_unwatch_ticket",
@@ -793,7 +813,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["ticket_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_TICKET"})
         ),
         types.Tool(
             name="freshdesk_create_contact",
@@ -824,7 +845,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["name"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_get_contact_by_id",
@@ -835,7 +857,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "contact_id": {"type": "integer", "description": "ID of the contact to retrieve"}
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_list_contacts",
@@ -877,7 +900,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "description": "Number of results per page (max 100). Default is 30."
                     }
                 }
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_update_contact",
@@ -937,7 +961,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_delete_contact",
@@ -961,7 +986,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_search_contacts_by_name",
@@ -972,7 +998,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "name": {"type": "string", "description": "Name of the contact to search for"}
                 },
                 "required": ["name"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_filter_contacts",
@@ -995,7 +1022,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["query"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_make_contact_agent",
@@ -1014,7 +1042,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "focus_mode": {"type": "boolean", "description": "Whether agent is in focus mode"}
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_restore_contact",
@@ -1025,7 +1054,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "contact_id": {"type": "integer", "description": "ID of the contact to restore"}
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_send_contact_invite",
@@ -1036,7 +1066,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "contact_id": {"type": "integer", "description": "ID of the contact to send an invite to"}
                 },
                 "required": ["contact_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_merge_contacts",
@@ -1083,7 +1114,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     }
                 },
                 "required": ["primary_contact_id", "secondary_contact_ids"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "FRESHDESK_CONTACT"})
         ),
         types.Tool(
             name="freshdesk_create_company",
@@ -1136,7 +1168,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_get_company_by_id",
@@ -1150,7 +1183,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_list_companies",
@@ -1177,7 +1211,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                             "description": "Number of records per page (max 100)"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_update_company",
@@ -1233,7 +1268,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_delete_company",
@@ -1247,7 +1283,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_filter_companies",
@@ -1274,7 +1311,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
             types.Tool(
                 name="freshdesk_search_companies_by_name",
@@ -1288,7 +1326,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_COMPANY"})
             ),
 
             types.Tool(
@@ -1298,7 +1337,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "type": "object",
                     "properties": {},
                     "required": []
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_ACCOUNT"})
             ),
             types.Tool(
                 name="freshdesk_list_agents",
@@ -1334,7 +1374,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                             "default": 30
                         },
                     },
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_get_agent_by_id",
@@ -1349,6 +1390,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["agent_id"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_get_current_agent",
@@ -1357,6 +1399,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_create_agent",
@@ -1424,6 +1467,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["email", "name", "ticket_scope", "role_ids"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_update_agent",
@@ -1482,6 +1526,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["agent_id"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_delete_agent",
@@ -1493,6 +1538,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["agent_id"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_search_agents",
@@ -1504,6 +1550,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["term"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             types.Tool(
                 name="freshdesk_bulk_create_agents",
@@ -1576,6 +1623,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                     "required": ["agents_data"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_AGENT"})
             ),
             
             # Thread tools
@@ -1631,7 +1679,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["thread_type", "parent_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1646,7 +1695,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["thread_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1669,7 +1719,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["thread_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1684,7 +1735,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["thread_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1749,7 +1801,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["thread_id", "body"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1764,7 +1817,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["message_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1801,7 +1855,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["message_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
             
             types.Tool(
@@ -1816,7 +1871,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                     "required": ["message_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "FRESHDESK_THREAD"})
             ),
         ]
     

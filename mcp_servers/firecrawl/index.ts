@@ -190,6 +190,7 @@ const SCRAPE_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_SCRAPE' },
 };
 
 const MAP_TOOL: Tool = {
@@ -226,6 +227,7 @@ const MAP_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_DISCOVERY' },
 };
 
 const CRAWL_TOOL: Tool = {
@@ -338,6 +340,7 @@ const CRAWL_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_CRAWL' },
 };
 
 const BATCH_SCRAPE_TOOL: Tool = {
@@ -389,6 +392,7 @@ const BATCH_SCRAPE_TOOL: Tool = {
         },
         required: ['urls'],
     },
+    annotations: { category: 'FIRECRAWL_SEARCH' },
 };
 
 const CHECK_BATCH_STATUS_TOOL: Tool = {
@@ -404,6 +408,7 @@ const CHECK_BATCH_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
+    annotations: { category: 'FIRECRAWL_EXTRACT' },
 };
 
 const CHECK_CRAWL_STATUS_TOOL: Tool = {
@@ -419,6 +424,7 @@ const CHECK_CRAWL_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
+    annotations: { category: 'FIRECRAWL_STATUS' },
 };
 
 const SEARCH_TOOL: Tool = {

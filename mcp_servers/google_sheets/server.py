@@ -318,6 +318,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET"}
+                ),
             ),
             types.Tool(
                 name="google_sheets_get_spreadsheet",
@@ -332,6 +335,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET"}
+                ),
             ),
             types.Tool(
                 name="google_sheets_write_to_cell",
@@ -362,6 +368,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_CELL"}
+                ),
             ),
             types.Tool(
                 name="google_sheets_list_all_sheets",
@@ -370,6 +379,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET"}
+                ),
             ),
         ]
 

@@ -464,6 +464,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
             ),
             types.Tool(
                 name="add_slide",
@@ -486,6 +487,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_SLIDE"}),
             ),
             types.Tool(
                 name="list_presentations",
@@ -494,6 +496,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
             ),
             types.Tool(
                 name="get_presentation",
@@ -512,6 +515,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
             ),
             types.Tool(
                 name="batch_update_presentation",
@@ -530,6 +534,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
             ),
             types.Tool(
                 name="summarize_presentation",
@@ -548,6 +553,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
             )
         ]
 

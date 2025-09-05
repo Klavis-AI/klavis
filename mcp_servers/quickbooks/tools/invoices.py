@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for invoice creation (required by QuickBooks)
@@ -204,7 +205,8 @@ create_invoice_tool = Tool(
         "type": "object",
         "properties": invoice_properties_minimal,
         "required": ["CustomerRefValue", "LineItems"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 get_invoice_tool = Tool(
@@ -217,7 +219,8 @@ get_invoice_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks invoice ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 list_invoices_tool = Tool(
@@ -231,7 +234,8 @@ list_invoices_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 search_invoices_tool = Tool(
@@ -285,7 +289,8 @@ search_invoices_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 update_invoice_tool = Tool(
@@ -296,7 +301,8 @@ update_invoice_tool = Tool(
         "type": "object",
         "properties": invoice_properties,
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 delete_invoice_tool = Tool(
@@ -309,7 +315,8 @@ delete_invoice_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks invoice ID to delete"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 send_invoice_tool = Tool(
@@ -329,7 +336,8 @@ send_invoice_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 void_invoice_tool = Tool(
@@ -345,7 +353,8 @@ void_invoice_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 
