@@ -31,22 +31,15 @@ auth_token_context: ContextVar[str] = ContextVar("auth_token", default="")
 
 # -------- Token helpers -------- #
 def extract_access_token(request_or_scope) -> str:
-    """Extract raw access token from:
-    1. AUTH_DATA env var containing JSON {"access_token": "..."}
-    2. x-auth-data header (base64 encoded JSON) in SSE/HTTP modes
-    Returns empty string on failure.
-    """
     auth_data = os.getenv("AUTH_DATA")
     if not auth_data and request_or_scope is not None:
         try:
-            # Starlette Request object path
             if hasattr(request_or_scope, 'headers'):
                 header_val = request_or_scope.headers.get(b'x-auth-data') or request_or_scope.headers.get('x-auth-data')
                 if header_val:
                     if isinstance(header_val, bytes):
                         header_val = header_val.decode('utf-8')
                     auth_data = base64.b64decode(header_val).decode('utf-8')
-            # ASGI scope dict path
             elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
                 headers = dict(request_or_scope.get('headers', []))
                 header_val = headers.get(b'x-auth-data') or headers.get('x-auth-data')
@@ -104,7 +97,6 @@ async def create_meet(summary: str, start_time: str, end_time: str, attendees: L
                 }
             }
         }
-        # Decide whether to send invitations (only makes sense if attendees provided)
         send_updates = 'all' if notify_attendees and attendees else 'none'
         created = service.events().insert(
             calendarId='primary',
@@ -128,7 +120,7 @@ async def create_meet(summary: str, start_time: str, end_time: str, attendees: L
             error_detail = {}
         logger.error(f"tool=create_meet http_error status={status} msg={detail}")
         return failure(detail, code=str(status or 'http_error'), details=error_detail)
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         logger.exception(f"tool=create_meet unexpected_error={e}")
         return failure("Unexpected server error", code="internal_error")
 
@@ -251,7 +243,6 @@ async def update_meeting(event_id: str, summary: str = None, start_time: str = N
             event['end'] = {'dateTime': end_time, 'timeZone': 'UTC'}
         if attendees is not None:
             event['attendees'] = [{'email': email} for email in attendees]
-        # Detect if anything actually changed (simple comparison of key fields)
         changed = False
         for key in ['summary', 'description']:
             if original.get(key) != event.get(key):
@@ -261,7 +252,6 @@ async def update_meeting(event_id: str, summary: str = None, start_time: str = N
             changed = True
         if not changed and (original.get('end') or {}) != (event.get('end') or {}):
             changed = True
-        # Compare attendee email sets if attendees updated
         if not changed and attendees is not None:
             orig_emails = sorted([a.get('email') for a in original.get('attendees', []) or []])
             new_emails = sorted([a.get('email') for a in event.get('attendees', []) or []])

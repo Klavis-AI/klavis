@@ -28,7 +28,7 @@ try:  # Support running as module or script
         shape_meeting,
         http_error_to_message,
     )
-except ImportError:  # Fallback when executed directly (python server.py)
+except ImportError:  # Fallback when executed directly
     from tools.utils import (
         ValidationError,
         validate_time_window,
@@ -58,7 +58,8 @@ try:
         delete_meeting,
         get_past_meeting_attendees,
     )
-except ImportError:  # Running as script
+    from .tools import meet_api as meet_v2
+except ImportError:
     from tools.base import (
         auth_token_context,
         extract_access_token,
@@ -71,6 +72,7 @@ except ImportError:  # Running as script
         delete_meeting,
         get_past_meeting_attendees,
     )
+    import tools.meet_api as meet_v2
 
 ## Core tool implementations now imported from tools.base
 
@@ -88,7 +90,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
 
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
-        return [
+        tools = [
             types.Tool(
                 name="google_meet_create_meet",
                 description="Create a new Google Meet meeting (via Calendar event)",
@@ -179,6 +181,43 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                 },
             ),
         ]
+        tools.extend([
+            types.Tool(
+                name="google_meet_v2_create_instant",
+                description="Create an instant ad-hoc Google Meet (Meet API v2, Workspace/EDU only)",
+                inputSchema={"type": "object", "properties": {}},
+            ),
+            types.Tool(
+                name="google_meet_v2_get_meeting",
+                description="Get Meet API v2 meeting (space) details (Workspace/EDU)",
+                inputSchema={
+                    "type": "object",
+                    "required": ["space_id"],
+                    "properties": {"space_id": {"type": "string", "description": "Space ID or spaces/<id>"}},
+                },
+            ),
+            types.Tool(
+                name="google_meet_v2_list_meetings",
+                description="List Meet API v2 meetings/spaces (Workspace/EDU)",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"max_results": {"type": "integer", "default": 10, "description": "1-100"}},
+                },
+            ),
+            types.Tool(
+                name="google_meet_v2_get_participants",
+                description="Get participants for a Meet API v2 meeting (Workspace/EDU)",
+                inputSchema={
+                    "type": "object",
+                    "required": ["space_id"],
+                    "properties": {
+                        "space_id": {"type": "string", "description": "Space ID or spaces/<id>"},
+                        "max_results": {"type": "integer", "default": 50, "description": "1-300"},
+                    },
+                },
+            ),
+        ])
+        return tools
     @app.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
         if name == "google_meet_create_meet":
@@ -230,6 +269,43 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
             if not event_id:
                 return [types.TextContent(type="text", text=json.dumps(failure("event_id parameter is required")))]
             result = await get_past_meeting_attendees(event_id)
+            return [types.TextContent(type="text", text=json.dumps(result))]
+        # ----------------Meet API v2 tools-----------------
+        elif name == "google_meet_v2_create_instant":
+            try:
+                result = await meet_v2.create_instant_meeting()
+            except Exception as e:  # Safety net
+                logger.exception("meet_v2_create_instant unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
+            return [types.TextContent(type="text", text=json.dumps(result))]
+        elif name == "google_meet_v2_get_meeting":
+            space_id = arguments.get("space_id")
+            if not space_id:
+                return [types.TextContent(type="text", text=json.dumps(failure("space_id parameter is required")))]
+            try:
+                result = await meet_v2.get_meeting(space_id)
+            except Exception as e:
+                logger.exception("meet_v2_get_meeting unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
+            return [types.TextContent(type="text", text=json.dumps(result))]
+        elif name == "google_meet_v2_list_meetings":
+            max_results = arguments.get("max_results", 10)
+            try:
+                result = await meet_v2.list_meetings(max_results)
+            except Exception as e:
+                logger.exception("meet_v2_list_meetings unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
+            return [types.TextContent(type="text", text=json.dumps(result))]
+        elif name == "google_meet_v2_get_participants":
+            space_id = arguments.get("space_id")
+            if not space_id:
+                return [types.TextContent(type="text", text=json.dumps(failure("space_id parameter is required")))]
+            max_results = arguments.get("max_results", 50)
+            try:
+                result = await meet_v2.get_participants(space_id, max_results)
+            except Exception as e:
+                logger.exception("meet_v2_get_participants unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
             return [types.TextContent(type="text", text=json.dumps(result))]
         return [types.TextContent(type="text", text=json.dumps(failure(f"Unknown tool: {name}", code="unknown_tool")))]
     
