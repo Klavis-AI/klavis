@@ -124,7 +124,10 @@ def main(
                         }
                     },
                     "required": ["symbols"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_MARKET"}
+                ),
             ),
             types.Tool(
                 name="coinbase_get_current_exchange_rate",
@@ -144,7 +147,10 @@ def main(
                         }
                     },
                     "required": ["symbols"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_MARKET"}
+                ),
             ),
             types.Tool(
                 name="coinbase_get_historical_prices",
@@ -176,7 +182,10 @@ def main(
                         }
                     },
                     "required": ["symbol", "start", "end"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_MARKET"}
+                ),
             ),
             # Account & Portfolio Tools (requires API key)
             types.Tool(
@@ -190,7 +199,10 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {}
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_ACCOUNT"}
+                ),
             ),
             types.Tool(
                 name="coinbase_get_account_balance",
@@ -209,7 +221,10 @@ def main(
                         }
                     },
                     "required": ["account_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_ACCOUNT"}
+                ),
             ),
             types.Tool(
                 name="coinbase_get_transactions",
@@ -241,7 +256,10 @@ def main(
                         }
                     },
                     "required": ["account_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_ACCOUNT"}
+                ),
             ),
             types.Tool(
                 name="coinbase_get_portfolio_value",
@@ -253,7 +271,10 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {}
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_ACCOUNT"}
+                ),
             ),
             # Product Information Tools (Cryptocurreny)
             types.Tool(
@@ -272,7 +293,10 @@ def main(
                         }
                     },
                     "required": ["product_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "COINBASE_MARKET"}
+                ),
             ),
         ]
 

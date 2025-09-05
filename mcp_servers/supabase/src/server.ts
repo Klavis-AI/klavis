@@ -20,6 +20,8 @@ import {
 } from './regions.js';
 import { hashObject } from './util.js';
 import { AsyncLocalStorage } from 'async_hooks';
+import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export const asyncLocalStorage = new AsyncLocalStorage<{
   accessToken: string;
@@ -706,6 +708,310 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
       }),
     },
   });
+
+  // Override ListTools handler to include annotations with semantic categories
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: [
+      // PROJECT
+      {
+        name: 'supabase_list_projects',
+        description: 'Lists all Supabase projects for the user.',
+        inputSchema: zodToJsonSchema(z.object({})),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_get_project',
+        description: 'Gets details for a Supabase project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            id: z.string().describe('The project ID'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_create_project',
+        description:
+          'Creates a new Supabase project. Always ask the user which organization to create the project in. The project can take a few minutes to initialize - use `get_project` to check the status.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            name: z.string().describe('The name of the project'),
+            region: z
+              .optional(
+                z
+                  .enum(AWS_REGION_CODES)
+                  .describe('The region to create the project in. Defaults to the closest region.')
+              ),
+            organization_id: z.string(),
+            confirm_cost_id: z
+              .string({
+                required_error:
+                  'User must confirm understanding of costs before creating a project.',
+              })
+              .describe('The cost confirmation ID. Call `confirm_cost` first.'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_pause_project',
+        description: 'Pauses a Supabase project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_restore_project',
+        description: 'Restores a Supabase project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_get_project_url',
+        description: 'Gets the API URL for a project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+      {
+        name: 'supabase_get_anon_key',
+        description: 'Gets the anonymous API key for a project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PROJECT' },
+      },
+
+      // ORGANIZATION
+      {
+        name: 'supabase_list_organizations',
+        description: 'Lists all organizations that the user is a member of.',
+        inputSchema: zodToJsonSchema(z.object({})),
+        annotations: { category: 'SUPABASE_ORGANIZATION' },
+      },
+      {
+        name: 'supabase_get_organization',
+        description: 'Gets details for an organization. Includes subscription plan.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            id: z.string().describe('The organization ID'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_ORGANIZATION' },
+      },
+
+      // PRICING
+      {
+        name: 'supabase_get_cost',
+        description:
+          'Gets the cost of creating a new project or branch. Never assume organization as costs can be different for each.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            type: z.enum(['project', 'branch']),
+            organization_id: z.string().describe('The organization ID. Always ask the user.'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PRICING' },
+      },
+      {
+        name: 'supabase_confirm_cost',
+        description:
+          'Ask the user to confirm their understanding of the cost of creating a new project or branch. Call `get_cost` first. Returns a unique ID for this confirmation which should be passed to `create_project` or `create_branch`.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            type: z.enum(['project', 'branch']),
+            recurrence: z.enum(['hourly', 'monthly']),
+            amount: z.number(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_PRICING' },
+      },
+
+      // DATABASE
+      {
+        name: 'supabase_list_tables',
+        description: 'Lists all tables in a schema.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+            schemas: z
+              .optional(z.array(z.string()))
+              .describe('Optional list of schemas to include. Defaults to all schemas.'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_DATABASE' },
+      },
+      {
+        name: 'supabase_list_extensions',
+        description: 'Lists all extensions in the database.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_DATABASE' },
+      },
+      {
+        name: 'supabase_list_migrations',
+        description: 'Lists all migrations in the database.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_DATABASE' },
+      },
+      {
+        name: 'supabase_apply_migration',
+        description: 'Applies a migration to the database. Use this when executing DDL operations.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+            name: z.string().describe('The name of the migration in snake_case'),
+            query: z.string().describe('The SQL query to apply'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_DATABASE' },
+      },
+      {
+        name: 'supabase_execute_sql',
+        description:
+          'Executes raw SQL in the Postgres database. Use `apply_migration` instead for DDL operations.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+            query: z.string().describe('The SQL query to execute'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_DATABASE' },
+      },
+
+      // LOGS
+      {
+        name: 'supabase_get_logs',
+        description:
+          'Gets logs for a Supabase project by service type. Use this to help debug problems with your app. This will only return logs within the last minute. If the logs you are looking for are older than 1 minute, re-run your test to reproduce them.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+            service: z
+              .enum([
+                'api',
+                'branch-action',
+                'postgres',
+                'edge-function',
+                'auth',
+                'storage',
+                'realtime',
+              ])
+              .describe('The service to fetch logs for'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_LOGS' },
+      },
+
+      // TYPES
+      {
+        name: 'supabase_generate_typescript_types',
+        description: 'Generates TypeScript types for a project.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_TYPES' },
+      },
+
+      // BRANCH
+      {
+        name: 'supabase_create_branch',
+        description:
+          'Creates a development branch on a Supabase project. This will apply all migrations from the main project to a fresh branch database. Note that production data will not carry over. The branch will get its own project_id via the resulting project_ref. Use this ID to execute queries and migrations on the branch.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+            name: z.string().default('develop').describe('Name of the branch to create'),
+            confirm_cost_id: z
+              .string({
+                required_error:
+                  'User must confirm understanding of costs before creating a branch.',
+              })
+              .describe('The cost confirmation ID. Call `confirm_cost` first.'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+      {
+        name: 'supabase_list_branches',
+        description:
+          'Lists all development branches of a Supabase project. This will return branch details including status which you can use to check when operations like merge/rebase/reset complete.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            project_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+      {
+        name: 'supabase_delete_branch',
+        description: 'Deletes a development branch.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            branch_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+      {
+        name: 'supabase_merge_branch',
+        description: 'Merges migrations and edge functions from a development branch to production.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            branch_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+      {
+        name: 'supabase_reset_branch',
+        description:
+          'Resets migrations of a development branch. Any untracked data or schema changes will be lost.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            branch_id: z.string(),
+            migration_version: z
+              .string()
+              .optional()
+              .describe('Reset your development branch to a specific migration version.'),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+      {
+        name: 'supabase_rebase_branch',
+        description:
+          'Rebases a development branch on production. This will effectively run any newer migrations from production onto this branch to help handle migration drift.',
+        inputSchema: zodToJsonSchema(
+          z.object({
+            branch_id: z.string(),
+          })
+        ),
+        annotations: { category: 'SUPABASE_BRANCH' },
+      },
+    ],
+  }));
 
   return server;
 }

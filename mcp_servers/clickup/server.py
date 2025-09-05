@@ -105,6 +105,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TEAM"}
+                ),
             ),
             types.Tool(
                 name="clickup_get_workspaces",
@@ -113,6 +116,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_WORKSPACE"}
+                ),
             ),
             
             # Space tools
@@ -129,6 +135,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_SPACE"}
+                ),
             ),
             types.Tool(
                 name="clickup_create_space",
@@ -156,6 +165,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_SPACE"}
+                ),
             ),
             types.Tool(
                 name="clickup_update_space",
@@ -182,6 +194,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_SPACE"}
+                ),
             ),
             
             # Folder tools
@@ -198,6 +213,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_FOLDER"}
+                ),
             ),
             types.Tool(
                 name="clickup_create_folder",
@@ -216,6 +234,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_FOLDER"}
+                ),
             ),
             types.Tool(
                 name="clickup_update_folder",
@@ -234,6 +255,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_FOLDER"}
+                ),
             ),
             
             # List tools
@@ -253,6 +277,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_LIST"}
+                ),
             ),
             types.Tool(
                 name="clickup_create_list",
@@ -295,6 +322,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_LIST"}
+                ),
             ),
             types.Tool(
                 name="clickup_update_list",
@@ -334,6 +364,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_LIST"}
+                ),
             ),
             
             # Task tools - continuing from line 316
@@ -370,6 +403,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TASK"}
+                ),
             ),
             types.Tool(
                 name="clickup_get_task_by_id",
@@ -389,6 +425,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TASK"}
+                ),
             ),
             types.Tool(
                 name="clickup_create_task",
@@ -428,6 +467,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TASK"}
+                ),
             ),
             types.Tool(
                 name="clickup_update_task",
@@ -462,6 +504,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TASK"}
+                ),
             ),
             types.Tool(
                 name="clickup_search_tasks",
@@ -490,6 +535,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_TASK"}
+                ),
             ),
             
             # Comment tools
@@ -506,6 +554,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="clickup_create_comment",
@@ -529,6 +580,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="clickup_update_comment",
@@ -547,6 +601,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_COMMENT"}
+                ),
             ),
             
             # User tools
@@ -557,6 +614,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_USER"}
+                ),
             ),
             types.Tool(
                 name="clickup_get_team_members",
@@ -571,6 +631,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLICKUP_USER"}
+                ),
             ),
         ]
 

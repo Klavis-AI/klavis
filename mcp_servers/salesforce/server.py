@@ -103,7 +103,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "industry": {"type": "string", "description": "Filter accounts by industry"},
                         "account_type": {"type": "string", "description": "Filter accounts by type"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
             ),
             types.Tool(
                 name="salesforce_create_account",
@@ -114,7 +115,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "account_data": {"type": "object", "description": "Account data including Name (required) and other fields"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
             ),
             types.Tool(
                 name="salesforce_update_account",
@@ -126,7 +128,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "account_id": {"type": "string", "description": "The ID of the account to update"},
                         "account_data": {"type": "object", "description": "Updated account data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
             ),
             types.Tool(
                 name="salesforce_delete_account",
@@ -137,7 +140,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "account_id": {"type": "string", "description": "The ID of the account to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
             ),
             
             # Contact Tools
@@ -154,7 +158,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "email_contains": {"type": "string", "description": "Filter contacts by email containing this text (case-insensitive)"},
                         "title_contains": {"type": "string", "description": "Filter contacts by title containing this text (case-insensitive)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT"})
             ),
             types.Tool(
                 name="salesforce_create_contact",
@@ -165,7 +170,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "contact_data": {"type": "object", "description": "Contact data including LastName (required) and other fields"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT"})
             ),
             types.Tool(
                 name="salesforce_update_contact",
@@ -177,7 +183,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "contact_id": {"type": "string", "description": "The ID of the contact to update"},
                         "contact_data": {"type": "object", "description": "Updated contact data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT"})
             ),
             types.Tool(
                 name="salesforce_delete_contact",
@@ -188,7 +195,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "contact_id": {"type": "string", "description": "The ID of the contact to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT"})
             ),
             
             # Opportunity Tools  
@@ -205,7 +213,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "limit": {"type": "integer", "description": "Maximum number of opportunities to return (default: 50)", "default": 50},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY"})
             ),
             types.Tool(
                 name="salesforce_create_opportunity",
@@ -216,7 +225,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "opportunity_data": {"type": "object", "description": "Opportunity data including Name, StageName, and CloseDate (required)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY"})
             ),
             types.Tool(
                 name="salesforce_update_opportunity", 
@@ -234,7 +244,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "owner_id": {"type": "string", "description": "The ID of the owner of the opportunity"},
                         "account_id": {"type": "string", "description": "The ID of the account associated with the opportunity"},
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY"})
             ),
             types.Tool(
                 name="salesforce_delete_opportunity",
@@ -245,7 +256,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "opportunity_id": {"type": "string", "description": "The ID of the opportunity to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY"})
             ),
             
             # Lead Tools
@@ -263,7 +275,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "email_contains": {"type": "string", "description": "Filter leads by email containing this text (case-insensitive)"},
                         "industry": {"type": "string", "description": "Filter leads by industry"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
             ),
             types.Tool(
                 name="salesforce_create_lead",
@@ -274,7 +287,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "lead_data": {"type": "object", "description": "Lead data including LastName and Company (required)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
             ),
             types.Tool(
                 name="salesforce_update_lead",
@@ -286,7 +300,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "lead_id": {"type": "string", "description": "The ID of the lead to update"},
                         "lead_data": {"type": "object", "description": "Updated lead data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
             ),
             types.Tool(
                 name="salesforce_delete_lead",
@@ -297,7 +312,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "lead_id": {"type": "string", "description": "The ID of the lead to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
             ),
             types.Tool(
                 name="salesforce_convert_lead",
@@ -309,7 +325,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "lead_id": {"type": "string", "description": "The ID of the lead to convert"},
                         "conversion_data": {"type": "object", "description": "Optional conversion settings"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
             ),
             
             # Case Tools
@@ -327,7 +344,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "subject_contains": {"type": "string", "description": "Filter cases by subject containing this text (case-insensitive)"},
                         "case_type": {"type": "string", "description": "Filter cases by type"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE"})
             ),
             types.Tool(
                 name="salesforce_create_case",
@@ -338,7 +356,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "case_data": {"type": "object", "description": "Case data including Subject (required)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE"})
             ),
             types.Tool(
                 name="salesforce_update_case",
@@ -350,7 +369,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "case_id": {"type": "string", "description": "The ID of the case to update"},
                         "case_data": {"type": "object", "description": "Updated case data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE"})
             ),
             types.Tool(
                 name="salesforce_delete_case",
@@ -361,7 +381,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "case_id": {"type": "string", "description": "The ID of the case to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE"})
             ),
             
             # Campaign Tools
@@ -376,7 +397,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "limit": {"type": "integer", "description": "Maximum number of campaigns to return (default: 50)", "default": 50},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
             ),
             types.Tool(
                 name="salesforce_create_campaign",
@@ -387,7 +409,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "campaign_data": {"type": "object", "description": "Campaign data including Name (required)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
             ),
             types.Tool(
                 name="salesforce_update_campaign",
@@ -399,7 +422,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "campaign_id": {"type": "string", "description": "The ID of the campaign to update"},
                         "campaign_data": {"type": "object", "description": "Updated campaign data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
             ),
             types.Tool(
                 name="salesforce_delete_campaign",
@@ -410,7 +434,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "campaign_id": {"type": "string", "description": "The ID of the campaign to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
             ),
             
             # Query and Metadata Tools
@@ -423,7 +448,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "properties": {
                         "query": {"type": "string", "description": "SOQL query to execute"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_QUERY"})
             ),
             types.Tool(
                 name="salesforce_describe_object",
@@ -435,7 +461,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "object_name": {"type": "string", "description": "API name of the object to describe"},
                         "detailed": {"type": "boolean", "description": "Whether to return additional metadata for custom objects", "default": False}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_METADATA"})
             ),
         ]
 

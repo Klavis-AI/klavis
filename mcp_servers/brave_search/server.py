@@ -134,7 +134,10 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "BRAVE_SEARCH"}
+                ),
             ),
 
             types.Tool(
@@ -174,7 +177,10 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "BRAVE_SEARCH"}
+                ),
             ),
             types.Tool(
                 name="brave_news_search",
@@ -217,7 +223,10 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "BRAVE_SEARCH"}
+                ),
             ),
             types.Tool(
                 name="brave_video_search",
@@ -259,7 +268,10 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "BRAVE_SEARCH"}
+                ),
             )
 
         ]

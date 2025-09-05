@@ -171,6 +171,7 @@ def main(
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "PANDOC_CONVERT"}),
             )
         ]
 

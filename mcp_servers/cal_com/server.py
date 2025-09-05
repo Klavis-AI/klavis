@@ -109,7 +109,10 @@ def main(
                     "type": "object",
                     "properties": {},  # No parameters required
                     "required": []
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             ),
 
             # Create a schedule
@@ -176,7 +179,10 @@ def main(
                         }
                     },
                     "required": ["name", "timeZone", "isDefault"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             ),
 
             types.Tool(
@@ -246,7 +252,10 @@ def main(
                         }
                     },
                     "required": ["schedule_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             ),
 
             # Get default schedule
@@ -257,7 +266,10 @@ def main(
                     "type": "object",
                     "properties": {},  # No parameters
                     "required": []
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             ),
 
             # Get specific schedule
@@ -273,7 +285,10 @@ def main(
                         }
                     },
                     "required": ["schedule_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             ),
 
             # Delete a schedule
@@ -289,7 +304,10 @@ def main(
                         }
                     },
                     "required": ["schedule_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CAL_SCHEDULE"}
+                ),
             )
         ]
 

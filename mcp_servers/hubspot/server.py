@@ -136,7 +136,10 @@ def main(
                         }
                     },
                     "required": ["object_type"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_tasks",
@@ -151,7 +154,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_task_by_id",
@@ -165,7 +171,10 @@ def main(
                         }
                     },
                     "required": ["task_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_task",
@@ -183,7 +192,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_task_by_id",
@@ -204,7 +216,10 @@ def main(
                         }
                     },
                     "required": ["task_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_task_by_id",
@@ -218,7 +233,10 @@ def main(
                         }
                     },
                     "required": ["task_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_search_by_property",
@@ -307,7 +325,10 @@ def main(
                         }
                     },
                     "required": ["object_type", "property_name", "operator", "value", "properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_contacts",
@@ -322,7 +343,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_contact_by_id",
@@ -336,7 +360,10 @@ def main(
                         }
                     },
                     "required": ["contact_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_property",
@@ -362,7 +389,10 @@ def main(
                         },
                     },
                     "required": ["name", "label", "description", "object_type"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_contact_by_id",
@@ -376,7 +406,10 @@ def main(
                         }
                     },
                     "required": ["contact_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_contact",
@@ -390,7 +423,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_contact_by_id",
@@ -408,7 +444,10 @@ def main(
                         }
                     },
                     "required": ["contact_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_companies",
@@ -422,7 +461,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_companies",
@@ -437,7 +479,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_company_by_id",
@@ -451,7 +496,10 @@ def main(
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_company_by_id",
@@ -469,7 +517,10 @@ def main(
                         }
                     },
                     "required": ["company_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_company_by_id",
@@ -483,7 +534,10 @@ def main(
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_deals",
@@ -498,7 +552,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_deal_by_id",
@@ -512,7 +569,10 @@ def main(
                         }
                     },
                     "required": ["deal_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_deal",
@@ -526,7 +586,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_deal_by_id",
@@ -544,7 +607,10 @@ def main(
                         }
                     },
                     "required": ["deal_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_deal_by_id",
@@ -558,7 +624,10 @@ def main(
                         }
                     },
                     "required": ["deal_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_tickets",
@@ -573,7 +642,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_ticket_by_id",
@@ -587,7 +659,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_ticket",
@@ -601,7 +676,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_ticket_by_id",
@@ -619,7 +697,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_ticket_by_id",
@@ -633,7 +714,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_note",
@@ -675,7 +759,10 @@ def main(
                         }
                     },
                     "required": ["note_body"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_NOTE"}
+                )
             ),
         ]
 

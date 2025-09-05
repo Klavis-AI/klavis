@@ -565,6 +565,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_drive_search_and_retrieve_documents",
@@ -621,6 +624,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_drive_get_file_tree_structure",
@@ -656,6 +662,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
             ),
         ]
 

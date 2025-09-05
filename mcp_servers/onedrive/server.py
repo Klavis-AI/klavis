@@ -127,7 +127,8 @@ def main(
                         "new_name": {"type": "string", "description": "New name for the item"}
                     },
                     "required": ["file_id", "new_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             ),
             types.Tool(
                 name="onedrive_move_item",
@@ -139,7 +140,8 @@ def main(
                         "new_parent_id": {"type": "string", "description": "ID of the destination folder"}
                     },
                     "required": ["item_id", "new_parent_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             ),
             types.Tool(
                 name="onedrive_delete_item",
@@ -150,7 +152,8 @@ def main(
                         "item_id": {"type": "string", "description": "ID of the item to delete"}
                     },
                     "required": ["item_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             ),
 
             # File Content Operations
@@ -163,7 +166,8 @@ def main(
                         "file_id": {"type": "string", "description": "ID of the file to read"}
                     },
                     "required": ["file_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FILE"})
             ),
 
             # File Creation
@@ -184,7 +188,8 @@ def main(
                         }
                     },
                     "required": ["parent_folder", "new_file_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FILE"})
             ),
 
             # Folder Operations
@@ -204,7 +209,8 @@ def main(
                         }
                     },
                     "required": ["parent_folder", "new_folder_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
             ),
 
             # Listing & Searching
@@ -214,7 +220,8 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
             ),
             types.Tool(
                 name="onedrive_list_inside_folder",
@@ -225,7 +232,8 @@ def main(
                         "folder_id": {"type": "string", "description": "ID of the folder to list"}
                     },
                     "required": ["folder_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
             ),
             types.Tool(
                 name="onedrive_search_item_by_name",
@@ -236,7 +244,8 @@ def main(
                         "itemname": {"type": "string", "description": "Name or partial name to search for"}
                     },
                     "required": ["itemname"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             ),
             types.Tool(
                 name="onedrive_search_folder_by_name",
@@ -247,7 +256,8 @@ def main(
                         "folder_name": {"type": "string", "description": "Name or partial name to search for"}
                     },
                     "required": ["folder_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
             ),
             types.Tool(
                 name="onedrive_get_item_by_id",
@@ -258,7 +268,8 @@ def main(
                         "item_id": {"type": "string", "description": "ID of the item to retrieve"}
                     },
                     "required": ["item_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             ),
 
             # Sharing & Permissions
@@ -268,7 +279,8 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
             )
         ]
 

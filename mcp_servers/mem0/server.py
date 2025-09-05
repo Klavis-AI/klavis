@@ -110,7 +110,8 @@ def main(
                             "description": "Optional user ID. If not provided, uses the default user ID."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
                 name="mem0_get_all_memories",
@@ -133,7 +134,8 @@ def main(
                             "default": 50
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
                 name="mem0_search_memories",
@@ -156,7 +158,8 @@ def main(
                             "default": 20
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
                 name="mem0_update_memory",
@@ -178,7 +181,8 @@ def main(
                             "description": "Optional user ID. If not provided, uses the default user ID."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
                 name="mem0_delete_memory",
@@ -200,7 +204,8 @@ def main(
                             "default": False
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
         ]
 

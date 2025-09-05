@@ -99,6 +99,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_TEAM"}
+                ),
             ),
             types.Tool(
                 name="linear_get_issues",
@@ -149,6 +152,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_get_issue_by_id",
@@ -163,6 +169,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_create_issue",
@@ -201,6 +210,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_update_issue",
@@ -239,6 +251,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_get_projects",
@@ -285,6 +300,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_create_project",
@@ -316,6 +334,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_update_project",
@@ -350,6 +371,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_get_comments",
@@ -364,6 +388,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_create_comment",
@@ -382,6 +409,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_update_comment",
@@ -400,6 +430,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_search_issues",
@@ -423,6 +456,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
         ]
 
