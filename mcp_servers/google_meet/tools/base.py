@@ -54,7 +54,7 @@ def extract_access_token(request_or_scope) -> str:
                     if isinstance(header_val, bytes):
                         header_val = header_val.decode('utf-8')
                     auth_data = base64.b64decode(header_val).decode('utf-8')
-        except Exception as e:  # pragma: no cover (defensive)
+        except Exception as e:
             logger.debug(f"Failed to pull x-auth-data header: {e}")
 
     if not auth_data:
@@ -62,7 +62,7 @@ def extract_access_token(request_or_scope) -> str:
     try:
         auth_json = json.loads(auth_data)
         return auth_json.get("access_token", "") or ""
-    except Exception as e:  # pragma: no cover (defensive)
+    except Exception as e:
         logger.warning(f"Failed to parse AUTH_DATA JSON: {e}")
         return ""
 
@@ -146,17 +146,23 @@ async def list_meetings(max_results: int = 10, start_after: str | None = None, e
             timeMax=end_before,
             maxResults=max_results,
             singleEvents=True,
-            orderBy='startTime'
+            orderBy='startTime',
         ).execute()
         events = events_result.get('items', [])
         meet_events = []
         for event in events:
-            conference_data = event.get('conferenceData', {})
-            if conference_data:
+            hangout_link = event.get('hangoutLink') or ""
+            conference_data = event.get('conferenceData', {}) or {}
+            is_meet = False
+            if hangout_link and 'meet.google.com' in hangout_link:
+                is_meet = True
+            else:
                 for ep in conference_data.get('entryPoints', []) or []:
-                    if ep.get('entryPointType') == 'video' and 'meet.google.com' in ep.get('uri', ''):
-                        meet_events.append(event)
+                    if ep.get('entryPointType') == 'video' and 'meet.google.com' in (ep.get('uri') or ''):
+                        is_meet = True
                         break
+            if is_meet:
+                meet_events.append(event)
         meetings = [shape_meeting(e) for e in meet_events]
         logger.info(f"tool=list_meetings action=success count={len(meetings)}")
         return success({"meetings": meetings, "total_count": len(meetings)})
@@ -297,12 +303,6 @@ __all__ = [
 ]
 
 async def list_past_meetings(max_results: int = 10, since: str | None = None) -> Dict[str, Any]:
-    """List past Google Meet meetings that ended before now.
-
-    Args:
-        max_results: limit (1-100) after filtering for Meet events.
-        since: optional RFC3339 UTC lower bound for event start (timeMin).
-    """
     logger.info(f"tool=list_past_meetings action=start max_results={max_results} since={since}")
     try:
         if max_results <= 0 or max_results > 100:
@@ -315,69 +315,74 @@ async def list_past_meetings(max_results: int = 10, since: str | None = None) ->
         service = _calendar_service(token)
 
         now_dt = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+        if since:
+            time_min_str = since
+            lookback_days = None
+        else:
+            time_min_dt = now_dt - datetime.timedelta(days=30)
+            time_min_str = time_min_dt.isoformat().replace('+00:00', 'Z')
+            lookback_days = 30
         page_token = None
         meet_events: list[dict[str, Any]] = []
         fetched_events = 0
 
-        while len(meet_events) < max_results and fetched_events < 5000:
-            kwargs = {
+        def _to_dt(value: str) -> datetime.datetime | None:
+            if not value:
+                return None
+            try:
+                if value.endswith('Z'):
+                    value = value.replace('Z', '+00:00')
+                dt = datetime.datetime.fromisoformat(value)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=datetime.timezone.utc)
+                return dt.astimezone(datetime.timezone.utc)
+            except Exception:
+                return None
+
+        while len(meet_events) < max_results and fetched_events < 3000:
+            query = {
                 'calendarId': 'primary',
                 'singleEvents': True,
                 'orderBy': 'startTime',
-                'maxResults': 250,
+                'timeMin': time_min_str,
                 'timeMax': now_dt.isoformat().replace('+00:00', 'Z'),
+                'maxResults': 250,
             }
-            if since:
-                kwargs['timeMin'] = since
             if page_token:
-                kwargs['pageToken'] = page_token
-            events_result = service.events().list(**kwargs).execute()
-            events = events_result.get('items', [])
-            fetched_events += len(events)
-            logger.debug(f"list_past_meetings fetched_batch size={len(events)} total_fetched={fetched_events}")
+                query['pageToken'] = page_token
+            resp = service.events().list(**query).execute()
+            items = resp.get('items', [])
+            fetched_events += len(items)
 
-            for event in events:
+            for ev in items:
                 if len(meet_events) >= max_results:
                     break
-                end_info = event.get('end', {}) or {}
-                end_raw = end_info.get('dateTime') or end_info.get('date')
-                if not end_raw:
+                start_raw = (ev.get('start', {}) or {}).get('dateTime') or (ev.get('start', {}) or {}).get('date')
+                end_raw = (ev.get('end', {}) or {}).get('dateTime') or (ev.get('end', {}) or {}).get('date')
+                if not start_raw or not end_raw or len(start_raw) == 10 or len(end_raw) == 10:
                     continue
-                if len(end_raw) == 10:
+                start_dt = _to_dt(start_raw)
+                end_dt = _to_dt(end_raw)
+                if not start_dt or not end_dt:
                     continue
-                try:
-                    if end_raw.endswith('Z'):
-                        end_dt = datetime.datetime.fromisoformat(end_raw.replace('Z', '+00:00'))
-                    else:
-                        end_dt = datetime.datetime.fromisoformat(end_raw)
-                    if end_dt.tzinfo is None:
-                        end_dt = end_dt.replace(tzinfo=datetime.timezone.utc)
-                    end_dt_utc = end_dt.astimezone(datetime.timezone.UTC)
-                except Exception:
+                if end_dt > now_dt:
                     continue
-                if end_dt_utc > now_dt:
+                hangout_link = ev.get('hangoutLink') or ''
+                if 'meet.google.com' in hangout_link:
+                    meet_events.append(ev)
                     continue
-                conference_data = event.get('conferenceData', {})
-                if not conference_data:
-                    continue
-                has_meet = False
-                for ep in conference_data.get('entryPoints', []) or []:
+                conf = ev.get('conferenceData', {}) or {}
+                for ep in conf.get('entryPoints', []) or []:
                     if ep.get('entryPointType') == 'video' and 'meet.google.com' in (ep.get('uri') or ''):
-                        has_meet = True
+                        meet_events.append(ev)
                         break
-                if not has_meet:
-                    continue
-                meet_events.append(event)
-            page_token = events_result.get('nextPageToken')
+            page_token = resp.get('nextPageToken')
             if not page_token:
                 break
 
-        def start_key(ev: dict[str, Any]):
-            s = ev.get('start', {}).get('dateTime') or ''
-            return s
-        meet_events.sort(key=start_key, reverse=True)
-        limited = meet_events[:max_results]
-        shaped = [shape_meeting(e) for e in limited]
+        # Sort newest (latest start) first
+        meet_events.sort(key=lambda e: (e.get('start', {}) or {}).get('dateTime') or '', reverse=True)
+        shaped = [shape_meeting(e) for e in meet_events[:max_results]]
         logger.info(
             "tool=list_past_meetings action=success returned=%d fetched_events=%d pages_exhausted=%s", 
             len(shaped), fetched_events, page_token is None
@@ -385,7 +390,12 @@ async def list_past_meetings(max_results: int = 10, since: str | None = None) ->
         return success({
             "meetings": shaped,
             "total_count": len(shaped),
-            "debug": {"fetched_events": fetched_events, "raw_collected": len(meet_events)},
+            "debug": {
+                "fetched_events": fetched_events,
+                "raw_collected": len(meet_events),
+                "timeMin": time_min_str,
+                "lookback_days": lookback_days,
+            },
         })
     except ValidationError as ve:
         logger.warning(f"tool=list_past_meetings validation_error={ve}")
@@ -405,10 +415,7 @@ async def list_past_meetings(max_results: int = 10, since: str | None = None) ->
 
 
 async def get_past_meeting_attendees(event_id: str) -> Dict[str, Any]:
-    """Return attendee list (with response statuses) for a past meeting.
 
-    Fails if meeting does not exist or has not yet ended.
-    """
     logger.info(f"tool=get_past_meeting_attendees action=start event_id={event_id}")
     try:
         if not event_id:
@@ -422,7 +429,6 @@ async def get_past_meeting_attendees(event_id: str) -> Dict[str, Any]:
         end_dt = end_info.get('dateTime') or end_info.get('date')
         if not end_dt:
             return failure("Cannot determine meeting end time", code="no_end_time")
-        # Skip all-day events
         if len(end_dt) == 10:
             return failure("Event is all-day or missing precise end time", code="not_supported")
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'
@@ -439,19 +445,22 @@ async def get_past_meeting_attendees(event_id: str) -> Dict[str, Any]:
             for a in attendees
         ]
         logger.info(f"tool=get_past_meeting_attendees action=success event_id={event_id} count={len(shaped_attendees)}")
+        meet_url = next(
+            (
+                ep.get('uri')
+                for ep in (event.get('conferenceData', {}) or {}).get('entryPoints', []) or []
+                if ep.get('entryPointType') == 'video' and 'meet.google.com' in (ep.get('uri') or '')
+            ),
+            event.get('hangoutLink', '') or ''
+        )
+        if 'meet.google.com' not in meet_url:
+            meet_url = ''
         return success({
             "event_id": event_id,
             "summary": event.get('summary', ''),
             "ended": end_dt,
             "attendees": shaped_attendees,
-            "meet_url": next(
-                (
-                    ep.get('uri')
-                    for ep in (event.get('conferenceData', {}) or {}).get('entryPoints', []) or []
-                    if ep.get('entryPointType') == 'video'
-                ),
-                "",
-            ),
+            "meet_url": meet_url,
         })
     except HttpError as e:
         status = getattr(e.resp, 'status', 0)

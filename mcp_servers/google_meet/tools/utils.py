@@ -62,11 +62,16 @@ def failure(message: str, code: str = "validation_error", details: Optional[Dict
 
 def shape_meeting(event: Dict[str, Any]) -> Dict[str, Any]:
     meet_url = ""
-    conference = event.get("conferenceData", {})
+    conference = event.get("conferenceData", {}) or {}
     for ep in conference.get("entryPoints", []) or []:
-        if ep.get("entryPointType") == "video":
+        if ep.get("entryPointType") == "video" and 'meet.google.com' in (ep.get("uri") or ''):
             meet_url = ep.get("uri", "")
             break
+    # Fallback to hangoutLink if no conferenceData video entry point found
+    if not meet_url:
+        hl = event.get("hangoutLink") or ""
+        if 'meet.google.com' in hl:
+            meet_url = hl
     return {
         "event_id": event.get("id"),
         "summary": event.get("summary", ""),
