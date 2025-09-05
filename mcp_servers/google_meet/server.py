@@ -101,6 +101,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "end_time": {"type": "string", "description": "ISO RFC3339 datetime"},
                         "attendees": {"type": "array", "items": {"type": "string"}, "description": "List of attendee email addresses"},
                         "description": {"type": "string", "description": "Meeting description"},
+                        "notify_attendees": {"type": "boolean", "description": "Send calendar invitations to attendees (default true)", "default": True},
                     },
                 },
             ),
@@ -151,6 +152,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "end_time": {"type": "string", "description": "New end time (ISO RFC3339)"},
                         "attendees": {"type": "array", "items": {"type": "string"}, "description": "New list of attendee email addresses"},
                         "description": {"type": "string", "description": "New meeting description"},
+                        "notify_attendees": {"type": "boolean", "description": "Send updated invitations / notifications (default true)", "default": True},
                     },
                 },
             ),
@@ -185,7 +187,8 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
             end_time = arguments.get("end_time")
             attendees = arguments.get("attendees", [])
             description = arguments.get("description", "")
-            result = await create_meet(summary, start_time, end_time, attendees, description)
+            notify_attendees = arguments.get("notify_attendees", True)
+            result = await create_meet(summary, start_time, end_time, attendees, description, notify_attendees)
             return [types.TextContent(type="text", text=json.dumps(result))]
         elif name == "google_meet_list_meetings":
             max_results = arguments.get("max_results", 10)
@@ -213,7 +216,8 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
             end_time = arguments.get("end_time")
             attendees = arguments.get("attendees")
             description = arguments.get("description")
-            result = await update_meeting(event_id, summary, start_time, end_time, attendees, description)
+            notify_attendees = arguments.get("notify_attendees", True)
+            result = await update_meeting(event_id, summary, start_time, end_time, attendees, description, notify_attendees)
             return [types.TextContent(type="text", text=json.dumps(result))]
         elif name == "google_meet_delete_meeting":
             event_id = arguments.get("event_id")

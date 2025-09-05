@@ -70,7 +70,7 @@ def extract_access_token(request_or_scope) -> str:
 def get_auth_token() -> str:
     try:
         return auth_token_context.get()
-    except LookupError:  # pragma: no cover
+    except LookupError:
         return ""
 
 
@@ -80,7 +80,7 @@ def _calendar_service(access_token: str):
 
 
 # -------- Tool implementations -------- #
-async def create_meet(summary: str, start_time: str, end_time: str, attendees: List[str], description: str = "") -> Dict[str, Any]:
+async def create_meet(summary: str, start_time: str, end_time: str, attendees: List[str], description: str = "", notify_attendees: bool = True) -> Dict[str, Any]:
     logger.info(f"tool=create_meet action=start summary='{summary}'")
     try:
         if not summary or not start_time or not end_time or attendees is None:
@@ -104,8 +104,16 @@ async def create_meet(summary: str, start_time: str, end_time: str, attendees: L
                 }
             }
         }
-        created = service.events().insert(calendarId='primary', body=event, conferenceDataVersion=1).execute()
+        # Decide whether to send invitations (only makes sense if attendees provided)
+        send_updates = 'all' if notify_attendees and attendees else 'none'
+        created = service.events().insert(
+            calendarId='primary',
+            body=event,
+            conferenceDataVersion=1,
+            sendUpdates=send_updates,
+        ).execute()
         data = shape_meeting(created)
+        data['invitations_sent'] = bool(attendees) and notify_attendees
         logger.info(f"tool=create_meet action=success event_id={data.get('event_id')}")
         return success(data)
     except ValidationError as ve:
@@ -211,7 +219,7 @@ async def get_meeting_details(event_id: str) -> Dict[str, Any]:
 
 
 async def update_meeting(event_id: str, summary: str = None, start_time: str = None, end_time: str = None,
-                        attendees: List[str] = None, description: str = None) -> Dict[str, Any]:
+                        attendees: List[str] = None, description: str = None, notify_attendees: bool = True) -> Dict[str, Any]:
     logger.info(f"tool=update_meeting action=start event_id={event_id}")
     try:
         if not event_id:
@@ -232,6 +240,7 @@ async def update_meeting(event_id: str, summary: str = None, start_time: str = N
             return failure("Missing access token", code="unauthorized")
         service = _calendar_service(token)
         event = service.events().get(calendarId='primary', eventId=event_id).execute()
+        original = json.loads(json.dumps(event))  # shallow clone via serialize
         if summary is not None:
             event['summary'] = summary
         if description is not None:
@@ -242,8 +251,37 @@ async def update_meeting(event_id: str, summary: str = None, start_time: str = N
             event['end'] = {'dateTime': end_time, 'timeZone': 'UTC'}
         if attendees is not None:
             event['attendees'] = [{'email': email} for email in attendees]
-        updated_event = service.events().update(calendarId='primary', eventId=event_id, body=event, conferenceDataVersion=1).execute()
+        # Detect if anything actually changed (simple comparison of key fields)
+        changed = False
+        for key in ['summary', 'description']:
+            if original.get(key) != event.get(key):
+                changed = True
+                break
+        if not changed and (original.get('start') or {}) != (event.get('start') or {}):
+            changed = True
+        if not changed and (original.get('end') or {}) != (event.get('end') or {}):
+            changed = True
+        # Compare attendee email sets if attendees updated
+        if not changed and attendees is not None:
+            orig_emails = sorted([a.get('email') for a in original.get('attendees', []) or []])
+            new_emails = sorted([a.get('email') for a in event.get('attendees', []) or []])
+            if orig_emails != new_emails:
+                changed = True
+        if not changed:
+            data = shape_meeting(event)
+            data['invitations_sent'] = False
+            logger.info(f"tool=update_meeting action=noop event_id={event_id}")
+            return success(data)
+        send_updates = 'all' if notify_attendees else 'none'
+        updated_event = service.events().update(
+            calendarId='primary',
+            eventId=event_id,
+            body=event,
+            conferenceDataVersion=1,
+            sendUpdates=send_updates,
+        ).execute()
         data = shape_meeting(updated_event)
+        data['invitations_sent'] = notify_attendees
         logger.info(f"tool=update_meeting action=success event_id={event_id}")
         return success(data)
     except ValidationError as ve:
