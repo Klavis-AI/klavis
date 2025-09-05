@@ -1,12 +1,3 @@
-"""Utility helpers for the Google Meet MCP server.
-
-Focused on:
- - Input validation (RFC3339 datetimes, emails, temporal logic)
- - Standard response shaping
- - Error construction helpers
- - Simple logging helpers
-"""
-
 from __future__ import annotations
 
 import re
@@ -36,9 +27,7 @@ def parse_rfc3339(value: str) -> _dt.datetime:
     # Python can parse with strptime; handle optional fractional seconds
     fmt_main = "%Y-%m-%dT%H:%M:%SZ"
     if "." in value:
-        # Split fractional seconds
         base, frac = value[:-1].split(".")
-        # Normalize microseconds length
         frac = (frac + "000000")[:6]
         dt = _dt.datetime.strptime(base, "%Y-%m-%dT%H:%M:%S")
         return dt.replace(microsecond=int(frac), tzinfo=_dt.timezone.utc)
