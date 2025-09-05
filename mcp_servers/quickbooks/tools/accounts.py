@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for account creation (required by QuickBooks)
@@ -45,7 +46,8 @@ create_account_tool = Tool(
         "type": "object",
         "properties": account_properties_minimal,
         "required": ["Name"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 get_account_tool = Tool(
@@ -58,7 +60,8 @@ get_account_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks account ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 list_accounts_tool = Tool(
@@ -73,7 +76,8 @@ list_accounts_tool = Tool(
             "ActiveOnly": {"type": "boolean", "description": "Return only active accounts", "default": True}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 update_account_tool = Tool(
@@ -84,7 +88,8 @@ update_account_tool = Tool(
         "type": "object",
         "properties": account_properties,
         "required": ["Id", "Name"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 search_accounts_tool = Tool(
@@ -116,7 +121,8 @@ search_accounts_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 

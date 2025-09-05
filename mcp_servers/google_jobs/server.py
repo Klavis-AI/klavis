@@ -136,7 +136,8 @@ def main(
                             "default": 0
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
             ),
             types.Tool(
                 name="google_jobs_get_details",
@@ -150,7 +151,8 @@ def main(
                             "description": "Unique job identifier from search results"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_DETAILS"})
             ),
             types.Tool(
                 name="google_jobs_search_by_company",
@@ -178,7 +180,8 @@ def main(
                             "default": 0
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
             ),
             types.Tool(
                 name="google_jobs_search_remote",
@@ -211,7 +214,8 @@ def main(
                             "default": 0
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
             ),
             types.Tool(
                 name="google_jobs_get_suggestions",
@@ -225,7 +229,8 @@ def main(
                             "description": "Base job query to get suggestions for"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SUGGESTION"})
             ),
         ]
 

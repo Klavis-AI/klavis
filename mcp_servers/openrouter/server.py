@@ -114,6 +114,7 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
             types.Tool(
                 name="openrouter_search_models",
@@ -142,6 +143,7 @@ def main(
                     },
                     "required": ["query"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
             types.Tool(
                 name="openrouter_get_model_pricing",
@@ -156,6 +158,7 @@ def main(
                     },
                     "required": ["model_id"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
             
             types.Tool(
@@ -242,6 +245,7 @@ def main(
                     },
                     "required": ["model", "messages"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_CHAT_COMPLETION"}),
             ),
             types.Tool(
                 name="openrouter_create_chat_completion_stream",
@@ -306,6 +310,7 @@ def main(
                     },
                     "required": ["model", "messages"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_CHAT_COMPLETION"}),
             ),
             types.Tool(
                 name="openrouter_create_completion",
@@ -367,6 +372,7 @@ def main(
                     },
                     "required": ["model", "prompt"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_CHAT_COMPLETION"}),
             ),
             
             types.Tool(
@@ -392,6 +398,7 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_USAGE"}),
             ),
             types.Tool(
                 name="openrouter_get_user_profile",
@@ -401,6 +408,7 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_USER"}),
             ),
             types.Tool(
                 name="openrouter_get_credits",
@@ -410,6 +418,7 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_METADATA"}),
             ),
             types.Tool(
                 name="openrouter_get_api_key_info",
@@ -419,6 +428,7 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_METADATA"}),
             ),
             types.Tool(
                 name="openrouter_get_cost_estimate",
@@ -443,6 +453,7 @@ def main(
                     },
                     "required": ["model", "input_tokens"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_USAGE"}),
             ),
             
             types.Tool(
@@ -475,6 +486,7 @@ def main(
                     },
                     "required": ["models", "test_prompt"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
             types.Tool(
                 name="openrouter_analyze_model_performance",
@@ -505,6 +517,7 @@ def main(
                     },
                     "required": ["model", "test_prompts"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
             types.Tool(
                 name="openrouter_get_model_recommendations",
@@ -529,6 +542,7 @@ def main(
                     },
                     "required": ["use_case"],
                 },
+                annotations=types.ToolAnnotations(**{"category": "OPENROUTER_MODEL"}),
             ),
         ]
 

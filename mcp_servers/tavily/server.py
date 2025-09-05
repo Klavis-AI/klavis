@@ -152,6 +152,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "includeFavicon": {"type": "boolean"},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "TAVILY_SEARCH"}
+                ),
             ),
             types.Tool(
                 name="tavily_extract",
@@ -176,6 +179,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "include_favicon": {"type": "boolean", "default": False},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "TAVILY_EXTRACT"}
+                ),
             ),
             types.Tool(
                 name="tavily_crawl",
@@ -202,6 +208,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "include_favicon": {"type": "boolean", "default": False},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "TAVILY_CRAWL"}
+                ),
             ),
             types.Tool(
                 name="tavily_map",
@@ -225,6 +234,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "categories": {"type": "array", "items": {"type": "string"}},
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "TAVILY_MAP"}
+                ),
             ),
         ]
 

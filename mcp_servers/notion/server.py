@@ -165,6 +165,9 @@ def main(
                     },
                     "required": ["page"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_get_page",
@@ -184,6 +187,9 @@ def main(
                     },
                     "required": ["page_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_update_page_properties",
@@ -218,6 +224,9 @@ def main(
                     },
                     "required": ["page_id", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_query_database",
@@ -262,6 +271,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_get_database",
@@ -276,6 +288,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_create_database",
@@ -312,6 +327,9 @@ def main(
                     },
                     "required": ["parent", "title", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_update_database",
@@ -352,6 +370,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_create_database_item",
@@ -383,6 +404,9 @@ def main(
                     },
                     "required": ["database_id", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
 
             types.Tool(
@@ -414,6 +438,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_SEARCH"}
+                ),
             ),
             types.Tool(
                 name="notion_get_user",
@@ -428,6 +455,9 @@ def main(
                     },
                     "required": ["user_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
             types.Tool(
                 name="notion_list_users",
@@ -446,6 +476,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
 
             types.Tool(
@@ -470,6 +503,9 @@ def main(
                     },
                     "required": ["rich_text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="notion_get_comments",
@@ -492,6 +528,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="notion_get_me",
@@ -501,6 +540,9 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
             types.Tool(
                 name="notion_retrieve_page_property",
@@ -527,6 +569,9 @@ def main(
                     },
                     "required": ["page_id", "property_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_retrieve_block",
@@ -541,6 +586,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_update_block",
@@ -563,6 +611,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_delete_block",
@@ -577,6 +628,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_get_block_children",
@@ -599,6 +653,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_append_block_children",
@@ -622,6 +679,9 @@ def main(
                     },
                     "required": ["block_id", "children"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
         ]
 

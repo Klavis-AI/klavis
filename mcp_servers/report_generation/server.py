@@ -275,6 +275,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "REPORT_GENERATION_REPORT"}),
             )
         ]
 

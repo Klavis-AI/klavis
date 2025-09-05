@@ -175,7 +175,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_SEARCH"})
             ),
 
             types.Tool(
@@ -216,7 +217,8 @@ def main(
                         }
                     },
                     "required": ["ids"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_CONTENT"})
             ),
 
             types.Tool(
@@ -285,7 +287,8 @@ def main(
                         }
                     },
                     "required": ["url"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_DISCOVERY"})
             ),
 
             types.Tool(
@@ -355,7 +358,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_QA"})
             ),
 
             types.Tool(
@@ -429,7 +433,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_RESEARCH"})
             )
         ]
 

@@ -141,6 +141,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_CHANNEL"}
+                ),
             ),
             types.Tool(
                 name="slack_get_channel_history",
@@ -160,6 +163,9 @@ def main(
                     },
                     "required": ["channel_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_CHANNEL"}
+                ),
             ),
             types.Tool(
                 name="slack_invite_users_to_channel",
@@ -181,6 +187,9 @@ def main(
                     },
                     "required": ["channel_id", "user_ids"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_CHANNEL"}
+                ),
             ),
             
             # User Info
@@ -209,6 +218,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_USER"}
+                ),
             ),
             types.Tool(
                 name="slack_user_get_info",
@@ -227,6 +239,9 @@ def main(
                     },
                     "required": ["user_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_USER"}
+                ),
             ),
             
             # User Search
@@ -276,6 +291,9 @@ def main(
                     },
                     "required": ["query"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_MESSAGE"}
+                ),
             ),
             
             # User Messages
@@ -296,6 +314,9 @@ def main(
                     },
                     "required": ["channel_id", "text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="slack_user_reply_to_thread",
@@ -318,6 +339,9 @@ def main(
                     },
                     "required": ["channel_id", "thread_ts", "text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="slack_user_add_reaction",
@@ -340,6 +364,9 @@ def main(
                     },
                     "required": ["channel_id", "timestamp", "reaction"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_REACTION"}
+                ),
             ),
             
             # ============= BOT TOOLS (using bot token) =============
@@ -362,6 +389,9 @@ def main(
                     },
                     "required": ["channel_id", "text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="slack_bot_reply_to_thread",
@@ -384,6 +414,9 @@ def main(
                     },
                     "required": ["channel_id", "thread_ts", "text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="slack_bot_add_reaction",
@@ -406,6 +439,9 @@ def main(
                     },
                     "required": ["channel_id", "timestamp", "reaction"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_REACTION"}
+                ),
             ),
         ]
 
