@@ -145,6 +145,9 @@ def main(
                     },
                     "required": ["name", "workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_get_task",
@@ -165,6 +168,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_search_tasks",
@@ -244,6 +250,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_update_task",
@@ -282,6 +291,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_mark_task_completed",
@@ -296,6 +308,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_get_subtasks",
@@ -320,6 +335,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_attach_file_to_task",
@@ -354,6 +372,9 @@ def main(
                     },
                     "required": ["task_id", "file_name"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK"}
+                ),
             ),
             types.Tool(
                 name="asana_get_projects",
@@ -432,6 +453,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="asana_get_project",
@@ -446,6 +470,9 @@ def main(
                     },
                     "required": ["project_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="asana_get_workspaces",
@@ -466,6 +493,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_WORKSPACE"}
+                ),
             ),
             types.Tool(
                 name="asana_get_workspace",
@@ -480,6 +510,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_WORKSPACE"}
+                ),
             ),
             types.Tool(
                 name="asana_get_users",
@@ -504,6 +537,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_USER"}
+                ),
             ),
             types.Tool(
                 name="asana_get_user",
@@ -518,6 +554,9 @@ def main(
                     },
                     "required": ["user_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_USER"}
+                ),
             ),
             types.Tool(
                 name="asana_get_teams",
@@ -542,6 +581,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TEAM"}
+                ),
             ),
             types.Tool(
                 name="asana_get_team",
@@ -556,6 +598,9 @@ def main(
                     },
                     "required": ["team_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TEAM"}
+                ),
             ),
             types.Tool(
                 name="asana_get_user_teams",
@@ -580,6 +625,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TEAM"}
+                ),
             ),
             types.Tool(
                 name="asana_get_tags",
@@ -604,6 +652,9 @@ def main(
                     },
                     "required": ["workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TAG"}
+                ),
             ),
             types.Tool(
                 name="asana_get_tag",
@@ -618,6 +669,9 @@ def main(
                     },
                     "required": ["tag_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TAG"}
+                ),
             ),
             types.Tool(
                 name="asana_create_tag",
@@ -645,6 +699,9 @@ def main(
                     },
                     "required": ["name", "workspace_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TAG"}
+                ),
             ),
         ]
 

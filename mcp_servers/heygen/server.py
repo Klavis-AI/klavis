@@ -102,6 +102,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_ACCOUNT"}),
             ),
             # Assets - Voices
             types.Tool(
@@ -118,6 +119,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE"}),
             ),
             types.Tool(
                 name="heygen_get_voice_locales",
@@ -132,6 +134,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE"}),
             ),
             # Assets - Avatars
             types.Tool(
@@ -141,6 +144,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
             ),
             types.Tool(
                 name="heygen_get_avatars_in_avatar_group",
@@ -155,6 +159,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
             ),
             types.Tool(
                 name="heygen_list_avatars",
@@ -169,6 +174,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
             ),
             # Generation
             types.Tool(
@@ -213,6 +219,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
             ),
             types.Tool(
                 name="heygen_get_avatar_video_status",
@@ -227,6 +234,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
             ),
             # Management
             types.Tool(
@@ -247,6 +255,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
             ),
             types.Tool(
                 name="heygen_delete_video",
@@ -261,6 +270,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
             ),
         ]
 

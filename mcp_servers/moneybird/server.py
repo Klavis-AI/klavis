@@ -103,6 +103,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_ADMINISTRATION"}),
             ),
             # Contacts
             types.Tool(
@@ -126,6 +127,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_CONTACT"}),
             ),
             types.Tool(
                 name="moneybird_get_contact",
@@ -144,6 +146,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_CONTACT"}),
             ),
             types.Tool(
                 name="moneybird_create_contact",
@@ -175,6 +178,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_CONTACT"}),
             ),
             types.Tool(
                 name="moneybird_create_contact_person",
@@ -209,6 +213,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_CONTACT"}),
             ),
             # Sales Invoices
             types.Tool(
@@ -248,6 +253,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_INVOICE"}),
             ),
             types.Tool(
                 name="moneybird_get_sales_invoice",
@@ -266,6 +272,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_INVOICE"}),
             ),
             types.Tool(
                 name="moneybird_create_sales_invoice",
@@ -296,6 +303,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_INVOICE"}),
             ),
             # Financial
             types.Tool(
@@ -311,6 +319,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_ACCOUNT"}),
             ),
             types.Tool(
                 name="moneybird_list_products",
@@ -333,6 +342,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_PRODUCT"}),
             ),
             # Projects & Time
             types.Tool(
@@ -356,6 +366,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_PROJECT"}),
             ),
             types.Tool(
                 name="moneybird_list_time_entries",
@@ -390,6 +401,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MONEYBIRD_ENTRY"}),
             ),
         ]
 

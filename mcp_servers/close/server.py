@@ -165,6 +165,9 @@ def main(
                     },
                     "required": ["name"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             types.Tool(
                 name="close_get_lead",
@@ -183,6 +186,9 @@ def main(
                     },
                     "required": ["lead_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             types.Tool(
                 name="close_search_leads",
@@ -207,6 +213,9 @@ def main(
                     },
                     "required": ["query"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             types.Tool(
                 name="close_update_lead",
@@ -237,6 +246,9 @@ def main(
                     },
                     "required": ["lead_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             types.Tool(
                 name="close_delete_lead",
@@ -251,6 +263,9 @@ def main(
                     },
                     "required": ["lead_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             types.Tool(
                 name="close_list_leads",
@@ -279,6 +294,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_LEAD"}
+                ),
             ),
             
             # Contact Management Tools
@@ -325,6 +343,9 @@ def main(
                     },
                     "required": ["lead_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_CONTACT"}
+                ),
             ),
             types.Tool(
                 name="close_get_contact",
@@ -339,6 +360,9 @@ def main(
                     },
                     "required": ["contact_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_CONTACT"}
+                ),
             ),
             types.Tool(
                 name="close_search_contacts",
@@ -363,6 +387,9 @@ def main(
                     },
                     "required": ["query"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_CONTACT"}
+                ),
             ),
             types.Tool(
                 name="close_update_contact",
@@ -407,6 +434,9 @@ def main(
                     },
                     "required": ["contact_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_CONTACT"}
+                ),
             ),
             types.Tool(
                 name="close_delete_contact",
@@ -421,6 +451,9 @@ def main(
                     },
                     "required": ["contact_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_CONTACT"}
+                ),
             ),
             
             # Opportunity Management Tools
@@ -463,6 +496,9 @@ def main(
                     },
                     "required": ["lead_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_OPPORTUNITY"}
+                ),
             ),
             types.Tool(
                 name="close_get_opportunity",
@@ -477,6 +513,9 @@ def main(
                     },
                     "required": ["opportunity_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_OPPORTUNITY"}
+                ),
             ),
             types.Tool(
                 name="close_update_opportunity",
@@ -517,6 +556,9 @@ def main(
                     },
                     "required": ["opportunity_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_OPPORTUNITY"}
+                ),
             ),
             types.Tool(
                 name="close_delete_opportunity",
@@ -531,6 +573,9 @@ def main(
                     },
                     "required": ["opportunity_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_OPPORTUNITY"}
+                ),
             ),
             
             # Task Management Tools
@@ -563,6 +608,9 @@ def main(
                     },
                     "required": ["lead_id", "text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_TASK"}
+                ),
             ),
             types.Tool(
                 name="close_get_task",
@@ -577,6 +625,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_TASK"}
+                ),
             ),
             types.Tool(
                 name="close_update_task",
@@ -607,6 +658,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_TASK"}
+                ),
             ),
             types.Tool(
                 name="close_delete_task",
@@ -621,6 +675,9 @@ def main(
                     },
                     "required": ["task_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_TASK"}
+                ),
             ),
             types.Tool(
                 name="close_list_tasks",
@@ -662,6 +719,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_TASK"}
+                ),
             ),
             
             # User Management Tools
@@ -672,6 +732,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_USER"}
+                ),
             ),
             types.Tool(
                 name="close_list_users",
@@ -692,6 +755,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_USER"}
+                ),
             ),
             types.Tool(
                 name="close_get_user",
@@ -706,6 +772,9 @@ def main(
                     },
                     "required": ["user_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_USER"}
+                ),
             ),
         ]
 

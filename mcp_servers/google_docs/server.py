@@ -281,6 +281,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_docs_get_all_documents",
@@ -289,6 +292,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_docs_insert_text_at_end",
@@ -307,6 +313,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_docs_create_blank_document",
@@ -321,6 +330,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_docs_create_document_from_text",
@@ -339,6 +351,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
             ),
         ]
 

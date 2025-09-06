@@ -93,6 +93,9 @@ const getPostgresMcpServer = () => {
               sql: { type: "string" },
             },
           },
+          annotations: {
+            category: "POSTGRES_QUERY",
+          },
         },
       ],
     };

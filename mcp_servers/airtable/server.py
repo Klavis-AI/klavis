@@ -109,6 +109,9 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_BASE"}
+                ),
             ),
             types.Tool(
                 name="airtable_list_tables_info",
@@ -123,6 +126,9 @@ def main(
                     },
                     "required": ["base_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_TABLE"}
+                ),
             ),
             types.Tool(
                 name="airtable_create_table",
@@ -150,6 +156,9 @@ def main(
                     },
                     "required": ["base_id", "name", "fields"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_TABLE"}
+                ),
             ),
             types.Tool(
                 name="airtable_update_table",
@@ -176,6 +185,9 @@ def main(
                     },
                     "required": ["base_id", "table_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_TABLE"}
+                ),
             ),
             types.Tool(
                 name="airtable_create_field",
@@ -210,6 +222,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "name", "type"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_FIELD"}
+                ),
             ),
             types.Tool(
                 name="airtable_update_field",
@@ -240,6 +255,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "field_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_FIELD"}
+                ),
             ),
             types.Tool(
                 name="airtable_list_records",
@@ -293,6 +311,9 @@ def main(
                     },
                     "required": ["base_id", "table_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_RECORD"}
+                ),
             ),
             types.Tool(
                 name="airtable_get_record",
@@ -315,6 +336,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "record_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_RECORD"}
+                ),
             ),
             types.Tool(
                 name="airtable_create_records",
@@ -346,6 +370,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "records"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_RECORD"}
+                ),
             ),
             types.Tool(
                 name="airtable_update_records",
@@ -388,6 +415,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "records"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_RECORD"}
+                ),
             ),
             types.Tool(
                 name="airtable_delete_records",
@@ -411,6 +441,9 @@ def main(
                     },
                     "required": ["base_id", "table_id", "record_ids"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AIRTABLE_RECORD"}
+                ),
             ),
         ]
 

@@ -311,6 +311,9 @@ const searchIssuesTool: Tool = {
     },
     required: ["jql"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const createIssueTool: Tool = {
@@ -358,6 +361,9 @@ const createIssueTool: Tool = {
     },
     required: ["project_key", "summary", "issue_type"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const getIssueTool: Tool = {
@@ -398,6 +404,9 @@ const getIssueTool: Tool = {
     },
     required: ["issue_key"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const updateIssueTool: Tool = {
@@ -426,6 +435,9 @@ const updateIssueTool: Tool = {
     },
     required: ["issue_key", "fields"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const addCommentTool: Tool = {
@@ -444,6 +456,9 @@ const addCommentTool: Tool = {
       },
     },
     required: ["issue_key", "comment"],
+  },
+  annotations: {
+    category: "JIRA_COMMENT",
   },
 };
 
@@ -489,6 +504,9 @@ const searchTool: Tool = {
     },
     required: ["jql"],
   },
+  annotations: {
+    category: "JIRA_SEARCH",
+  },
 };
 
 const searchFieldsTool: Tool = {
@@ -515,6 +533,9 @@ const searchFieldsTool: Tool = {
       },
     },
     required: [],
+  },
+  annotations: {
+    category: "JIRA_FIELD",
   },
 };
 
@@ -544,6 +565,9 @@ const getProjectIssuesTool: Tool = {
     },
     required: ["project_key"],
   },
+  annotations: {
+    category: "JIRA_PROJECT",
+  },
 };
 
 const getEpicIssuesTool: Tool = {
@@ -571,6 +595,9 @@ const getEpicIssuesTool: Tool = {
       },
     },
     required: ["epic_key"],
+  },
+  annotations: {
+    category: "JIRA_ISSUE",
   },
 };
 
@@ -601,6 +628,9 @@ const getSprintsFromBoardTool: Tool = {
         maximum: 50,
       },
     },
+  },
+  annotations: {
+    category: "JIRA_SPRINT",
   },
 };
 
@@ -638,6 +668,9 @@ const createSprintTool: Tool = {
       "end_date",
     ],
   },
+  annotations: {
+    category: "JIRA_SPRINT",
+  },
 };
 
 const getSprintIssuesTool: Tool = {
@@ -669,6 +702,9 @@ const getSprintIssuesTool: Tool = {
       },
     },
     required: ["sprint_id"],
+  },
+  annotations: {
+    category: "JIRA_SPRINT",
   },
 };
 
@@ -705,6 +741,9 @@ const updateSprintTool: Tool = {
     },
     required: ["sprint_id"],
   },
+  annotations: {
+    category: "JIRA_SPRINT",
+  },
 };
 
 const deleteIssueTool: Tool = {
@@ -720,6 +759,9 @@ const deleteIssueTool: Tool = {
     },
     required: ["issue_key"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const getLinkTypesTool: Tool = {
@@ -729,6 +771,9 @@ const getLinkTypesTool: Tool = {
     type: "object",
     properties: {},
     required: [],
+  },
+  annotations: {
+    category: "JIRA_LINK",
   },
 };
 

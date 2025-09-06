@@ -140,6 +140,9 @@ def main(
                     },
                     "required": ["space_identifier", "title", "content"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_page",
@@ -154,6 +157,9 @@ def main(
                     },
                     "required": ["page_identifier"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_pages_by_id",
@@ -169,6 +175,9 @@ def main(
                     },
                     "required": ["page_ids"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             types.Tool(
                 name="confluence_list_pages",
@@ -200,6 +209,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             types.Tool(
                 name="confluence_update_page_content",
@@ -223,6 +235,9 @@ def main(
                     },
                     "required": ["page_identifier", "content"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             types.Tool(
                 name="confluence_rename_page",
@@ -241,6 +256,9 @@ def main(
                     },
                     "required": ["page_identifier", "title"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_PAGE"}
+                ),
             ),
             # Space tools
             types.Tool(
@@ -268,6 +286,9 @@ def main(
                     },
                     "required": ["name"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_SPACE"}
+                ),
             ),
             types.Tool(
                 name="confluence_list_spaces",
@@ -287,6 +308,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_SPACE"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_space",
@@ -301,6 +325,9 @@ def main(
                     },
                     "required": ["space_identifier"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_SPACE"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_space_hierarchy",
@@ -315,6 +342,9 @@ def main(
                     },
                     "required": ["space_identifier"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_SPACE"}
+                ),
             ),
             # Search tools
             types.Tool(
@@ -345,6 +375,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_SEARCH"}
+                ),
             ),
             # Attachment tools
             types.Tool(
@@ -371,6 +404,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_attachments_for_page",
@@ -395,6 +431,9 @@ def main(
                     },
                     "required": ["page_identifier"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                ),
             ),
             types.Tool(
                 name="confluence_get_attachment",
@@ -409,6 +448,9 @@ def main(
                     },
                     "required": ["attachment_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                ),
             ),
         ]
 
