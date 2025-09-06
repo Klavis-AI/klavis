@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("REPORT_GENERATION", "user123"
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/report_generation-mcp-server:latest
+
+
 # Run Report Generation MCP Server
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/report_generation-mcp-server:latest
 ```
 
