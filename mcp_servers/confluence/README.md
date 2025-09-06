@@ -26,9 +26,14 @@ server = klavis.mcp_server.create_server_instance("CONFLUENCE", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Confluence MCP Server (OAuth support through Klavis AI)
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+# Pull latest image
+docker pull ghcr.io/klavis-ai/confluence-mcp-server:latest
+
+
+# Run Confluence MCP Server with OAuth Support through Klavis AI
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/confluence-mcp-server:latest
+
 
 # Run Confluence MCP Server (no OAuth support)
 docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_confluence_api_token_here"}' \

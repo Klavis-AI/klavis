@@ -26,9 +26,14 @@ server = klavis.mcp_server.create_server_instance("MONEYBIRD", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Moneybird MCP Server (OAuth support through Klavis AI)
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+# Pull latest image
+docker pull ghcr.io/klavis-ai/moneybird-mcp-server:latest
+
+
+# Run Moneybird MCP Server with OAuth Support through Klavis AI
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/moneybird-mcp-server:latest
+
 
 # Run Moneybird MCP Server (no OAuth support)
 docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_moneybird_api_token_here"}' \

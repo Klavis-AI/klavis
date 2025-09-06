@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("RESEND", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/resend-mcp-server:latest
+
+
 # Run Resend MCP Server
-docker run -p 5000:5000 -e API_KEY=your_resend_api_key \
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
   ghcr.io/klavis-ai/resend-mcp-server:latest
 ```
 

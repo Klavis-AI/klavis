@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("OPENROUTER", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/openrouter-mcp-server:latest
+
+
 # Run OpenRouter MCP Server
-docker run -p 5000:5000 -e API_KEY=your_openrouter_api_key \
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
   ghcr.io/klavis-ai/openrouter-mcp-server:latest
 ```
 

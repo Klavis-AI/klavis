@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("DISCORD", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/discord-mcp-server:latest
+
+
 # Run Discord MCP Server
-docker run -p 5000:5000 -e DISCORD_TOKEN=your_discord_bot_token_here \
+docker run -p 5000:5000 -e DISCORD_TOKEN=$DISCORD_TOKEN \
   ghcr.io/klavis-ai/discord-mcp-server:latest
 ```
 

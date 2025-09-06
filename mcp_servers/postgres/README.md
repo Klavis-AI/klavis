@@ -26,6 +26,10 @@ server = klavis.mcp_server.create_server_instance("POSTGRES", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/postgres-mcp-server:latest
+
+
 # Run PostgreSQL MCP Server
 docker run -p 5000:5000 \
   -e API_KEY="postgresql://user:password@host:port/database" \
