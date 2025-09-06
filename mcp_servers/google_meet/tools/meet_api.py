@@ -18,8 +18,8 @@ from .base import get_auth_token
 
 logger = logging.getLogger(__name__)
 
-MEET_API_DISABLED_ENV = "MEET_API_V2_DISABLED"
-MEET_API_BASE = "https://meet.googleapis.com/v2"
+MEET_API_DISABLED_ENV = os.getenv("MEET_API_DISABLED_ENV", "MEET_API_V2_DISABLED")
+MEET_API_BASE = os.getenv("MEET_API_BASE", "https://meet.googleapis.com/v2")
 
 
 def _meet_service(access_token: str):
@@ -158,7 +158,7 @@ async def get_meeting(space_id: str) -> Dict[str, Any]:
         return failure("Unexpected server error", code="internal_error")
 
 
-# NOTE: Temporarily disabled; server will not expose this tool.
+# NOTE:
 # Leaving implementation for future enablement when API/scopes are broadly available.
 async def list_meetings(max_results: int = 10) -> Dict[str, Any]:
     logger.info("tool=google_meet_v2_list_meetings action=start max_results=%s", max_results)
@@ -213,7 +213,7 @@ async def list_meetings(max_results: int = 10) -> Dict[str, Any]:
         return failure("Unexpected server error", code="internal_error")
 
 
-# NOTE: Temporarily disabled; server will not expose this tool.
+# NOTE:
 # Leaving implementation for future enablement when API/scopes are broadly available.
 async def get_participants(space_id: str, max_results: int = 50) -> Dict[str, Any]:
     logger.info("tool=google_meet_v2_get_participants action=start space_id=%s", space_id)

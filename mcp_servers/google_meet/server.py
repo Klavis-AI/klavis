@@ -196,27 +196,26 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                     "properties": {"space_id": {"type": "string", "description": "Space ID or spaces/<id>"}},
                 },
             ),
-            # Disabled for now due to API availability/scope constraints:
-            # types.Tool(
-            #     name="google_meet_v2_list_meetings",
-            #     description="List Meet API v2 meetings/spaces (Workspace/EDU)",
-            #     inputSchema={
-            #         "type": "object",
-            #         "properties": {"max_results": {"type": "integer", "default": 10, "description": "1-100"}},
-            #     },
-            # ),
-            # types.Tool(
-            #     name="google_meet_v2_get_participants",
-            #     description="Get participants for a Meet API v2 meeting (Workspace/EDU)",
-            #     inputSchema={
-            #         "type": "object",
-            #         "required": ["space_id"],
-            #         "properties": {
-            #             "space_id": {"type": "string", "description": "Space ID or spaces/<id>"},
-            #             "max_results": {"type": "integer", "default": 50, "description": "1-300"},
-            #         },
-            #     },
-            # ),
+            types.Tool(
+                name="google_meet_v2_list_meetings",
+                description="List Meet API v2 meetings/spaces (Workspace/EDU)",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"max_results": {"type": "integer", "default": 10, "description": "1-100"}},
+                },
+            ),
+            types.Tool(
+                name="google_meet_v2_get_participants",
+                description="Get participants for a Meet API v2 meeting (Workspace/EDU)",
+                inputSchema={
+                    "type": "object",
+                    "required": ["space_id"],
+                    "properties": {
+                        "space_id": {"type": "string", "description": "Space ID or spaces/<id>"},
+                        "max_results": {"type": "integer", "default": 50, "description": "1-300"},
+                    },
+                },
+            ),
         ])
         return tools
     @app.call_tool()
@@ -289,26 +288,25 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                 logger.exception("meet_v2_get_meeting unexpected error=%s", e)
                 result = failure("Unexpected server error", code="internal_error")
             return [types.TextContent(type="text", text=json.dumps(result))]
-    # Disabled handlers for Meet API v2 list/participants until generally available
-    # elif name == "google_meet_v2_list_meetings":
-    #     max_results = arguments.get("max_results", 10)
-    #     try:
-    #         result = await meet_v2.list_meetings(max_results)
-    #     except Exception as e:
-    #         logger.exception("meet_v2_list_meetings unexpected error=%s", e)
-    #         result = failure("Unexpected server error", code="internal_error")
-    #     return [types.TextContent(type="text", text=json.dumps(result))]
-    # elif name == "google_meet_v2_get_participants":
-    #     space_id = arguments.get("space_id")
-    #     if not space_id:
-    #         return [types.TextContent(type="text", text=json.dumps(failure("space_id parameter is required")))]
-    #     max_results = arguments.get("max_results", 50)
-    #     try:
-    #         result = await meet_v2.get_participants(space_id, max_results)
-    #     except Exception as e:
-    #         logger.exception("meet_v2_get_participants unexpected error=%s", e)
-    #         result = failure("Unexpected server error", code="internal_error")
-    #     return [types.TextContent(type="text", text=json.dumps(result))]
+        elif name == "google_meet_v2_list_meetings":
+            max_results = arguments.get("max_results", 10)
+            try:
+                result = await meet_v2.list_meetings(max_results)
+            except Exception as e:
+                logger.exception("meet_v2_list_meetings unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
+            return [types.TextContent(type="text", text=json.dumps(result))]
+        elif name == "google_meet_v2_get_participants":
+            space_id = arguments.get("space_id")
+            if not space_id:
+                return [types.TextContent(type="text", text=json.dumps(failure("space_id parameter is required")))]
+            max_results = arguments.get("max_results", 50)
+            try:
+                result = await meet_v2.get_participants(space_id, max_results)
+            except Exception as e:
+                logger.exception("meet_v2_get_participants unexpected error=%s", e)
+                result = failure("Unexpected server error", code="internal_error")
+            return [types.TextContent(type="text", text=json.dumps(result))]
         return [types.TextContent(type="text", text=json.dumps(failure(f"Unknown tool: {name}", code="unknown_tool")))]
     
     if stdio:
