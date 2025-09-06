@@ -80,3 +80,5 @@ dist/
 
 # submodules
 .gitmodules
+
+.cursor/
