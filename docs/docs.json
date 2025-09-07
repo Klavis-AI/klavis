@@ -134,9 +134,14 @@
             "group": "Manage MCP Server",
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
-              "api-reference/mcp-server/create-a-unified-mcp-server-instance",
               "api-reference/mcp-server/get-server-instance",
               "api-reference/mcp-server/delete-a-server-instance"
+            ]
+          },
+          {
+            "group": "Strata",
+            "pages": [
+              "api-reference/strata/create"
             ]
           },
           {

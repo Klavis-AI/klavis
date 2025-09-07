@@ -79,6 +79,43 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
+    "/mcp-server/strata/create": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Create Strata",
+        "description": "Create a Strata MCP server.",
+        "operationId": "create_strata_server_mcp_server_strata_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StrataCreateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
     "/mcp-server/instance/create": {
       "post": {
         "tags": ["mcp-server"],
@@ -116,49 +153,10 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
-    "/mcp-server/unified/instance/create": {
-      "post": {
-        "tags": ["mcp-server"],
-        "summary": "Create Unified MCP Server Instance",
-        "description": "Creates a URL for the Unified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.",
-        "operationId": "createUnifiedMCPServerInstance",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUnifiedServerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateServerResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        },
-        "security": [{ "HTTPBearer": [] }]
-      }
-    },
     "/mcp-server/self-hosted/instance/create": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Create a Self-Hosted MCP Server Instance",
+        "summary": "Create",
         "description": "Creates an instance id for a self-hosted MCP server,\nvalidating the request with an API key and user details.\nThe main purpose of this endpoint is to create an instance id for a self-hosted MCP server.\nThe instance id is used to identify and store the auth metadata in the database.\nReturns the existing instance id if it already exists for the user.",
         "operationId": "createSelfHostedServerInstance",
         "requestBody": {
@@ -238,7 +236,7 @@
     "/mcp-server/instance/delete-auth/{instance_id}": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete Auth data for Server Instance",
+        "summary": "Delete",
         "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [{ "HTTPBearer": [] }],
@@ -3537,36 +3535,6 @@
         "required": ["serverUrl", "instanceId"],
         "title": "CreateServerResponse"
       },
-      "CreateUnifiedServerRequest": {
-        "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Userid",
-            "description": "The identifier for the user requesting the server URL."
-          },
-          "platformName": {
-            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
-            "title": "Platformname",
-            "description": "The name of the platform associated with the user. Optional."
-          },
-          "connectionType": {
-            "$ref": "#/components/schemas/ConnectionType",
-            "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
-            "default": "StreamableHttp"
-          },
-          "isHierarchical": {
-            "type": "boolean",
-            "title": "Ishierarchical",
-            "description": "Whether the server is hierarchical. Default is False.",
-            "default": false,
-            "include_in_schema": false
-          }
-        },
-        "type": "object",
-        "required": ["userId"],
-        "title": "CreateUnifiedServerRequest"
-      },
       "CreateWhiteLabelingRequest": {
         "properties": {
           "client_id": {
@@ -3931,7 +3899,20 @@
           "Vercel",
           "WhatsApp",
           "WordPress",
-          "YouTube"
+          "YouTube",
+          "Cloudflare",
+          "Stripe",
+          "Figma",
+          "Metabase",
+          "Pipedrive",
+          "Klaviyo",
+          "Box",
+          "Dialpad",
+          "Docusign",
+          "Elevenlabs",
+          "Pagerduty",
+          "Posthog",
+          "Sendgrid"
         ],
         "title": "McpServerName"
       },
@@ -3967,6 +3948,7 @@
           "Notion",
           "Onedrive",
           "PagerDuty",
+          "Pipedrive",
           "Salesforce",
           "Shopify",
           "Slack",
@@ -4020,6 +4002,54 @@
         "type": "object",
         "required": ["success"],
         "title": "StatusResponse"
+      },
+      "StrataCreateRequest": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Userid",
+            "description": "The identifier for the user"
+          },
+          "servers": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/McpServerName" },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Servers",
+            "description": "Optional list of server names to enable (e.g., 'jira', 'linear'). Defaults to ALL."
+          }
+        },
+        "type": "object",
+        "required": ["userId"],
+        "title": "StrataCreateRequest"
+      },
+      "StrataCreateResponse": {
+        "properties": {
+          "strataServerUrl": {
+            "type": "string",
+            "title": "Strataserverurl",
+            "description": "URL to connect to the Strata MCP server"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of server name to OAuth URL"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of server name to API key setup URL"
+          }
+        },
+        "type": "object",
+        "required": ["strataServerUrl"],
+        "title": "StrataCreateResponse"
       },
       "ToolFormat": {
         "type": "string",
