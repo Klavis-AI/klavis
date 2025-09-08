@@ -27,12 +27,12 @@ server = klavis.mcp_server.create_server_instance("HACKER_NEWS", "user123")
 
 ```bash
 # Pull latest image
-docker pull ghcr.io/klavis-ai/hacker_news-mcp-server:latest
+docker pull ghcr.io/klavis-ai/hacker-news-mcp-server:latest
 
 
 # Run Hacker News MCP Server (no authentication required)
 docker run -p 5000:5000 \
-  ghcr.io/klavis-ai/hacker_news-mcp-server:latest
+  ghcr.io/klavis-ai/hacker-news-mcp-server:latest
 ```
 
 **No Authentication:** Hacker News API is public and requires no authentication or API keys.
