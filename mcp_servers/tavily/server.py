@@ -56,7 +56,7 @@ def extract_api_key(request_or_scope) -> str:
             try:
                 # Parse the JSON auth data to extract token
                 auth_json = json.loads(auth_data)
-                api_key = auth_json.get('token', '')
+                api_key = auth_json.get('token') or auth_json.get('api_key') or ''
             except (json.JSONDecodeError, TypeError) as e:
                 logger.warning(f"Failed to parse auth data JSON: {e}")
                 api_key = ""
@@ -153,7 +153,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_SEARCH"}
+                    **{"category": "TAVILY_WEB_SEARCH"}
                 ),
             ),
             types.Tool(
@@ -180,7 +180,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_EXTRACT"}
+                    **{"category": "TAVILY_WEB_SEARCH"}
                 ),
             ),
             types.Tool(
@@ -209,7 +209,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_CRAWL"}
+                    **{"category": "TAVILY_WEB_SEARCH"}
                 ),
             ),
             types.Tool(
@@ -235,7 +235,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_MAP"}
+                    **{"category": "TAVILY_WEB_SEARCH"}
                 ),
             ),
         ]

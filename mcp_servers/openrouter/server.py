@@ -57,7 +57,7 @@ def extract_api_key(request_or_scope) -> str:
             try:
                 # Parse the JSON auth data to extract token
                 auth_json = json.loads(auth_data)
-                api_key = auth_json.get('token', '')
+                api_key = auth_json.get('token') or auth_json.get('api_key') or ''
             except (json.JSONDecodeError, TypeError) as e:
                 logger.warning(f"Failed to parse auth data JSON: {e}")
                 api_key = ""
