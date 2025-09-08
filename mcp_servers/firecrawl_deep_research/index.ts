@@ -324,7 +324,7 @@ function extractApiKey(req: Request): string {
     }
 
     const authDataJson = JSON.parse(authData);
-    return authDataJson.token ?? '';
+    return authDataJson.token ?? authDataJson.api_key ?? '';
 }
 
 const app = express();
