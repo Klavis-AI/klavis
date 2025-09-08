@@ -14,6 +14,7 @@ import (
 	"github.com/github/github-mcp-server/pkg/github"
 	"github.com/github/github-mcp-server/pkg/translations"
 	gogithub "github.com/google/go-github/v69/github"
+	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/server"
 	log "github.com/sirupsen/logrus"
 )
@@ -156,6 +157,7 @@ func runServer() error {
 }
 
 func main() {
+	_ = godotenv.Load(".env")
 	if err := runServer(); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}

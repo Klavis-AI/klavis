@@ -140,6 +140,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT"}),
             ),
             types.Tool(
                 name="mixpanel_get_events",
@@ -154,6 +155,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT"}),
             ),
             types.Tool(
                 name="mixpanel_get_event_properties",
@@ -175,6 +177,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA"}),
             ),
             types.Tool(
                 name="mixpanel_get_event_property_values",
@@ -200,6 +203,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA"}),
             ),
             types.Tool(
                 name="mixpanel_run_funnels_query",
@@ -229,6 +233,7 @@ def main(
                         "project_id": {"type": ["string", "integer"]}
                     }
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
             ),
             types.Tool(
                 name="mixpanel_run_segmentation_query",
@@ -295,6 +300,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
             ),
             types.Tool(
                 name="mixpanel_run_retention_query",
@@ -360,6 +366,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
             ),
             types.Tool(
                 name="mixpanel_run_frequency_query",
@@ -434,6 +441,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
             ),
             types.Tool(
                 name="mixpanel_get_projects",
@@ -442,6 +450,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_PROJECT"}),
             )
         ]
 

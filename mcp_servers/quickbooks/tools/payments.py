@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for payment creation (required by QuickBooks)
@@ -128,7 +129,8 @@ create_payment_tool = Tool(
         "type": "object",
         "properties": payment_properties_minimal,
         "required": ["TotalAmt", "CustomerRefValue"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 get_payment_tool = Tool(
@@ -141,7 +143,8 @@ get_payment_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks payment ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 list_payments_tool = Tool(
@@ -155,7 +158,8 @@ list_payments_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 search_payments_tool = Tool(
@@ -188,7 +192,8 @@ search_payments_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 update_payment_tool = Tool(
@@ -199,7 +204,8 @@ update_payment_tool = Tool(
         "type": "object",
         "properties": payment_properties,
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 delete_payment_tool = Tool(
@@ -212,7 +218,8 @@ delete_payment_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks payment ID to delete"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 send_payment_tool = Tool(
@@ -232,7 +239,8 @@ send_payment_tool = Tool(
             }
         },
         "required": ["Id", "SendTo"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 void_payment_tool = Tool(
@@ -248,7 +256,8 @@ void_payment_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 

@@ -32,8 +32,7 @@ klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 # Create an Exa MCP server instance
 exa_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.EXA,
-    user_id="<YOUR_USER_ID>",
-    platform_name="<YOUR_PLATFORM_NAME>",
+    user_id="<YOUR_USER_ID>"
 )
 ```
 
@@ -45,8 +44,7 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 // Create an Exa MCP server instance
 const exaServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Exa,
-    userId: "<YOUR_USER_ID>",
-    platformName: "<YOUR_PLATFORM_NAME>",
+    userId: "<YOUR_USER_ID>"
 });
 ```
 
@@ -57,9 +55,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
   "serverName": "Exa",
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>"
-}'
+  "userId": "<YOUR_USER_ID>"}'
 ```
 
 ```go Go
@@ -76,7 +72,7 @@ func main() {
 
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
-	payload := strings.NewReader("{\n  \"serverName\": \"Exa\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	payload := strings.NewReader("{\n  \"serverName\": \"Exa\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -98,7 +94,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Exa\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"Exa\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 ```
 </CodeGroup>
@@ -184,8 +180,8 @@ func main() {
 	    payload := map[string]interface{}{
         "instanceId": "<YOUR_INSTANCE_ID>",
 		"authData": map[string]string{
-            "token": "<YOUR_EXA_API_KEY>",
-        },
+            "token": "<YOUR_EXA_API_KEY>"
+        }
     }
 	
 	jsonPayload, _ := json.Marshal(payload)

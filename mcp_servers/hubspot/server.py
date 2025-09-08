@@ -49,6 +49,12 @@ from tools import (
     hubspot_delete_ticket_by_id,
     # Notes
     hubspot_create_note,
+    # Tasks
+    hubspot_get_tasks,
+    hubspot_get_task_by_id,
+    hubspot_create_task,
+    hubspot_update_task_by_id,
+    hubspot_delete_task_by_id,
 )
 
 # Configure logging
@@ -130,7 +136,107 @@ def main(
                         }
                     },
                     "required": ["object_type"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_get_tasks",
+                description="Fetch a list of tasks from HubSpot.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Number of tasks to retrieve. Defaults to 10.",
+                            "default": 10,
+                            "minimum": 1
+                        }
+                    }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_get_task_by_id",
+                description="Get a specific task by HubSpot task ID.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "task_id": {
+                            "type": "string",
+                            "description": "The HubSpot task ID."
+                        }
+                    },
+                    "required": ["task_id"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_create_task",
+                description="Create a new task using a JSON string of properties.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "properties": {
+                            "type": "string",
+                            "description": (
+                                "JSON string of task properties. Required: 'hs_timestamp' (ms since epoch). "
+                                "Optional: 'hs_task_subject', 'hs_task_body', 'hubspot_owner_id', 'hs_task_type' (CALL | EMAIL | TODO | LINKEDIN_MESSAGE), "
+                                "'hs_task_status' (NOT_STARTED | IN_PROGRESS | WAITING | COMPLETED | DEFERRED), 'hs_task_priority' (LOW | MEDIUM | HIGH)."
+                            )
+                        }
+                    },
+                    "required": ["properties"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_update_task_by_id",
+                description="Update an existing task using a JSON string of updated properties.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "task_id": {
+                            "type": "string",
+                            "description": "The ID of the task to update."
+                        },
+                        "updates": {
+                            "type": "string",
+                            "description": (
+                                "JSON string of the properties to update (e.g., hs_task_subject, hs_task_body, hubspot_owner_id, hs_task_type, "
+                                "hs_task_status, hs_task_priority, hs_timestamp)."
+                            )
+                        }
+                    },
+                    "required": ["task_id", "updates"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_delete_task_by_id",
+                description="Delete a task from HubSpot by task ID.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "task_id": {
+                            "type": "string",
+                            "description": "The ID of the task to delete."
+                        }
+                    },
+                    "required": ["task_id"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TASK"}
+                )
             ),
             types.Tool(
                 name="hubspot_search_by_property",
@@ -219,7 +325,10 @@ def main(
                         }
                     },
                     "required": ["object_type", "property_name", "operator", "value", "properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_contacts",
@@ -234,7 +343,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_contact_by_id",
@@ -248,7 +360,10 @@ def main(
                         }
                     },
                     "required": ["contact_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_property",
@@ -274,7 +389,10 @@ def main(
                         },
                     },
                     "required": ["name", "label", "description", "object_type"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_PROPERTY"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_contact_by_id",
@@ -288,7 +406,10 @@ def main(
                         }
                     },
                     "required": ["contact_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_contact",
@@ -302,7 +423,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_contact_by_id",
@@ -320,7 +444,10 @@ def main(
                         }
                     },
                     "required": ["contact_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_CONTACT"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_companies",
@@ -334,7 +461,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_companies",
@@ -349,7 +479,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_company_by_id",
@@ -363,7 +496,10 @@ def main(
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_company_by_id",
@@ -381,7 +517,10 @@ def main(
                         }
                     },
                     "required": ["company_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_company_by_id",
@@ -395,7 +534,10 @@ def main(
                         }
                     },
                     "required": ["company_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_COMPANY"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_deals",
@@ -410,7 +552,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_deal_by_id",
@@ -424,7 +569,10 @@ def main(
                         }
                     },
                     "required": ["deal_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_deal",
@@ -438,7 +586,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_deal_by_id",
@@ -456,7 +607,10 @@ def main(
                         }
                     },
                     "required": ["deal_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_deal_by_id",
@@ -470,7 +624,10 @@ def main(
                         }
                     },
                     "required": ["deal_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_DEAL"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_tickets",
@@ -485,7 +642,10 @@ def main(
                             "minimum": 1
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_get_ticket_by_id",
@@ -499,7 +659,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_ticket",
@@ -513,7 +676,10 @@ def main(
                         }
                     },
                     "required": ["properties"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_update_ticket_by_id",
@@ -531,7 +697,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id", "updates"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_delete_ticket_by_id",
@@ -545,7 +714,10 @@ def main(
                         }
                     },
                     "required": ["ticket_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_TICKET"}
+                )
             ),
             types.Tool(
                 name="hubspot_create_note",
@@ -587,7 +759,10 @@ def main(
                         }
                     },
                     "required": ["note_body"]
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_NOTE"}
+                )
             ),
         ]
 
@@ -1177,6 +1352,126 @@ def main(
                     types.TextContent(
                         type="text",
                         text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Tasks
+        elif name == "hubspot_get_tasks":
+            try:
+                limit = arguments.get("limit", 10)
+                result = await hubspot_get_tasks(limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_get_task_by_id":
+            task_id = arguments.get("task_id")
+            if not task_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: task_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_get_task_by_id(task_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_create_task":
+            try:
+                result = await hubspot_create_task(arguments["properties"])
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_update_task_by_id":
+            task_id = arguments.get("task_id")
+            updates = arguments.get("updates")
+            if not task_id or not updates:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: task_id and updates parameters are required",
+                    )
+                ]
+            try:
+                result = await hubspot_update_task_by_id(
+                    task_id=task_id,
+                    updates=updates
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_task_by_id":
+            task_id = arguments.get("task_id")
+            if not task_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: task_id parameter is required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_task_by_id(task_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Deleted",
                     )
                 ]
             except Exception as e:

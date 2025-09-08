@@ -16,8 +16,6 @@ Before we begin, you'll need:
   </Card>
 </CardGroup>
 
-
-
 ## Installation
 
 First, install the required packages:
@@ -106,7 +104,7 @@ class Agent:
         mcp_tools = self.klavis.mcp_server.list_tools(
             server_url=self.mcp_server_url,
     
-            format=ToolFormat.OPENAI,
+            format=ToolFormat.OPENAI
         )
         
         # 2. Call LLM with tools
@@ -137,7 +135,7 @@ class Agent:
                 tool_result = self.klavis.mcp_server.call_tools(
                     server_url=self.mcp_server_url,
                     tool_name=tool_name,
-                    tool_args=tool_args,
+                    tool_args=tool_args
                 )
                 
                 messages.append({
@@ -176,7 +174,7 @@ class Agent {
         // 1. Get available tools
         const mcpTools = await this.klavis.mcpServer.listTools({
             serverUrl: this.mcpServerUrl,
-            format: Klavis.ToolFormat.Openai,
+            format: Klavis.ToolFormat.Openai
         });
 
         // 2. Call LLM with tools
@@ -206,7 +204,7 @@ class Agent {
                 const toolResult = await this.klavis.mcpServer.callTools({
                     serverUrl: this.mcpServerUrl,
                     toolName: toolName,
-                    toolArgs: toolArgs,
+                    toolArgs: toolArgs
                 });
 
                 messages.push({
@@ -257,8 +255,7 @@ YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=TG6QOa2JJJQ"
 # 1. Create YouTube MCP server instance
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # 2. Create an agent with YouTube MCP server
@@ -284,8 +281,7 @@ const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=TG6QOa2JJJQ";
 // 1. Create YouTube MCP server instance
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // 2. Create an agent with YouTube MCP server
@@ -320,8 +316,7 @@ import webbrowser
 # Create Gmail MCP server instance
 gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # Redirect to Gmail OAuth page for authorization
@@ -354,8 +349,7 @@ print(response)
 // Create Gmail MCP server instance
 const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // Redirect to Gmail OAuth page for authorization

@@ -1,71 +1,69 @@
 # Mixpanel MCP Server
 
-MCP server for [Mixpanel](https://mixpanel.com) analytics platform.
+A Model Context Protocol (MCP) server for Mixpanel integration. Analyze user events, track metrics, and manage analytics using Mixpanel's API.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Event Tracking**: Track single or batch events
-- **User Profiles**: Manage user profile data
-- **Analytics**: Query events, get counts, and top events
-- **Funnels**: List and access saved funnels
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Setup
+Get instant access to Mixpanel with our managed infrastructure - **no setup required**:
 
-### Prerequisites
-- Python 3.12+
-- Mixpanel Service Account (Owner/Admin role)
-
-### Quick Start
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Set environment variables:
-```bash
-export MIXPANEL_SERVICE_ACCOUNT_USERNAME=sa_abc123.mixpanel
-export MIXPANEL_SERVICE_ACCOUNT_SECRET=your_secret
-```
-
-3. Run the server:
-```bash
-python server.py
-```
-
-## Authentication
-
-Provide credentials via HTTP header (includes project ID):
-```
-x-auth-token: serviceaccount_username:serviceaccount_secret:project_id
-```
-
-Or set environment variables (project ID provided in header):
-```bash
-export MIXPANEL_SERVICE_ACCOUNT_USERNAME=sa_abc123.mixpanel
-export MIXPANEL_SERVICE_ACCOUNT_SECRET=your_secret
-```
-
-## Available Tools
-
-| Tool | Description |
-|------|-------------|
-| `mixpanel_send_events` | Send events to Mixpanel using /import endpoint |
-| `mixpanel_get_events` | Get all event names in a project |
-| `mixpanel_get_event_properties` | Get available properties for an event |
-| `mixpanel_get_event_property_values` | Get possible values for an event property |
-| `mixpanel_run_funnels_query` | Run funnel analysis for conversion tracking |
-| `mixpanel_run_segmentation_query` | Analyze events with filters and grouping |
-| `mixpanel_run_retention_query` | Track user retention over time |
-| `mixpanel_run_frequency_query` | Analyze user engagement frequency |
-| `mixpanel_get_projects` | Get all accessible projects |
-
-## Docker
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-# Build
-docker build -f mcp_servers/mixpanel/Dockerfile -t mixpanel-mcp-server .
-
-# Run
-docker run -p 5000:5000 mixpanel-mcp-server
+pip install klavis
+# or
+npm install klavis
 ```
+
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("MIXPANEL", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
+
+```bash
+# Run Mixpanel MCP Server
+docker run -p 5000:5000 -e API_KEY=your_mixpanel_secret \
+  ghcr.io/klavis-ai/mixpanel-mcp-server:latest
+```
+
+**API Secret Setup:** Get your Mixpanel API secret from your [Mixpanel project settings](https://mixpanel.com/settings/project).
+
+## 🛠️ Available Tools
+
+- **Event Analytics**: Track and analyze user events and behaviors
+- **User Profiles**: Manage user properties and segmentation
+- **Funnel Analysis**: Create and analyze conversion funnels
+- **Cohort Analysis**: Track user retention and engagement
+- **Report Generation**: Generate custom analytics reports
+
+## 📚 Documentation & Support
+
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

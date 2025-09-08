@@ -1,30 +1,73 @@
-# 🔥 OneDrive MCP Server
+# OneDrive MCP Server
 
-## 📦 OneDrive MCP Tools
+A Model Context Protocol (MCP) server for Microsoft OneDrive integration. Manage files, folders, and sharing using OneDrive's API with OAuth support.
 
-| Tool                                     | What it does                               | Parameters                                                                                                                                                                                                         |
-| ---------------------------------------- |--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **onedrive\_rename\_item**               | Rename a file or folder by its ID.         | • `file_id` *(str)* – ID of the file/folder<br>• `new_name` *(str)* – New name                                                                                                                                     |
-| **onedrive\_move\_item**                 | Move a file or folder into another folder. | • `item_id` *(str)* – ID of the item<br>• `new_parent_id` *(str)* – ID of destination folder                                                                                                                       |
-| **onedrive\_delete\_item**               | Delete a file or folder by its ID.         | • `item_id` *(str)* – ID of the item                                                                                                                                                                               |
-| **onedrive\_read\_file\_content**        | Read the raw content of a text file.       | • `file_id` *(str)* – ID of the file                                                                                                                                                                               |
-| **onedrive\_create\_file**               | Create a new file.                         | • `parent_folder` *(str)* – 'root' or ID of parent folder<br>• `new_file_name` *(str)* – File name<br>• `data` *(str, optional)* – Content<br>• `if_exists` *(error / rename / replace)* – Conflict behavior (default: error) |
-| **onedrive\_create\_folder**             | Create a folder.                           | • `parent_folder` *(str)* – 'root' or ID of parent folder<br>• `new_folder_name` *(str)* – Folder name<br>• `behavior` *(fail / replace / rename)* – Conflict handling (default: fail)                             |
-| **onedrive\_list\_root\_files\_folders** | List all files and folders in the root.    | –                                                                                                                                                                                                                  |
-| **onedrive\_list\_inside\_folder**       | List contents of a specific folder.        | • `folder_id` *(str)* – ID of the folder                                                                                                                                                                           |
-| **onedrive\_search\_item\_by\_name**     | Search files & folders by name.            | • `itemname` *(str)* – Name or partial name                                                                                                                                                                        |
-| **onedrive\_search\_folder\_by\_name**   | Search only folders by name.               | • `folder_name` *(str)* – Folder name                                                                                                                                                                              |
-| **onedrive\_get\_item\_by\_id**          | Get details/metadata about any item.       | • `item_id` *(str)* – ID of the item                                                                                                                                                                               |
-| **onedrive\_list\_shared\_items**        | List items shared with the user.           | –                                                                                                                                                                                                                  |
+## 🚀 Quick Start - Run in 30 Seconds
 
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## ⚡ Key Features
+Get instant access to OneDrive with our managed infrastructure - **no setup required**:
 
-* **Dual Transport**
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-  * SSE endpoint: `/sse`
-  * Streamable HTTP endpoint: `/mcp` (enable JSON response with `--json-response`)
-* **Auth**: Add `x-auth-token` header to each request
-* **Structured Errors**: Clear error messages for easier debugging
-* **Logging**: Choose log level with `--log-level` (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("ONEDRIVE", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
+
+```bash
+# Run OneDrive MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/onedrive-mcp-server:latest
+
+# Run OneDrive MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_onedrive_access_token_here"}' \
+  ghcr.io/klavis-ai/onedrive-mcp-server:latest
+```
+
+**OAuth Setup:** OneDrive requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+
+## 🛠️ Available Tools
+
+- **File Management**: Upload, download, and manage OneDrive files
+- **Folder Operations**: Create, move, and organize folders
+- **Sharing**: Create and manage shared links and permissions
+- **Search**: Search files and folders by name and content
+- **Collaboration**: Handle real-time collaboration and version control
+
+## 📚 Documentation & Support
+
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

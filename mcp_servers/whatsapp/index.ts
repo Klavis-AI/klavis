@@ -109,6 +109,9 @@ const SEND_TEXT_MESSAGE_TOOL: Tool = {
         },
         required: ['phone_number_id', 'to', 'text'],
     },
+    annotations: {
+        category: 'WHATSAPP_MESSAGE',
+    },
 };
 
 function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency', data: any): void {
@@ -187,6 +190,10 @@ const getWhatsAppMcpServer = () => {
 
 function extractApiKey(req: Request): string {
     let authData = process.env.API_KEY;
+
+    if (authData) {
+        return authData;
+    }
     
     if (!authData && req.headers['x-auth-data']) {
         try {

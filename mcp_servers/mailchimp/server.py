@@ -66,12 +66,14 @@ async def run_server(log_level: str = "INFO"):
             types.Tool(
                 name="mailchimp_ping",
                 description="Test Mailchimp Connection - verify API authentication is working correctly.",
-                inputSchema={"type": "object", "properties": {}}
+                inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT"})
             ),
             types.Tool(
                 name="mailchimp_get_account_info",
                 description="Get Account Information - retrieve comprehensive account details.",
-                inputSchema={"type": "object", "properties": {}}
+                inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT"})
             ),
             
             # Audience/List management tools
@@ -84,7 +86,8 @@ async def run_server(log_level: str = "INFO"):
                         "count": {"type": "integer", "default": 10, "minimum": 1, "maximum": 1000},
                         "offset": {"type": "integer", "default": 0, "minimum": 0}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
             ),
             types.Tool(
                 name="mailchimp_create_audience",
@@ -116,7 +119,8 @@ async def run_server(log_level: str = "INFO"):
                         "double_optin": {"type": "boolean", "default": False},
                         "has_welcome": {"type": "boolean", "default": False}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
             ),
             types.Tool(
                 name="mailchimp_get_audience_info",
@@ -125,7 +129,8 @@ async def run_server(log_level: str = "INFO"):
                     "type": "object",
                     "required": ["list_id"],
                     "properties": {"list_id": {"type": "string"}}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
             ),
             types.Tool(
                 name="mailchimp_update_audience",
@@ -146,7 +151,8 @@ async def run_server(log_level: str = "INFO"):
                         "double_optin": {"type": "boolean"},
                         "has_welcome": {"type": "boolean"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
             ),
             types.Tool(
                 name="mailchimp_delete_audience",
@@ -155,7 +161,8 @@ async def run_server(log_level: str = "INFO"):
                     "type": "object",
                     "required": ["list_id"],
                     "properties": {"list_id": {"type": "string"}}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
             ),
             
             # Member/Contact management tools
@@ -175,7 +182,8 @@ async def run_server(log_level: str = "INFO"):
                         },
                         "since_timestamp_opt": {"type": "string"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_add_member_to_audience",
@@ -201,7 +209,8 @@ async def run_server(log_level: str = "INFO"):
                         "ip_opt": {"type": "string"},
                         "timestamp_opt": {"type": "string"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_get_member_info",
@@ -213,7 +222,8 @@ async def run_server(log_level: str = "INFO"):
                         "list_id": {"type": "string"},
                         "email_address": {"type": "string"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_update_member",
@@ -235,7 +245,8 @@ async def run_server(log_level: str = "INFO"):
                         "ip_opt": {"type": "string"},
                         "timestamp_opt": {"type": "string"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_delete_member",
@@ -247,7 +258,8 @@ async def run_server(log_level: str = "INFO"):
                         "list_id": {"type": "string"},
                         "email_address": {"type": "string"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_add_member_tags",
@@ -260,7 +272,8 @@ async def run_server(log_level: str = "INFO"):
                         "email_address": {"type": "string"},
                         "tags": {"type": "array", "items": {"type": "string"}}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_remove_member_tags",
@@ -273,7 +286,8 @@ async def run_server(log_level: str = "INFO"):
                         "email_address": {"type": "string"},
                         "tags": {"type": "array", "items": {"type": "string"}}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             types.Tool(
                 name="mailchimp_get_member_activity",
@@ -286,7 +300,8 @@ async def run_server(log_level: str = "INFO"):
                         "email_address": {"type": "string"},
                         "count": {"type": "integer", "default": 10, "minimum": 1, "maximum": 50}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
             ),
             
             # Campaign management tools
@@ -309,7 +324,8 @@ async def run_server(log_level: str = "INFO"):
                         "sort_field": {"type": "string", "enum": ["create_time", "send_time"]},
                         "sort_dir": {"type": "string", "enum": ["ASC", "DESC"]}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_create_campaign",
@@ -334,7 +350,8 @@ async def run_server(log_level: str = "INFO"):
                         "template_id": {"type": "integer"},
                         "drag_and_drop": {"type": "boolean", "default": True}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_get_campaign_info",
@@ -343,7 +360,8 @@ async def run_server(log_level: str = "INFO"):
                     "type": "object",
                     "required": ["campaign_id"],
                     "properties": {"campaign_id": {"type": "string"}}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_set_campaign_content",
@@ -360,7 +378,8 @@ async def run_server(log_level: str = "INFO"):
                         "archive": {"type": "object"},
                         "variate_contents": {"type": "array"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_send_campaign",
@@ -369,7 +388,8 @@ async def run_server(log_level: str = "INFO"):
                     "type": "object",
                     "required": ["campaign_id"],
                     "properties": {"campaign_id": {"type": "string"}}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_schedule_campaign",
@@ -383,7 +403,8 @@ async def run_server(log_level: str = "INFO"):
                         "timewarp": {"type": "boolean", "default": False},
                         "batch_delay": {"type": "integer"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
             types.Tool(
                 name="mailchimp_delete_campaign",
@@ -392,7 +413,8 @@ async def run_server(log_level: str = "INFO"):
                     "type": "object",
                     "required": ["campaign_id"],
                     "properties": {"campaign_id": {"type": "string"}}
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
             ),
         ]
         

@@ -102,6 +102,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_USER"}
+                ),
             ),
             # Lists
             types.Tool(
@@ -135,6 +138,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_LIST"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_metadata_on_all_lists",
@@ -152,6 +158,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_LIST"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_metadata_on_a_single_list",
@@ -166,6 +175,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_LIST"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_metadata_on_a_single_list_fields",
@@ -188,6 +200,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_LIST"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_a_single_list_entry_on_a_list",
@@ -216,6 +231,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_LIST"}
+                ),
             ),
             # Persons
             types.Tool(
@@ -249,6 +267,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"} 
+                ),
             ),
             types.Tool(
                 name="affinity_get_single_person",
@@ -273,6 +294,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_person_fields_metadata",
@@ -290,6 +314,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_person_lists",
@@ -312,6 +339,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_person_list_entries",
@@ -334,6 +364,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"}
+                ),
             ),
             # Companies
             types.Tool(
@@ -367,6 +400,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_COMPANY"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_single_company",
@@ -391,6 +427,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_COMPANY"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_company_fields_metadata",
@@ -408,6 +447,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_COMPANY"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_company_lists",
@@ -430,6 +472,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_COMPANY"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_company_list_entries",
@@ -452,6 +497,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_COMPANY"}
+                ),
             ),
             # Opportunities
             types.Tool(
@@ -475,6 +523,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_OPPORTUNITY"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_single_opportunity",
@@ -489,6 +540,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_OPPORTUNITY"}
+                ),
             ),
             # Search Tools
             types.Tool(
@@ -527,6 +581,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_PERSON"}
+                ),
             ),
             types.Tool(
                 name="affinity_search_organizations",
@@ -560,6 +617,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_ORGANIZATION"}
+                ),
             ),
             types.Tool(
                 name="affinity_search_opportunities",
@@ -581,6 +641,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_OPPORTUNITY"}
+                ),
             ),
             # Notes
             types.Tool(
@@ -611,6 +674,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_NOTE"}
+                ),
             ),
             types.Tool(
                 name="affinity_get_specific_note",
@@ -625,6 +691,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "AFFINITY_NOTE"}
+                ),
             ),
         ]
 

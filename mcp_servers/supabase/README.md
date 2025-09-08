@@ -1,98 +1,77 @@
-# Supabase MCP Server (Klavis Fork)
+# Supabase MCP Server
 
-This directory contains a Model Context Protocol (MCP) server designed to allow LLM to interact with your Supabase projects. It is based on the official [supabase-community/supabase-mcp](https://github.com/supabase-community/supabase-mcp) server but may include modifications specific to the Klavis project.
+A Model Context Protocol (MCP) server for Supabase integration. Manage database operations, authentication, and real-time subscriptions using Supabase's API.
 
-This server acts as a bridge, exposing Supabase functionalities (like database querying, project management, log fetching) as tools that MCP-compatible AI clients can utilize.
+## 🚀 Quick Start - Run in 30 Seconds
 
-## License
+### 🌐 Using Hosted Service (Recommended for Production)
 
-This specific implementation is licensed under the MIT License.
+Get instant access to Supabase with our managed infrastructure - **no setup required**:
 
-## Prerequisites
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-*   **Node.js:** Version 22.x or higher is recommended (check with `node -v`). Download from [nodejs.org](https://nodejs.org/).
-*   **Docker:** Required for the recommended setup method. Download from [docker.com](https://www.docker.com/).
-*   **Supabase Account:** You need a Supabase account.
-*   **Supabase Personal Access Token (PAT):**
-    1.  Go to your Supabase Account Settings -> Access Tokens.
-    2.  Generate a new token. Give it a descriptive name (e.g., "Klavis MCP Server").
-    3.  **Important:** Copy the token immediately. You won't be able to see it again.
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
-## Setup
+```python
+from klavis import Klavis
 
-1.  **Environment Variables:**
-    *   Navigate to the `mcp_servers/supabase` directory in your terminal.
-    *   Copy the example environment file: `cp .env.example .env`
-    *   Edit the newly created `.env` file and add your Supabase Personal Access Token:
-        ```env
-        SUPABASE_AUTH_TOKEN=your_supabase_personal_access_token_here
-        # Add any other required environment variables if needed
-        ```
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("SUPABASE", "user123")
+```
 
-## Running the Server Locally
+### 🐳 Using Docker (For Self-Hosting)
 
-You can run the server using Docker (recommended) or directly with Node.js.
+```bash
+# Run Supabase MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/supabase-mcp-server:latest
 
-### Method 1: Docker (Recommended)
+# Run Supabase MCP Server (no OAuth support)
+docker run -p 5000:5000 \
+  -e SUPABASE_URL=your_supabase_url \
+  -e AUTH_DATA='{"access_token":"your_supabase_anon_key_here"}' \
+  ghcr.io/klavis-ai/supabase-mcp-server:latest
+```
 
-This method isolates the server environment and simplifies dependency management.
+**OAuth Setup:** Supabase requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-1.  **Build the Docker Image:**
-    *   Make sure you are in the root directory of the `klavis` project (the parent directory of `mcp_servers`).
-    *   Run the build command:
-        ```bash
-        docker build -t klavis-supabase-mcp -f mcp_servers/supabase/Dockerfile .
-        ```
-    *   This command builds an image named `klavis-supabase-mcp` using the specific `Dockerfile` for the Supabase MCP server. The `.` indicates the build context is the current directory (`klavis`).
+**Manual Setup:** Alternatively, provide your Supabase URL and anon key directly.
 
-2.  **Run the Docker Container:**
-    *   Execute the following command:
-        ```bash
-        docker run --rm -p 5000:5000 --env-file mcp_servers/supabase/.env klavis-supabase-mcp
-        ```
-    *   `--rm`: Automatically removes the container when it exits.
-    *   `-p 5000:5000`: Maps port 5000 on your host machine to port 5000 inside the container (the port the server listens on).
-    *   `--env-file mcp_servers/supabase/.env`: Loads the environment variables (including your `SUPABASE_AUTH_TOKEN`) from the specified `.env` file into the container.
-    *   `klavis-supabase-mcp`: The name of the image to run.
+## 🛠️ Available Tools
 
-The server should now be running and accessible at `http://localhost:5000`.
+- **Database Operations**: Query, insert, update, and delete data
+- **Authentication**: User management and authentication flows
+- **Real-time**: Subscribe to database changes and real-time updates
+- **Storage**: File upload and storage management
+- **Functions**: Invoke Supabase Edge Functions
 
-### Method 2: Node.js (Alternative)
+## 📚 Documentation & Support
 
-This method runs the server directly on your machine using your local Node.js installation.
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-1.  **Navigate to the Directory:**
-    ```bash
-    cd mcp_servers/supabase
-    ```
+## 🤝 Contributing
 
-2.  **Install Dependencies:**
-    *   Make sure you have created and configured the `.env` file in this directory as described in the Setup section.
-    ```bash
-    npm install
-    ```
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
-3.  **Build the Server Code:**
-    *   This compiles the TypeScript source code into JavaScript.
-    ```bash
-    npm run build
-    ```
+## 📜 License
 
-4.  **Run the Server:**
-    ```bash
-    node dist/sse.js
-    ```
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-The server should now be running and accessible at `http://localhost:5000`.
+---
 
-## Configuring Your MCP Client (e.g., Cursor)
-
-To allow your AI assistant to use this server, you need to configure it in the client's settings. MCP clients usually expect a URL where the server's Server-Sent Events (SSE) endpoint is available.
-
-For this server running locally, the endpoint is:
-
-`http://localhost:5000/sse`
-
-Consult your specific MCP client's documentation on how to add a custom MCP server. You will typically need to provide this URL. Unlike the original `npx` approach from the community repository, this server runs independently, and the client connects directly to its URL.
-
-*Note:* Ensure the `SUPABASE_AUTH_TOKEN` is correctly set in the `.env` file used by the server (either via `--env-file` for Docker or by being present in the directory for the Node.js method). The server uses this token to authenticate with Supabase on your behalf.
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

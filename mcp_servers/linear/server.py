@@ -99,6 +99,9 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_TEAM"}
+                ),
             ),
             types.Tool(
                 name="linear_get_issues",
@@ -112,13 +115,17 @@ def main(
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of issues to return (default: 50).",
-                            "default": 50,
+                            "description": "Maximum number of issues to return (default: 10).",
+                            "default": 10,
                         },
                         "filter": {
                             "type": "object",
                             "description": "Filter object for issues",
                             "properties": {
+                                "priority": {
+                                    "type": "integer",
+                                    "description": "Filter by priority (0=No Priority, 1=Urgent, 2=High, 3=Medium, 4=Low)"
+                                },
                                 "updatedAt": {
                                     "type": "object",
                                     "description": "Filter by update timestamp for issues.",
@@ -145,6 +152,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_get_issue_by_id",
@@ -159,6 +169,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_create_issue",
@@ -197,6 +210,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_update_issue",
@@ -235,6 +251,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
             types.Tool(
                 name="linear_get_projects",
@@ -281,6 +300,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_create_project",
@@ -312,6 +334,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_update_project",
@@ -346,6 +371,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_PROJECT"}
+                ),
             ),
             types.Tool(
                 name="linear_get_comments",
@@ -360,6 +388,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_create_comment",
@@ -378,6 +409,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_update_comment",
@@ -396,6 +430,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="linear_search_issues",
@@ -419,6 +456,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_ISSUE"}
+                ),
             ),
         ]
 
@@ -447,7 +487,7 @@ def main(
         
         elif name == "linear_get_issues":
             team_id = arguments.get("team_id")
-            limit = arguments.get("limit", 50)
+            limit = arguments.get("limit", 10)
             filter_param = arguments.get("filter")
             try:
                 result = await get_issues(team_id, limit, filter_param)

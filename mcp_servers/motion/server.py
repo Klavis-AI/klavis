@@ -100,6 +100,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE"}),
             ),
             types.Tool(
                 name="motion_get_users",
@@ -113,6 +114,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE"}),
             ),
             types.Tool(
                 name="motion_get_my_user",
@@ -121,6 +123,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_USER"}),
             ),
             types.Tool(
                 name="motion_get_tasks",
@@ -134,6 +137,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
             types.Tool(
                 name="motion_get_task",
@@ -148,6 +152,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
             types.Tool(
                 name="motion_create_task",
@@ -190,6 +195,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
             types.Tool(
                 name="motion_update_task",
@@ -232,6 +238,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
             types.Tool(
                 name="motion_delete_task",
@@ -246,6 +253,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
             types.Tool(
                 name="motion_search_tasks",
@@ -264,6 +272,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
             ),
 
             types.Tool(
@@ -278,6 +287,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT"}),
             ),
             types.Tool(
                 name="motion_get_project",
@@ -292,6 +302,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT"}),
             ),
             types.Tool(
                 name="motion_create_project",
@@ -318,6 +329,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT"}),
             ),
             types.Tool(
                 name="motion_get_comments",
@@ -332,6 +344,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_COMMENT"}),
             ),
             types.Tool(
                 name="motion_create_comment",
@@ -350,6 +363,7 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "MOTION_COMMENT"}),
             ),
         ]
 

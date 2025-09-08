@@ -20,7 +20,6 @@ def get_auth_token() -> str:
         if not token:
             # Fallback to environment variable if no token in context
             token = os.getenv("HUBSPOT_ACCESS_TOKEN")
-            print(f"---Token: {token}")
             if not token:
                 raise RuntimeError("No authentication token available")
         return token

@@ -39,6 +39,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site", "title", "content"]
           },
+          annotations: { category: 'WORDPRESS_POST' },
         },
         {
           name: "wordpress_get_posts",
@@ -52,6 +53,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site"]
           },
+          annotations: { category: 'WORDPRESS_POST' },
         },
         {
           name: "wordpress_update_post",
@@ -67,6 +69,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site", "postId"]
           },
+          annotations: { category: 'WORDPRESS_POST' },
         },
         {
           name: "wordpress_get_top_posts",
@@ -77,7 +80,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_POST' }
         },
         {
           name: "wordpress_get_site_info",
@@ -88,7 +92,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_SITE' }
         },
         {
           name: "wordpress_get_site_stats",
@@ -99,7 +104,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_SITE' }
         },
         {
           name: "wordpress_get_user_sites",
@@ -108,7 +114,8 @@ const getWordPressMcpServer = () => {
             type: "object",
             properties: {},
             required: []
-          }
+          },
+          annotations: { category: 'WORDPRESS_USER' }
         }
       ],
     };

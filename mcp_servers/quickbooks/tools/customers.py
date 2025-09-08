@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 customer_properties_user_define = {
@@ -146,6 +147,7 @@ create_customer_tool = Tool(
         "type": "object",
         "properties": customer_properties_user_define,
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 get_customer_tool = Tool(
@@ -158,6 +160,7 @@ get_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 list_customers_tool = Tool(
@@ -170,6 +173,7 @@ list_customers_tool = Tool(
             "ActiveOnly": {"type": "boolean", "description": "Return only active customers", "default": True}
         }
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 update_customer_tool = Tool(
@@ -180,6 +184,7 @@ update_customer_tool = Tool(
         "properties": customer_properties,
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 deactivate_customer_tool = Tool(
@@ -192,6 +197,7 @@ deactivate_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 activate_customer_tool = Tool(
@@ -204,6 +210,7 @@ activate_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 search_customers_tool = Tool(
@@ -262,7 +269,8 @@ search_customers_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"})
 )
 
 

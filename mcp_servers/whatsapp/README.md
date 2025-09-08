@@ -1,128 +1,69 @@
 # WhatsApp MCP Server
 
-A Model Context Protocol (MCP) server for integrating with the WhatsApp Business API. This server provides tools to send text messages through WhatsApp.
+A Model Context Protocol (MCP) server for WhatsApp Business integration. Send messages and manage WhatsApp Business conversations using WhatsApp's Business API.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Send Text Messages**: Send text messages with optional URL preview
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Prerequisites
+Get instant access to WhatsApp with our managed infrastructure - **no setup required**:
 
-- Node.js 18.0.0 or higher
-- WhatsApp Business API access
-- WhatsApp Business Phone Number ID
-- Access Token for WhatsApp Business API
-
-## Installation
-
-1. Navigate to the WhatsApp MCP server directory:
-```bash
-cd mcp_servers/whatsapp
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Build the project:
-```bash
-npm run build
-```
-
-## Configuration
-
-Set the following environment variable:
-
-- `WHATSAPP_ACCESS_TOKEN`: Your WhatsApp Business API access token
-
-Alternatively, you can provide the access token via request header:
-- `x-access-token`: WhatsApp access token
-
-Note: The WhatsApp Business Phone Number ID is provided as a parameter in each tool call, not as an environment variable.
-
-## Usage
-
-### Starting the Server
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-npm start
+pip install klavis
+# or
+npm install klavis
 ```
 
-The server will start on port 5000 and supports both:
-- **Streamable HTTP Transport** (recommended): POST `/mcp`
-- **HTTP+SSE Transport** (deprecated): GET `/sse` and POST `/messages`
+```python
+from klavis import Klavis
 
-### Available Tools
-
-#### whatsapp_send_text
-Send a text message to a WhatsApp user.
-
-**Parameters:**
-- `phone_number_id` (required): WhatsApp Business phone number ID (e.g., 123456789012345)
-- `to` (required): WhatsApp user phone number in international format (e.g., +16505551234)
-- `text` (required): Body text of the message (max 1024 characters)
-- `preview_url` (optional): Enable link preview for URLs in the text (default: false)
-
-**Example:**
-```json
-{
-  "phone_number_id": "123456789012345",
-  "to": "+16505551234",
-  "text": "Hello! Check out our website: https://example.com",
-  "preview_url": true
-}
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("WHATSAPP", "user123")
 ```
 
-## API Endpoints
+### 🐳 Using Docker (For Self-Hosting)
 
-### Streamable HTTP Transport (Recommended)
-- **POST** `/mcp`: Handle MCP requests using the streamable HTTP transport
-- **GET** `/mcp`: Returns 405 Method Not Allowed
-- **DELETE** `/mcp`: Returns 405 Method Not Allowed
-
-### HTTP+SSE Transport (Deprecated)
-- **GET** `/sse`: Establish SSE connection for MCP communication
-- **POST** `/messages`: Handle MCP messages with session ID
-
-## Development
-
-### Scripts
-
-- `npm run build`: Build the TypeScript project
-- `npm start`: Start the server
-- `npm run lint`: Run ESLint
-- `npm run lint:fix`: Fix ESLint issues
-- `npm run format`: Format code with Prettier
-
-### Project Structure
-
-```
-mcp_servers/whatsapp/
-├── index.ts          # Main server implementation
-├── package.json      # Project configuration
-├── tsconfig.json     # TypeScript configuration
-├── .eslintrc.json    # ESLint configuration
-└── README.md         # This file
+```bash
+# Run WhatsApp MCP Server
+docker run -p 5000:5000 -e API_KEY=your_whatsapp_token \
+  ghcr.io/klavis-ai/whatsapp-mcp-server:latest
 ```
 
-## Error Handling
+**Access Token Setup:** Get your WhatsApp Business API access token from the [Meta for Developers](https://developers.facebook.com/) platform.
 
-The server includes comprehensive error handling for:
-- Missing authentication credentials
-- Invalid phone number formats
-- API errors from WhatsApp Business API
-- Network connectivity issues
+## 🛠️ Available Tools
 
-All errors are logged and returned in a structured format.
+- **Message Sending**: Send text messages and media to WhatsApp contacts
+- **Template Messages**: Use pre-approved message templates
+- **Media Handling**: Send images, documents, and other media types
+- **Business Profile**: Manage WhatsApp Business profile information
+- **Webhook Management**: Handle incoming messages and events
 
-## Technical Details
+## 📚 Documentation & Support
 
-- Uses WhatsApp Business API v23.0
-- Supports AsyncLocalStorage for request context management
-- Built with Express.js and MCP SDK
-- Implements both current and legacy MCP transport protocols
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-## License
+## 🤝 Contributing
 
-MIT License 
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

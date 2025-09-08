@@ -1,101 +1,73 @@
 # Airtable MCP Server
 
-A Model Context Protocol (MCP) server for interacting with Airtable bases, tables, fields, and records.
+A Model Context Protocol (MCP) server for Airtable integration. Manage bases, tables, and records using Airtable's API with OAuth support.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Base Management**: Access and retrieve information about all Airtable bases
-- **Table Management**: Create, update, and list tables within bases
-- **Field Management**: Create and update table fields with various types
-- **Record Management**: Full CRUD operations on records with advanced filtering
-- **Advanced Querying**: Filter, sort, and paginate records with formula support
-- **Upsert Operations**: Update or insert records based on matching criteria
-- **Flexible Data Types**: Support for all Airtable field types and options
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Available Tools
+Get instant access to Airtable with our managed infrastructure - **no setup required**:
 
-### Base Operations
-- `airtable_list_bases_info`: Get information about all accessible bases
-
-### Table Operations
-- `airtable_list_tables_info`: Get information about all tables in a base
-- `airtable_create_table`: Create a new table with specified fields
-- `airtable_update_table`: Update table name and description
-
-### Field Operations
-- `airtable_create_field`: Create a new field in a table with specific type and options
-- `airtable_update_field`: Update field name and description
-
-### Record Operations
-- `airtable_list_records`: List records with advanced filtering, sorting, and pagination
-- `airtable_get_record`: Retrieve a specific record by ID
-- `airtable_create_records`: Create multiple records in a single operation
-- `airtable_update_records`: Update multiple records with optional upsert functionality
-- `airtable_delete_records`: Delete multiple records by IDs
-
-## Prerequisites
-
-Get this from: https://airtable.com/create/tokens with these permissions:
-
-1. data.records:read
-See the data in records
-
-2. data.records:write
-Create, edit, and delete records
-
-3. schema.bases:read
-See the structure of a base, like table names or field types
-
-4. schema.bases:write
-Edit the structure of a base, like adding new fields or tables
-
-## Configuration
-
-Create a `.env` file in the `mcp_servers/airtable/` directory with the following content:
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-AIRTABLE_MCP_SERVER_PORT=5000
-AIRTABLE_PERSONAL_ACCESS_TOKEN=your_token_here
+pip install klavis
+# or
+npm install klavis
 ```
 
-Set the following environment variables in the .env file:
+```python
+from klavis import Klavis
 
-- `AIRTABLE_MCP_SERVER_PORT`: Port for the server (default: 5000)
-- `AIRTABLE_PERSONAL_ACCESS_TOKEN`: Personal access token for the Airtable API
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("AIRTABLE", "user123")
+```
 
-## Authentication
+### 🐳 Using Docker (For Self-Hosting)
 
-The server expects an Airtable Personal Access Token to be provided in the request headers. Authentication is handled at the tool level through the base request implementation.
-
-## Running the Server
-
-### Direct Python
 ```bash
-python server.py --port 5000 --json-response
+# Run Airtable MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/airtable-mcp-server:latest
+
+# Run Airtable MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_airtable_api_key_here"}' \
+  ghcr.io/klavis-ai/airtable-mcp-server:latest
 ```
 
-### Docker
-from the root of the repository
-```bash
-docker build -t airtable-mcp-server mcp_servers/airtable
-docker run -p 5000:5000 --env-file mcp_servers/airtable/.env airtable-mcp-server
-```
+**OAuth Setup:** Airtable requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
 
-### Command Line Options
-- `--port`: Port to listen on (default: 5000)
-- `--log-level`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `--json-response`: Enable JSON responses for StreamableHTTP instead of SSE streams
+## 🛠️ Available Tools
 
-## API Endpoints
+- **Record Management**: Create, read, update, and delete Airtable records
+- **Table Operations**: Manage table structure and schema
+- **Base Management**: Access and manage Airtable bases
+- **Field Operations**: Handle different field types and data validation
+- **View Management**: Work with filtered views and sorting
 
-- **SSE**: `GET /sse` - Server-Sent Events endpoint for MCP communication
-- **StreamableHTTP**: `POST /mcp` - StreamableHTTP endpoint for MCP communication
+## 📚 Documentation & Support
 
-## Dependencies
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-- mcp>=1.8.1
-- httpx
-- starlette
-- uvicorn
-- click
-- python-dotenv
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

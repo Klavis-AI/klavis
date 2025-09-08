@@ -54,6 +54,7 @@ const DEEP_RESEARCH_TOOL: Tool = {
         },
         required: ['query'],
     },
+    annotations: { category: 'FIRECRAWL_RESEARCH' },
 };
 
 // Get API config
@@ -304,6 +305,10 @@ const getFirecrawlDeepResearchMcpServer = () => {
 
 function extractApiKey(req: Request): string {
     let authData = process.env.API_KEY;
+
+    if (authData) {
+        return authData;
+    }
     
     if (!authData && req.headers['x-auth-data']) {
         try {

@@ -1,115 +1,69 @@
 # Google Jobs MCP Server
 
-A MCP server that provides access to Google Jobs search functionality through SerpApi. This server enables AI assistants to search for job listings, get detailed job information, and perform specialized job searches.
+A Model Context Protocol (MCP) server for Google Jobs API integration. Search and access job listings using Google's Jobs API.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Job Search**: Search for job listings with various filters (location, date, employment type, salary, etc.)
-- **Job Details**: Get comprehensive information about specific job listings
-- **Company Jobs**: Search for all job openings at specific companies
-- **Remote Jobs**: Search specifically for remote job opportunities
-- **Search Suggestions**: Get related job titles and search suggestions
+### 🌐 Using Hosted Service (Recommended for Production)
 
-## Prerequisites
+Get instant access to Google Jobs with our managed infrastructure - **no setup required**:
 
-- **SerpApi** account and API key
-- **Docker:** Docker installed and running (recommended)
-- **Python:** Python 3.8+ with pip
-
-## SetUp & Configuration
-
-1. Get a SerpApi API key:
-   - Sign up at [SerpApi](https://serpapi.com/)
-   - Get your API key from the dashboard
-   - Add it to your `.env` file
-
-2. Set up environment variables:
-Create a `.env` file in the root directory:
-```bash
-SERPAPI_API_KEY=your_serpapi_api_key_here
-GOOGLE_JOBS_MCP_SERVER_PORT=5000
-```
-
-
-
-## Running the Server
-
-### Option 1: Docker (Recommended)
-
-The Docker build must be run from the project root directory (`klavis/`):
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
 ```bash
-# Navigate to the root directory of the project
-cd /path/to/klavis
-
-# Build the Docker image
-docker build -t google-jobs-mcp-server -f mcp_servers/google_jobs/Dockerfile .
-
-# Run the container
-docker run -d -p 5000:5000 --name google-jobs-mcp google-jobs-mcp-server
+pip install klavis
+# or
+npm install klavis
 ```
 
-To use your local .env file instead of building it into the image:
+```python
+from klavis import Klavis
+
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("GOOGLE_JOBS", "user123")
+```
+
+### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-docker run -d -p 5000:5000 --env-file mcp_servers/google_jobs/.env --name google-jobs-mcp google-jobs-mcp-server
+# Run Google Jobs MCP Server
+docker run -p 5000:5000 -e API_KEY=your_google_api_key \
+  ghcr.io/klavis-ai/google_jobs-mcp-server:latest
 ```
 
-### Option 2: Python Virtual Environment
+**API Key Setup:** Get your Google API key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and enable the Google Jobs API.
 
-```bash
-# Navigate to the Google-Jobs server directory
-cd mcp_servers/google_jobs
+## 🛠️ Available Tools
 
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+- **Job Search**: Search for job listings by keywords, location, and filters
+- **Job Details**: Get detailed information about specific job postings
+- **Company Information**: Access employer details and company profiles
+- **Location-based Search**: Find jobs in specific geographic areas
+- **Filter Options**: Apply various filters for salary, experience, job type
 
-# Install dependencies
-pip install -r requirements.txt
+## 📚 Documentation & Support
 
-# Run the server
-python server.py
-```
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
-Once running, the server will be accessible at `http://localhost:5000`.
+## 🤝 Contributing
 
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
+## 📜 License
 
-## Project Structure
+MIT License - see [LICENSE](../../LICENSE) for details.
 
-```
-google-jobs-mcp-server/
-├── .env                 # Environment variables (create this)
-├── Dockerfile          # Docker configuration
-├── README.md           # This file
-├── server.py           # Main MCP server implementation
-└── tools/              # Job search tools module
-    ├── __init__.py     # Tool exports
-    └── (additional tool files)
-```
+---
 
-
-## Troubleshooting
-
-**Common Issues:**
-
-1. **"Error: query parameter is required"**: Ensure required parameters are provided in tool calls
-2. **SerpApi authentication errors**: Verify your API key is correctly set
-3. **Port conflicts**: Change the port using `--port` option or environment variable
-4. **Import errors**: Ensure all dependencies are installed and the `tools` module is properly structured
-
-**Getting Help:**
-
-- Check the server logs for detailed error information
-- Verify your SerpApi account has sufficient credits
-- Ensure your API key has access to Google Jobs API
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Resources
-
-- [SerpApi Google Jobs API Documentation](https://serpapi.com/google-jobs-api)
-- [Model Context Protocol Specification](https://modelcontextprotocol.io/)
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

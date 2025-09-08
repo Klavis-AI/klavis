@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for vendor creation (required by QuickBooks)
@@ -144,7 +145,8 @@ create_vendor_tool = Tool(
         "type": "object",
         "properties": vendor_properties_minimal,
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 get_vendor_tool = Tool(
@@ -157,7 +159,8 @@ get_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 list_vendors_tool = Tool(
@@ -171,7 +174,8 @@ list_vendors_tool = Tool(
             "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 search_vendors_tool = Tool(
@@ -198,7 +202,8 @@ search_vendors_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 update_vendor_tool = Tool(
@@ -212,7 +217,8 @@ update_vendor_tool = Tool(
             if key != "Active"  # Remove Active from update inputs
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 activate_vendor_tool = Tool(
@@ -225,7 +231,8 @@ activate_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID to activate"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 deactivate_vendor_tool = Tool(
@@ -238,7 +245,8 @@ deactivate_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID to deactivate"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 

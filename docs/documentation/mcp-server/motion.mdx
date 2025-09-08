@@ -32,8 +32,7 @@ klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 # Create a Motion MCP server instance
 motion_server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.MOTION,
-    user_id="<YOUR_USER_ID>",
-    platform_name="<YOUR_PLATFORM_NAME>",
+    user_id="<YOUR_USER_ID>"
 )
 ```
 
@@ -45,8 +44,7 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 // Create a Motion MCP server instance
 const motionServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Motion,
-    userId: "<YOUR_USER_ID>",
-    platformName: "<YOUR_PLATFORM_NAME>",
+    userId: "<YOUR_USER_ID>"
 });
 ```
 
@@ -57,9 +55,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
   "serverName": "Motion",
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>"
-}'
+  "userId": "<YOUR_USER_ID>"}'
 ```
 ```python Python
 import requests
@@ -68,9 +64,7 @@ url = "https://api.klavis.ai/mcp-server/instance/create"
 
 payload = {
     "serverName": "Motion",
-    "userId": "<YOUR_USER_ID>",
-    "platformName": "<YOUR_PLATFORM_NAME>"
-}
+    "userId": "<YOUR_USER_ID>"}
 headers = {
     "Authorization": "Bearer <YOUR_API_KEY>",
     "Content-Type": "application/json"
@@ -85,7 +79,7 @@ print(response.text)
 const options = {
   method: 'POST',
   headers: {Authorization: 'Bearer <YOUR_API_KEY>', 'Content-Type': 'application/json'},
-  body: '{"serverName":"Motion","userId":"<YOUR_USER_ID>","platformName":"<YOUR_PLATFORM_NAME>"}'
+  body: '{"serverName":"Motion","userId":"<YOUR_USER_ID>"}'
 };
 
 fetch('https://api.klavis.ai/mcp-server/instance/create', options)
@@ -107,11 +101,11 @@ curl_setopt_array($curl, [
   CURLOPT_TIMEOUT => 30,
   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
   CURLOPT_CUSTOMREQUEST => "POST",
-  CURLOPT_POSTFIELDS => "{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}",
+  CURLOPT_POSTFIELDS => "{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}",
   CURLOPT_HTTPHEADER => [
     "Authorization: Bearer <YOUR_API_KEY>",
     "Content-Type: application/json"
-  ],
+  ]
 ]);
 
 $response = curl_exec($curl);
@@ -140,7 +134,7 @@ func main() {
 
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
-	payload := strings.NewReader("{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+	payload := strings.NewReader("{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -162,7 +156,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\"\n}")
+  .body("{\n  \"serverName\": \"Motion\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 ```
 </CodeGroup>
@@ -294,8 +288,8 @@ func main() {
 	    payload := map[string]interface{}{
         "instanceId": "<YOUR_INSTANCE_ID>",
 		"authData": map[string]string{
-            "token": "<YOUR_MOTION_API_KEY>",
-        },
+            "token": "<YOUR_MOTION_API_KEY>"
+        }
     }
 	
 	jsonPayload, _ := json.Marshal(payload)

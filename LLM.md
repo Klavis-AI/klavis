@@ -41,8 +41,7 @@ klavis_client = klavis.Client(api_key="your_api_key")
 # Create MCP server instance
 server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="user123",
-    platform_name="MyApp"
+    user_id="user123"
 )
 
 # List available tools
@@ -70,8 +69,7 @@ const klavisClient = new Klavis.Client({ apiKey: 'your_api_key' });
 // Create MCP server instance
 const server = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "user123",
-    platformName: "MyApp"
+    userId: "user123"
 });
 
 // List available tools
@@ -103,8 +101,7 @@ Authorization: Bearer YOUR_API_KEY
 
 {
   "serverName": "youtube",
-  "userId": "user123",
-  "platformName": "MyApp"
+  "userId": "user123"
 }
 ```
 
@@ -518,8 +515,7 @@ provider = AnthropicProvider(
 # Create server instance (returns OAuth URL if needed)
 server = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="user123",
-    platform_name="MyApp"
+    user_id="user123"
 )
 
 if server.oauth_url:

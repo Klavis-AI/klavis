@@ -1,38 +1,73 @@
-# Cal.com API Integration Server
+# Cal.com MCP Server
 
-A server that provides integration with Cal.com's API, offering tools for managing schedules, verified resources, and webhooks through both SSE and HTTP streaming interfaces.
+A Model Context Protocol (MCP) server for Cal.com integration. Manage bookings, availability, and scheduling using Cal.com's API with OAuth support.
 
-## Features
+## 🚀 Quick Start - Run in 30 Seconds
 
-- **Schedule Management**
-  - Create, read, update, and delete schedules
-  - Manage availability and overrides
-  - Get default schedule
+### 🌐 Using Hosted Service (Recommended for Production)
 
+Get instant access to Cal.com with our managed infrastructure - **no setup required**:
 
-## API Endpoints
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)**
 
-The server provides two transport mechanisms:
+```bash
+pip install klavis
+# or
+npm install klavis
+```
 
-### 1. Server-Sent Events (SSE) Endpoint
-- **URL**: `/sse`
-- **Method**: GET
-- **Headers**:
-  - `x-auth-token`: Your Cal.com API token (optional, can be set per request)
+```python
+from klavis import Klavis
 
-### 2. Streamable HTTP Endpoint
-- **URL**: `/mcp`
-- **Method**: POST
-- **Headers**:
-  - `x-auth-token`: Your Cal.com API token (optional, can be set per request)
-- **Content-Type**: `application/json`
+klavis = Klavis(api_key="your-free-key")
+server = klavis.mcp_server.create_server_instance("CAL_COM", "user123")
+```
 
-## Available Tools
+### 🐳 Using Docker (For Self-Hosting)
 
-### Schedule Tools
-- `cal_get_all_schedules`: List all schedules
-- `cal_create_a_schedule`: Create new schedule
-- `cal_update_a_schedule`: Update existing schedule
-- `cal_get_default_schedule`: Get default schedule
-- `cal_get_schedule`: Get specific schedule by ID
-- `cal_delete_a_schedule`: Delete schedule by ID
+```bash
+# Run Cal.com MCP Server (OAuth support through Klavis AI)
+docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+  ghcr.io/klavis-ai/cal_com-mcp-server:latest
+
+# Run Cal.com MCP Server (no OAuth support)
+docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_cal_com_api_key_here"}' \
+  ghcr.io/klavis-ai/cal_com-mcp-server:latest
+```
+
+**OAuth Setup:** Cal.com requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+
+## 🛠️ Available Tools
+
+- **Booking Management**: Create, update, and cancel meeting bookings
+- **Availability Control**: Manage availability schedules and time slots
+- **Event Types**: Configure meeting types and settings
+- **User Management**: Handle user profiles and team configurations
+- **Integration Settings**: Manage calendar and app integrations
+
+## 📚 Documentation & Support
+
+| Resource | Link |
+|----------|------|
+| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
+| **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
+
+## 📜 License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
+
+---
+
+<div align="center">
+  <p><strong>🚀 Supercharge AI Applications </strong></p>
+  <p>
+    <a href="https://www.klavis.ai">Get Free API Key</a> •
+    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://discord.gg/p7TuTEcssn">Discord</a>
+  </p>
+</div>

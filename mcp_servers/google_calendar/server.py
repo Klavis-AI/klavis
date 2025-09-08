@@ -568,6 +568,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_CALENDAR"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_create_event",
@@ -625,6 +628,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_list_events",
@@ -653,6 +659,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_update_event",
@@ -708,6 +717,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_delete_event",
@@ -733,6 +745,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_add_attendees_to_event",
@@ -763,6 +778,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
         ]
 

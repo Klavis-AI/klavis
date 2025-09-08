@@ -40,6 +40,7 @@ api_key_context: ContextVar[str] = ContextVar('api_key')
 def extract_api_key(request_or_scope) -> str:
     """Extract API key from headers or environment."""
     api_key = os.getenv("API_KEY")
+    auth_data = None
     
     if not api_key:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
@@ -54,8 +55,6 @@ def extract_api_key(request_or_scope) -> str:
             auth_data = headers.get(b'x-auth-data')
             if auth_data:
                 auth_data = base64.b64decode(auth_data).decode('utf-8')
-        else:
-            auth_data = None
         
         if auth_data:
             try:
@@ -176,7 +175,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_SEARCH"})
             ),
 
             types.Tool(
@@ -217,7 +217,8 @@ def main(
                         }
                     },
                     "required": ["ids"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_CONTENT"})
             ),
 
             types.Tool(
@@ -286,7 +287,8 @@ def main(
                         }
                     },
                     "required": ["url"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_DISCOVERY"})
             ),
 
             types.Tool(
@@ -356,7 +358,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_QA"})
             ),
 
             types.Tool(
@@ -430,7 +433,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "EXA_RESEARCH"})
             )
         ]
 

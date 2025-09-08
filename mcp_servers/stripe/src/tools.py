@@ -1,5 +1,6 @@
 # stripe_server/tools.py
 from mcp.types import Tool
+import mcp.types as types
 
 def get_stripe_tools() -> list[Tool]:
     return [
@@ -14,7 +15,8 @@ def get_stripe_tools() -> list[Tool]:
                     "metadata": {"type": "object"}
                 },
                 "required": ["email"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_CUSTOMER"})
         ),
         Tool(
             name="customer_retrieve",
@@ -25,7 +27,8 @@ def get_stripe_tools() -> list[Tool]:
                     "customer_id": {"type": "string"}
                 },
                 "required": ["customer_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_CUSTOMER"})
         ),
         Tool(
             name="customer_update",
@@ -40,7 +43,8 @@ def get_stripe_tools() -> list[Tool]:
                     }
                 },
                 "required": ["customer_id", "update_fields"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_CUSTOMER"})
         ),
         Tool(
             name="payment_intent_create",
@@ -59,7 +63,8 @@ def get_stripe_tools() -> list[Tool]:
                     "metadata": {"type": "object"}
                 },
                 "required": ["amount", "currency"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_PAYMENT"})
         ),
         Tool(
             name="charge_list",
@@ -70,7 +75,8 @@ def get_stripe_tools() -> list[Tool]:
                     "limit": {"type": "integer", "maximum": 100, "default": 10},
                     "customer_id": {"type": "string"}
                 }
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_CHARGE"})
         ),
         Tool(
             name="refund_create",
@@ -86,6 +92,7 @@ def get_stripe_tools() -> list[Tool]:
                     }
                 },
                 "required": ["charge_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "STRIPE_REFUND"})
         )
     ]
