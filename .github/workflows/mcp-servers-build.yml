@@ -132,7 +132,7 @@ jobs:
           fi
           
           echo "Using server name: $SERVER_NAME for ${{ matrix.server }}"
-          echo "BASE_IMAGE=$(echo '${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${SERVER_NAME}-mcp-server' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "BASE_IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${SERVER_NAME}-mcp-server" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and tag basic image
         id: build-base
