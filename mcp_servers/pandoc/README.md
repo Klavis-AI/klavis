@@ -26,6 +26,10 @@ server = klavis.mcp_server.create_server_instance("PANDOC", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/pandoc-mcp-server:latest
+
+
 # Run Pandoc MCP Server (no authentication required)
 docker run -p 5000:5000 \
   ghcr.io/klavis-ai/pandoc-mcp-server:latest

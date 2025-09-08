@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("WORDPRESS", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run WordPress MCP Server (OAuth support through Klavis AI)
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
+# Pull latest image
+docker pull ghcr.io/klavis-ai/wordpress-mcp-server:latest
+
+
+# Run WordPress MCP Server with OAuth Support through Klavis AI
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/wordpress-mcp-server:latest
 
 # Run WordPress MCP Server (no OAuth support)

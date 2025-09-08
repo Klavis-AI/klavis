@@ -26,13 +26,18 @@ server = klavis.mcp_server.create_server_instance("GOOGLE_SLIDES", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
-# Run Google Slides MCP Server (OAuth support through Klavis AI)
-docker run -p 5000:5000 -e KLAVIS_API_KEY=your_free_key \
-  ghcr.io/klavis-ai/google_slides-mcp-server:latest
+# Pull latest image
+docker pull ghcr.io/klavis-ai/google-slides-mcp-server:latest
+
+
+# Run Google Slides MCP Server with OAuth Support through Klavis AI
+docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+  ghcr.io/klavis-ai/google-slides-mcp-server:latest
+
 
 # Run Google Slides MCP Server (no OAuth support)
 docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_google_access_token_here"}' \
-  ghcr.io/klavis-ai/google_slides-mcp-server:latest
+  ghcr.io/klavis-ai/google-slides-mcp-server:latest
 ```
 
 **OAuth Setup:** Google Slides requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.

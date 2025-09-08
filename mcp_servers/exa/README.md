@@ -26,8 +26,12 @@ server = klavis.mcp_server.create_server_instance("EXA", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/exa-mcp-server:latest
+
+
 # Run Exa MCP Server
-docker run -p 5000:5000 -e API_KEY=your_exa_api_key \
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
   ghcr.io/klavis-ai/exa-mcp-server:latest
 ```
 

@@ -26,9 +26,13 @@ server = klavis.mcp_server.create_server_instance("BRAVE_SEARCH", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/brave-search-mcp-server:latest
+
+
 # Run Brave Search MCP Server
-docker run -p 5000:5000 -e API_KEY=your_brave_api_key \
-  ghcr.io/klavis-ai/brave_search-mcp-server:latest
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
+  ghcr.io/klavis-ai/brave-search-mcp-server:latest
 ```
 
 **API Key Setup:** Get your Brave Search API key from the [Brave Search API Dashboard](https://api.search.brave.com/).

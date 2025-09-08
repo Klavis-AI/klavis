@@ -118,7 +118,21 @@ jobs:
       - name: Get image URL
         id: get-image-url
         run: |
-          echo "BASE_IMAGE=$(echo '${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.server }}-mcp-server' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          # Check if custom mapping exists, otherwise use original name
+          if [ -f ".github/workflows/server-name-mapping.json" ]; then
+            MAPPED_NAME=$(jq -r --arg name "${{ matrix.server }}" '.[$name] // empty' .github/workflows/server-name-mapping.json)
+          fi
+          
+          if [ -z "$MAPPED_NAME" ]; then
+            # Default: use original server name
+            SERVER_NAME="${{ matrix.server }}"
+          else
+            # Use custom mapping
+            SERVER_NAME="$MAPPED_NAME"
+          fi
+          
+          echo "Using server name: $SERVER_NAME for ${{ matrix.server }}"
+          echo "BASE_IMAGE=$(echo '${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${SERVER_NAME}-mcp-server' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and tag basic image
         id: build-base
