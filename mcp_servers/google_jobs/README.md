@@ -26,9 +26,13 @@ server = klavis.mcp_server.create_server_instance("GOOGLE_JOBS", "user123")
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/google-jobs-mcp-server:latest
+
+
 # Run Google Jobs MCP Server
-docker run -p 5000:5000 -e API_KEY=your_google_api_key \
-  ghcr.io/klavis-ai/google_jobs-mcp-server:latest
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
+  ghcr.io/klavis-ai/google-jobs-mcp-server:latest
 ```
 
 **API Key Setup:** Get your Google API key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and enable the Google Jobs API.

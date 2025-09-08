@@ -26,9 +26,13 @@ server = klavis.mcp_server.create_server_instance("FIRECRAWL_DEEP_RESEARCH", "us
 ### 🐳 Using Docker (For Self-Hosting)
 
 ```bash
+# Pull latest image
+docker pull ghcr.io/klavis-ai/firecrawl-deep-research-mcp-server:latest
+
+
 # Run Firecrawl Deep Research MCP Server
-docker run -p 5000:5000 -e API_KEY=your_firecrawl_api_key \
-  ghcr.io/klavis-ai/firecrawl_deep_research-mcp-server:latest
+docker run -p 5000:5000 -e API_KEY=$API_KEY \
+  ghcr.io/klavis-ai/firecrawl-deep-research-mcp-server:latest
 ```
 
 **API Key Setup:** Get your Firecrawl API key from the [Firecrawl Dashboard](https://firecrawl.dev/).
