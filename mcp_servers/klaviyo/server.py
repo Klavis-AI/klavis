@@ -108,20 +108,34 @@ def main(
                 },
                 "required": ["email"],
             },),
-            types.Tool(name="create_or_update_profile_single", description="Create or update a single profile", inputSchema={"type": "object", "properties": {"email": {"type": "string"}, "attributes": {"type": "object"}}, "required": ["email"]}),
-            types.Tool(name="get_lists", description="Get all lists", inputSchema={"type": "object", "properties": {}}),
-            types.Tool(name="get_list", description="Get details of a list", inputSchema={"type": "object", "properties": {"list_id": {"type": "string"}}, "required": ["list_id"]}),
-            types.Tool(name="create_list", description="Create a new list", inputSchema={"type": "object", "properties": {"list_name": {"type": "string"}}, "required": ["list_name"]}),
-            types.Tool(name="get_profiles_for_list", description="Get profiles for a list", inputSchema={"type": "object", "properties": {"list_id": {"type": "string"}}, "required": ["list_id"]}),
-            types.Tool(name="get_metrics", description="Get metrics", inputSchema={"type": "object", "properties": {}}),
-            types.Tool(name="get_custom_metrics", description="Get custom metrics", inputSchema={"type": "object", "properties": {}}),
-            types.Tool(name="get_campaigns", description="Retrieve campaigns", inputSchema={"type": "object", "properties": {"channel": {"type": "string"}}, "required": ["channel"]}),
-            types.Tool(name="create_campaign", description="Create a new campaign", inputSchema={"type": "object", "properties": {"name": {"type": "string"}, "channel": {"type": "string"}}, "required": ["name", "channel"]}),
-            types.Tool(name="get_campaign", description="Get a specific campaign by ID", inputSchema={"type": "object", "properties": {"campaign_id": {"type": "string"}}, "required": ["campaign_id"]}),
-            types.Tool(name="get_templates", description="Get templates", inputSchema={"type": "object", "properties": {}}),
-            types.Tool(name="render_template", description="Render a template", inputSchema={"type": "object", "properties": {"template_id": {"type": "string"}, "context": {"type": "object"}}, "required": ["template_id"]}),
-            types.Tool(name="get_flows", description="Get flows", inputSchema={"type": "object", "properties": {}}),
-            types.Tool(name="get_account_details", description="Get account details", inputSchema={"type": "object", "properties": {}}),
+            types.Tool(name="create_or_update_profile_single", description="Create or update a single profile", inputSchema={
+                       "type": "object", "properties": {"email": {"type": "string"}, "attributes": {"type": "object"}}, "required": ["email"]}),
+            types.Tool(name="get_lists", description="Get all lists",
+                       inputSchema={"type": "object", "properties": {}}),
+            types.Tool(name="get_list", description="Get details of a list", inputSchema={
+                       "type": "object", "properties": {"list_id": {"type": "string"}}, "required": ["list_id"]}),
+            types.Tool(name="create_list", description="Create a new list", inputSchema={
+                       "type": "object", "properties": {"list_name": {"type": "string"}}, "required": ["list_name"]}),
+            types.Tool(name="get_profiles_for_list", description="Get profiles for a list", inputSchema={
+                       "type": "object", "properties": {"list_id": {"type": "string"}}, "required": ["list_id"]}),
+            types.Tool(name="get_metrics", description="Get metrics",
+                       inputSchema={"type": "object", "properties": {}}),
+            types.Tool(name="get_custom_metrics", description="Get custom metrics", inputSchema={
+                       "type": "object", "properties": {}}),
+            types.Tool(name="get_campaigns", description="Retrieve campaigns", inputSchema={
+                       "type": "object", "properties": {"channel": {"type": "string"}}, "required": ["channel"]}),
+            types.Tool(name="create_campaign", description="Create a new campaign", inputSchema={"type": "object", "properties": {
+                       "name": {"type": "string"}, "channel": {"type": "string"}}, "required": ["name", "channel"]}),
+            types.Tool(name="get_campaign", description="Get a specific campaign by ID", inputSchema={
+                       "type": "object", "properties": {"campaign_id": {"type": "string"}}, "required": ["campaign_id"]}),
+            types.Tool(name="get_templates", description="Get templates",
+                       inputSchema={"type": "object", "properties": {}}),
+            types.Tool(name="render_template", description="Render a template", inputSchema={"type": "object", "properties": {
+                       "template_id": {"type": "string"}, "context": {"type": "object"}}, "required": ["template_id"]}),
+            types.Tool(name="get_flows", description="Get flows",
+                       inputSchema={"type": "object", "properties": {}}),
+            types.Tool(name="get_account_details", description="Get account details", inputSchema={
+                       "type": "object", "properties": {}}),
         ]
 
     # -------------------------------
@@ -137,29 +151,29 @@ def main(
             elif name == "get_lists":
                 result = await lists.get_lists()
             elif name == "get_list":
-                result =  await lists.get_list(arguments["list_id"])
+                result = await lists.get_list(arguments["list_id"])
             elif name == "create_list":
-                result =  await lists.create_list(arguments["list_name"])
+                result = await lists.create_list(arguments["list_name"])
             elif name == "get_profiles_for_list":
-                result =  await lists.get_profiles_for_list(arguments["list_id"])
+                result = await lists.get_profiles_for_list(arguments["list_id"])
             elif name == "get_metrics":
-                result =  await metrics.get_metrics()
+                result = await metrics.get_metrics()
             elif name == "get_custom_metrics":
-                result =  await metrics.get_custom_metrics()
+                result = await metrics.get_custom_metrics()
             elif name == "get_campaigns":
-                result =  await campaigns.get_campaigns(arguments["channel"])
+                result = await campaigns.get_campaigns(arguments["channel"])
             elif name == "create_campaign":
-                result =  await campaigns.create_campaign(arguments["name"], arguments["channel"])
+                result = await campaigns.create_campaign(arguments["name"], arguments["channel"])
             elif name == "get_campaign":
-                result =  await campaigns.get_campaign(arguments["campaign_id"])
+                result = await campaigns.get_campaign(arguments["campaign_id"])
             elif name == "get_templates":
-                result =  await templates.get_templates()
+                result = await templates.get_templates()
             elif name == "render_template":
-                result =  await templates.render_template(arguments["template_id"], arguments.get("context", {}))
+                result = await templates.render_template(arguments["template_id"], arguments.get("context", {}))
             elif name == "get_flows":
-                result =  await flows.get_flows()
+                result = await flows.get_flows()
             elif name == "get_account_details":
-                result =  await accounts.get_account_details()
+                result = await accounts.get_account_details()
             else:
                 return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
 
