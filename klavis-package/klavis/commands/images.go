@@ -32,7 +32,12 @@ var imageCmd = &cobra.Command{
 		// Print results
 		fmt.Println("Klavis images installed:")
 		for _, img := range klavisImages {
-			fmt.Println(img)
+			// Remove prefix
+			name := strings.TrimPrefix(img, "ghcr.io/klavis-ai/")
+			// Remove suffix
+			name = strings.TrimSuffix(name, "-mcp-server:latest")
+
+			fmt.Println(name)
 		}
 
 		// Optional: print count

@@ -16,7 +16,7 @@ var runCmd = &cobra.Command{
 		tool := args[0]
 
 		image := fmt.Sprintf("ghcr.io/klavis-ai/%s-mcp-server:latest", tool)
-		fmt.Println("Running Docker container:", image)
+		fmt.Println("Running Server:", tool)
 
 		// Run Docker with interactive terminal
 		run := exec.Command("docker", "run", "--rm", "-it", image)
