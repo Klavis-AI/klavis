@@ -30,8 +30,7 @@
               "documentation/introduction",
               "documentation/develop-with-ai",
               "documentation/klavis-security",
-              "documentation/klavis-oauth-white-label",
-              "documentation/klavis-unified-mcp-server"
+              "documentation/klavis-oauth-white-label"
             ]
           },
           {
