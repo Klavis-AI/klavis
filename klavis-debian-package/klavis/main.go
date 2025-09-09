@@ -15,6 +15,7 @@ func main() {
 
 	rootCmd.AddCommand(commands.GetInstallCommand())
 	rootCmd.AddCommand(commands.GetRunCommand())
+	rootCmd.AddCommand(commands.GetImagesCommand())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
