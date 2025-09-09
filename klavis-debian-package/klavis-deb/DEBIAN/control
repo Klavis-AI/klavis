@@ -1,8 +1,0 @@
-Package: klavis
-Version: 0.1
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: Mayank Singh Jadon <mayank.msj.singh@gmail.com>
-Description: Klavis CLI for installing and running AI MCP tools via Docker
-Depends: docker (>= 28.1.1)
