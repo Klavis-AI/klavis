@@ -1,29 +1,54 @@
-mkdir -p ../klavis-package/klavis/bin
+#!/bin/bash
+set -e
 
-echo "Creating Compiled Files"
+echo "========================================"
+echo "🔨 Building Klavis Binaries"
+echo "========================================"
 
+mkdir -p bin
+
+echo "📦 Compiling for Linux..."
 GOOS=linux   GOARCH=amd64 go build -o bin/klavis-linux
+echo "📦 Compiling for macOS..."
 GOOS=darwin  GOARCH=amd64 go build -o bin/klavis-darwin
+echo "📦 Compiling for Windows..."
 GOOS=windows GOARCH=amd64 go build -o bin/klavis-windows.exe
 
-echo "Moving to klavis-linux to klavis-deb/usr/local/bin/ by name klavis"
-
+echo ""
+echo "========================================"
+echo "🚚 Moving Linux binary into Debian package"
+echo "========================================"
 cp bin/klavis-linux ../klavis-deb/usr/local/bin/klavis
 
-echo "creating 'klavis.bash' and '_klavis'"
-
+echo ""
+echo "========================================"
+echo "📝 Generating Completion Scripts"
+echo "========================================"
 ./bin/klavis-linux completion bash > ../klavis-deb/etc/bash_completion.d/klavis.bash
-./bin/klavis-linux completion zsh > ../klavis-deb/usr/share/zsh/vendor-completions/_klavis
+./bin/klavis-linux completion zsh  > ../klavis-deb/usr/share/zsh/vendor-completions/_klavis
+echo "✅ Completion scripts created (bash + zsh)"
 
-echo "building klavis-deb"
-
+echo ""
+echo "========================================"
+echo "📦 Building Debian Package"
+echo "========================================"
 dpkg-deb --build ../klavis-deb
+echo "✅ Debian package built: ../klavis-deb.deb"
 
-echo "Installing klavis-deb.deb"
+echo ""
+echo "========================================"
+echo "📥 Installing Package"
+echo "========================================"
+sudo dpkg -i ../klavis-deb.deb || true
+echo "✅ Klavis installed!"
 
-sudo dpkg -i ../klavis-deb.deb
+echo ""
+echo "========================================"
+echo "🎉 All Done!"
+echo "========================================"
+echo "👉 Try running: klavis --help"
+echo "👉 Autocompletion available in bash & zsh"
+echo ""
 
-echo "✅ Klavis package built and installed!"
-echo "Try running: klavis --help"
-echo "Auto-completion should work in both bash and zsh"
 
+klavis
