@@ -190,7 +190,7 @@ const SCRAPE_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_SCRAPE' },
+    annotations: { category: 'FIRECRAWL_SEARCH' },
 };
 
 const MAP_TOOL: Tool = {
@@ -227,7 +227,7 @@ const MAP_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_DISCOVERY' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
 };
 
 const CRAWL_TOOL: Tool = {
@@ -340,7 +340,7 @@ const CRAWL_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_CRAWL' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
 };
 
 const BATCH_SCRAPE_TOOL: Tool = {
@@ -392,7 +392,7 @@ const BATCH_SCRAPE_TOOL: Tool = {
         },
         required: ['urls'],
     },
-    annotations: { category: 'FIRECRAWL_SEARCH' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
 };
 
 const CHECK_BATCH_STATUS_TOOL: Tool = {
@@ -408,7 +408,7 @@ const CHECK_BATCH_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
-    annotations: { category: 'FIRECRAWL_EXTRACT' },
+    annotations: { category: 'FIRECRAWL_METADATA' },
 };
 
 const CHECK_CRAWL_STATUS_TOOL: Tool = {
@@ -424,7 +424,7 @@ const CHECK_CRAWL_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
-    annotations: { category: 'FIRECRAWL_STATUS' },
+    annotations: { category: 'FIRECRAWL_METADATA' },
 };
 
 const SEARCH_TOOL: Tool = {
@@ -499,6 +499,7 @@ const SEARCH_TOOL: Tool = {
         },
         required: ['query'],
     },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
 };
 
 const EXTRACT_TOOL: Tool = {
@@ -541,6 +542,7 @@ const EXTRACT_TOOL: Tool = {
         },
         required: ['urls'],
     },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH' },
 };
 
 const GENERATE_LLMSTXT_TOOL: Tool = {
@@ -565,6 +567,7 @@ const GENERATE_LLMSTXT_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH' },
 };
 
 // Type definitions
@@ -1498,7 +1501,7 @@ function extractApiKey(req: Request): string {
     }
 
     const authDataJson = JSON.parse(authData);
-    return authDataJson.token ?? '';
+    return authDataJson.token ?? authDataJson.api_key ?? '';
 }
 
 const app = express();
