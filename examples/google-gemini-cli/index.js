@@ -150,9 +150,9 @@ function main() {
     }
 
     // Extract service name from URL
-    const urlMatch = instanceUrl.match(/https?:\/\/([^-]+)-mcp-server\.klavis\.ai/);
+    const urlMatch = instanceUrl.match(/https?:\/\/([^.]+)\.klavis\.ai/);
     if (!urlMatch) {
-      console.error("❌ Invalid URL format. Expected pattern: https://SERVICE-mcp-server.klavis.ai/?instance_id=your-id");
+      console.error("❌ Invalid URL format. Expected pattern: https://SERVICE-mcp-server.klavis.ai/");
       process.exit(1);
     }
     
