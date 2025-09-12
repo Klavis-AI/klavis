@@ -302,7 +302,7 @@
           },
           {
             "group": "Developer",
-            "pages": ["knowledge-base/developer/claude_desktop", "knowledge-base/developer/cline", "knowledge-base/developer/continue",  "knowledge-base/developer/cursor","knowledge-base/developer/github_copilot","knowledge-base/developer/kiro","knowledge-base/developer/windsurf"]
+            "pages": ["knowledge-base/developer/claude_code", "knowledge-base/developer/claude_desktop", "knowledge-base/developer/cline", "knowledge-base/developer/continue",  "knowledge-base/developer/cursor","knowledge-base/developer/github_copilot","knowledge-base/developer/kiro","knowledge-base/developer/windsurf"]
           },
           {
             "group": "OAuth Apps",
