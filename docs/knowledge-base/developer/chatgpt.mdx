@@ -1,0 +1,191 @@
+---
+title: "ChatGPT Connectors"
+description: "Connect Klavis MCP Servers with ChatGPT Connectors in minutes and supercharge your AI coding experience"
+---
+<img
+  className="block dark:hidden"
+  src="/images/knowledge-base/chatGPT/ChatGPT.png"
+  alt="ChatGPT Connectors with Klavis MCP Servers"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/knowledge-base/chatGPT/ChatGPT.png"
+  alt="ChatGPT Connectors with Klavis MCP Servers"
+/>
+
+## Quick Setup Guide
+
+<Steps>
+  <Step title="Access Klavis MCP Servers">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
+    
+    <img
+      src="/images/knowledge-base/chatGPT/step1.png"
+      alt="Klavis home page"
+    />    
+    Click the **"Create"** button next to your chosen server.
+  </Step>
+
+  <Step title="Complete Authentication">
+    <img
+      src="/images/knowledge-base/chatGPT/step2.png"
+      alt="Klavis MCP Servers page"
+    />
+    
+    <img
+      src="/images/knowledge-base/chatGPT/step3.png"
+      alt="OAuth authentication flow"
+    />
+    
+    <img
+      src="/images/knowledge-base/chatGPT/step4.png"
+      alt="Server URL generated"
+    />
+    
+    <Accordion title="🔐 OAuth Services (Most Common)">
+      - Automatically redirected to OAuth authorization
+      - Sign in to your account (GitHub, Google, Slack, etc.)
+      - Grant necessary permissions
+      - Redirected back to Klavis automatically
+    </Accordion>
+    
+    <Accordion title="🔑 API Key Services">
+      - Prompted to enter an API key
+      - Follow service-specific instructions to generate key
+      - Paste key in the provided field
+      - Click **"Save"** to continue
+    </Accordion>
+  </Step>
+
+
+
+  <Step title="Enable Developer Mode">
+    To connect Klavis MCP Server with Connectors, you need to ensure **Developer Mode** is enabled.
+    - Settings > Connectors > Advanced Settings > Developer Mode (enable it!)
+
+    <img
+      src="/images/knowledge-base/chatGPT/step5.png"
+      alt="Developer Mode in ChatGPT"
+    />
+
+  </Step>
+
+  <Step title="Add MCP Connector">
+    Open a new chat in ChatGPT:
+    - Click on '**+**' icon or type `/`
+    - Select **More** > **Developer Mode**
+    - Tap **Add Sources** > **Connect more**
+
+    Now, fill the essential detail to add new connector:
+    - **Icon** (Optional): Add icon for your MCP (128 * 128 recommended)
+    - **Name**: Name your MCP
+    - **Description** (Optional): Short description of your MCP
+    - **MCP Server URL**: Paste Your Klavis MCP Server URL
+    - **Authentication**: select **No Authentication**
+
+    Tick 'I trust this application' and click **Create** button  
+
+    <img
+      src="/images/knowledge-base/chatGPT/step6.png"
+      alt="Adding MCP Server in ChatGPT Connector"
+    />
+
+    <Note>
+      Klavis AI authenticates your MCP server while generating server url.
+    </Note>
+
+  </Step>
+
+  <Step title="Verify Tools Loading">
+
+    To verify if MCP is configured properly in ChatGPT chat, click **Add Sources** and you will see active servers.
+     
+    <img
+      src="/images/knowledge-base/chatGPT/step7.png"
+      alt="MCP Configuration in ChatGPT"
+    />
+
+    To verify server tools:
+    - Go to **Setting** > **Connectors**
+    - Select your MCP > Scroll to **Actions** tab
+
+    <img
+      src="/images/knowledge-base/chatGPT/step8.png"
+      alt="Verify Tools Loading in ChatGPT"
+    />
+    
+  </Step>
+
+  <Step title="Start Using in ChatGPT Chat">
+    <img
+      src="/images/knowledge-base/chatGPT/step9.png"
+      alt="Using MCP Server in ChatGPT Chat"
+    />
+    
+    Open ChatGPT Chat and start using natural language:
+    
+    <CodeGroup>
+    ```text GitHub
+    "Create a new issue titled 'Add dark mode' with priority label. Use Tools"
+    ```
+    
+    ```text Slack
+    "Send a message to #general: 'Standup meeting in 5 minutes! Use my MCP server'"
+    ```
+    
+    ```text Gmail
+    "Send email to john@company.com about project update. Use Tools"
+    ```
+    
+    ```text Notion
+    "Create a new page called 'Meeting Notes' with today's date. Use my MCP server"
+    ```
+    </CodeGroup>
+    
+    <Note>
+      🎯 ChatGPT Chat can't automatically detect when to use your MCP server tools based on context - you need to explicitly specify MCP server or tool name.
+    </Note>
+  </Step>
+
+  <Step title="Happy Building! 🎉">
+    You're all set! Your MCP server is now integrated with ChatGPT
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="🔧 Tools Not Appearing">
+    - Double-check your Server URL for typos
+    - Ensure stable internet connection
+    - Verify authentication in Klavis dashboard
+    - Try completely restarting ChatGPT
+  </Accordion>
+  
+  <Accordion title="🔐 Authentication Issues">
+    - Re-authenticate in the Klavis dashboard
+    - Check if your OAuth tokens have expired
+    - Verify API key permissions (for API key services)
+    - Ensure you've granted all necessary permissions
+  </Accordion>
+  
+  <Accordion title="⚡ Performance Issues">
+    - Limit the number of active MCP servers
+    - Check your internet connection speed
+    - Restart ChatGPT periodically
+    - Contact support if issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Community" icon="discord">
+    Join our Discord for community support and discussions
+  </Card>
+  <Card title="Support" icon="headphones">
+    Contact our technical support team for assistance
+  </Card>
+</CardGroup>
+
+---
