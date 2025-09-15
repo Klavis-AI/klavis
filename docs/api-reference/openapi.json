@@ -3992,7 +3992,8 @@
           "ElevenLabs",
           "PagerDuty",
           "PostHog",
-          "SendGrid"
+          "SendGrid",
+          "Zendesk"
         ],
         "title": "McpServerName"
       },
@@ -4038,7 +4039,8 @@
           "Xero",
           "WordPress",
           "Dropbox",
-          "QuickBooks"
+          "QuickBooks",
+          "Zendesk"
         ],
         "title": "OAuthServerName"
       },
