@@ -83,7 +83,7 @@
       "post": {
         "tags": ["mcp-server"],
         "summary": "Create Strata",
-        "description": "Create a Strata MCP server.",
+        "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis MCP servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "create_strata_server_mcp_server_strata_create_post",
         "requestBody": {
           "content": {
@@ -101,6 +101,119 @@
                 "schema": {
                   "$ref": "#/components/schemas/StrataCreateResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/strata/add": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Add Servers",
+        "description": "Add servers to an existing Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
+        "operationId": "add_servers_to_strata_mcp_server_strata_add_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrataAddServersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataAddServersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/strata/delete": {
+      "delete": {
+        "tags": ["mcp-server"],
+        "summary": "Delete Servers",
+        "description": "Delete servers from an existing Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to delete all Klavis MCP servers, a list of specific server names, or null to delete no servers\n- externalServers: Optional list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
+        "operationId": "delete_servers_from_strata_mcp_server_strata_delete_delete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrataDeleteServersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataDeleteServersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/strata/get": {
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get servers",
+        "description": "Get information about an existing Strata MCP server instance.\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
+        "operationId": "get_strata_instance_mcp_server_strata_get_get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StrataGetRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StrataGetResponse" }
               }
             }
           },
@@ -2962,74 +3075,6 @@
         }
       }
     },
-    "/oauth/twitter/authorize": {
-      "get": {
-        "tags": ["twitter-oauth"],
-        "summary": "Authorize Twitter",
-        "description": "Start Twitter OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
-        "operationId": "authorizeTwitter",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting authorization",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting authorization"
-          },
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Client ID for white labeling, if not provided will use default credentials",
-              "title": "Client Id"
-            },
-            "description": "Client ID for white labeling, if not provided will use default credentials"
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Optional OAuth scopes to request (space-separated string)",
-              "title": "Scope"
-            },
-            "description": "Optional OAuth scopes to request (space-separated string)"
-          },
-          {
-            "name": "redirect_url",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Optional URL to redirect to after authorization completes",
-              "title": "Redirect Url"
-            },
-            "description": "Optional URL to redirect to after authorization completes"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/klaviyo/authorize": {
       "get": {
         "tags": ["klaviyo-oauth"],
@@ -3609,6 +3654,42 @@
         "required": ["id", "name"],
         "title": "ExtendedMcpServer"
       },
+      "ExternalServerInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the external server"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL of the external MCP server"
+          }
+        },
+        "type": "object",
+        "required": ["name", "url"],
+        "title": "ExternalServerInfo"
+      },
+      "ExternalServerRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "The name of the external server"
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Url",
+            "description": "The URL of the external MCP server"
+          }
+        },
+        "type": "object",
+        "required": ["name", "url"],
+        "title": "ExternalServerRequest"
+      },
       "GeneralAuth": {
         "properties": {
           "data": {
@@ -3885,7 +3966,7 @@
           "Moneybird",
           "Motion",
           "Notion",
-          "Onedrive",
+          "OneDrive",
           "Openrouter",
           "Plai",
           "Postgres",
@@ -3903,16 +3984,15 @@
           "Cloudflare",
           "Stripe",
           "Figma",
-          "Metabase",
           "Pipedrive",
           "Klaviyo",
           "Box",
           "Dialpad",
-          "Docusign",
-          "Elevenlabs",
-          "Pagerduty",
-          "Posthog",
-          "Sendgrid"
+          "DocuSign",
+          "ElevenLabs",
+          "PagerDuty",
+          "PostHog",
+          "SendGrid"
         ],
         "title": "McpServerName"
       },
@@ -4003,6 +4083,75 @@
         "required": ["success"],
         "title": "StatusResponse"
       },
+      "StrataAddServersRequest": {
+        "properties": {
+          "strataId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "servers": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/McpServerName" },
+                "type": "array"
+              },
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
+            ],
+            "title": "Servers",
+            "description": "List of Klavis MCP servers to add (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
+          },
+          "externalServers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalServerRequest"
+                },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Externalservers",
+            "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
+          }
+        },
+        "type": "object",
+        "required": ["strataId"],
+        "title": "StrataAddServersRequest"
+      },
+      "StrataAddServersResponse": {
+        "properties": {
+          "addedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Addedservers",
+            "description": "List of Klavis MCP servers that were added"
+          },
+          "addedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Addedexternalservers",
+            "description": "List of external MCP servers that were added with name and URL"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of server name to OAuth URL for newly added servers"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of server name to API key setup URL for newly added servers"
+          }
+        },
+        "type": "object",
+        "required": ["addedServers"],
+        "title": "StrataAddServersResponse"
+      },
       "StrataCreateRequest": {
         "properties": {
           "userId": {
@@ -4017,10 +4166,24 @@
                 "items": { "$ref": "#/components/schemas/McpServerName" },
                 "type": "array"
               },
+              { "type": "string", "const": "ALL" },
               { "type": "null" }
             ],
             "title": "Servers",
-            "description": "Optional list of server names to enable (e.g., 'jira', 'linear'). Defaults to ALL."
+            "description": "List of Klavis MCP servers to enable (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
+          },
+          "externalServers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalServerRequest"
+                },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Externalservers",
+            "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
           }
         },
         "type": "object",
@@ -4033,6 +4196,23 @@
             "type": "string",
             "title": "Strataserverurl",
             "description": "URL to connect to the Strata MCP server"
+          },
+          "strataId": {
+            "type": "string",
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "addedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Addedservers",
+            "description": "List of Klavis MCP servers that were added"
+          },
+          "addedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Addedexternalservers",
+            "description": "List of external MCP servers that were added with name and URL"
           },
           "oauthUrls": {
             "additionalProperties": { "type": "string" },
@@ -4048,8 +4228,119 @@
           }
         },
         "type": "object",
-        "required": ["strataServerUrl"],
+        "required": ["strataServerUrl", "strataId", "addedServers"],
         "title": "StrataCreateResponse"
+      },
+      "StrataDeleteServersRequest": {
+        "properties": {
+          "strataId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "servers": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/McpServerName" },
+                "type": "array"
+              },
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
+            ],
+            "title": "Servers",
+            "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers."
+          },
+          "externalServers": {
+            "anyOf": [
+              { "items": { "type": "string" }, "type": "array" },
+              { "type": "null" }
+            ],
+            "title": "Externalservers",
+            "description": "Optional list of external server names to delete. These are the names of previously added external MCP servers."
+          }
+        },
+        "type": "object",
+        "required": ["strataId"],
+        "title": "StrataDeleteServersRequest"
+      },
+      "StrataDeleteServersResponse": {
+        "properties": {
+          "deletedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Deletedservers",
+            "description": "List of Klavis MCP server names that were deleted"
+          },
+          "deletedExternalServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Deletedexternalservers",
+            "description": "List of external MCP server names that were deleted"
+          }
+        },
+        "type": "object",
+        "required": ["deletedServers", "deletedExternalServers"],
+        "title": "StrataDeleteServersResponse"
+      },
+      "StrataGetRequest": {
+        "properties": {
+          "strataId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Strataid",
+            "description": "The strata server ID"
+          }
+        },
+        "type": "object",
+        "required": ["strataId"],
+        "title": "StrataGetRequest"
+      },
+      "StrataGetResponse": {
+        "properties": {
+          "strataServerUrl": {
+            "type": "string",
+            "title": "Strataserverurl",
+            "description": "URL to connect to the Strata MCP server"
+          },
+          "strataId": {
+            "type": "string",
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "connectedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Connectedservers",
+            "description": "List of Klavis MCP servers currently connected to this strata"
+          },
+          "connectedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Connectedexternalservers",
+            "description": "List of external servers with name and URL currently connected to this strata"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of Klavis MCP server name to OAuth URL"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of Klavis MCP server name to API key setup URL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "strataServerUrl",
+          "strataId",
+          "connectedServers",
+          "connectedExternalServers"
+        ],
+        "title": "StrataGetResponse"
       },
       "ToolFormat": {
         "type": "string",
