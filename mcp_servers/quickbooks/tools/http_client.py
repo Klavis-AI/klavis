@@ -14,7 +14,7 @@ class QuickBooksHTTPClient:
         # Use provided parameters or fall back to environment variables
         self.access_token = access_token or os.getenv('QB_ACCESS_TOKEN')
         self.company_id = company_id or os.getenv('QB_REALM_ID')
-        self.environment = (environment or os.getenv('QB_ENVIRONMENT', 'sandbox')).lower()
+        self.environment = (environment or os.getenv('QB_ENVIRONMENT', 'production')).lower()
         self.minor_version = minor_version
         self.async_session = httpx.AsyncClient()
 
