@@ -82,7 +82,7 @@
     "/mcp-server/strata/create": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Create Strata",
+        "summary": "Create",
         "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis MCP servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "create_strata_server_mcp_server_strata_create_post",
         "requestBody": {
@@ -119,7 +119,7 @@
     "/mcp-server/strata/add": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Add Servers",
+        "summary": "Add",
         "description": "Add servers to an existing Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "add_servers_to_strata_mcp_server_strata_add_post",
         "requestBody": {
@@ -158,7 +158,7 @@
     "/mcp-server/strata/delete": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete Servers",
+        "summary": "Delete",
         "description": "Delete servers from an existing Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to delete all Klavis MCP servers, a list of specific server names, or null to delete no servers\n- externalServers: Optional list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
         "operationId": "delete_servers_from_strata_mcp_server_strata_delete_delete",
         "requestBody": {
@@ -197,7 +197,7 @@
     "/mcp-server/strata/get": {
       "get": {
         "tags": ["mcp-server"],
-        "summary": "Get servers",
+        "summary": "Get",
         "description": "Get information about an existing Strata MCP server instance.\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
         "operationId": "get_strata_instance_mcp_server_strata_get_get",
         "requestBody": {

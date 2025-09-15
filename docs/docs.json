@@ -140,7 +140,10 @@
           {
             "group": "Strata",
             "pages": [
-              "api-reference/strata/create"
+              "api-reference/strata/create",
+              "api-reference/strata/get",
+              "api-reference/strata/add",
+              "api-reference/strata/delete"
             ]
           },
           {
