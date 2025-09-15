@@ -111,7 +111,7 @@ class SessionManager:
             return "", "", ""
         
         try:
-            auth_json = json.loads(auth_data.decode('utf-8'))
+            auth_json = json.loads(auth_data)
             return (
                 auth_json.get('access_token', ''),
                 auth_json.get('realm_id', ''),
