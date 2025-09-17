@@ -3442,6 +3442,17 @@
             "$ref": "#/components/schemas/ConnectionType",
             "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
             "default": "StreamableHttp"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
@@ -3665,6 +3676,17 @@
             "type": "string",
             "title": "Url",
             "description": "The URL of the external MCP server"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers used when connecting to the external server"
           }
         },
         "type": "object",
@@ -3684,6 +3706,17 @@
             "minLength": 1,
             "title": "Url",
             "description": "The URL of the external MCP server"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the external server (e.g., for bearer authentication)"
           }
         },
         "type": "object",
@@ -3863,6 +3896,17 @@
             "$ref": "#/components/schemas/ToolFormat",
             "description": "The format to return tools in. Default is MCP Native format for maximum compatibility.",
             "default": "mcp_native"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
