@@ -17,4 +17,4 @@ COPY mcp_servers/reddit_search/tools/ ./tools/
 EXPOSE 5001
 
 # Command to run the server
-CMD ["python", "server.py", "--port", "5001"] 
+CMD ["python", "server.py"] 
