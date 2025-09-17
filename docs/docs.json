@@ -21,7 +21,19 @@
   "navigation": {
     "anchors": [
       {
-        "anchor": "Documentation",
+        "anchor": "Website",
+        "href": "https://www.klavis.ai",
+        "icon": "globe"
+      },
+      {
+        "anchor": "Blog",
+        "href": "https://www.klavis.ai/blog",
+        "icon": "newspaper"
+      }
+    ],
+    "tabs": [
+      {
+        "tab": "Documentation",
         "icon": "server",
         "groups": [
           {
@@ -122,7 +134,7 @@
         ]
       },
       {
-        "anchor": "API Reference",
+        "tab": "API Reference",
         "icon": "webhook",
         "groups": [
           {
@@ -292,7 +304,7 @@
         ]
       },
       {
-        "anchor": "Knowledge Base",
+        "tab": "Knowledge Base",
         "icon": "book",
         "groups": [
           {
