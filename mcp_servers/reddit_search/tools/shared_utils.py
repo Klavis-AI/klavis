@@ -1,6 +1,6 @@
-import os 
+import os
 import logging
-import requests
+import httpx
 from typing import Dict, List, TypedDict
 import time
 import random
@@ -21,16 +21,18 @@ REDDIT_API_BASE = "https://oauth.reddit.com"
 REDDIT_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "klavis-mcp/0.1 (+https://klavis.ai)")
 
-# cached access token
+# cached access token and client
 _access_token = None
 _token_expires_at: float | None = None
+_client: httpx.Client | None = None
+
 
 def _get_reddit_auth_header() -> dict[str, str]:
     """
     Authenticates with the Reddit API and returns the required authorization header.
     It cleverly caches the access token in memory.
     """
-    global _access_token
+    global _access_token, _client
 
     # if the access token is already cached, return it
     if _access_token:
@@ -39,16 +41,17 @@ def _get_reddit_auth_header() -> dict[str, str]:
     # if the client_ID and client_secret are not set, raise an error
     if not REDDIT_CLIENT_ID or not REDDIT_CLIENT_SECRET:
         raise ValueError("REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET must be set")
-    
-    auth = requests.auth.HTTPBasicAuth(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
+
+    auth = (REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
     data = {"grant_type": "client_credentials"}
     headers = {"User-Agent": REDDIT_USER_AGENT}
 
     logger.info("No cached token found. Requesting new Reddit API access token...")
 
     # make the post request to get the access token
-    response = requests.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
-    response.raise_for_status()
+    with httpx.Client() as client:
+        response = client.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
+        response.raise_for_status()
 
     token_data = response.json()
     _access_token = token_data["access_token"]
@@ -62,6 +65,10 @@ def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3) -> D
 
     path should start with '/'.
     """
+    global _client
+    if _client is None:
+        _client = httpx.Client()
+
     headers = _get_reddit_auth_header()
     params = params.copy() if params else {}
     # Prefer raw_json for more consistent body content
@@ -71,7 +78,7 @@ def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3) -> D
     last_exc: Exception | None = None
     for attempt in range(max_retries):
         try:
-            response = requests.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params, timeout=20)
+            response = _client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params, timeout=20)
             if response.status_code == 429:
                 retry_after = response.headers.get("Retry-After")
                 sleep_s = float(retry_after) if retry_after else backoff_seconds
@@ -81,7 +88,7 @@ def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3) -> D
                 continue
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.RequestException as exc:
+        except httpx.RequestError as exc:
             last_exc = exc
             logger.warning(f"Reddit GET {path} failed (attempt {attempt+1}/{max_retries}): {exc}")
             time.sleep(backoff_seconds + random.uniform(0, 0.5))
