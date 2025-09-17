@@ -1,4 +1,4 @@
-mcp>=1.12.0
+mcp==1.11.0
 fastapi
 uvicorn[standard]
 click>=8.0.0

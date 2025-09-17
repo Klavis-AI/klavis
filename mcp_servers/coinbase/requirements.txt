@@ -1,4 +1,4 @@
-mcp[cli]>=1.12.0
+mcp[cli]==1.11.0
 aiohttp
 python-dotenv==1.0.0
 uvicorn[standard]

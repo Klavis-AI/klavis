@@ -1,4 +1,4 @@
-mcp[cli]>=1.12.0
+mcp[cli]==1.11.0
 fastapi
 uvicorn[standard]
 starlette
