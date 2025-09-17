@@ -405,6 +405,61 @@ async def search_and_retrieve_documents(
         logger.exception(f"Error executing tool search_and_retrieve_documents: {e}")
         raise e
 
+async def empty_trash(
+    drive_id: str | None = None,
+) -> Dict[str, Any]:
+    """Permanently delete all of the user's trashed files."""
+    logger.info(f"Executing tool: empty_trash with drive_id: {drive_id}")
+    try:
+        access_token = get_auth_token()
+        
+        # Use v2 API for empty trash operation
+        credentials = Credentials(token=access_token)
+        service = build('drive', 'v2', credentials=credentials)
+        
+        params = {}
+        if drive_id:
+            params['driveId'] = drive_id
+            
+        service.files().emptyTrash(**params).execute()
+        
+        return {"success": True, "message": "Trash emptied successfully"}
+    except HttpError as e:
+        logger.error(f"Google Drive API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool empty_trash: {e}")
+        raise e
+
+async def create_shared_drive(
+    name: str,
+    request_id: str,
+) -> Dict[str, Any]:
+    """Create a new shared drive."""
+    logger.info(f"Executing tool: create_shared_drive with name: {name}, request_id: {request_id}")
+    try:
+        access_token = get_auth_token()
+        service = get_drive_service(access_token)
+        
+        drive_metadata = {
+            'name': name
+        }
+        
+        result = service.drives().create(
+            body=drive_metadata,
+            requestId=request_id
+        ).execute()
+        
+        return result
+    except HttpError as e:
+        logger.error(f"Google Drive API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool create_shared_drive: {e}")
+        raise e
+
 async def get_file_tree_structure(
     include_shared_drives: bool = False,
     restrict_to_shared_drive_id: str | None = None,
@@ -666,6 +721,43 @@ def main(
                     **{"category": "GOOGLE_DRIVE_FILE"}
                 ),
             ),
+            types.Tool(
+                name="google_drive_empty_trash",
+                description="Permanently delete all of the user's trashed files.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "drive_id": {
+                            "type": "string",
+                            "description": "If set, empties the trash of the provided shared drive.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
+            ),
+            types.Tool(
+                name="google_drive_create_shared_drive",
+                description="Create a new shared drive.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the shared drive to create.",
+                        },
+                        "request_id": {
+                            "type": "string",
+                            "description": "Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a shared drive.",
+                        },
+                    },
+                    "required": ["name", "request_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -750,7 +842,54 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_drive_empty_trash":
+            try:
+                result = await empty_trash(
+                    drive_id=arguments.get("drive_id"),
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_drive_create_shared_drive":
+            try:
+                name = arguments.get("name", "")
+                if not name:
+                    raise ValueError("The 'name' argument is required.")
+                request_id = arguments.get("request_id")
+                if not request_id:
+                    raise ValueError("The 'request_id' argument is required.")
+                result = await create_shared_drive(
+                    name=name,
+                    request_id=request_id
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",
