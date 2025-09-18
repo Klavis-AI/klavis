@@ -8,20 +8,17 @@ from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except Exception:
-    pass
+from dotenv import load_dotenv
+load_dotenv()
 
 
-async def main() -> None:
+async def main():
     klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
 
     # Step 1: Create a Strata MCP server with Gmail and Google Calendar integrations
     response = klavis_client.mcp_server.create_strata_server(
         user_id="demo_user",
-        servers=[McpServerName.GMAIL, McpServerName.GOOGLE_CALENDAR],
+        servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
     )
 
     # Step 2: Handle OAuth authorization if needed
@@ -52,9 +49,10 @@ async def main() -> None:
         ),
     )
 
+    my_email = "golden-kpop@example.com" # TODO: Replace with your email
     # Step 5: Invoke the agent
     result = await agent.ainvoke({
-        "messages": [{"role": "user", "content": "get my recent 1 emails"}],
+        "messages": [{"role": "user", "content": f"summarize this video - https://youtu.be/yebNIHKAC4A?si=1Rz_ZsiVRz0YfOR7 and send the summary to my email {my_email}"}],
     })
     
     # Print only the final AI response content

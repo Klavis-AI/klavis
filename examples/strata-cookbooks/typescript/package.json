@@ -1,0 +1,24 @@
+{
+  "name": "strata-langchain-typescript-example",
+  "version": "1.0.0",
+  "description": "TypeScript example using Klavis Strata with LangChain",
+  "main": "build_with_langchain.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build_with_langchain.js",
+    "dev": "tsx build_with_langchain.ts"
+  },
+  "dependencies": {
+    "@langchain/openai": "^0.3.33",
+    "@langchain/langgraph": "^0.6.7",
+    "klavis": "^2.0.2",
+    "dotenv": "^16.4.7",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "type": "module"
+}
