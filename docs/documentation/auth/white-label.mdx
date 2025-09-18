@@ -1,5 +1,5 @@
 ---
-title: 'Klavis OAuth & White-label'
+title: 'White-label'
 description: 'White-label allows you to integrate our OAuth flows with your own branding and custom OAuth applications'
 ---
 
@@ -11,26 +11,59 @@ description: 'White-label allows you to integrate our OAuth flows with your own 
 
 OAuth (Open Authorization) is an open standard protocol that allows third-party applications to access resources on behalf of users without exposing their credentials. Klavis AI implements OAuth 2.0 to securely connect with services like GitHub, Slack, Gmail, Notion, and more.
 
-## What is White Labeling?
+## What is White-label?
 
-White labeling allows you to customize the authentication experience with your own branding. When enabled, users will see your application name, logo, and other brand elements during the OAuth flow instead of Klavis AI's.
+White-label allows you to customize the authentication experience with your own branding. When enabled, users will see your application name, logo, and other brand elements during the OAuth flow instead of Klavis AI's.
 
-## OAuth Flow ( w/ white labeling)
+## OAuth Flow (w/ white-label)
 
-![OAuth with white labeling](/images/white-labeling.png)
+```mermaid
+sequenceDiagram
+    actor EndUser
+    participant ClientApp as Your  App
+    participant KlavisAI as Klavis AI
+    participant ThirdPartyIdP as Third-party App
+
+    %% --- OAuth Flow Initiation ---
+    EndUser->>ClientApp: 1. Initiates action in Your App<br/> (e.g., "Connect my Account").
+    ClientApp->>KlavisAI: 2. Requests Klavis AI <br/> to start OAuth flow.
+
+    activate KlavisAI
+    Note over KlavisAI: Klavis AI retrieves the Your App's Config
+    KlavisAI->>EndUser: 3. Redirects End-User's browser to <br/> Third-party authorization endpoint.
+    deactivate KlavisAI
+    activate EndUser
+
+    EndUser->>ThirdPartyIdP: 4. Browser navigates to Third-party authorization URL.
+    activate ThirdPartyIdP
+    ThirdPartyIdP-->>EndUser: 5. Third-party App presents its Login & Consent screen with Your App Info and Logo.
+ 
+    EndUser->>ThirdPartyIdP: 6. End-User authenticates with Third-party App & grants consent.
+    deactivate EndUser
+    ThirdPartyIdP-->>KlavisAI: 7. Third-party App redirects <br/>Klavis AI callback URI.
+    deactivate ThirdPartyIdP
+
+    %% --- Token Exchange (Klavis AI with Third-party) ---
+    KlavisAI->>ThirdPartyIdP: 8. Klavis AI exchanges <br/> Authorization Code for Access Token.
+    activate ThirdPartyIdP
+    ThirdPartyIdP-->>KlavisAI: 9. Third-party returns <br/>Access/Refresh Token to Klavis AI.
+    deactivate ThirdPartyIdP
+
+    KlavisAI->>EndUser: 10. OAuth White Labeling succeeds.
+```
 
 
 ## Implementation
 
-### Setting Up White Labeling
+### Setting Up White-label
 
-To set up white labeling for your OAuth integrations:
+To set up white-label for your OAuth integrations:
 
 <Steps>
   <Step title="Register Your Application">
     Register your application with the third-party service (GitHub, Slack, etc.) to obtain your client ID and client secret.
   </Step>
-  <Step title="Configure White Labeling in Klavis AI">
+      <Step title="Configure White-label in Klavis AI">
     Go to the Klavis AI white label configuration page:
     
     [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
@@ -49,7 +82,7 @@ To set up white labeling for your OAuth integrations:
     <CodeGroup>
     
     ```javascript without SDK
-    // Example: Initiating GitHub OAuth with white labeling
+    // Example: Initiating GitHub OAuth with white-label
     const authUrl = `https://api.klavis.ai/oauth/github/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
     window.location.href = authUrl;
     ```
@@ -61,7 +94,7 @@ To set up white labeling for your OAuth integrations:
       apiKey: "YOUR_API_KEY"
     });
     
-    // Example: Initiating GitHub OAuth with white labeling
+    // Example: Initiating GitHub OAuth with white-label
     const oauthUrl = await klavis.mcpServer.getOAuthUrl({
       serverName: Klavis.McpServerName.Github,
       instanceId: instanceId,
@@ -76,12 +109,13 @@ To set up white labeling for your OAuth integrations:
     ```python Python SDK
     import webbrowser
     from klavis import Klavis
+    from klavis.types import McpServerName
     
     klavis = Klavis(api_key="YOUR_API_KEY")
     
-    # Example: Initiating GitHub OAuth with white labeling
+    # Example: Initiating GitHub OAuth with white-label
     oauth_url = klavis.mcp_server.get_oauth_url(
-        server_name="github",
+        server_name=McpServerName.GITHUB,
         instance_id=instance_id,
         client_id=your_client_id,
         # redirect_uri="YOUR_REDIRECT_URI",
@@ -124,4 +158,4 @@ async def redirect_to_jira_callback(request: Request):
 
 </Steps>
 
-For technical assistance with OAuth implementation or white labeling, please join our Discord community.
+For technical assistance with OAuth implementation or white-label, please join our Discord community.

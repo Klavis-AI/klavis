@@ -1,0 +1,561 @@
+---
+title: Quickstart
+description: Connect any integration in minutes via MCP
+icon: rocket
+mode: "wide"
+---
+
+This quickstart uses OpenAI as example to show how to connect to tools with Klavis in minutes.
+
+
+<Info>
+
+**Prerequisites**
+
+- A Klavis account and API Key from your [Dashboard](https://www.klavis.ai/home/api-keys)
+- Optional: An LLM API Key (OpenAI, Claude)
+- Optional: Python 3.9+ or Node.js 18+
+
+</Info>
+
+## Getting started
+
+<Card title="Multi-app integration" icon="layer-group" horizontal href="#multi-app-integration">
+  Optimized to handle tool overload and context window limits, ideal when connecting to multiple integrations. Click to jump >
+</Card>
+
+<Card title="Individual-app integration" icon="terminal" horizontal href="#individual-app-integration">
+  Best suited for vertical AI agents that only need to connect to a limited set of tools or a single MCP Server. Click to jump >
+</Card>
+
+## Multi-app integration
+
+One MCP server for AI agents to handle thousands of tools progressively.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Create a Strata server (multi-app)">
+        <CodeGroup>
+          ```bash Curl
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "userId": "user123",
+              "servers": ["Gmail"]
+            }'
+          ```
+
+          ```python Python
+          from klavis import Klavis
+
+          klavis = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+
+          strata = klavis.strata.create(
+              user_id="user123",
+              servers=["GMAIL"],
+          )
+
+          print("Strata URL:", strata.strata_server_url)
+          ```
+
+          ```typescript TypeScript
+          // Create a Strata server via TypeScript SDK
+          import { Klavis } from 'klavis';
+
+          const klavis = new Klavis.Client({ apiKey: 'YOUR_KLAVIS_API_KEY' });
+          const strata = await klavis.strata.create({
+            userId: 'user123',
+            servers: ['GMAIL'],
+          });
+          // const strataUrl = strata.strataServerUrl; // use the returned URL
+          ```
+        </CodeGroup>
+        <Card title="API Reference" icon="api" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      <Step title="Authenticate required apps">
+        Use OAuth links when needed, then re-list tools.
+        <Card title="OAuth APIs" icon="key" href="/api-reference/mcp-server/get-oauth-url" horizontal>
+          Fetch OAuth URLs per app when required
+        </Card>
+      </Step>
+      <Step title="Connect to your AI application">
+        <Tabs>
+          <Tab title="With MCP Client">
+            <CodeGroup>
+              ```python Python
+              import asyncio
+              from mcp import ClientSession
+              from mcp.client.sse import sse_client
+
+              async def main(url: str):
+                  async with sse_client(url) as streams:
+                      async with ClientSession(*streams) as session:
+                          await session.initialize()
+                          tools = await session.list_tools()
+                          print([t.name for t in tools.tools])
+
+              # Replace with your actual Strata URL
+              asyncio.run(main("YOUR_STRATA_URL"))
+              ```
+            </CodeGroup>
+          </Tab>
+          <Tab title="Without MCP Client(Function calling)">
+            <CodeGroup>
+              ```python Python
+              import os, json
+              from openai import OpenAI
+              from klavis import Klavis
+              from klavis.types import ToolFormat
+
+              klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+              openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+              strata_url = "YOUR_STRATA_URL"  # from Strata creation
+
+              messages = [
+                  {"role": "system", "content": "You are a helpful assistant. Use the available tools to answer the user's question."},
+                  {"role": "user", "content": "Search my inbox for unread emails from Acme and summarize."}
+              ]
+
+              tools_info = klavis_client.mcp_server.list_tools(
+                  server_url=strata_url,
+                  format=ToolFormat.OPENAI,
+              )
+
+              resp = openai_client.chat.completions.create(
+                  model="gpt-4o-mini",
+                  messages=messages,
+                  tools=tools_info.tools
+              )
+
+              messages.append(resp.choices[0].message)
+
+              if resp.choices[0].message.tool_calls:
+                  for tc in resp.choices[0].message.tool_calls:
+                      fn = tc.function.name
+                      args = json.loads(tc.function.arguments)
+                      result = klavis_client.mcp_server.call_tools(
+                          server_url=strata_url,
+                          tool_name=fn,
+                          tool_args=args,
+                      )
+                      messages.append({
+                          "role": "tool",
+                          "tool_call_id": tc.id,
+                          "content": str(result)
+                      })
+
+              final = openai_client.chat.completions.create(
+                  model="gpt-4o-mini",
+                  messages=messages
+              )
+              print(final.choices[0].message.content)
+              ```
+
+              ```typescript TypeScript
+              import { KlavisClient, Klavis } from 'klavis';
+              import OpenAI from 'openai';
+
+              const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+              const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+              const strataUrl = 'YOUR_STRATA_URL';
+
+              const messages = [
+                { role: 'system', content: 'You are a helpful assistant. Use the available tools to answer the user\'s question.' },
+                { role: 'user', content: 'Search my inbox for unread emails from Acme and summarize.' }
+              ];
+
+              const toolsInfo = await klavisClient.mcpServer.listTools({
+                serverUrl: strataUrl,
+                format: Klavis.ToolFormat.Openai
+              });
+
+              const resp = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: messages as any,
+                tools: toolsInfo.tools as any
+              });
+
+              messages.push(resp.choices[0].message as any);
+
+              if (resp.choices[0].message.tool_calls) {
+                for (const tc of resp.choices[0].message.tool_calls) {
+                  const fn = tc.function.name;
+                  const args = JSON.parse(tc.function.arguments);
+                  const result = await klavisClient.mcpServer.callTools({
+                    serverUrl: strataUrl,
+                    toolName: fn,
+                    toolArgs: args
+                  });
+                  messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) } as any);
+                }
+              }
+
+              const final = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: messages as any
+              });
+              console.log(final.choices[0].message.content);
+              ```
+            </CodeGroup>
+          </Tab>
+        </Tabs>
+      </Step>
+      <Step title="Optional: Use with function calling">
+        See SDK guides for OpenAI/Claude examples.
+        <CardGroup cols={2}>
+          <Card title="Python SDK" icon="python" href="/documentation/sdk/python" />
+          <Card title="TypeScript SDK" icon="js" href="/documentation/sdk/typescript" />
+        </CardGroup>
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your <a href="https://www.klavis.ai/home">Dashboard</a> and navigate to Strata.
+      </Step>
+      <Step title="Choose apps">
+        Select the integrations to include (for example, Gmail, Slack, Notion, GitHub).
+      </Step>
+      <Step title="Create Strata">
+        Provision your Strata server and copy its server URL.
+      </Step>
+      <Step title="Authenticate">
+        Complete OAuth for any apps that require it.
+      </Step>
+      <Step title="Use in your app">
+        Paste the Strata URL into your MCP client or SDK calls.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Run self-hosted MCP servers (optional)">
+        <CodeGroup>
+          ```bash Docker
+          docker run -p 5000:5000 ghcr.io/klavis-ai/gmail-mcp-server:latest
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Combine with Klavis Strata">
+        Add your external servers alongside hosted ones.
+        ```python
+        strata = klavis.strata.create(
+            user_id="user123",
+            servers=["GMAIL", "SLACK"],
+            external_servers=[{"name": "crm", "url": "http://localhost:5000"}],
+        )
+        ```
+      </Step>
+      <Step title="Use the unified Strata URL">
+        Point your MCP client to the Strata URL and list/call tools as usual.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Individual-app integration
+
+Connect a single integration (like Gmail or GitHub) as its own MCP server.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```bash curl
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Gmail",
+              "userId": "user123"
+            }'
+          ```
+
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+
+          klavis = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+          server = klavis.mcp_server.create_server_instance(
+              server_name=McpServerName.GMAIL,
+              user_id="user123",
+          )
+          print(server.server_url)
+          ```
+
+          ```javascript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+
+          const klavisClient = new KlavisClient({ apiKey: 'YOUR_KLAVIS_API_KEY' });
+          const server = await klavisClient.mcpServer.createServerInstance({
+            serverName: Klavis.McpServerName.Gmail,
+            userId: 'user123',
+          });
+          console.log(server.serverUrl);
+          ```
+        </CodeGroup>
+        <Card title="API Reference" icon="api" href="/api-reference/mcp-server/create-a-server-instance" horizontal>
+          Create/Get/Delete server instance endpoints
+        </Card>
+      </Step>
+      <Step title="Authenticate (OAuth or API key)">
+        <CodeGroup>
+          ```python OAuth (Python)
+          import webbrowser
+          if getattr(server, 'oauth_url', None):
+              webbrowser.open(server.oauth_url)
+          ```
+
+          ```javascript OAuth (TypeScript)
+          if (server.oauthUrl) {
+            window?.open?.(server.oauthUrl);
+          }
+          ```
+        </CodeGroup>
+        <Card title="OAuth APIs" icon="key" href="/api-reference/mcp-server/get-oauth-url" horizontal>
+          Get OAuth URL and manage auth data
+        </Card>
+      </Step>
+      <Step title="Connect to your AI application">
+        <Tabs>
+          <Tab title="With MCP Client">
+            <CodeGroup>
+              ```python Python
+              import asyncio
+              from mcp import ClientSession
+              from mcp.client.sse import sse_client
+
+              async def main(url: str):
+                  async with sse_client(url) as streams:
+                      async with ClientSession(*streams) as session:
+                          await session.initialize()
+                          tools = await session.list_tools()
+                          print([t.name for t in tools.tools])
+
+              # Replace with your actual Gmail server URL
+              asyncio.run(main("YOUR_GMAIL_SERVER_URL"))
+              ```
+            </CodeGroup>
+          </Tab>
+          <Tab title="Without MCP Client (Function calling)">
+            <CodeGroup>
+              ```python Python
+              import os, json
+              from openai import OpenAI
+              from klavis import Klavis
+              from klavis.types import ToolFormat
+
+              klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+              openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+              server_url = "YOUR_GMAIL_SERVER_URL"  # from server creation
+
+              messages = [
+                  {"role": "system", "content": "You are a helpful assistant. Use the available tools to answer the user's question."},
+                  {"role": "user", "content": "Search my inbox for unread emails from Acme and summarize."}
+              ]
+
+              tools_info = klavis_client.mcp_server.list_tools(
+                  server_url=server_url,
+                  format=ToolFormat.OPENAI,
+              )
+
+              resp = openai_client.chat.completions.create(
+                  model="gpt-4o-mini",
+                  messages=messages,
+                  tools=tools_info.tools
+              )
+
+              messages.append(resp.choices[0].message)
+
+              if resp.choices[0].message.tool_calls:
+                  for tc in resp.choices[0].message.tool_calls:
+                      fn = tc.function.name
+                      args = json.loads(tc.function.arguments)
+                      result = klavis_client.mcp_server.call_tools(
+                          server_url=server_url,
+                          tool_name=fn,
+                          tool_args=args,
+                      )
+                      messages.append({
+                          "role": "tool",
+                          "tool_call_id": tc.id,
+                          "content": str(result)
+                      })
+
+              final = openai_client.chat.completions.create(
+                  model="gpt-4o-mini",
+                  messages=messages
+              )
+              print(final.choices[0].message.content)
+              ```
+
+              ```javascript TypeScript
+              import { KlavisClient, Klavis } from 'klavis';
+              import OpenAI from 'openai';
+
+              const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+              const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+              const serverUrl = 'YOUR_GMAIL_SERVER_URL';
+
+              const messages = [
+                { role: 'system', content: 'You are a helpful assistant. Use the available tools to answer the user\'s question.' },
+                { role: 'user', content: 'Search my inbox for unread emails from Acme and summarize.' }
+              ];
+
+              const toolsInfo = await klavisClient.mcpServer.listTools({
+                serverUrl,
+                format: Klavis.ToolFormat.Openai
+              });
+
+              const resp = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: messages as any,
+                tools: toolsInfo.tools as any
+              });
+
+              messages.push(resp.choices[0].message as any);
+
+              if (resp.choices[0].message.tool_calls) {
+                for (const tc of resp.choices[0].message.tool_calls) {
+                  const fn = tc.function.name;
+                  const args = JSON.parse(tc.function.arguments);
+                  const result = await klavisClient.mcpServer.callTools({
+                    serverUrl,
+                    toolName: fn,
+                    toolArgs: args
+                  });
+                  messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) } as any);
+                }
+              }
+
+              const final = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: messages as any
+              });
+              console.log(final.choices[0].message.content);
+              ```
+            </CodeGroup>
+          </Tab>
+        </Tabs>
+        <CardGroup cols={2}>
+          <Card title="List Tools" icon="list" href="/api-reference/mcp-server/list-tools" />
+          <Card title="Call Tool" icon="bolt" href="/api-reference/mcp-server/call-tool" />
+        </CardGroup>
+      </Step>
+      <Step title="Optional: Use with function calling">
+        <CardGroup cols={2}>
+          <Card title="Python SDK" icon="python" href="/documentation/sdk/python" />
+          <Card title="TypeScript SDK" icon="js" href="/documentation/sdk/typescript" />
+        </CardGroup>
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your <a href="https://www.klavis.ai/home">Dashboard</a>.
+      </Step>
+      <Step title="Create server">
+        Choose an integration (for example, Gmail), set a user ID, and create.
+      </Step>
+      <Step title="Authenticate">
+        Complete OAuth if prompted to authorize the app.
+      </Step>
+      <Step title="Copy server URL">
+        Use this URL in your MCP client or SDK calls.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Run the server locally or in your infra">
+        <CodeGroup>
+          ```bash Docker
+          docker run -p 5000:5000 ghcr.io/klavis-ai/gmail-mcp-server:latest
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Point your MCP client to the URL">
+        Use the local URL (for example, http://localhost:5000) in your client or aggregator.
+      </Step>
+      <Step title="Secure and deploy">
+        Add TLS, auth, and deploy behind your gateway as needed.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Python SDK" icon="python" href="/documentation/sdk/python">
+    Deep dive into the Python SDK
+  </Card>
+  <Card title="TypeScript SDK" icon="js" href="/documentation/sdk/typescript">
+    Build with TypeScript/JavaScript
+  </Card>
+  <Card title="MCP Integrations" icon="server" href="/documentation/mcp-server/github">
+    Explore available servers and capabilities
+  </Card>
+  <Card title="Strata" icon="layers" href="/documentation/concepts/strata">
+    Progressive tool discovery across 100+ integrations
+  </Card>
+  <Card title="Auth & OAuth" icon="key" href="/documentation/auth/white-label">
+    Unified auth with OAuth and API keys
+  </Card>
+  <Card title="API Reference" icon="api" href="/api-reference/introduction">
+    Endpoints for servers, tools, and auth
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="401 Unauthorized or invalid API key">
+    Ensure you are using the correct API key from your Dashboard and that requests include the header `Authorization: Bearer YOUR_KLAVIS_API_KEY`.
+  </Accordion>
+  <Accordion title="OAuth page not loading or failing">
+    Some enterprise networks block consent pages. Try another network or private window. Verify the `oauth_url` is correct and not expired, then retry creating the server.
+  </Accordion>
+  <Accordion title="No tools returned or tool not found">
+    Verify the integration supports the tool you expect. Re-list tools after authentication and check the tool schema to construct valid arguments.
+  </Accordion>
+  <Accordion title="Tool call failing with invalid arguments">
+    Read the tool's JSON schema and provide all required parameters with correct types. Start with minimal required fields and iterate.
+  </Accordion>
+  <Accordion title="Rate limits or timeouts">
+    Add retries with backoff and avoid rapid, concurrent tool calls. If issues persist, check status in your Dashboard.
+  </Accordion>
+</AccordionGroup>
