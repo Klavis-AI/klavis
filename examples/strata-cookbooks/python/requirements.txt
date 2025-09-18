@@ -1,0 +1,4 @@
+openai>=1.108.0
+klavis>=2.0.2
+python-dotenv>=1.1.0
+mcp==1.14.0

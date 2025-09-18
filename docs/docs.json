@@ -19,18 +19,52 @@
     "strict": true
   },
   "navigation": {
-    "anchors": [
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Website",
+          "href": "https://www.klavis.ai",
+          "icon": "globe"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://www.klavis.ai/blog",
+          "icon": "newspaper"
+        }
+      ]
+    },
+    "tabs": [
       {
-        "anchor": "Documentation",
-        "icon": "server",
+        "tab": "Documentation",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Get Started",
             "pages": [
               "documentation/introduction",
-              "documentation/develop-with-ai",
-              "documentation/klavis-security",
-              "documentation/klavis-oauth-white-label"
+              "documentation/quickstart",
+              "documentation/installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "documentation/concepts/mcp",
+              "documentation/concepts/strata"
+            ]
+          },
+          {
+            "group": "Auth with Klavis",
+            "pages": [
+              "documentation/auth/api-key",
+              "documentation/auth/oauth",
+              "documentation/auth/white-label"
+            ]
+          },
+          {
+            "group": "Enterprise Security",
+            "pages": [
+              "documentation/enterprise-security/klavis-security"
             ]
           },
           {
@@ -56,8 +90,9 @@
             ]
           },
           {
-            "group": "MCP Server Quickstart",
+            "group": "MCP Integrations",
             "pages": [
+              "documentation/mcp-server/overview",
               "documentation/mcp-server/affinity",
               "documentation/mcp-server/airtable",
               "documentation/mcp-server/asana",
@@ -109,33 +144,16 @@
               "documentation/mcp-server/youtube",
               "documentation/mcp-server/zendesk"
             ]
-          },
-          {
-            "group": "MCP Client Quickstart",
-            "pages": [
-              "documentation/mcp-client/discord",
-              "documentation/mcp-client/slack",
-              "documentation/mcp-client/web",
-              "documentation/mcp-client/whatsapp"
-            ]
           }
         ]
       },
       {
-        "anchor": "API Reference",
-        "icon": "webhook",
+        "tab": "API Reference",
+        "icon": "magnifying-glass",
         "groups": [
           {
             "group": "API References",
             "pages": ["api-reference/introduction"]
-          },
-          {
-            "group": "Manage MCP Server",
-            "pages": [
-              "api-reference/mcp-server/create-a-server-instance",
-              "api-reference/mcp-server/get-server-instance",
-              "api-reference/mcp-server/delete-a-server-instance"
-            ]
           },
           {
             "group": "Strata",
@@ -144,6 +162,14 @@
               "api-reference/strata/get",
               "api-reference/strata/add",
               "api-reference/strata/delete"
+            ]
+          },
+          {
+            "group": "Individual MCP Server",
+            "pages": [
+              "api-reference/mcp-server/create-a-server-instance",
+              "api-reference/mcp-server/get-server-instance",
+              "api-reference/mcp-server/delete-a-server-instance"
             ]
           },
           {
@@ -292,7 +318,7 @@
         ]
       },
       {
-        "anchor": "Knowledge Base",
+        "tab": "Knowledge Base",
         "icon": "book",
         "groups": [
           {
@@ -301,7 +327,7 @@
           },
           {
             "group": "Onboarding",
-            "pages": ["knowledge-base/onboarding/create-your-first-mcp-server", "knowledge-base/onboarding/use-your-first-mcp-server"]
+            "pages": ["knowledge-base/onboarding/create-your-first-mcp-server", "knowledge-base/onboarding/use-your-first-mcp-server", "knowledge-base/develop-with-ai"]
           },
           {
             "group": "Developer",
