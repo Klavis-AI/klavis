@@ -1,6 +1,6 @@
 import logging
 
-from .shared_utils import reddit_get, PostDetails, CommentInfo
+from .base import reddit_get, PostDetails, CommentInfo
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ async def get_post_and_top_comments(post_id: str, subreddit: str) -> PostDetails
 
     logger.info(f"Making API call to Reddit for comments on post '{post_id}' in subreddit '{subreddit}'")
     # Use the comments endpoint directly - this is the correct Reddit API pattern
-    data = reddit_get(f"/comments/{post_id}", params=params)
+    data = await reddit_get(f"/comments/{post_id}", params=params)
     
     # Reddit returns an array: [post_listing, comments_listing]
     # First element contains the post data, second contains comments

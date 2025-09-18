@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from .shared_utils import reddit_get, PostInfo, build_broad_query, compute_semantic_score
+from .base import reddit_get, PostInfo, build_broad_query, compute_semantic_score
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ async def find_similar_posts_reddit(post_id: str, limit: int = 10) -> List[PostI
     ranks by semantic similarity and Reddit score, and returns up to `limit`.
     """
     # 1) Resolve the post to get its title and subreddit quickly
-    info = reddit_get("/api/info", params={"id": f"t3_{post_id}"})
+    info = await reddit_get("/api/info", params={"id": f"t3_{post_id}"})
     children = info.get("data", {}).get("children", [])
     if not children:
         raise ValueError(f"Post with ID '{post_id}' not found")
@@ -39,7 +39,7 @@ async def find_similar_posts_reddit(post_id: str, limit: int = 10) -> List[PostI
                 "restrict_sr": 1,
                 "subreddit": subreddit,
             }
-            data_sr = reddit_get("/search", params=params_sr)
+            data_sr = await reddit_get("/search", params=params_sr)
             for child in data_sr.get("data", {}).get("children", []):
                 pd = child.get("data", {})
                 if pd.get("id") == post_id:
@@ -66,7 +66,7 @@ async def find_similar_posts_reddit(post_id: str, limit: int = 10) -> List[PostI
             "type": "link",
             "sort": "relevance",
         }
-        data_all = reddit_get("/search", params=params_all)
+        data_all = await reddit_get("/search", params=params_all)
         for child in data_all.get("data", {}).get("children", []):
             pd = child.get("data", {})
             if pd.get("id") == post_id:

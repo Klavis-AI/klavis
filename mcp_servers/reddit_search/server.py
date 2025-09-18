@@ -22,6 +22,7 @@ from tools import (
     get_post_and_top_comments as get_comments_impl,
     find_similar_posts_reddit as find_similar_impl,
 )
+from tools.base import init_http_clients, close_http_clients
 
 load_dotenv()
 
@@ -190,15 +191,10 @@ def main(
 
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
-
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        async with sse.connect_sse(
-                request.scope, request.receive, request._send
-        ) as streams:
-            await app.run(
-                streams[0], streams[1], app.create_initialization_options()
-            )
+        async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
+            await app.run(streams[0], streams[1], app.create_initialization_options())
         return Response()
 
     # Set up StreamableHTTP transport
@@ -217,13 +213,15 @@ def main(
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
-        """Context manager for session manager."""
+        """Context manager for session manager and HTTP clients."""
+        await init_http_clients()
         async with session_manager.run():
             logger.info("Reddit MCP Server started with dual transports!")
             try:
                 yield
             finally:
                 logger.info("Reddit MCP Server shutting down...")
+                await close_http_clients()
 
     # Create an ASGI application with routes for both transports
     starlette_app = Starlette(

@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from .shared_utils import reddit_get, SubredditInfo
+from .base import reddit_get, SubredditInfo
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ async def find_relevant_subreddits(query: str) -> List[SubredditInfo]:
     params = {"q": query, "limit": 10, "type": "sr"}
 
     logger.info(f"Making API call to Reddit to find subreddits for query: '{query}'")
-    data = reddit_get("/subreddits/search", params=params)
+    data = await reddit_get("/subreddits/search", params=params)
     # Reddit API returns data in listing format: {"data": {"children": [...]}}
     subreddits = data["data"]["children"]
     

@@ -5,6 +5,7 @@ from typing import Dict, List, TypedDict
 import time
 import random
 import re
+import asyncio
 
 from dotenv import load_dotenv
 
@@ -22,82 +23,120 @@ REDDIT_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "klavis-mcp/0.1 (+https://klavis.ai)")
 
 # cached access token and client
-_access_token = None
+_access_token: str | None = None
 _token_expires_at: float | None = None
-_client: httpx.Client | None = None
+_async_client: httpx.AsyncClient | None = None
+_token_lock: asyncio.Lock = asyncio.Lock()
+
+# simple per-process concurrency limiter (env-configurable)
+_max_concurrency = int(os.getenv("REDDIT_MAX_CONCURRENCY", "10"))
+_request_semaphore = asyncio.Semaphore(_max_concurrency)
 
 
-def _get_reddit_auth_header() -> dict[str, str]:
-    """
-    Authenticates with the Reddit API and returns the required authorization header.
-    It cleverly caches the access token in memory.
-    """
-    global _access_token, _client
+async def _ensure_async_client() -> httpx.AsyncClient:
+    global _async_client
+    if _async_client is None:
+        _async_client = httpx.AsyncClient(timeout=httpx.Timeout(20.0, connect=10.0))
+    return _async_client
 
-    # if the access token is already cached, return it
-    if _access_token:
-        return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
 
-    # if the client_ID and client_secret are not set, raise an error
+async def _refresh_token_locked() -> None:
+    """Refresh OAuth token under lock. Caller must hold _token_lock."""
+    global _access_token, _token_expires_at
+
     if not REDDIT_CLIENT_ID or not REDDIT_CLIENT_SECRET:
         raise ValueError("REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET must be set")
 
+    logger.info("Requesting new Reddit API access token…")
+    client = await _ensure_async_client()
     auth = (REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
     data = {"grant_type": "client_credentials"}
     headers = {"User-Agent": REDDIT_USER_AGENT}
-
-    logger.info("No cached token found. Requesting new Reddit API access token...")
-
-    # make the post request to get the access token
-    with httpx.Client() as client:
-        response = client.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
-        response.raise_for_status()
-
-    token_data = response.json()
-    _access_token = token_data["access_token"]
-    logger.info("Successfully obtained and cached new Reddit API access token.")
-
-    return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
+    resp = await client.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
+    resp.raise_for_status()
+    token_data = resp.json()
+    _access_token = token_data.get("access_token")
+    expires_in = float(token_data.get("expires_in", 3600))
+    # refresh a bit early to avoid expiry races
+    _token_expires_at = time.time() + max(60.0, expires_in - 120.0)
+    logger.info("Obtained new Reddit API access token.")
 
 
-def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3) -> Dict:
-    """HTTP GET helper with UA header and simple retry/backoff including 429.
+async def _get_reddit_auth_header() -> dict[str, str]:
+    """Return Authorization header, refreshing the token if needed."""
+    global _access_token, _token_expires_at
+
+    # Fast path: token exists and not near expiry
+    if _access_token and _token_expires_at and time.time() < _token_expires_at:
+        return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
+
+    # Acquire lock to refresh once across awaiters
+    async with _token_lock:
+        if _access_token and _token_expires_at and time.time() < _token_expires_at:
+            return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
+        await _refresh_token_locked()
+        return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
+
+
+async def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3) -> Dict:
+    """HTTP GET helper with UA header and async retry/backoff including 429.
 
     path should start with '/'.
     """
-    global _client
-    if _client is None:
-        _client = httpx.Client()
-
-    headers = _get_reddit_auth_header()
+    client = await _ensure_async_client()
+    headers = await _get_reddit_auth_header()
     params = params.copy() if params else {}
-    # Prefer raw_json for more consistent body content
     params.setdefault("raw_json", 1)
 
     backoff_seconds = 1.0
     last_exc: Exception | None = None
-    for attempt in range(max_retries):
-        try:
-            response = _client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params, timeout=20)
-            if response.status_code == 429:
-                retry_after = response.headers.get("Retry-After")
-                sleep_s = float(retry_after) if retry_after else backoff_seconds
-                logger.warning(f"Reddit API 429 rate limit. Sleeping {sleep_s}s then retrying…")
-                time.sleep(sleep_s)
-                backoff_seconds = min(backoff_seconds * 2, 8)
-                continue
-            response.raise_for_status()
-            return response.json()
-        except httpx.RequestError as exc:
-            last_exc = exc
-            logger.warning(f"Reddit GET {path} failed (attempt {attempt+1}/{max_retries}): {exc}")
-            time.sleep(backoff_seconds + random.uniform(0, 0.5))
-            backoff_seconds = min(backoff_seconds * 2, 8)
 
-    # If all retries failed, raise last exception
+    for attempt in range(max_retries):
+        async with _request_semaphore:
+            try:
+                resp = await client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params)
+                if resp.status_code == 401:
+                    # Token likely expired/invalid; refresh once and retry
+                    async with _token_lock:
+                        _access_token_local = _access_token  # for log context
+                        _access_token_local = _access_token_local  # no-op to avoid linter
+                        await _refresh_token_locked()
+                        headers = await _get_reddit_auth_header()
+                    resp = await client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params)
+
+                if resp.status_code == 429:
+                    retry_after = resp.headers.get("Retry-After")
+                    sleep_s = float(retry_after) if retry_after else backoff_seconds
+                    logger.warning(f"Reddit API 429 rate limit. Sleeping {sleep_s}s then retrying…")
+                    await asyncio.sleep(sleep_s + random.uniform(0, 0.25))
+                    backoff_seconds = min(backoff_seconds * 2, 8)
+                    continue
+
+                resp.raise_for_status()
+                return resp.json()
+            except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+                last_exc = exc
+                logger.warning(f"Reddit GET {path} failed (attempt {attempt+1}/{max_retries}): {exc}")
+                await asyncio.sleep(backoff_seconds + random.uniform(0, 0.5))
+                backoff_seconds = min(backoff_seconds * 2, 8)
+
     if last_exc:
         raise last_exc
     raise RuntimeError("Reddit GET failed unexpectedly with no exception recorded")
+
+
+# Lifecycle helpers to integrate with server startup/shutdown
+async def init_http_clients() -> None:
+    await _ensure_async_client()
+
+
+async def close_http_clients() -> None:
+    global _async_client
+    if _async_client is not None:
+        try:
+            await _async_client.aclose()
+        finally:
+            _async_client = None
 
 
 _STOPWORDS = {

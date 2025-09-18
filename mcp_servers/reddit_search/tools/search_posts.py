@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from .shared_utils import reddit_get, PostInfo, build_broad_query, compute_semantic_score
+from .base import reddit_get, PostInfo, build_broad_query, compute_semantic_score
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
             "sort": "relevance",
             "restrict_sr": 1,
         }
-        data = reddit_get("/search", params={**params, "sr_detail": False, "subreddit": subreddit})
+        data = await reddit_get("/search", params={**params, "sr_detail": False, "subreddit": subreddit})
         posts = data.get("data", {}).get("children", [])
         for post in posts:
             pd = post.get("data", {})
@@ -55,8 +55,8 @@ async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
     # 2) Fallback to listing endpoints and local filtering if needed
     if len(scored) < 10:
         try:
-            hot = reddit_get(f"/r/{subreddit}/hot", params={"limit": 25}).get("data", {}).get("children", [])
-            top = reddit_get(f"/r/{subreddit}/top", params={"limit": 25, "t": "month"}).get("data", {}).get("children", [])
+            hot = (await reddit_get(f"/r/{subreddit}/hot", params={"limit": 25})).get("data", {}).get("children", [])
+            top = (await reddit_get(f"/r/{subreddit}/top", params={"limit": 25, "t": "month"})).get("data", {}).get("children", [])
             for post in hot + top:
                 pd = post.get("data", {})
                 pi: PostInfo = PostInfo(
