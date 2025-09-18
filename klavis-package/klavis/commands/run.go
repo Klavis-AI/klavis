@@ -19,7 +19,7 @@ var runCmd = &cobra.Command{
 		fmt.Println("Running Server:", tool)
 
 		// Run Docker with interactive terminal
-		run := exec.Command("docker", "run", "--rm", "-it", image)
+		run := exec.Command("docker", "run", "--rm", "-it", "-p", "5000:5000", image)
 		run.Stdout = os.Stdout
 		run.Stderr = os.Stderr
 		run.Stdin = os.Stdin
