@@ -22,10 +22,10 @@ Imagine you have:
 
 Instead of flooding your AI model with hundreds of tools, Strata acts as an intelligent router:
 
-🔍 **Smart Discovery** → Only exposes a few essential tools to the model
-🎯 **Progressive Access** → Finds and surfaces the right tool when needed
-⚡ **Optimized Context** → Maintains peak model performance
-🔗 **Seamless Integration** → Works with your existing MCP servers, and easy configuration
+🔍 **Smart Discovery** → Only exposes a few essential tools to the model  
+🎯 **Progressive Access** → Finds and surfaces the right tool when needed  
+⚡ **Optimized Context** → Maintains peak model performance  
+🔗 **Seamless Integration** → Works with your existing MCP servers, and easy configuration  
 
 Your AI agent gets access to thousands of tools while maintaining high performance! ⚡
 
