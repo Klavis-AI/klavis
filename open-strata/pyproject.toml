@@ -1,7 +1,7 @@
 [project]
 name = "strata-mcp"
 version = "0.9.2"
-description = "A unified router for Model Context Protocol (MCP) servers that supports multiple transport types (SSE, HTTP, stdio) and provides tool routing capabilities."
+description = "One Model Context Protocol (MCP) server for AI agents to handle thousands of tools"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
