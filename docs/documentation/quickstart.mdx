@@ -26,6 +26,34 @@ mode: "wide"
 One MCP server for AI agents to handle thousands of tools progressively.
 
 <Tabs>
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your <a href="https://www.klavis.ai/home/mcp-servers">Dashboard</a>.
+        
+        <Tip>
+        Klavis enables all integrations for you by default. Click the ellipsis button if you want to disable a specific integration.
+        </Tip>
+        
+        <img
+          className="block dark:hidden"
+          src="/images/get-started/quickstart/strata_ui.png"
+          alt="Strata UI Dashboard"
+        />
+        <img
+          className="hidden dark:block"
+          src="/images/get-started/quickstart/strata_ui.png"
+          alt="Strata UI Dashboard"
+        />
+      </Step>
+      <Step title="(Optional) Authenticate">
+        Complete authentication by clicking the "Authorize" button. You can also skip this step since we have an authentication handler tool that will prompt to authenticate when needed.
+      </Step>
+      <Step title="Use in your app">
+        Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
+      </Step>
+    </Steps>
+  </Tab>
   <Tab title="API">
     <Steps>
       <Step title="Install the SDKs">
@@ -209,33 +237,6 @@ One MCP server for AI agents to handle thousands of tools progressively.
       </Step>
     </Steps>
   </Tab>
-  <Tab title="UI">
-    <Steps>
-      <Step title="Open Dashboard">
-        Go to your <a href="https://www.klavis.ai/home/mcp-servers">Dashboard</a>.
-        
-        <img
-          className="block dark:hidden"
-          src="/images/get-started/quickstart/strata_ui.png"
-          alt="Strata UI Dashboard"
-        />
-        <img
-          className="hidden dark:block"
-          src="/images/get-started/quickstart/strata_ui.png"
-          alt="Strata UI Dashboard"
-        />
-      </Step>
-      <Step title="Choose apps">
-        Select the integrations to include (for example, Gmail, Slack, Notion, GitHub).
-      </Step>
-      <Step title="Authenticate">
-        Complete Auth for any apps that require it.
-      </Step>
-      <Step title="Use in your app">
-        Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
-      </Step>
-    </Steps>
-  </Tab>
   <Tab title="Open Source">
     <Steps>
       <Step title="Run self-hosted MCP servers (optional)">
@@ -267,6 +268,33 @@ One MCP server for AI agents to handle thousands of tools progressively.
 Connect a single integration (like Gmail or GitHub) as its own MCP server.
 
 <Tabs>
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your <a href="https://www.klavis.ai/home">Dashboard</a>.
+      </Step>
+      <Step title="Choose apps">
+        Choose an integration (for example, Gmail), and get the "individual server url"
+        
+        <img
+          className="block dark:hidden"
+          src="/images/get-started/quickstart/individual_url.png"
+          alt="Individual Server URL"
+        />
+        <img
+          className="hidden dark:block"
+          src="/images/get-started/quickstart/individual_url.png"
+          alt="Individual Server URL"
+        />
+      </Step>
+      <Step title="Authenticate">
+        Complete Auth by Click "Anthorize" button.
+      </Step>
+      <Step title="Use in your app">
+        Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
+      </Step>
+    </Steps>
+  </Tab>
   <Tab title="API">
     <Steps>
       <Step title="Install the SDKs (optional)">
@@ -429,33 +457,6 @@ Connect a single integration (like Gmail or GitHub) as its own MCP server.
             <Info>Coming soon</Info>
           </Tab>
         </Tabs>
-      </Step>
-    </Steps>
-  </Tab>
-  <Tab title="UI">
-    <Steps>
-      <Step title="Open Dashboard">
-        Go to your <a href="https://www.klavis.ai/home">Dashboard</a>.
-      </Step>
-      <Step title="Choose apps">
-        Choose an integration (for example, Gmail), and get the "individual server url"
-        
-        <img
-          className="block dark:hidden"
-          src="/images/get-started/quickstart/individual_url.png"
-          alt="Individual Server URL"
-        />
-        <img
-          className="hidden dark:block"
-          src="/images/get-started/quickstart/individual_url.png"
-          alt="Individual Server URL"
-        />
-      </Step>
-      <Step title="Authenticate">
-        Complete Auth if prompted to authorize the app.
-      </Step>
-      <Step title="Use in your app">
-        Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
       </Step>
     </Steps>
   </Tab>
