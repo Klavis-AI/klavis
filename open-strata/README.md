@@ -1,10 +1,6 @@
 <div align="center">
-  <picture>
-    <img src="https://raw.githubusercontent.com/klavis-ai/klavis/main/static/klavis-ai.png" width="80">
-  </picture>
+  <img width="1157" height="365" alt="image" src="https://github.com/user-attachments/assets/d1db7ed7-1bc5-4d49-a858-c10be6003347" />
 </div>
-
-<h1 align="center">Strata MCP - One MCP Server Handles Thousands of Tools</h1>
 
 
 # Overview
