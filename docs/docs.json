@@ -153,7 +153,7 @@
         "groups": [
           {
             "group": "API References",
-            "pages": ["api-reference/introduction"]
+            "pages": ["api-reference/introduction", "api-reference/api_key"]
           },
           {
             "group": "Strata",
@@ -215,103 +215,103 @@
               "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
                 "group": "GitHub OAuth",
-                "pages": ["api-reference/github-oauth/authorize-github"]
+                "pages": ["api-reference/oauth/github-oauth/authorize-github"]
               },
               {
                 "group": "Slack OAuth",
-                "pages": ["api-reference/slack-oauth/authorize-slack"]
+                "pages": ["api-reference/oauth/slack-oauth/authorize-slack"]
               },
               {
                 "group": "Jira OAuth",
-                "pages": ["api-reference/jira-oauth/authorize-jira"]
+                "pages": ["api-reference/oauth/jira-oauth/authorize-jira"]
               },
               {
                 "group": "Notion OAuth",
-                "pages": ["api-reference/notion-oauth/authorize-notion"]
+                "pages": ["api-reference/oauth/notion-oauth/authorize-notion"]
               },
               {
                 "group": "Supabase OAuth",
-                "pages": ["api-reference/supabase-oauth/authorize-supabase"]
+                "pages": ["api-reference/oauth/supabase-oauth/authorize-supabase"]
               },
               {
                 "group": "WordPress OAuth",
-                "pages": ["api-reference/wordpress-oauth/authorize-wordpress"]
+                "pages": ["api-reference/oauth/wordpress-oauth/authorize-wordpress"]
               },
               {
                 "group": "Gmail OAuth",
-                "pages": ["api-reference/gmail-oauth/authorize-gmail"]
+                "pages": ["api-reference/oauth/gmail-oauth/authorize-gmail"]
               },
               {
                 "group": "Google Calendar OAuth",
                 "pages": [
-                  "api-reference/gcalendar-oauth/authorize-gcalendar"
+                  "api-reference/oauth/gcalendar-oauth/authorize-gcalendar"
                 ]
               },
               {
                 "group": "Google Drive OAuth",
                 "pages": [
-                  "api-reference/gdrive-oauth/authorize-gdrive"
+                  "api-reference/oauth/gdrive-oauth/authorize-gdrive"
                 ]
               },
               {
                 "group": "Google Docs OAuth",
                 "pages": [
-                  "api-reference/gdocs-oauth/authorize-gdocs"
+                  "api-reference/oauth/gdocs-oauth/authorize-gdocs"
                 ]
               },
               {
                 "group": "Google Sheets OAuth",
                 "pages": [
-                  "api-reference/gsheets-oauth/authorize-gsheets"
+                  "api-reference/oauth/gsheets-oauth/authorize-gsheets"
                 ]
               },
               {
                 "group": "Airtable OAuth",
-                "pages": ["api-reference/airtable-oauth/authorize-airtable"]
+                "pages": ["api-reference/oauth/airtable-oauth/authorize-airtable"]
               },
               {
                 "group": "Asana OAuth",
-                "pages": ["api-reference/asana-oauth/authorize-asana"]
+                "pages": ["api-reference/oauth/asana-oauth/authorize-asana"]
               },
               {
                 "group": "Close OAuth",
-                "pages": ["api-reference/close-oauth/authorize-close"]
+                "pages": ["api-reference/oauth/close-oauth/authorize-close"]
               },
               {
                 "group": "Confluence OAuth",
-                "pages": ["api-reference/confluence-oauth/authorize-confluence"]
+                "pages": ["api-reference/oauth/confluence-oauth/authorize-confluence"]
               },
               {
                 "group": "Salesforce OAuth",
-                "pages": ["api-reference/salesforce-oauth/authorize-salesforce"]
+                "pages": ["api-reference/oauth/salesforce-oauth/authorize-salesforce"]
               },
               {
                 "group": "Linear OAuth",
-                "pages": ["api-reference/linear-oauth/authorize-linear"]
+                "pages": ["api-reference/oauth/linear-oauth/authorize-linear"]
               },
               {
                 "group": "Linkedin OAuth",
-                "pages": ["api-reference/linkedin-oauth/authorize-linkedin"]
+                "pages": ["api-reference/oauth/linkedin-oauth/authorize-linkedin"]
               },
               {
                 "group": "Attio OAuth",
-                "pages": ["api-reference/attio-oauth/authorize-attio"]
+                "pages": ["api-reference/oauth/attio-oauth/authorize-attio"]
               },
               {
                 "group": "Canva OAuth",
-                "pages": ["api-reference/canva-oauth/authorize-canva"]
+                "pages": ["api-reference/oauth/canva-oauth/authorize-canva"]
               },
               {
                 "group": "Xero OAuth",
-                "pages": ["api-reference/xero-oauth/authorize-xero"]
+                "pages": ["api-reference/oauth/xero-oauth/authorize-xero"]
               },
               {
                 "group": "Dropbox OAuth",
-                "pages": ["api-reference/dropbox-oauth/authorize-dropbox"]
+                "pages": ["api-reference/oauth/dropbox-oauth/authorize-dropbox"]
               },
               {
                 "group": "QuickBooks OAuth",
-                "pages": ["api-reference/quickbooks-oauth/authorize-quickbooks"]
+                "pages": ["api-reference/oauth/quickbooks-oauth/authorize-quickbooks"]
               }
             ]
           }
