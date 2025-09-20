@@ -200,24 +200,66 @@
         ]
       }
     },
-    "/mcp-server/strata/delete": {
+    "/mcp-server/strata/{strataId}/servers": {
       "delete": {
         "tags": [
           "mcp-server"
         ],
         "summary": "Delete",
-        "description": "Delete servers from an existing Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to delete all Klavis MCP servers, a list of specific server names, or null to delete no servers\n- externalServers: Optional list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
-        "operationId": "delete_servers_from_strata_mcp_server_strata_delete_delete",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StrataDeleteServersRequest"
-              }
+        "description": "Delete servers from an existing Strata MCP server.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Query parameter - comma-separated list of Klavis MCP server names or 'ALL', or omit to delete no Klavis servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
+        "operationId": "delete_servers_from_strata_mcp_server_strata__strataId__servers_delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Strataid"
             }
           },
-          "required": true
-        },
+          {
+            "name": "servers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated list of Klavis MCP server names to delete, or 'ALL' to delete all Klavis servers",
+              "title": "Servers"
+            },
+            "description": "Comma-separated list of Klavis MCP server names to delete, or 'ALL' to delete all Klavis servers"
+          },
+          {
+            "name": "externalServers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated list of external server names to delete",
+              "title": "Externalservers"
+            },
+            "description": "Comma-separated list of external server names to delete"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -239,32 +281,33 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
-    "/mcp-server/strata/get": {
+    "/mcp-server/strata/{strataId}": {
       "get": {
         "tags": [
           "mcp-server"
         ],
         "summary": "Get",
         "description": "Get information about an existing Strata MCP server instance.\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
-        "operationId": "get_strata_instance_mcp_server_strata_get_get",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StrataGetRequest"
-              }
+        "operationId": "get_strata_instance_mcp_server_strata__strataId__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Strataid"
             }
-          },
-          "required": true
-        },
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -286,12 +329,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/mcp-server/instance/create": {
@@ -1085,7 +1123,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1182,7 +1222,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1279,7 +1321,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1358,7 +1402,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1455,7 +1501,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1552,7 +1600,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1649,7 +1699,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1746,7 +1798,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1843,7 +1897,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1940,7 +1996,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2037,7 +2095,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2134,7 +2194,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2231,7 +2293,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2310,7 +2374,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2425,7 +2491,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2522,7 +2590,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2619,7 +2689,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2716,7 +2788,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2795,7 +2869,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2892,7 +2968,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2989,7 +3067,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3086,7 +3166,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3183,7 +3265,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3280,7 +3364,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3377,7 +3463,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3474,7 +3562,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3571,7 +3661,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3668,7 +3760,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3765,7 +3859,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3844,7 +3940,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4018,7 +4116,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4115,7 +4215,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4212,7 +4314,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4308,7 +4412,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4405,7 +4511,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4502,7 +4610,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4636,7 +4746,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4803,7 +4915,9 @@
       "CallToolResult": {
         "properties": {
           "content": {
-            "items": {},
+            "items": {
+
+            },
             "type": "array",
             "title": "Content",
             "description": "The content of the tool call"
@@ -5407,7 +5521,9 @@
           "tools": {
             "anyOf": [
               {
-                "items": {},
+                "items": {
+
+                },
                 "type": "array"
               },
               {
@@ -5878,55 +5994,6 @@
         ],
         "title": "StrataCreateResponse"
       },
-      "StrataDeleteServersRequest": {
-        "properties": {
-          "strataId": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Strataid",
-            "description": "The strata server ID"
-          },
-          "servers": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/McpServerName"
-                },
-                "type": "array"
-              },
-              {
-                "type": "string",
-                "const": "ALL"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Servers",
-            "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers."
-          },
-          "externalServers": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Externalservers",
-            "description": "Optional list of external server names to delete. These are the names of previously added external MCP servers."
-          }
-        },
-        "type": "object",
-        "required": [
-          "strataId"
-        ],
-        "title": "StrataDeleteServersRequest"
-      },
       "StrataDeleteServersResponse": {
         "properties": {
           "deletedServers": {
@@ -5952,21 +6019,6 @@
           "deletedExternalServers"
         ],
         "title": "StrataDeleteServersResponse"
-      },
-      "StrataGetRequest": {
-        "properties": {
-          "strataId": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Strataid",
-            "description": "The strata server ID"
-          }
-        },
-        "type": "object",
-        "required": [
-          "strataId"
-        ],
-        "title": "StrataGetRequest"
       },
       "StrataGetResponse": {
         "properties": {
