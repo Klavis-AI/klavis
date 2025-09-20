@@ -331,7 +331,7 @@
           },
           {
             "group": "Use MCP Server",
-            "pages": ["knowledge-base/use-mcp-server/chatgpt","knowledge-base/use-mcp-server/claude_code", "knowledge-base/use-mcp-server/claude_web_desktop", "knowledge-base/use-mcp-server/cline", "knowledge-base/use-mcp-server/continue",  "knowledge-base/use-mcp-server/cursor","knowledge-base/use-mcp-server/github_copilot","knowledge-base/use-mcp-server/kiro","knowledge-base/use-mcp-server/windsurf"]
+            "pages": ["knowledge-base/use-mcp-server/overview", "knowledge-base/use-mcp-server/chatgpt","knowledge-base/use-mcp-server/claude_code", "knowledge-base/use-mcp-server/claude_web_desktop", "knowledge-base/use-mcp-server/cline", "knowledge-base/use-mcp-server/continue",  "knowledge-base/use-mcp-server/cursor","knowledge-base/use-mcp-server/github_copilot","knowledge-base/use-mcp-server/kiro","knowledge-base/use-mcp-server/windsurf"]
           },
           {
             "group": "OAuth Apps",
