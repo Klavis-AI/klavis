@@ -1,202 +1,163 @@
 ---
 title: 'Google Drive'
-description: 'Learn how to use Klavis to connect your AI application to Google Drive MCP Server'
+description: 'Connect AI agents to Google Drive for file storage and collaboration'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Google Drive to manage files, folders, permissions, and organize cloud storage through AI agents.
 
-## For Developer
-
-Follow the instructions below to integrate Google Drive MCP server to your AI application using our API or SDK.
-
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Google Drive MCP Server
-
-Use the following endpoint to create a new remote Google Drive MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Google Drive MCP server instance
-google_drive_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.GOOGLE_DRIVE,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Google Drive MCP server instance
-const googleDriveServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.GoogleDrive,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Google Drive",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Google Drive\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Google Drive\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://gdrive-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/gdrive/authorize?instance_id=<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check>**serverUrl** specifies the endpoint of the Google Drive MCP server, which you can connect with the MCP client of your application.</Check>
-<Note>**instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Google Drive information.</Note>
-
-### 2. Implement OAuth Authorization
-
-<Note>
-**Google Picker API**
-
-Klavis use Google Picker API to allow the user to create Drive files, and select and modify any file from their Drive that they want to share with your application , including files not created with the application. This gives users more control and confidence that your application's access to their files is limited and secure.
-</Note>
-
-Or if you want to set up your own branding - [White Labeling](https://docs.klavis.ai/documentation/auth/white-label)
-
-After you have set up the white labeling for Google Drive, you can then do the following:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(google_drive_server.oauth_url)
-```
-
-```javascript TypeScript
-// The OAuth URL is provided in the server response
-console.log('OAuth URL:', googleDriveServer.oauthUrl);
-
-// Redirect user to authorize
-window.location.href = googleDriveServer.oauthUrl;
-```
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/gdrive/authorize"
-    
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-    
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-    
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class GoogleDriveOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/gdrive/authorize?instance_id=" + 
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Google Drive MCP server instance
+          google_drive_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.GOOGLE_DRIVE,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Google Drive MCP server instance
+          const googleDriveServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.GoogleDrive,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Google Drive",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
         
-        System.out.println("Redirect to: " + authUrl);
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Google Drive
+          - `instanceId`: Unique identifier for your server instance
+          - `oauthUrl`: OAuth authorization URL for Google Drive authentication
+        </Info>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(google_drive_server.oauth_url)
+          ```
+          
+          ```typescript TypeScript
+          // Redirect user to OAuth authorization
+          window.location.href = googleDriveServer.oauthUrl;
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/gdrive/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
         
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
-</CodeGroup>
-<Tip>
-You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
-</Tip>
+        <Check>
+          🎉 **Your Google Drive MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-### Watch the Example
-<iframe
-  width="725"
-  height="450"
-  src="https://www.youtube.com/embed/Yp3qh0DjXHM"
-  title="YouTube video player"
-  frameBorder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  allowFullScreen
-></iframe>
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Google Drive">
+        Select Google Drive from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Google Drive account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/google_drive
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/google-drive-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/google-drive-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "google_drive": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
 | Tool Name                                    | Description                                                                                    |
@@ -206,4 +167,32 @@ You can also specify scope and redirect_url in the authUrl, and we also support 
 | google_drive_get_file_tree_structure         | Get the file/folder tree structure of the user's Google Drive                                 |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

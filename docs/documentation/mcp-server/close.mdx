@@ -1,215 +1,218 @@
 ---
 title: 'Close'
-description: 'Learn how to use Klavis to connect your AI application to Close CRM MCP Server'
+description: 'Connect AI agents to Close CRM for sales pipeline management and lead automation'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Close CRM to manage leads, contacts, opportunities, and automate sales workflows through AI agents.
 
-## For Developer
-
-Follow the instructions below to integrate Close CRM MCP server to your AI application using our API or SDK.
-
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Close CRM MCP Server
-
-Use the following endpoint to create a new remote Close CRM MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Close MCP server instance
-close_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.CLOSE,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Close MCP server instance
-const closeServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Close,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Close",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Close\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Close\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://close-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/close/authorize?instance_id=<instance-id>"
-}
-```
-</CodeGroup>
-
-
-<Check> **serverUrl** specifies the endpoint of the Close CRM MCP server, which you can connect with the MCP client of your application.</Check>
-<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Close CRM information.</Note>
-
-
-### 2. Implement OAuth Authorization
-
-Redirect users to the OAuth authorization flow:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(close_server.oauth_url)
-```
-
-```javascript TypeScript
-// Redirect user to authorize
-window.location.href = closeServer.oauthUrl;
-```
-
-
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/close/authorize"
-    
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-    
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-    
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class CloseOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/close/authorize?instance_id=" + 
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Close CRM MCP server instance
+          close_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.CLOSE,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Close CRM MCP server instance
+          const closeServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Close,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Close",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
         
-        System.out.println("Redirect to: " + authUrl);
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Close CRM
+          - `instanceId`: Unique identifier for your server instance
+          - `oauthUrl`: OAuth authorization URL for Close CRM authentication
+        </Info>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(close_server.oauth_url)
+          ```
+          
+          ```typescript TypeScript
+          // Redirect user to OAuth authorization
+          window.location.href = closeServer.oauthUrl;
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/close/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
         
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
+        <Check>
+          🎉 **Your Close CRM MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Close">
+        Select Close from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Close CRM account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/close
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/close-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/close-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "close": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-</CodeGroup>
-
-<Tip>
-You can also specify scope and redirect_url in the authUrl. Check the API reference for more details.
-</Tip>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| close_create_lead            | Create a new lead in Close CRM                                          |
-| close_get_lead               | Get a lead by its ID from Close CRM                                     |
-| close_search_leads           | Search for leads in Close CRM                                           |
-| close_update_lead            | Update an existing lead in Close CRM                                    |
-| close_delete_lead            | Delete a lead from Close CRM                                            |
-| close_list_leads             | List leads from Close CRM                                               |
-| close_create_contact         | Create a new contact in Close CRM                                       |
-| close_get_contact            | Get a contact by its ID from Close CRM                                  |
-| close_search_contacts        | Search for contacts in Close CRM                                        |
-| close_update_contact         | Update an existing contact in Close CRM                                 |
-| close_delete_contact         | Delete a contact from Close CRM                                         |
-| close_create_opportunity     | Create a new opportunity in Close CRM                                   |
-| close_get_opportunity        | Get an opportunity by its ID from Close CRM                             |
-| close_update_opportunity     | Update an existing opportunity in Close CRM                             |
-| close_delete_opportunity     | Delete an opportunity from Close CRM                                    |
-| close_create_task            | Create a new task in Close CRM                                          |
-| close_get_task               | Get a task by its ID from Close CRM                                     |
-| close_update_task            | Update an existing task in Close CRM                                    |
-| close_delete_task            | Delete a task from Close CRM                                            |
-| close_list_tasks             | List tasks from Close CRM                                               |
-| close_get_current_user       | Get information about the current user                                   |
-| close_list_users             | List users from Close CRM                                               |
-| close_get_user               | Get a user by their ID from Close CRM                                   |
+| Tool Name | Description |
+|-----------|-------------|
+| close_create_lead | Create a new lead in Close CRM |
+| close_get_lead | Get a lead by its ID from Close CRM |
+| close_search_leads | Search for leads in Close CRM |
+| close_update_lead | Update an existing lead in Close CRM |
+| close_delete_lead | Delete a lead from Close CRM |
+| close_list_leads | List leads from Close CRM |
+| close_create_contact | Create a new contact in Close CRM |
+| close_get_contact | Get a contact by its ID from Close CRM |
+| close_search_contacts | Search for contacts in Close CRM |
+| close_update_contact | Update an existing contact in Close CRM |
+| close_delete_contact | Delete a contact from Close CRM |
+| close_create_opportunity | Create a new opportunity in Close CRM |
+| close_get_opportunity | Get an opportunity by its ID from Close CRM |
+| close_update_opportunity | Update an existing opportunity in Close CRM |
+| close_delete_opportunity | Delete an opportunity from Close CRM |
+| close_create_task | Create a new task in Close CRM |
+| close_get_task | Get a task by its ID from Close CRM |
+| close_update_task | Update an existing task in Close CRM |
+| close_delete_task | Delete a task from Close CRM |
+| close_list_tasks | List tasks from Close CRM |
+| close_get_current_user | Get information about the current user |
+| close_list_users | List users from Close CRM |
+| close_get_user | Get a user by their ID from Close CRM |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

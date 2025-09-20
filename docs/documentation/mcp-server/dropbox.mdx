@@ -1,239 +1,243 @@
 ---
 title: 'Dropbox'
-description: 'Learn how to use Klavis to connect your AI application to Dropbox MCP Server'
+description: 'Connect AI agents to Dropbox for file storage and collaboration management'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Dropbox to manage files, organize folders, share content, and automate file operations through AI agents.
 
-## For Developer
-
-Follow the instructions below to integrate Dropbox MCP server to your AI application using our API or SDK.
-
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Dropbox MCP Server
-
-Use the following endpoint to create a new remote Dropbox MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Dropbox MCP server instance
-dropbox_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.DROPBOX,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Dropbox MCP server instance
-const dropboxServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Dropbox,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Dropbox",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Dropbox\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Dropbox\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://dropbox-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/dropbox/authorize?instance_id=<instance-id>"
-}
-```
-</CodeGroup>
-
-
-<Check> **serverUrl** specifies the endpoint of the Dropbox MCP server, which you can connect with the MCP client of your application.</Check>
-<Note> **instanceId** is used for authentication and identification of your server instance. After you complete the next steps, this token allows the MCP server to access user's private Dropbox information.</Note>
-
-
-### 2. Implement OAuth Authorization
-
-Redirect users to the OAuth authorization flow:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(dropbox_server.oauth_url)
-```
-
-```javascript TypeScript
-// The OAuth URL is provided in the server response
-console.log('OAuth URL:', dropboxServer.oauthUrl);
-
-// Redirect user to authorize
-window.location.href = dropboxServer.oauthUrl;
-```
-
-
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/dropbox/authorize"
-    
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-    
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-    
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class DropboxOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/dropbox/authorize?instance_id=" + 
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Dropbox MCP server instance
+          dropbox_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.DROPBOX,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Dropbox MCP server instance
+          const dropboxServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Dropbox,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Dropbox",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
         
-        System.out.println("Redirect to: " + authUrl);
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Dropbox
+          - `instanceId`: Unique identifier for your server instance
+          - `oauthUrl`: OAuth authorization URL for Dropbox authentication
+        </Info>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(dropbox_server.oauth_url)
+          ```
+          
+          ```typescript TypeScript
+          // Redirect user to OAuth authorization
+          window.location.href = dropboxServer.oauthUrl;
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/dropbox/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
         
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
+        <Check>
+          🎉 **Your Dropbox MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Dropbox">
+        Select Dropbox from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Dropbox account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/dropbox
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/dropbox-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/dropbox-mcp-server:latest
+        
+        # Or run with manual API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"access_token":"your_dropbox_token"}' \
+          ghcr.io/klavis-ai/dropbox-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "dropbox": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-</CodeGroup>
-
-<Tip>
-You can also specify scope and redirect_url in the authUrl, and we also support white-label. Check the API reference for more details.
-</Tip>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| dropbox_list_folder               | Lists the contents of a folder                                          |
-| dropbox_continue_folder_listing              | Continues listing folder contents using a cursor                               |
-| dropbox_create_folder                  | Creates a new folder                                             |
-| dropbox_delete_file_folder                  | Deletes a file or folder                                       |
-| dropbox_move_file_folder                  | Moves or renames a file or folder                                            |
-| dropbox_copy_file_folder                  | Creates a copy of a file or folder                                      |
-| dropbox_batch_delete_files                  | Deletes multiple files and folders in a single operation      |
-| dropbox_batch_move_files                    | Moves or renames multiple files and folders in a single operation                                         |
-| dropbox_batch_copy_files                | Creates copies of multiple files and folders in a single operation                                       |
-| dropbox_check_batch_job_status                | Checks the status of a batch operation    |
-| dropbox_upload_file                | Uploads a local file to Dropbox using file:// URI                                     |
-| dropbox_download_file                | Downloads a file from Dropbox                                     |
-| dropbox_get_file_info                | Gets metadata information about a file or folder                                     |
-| dropbox_list_revisions                | Lists the revisions of a file                                     |
-| dropbox_restore_file                | Restores a file to a previous revision                                     |
-| dropbox_search_files                | Searches for files and folders                                     |
-| dropbox_continue_file_search                | Continues searching files using a cursor                                     |
-| dropbox_get_shared_links                | Lists shared links for files and folders                                     |
-| dropbox_share_file                | Creates a shared link for a file or folder                                     |
-| dropbox_add_file_member                | Adds a member to a file                                     |
-| dropbox_list_file_members                | Lists the members of a file                                     |
-| dropbox_remove_file_member                | Removes a member from a file                                     |
-| dropbox_share_folder                | Shares a folder                                     |
-| dropbox_list_folder_members                | Lists the members of a shared folder                                     |
-| dropbox_add_folder_member                | Adds a member to a shared folder                                     |
-| dropbox_unshare_file                | Removes all members from a file                                     |
-| dropbox_unshare_folder                | Allows a shared folder owner to unshare the folder                                     |
-| dropbox_remove_folder_member                | Removes a member from a shared folder                                     |
-| dropbox_create_file_request                | Creates a file request                                     |
-| dropbox_get_file_request                | Gets a file request by ID                                     |
-| dropbox_list_file_requests                | Lists all file requests                                     |
-| dropbox_delete_file_request                | Deletes file requests                                     |
-| dropbox_update_file_request                | Updates a file request                                     |
-| dropbox_get_current_account                | Gets information about the current account                                     |
-| dropbox_get_space_usage                | Gets the current space usage information                                     |
-| dropbox_get_temporary_link                | Gets a temporary link to a file                                     |
-| dropbox_get_file_thumbnail                | Gets a thumbnail image for a file                                     |
-| dropbox_save_url_to_dropbox                | Downloads content from a URL and saves it as a file in Dropbox                                     |
-| dropbox_check_url_save_status                | Checks the status of a save URL operation                                     |
-| dropbox_lock_files_batch                | Temporarily locks files to prevent them from being edited by others                                     |
-| dropbox_unlock_files_batch                | Unlocks previously locked files                                     |
-| dropbox_list_received_files                | Lists files that have been shared with the current user by others                                     |
-| dropbox_check_job_status                | Checks the status of an asynchronous operation                                     |
+| Tool Name | Description |
+|-----------|-------------|
+| dropbox_list_folder | Lists the contents of a folder |
+| dropbox_continue_folder_listing | Continues listing folder contents using a cursor |
+| dropbox_create_folder | Creates a new folder |
+| dropbox_delete_file_folder | Deletes a file or folder |
+| dropbox_move_file_folder | Moves or renames a file or folder |
+| dropbox_copy_file_folder | Creates a copy of a file or folder |
+| dropbox_batch_delete_files | Deletes multiple files and folders in a single operation |
+| dropbox_batch_move_files | Moves or renames multiple files and folders in a single operation |
+| dropbox_batch_copy_files | Creates copies of multiple files and folders in a single operation |
+| dropbox_check_batch_job_status | Checks the status of a batch operation |
+| dropbox_upload_file | Uploads a local file to Dropbox using file:// URI |
+| dropbox_download_file | Downloads a file from Dropbox |
+| dropbox_get_file_info | Gets metadata information about a file or folder |
+| dropbox_list_revisions | Lists the revisions of a file |
+| dropbox_restore_file | Restores a file to a previous revision |
+| dropbox_search_files | Searches for files and folders |
+| dropbox_continue_file_search | Continues searching files using a cursor |
+| dropbox_get_shared_links | Lists shared links for files and folders |
+| dropbox_share_file | Creates a shared link for a file or folder |
+| dropbox_add_file_member | Adds a member to a file |
+| dropbox_list_file_members | Lists the members of a file |
+| dropbox_remove_file_member | Removes a member from a file |
+| dropbox_share_folder | Shares a folder |
+| dropbox_list_folder_members | Lists the members of a shared folder |
+| dropbox_add_folder_member | Adds a member to a shared folder |
+| dropbox_unshare_file | Removes all members from a file |
+| dropbox_unshare_folder | Allows a shared folder owner to unshare the folder |
+| dropbox_remove_folder_member | Removes a member from a shared folder |
+| dropbox_create_file_request | Creates a file request |
+| dropbox_get_file_request | Gets a file request by ID |
+| dropbox_list_file_requests | Lists all file requests |
+| dropbox_delete_file_request | Deletes file requests |
+| dropbox_update_file_request | Updates a file request |
+| dropbox_get_current_account | Gets information about the current account |
+| dropbox_get_space_usage | Gets the current space usage information |
+| dropbox_get_temporary_link | Gets a temporary link to a file |
+| dropbox_get_file_thumbnail | Gets a thumbnail image for a file |
+| dropbox_save_url_to_dropbox | Downloads content from a URL and saves it as a file in Dropbox |
+| dropbox_check_url_save_status | Checks the status of a save URL operation |
+| dropbox_lock_files_batch | Temporarily locks files to prevent them from being edited by others |
+| dropbox_unlock_files_batch | Unlocks previously locked files |
+| dropbox_list_received_files | Lists files that have been shared with the current user by others |
+| dropbox_check_job_status | Checks the status of an asynchronous operation |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup> 

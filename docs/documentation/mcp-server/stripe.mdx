@@ -1,129 +1,226 @@
 ---
 title: 'Stripe'
-description: 'Learn how to use Klavis to connect your AI application to Stripe MCP Server'
+description: 'Connect AI agents to Stripe for payment processing, customer management, and subscription automation'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Stripe to manage payments, customers, subscriptions, and automate payment processing workflows through AI agents.
 
-## For Developer
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Stripe MCP server instance
+          stripe_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.STRIPE,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Stripe MCP server instance
+          const stripeServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Stripe,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Stripe",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Stripe
+          - `instanceId`: Unique identifier for your server instance
+        </Info>
+      </Step>
+      
+      <Step title="Configure Stripe API Key">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          
+          klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+          
+          # Set the Stripe API key
+          response = klavis_client.mcp_server.set_instance_auth(
+              instance_id="YOUR_INSTANCE_ID",
+              auth_data={
+                  "token": "sk_test_your_stripe_secret_key_here"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_KLAVIS_API_KEY' });
+          
+          // Set the Stripe API key
+          const response = await klavis.mcpServer.setInstanceAuth({
+              instanceId: "YOUR_INSTANCE_ID",
+              authData: {
+                  token: "sk_test_your_stripe_secret_key_here"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "instanceId": "YOUR_INSTANCE_ID",
+              "authData": {
+                "token": "sk_test_your_stripe_secret_key_here"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Note>
+          Get your Stripe secret key from your [Stripe Dashboard](https://dashboard.stripe.com/apikeys). Use test keys for development.
+        </Note>
+        
+        <Check>
+          Your Stripe MCP Server is ready! Once the API key is configured, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-Follow the instructions below to integrate Stripe MCP server to your AI application using our API or SDK.
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Stripe">
+        Select Stripe from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure API Key">
+        Enter your Stripe secret API key in the configuration form.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/stripe
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/stripe-mcp-server:latest
+        
+        # Run with API key
+        docker run -p 5000:5000 \
+          -e STRIPE_API_KEY="sk_test_your_stripe_secret_key_here" \
+          ghcr.io/klavis-ai/stripe-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "stripe": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Stripe MCP Server
-
-Use the following endpoint to create a new remote Stripe MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Stripe MCP server instance
-stripe_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.STRIPE,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Stripe MCP server instance
-const stripeServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Stripe,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Stripe",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Stripe\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Stripe\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://stripe-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check> **serverUrl** specifies the endpoint of the Stripe MCP server, which you can connect and use this MCP Server to interact with Stripe data and functionality.</Check>
-<Note> **instanceId** is used for authentication and identification of your server instance.</Note>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name                   | Description                                                              |
-|-----------------------------|--------------------------------------------------------------------------|
-| create_customer             | Create a new customer in Stripe                                          |
-| create_payment_intent       | Create a new payment intent for processing payments                      |
-| retrieve_payment            | Get information about a specific payment                                 |
-| create_subscription         | Create a new subscription for a customer                                 |
-| list_invoices               | List invoices for a customer or your account                             |
+| Tool Name | Description |
+|-----------|-------------|
+| create_customer | Create a new customer in Stripe |
+| create_payment_intent | Create a new payment intent for processing payments |
+| retrieve_payment | Get information about a specific payment |
+| create_subscription | Create a new subscription for a customer |
+| list_invoices | List invoices for a customer or your account |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup> 

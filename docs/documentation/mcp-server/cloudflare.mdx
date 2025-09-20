@@ -1,119 +1,177 @@
 ---
 title: 'Cloudflare'
-description: 'Learn how to use Klavis to connect your AI application to Cloudflare MCP Server'
+description: 'Connect AI agents to Cloudflare for CDN, security, and edge computing management'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Cloudflare to manage DNS records, deploy Workers, configure firewalls, and optimize web performance through AI agents.
 
-## For Developer
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Cloudflare MCP server instance
+          cloudflare_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.CLOUDFLARE,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Cloudflare MCP server instance
+          const cloudflareServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Cloudflare,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Cloudflare",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Cloudflare
+          - `instanceId`: Unique identifier for your server instance
+        </Info>
+      </Step>
+      
+      <Step title="Configure API Key">
+        <CodeGroup>
+          ```python Python
+          # Set the Cloudflare API key for your instance
+          response = klavis_client.mcp_server.set_instance_auth(
+              instance_id=cloudflare_server.instance_id,
+              auth_data={
+                  "api_key": "YOUR_CLOUDFLARE_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          // Set the Cloudflare API key for your instance
+          const response = await klavis.mcpServer.setInstanceAuth({
+              instanceId: cloudflareServer.instanceId,
+              authData: {
+                  api_key: "YOUR_CLOUDFLARE_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "instanceId": "YOUR_INSTANCE_ID",
+              "authData": {
+                "api_key": "YOUR_CLOUDFLARE_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Cloudflare MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-Follow the instructions below to integrate Cloudflare MCP server to your AI application using our API or SDK.
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Cloudflare">
+        Select Cloudflare from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure API Key">
+        Enter your Cloudflare API key to authenticate the connection.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/cloudflare
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/cloudflare-mcp-server:latest
+        
+        # Run with API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"api_key":"your_cloudflare_api_key"}' \
+          ghcr.io/klavis-ai/cloudflare-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "cloudflare": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Cloudflare MCP Server
-
-Use the following endpoint to create a new remote Cloudflare MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Cloudflare MCP server instance
-cloudflare_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.CLOUDFLARE,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Cloudflare MCP server instance
-const cloudflareServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Cloudflare,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Cloudflare",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Cloudflare\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Cloudflare\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json Response
-{
-  "serverUrl": "https://cloudflare-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
-  "instanceId": "<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check> **serverUrl** specifies the endpoint of the Cloudflare MCP server, which you can connect and use this MCP Server to interact with Cloudflare data and functionality.</Check>
-<Note> **instanceId** is used for authentication and identification of your server instance.</Note>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
 | Tool Name                   | Description                                                              |
@@ -125,4 +183,32 @@ HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/i
 | analytics_query             | Query analytics data for your Cloudflare-enabled domains                 |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

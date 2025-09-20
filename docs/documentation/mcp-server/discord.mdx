@@ -1,145 +1,196 @@
 ---
 title: 'Discord'
-description: 'Learn how to use Klavis to connect your AI application to Discord MCP Server'
+description: 'Connect AI agents to Discord for server management and communication'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Discord to manage servers, send messages, and interact with communities through AI agents.
 
-## For Developer
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Discord MCP server instance
+          discord_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.DISCORD,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Discord MCP server instance
+          const discordServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Discord,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Discord",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Discord
+          - `instanceId`: Unique identifier for your server instance
+          - Note: Discord requires bot authorization to access servers
+        </Info>
+      </Step>
+      
+      <Step title="Authorize Discord Bot">
+        <Info>
+          To enable your MCP server to access Discord, you need to add the [Klavis AI bot](https://discord.com/oauth2/authorize?client_id=1349237156065050674) to your Discord Server.
+        </Info>
+        
+        **Bot Permissions**: The bot will request the following permissions:
+        - Read messages/view channels
+        - Send messages  
+        - Read message history
+        - Attach files
+        - Embed links
+        
+        <Check>
+          🎉 **Your Discord MCP Server is ready!** Once the bot is added to your server, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-Follow the instructions below to integrate Discord MCP server to your AI application using our API or SDK.
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Discord">
+        Select Discord from the list of available integrations.
+      </Step>
+      
+      <Step title="Authorize Bot">
+        Add the Klavis AI bot to your Discord server with the required permissions.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/discord
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/discord-mcp-server:latest
+        
+        # Run with Discord bot token
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"bot_token":"your_discord_bot_token"}' \
+          ghcr.io/klavis-ai/discord-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "discord": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Discord MCP Server
-
-Use the following endpoint to create a new remote Discord MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Discord MCP server instance
-discord_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.DISCORD,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Discord MCP server instance
-const discordServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Discord,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Discord",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Discord\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Discord\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://discord-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check>**serverUrl** specifies the endpoint of the Discord MCP server, which allows you to interact with Discord servers and channels.</Check>
-<Note>**instanceId** is used to get an authentication token. After you complete the OAuth flow, this token allows the MCP server to access Discord on your behalf.</Note>
-
-### 2. Discord Bot Setup
-
-To enable your MCP server to access Discord, you need to add [Klavis AI bot](https://discord.com/oauth2/authorize?client_id=1349237156065050674) to your Discord Server.
-
-#### Bot Permissions
-When authorizing your bot, you'll be prompted to select a Discord server. The bot will request the following permissions:
-- Read messages/view channels
-- Send messages
-- Read message history
-- Attach files
-- Embed links
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name              | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| discord_get_server_info        | Get information about a Discord server (guild) including name, member counts, and settings |
-| discord_list_members           | Get a list of members in a server with their roles and join dates (Default 100, Max 1000) |
-| discord_create_text_channel    | Create a new text channel with optional category and topic                     |
-| discord_add_reaction           | Add a reaction emoji to a message. Supports Unicode and custom emojis          |
-| discord_add_multiple_reactions | Add multiple reaction emojis to a message in a single operation                |
-| discord_remove_reaction        | Remove the bot's own reaction emoji from a message                             |
-| discord_send_message           | Send a text message to a specific Discord channel                              |
-| discord_read_messages          | Read recent messages from a Discord channel including content and reactions (Default 50, Max 100) |
-| discord_get_user_info          | Get detailed information about a Discord user including username and avatar    |
+| Tool Name | Description |
+|-----------|-------------|
+| discord_get_server_info | Get information about a Discord server (guild) including name, member counts, and settings |
+| discord_list_members | Get a list of members in a server with their roles and join dates (Default 100, Max 1000) |
+| discord_create_text_channel | Create a new text channel with optional category and topic |
+| discord_add_reaction | Add a reaction emoji to a message. Supports Unicode and custom emojis |
+| discord_add_multiple_reactions | Add multiple reaction emojis to a message in a single operation |
+| discord_remove_reaction | Remove the bot's own reaction emoji from a message |
+| discord_send_message | Send a text message to a specific Discord channel |
+| discord_read_messages | Read recent messages from a Discord channel including content and reactions (Default 50, Max 100) |
+| discord_get_user_info | Get detailed information about a Discord user including username and avatar |
 </Accordion>
 
 <Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

@@ -238,26 +238,58 @@ One MCP server for AI agents to handle thousands of tools progressively.
     </Steps>
   </Tab>
   <Tab title="Open Source">
+    <Tip>
+    Visit https://github.com/Klavis-AI/klavis/open-strata to view the source code and find more information
+    </Tip>
     <Steps>
-      <Step title="Run self-hosted MCP servers (optional)">
+      <Step title="Install Strata MCP">
         <CodeGroup>
-          ```bash Docker
-          docker run -p 5000:5000 ghcr.io/klavis-ai/gmail-mcp-server:latest
+          ```bash pipx
+          pipx install strata-mcp
+          ```
+          ```bash pip
+          pip install strata-mcp
           ```
         </CodeGroup>
       </Step>
-      <Step title="Combine with Klavis Strata">
-        Add your external servers alongside hosted ones.
-        ```python
-        strata = klavis.strata.create(
-            user_id="user123",
-            servers=["GMAIL", "SLACK"],
-            external_servers=[{"name": "crm", "url": "http://localhost:5000"}],
-        )
-        ```
+      <Step title="Add your MCP servers">
+        Configure your MCP servers using the CLI tool.
+        <CodeGroup>
+          ```bash Add Server
+          strata add
+          ```
+          ```bash List Servers
+          strata list
+          ```
+          ```bash Enable Server
+          strata enable <server-name>
+          ```
+        </CodeGroup>
       </Step>
-      <Step title="Use the unified Strata URL">
-        Point your MCP client to the Strata URL and list/call tools as usual.
+      <Step title="Run Strata MCP Server">
+        Start the Strata server to manage all your tools.
+        <CodeGroup>
+          ```bash Stdio Mode (Default)
+          strata
+          ```
+          ```bash HTTP/SSE Mode
+          strata run --port 8080
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Connect to your AI application">
+        Use the Strata tool to add your AI client.
+        <CodeGroup>
+          ```bash Claude Code
+          strata tool add claude
+          ```
+          ```bash Cursor
+          strata tool add cursor
+          ```
+          ```bash VSCode
+          strata tool add vscode
+          ```
+        </CodeGroup>
       </Step>
     </Steps>
   </Tab>
@@ -461,6 +493,9 @@ Connect a single integration (like Gmail or GitHub) as its own MCP server.
     </Steps>
   </Tab>
   <Tab title="Open Source">
+    <Tip>
+    Visit https://github.com/Klavis-AI/klavis/mcp_servers to view the source code and find more information
+    </Tip>
     <Steps>
       <Step title="Run the server locally or in your infra">
         <CodeGroup>
@@ -468,6 +503,9 @@ Connect a single integration (like Gmail or GitHub) as its own MCP server.
           docker run -p 5000:5000 ghcr.io/klavis-ai/gmail-mcp-server:latest
           ```
         </CodeGroup>
+        <Info>
+        Browse all available MCP server Docker images at [GitHub Packages](https://github.com/orgs/Klavis-AI/packages?repo_name=klavis)
+        </Info>
       </Step>
       <Step title="Point your MCP client to the URL">
         Use the local URL (for example, http://localhost:5000) in your client or aggregator.

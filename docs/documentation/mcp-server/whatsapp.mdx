@@ -1,246 +1,177 @@
 ---
 title: 'WhatsApp'
-description: 'Learn how to use Klavis to connect your AI application to WhatsApp MCP Server'
+description: 'Connect AI agents to WhatsApp for business messaging and communication'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to WhatsApp to send messages and manage conversations through the WhatsApp Business API via AI agents.
 
-## For Developer
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a WhatsApp MCP server instance
+          whatsapp_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.WHATSAPP,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a WhatsApp MCP server instance
+          const whatsappServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.WhatsApp,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "WhatsApp",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to WhatsApp
+          - `instanceId`: Unique identifier for your server instance
+        </Info>
+      </Step>
+      
+      <Step title="Configure API Key">
+        <CodeGroup>
+          ```python Python
+          # Set the WhatsApp API key for your instance
+          response = klavis_client.mcp_server.set_instance_auth(
+              instance_id=whatsapp_server.instance_id,
+              auth_data={
+                  "token": "YOUR_WHATSAPP_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          // Set the WhatsApp API key for your instance
+          const response = await klavis.mcpServer.setInstanceAuth({
+              instanceId: whatsappServer.instanceId,
+              authData: {
+                  token: "YOUR_WHATSAPP_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "instanceId": "YOUR_INSTANCE_ID",
+              "authData": {
+                "token": "YOUR_WHATSAPP_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your WhatsApp MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-Follow the instructions below to integrate WhatsApp MCP server to your AI application using our API or SDK.
-
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a WhatsApp MCP Server
-
-Use the following endpoint to create a new remote WhatsApp MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a WhatsApp MCP server instance
-whatsapp_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.WHATSAPP,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a WhatsApp MCP server instance
-const whatsappServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.WhatsApp,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "WhatsApp",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"WhatsApp\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"WhatsApp\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json Response
-{
-  "serverUrl": "https://whatsapp-mcp-server.klavis.ai/sse?instance_id=<instance-id>",
-  "instanceId": "<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check> **serverUrl** specifies the endpoint of the WhatsApp MCP server, which allows you to send messages and manage conversations through WhatsApp Business API.</Check>
-<Note> **instanceId** is used for authentication and identification of your server instance.</Note>
-
-### 2. Configure WhatsApp API Key
-
-To use the WhatsApp MCP Server, you need to configure it with your WhatsApp Business API key.
-
-#### Setting up WhatsApp API Key
-
-<CodeGroup>
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/set-auth \
-  --header 'Authorization: Bearer <YOUR_KLAVIS_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "instanceId": "<YOUR_INSTANCE_ID>",
-  "authData": {
-    "token": "<YOUR_WHATSAPP_API_KEY>"
-  }
-}'
-```
-
-```python Python
-from klavis import Klavis
-
-klavis_client = Klavis(api_key="<YOUR_KLAVIS_API_KEY>")
-
-# Set the WhatsApp API key for your instance
-response = klavis_client.mcp_server.set_instance_auth(
-    instance_id="<YOUR_INSTANCE_ID>",
-    auth_data={
-        "token": "<YOUR_WHATSAPP_API_KEY>"
-    }
-)
-
-print(response)
-```
-
-```javascript TypeScript
-import { KlavisClient } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_KLAVIS_API_KEY>' });
-
-// Set the WhatsApp API key for your instance
-const response = await klavisClient.mcpServer.setInstanceAuth({
-    instanceId: "<YOUR_INSTANCE_ID>",
-    authData: {
-        token: "<YOUR_WHATSAPP_API_KEY>"
-    }
-});
-
-console.log(response);
-```
-```go Go
-package main
-
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-)
-
-func main() {
-	url := "https://api.klavis.ai/mcp-server/instance/set-auth"
-	
-	    payload := map[string]interface{}{
-        "instanceId": "<YOUR_INSTANCE_ID>",
-		"authData": map[string]string{
-            "token": "<YOUR_WHATSAPP_API_KEY>"
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose WhatsApp">
+        Select WhatsApp from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure API Key">
+        Enter your WhatsApp Business API key to authenticate the connection.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/whatsapp
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/whatsapp-mcp-server:latest
+        
+        # Run with API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"token":"your_whatsapp_api_key"}' \
+          ghcr.io/klavis-ai/whatsapp-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "whatsapp": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
         }
-    }
-	
-	jsonPayload, _ := json.Marshal(payload)
-	
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
-	req.Header.Set("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
-	req.Header.Set("Content-Type", "application/json")
-	
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	
-	fmt.Println("Response Status:", resp.Status)
-}
-```
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-```java Java
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-
-public class SetAuthToken {
-    public static void main(String[] args) {
-        try {
-            String requestBody = "{\"instanceId\":\"<YOUR_INSTANCE_ID>\",\"authData\":{\"token\":\"<YOUR_WHATSAPP_API_KEY>\"}}";
-            
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.klavis.ai/mcp-server/instance/set-auth"))
-                .header("Authorization", "Bearer <YOUR_KLAVIS_API_KEY>")
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-                
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-            System.out.println("Response: " + response.body());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json Response
-{
-  "success": true,
-  "message": "<string>"
-}
-```
-</CodeGroup>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
 | Tool Name                      | Description                                                              |
@@ -248,4 +179,32 @@ public class SetAuthToken {
 | whatsapp_send_text             | Send a text message to a WhatsApp user using the WhatsApp Business API. |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

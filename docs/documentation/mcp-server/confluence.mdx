@@ -1,200 +1,214 @@
 ---
 title: 'Confluence'
-description: 'Learn how to use Klavis to connect your AI application to Confluence MCP Server'
+description: 'Connect AI agents to Confluence for document management and collaborative editing'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Confluence to manage documents, create and edit pages, organize spaces, and collaborate on content through AI agents.
 
-## For Developer
-
-Follow the instructions below to integrate Confluence MCP server to your AI application using our API or SDK.
-
-### Prerequisites
-
-- [Create an API key](https://www.klavis.ai/home/api-keys)
-
-### 1. Create a Confluence MCP Server
-
-Use the following endpoint to create a new remote Confluence MCP server instance:
-
-#### Request
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Confluence MCP server instance
-confluence_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.CONFLUENCE,
-    user_id="<YOUR_USER_ID>"
-)
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Confluence MCP server instance
-const confluenceServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Confluence,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Confluence",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Confluence\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Confluence\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-</CodeGroup>
-
-#### Response
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://confluence-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/confluence/authorize?instance_id=<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check>**serverUrl** specifies the endpoint of the Confluence MCP server, which allows you to interact with Confluence spaces, pages, and content.</Check>
-<Note>**instanceId** is used to get an authentication token. After you complete the OAuth flow, this token allows the MCP server to access Confluence on your behalf.</Note>
-
-### 2. Confluence OAuth Flow
-
-Redirect users to the OAuth authorization flow:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(confluence_server.oauth_url)
-```
-
-```javascript TypeScript
-// Redirect user to authorize
-window.location.href = confluenceServer.oauthUrl;
-```
-
-
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/confluence/authorize"
-    
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-    
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-    
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class ConfluenceOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/confluence/authorize?instance_id=" + 
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Confluence MCP server instance
+          confluence_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.CONFLUENCE,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Confluence MCP server instance
+          const confluenceServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Confluence,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Confluence",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
         
-        System.out.println("Redirect to: " + authUrl);
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Confluence
+          - `instanceId`: Unique identifier for your server instance
+          - `oauthUrl`: OAuth authorization URL for Confluence authentication
+        </Info>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(confluence_server.oauth_url)
+          ```
+          
+          ```typescript TypeScript
+          // Redirect user to OAuth authorization
+          window.location.href = confluenceServer.oauthUrl;
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/confluence/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
         
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
+        <Check>
+          🎉 **Your Confluence MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Confluence">
+        Select Confluence from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Confluence workspace.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/confluence
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/confluence-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/confluence-mcp-server:latest
+        
+        # Or run with manual API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"access_token":"your_confluence_token"}' \
+          ghcr.io/klavis-ai/confluence-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "confluence": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-</CodeGroup>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name                          | Description                                                                                           |
-|------------------------------------|-------------------------------------------------------------------------------------------------------|
-| confluence_create_page             | Create a new page in Confluence                                                                      |
-| confluence_get_page                | Retrieve a SINGLE page's content by its ID or title. For retrieving MULTIPLE pages, use confluence_get_pages_by_id instead |
-| confluence_get_pages_by_id         | Get the content of MULTIPLE pages by their ID in a single efficient request                         |
-| confluence_list_pages              | Get the content of multiple pages with optional filtering and sorting                               |
-| confluence_update_page_content     | Update a page's content                                                                              |
-| confluence_rename_page             | Rename a page by changing its title                                                                  |
-| confluence_create_space            | Create a new space in Confluence                                                                     |
-| confluence_list_spaces             | List all spaces sorted by name in ascending order                                                   |
-| confluence_get_space               | Get the details of a space by its ID or key                                                         |
-| confluence_get_space_hierarchy     | Retrieve the full hierarchical structure of a Confluence space as a tree structure                  |
-| confluence_search_content          | Search for content in Confluence. The search is performed across all content in the authenticated user's Confluence workspace. All search terms in Confluence are case insensitive. |
-| confluence_list_attachments        | List attachments in a workspace                                                                      |
-| confluence_get_attachments_for_page| Get attachments for a page by its ID or title. If a page title is provided, then the first page with an exact matching title will be returned. |
-| confluence_get_attachment          | Get a specific attachment by its ID                                                                  |
+| Tool Name | Description |
+|-----------|-------------|
+| confluence_create_page | Create a new page in Confluence |
+| confluence_get_page | Retrieve a SINGLE page's content by its ID or title. For retrieving MULTIPLE pages, use confluence_get_pages_by_id instead |
+| confluence_get_pages_by_id | Get the content of MULTIPLE pages by their ID in a single efficient request |
+| confluence_list_pages | Get the content of multiple pages with optional filtering and sorting |
+| confluence_update_page_content | Update a page's content |
+| confluence_rename_page | Rename a page by changing its title |
+| confluence_create_space | Create a new space in Confluence |
+| confluence_list_spaces | List all spaces sorted by name in ascending order |
+| confluence_get_space | Get the details of a space by its ID or key |
+| confluence_get_space_hierarchy | Retrieve the full hierarchical structure of a Confluence space as a tree structure |
+| confluence_search_content | Search for content in Confluence. The search is performed across all content in the authenticated user's Confluence workspace. All search terms in Confluence are case insensitive. |
+| confluence_list_attachments | List attachments in a workspace |
+| confluence_get_attachments_for_page | Get attachments for a page by its ID or title. If a page title is provided, then the first page with an exact matching title will be returned. |
+| confluence_get_attachment | Get a specific attachment by its ID |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note> 
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup> 

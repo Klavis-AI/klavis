@@ -1,16 +1,221 @@
 ---
 title: 'Perplexity'
-description: 'Learn how to use Klavis to connect your AI application to Perplexity MCP Server'
+description: 'Connect AI agents to Perplexity for advanced AI-powered search and research'
 ---
 
-import NoCodeSnippet from '/snippets/mcp-server-card/no-code.mdx';
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-<NoCodeSnippet />
+## Getting started
 
----
+Connect to Perplexity to leverage AI-powered search capabilities and advanced research functionality through AI agents.
 
-## For Developer
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a server instance">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Perplexity MCP server instance
+          perplexity_server = klavis_client.mcp_server.create_server_instance(
+              server_name=McpServerName.PERPLEXITY,
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Perplexity MCP server instance
+          const perplexityServer = await klavis.mcpServer.createServerInstance({
+              serverName: Klavis.McpServerName.Perplexity,
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "serverName": "Perplexity",
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `serverUrl`: The URL for connecting your MCP client to Perplexity
+          - `instanceId`: Unique identifier for your server instance
+        </Info>
+      </Step>
+      
+      <Step title="Configure API Key">
+        <CodeGroup>
+          ```python Python
+          # Set the Perplexity API key for your instance
+          response = klavis_client.mcp_server.set_instance_auth(
+              instance_id=perplexity_server.instance_id,
+              auth_data={
+                  "api_key": "YOUR_PERPLEXITY_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          // Set the Perplexity API key for your instance
+          const response = await klavis.mcpServer.setInstanceAuth({
+              instanceId: perplexityServer.instanceId,
+              authData: {
+                  api_key: "YOUR_PERPLEXITY_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "instanceId": "YOUR_INSTANCE_ID",
+              "authData": {
+                "api_key": "YOUR_PERPLEXITY_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Perplexity MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
 
-Follow the instructions below to integrate Perplexity MCP server to your AI application using our API or SDK.
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Perplexity">
+        Select Perplexity from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure API Key">
+        Enter your Perplexity API key to authenticate the connection.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/perplexity
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/perplexity-mcp-server:latest
+        
+        # Run with API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"api_key":"your_perplexity_api_key"}' \
+          ghcr.io/klavis-ai/perplexity-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "perplexity": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-Coming Soon 
+## Available Tools
+
+<Note>
+  **Coming Soon**: Perplexity integration is currently in development. Tool functionality will be available soon with features including:
+  - AI-powered web search
+  - Research and information synthesis
+  - Real-time data access
+  - Citation and source tracking
+</Note>
+
+<Accordion title="Planned Tools">
+| Tool Name (Coming Soon)        | Description                                                              |
+|--------------------------------|--------------------------------------------------------------------------|
+| perplexity_search              | Perform AI-powered search queries with intelligent results |
+| perplexity_ask                 | Ask questions and get comprehensive, cited answers |
+| perplexity_research            | Conduct deep research on complex topics |
+| perplexity_summarize           | Summarize content with key insights |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
