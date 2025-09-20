@@ -5,7 +5,7 @@
 </div>
 
 <h1 align="center">Klavis AI</h1>
-<p align="center"><strong>🚀 Unified MCP Infrastructure | 🔧 Production-Ready MCP Servers</strong></p>
+<p align="center"><strong>📦 MCP Integration for your AI Application</strong></p>
 
 <div align="center">
 
@@ -88,7 +88,7 @@ Each integration provides specific capabilities (like managing GitHub repos or s
 
 ## 🚀 Quick Start
 
-### Option 1: Use Hosted Service (Easiest)
+### Option 1: Use Hosted Service by WebUI (Easiest)
 
 Get instant access without any setup:
 
@@ -98,17 +98,91 @@ Get instant access without any setup:
 
 Ready in under 2 minutes! 🚀
 
-### Option 2: Self-Host with Docker
+**Alternative ways**: Use our API or SDK for programmatic access
+
+### Option 2: Open Source
+
+Self-host everything on your own infrastructure:
 
 ```bash
-# Run any MCP server
+# Run any MCP Integration
 docker pull ghcr.io/klavis-ai/github-mcp-server:latest
 docker run -p 5000:5000 ghcr.io/klavis-ai/github-mcp-server:latest
 
-# Or install Open Source Strata locally
+# Install Open Source Strata locally
 pipx install strata-mcp
 strata add --type stdio playwright npx @playwright/mcp@latest
 ```
+
+### Option 3: SDK
+
+Build custom applications with our SDKs:
+
+```python
+# Python SDK
+from klavis import Klavis
+from klavis.types import McpServerName
+
+klavis = Klavis(api_key="your-key")
+
+# Create Strata instance
+strata = klavis.mcp_server.create_strata_server(
+    user_id="user123",
+    servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+)
+
+# Or use individual MCP servers
+gmail = klavis.mcp_server.create_server_instance(
+    server_name=McpServerName.GMAIL,
+    user_id="user123",
+)
+```
+
+```typescript
+// TypeScript SDK
+import { KlavisClient, McpServerName } from 'klavis';
+
+const klavis = new KlavisClient({ apiKey: 'your-api-key' });
+
+// Create Strata instance
+const strata = await klavis.mcpServer.createStrataServer({
+    userId: "user123",
+    servers: [McpServerName.GMAIL, McpServerName.YOUTUBE]
+});
+
+// Or use individual MCP servers
+const gmail = await klavis.mcpServer.createServerInstance({
+    serverName: McpServerName.GMAIL,
+    userId: "user123"
+});
+```
+
+### Option 4: Direct API
+
+Use REST API for any programming language:
+
+```bash
+# Create Strata server
+curl -X POST "https://api.klavis.ai/v1/mcp-server/strata" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "servers": ["GMAIL", "YOUTUBE"]
+  }'
+
+# Create individual MCP server
+curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
+  -H "Authorization: Bearer your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "server_name": "GMAIL",
+    "user_id": "user123"
+  }'
+```
+
+[📖 **Complete Documentation** →](https://docs.klavis.ai/documentation/quickstart)
+
 
 ## 📚 Resources
 
