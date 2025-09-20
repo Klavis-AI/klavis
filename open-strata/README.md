@@ -7,6 +7,10 @@
 
 **Strata** is a unified MCP server that intelligently manages thousands of tools across multiple applications, presenting them to AI agents progressively without overwhelming the model context.
 
+> **🚀 Looking for production-ready solution?** We offer a **fully managed Strata service** with enterprise-grade performance, native OpenAPI parsing, and advanced AI model optimizations. [Get started instantly →](https://docs.klavis.ai/documentation/concepts/strata)
+
+**This repository contains our open-source implementation** - a streamlined version you can easily deploy as your MCP aggregation manager in your local infrastructure.
+
 ### 🚀 The Problem We Solve
 
 Imagine you have:
