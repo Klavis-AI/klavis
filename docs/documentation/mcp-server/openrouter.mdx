@@ -116,46 +116,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
         </Check>
       </Step>
       
-      <Step title="(optional) Connect to your AI application">
-        <Tabs>
-          <Tab title="LangChain">
-            ```python
-            import asyncio
-            from langchain_openai import ChatOpenAI
-            from langchain_mcp_adapters.client import MultiServerMCPClient
-            from langgraph.prebuilt import create_react_agent
-            
-            async def main():
-                # Create MCP client
-                mcp_client = MultiServerMCPClient({
-                    "openrouter": {
-                        "transport": "streamable_http",
-                        "url": openrouter_server.server_url
-                    }
-                })
-                
-                # Get tools and create agent
-                tools = await mcp_client.get_tools()
-                llm = ChatOpenAI(model="gpt-4o-mini")
-                
-                agent = create_react_agent(
-                    model=llm,
-                    tools=tools,
-                    prompt="You are an AI model management assistant that helps access and compare different AI models through OpenRouter."
-                )
-                
-                # Use the agent
-                result = await agent.ainvoke({
-                    "messages": [{"role": "user", "content": "List available models and compare their pricing"}]
-                })
-                
-                print(result["messages"][-1].content)
-            
-            asyncio.run(main())
-            ```
-          </Tab>
-        </Tabs>
-      </Step>
+
     </Steps>
   </Tab>
   

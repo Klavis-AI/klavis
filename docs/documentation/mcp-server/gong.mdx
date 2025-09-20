@@ -116,46 +116,7 @@ Connect to Gong to access sales conversation intelligence, analyze call transcri
         </Check>
       </Step>
       
-      <Step title="(optional) Connect to your AI application">
-        <Tabs>
-          <Tab title="LangChain">
-            ```python
-            import asyncio
-            from langchain_openai import ChatOpenAI
-            from langchain_mcp_adapters.client import MultiServerMCPClient
-            from langgraph.prebuilt import create_react_agent
-            
-            async def main():
-                # Create MCP client
-                mcp_client = MultiServerMCPClient({
-                    "gong": {
-                        "transport": "streamable_http",
-                        "url": gong_server.server_url
-                    }
-                })
-                
-                # Get tools and create agent
-                tools = await mcp_client.get_tools()
-                llm = ChatOpenAI(model="gpt-4o-mini")
-                
-                agent = create_react_agent(
-                    model=llm,
-                    tools=tools,
-                    prompt="You are a sales intelligence assistant that helps analyze sales conversations and call data."
-                )
-                
-                # Use the agent
-                result = await agent.ainvoke({
-                    "messages": [{"role": "user", "content": "Get recent call transcripts for sales analysis"}]
-                })
-                
-                print(result["messages"][-1].content)
-            
-            asyncio.run(main())
-            ```
-          </Tab>
-        </Tabs>
-      </Step>
+
     </Steps>
   </Tab>
   

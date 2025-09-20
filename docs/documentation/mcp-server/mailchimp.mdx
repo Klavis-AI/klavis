@@ -117,46 +117,7 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
         </Check>
       </Step>
       
-      <Step title="(optional) Connect to your AI application">
-        <Tabs>
-          <Tab title="LangChain">
-            ```python
-            import asyncio
-            from langchain_openai import ChatOpenAI
-            from langchain_mcp_adapters.client import MultiServerMCPClient
-            from langgraph.prebuilt import create_react_agent
-            
-            async def main():
-                # Create MCP client
-                mcp_client = MultiServerMCPClient({
-                    "mailchimp": {
-                        "transport": "streamable_http",
-                        "url": mailchimp_server.server_url
-                    }
-                })
-                
-                # Get tools and create agent
-                tools = await mcp_client.get_tools()
-                llm = ChatOpenAI(model="gpt-4o-mini")
-                
-                agent = create_react_agent(
-                    model=llm,
-                    tools=tools,
-                    prompt="You are an email marketing assistant that helps manage Mailchimp campaigns and audiences."
-                )
-                
-                # Use the agent
-                result = await agent.ainvoke({
-                    "messages": [{"role": "user", "content": "Get all my email audiences and their subscriber counts"}]
-                })
-                
-                print(result["messages"][-1].content)
-            
-            asyncio.run(main())
-            ```
-          </Tab>
-        </Tabs>
-      </Step>
+
     </Steps>
   </Tab>
   

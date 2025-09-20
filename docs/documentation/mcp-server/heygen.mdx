@@ -111,46 +111,7 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
         </Check>
       </Step>
       
-      <Step title="(optional) Connect to your AI application">
-        <Tabs>
-          <Tab title="LangChain">
-            ```python
-            import asyncio
-            from langchain_openai import ChatOpenAI
-            from langchain_mcp_adapters.client import MultiServerMCPClient
-            from langgraph.prebuilt import create_react_agent
-            
-            async def main():
-                # Create MCP client
-                mcp_client = MultiServerMCPClient({
-                    "heygen": {
-                        "transport": "streamable_http",
-                        "url": heygen_server.server_url
-                    }
-                })
-                
-                # Get tools and create agent
-                tools = await mcp_client.get_tools()
-                llm = ChatOpenAI(model="gpt-4o-mini")
-                
-                agent = create_react_agent(
-                    model=llm,
-                    tools=tools,
-                    prompt="You are a video generation assistant that helps create AI-powered videos with HeyGen avatars."
-                )
-                
-                # Use the agent
-                result = await agent.ainvoke({
-                    "messages": [{"role": "user", "content": "Generate a video with an avatar speaking about AI technology"}]
-                })
-                
-                print(result["messages"][-1].content)
-            
-            asyncio.run(main())
-            ```
-          </Tab>
-        </Tabs>
-      </Step>
+
     </Steps>
   </Tab>
   
