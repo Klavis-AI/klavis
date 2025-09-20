@@ -55,7 +55,7 @@
 
 ## 🤔 What is Strata?
 
-**Strata** solves the critical problems that plague AI agents working with tools:
+**Strata** is one MCP server that guides AI agents through thousands of tools in multiple apps progressively, instead of overwhelming them with everything at once, it was designed by thinking human interacting with tools, solving the three major problems that plague AI agents today:
 
 ### 🚨 The Problems
 - **Tool Overload**: Too many tools cause LLM choice paralysis and poor decisions
@@ -63,27 +63,26 @@
 - **Coverage Gap**: Most servers are stuck at 40~50 tools, limiting what you can build
 
 ### ✨ The Strata Solution
-**Strata** is an intelligent MCP (Model Context Protocol) server that guides AI agents through thousands of tools progressively, instead of overwhelming them with everything at once:
 
 - 🎯 **Progressive Discovery** - Introduces tools step-by-step to prevent choice paralysis
 - 💰 **Cost Optimization** - Reduces token usage and API costs significantly
 - 🚀 **Unlimited Scale** - Access thousands of tools beyond typical 40-50 limits
-- 📊 **Proven Performance** - +14.1% higher success rate, 83%+ accuracy across 2,000+ queries
+- 📊 **Proven Performance** - +14.1% higher success rate, 83%+ accuracy across 2,000+ queries by human evaluators
 
 Think of it as a smart guide that helps your AI find exactly the right tool for any task!
 
 [📖 **Learn More about Strata** →](https://docs.klavis.ai/documentation/concepts/strata)
 
-## 🤔 What are MCP Servers?
+## 🤔 What are MCP Integrations?
 
-**MCP (Model Context Protocol)** servers enable AI models to interact with external systems and services. Our MCP collection includes:
+**MCP Integrations** are our collection of 50+ production-ready MCP servers that connect AI models to real-world services and systems. Our comprehensive suite includes:
 
-- 🔐 **OAuth-enabled integrations** - GitHub, Gmail, Slack, Salesforce, and more
-- 🐳 **Docker images** - Ready-to-deploy containers for instant setup
-- 🏢 **Enterprise-grade** - Production-ready with security and reliability
-- 📖 **Open source** - Full source code available for customization
+- 🔐 **OAuth-enabled integrations** - GitHub, Gmail, Slack, Salesforce, and more  
+- 🐳 **Docker images** - Ready-to-deploy containers for instant setup  
+- 🏢 **Enterprise-grade** - Production-ready with security and reliability  
+- 📖 **Open source** - Full source code available for customization  
 
-Each MCP server provides specific capabilities (like managing GitHub repos or sending emails) that AI models can use through a standardized protocol.
+Each integration provides specific capabilities (like managing GitHub repos or sending emails) that AI models can use seamlessly through the standardized MCP protocol.
 
 [🌐 **Browse All MCP Servers** →](https://docs.klavis.ai/documentation/mcp-server/overview)
 
