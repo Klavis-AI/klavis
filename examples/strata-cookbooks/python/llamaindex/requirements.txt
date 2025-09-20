@@ -1,0 +1,5 @@
+klavis>=2.0.2
+python-dotenv>=1.1.1
+llama-index-llms-openai>=0.5.6
+llama-index-tools-mcp>=0.4.1
+llama-index-core>=0.14.2
