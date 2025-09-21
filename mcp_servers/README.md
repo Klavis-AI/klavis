@@ -304,7 +304,7 @@ Check out our [Contributing Guide](CONTRIBUTING.md) to get started!
 
 ## 📜 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Apache 2.0 license - see [LICENSE](LICENSE) for details.
 
 ---
 

@@ -182,7 +182,7 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 
 ## 📜 License
 
-- **Root Repository**: MIT License - see [LICENSE](LICENSE)
+- **Root Repository**: Apache 2.0 license - see [LICENSE](LICENSE)
 
 ---
 
