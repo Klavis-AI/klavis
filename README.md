@@ -5,7 +5,7 @@
 </div>
 
 <h1 align="center">Klavis AI</h1>
-<p align="center"><strong>📦 MCP Integration for your AI Application</strong></p>
+<p align="center"><strong>📦 MCP integration layers that let AI agents use thousands of tools reliably</strong></p>
 
 <div align="center">
 
@@ -53,54 +53,33 @@
   </table>
 </div>
 
-## 🤔 What is Strata?
+## Strata
 
-**Strata** is one MCP server that guides AI agents through thousands of tools in multiple apps progressively, instead of overwhelming them with everything at once, it was designed by thinking human interacting with tools, solving the three major problems that plague AI agents today:
+**One MCP server. Thousands of tools. Zero overwhelm.**
 
-### 🚨 The Problems
-- **Tool Overload**: Too many tools cause LLM choice paralysis and poor decisions
-- **Context Overload**: Long tool lists blow up token counts and costs  
-- **Coverage Gap**: Most servers are stuck at 40~50 tools, limiting what you can build
+Strata is one MCP server that guides your AI agents through thousands of tools in multiple apps progressively.
 
-### ✨ The Strata Solution
+### Why Strata?
 
-- 🎯 **Progressive Discovery** - Introduces tools step-by-step to prevent choice paralysis
-- 💰 **Cost Optimization** - Reduces token usage and API costs significantly
-- 🚀 **Unlimited Scale** - Access thousands of tools beyond typical 40-50 limits
-- 📊 **Proven Performance** - +14.1% higher success rate, 83%+ accuracy across 2,000+ queries by human evaluators
+🎯 **Scalable Tool Integration** → Beyond 40-50 tool limits  
+🚀 **Progressive Discovery** → Guides agents from intent to action, step-by-step.
 
-Think of it as a smart guide that helps your AI find exactly the right tool for any task!
+[📖 **Learn More** →](https://docs.klavis.ai/documentation/concepts/strata)
 
-[📖 **Learn More about Strata** →](https://docs.klavis.ai/documentation/concepts/strata)
+## MCP Integrations
 
-## 🤔 What are MCP Integrations?
+**50+ production MCP servers. OAuth included. Deploy anywhere.**
 
-**MCP Integrations** are our collection of 50+ production-ready MCP servers that connect AI models to real-world services and systems. Our comprehensive suite includes:
+Connect your AI to GitHub, Gmail, Slack, Salesforce, and more - all with enterprise OAuth and Docker support.
 
-- 🔐 **OAuth-enabled integrations** - GitHub, Gmail, Slack, Salesforce, and more  
-- 🐳 **Docker images** - Ready-to-deploy containers for instant setup  
-- 🏢 **Enterprise-grade** - Production-ready with security and reliability  
-- 📖 **Open source** - Full source code available for customization  
+🔐 **Real OAuth** → Not just API keys  
+🐳 **Docker ready** → One-line deploy  
 
-Each integration provides specific capabilities (like managing GitHub repos or sending emails) that AI models can use seamlessly through the standardized MCP protocol.
-
-[🌐 **Browse All MCP Servers** →](https://docs.klavis.ai/documentation/mcp-server/overview)
+[🌐 **Browse All Servers** →](https://docs.klavis.ai/documentation/mcp-server/overview)
 
 ## 🚀 Quick Start
 
-### Option 1: Use Hosted Service by WebUI (Easiest)
-
-Get instant access without any setup:
-
-1. **Sign Up**: [Create account →](https://www.klavis.ai/auth/sign-up)
-2. **Get Started**: [Follow quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
-3. **Use Strata or individual MCP servers** in Claude Code, Cursor, VSCode, etc.
-
-Ready in under 2 minutes! 🚀
-
-**Alternative ways**: Use our API or SDK for programmatic access
-
-### Option 2: Open Source
+### Option 1: Open Source
 
 Self-host everything on your own infrastructure:
 
@@ -113,6 +92,16 @@ docker run -p 5000:5000 ghcr.io/klavis-ai/github-mcp-server:latest
 pipx install strata-mcp
 strata add --type stdio playwright npx @playwright/mcp@latest
 ```
+
+### Option 2: Use Hosted Service by WebUI
+
+Get instant access without any setup:
+
+1. **Sign Up**: [Create account →](https://www.klavis.ai/auth/sign-up)
+2. **Get Started**: [Follow quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
+3. **Use Strata or individual MCP servers** in Claude Code, Cursor, VSCode, etc.
+
+Ready in under 2 minutes! 🚀
 
 ### Option 3: SDK
 
@@ -194,7 +183,6 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 ## 📜 License
 
 - **Root Repository**: MIT License - see [LICENSE](LICENSE)
-- **Open Source Strata**: Apache License 2.0 - see [open-strata/LICENSE](open-strata/LICENSE)
 
 ---
 

@@ -239,26 +239,6 @@ strata list
 strata run --port 8080
 ```
 
-# 🚀 Quicker Start
-
-**Skip the configuration hassle!** 🎯
-
-Don't want to spend time configuring dozens of MCP servers? We've got you covered! 
-
-### ✨ What You Get Instantly:
-- 🏗️ **Fully Hosted Strata** - Zero setup, production-ready
-- 🛠️ **40+ Pre-configured MCP Servers** - Ready to use out of the box
-- 🌐 **Multi-Domain Coverage** - Development, productivity, APIs, databases, and more
-- ⚡ **Thousands of Tools** - At your fingertips immediately
-
-### 💡 Perfect For:
-- 🚀 **Rapid Prototyping** - Start building with AI tools in minutes
-- 🧪 **Testing & Exploration** - Try Strata without any commitment
-- 💼 **Production Workloads** - Enterprise-grade reliability
-
-### 🎁 Get Started in 1 minute:
-Just point your AI assistant to our hosted Strata endpoint and you're ready to go!
-
 ---
 
 **Ready to experience the power of thousands of AI tools?** 
@@ -266,7 +246,3 @@ Just point your AI assistant to our hosted Strata endpoint and you're ready to g
 👉 **[Get Instant Access at Klavis AI (YC X25)](https://klavis.ai/)** 👈
 
 *From zero to thousands of tools in under a minute!* ⏱️
-
-## License
-
-Apache License 2.0
