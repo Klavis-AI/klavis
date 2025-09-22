@@ -1,6 +1,6 @@
 """
 Shared search utility for both single_server and strata_server.
-Provides type-safe interfaces for searching through MCP tools and OpenAPI endpoints.
+Provides type-safe interfaces for searching through MCP tools
 Uses a unified generic approach to reduce code duplication.
 """
 
@@ -13,7 +13,7 @@ from strata.utils.bm25_search import BM25SearchEngine
 
 class UniversalToolSearcher:
     """
-    Universal searcher that handles all tool types (MCP tools and OpenAPI endpoints)
+    Universal searcher that handles all tool types
     using a single unified approach based on function names.
     """
 
@@ -76,14 +76,12 @@ class UniversalToolSearcher:
                 if summary:
                     fields.append(("summary", str(summary).lower(), 30))
 
-                # Tags (for OpenAPI)
                 tags = self._get_tool_field(tool, "tags", [])
                 if isinstance(tags, list):
                     for tag in tags:
                         if tag:
                             fields.append(("tag", str(tag).lower(), 30))
 
-                # Path and Method (for OpenAPI)
                 path = self._get_tool_field(tool, "path", "")
                 if path:
                     fields.append(("path", str(path).lower(), 30))
@@ -92,7 +90,6 @@ class UniversalToolSearcher:
                 if method:
                     fields.append(("method", str(method).lower(), 15))
 
-                # Parameters (for OpenAPI
                 for param_type in ["path_params", "query_params"]:
                     params = self._get_tool_field(tool, param_type, {})
                     for param_name, param_info in params.items():
@@ -125,8 +122,6 @@ class UniversalToolSearcher:
                                 )
                             )
 
-                # Response schema fields (for OpenAPI)
-                # No parse due to complexity, just index the raw JSON string
                 response_schema = self._get_tool_field(tool, "response_schema", {})
                 for param_name, param_info in response_schema.get(
                     "properties", {}
