@@ -159,6 +159,12 @@ class CallbackServer:
     
 def create_oauth_provider(server_name: str, url: str) -> OAuthClientProvider:
     """Create OAuth authentication provider."""
+    
+    # Special handling for GitHub Copilot MCP server
+    if "api.githubcopilot.com" in url or "github" in server_name.lower():
+        return create_github_oauth_provider(server_name, url)
+    
+    # Generic OAuth provider for other servers
     client_metadata_dict = {
         "client_name": "KLAVIS Strata MCP Router",
         "redirect_uris": ["http://localhost:3030/callback"],
@@ -198,3 +204,61 @@ def create_oauth_provider(server_name: str, url: str) -> OAuthClientProvider:
         redirect_handler=_default_redirect_handler,
         callback_handler=callback_handler,
     )
+
+
+class GitHubOAuthProvider(OAuthClientProvider):
+    """Custom OAuth provider for GitHub Copilot MCP server."""
+    
+    def __init__(self, server_name: str, url: str):
+        self.server_name = server_name
+        self.mcp_url = url
+        
+        # Pre-registered client for GitHub Copilot (simulating what VS Code uses)
+        client_metadata_dict = {
+            "client_name": "KLAVIS Strata MCP Router",
+            "redirect_uris": ["http://localhost:3030/callback"],
+            "grant_types": ["authorization_code", "refresh_token"],
+            "response_types": ["code"],
+            "token_endpoint_auth_method": "none",  # PKCE flow
+        }
+        
+        super().__init__(
+            server_url="https://github.com",
+            client_metadata=OAuthClientMetadata.model_validate(client_metadata_dict),
+            storage=LocalTokenStorage(server_name),
+            redirect_handler=self._github_redirect_handler,
+            callback_handler=self._github_callback_handler,
+        )
+        
+        # Override client info with hardcoded GitHub OAuth app
+        self._static_client_info = OAuthClientInformationFull(
+            client_id="Iv1.b507a08c87ecfe98",  # GitHub's public client ID for MCP
+            client_metadata=self.client_metadata
+        )
+
+    async def _github_redirect_handler(self, authorization_url: str) -> None:
+        """GitHub-specific redirect handler."""
+        logger.info(f"🔐 Opening GitHub authorization page: {authorization_url}")
+        logger.info("📝 Please authorize KLAVIS Strata MCP Router to access GitHub")
+        webbrowser.open(authorization_url)
+
+    async def _github_callback_handler(self) -> tuple[str, str | None]:
+        """GitHub-specific callback handler."""
+        callback_server = CallbackServer(port=3030)
+        callback_server.start()
+        logger.info("⏳ Waiting for GitHub authorization callback...")
+        try:
+            auth_code = callback_server.wait_for_callback(timeout=300)
+            return auth_code, callback_server.get_state()
+        finally:
+            callback_server.stop()
+
+    async def get_client_info(self) -> OAuthClientInformationFull:
+        """Return pre-configured client info, bypassing dynamic registration."""
+        return self._static_client_info
+
+
+def create_github_oauth_provider(server_name: str, url: str) -> GitHubOAuthProvider:
+    """Create GitHub-specific OAuth authentication provider that bypasses dynamic registration."""
+    logger.info(f"Creating GitHub OAuth provider for {server_name}")
+    return GitHubOAuthProvider(server_name, url)
