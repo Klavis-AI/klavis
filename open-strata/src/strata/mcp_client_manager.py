@@ -16,14 +16,17 @@ logger = logging.getLogger(__name__)
 class MCPClientManager:
     """Manages multiple MCP client connections based on configuration."""
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Optional[Path] = None, server_names: Optional[List[str]] = None):
         """Initialize the MCP client manager.
 
         Args:
             config_path: Optional path to configuration file.
                         If None, uses default from MCPServerList.
+            server_names: Optional list of specific server names to initialize.
+                         If None, all enabled servers will be initialized.
         """
         self.server_list = MCPServerList(config_path)
+        self.server_names = server_names  # Specific servers to manage
         self.active_clients: Dict[str, MCPClient] = {}
         self.active_transports: Dict[str, HTTPTransport | StdioTransport] = {}
         # Cache of current server configs for comparison during sync
@@ -35,12 +38,17 @@ class MCPClientManager:
         """Initialize MCP clients from configuration.
 
         Only initializes servers that are enabled in the configuration.
+        If server_names was specified in __init__, only those servers will be initialized.
 
         Returns:
             Dict mapping server names to success status (True if connected)
         """
         results = {}
         enabled_servers = self.server_list.list_servers(enabled_only=True)
+        
+        # Filter servers if specific names were provided
+        if self.server_names:
+            enabled_servers = [s for s in enabled_servers if s.name in self.server_names]
 
         for server in enabled_servers:
             try:

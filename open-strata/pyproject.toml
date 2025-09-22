@@ -1,9 +1,9 @@
 [project]
 name = "strata-mcp"
-version = "1.0.0"
+version = "1.0.1"
 description = "One Model Context Protocol (MCP) server for AI agents to handle thousands of tools"
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 authors = [
     { name = "Klavis AI", email = "connect@klavis.ai" },
 ]
@@ -11,7 +11,7 @@ keywords = ["mcp", "model-context-protocol", "router", "ai", "llm", "tools"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache 2.0 license",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
