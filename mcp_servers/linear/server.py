@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
-    get_teams, get_team_by_id,
+    get_teams,
     get_issues, get_issue_by_id, create_issue, update_issue, search_issues,
     get_projects, create_project, update_project,
     get_comments, create_comment, update_comment
@@ -94,27 +94,10 @@ def main(
         return [
             types.Tool(
                 name="linear_get_teams",
-                description="Get all teams in the Linear workspace.",
+                description="Get all teams in the Linear workspace including workflow states and team members.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
-                },
-                annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_TEAM"}
-                ),
-            ),
-            types.Tool(
-                name="linear_get_team_by_id",
-                description="Get a specific team by its ID with detailed information including workflow states and team members.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["team_id"],
-                    "properties": {
-                        "team_id": {
-                            "type": "string",
-                            "description": "The ID of the team to retrieve.",
-                        },
-                    },
                 },
                 annotations=types.ToolAnnotations(
                     **{"category": "LINEAR_TEAM"}
@@ -487,32 +470,6 @@ def main(
         if name == "linear_get_teams":
             try:
                 result = await get_teams()
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "linear_get_team_by_id":
-            team_id = arguments.get("team_id")
-            if not team_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: team_id parameter is required",
-                    )
-                ]
-            try:
-                result = await get_team_by_id(team_id)
                 return [
                     types.TextContent(
                         type="text",
