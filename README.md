@@ -12,6 +12,8 @@
 
 <a href="https://www.producthunt.com/products/strata-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_source=badge-strata&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1016948&theme=light&period=daily&t=1758639605639" alt="Strata - One&#0032;MCP&#0032;server&#0032;for&#0032;AI&#0032;agents&#0032;to&#0032;handle&#0032;thousands&#0032;of&#0032;tools | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
+<a href="https://www.producthunt.com/products/strata-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_source=badge-strata&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1016948&theme=light&period=daily&t=1758639605639" alt="Strata - One&#0032;MCP&#0032;server&#0032;for&#0032;AI&#0032;agents&#0032;to&#0032;handle&#0032;thousands&#0032;of&#0032;tools | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 </div>
 
 ## 🎯 Choose Your Solution
