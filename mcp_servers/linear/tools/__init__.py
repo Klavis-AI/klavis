@@ -10,24 +10,24 @@ from .base import auth_token_context
 __all__ = [
     # Teams
     "get_teams",
-
+    
     # Issues
     "get_issues",
-    "get_issue_by_id",
+    "get_issue_by_id", 
     "create_issue",
     "update_issue",
     "search_issues",
-
+    
     # Projects
     "get_projects",
     "create_project",
     "update_project",
-
+    
     # Comments
     "get_comments",
     "create_comment",
     "update_comment",
-
+    
     # Base
     "auth_token_context",
 ] 
