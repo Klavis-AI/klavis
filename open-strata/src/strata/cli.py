@@ -156,7 +156,8 @@ def disable_command(args):
     return 0
 
 async def authenticate(server_name):
-    async with MCPClientManager() as client_manager:
+    # Only initialize the specific server we want to authenticate
+    async with MCPClientManager(server_names=[server_name]) as client_manager:
         await client_manager.authenticate_server(server_name)
 
 def authenticate_command(args):
