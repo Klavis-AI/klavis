@@ -24,6 +24,7 @@ from tools import (
     create_post as create_post_impl,
     get_user_posts as get_user_posts_impl,
     create_comment as create_comment_impl,
+    upvote as upvote_impl,
 )
 
 from tools.base import init_http_clients, close_http_clients
@@ -70,6 +71,7 @@ def main(
         "reddit_create_post": create_post_impl,
         "reddit_get_user_posts": get_user_posts_impl,
         "reddit_create_comment": create_comment_impl,
+        "reddit_upvote": upvote_impl,
     }
 
     @app.list_tools()
@@ -198,6 +200,20 @@ def main(
                     },
                     "required": ["post_id", "text"]
                 }
+            ),
+            types.Tool(
+                name="reddit_upvote",
+                description="Upvotes a post.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "post_id": {
+                            "type": "string",
+                            "description": "The ID of the post to upvote (without the 't3_' prefix)."
+                        }
+                    },
+                    "required": ["post_id"]
+                }
             )
         ]
 
@@ -223,6 +239,10 @@ def main(
                 arguments["limit"] = max(1, min(100, arguments.get("limit", 25)))
 
             result = await tool_func(**arguments)
+
+            if name == "reddit_create_subreddit" and "troubleshooting" in result:
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
         except Exception as e:

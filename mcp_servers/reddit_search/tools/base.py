@@ -103,7 +103,7 @@ async def _refresh_user_token_locked() -> None:
         "grant_type": "password",
         "username": REDDIT_USERNAME,
         "password": REDDIT_PASSWORD,
-        "scope": "identity submit read"
+        "scope": "identity submit read vote"
     }
     headers = {"User-Agent": REDDIT_USER_AGENT}
     resp = await client.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
