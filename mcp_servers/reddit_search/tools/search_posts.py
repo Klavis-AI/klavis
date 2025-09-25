@@ -1,10 +1,18 @@
 import logging
-from typing import List
+from typing import List, TypedDict
 
-from .base import reddit_get, PostInfo, build_broad_query, compute_semantic_score
+from .base import reddit_get, build_broad_query, compute_semantic_score
 
 logger = logging.getLogger(__name__)
 
+class PostInfo(TypedDict):
+    """Structured data for a Reddit post summary."""
+    id: str
+    subreddit: str
+    title: str
+    score: int
+    url: str
+    comment_count: int
 
 async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
     """Search for posts in a subreddit with semantic-style matching.
@@ -76,7 +84,8 @@ async def search_subreddit_posts(subreddit: str, query: str) -> List[PostInfo]:
     # 3) Rank: semantic score first, then Reddit score
     # Deduplicate by id
     seen: set[str] = set()
-    for s, pi in sorted(scored, key=lambda x: (x[0], x[1]["score"]), reverse=True):
+    for s, pi in sorted(scored, key=lambda x: (x[0], x[1]["score"]),
+                          reverse=True):
         if not pi["id"] or pi["id"] in seen:
             continue
         seen.add(pi["id"])

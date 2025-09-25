@@ -1,7 +1,8 @@
 import logging
 from typing import List
 
-from .base import reddit_get, PostInfo, build_broad_query, compute_semantic_score
+from .base import reddit_get, build_broad_query, compute_semantic_score
+from .search_posts import PostInfo
 
 logger = logging.getLogger(__name__)
 

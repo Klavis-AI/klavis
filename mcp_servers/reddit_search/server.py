@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from collections.abc import AsyncIterator
-from typing import List
+from typing import List, Callable, Awaitable, Any
 
 import click
 import mcp.types as types
@@ -59,6 +59,14 @@ def main(
 
     # Create the MCP server instance
     app = Server("reddit-mcp-server")
+
+    tool_implementations: dict[str, Callable[..., Awaitable[Any]]] = {
+        "reddit_find_subreddits": find_subreddits_impl,
+        "reddit_search_posts": search_posts_impl,
+        "reddit_get_post_comments": get_comments_impl,
+        "reddit_find_similar_posts": find_similar_impl,
+        "reddit_create_post": create_post_impl,
+    }
 
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
@@ -161,65 +169,27 @@ def main(
             name: str,
             arguments: dict
     ) -> List[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        if name == "reddit_find_subreddits":
-            try:
-                logger.info("Tool call: reddit_find_subreddits(query=%r)", arguments["query"])
-                result = await find_subreddits_impl(arguments["query"])
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing reddit_find_subreddits: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        
+        tool_func = tool_implementations.get(name)
+        if not tool_func:
+            return [types.TextContent(type="text", text=f"Error: Unknown tool '{name}'")]
 
-        elif name == "reddit_search_posts":
-            try:
-                logger.info(
-                    "Tool call: reddit_search_posts(subreddit=%r, query=%r)",
-                    arguments["subreddit"],
-                    arguments["query"],
-                )
-                result = await search_posts_impl(arguments["subreddit"], arguments["query"])
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing reddit_search_posts: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        try:
+            # Log the tool call with its arguments
+            arg_str = ", ".join(f"{k}={v!r}" for k, v in arguments.items())
+            logger.info(f"Tool call: {name}({arg_str})")
 
-        elif name == "reddit_get_post_comments":
-            try:
-                logger.info(
-                    "Tool call: reddit_get_post_comments(post_id=%r, subreddit=%r)",
-                    arguments["post_id"],
-                    arguments["subreddit"],
-                )
-                result = await get_comments_impl(arguments["post_id"], arguments["subreddit"])
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing reddit_get_post_comments: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            # Special handling for limit, as it's a parameter to the function
+            if name == "reddit_find_similar_posts":
+                arguments["limit"] = max(1, min(50, arguments.get("limit", 10)))
 
-        elif name == "reddit_find_similar_posts":
-            try:
-                post_id = arguments["post_id"]
-                limit = arguments.get("limit", 10)
-                logger.info(
-                    "Tool call: reddit_find_similar_posts(post_id=%r, limit=%r)",
-                    post_id,
-                    limit,
-                )
-                # Ensure limit is within bounds
-                limit = max(1, min(50, limit))
-                result = await find_similar_impl(post_id, limit)
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing reddit_find_similar_posts: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            result = await tool_func(**arguments)
+            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-        elif name == "reddit_create_post":
-            try:
-                result = await create_post_impl(arguments["subreddit"], arguments["title"], arguments["text"])
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                logger.exception(f"Error executing reddit_create_post: {e}")
-                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        except Exception as e:
+            logger.exception(f"Error executing {name}: {e}")
+            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
 
     # Set up SSE transport
     sse = SseServerTransport("/messages/")

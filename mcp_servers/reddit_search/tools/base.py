@@ -322,35 +322,4 @@ def compute_semantic_score(query: str, title: str, selftext: str) -> float:
     return float(score)
 
 
-# Define the structure of the returned data
-class SubredditInfo(TypedDict):
-    """Structured data for a single subreddit."""
-    name: str
-    subscriber_count: int
-    description: str
 
-
-class PostInfo(TypedDict):
-    """Structured data for a Reddit post summary."""
-    id: str
-    subreddit: str
-    title: str
-    score: int
-    url: str
-    comment_count: int
-
-
-class CommentInfo(TypedDict):
-    """Structured data for a single comment."""
-    author: str
-    text: str
-    score: int
-
-
-class PostDetails(TypedDict):
-    """The combined structure for a post and its top comments."""
-    title: str
-    author: str
-    text: str
-    score: int
-    top_comments: List[CommentInfo]

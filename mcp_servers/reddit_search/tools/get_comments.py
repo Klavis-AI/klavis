@@ -1,9 +1,23 @@
 import logging
+from typing import List, TypedDict
 
-from .base import reddit_get, PostDetails, CommentInfo
+from .base import reddit_get
 
 logger = logging.getLogger(__name__)
 
+class CommentInfo(TypedDict):
+    """Structured data for a single comment."""
+    author: str
+    text: str
+    score: int
+
+class PostDetails(TypedDict):
+    """The combined structure for a post and its top comments."""
+    title: str
+    author: str
+    text: str
+    score: int
+    top_comments: List[CommentInfo]
 
 async def get_post_and_top_comments(post_id: str, subreddit: str) -> PostDetails:
     """Gets post and comment details via the Reddit API and cleans the data."""
