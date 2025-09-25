@@ -50,7 +50,10 @@ async def _refresh_token_locked() -> None:
     logger.info("Requesting new Reddit API access token…")
     client = await _ensure_async_client()
     auth = (REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
-    data = {"grant_type": "client_credentials"}
+    data = {
+        "grant_type": "client_credentials",
+        "scope": "identity submit read"  # Required scopes for posting and reading
+    }
     headers = {"User-Agent": REDDIT_USER_AGENT}
     resp = await client.post(REDDIT_TOKEN_URL, auth=auth, data=data, headers=headers)
     resp.raise_for_status()
