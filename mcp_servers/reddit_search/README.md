@@ -84,6 +84,44 @@ docker build -t reddit-mcp-server -f mcp_servers/reddit_search/Dockerfile .
 docker run -p 5001:5001 --env-file mcp_servers/reddit_search/.env reddit-mcp-server
 ```
 
+## Quickstart: Run with Docker and Configure in Cursor
+
+1. Create `.env` at `mcp_servers/reddit_search/.env`:
+```bash
+REDDIT_MCP_SERVER_PORT=5001
+REDDIT_CLIENT_ID=your_client_id_here
+REDDIT_CLIENT_SECRET=your_client_secret_here
+REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
+```
+
+2. Build and run the Docker container from the repo root:
+```bash
+docker build -t reddit-mcp-server -f mcp_servers/reddit_search/Dockerfile .
+docker run -p 5001:5001 --env-file mcp_servers/reddit_search/.env reddit-mcp-server
+```
+
+3. In Cursor IDE, add the MCP server:
+   - Settings → Features → MCP Servers → Add server
+   - Name: `reddit-search`
+   - URL: `http://localhost:5001/sse`
+
+   Alternatively, add to `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "reddit-search": {
+      "url": "http://localhost:5001/sse"
+    }
+  }
+}
+```
+
+4. Test in Cursor chat (examples):
+   - "Use reddit_find_subreddits to find subreddits related to machine learning"
+   - "Use reddit_search_posts in subreddit 'programming' for query 'Python vs JavaScript'"
+   - "Use reddit_get_post_comments for post_id '<paste_id>' in subreddit 'programming'"
+   - "Use reddit_find_similar_posts for post_id '<paste_id>' with limit 5"
+
 ### Command Line Options
 - `--port`: Port to listen on (default: 5001)
 - `--log-level`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -107,13 +145,7 @@ To integrate this MCP server with Cursor IDE:
 {
   "mcpServers": {
     "reddit-search": {
-      "command": "python",
-      "args": ["mcp_servers/reddit_search/server.py", "--port", "5001"],
-      "env": {
-        "REDDIT_CLIENT_ID": "your_client_id",
-        "REDDIT_CLIENT_SECRET": "your_client_secret",
-        "REDDIT_USER_AGENT": "klavis-mcp/0.1 (+https://klavis.ai)"
-      }
+      "url": "http://localhost:5001/sse"
     }
   }
 }
