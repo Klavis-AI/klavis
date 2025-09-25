@@ -1,6 +1,10 @@
 import logging
+import os
+import praw
 from typing import Dict, Any
-from .base import reddit_post
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +26,35 @@ class PostCreationResult:
         }
 
 
+def _get_reddit_instance():
+    """Get a configured PRAW Reddit instance."""
+    client_id = os.getenv("REDDIT_CLIENT_ID")
+    client_secret = os.getenv("REDDIT_CLIENT_SECRET")
+    user_agent = os.getenv("REDDIT_USER_AGENT", "klavis-mcp/0.1 (+https://klavis.ai)")
+    username = os.getenv("REDDIT_USERNAME")
+    password = os.getenv("REDDIT_PASSWORD")
+    
+    if not all([client_id, client_secret, username, password]):
+        raise ValueError(
+            "Missing required Reddit credentials. Please set:\n"
+            "- REDDIT_CLIENT_ID\n"
+            "- REDDIT_CLIENT_SECRET\n"
+            "- REDDIT_USERNAME\n"
+            "- REDDIT_PASSWORD\n"
+            "in your .env file"
+        )
+    
+    return praw.Reddit(
+        client_id=client_id,
+        client_secret=client_secret,
+        user_agent=user_agent,
+        username=username,
+        password=password
+    )
+
+
 async def create_post(subreddit: str, title: str, text: str) -> Dict[str, Any]:
-    """Write a text post to a subreddit.
+    """Write a text post to a subreddit using PRAW.
     
     Args:
         subreddit: The subreddit to write the post to (without r/ prefix).
@@ -50,44 +81,28 @@ async def create_post(subreddit: str, title: str, text: str) -> Dict[str, Any]:
         logger.error(error_msg)
         return PostCreationResult(success=False, error=error_msg).to_dict()
     
-    # Prepare the data payload for Reddit API
-    data = {
-        "sr": subreddit,
-        "title": title,
-        "kind": "self",  # Required: specifies this is a text post (not "link")
-        "text": text,
-        "api_type": "json",  # Required: tells Reddit to return JSON response
-        "sendreplies": True  # Optional: send replies to inbox
-    }
-    
     try:
         logger.info(f"Creating post in r/{subreddit} with title: '{title[:50]}...'")
-        response = await reddit_post("/api/submit", data)
         
-        # Check for Reddit API errors
-        if response and response.get("json", {}).get("errors"):
-            errors = response["json"]["errors"]
-            error_msg = f"Reddit API errors: {errors}"
-            logger.error(f"Reddit API returned errors for r/{subreddit}: {errors}")
-            return PostCreationResult(success=False, error=error_msg).to_dict()
+        # Get Reddit instance
+        reddit = _get_reddit_instance()
         
-        # Extract post information from successful response
-        json_data = response.get("json", {})
-        if json_data.get("data"):
-            post_data = json_data["data"]
-            post_id = post_data.get("id", "")
-            post_url = post_data.get("url", "")
-            
-            logger.info(f"Successfully created post {post_id} in r/{subreddit}")
-            return PostCreationResult(
-                success=True, 
-                post_id=post_id, 
-                url=post_url
-            ).to_dict()
-        else:
-            error_msg = "Unexpected response format from Reddit API"
-            logger.error(f"{error_msg}: {response}")
-            return PostCreationResult(success=False, error=error_msg).to_dict()
+        # Get the subreddit
+        subreddit_obj = reddit.subreddit(subreddit)
+        
+        # Submit the post
+        submission = subreddit_obj.submit(title=title, selftext=text)
+        
+        # Extract post information
+        post_id = submission.id
+        post_url = f"https://reddit.com{submission.permalink}"
+        
+        logger.info(f"Successfully created post {post_id} in r/{subreddit}")
+        return PostCreationResult(
+            success=True, 
+            post_id=post_id, 
+            url=post_url
+        ).to_dict()
             
     except Exception as e:
         error_msg = f"Failed to create post in r/{subreddit}: {str(e)}"

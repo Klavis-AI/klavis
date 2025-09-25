@@ -8,6 +8,7 @@ This Model Context Protocol (MCP) server enables AI clients (e.g., Cursor, Claud
 - **Post Search**: Search for posts within specific subreddits with semantic ranking
 - **Comment Retrieval**: Get top comments for specific posts
 - **Similar Post Discovery**: Find posts similar to a given post using semantic matching
+- **Post Creation**: Create new text posts in subreddits using PRAW
 - **Advanced Querying**: Supports comparison queries (e.g., "X vs Y") with specialized ranking
 - **Rate Limiting**: Built-in rate limiting and retry logic for Reddit API
 - **Dual Transport**: Supports both SSE and StreamableHTTP protocols
@@ -21,6 +22,7 @@ This Model Context Protocol (MCP) server enables AI clients (e.g., Cursor, Claud
 - `reddit_search_posts`: Search for posts in a specific subreddit
 - `reddit_get_post_comments`: Get top comments for a specific post
 - `reddit_find_similar_posts`: Find posts similar to a given post using semantic matching
+- `reddit_create_post`: Create a new text post in a subreddit
 
 ## Prerequisites
 
@@ -30,6 +32,8 @@ To use this server, you need Reddit API credentials:
 2. Click "Create App" or "Create Another App"
 3. Choose "script" application type
 4. Note down your `client_id` and `client_secret`
+
+**For Post Creation**: You'll also need your Reddit username and password for authentication.
 
 ## Acquire Reddit API Credentials
 
@@ -47,6 +51,10 @@ REDDIT_MCP_SERVER_PORT=5001
 REDDIT_CLIENT_ID=your_client_id_here
 REDDIT_CLIENT_SECRET=your_client_secret_here
 REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
+
+# For post creation (optional - only needed if using reddit_create_post)
+REDDIT_USERNAME=your_reddit_username
+REDDIT_PASSWORD=your_reddit_password
 ```
 
 2) Environment variables reference:
