@@ -182,7 +182,7 @@ The server uses Reddit's OAuth2 client credentials flow for authentication. Acce
 - mcp>=1.12.0
 - pydantic
 - typing-extensions
-- requests
+- httpx
 - click
 - python-dotenv
 - starlette

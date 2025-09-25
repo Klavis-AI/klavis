@@ -73,6 +73,7 @@ async def _get_reddit_auth_header() -> dict[str, str]:
     # Acquire lock to refresh once across awaiters
     async with _token_lock:
         if _access_token and _token_expires_at and time.time() < _token_expires_at:
+            
             return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
         await _refresh_token_locked()
         return {"Authorization": f"Bearer {_access_token}", "User-Agent": REDDIT_USER_AGENT}
@@ -98,8 +99,6 @@ async def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3
                 if resp.status_code == 401:
                     # Token likely expired/invalid; refresh once and retry
                     async with _token_lock:
-                        _access_token_local = _access_token  # for log context
-                        _access_token_local = _access_token_local  # no-op to avoid linter
                         await _refresh_token_locked()
                         headers = await _get_reddit_auth_header()
                     resp = await client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params)
@@ -125,6 +124,55 @@ async def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3
     raise RuntimeError("Reddit GET failed unexpectedly with no exception recorded")
 
 
+
+async def reddit_post(path: str, data: Dict, max_retries: int = 3) -> Dict:
+    """HTTP POST helper with UA header and async retry/backoff including 429.
+
+    path should start with '/'.
+    data is the request body payload.
+    """
+    client = await _ensure_async_client()
+    headers = await _get_reddit_auth_header()
+
+    backoff_seconds = 1.0
+    last_exc: Exception | None = None
+
+    for attempt in range(max_retries):
+        async with _request_semaphore:
+            try:
+                # The data payload is passed directly to the 'data' argument
+                resp = await client.post(f"{REDDIT_API_BASE}{path}", headers=headers, data=data)
+
+                if resp.status_code == 401:
+                    # Token likely expired/invalid; refresh once and retry
+                    async with _token_lock:
+                        await _refresh_token_locked()
+                        headers = await _get_reddit_auth_header()
+                    # Retry the request with the new token
+                    resp = await client.post(f"{REDDIT_API_BASE}{path}", headers=headers, data=data)
+
+                if resp.status_code == 429:
+                    retry_after = resp.headers.get("Retry-After")
+                    sleep_s = float(retry_after) if retry_after else backoff_seconds
+                    logger.warning(f"Reddit API 429 rate limit. Sleeping {sleep_s}s then retrying…")
+                    await asyncio.sleep(sleep_s) # No need for extra random jitter here, it's already in GET
+                    backoff_seconds = min(backoff_seconds * 2, 8)
+                    continue
+
+                resp.raise_for_status()
+                return resp.json()
+
+            except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+                last_exc = exc
+                logger.warning(f"Reddit POST {path} failed (attempt {attempt+1}/{max_retries}): {exc}")
+                await asyncio.sleep(backoff_seconds)
+                backoff_seconds = min(backoff_seconds * 2, 8)
+
+    if last_exc:
+        raise last_exc
+    raise RuntimeError("Reddit POST failed unexpectedly with no exception recorded")
+
+    
 # Lifecycle helpers to integrate with server startup/shutdown
 async def init_http_clients() -> None:
     await _ensure_async_client()

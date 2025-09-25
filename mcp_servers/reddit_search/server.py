@@ -21,7 +21,9 @@ from tools import (
     search_subreddit_posts as search_posts_impl,
     get_post_and_top_comments as get_comments_impl,
     find_similar_posts_reddit as find_similar_impl,
+    create_post as create_post_impl,
 )
+
 from tools.base import init_http_clients, close_http_clients
 
 load_dotenv()
@@ -129,6 +131,28 @@ def main(
                     },
                     "required": ["post_id"]
                 }
+            ),
+            types.Tool(
+                name="reddit_create_post",
+                description="Create a new post in a subreddit.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "subreddit": {
+                            "type": "string",
+                            "description": "Name of the subreddit to create the post in (without r/ prefix)"
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Title of the post"
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Text of the post"
+                        }
+                    },
+                    "required": ["subreddit", "title", "text"]
+                }
             )
         ]
 
@@ -187,6 +211,14 @@ def main(
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error executing reddit_find_similar_posts: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "reddit_create_post":
+            try:
+                result = await create_post_impl(arguments["subreddit"], arguments["title"], arguments["text"])
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error executing reddit_create_post: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]
 
     # Set up SSE transport
