@@ -21,8 +21,8 @@ from tools import (
     search_subreddit_posts as search_posts_impl,
     get_post_and_top_comments as get_comments_impl,
     find_similar_posts_reddit as find_similar_impl,
-    create_post as create_post_impl,
 )
+from tools.create_post import create_post as create_post_impl
 
 from tools.base import init_http_clients, close_http_clients
 

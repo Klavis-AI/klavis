@@ -44,13 +44,20 @@ async def create_post(subreddit: str, title: str, text: str) -> Dict[str, Any]:
         logger.error(error_msg)
         return PostCreationResult(success=False, error=error_msg).to_dict()
     
+    # Validate title length (Reddit limit: 300 characters)
+    if len(title) > 300:
+        error_msg = f"Title too long: {len(title)} characters (max 300)"
+        logger.error(error_msg)
+        return PostCreationResult(success=False, error=error_msg).to_dict()
+    
     # Prepare the data payload for Reddit API
     data = {
         "sr": subreddit,
         "title": title,
-        "kind": "self",  # Required: specifies this is a text post
+        "kind": "self",  # Required: specifies this is a text post (not "link")
         "text": text,
-        "api_type": "json"  # Required: tells Reddit to return JSON response
+        "api_type": "json",  # Required: tells Reddit to return JSON response
+        "sendreplies": True  # Optional: send replies to inbox
     }
     
     try:
