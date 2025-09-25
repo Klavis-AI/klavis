@@ -1,50 +1,44 @@
 # Reddit Search MCP Server
 
-This Model Context Protocol (MCP) server enables AI clients (e.g., Cursor, Claude Desktop) to search and retrieve Reddit content. It exposes tools to discover relevant subreddits, search posts with semantic-style ranking, fetch post comments, and find similar posts. The server authenticates with Reddit via OAuth2 client credentials and includes resilient request handling.
+A Model Context Protocol (MCP) server that enables AI clients to search, retrieve, and interact with Reddit content. Provides semantic search, post creation, comment management, and community discovery capabilities.
 
 ## Features
 
-- **Subreddit Discovery**: Find relevant subreddits based on search queries
-- **Post Search**: Search for posts within specific subreddits with semantic ranking
-- **Comment Retrieval**: Get top comments for specific posts
-- **Similar Post Discovery**: Find posts similar to a given post using semantic matching
-- **Post Creation**: Create new text posts in subreddits using PRAW
-- **Advanced Querying**: Supports comparison queries (e.g., "X vs Y") with specialized ranking
+- **Semantic Search**: Find relevant subreddits and posts using natural language queries
+- **Content Creation**: Create posts and comments programmatically
+- **Community Discovery**: Discover relevant subreddits based on topics
 - **Rate Limiting**: Built-in rate limiting and retry logic for Reddit API
 - **Dual Transport**: Supports both SSE and StreamableHTTP protocols
 
-## Available Tools
+## Tools Reference
 
-### Subreddit Operations
-- `reddit_find_subreddits`: Find relevant subreddits based on a query
-
-### Post Operations
-- `reddit_search_posts`: Search for posts in a specific subreddit
-- `reddit_get_post_comments`: Get top comments for a specific post
-- `reddit_find_similar_posts`: Find posts similar to a given post using semantic matching
-- `reddit_create_post`: Create a new text post in a subreddit
+| Tool | Description | Input Parameters | Output | Credentials Required |
+|------|-------------|------------------|--------|---------------------|
+| `reddit_find_subreddits` | Find relevant subreddits based on a query | `query` (string) | Array of subreddit objects with name, description, subscriber_count | Basic API credentials |
+| `reddit_search_posts` | Search for posts in a specific subreddit | `subreddit` (string), `query` (string) | Array of post objects with title, score, url, comment_count | Basic API credentials |
+| `reddit_get_post_comments` | Get top comments for a specific post | `post_id` (string), `subreddit` (string) | Array of comment objects with author, body, score | Basic API credentials |
+| `reddit_find_similar_posts` | Find posts similar to a given post | `post_id` (string), `limit` (number, optional) | Array of similar post objects | Basic API credentials |
+| `reddit_create_post` | Create a new text post in a subreddit | `subreddit` (string), `title` (string), `text` (string) | Post creation confirmation with post_id | Basic API credentials + Username/Password |
+| `reddit_create_comment` | Create a comment on a post | `post_id` (string), `text` (string) | Comment creation confirmation with comment_id | Basic API credentials + Username/Password |
+| `reddit_upvote` | Upvote a post | `post_id` (string) | Upvote confirmation | Basic API credentials + Username/Password |
+| `reddit_get_user_posts` | Get recent posts by authenticated user | `limit` (number, optional) | Array of user's post objects | Basic API credentials + Username/Password |
 
 ## Prerequisites
 
-To use this server, you need Reddit API credentials:
+### Reddit API Credentials
 
-1. Go to https://www.reddit.com/prefs/apps
+1. Visit https://www.reddit.com/prefs/apps
 2. Click "Create App" or "Create Another App"
 3. Choose "script" application type
-4. Note down your `client_id` and `client_secret`
-
-**For Post Creation**: You'll also need your Reddit username and password for authentication.
-
-## Acquire Reddit API Credentials
-
-1. Visit `https://www.reddit.com/prefs/apps`
-2. Click “Create App” (or “Create Another App”)
-3. Choose application type: `script`
 4. Save the generated `client_id` and `client_secret`
 
-## Installation & Configuration
+**For Post Creation/Interaction**: You'll also need your Reddit username and password.
 
-1) Create a `.env` file in `mcp_servers/reddit_search/` with:
+## Setup
+
+### 1. Environment Configuration
+
+Create `.env` file in `mcp_servers/reddit_search/`:
 
 ```bash
 REDDIT_MCP_SERVER_PORT=5001
@@ -52,68 +46,31 @@ REDDIT_CLIENT_ID=your_client_id_here
 REDDIT_CLIENT_SECRET=your_client_secret_here
 REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
 
-# For post creation (optional - only needed if using reddit_create_post)
+# For post creation (optional - only needed for reddit_create_post, reddit_create_comment, reddit_upvote)
 REDDIT_USERNAME=your_reddit_username
 REDDIT_PASSWORD=your_reddit_password
 ```
 
-2) Environment variables reference:
+### 2. Running the Server
 
-- `REDDIT_MCP_SERVER_PORT`: Port for the server (default: 5001)
-- `REDDIT_CLIENT_ID`: Reddit app client ID
-- `REDDIT_CLIENT_SECRET`: Reddit app client secret
-- `REDDIT_USER_AGENT`: User agent string for Reddit API requests
-
-## Running the Server
-
-### Direct Python (uv)
-From the repository root on Windows PowerShell:
+#### Docker (Recommended)
 ```bash
-cd mcp_servers/reddit_search; uv sync; uv run python server.py
-```
-Expected terminal output includes:
-- "Starting Reddit MCP Server..."
-- A log line indicating a Reddit token was obtained
-- Tool invocation logs when tools are used, e.g.:
-  - `Tool call: reddit_find_subreddits(query='...')`
-  - `Tool call: reddit_search_posts(subreddit='...', query='...')`
-  - `Tool call: reddit_get_post_comments(post_id='...', subreddit='...')`
-  - `Tool call: reddit_find_similar_posts(post_id='...', limit=...)`
-
-### Direct Python (standard)
-```bash
-python server.py --port 5001 --json-response
-```
-
-### Docker
-From the root of the repository:
-```bash
+# From repository root
 docker build -t reddit-mcp-server -f mcp_servers/reddit_search/Dockerfile .
 docker run -p 5001:5001 --env-file mcp_servers/reddit_search/.env reddit-mcp-server
 ```
 
-## Quickstart: Run with Docker and Configure in Cursor
-
-1. Create `.env` at `mcp_servers/reddit_search/.env`:
+#### Direct Python
 ```bash
-REDDIT_MCP_SERVER_PORT=5001
-REDDIT_CLIENT_ID=your_client_id_here
-REDDIT_CLIENT_SECRET=your_client_secret_here
-REDDIT_USER_AGENT=klavis-mcp/0.1 (+https://klavis.ai)
+cd mcp_servers/reddit_search
+python server.py --port 5001
 ```
 
-2. Build and run the Docker container from the repo root:
-```bash
-docker build -t reddit-mcp-server -f mcp_servers/reddit_search/Dockerfile .
-docker run -p 5001:5001 --env-file mcp_servers/reddit_search/.env reddit-mcp-server
-```
+## Cursor IDE Integration
 
-3. In Cursor IDE, add the MCP server:
-   - Settings → Features → MCP Servers → Add server
-   - Name: `reddit-search`
-   - URL: `http://localhost:5001/sse`
+### 1. Configure MCP Server in Cursor
 
-   Alternatively, add to `~/.cursor/mcp.json`:
+Add to `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
@@ -124,66 +81,31 @@ docker run -p 5001:5001 --env-file mcp_servers/reddit_search/.env reddit-mcp-ser
 }
 ```
 
-4. Test in Cursor chat (examples):
-   - "Use reddit_find_subreddits to find subreddits related to machine learning"
-   - "Use reddit_search_posts in subreddit 'programming' for query 'Python vs JavaScript'"
-   - "Use reddit_get_post_comments for post_id '<paste_id>' in subreddit 'programming'"
-   - "Use reddit_find_similar_posts for post_id '<paste_id>' with limit 5"
+### 2. Test in Cursor Chat
 
-### Command Line Options
-- `--port`: Port to listen on (default: 5001)
-- `--log-level`: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `--json-response`: Enable JSON responses for StreamableHTTP instead of SSE streams
+Try these example queries:
+
+- "Use reddit_find_subreddits to find subreddits related to machine learning"
+- "Use reddit_search_posts in subreddit 'programming' for query 'Python vs JavaScript'"
+- "Use reddit_get_post_comments for post_id '1nqa311' in subreddit 'programming'"
+- "Use reddit_find_similar_posts for post_id '1nqa311' with limit 5"
+- "Use reddit_create_post in subreddit 'test' with title 'Test Post' and text 'This is a test'"
 
 ## API Endpoints
 
 - **SSE**: `GET /sse` - Server-Sent Events endpoint for MCP communication
 - **StreamableHTTP**: `POST /mcp` - StreamableHTTP endpoint for MCP communication
 
-## Integration with Cursor IDE
+## Authentication
 
-To integrate this MCP server with Cursor IDE:
+The server uses Reddit's OAuth2 client credentials flow. Access tokens are automatically obtained and cached for the duration of the server session.
 
-1. **Configure MCP Server in Cursor**:
-   - Open Cursor IDE
-   - Go to Settings > Features > MCP Servers
-   - Add a new MCP server with the following configuration:
+## Rate Limiting
 
-```json
-{
-  "mcpServers": {
-    "reddit-search": {
-      "url": "http://localhost:5001/sse"
-    }
-  }
-}
-```
-
-2. **Test the Integration** (examples you can paste in chat):
-   - "Use reddit_find_subreddits to find subreddits related to machine learning"
-   - "Use reddit_search_posts in subreddit 'programming' for query 'Python vs JavaScript'"
-   - "Use reddit_get_post_comments for post_id '<paste_id>' in subreddit 'programming'"
-   - "Use reddit_find_similar_posts for post_id '<paste_id>' with limit 5"
-
-## Example Usage
-
-Once integrated with Cursor, you can use natural language queries like:
-
-- "Find subreddits related to machine learning"
-- "Search for posts about Python vs JavaScript in the programming subreddit"
-- "Get the comments for this Reddit post: [post_id]"
-- "Find posts similar to this one about AI development"
-
-## API Rate Limiting
-
-The server includes built-in rate limiting and retry logic:
+Built-in rate limiting and retry logic:
 - Respects Reddit's rate limits (429 responses)
 - Implements exponential backoff for failed requests
 - Includes jitter to prevent thundering herd effects
-
-## Authentication
-
-The server uses Reddit's OAuth2 client credentials flow for authentication. Access tokens are automatically obtained and cached for the duration of the server session.
 
 ## Dependencies
 
@@ -195,20 +117,3 @@ The server uses Reddit's OAuth2 client credentials flow for authentication. Acce
 - python-dotenv
 - starlette
 - uvicorn[standard]
-
-## Error Handling
-
-The server includes comprehensive error handling for:
-- Invalid Reddit API credentials
-- Network connectivity issues
-- Rate limiting (automatic retry with backoff)
-- Malformed API responses
-- Missing or invalid post/subreddit IDs
-
-## Semantic Search Features
-
-The server implements advanced semantic search capabilities:
-- **Token-based matching**: Analyzes text content for relevant keywords
-- **Comparison query detection**: Special handling for "X vs Y" style queries
-- **Semantic scoring**: Ranks results based on relevance, not just Reddit scores
-- **Fallback strategies**: Multiple search approaches to ensure comprehensive results
