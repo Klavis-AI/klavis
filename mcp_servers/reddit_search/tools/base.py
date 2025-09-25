@@ -174,6 +174,47 @@ async def reddit_get(path: str, params: Dict | None = None, max_retries: int = 3
     raise RuntimeError("Reddit GET failed unexpectedly with no exception recorded")
 
 
+async def reddit_get_as_user(path: str, params: Dict | None = None, max_retries: int = 3) -> Dict:
+    """HTTP GET helper for user actions with retry/backoff logic."""
+    client = await _ensure_async_client()
+    headers = await _get_reddit_user_auth_header()
+    params = params.copy() if params else {}
+    params.setdefault("raw_json", 1)
+
+    backoff_seconds = 1.0
+    last_exc: Exception | None = None
+
+    for attempt in range(max_retries):
+        async with _request_semaphore:
+            try:
+                resp = await client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params)
+                if resp.status_code == 401:
+                    async with _user_token_lock:
+                        await _refresh_user_token_locked()
+                        headers = await _get_reddit_user_auth_header()
+                    resp = await client.get(f"{REDDIT_API_BASE}{path}", headers=headers, params=params)
+
+                if resp.status_code == 429:
+                    retry_after = resp.headers.get("Retry-After")
+                    sleep_s = float(retry_after) if retry_after else backoff_seconds
+                    logger.warning(f"Reddit API 429 rate limit. Sleeping {sleep_s}s then retrying…")
+                    await asyncio.sleep(sleep_s + random.uniform(0, 0.25))
+                    backoff_seconds = min(backoff_seconds * 2, 8)
+                    continue
+
+                resp.raise_for_status()
+                return resp.json()
+            except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+                last_exc = exc
+                logger.warning(f"Reddit GET (as user) {path} failed (attempt {attempt+1}/{max_retries}): {exc}")
+                await asyncio.sleep(backoff_seconds + random.uniform(0, 0.5))
+                backoff_seconds = min(backoff_seconds * 2, 8)
+
+    if last_exc:
+        raise last_exc
+    raise RuntimeError("Reddit GET (as user) failed unexpectedly with no exception recorded")
+
+
 
 async def reddit_post_as_user(path: str, data: Dict, max_retries: int = 3) -> Dict:
     """HTTP POST helper for user actions with retry/backoff logic."""

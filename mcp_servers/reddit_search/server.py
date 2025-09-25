@@ -21,8 +21,10 @@ from tools import (
     search_subreddit_posts as search_posts_impl,
     get_post_and_top_comments as get_comments_impl,
     find_similar_posts_reddit as find_similar_impl,
+    create_post as create_post_impl,
+    get_user_posts as get_user_posts_impl,
+    create_comment as create_comment_impl,
 )
-from tools.create_post import create_post as create_post_impl
 
 from tools.base import init_http_clients, close_http_clients
 
@@ -66,6 +68,8 @@ def main(
         "reddit_get_post_comments": get_comments_impl,
         "reddit_find_similar_posts": find_similar_impl,
         "reddit_create_post": create_post_impl,
+        "reddit_get_user_posts": get_user_posts_impl,
+        "reddit_create_comment": create_comment_impl,
     }
 
     @app.list_tools()
@@ -161,6 +165,39 @@ def main(
                     },
                     "required": ["subreddit", "title", "text"]
                 }
+            ),
+            types.Tool(
+                name="reddit_get_user_posts",
+                description="Fetches the most recent posts submitted by the authenticated user.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of posts to return (default: 25, max: 100)",
+                            "default": 25
+                        }
+                    },
+                    "required": []
+                }
+            ),
+            types.Tool(
+                name="reddit_create_comment",
+                description="Creates a new comment on a given Reddit post.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "post_id": {
+                            "type": "string",
+                            "description": "The ID of the post to comment on (without the 't3_' prefix)."
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "The Markdown content of the comment."
+                        }
+                    },
+                    "required": ["post_id", "text"]
+                }
             )
         ]
 
@@ -179,9 +216,11 @@ def main(
             arg_str = ", ".join(f"{k}={v!r}" for k, v in arguments.items())
             logger.info(f"Tool call: {name}({arg_str})")
 
-            # Special handling for limit, as it's a parameter to the function
+            # Special handling for limit parameters
             if name == "reddit_find_similar_posts":
                 arguments["limit"] = max(1, min(50, arguments.get("limit", 10)))
+            elif name == "reddit_get_user_posts":
+                arguments["limit"] = max(1, min(100, arguments.get("limit", 25)))
 
             result = await tool_func(**arguments)
             return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
