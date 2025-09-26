@@ -40,7 +40,7 @@ def log_banner() -> None:
   \033[1;32mEmpowering AI with Seamless Integration\033[0m
 
   \033[1;36m═════════════════════════════════════════════════════════════════════════════\033[0m
-  \033[1;32m STRATA MCP  \033[0m·\033[1;33m  One MCP server that handles thousands of tools progressively\033[0m
+  \033[1;32m STRATA MCP  \033[0m·\033[1;33m  One MCP server that use tools reliably at any scale \033[0m
   \033[1;36m═════════════════════════════════════════════════════════════════════════════\033[0m
   \033[1;33m→ Starting MCP Server...\033[0m
 """

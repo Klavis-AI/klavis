@@ -1,7 +1,7 @@
 [project]
 name = "strata-mcp"
 version = "1.0.1"
-description = "One Model Context Protocol (MCP) server for AI agents to handle thousands of tools"
+description = ""
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
