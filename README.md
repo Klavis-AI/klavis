@@ -5,7 +5,7 @@
 </div>
 
 <h1 align="center">Klavis AI</h1>
-<p align="center"><strong>📦 MCP integration layers that let AI agents use thousands of tools reliably</strong></p>
+<p align="center"><strong>📦 MCP integration layers that let AI agents use tools reliably at any scale</strong></p>
 
 <div align="center">
 
@@ -28,7 +28,7 @@
           <div>
             <h2>📦 Strata</h2>
             <p><strong>Unified MCP Router</strong></p>
-            <p>One MCP server for AI agents to handle thousands of tools</p>
+            <p>One MCP server for AI agents to use tools reliably at any scale</p>
           </div>
           <div>
             <a href="open-strata/README.md">
@@ -57,9 +57,7 @@
 
 ## Strata
 
-**One MCP server. Thousands of tools. Zero overwhelm.**
-
-Strata is one MCP server that guides your AI agents through thousands of tools in multiple apps progressively.
+Strata is one MCP server that guides your AI agents use tools reliably progressively at any scale.
 
 ### Why Strata?
 

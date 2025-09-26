@@ -5,7 +5,7 @@
 
 # Overview
 
-**Strata** is a unified MCP server that intelligently manages thousands of tools across multiple applications, presenting them to AI agents progressively without overwhelming the model context.
+**Strata** is a unified MCP server that intelligently manages any tool across one or multiple applications, presenting them to AI agents progressively without overwhelming the model context.
 
 > [!TIP]
 > **🚀 Looking for production-ready solution?** We offer a **fully managed Strata service** with enterprise-grade performance, access to more features and advanced AI model optimizations. [Get started instantly →](https://www.klavis.ai/)
@@ -27,9 +27,6 @@ Instead of flooding your AI model with hundreds of tools, Strata acts as an inte
 🎯 **Progressive Access** → Finds and surfaces the right tool when needed  
 ⚡ **Optimized Context** → Maintains peak model performance  
 🔗 **Seamless Integration** → Works with your existing MCP servers, and easy configuration  
-
-Your AI agent gets access to thousands of tools while maintaining high performance! ⚡
-
 
 # Quick Start
 
@@ -242,8 +239,5 @@ strata run --port 8080
 
 ---
 
-**Ready to experience the power of thousands of AI tools?** 
-
 👉 **[Get Instant Access at Klavis AI (YC X25)](https://klavis.ai/)** 👈
 
-*From zero to thousands of tools in under a minute!* ⏱️
