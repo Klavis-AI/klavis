@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 from contextvars import ContextVar
 from typing import Optional
 from dotenv import load_dotenv
@@ -14,16 +15,28 @@ auth_token_context: ContextVar[str] = ContextVar('auth_token')
 def get_auth_token() -> str:
     try:
         token = auth_token_context.get()
-        if not token:
-            token = os.getenv("OUTLOOK_ACCESS_TOKEN")
-            if not token:
-                raise RuntimeError("No authentication token available")
-        return token
+        if token:
+            return token
     except LookupError:
-        token = os.getenv("OUTLOOK_ACCESS_TOKEN")
-        if not token:
-            raise RuntimeError("Authentication token not found in context or environment")
+        pass
+    
+    # Fallback to AUTH_DATA environment variable
+    auth_data = os.getenv("AUTH_DATA")
+    if auth_data:
+        try:
+            auth_json = json.loads(auth_data)
+            access_token = auth_json.get('access_token', '')
+            if access_token:
+                return access_token
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to parse AUTH_DATA JSON: {e}")
+    
+    # Legacy fallback to OUTLOOK_ACCESS_TOKEN
+    token = os.getenv("OUTLOOK_ACCESS_TOKEN")
+    if token:
         return token
+    
+    raise RuntimeError("Authentication token not found in context or environment")
 
 def get_outlookMail_client() -> Optional[dict]:
     """
