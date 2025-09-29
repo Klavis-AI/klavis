@@ -160,20 +160,24 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
 ## Available Tools
 
 <Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| outlook_send_email | Send an email through Outlook with support for HTML content, attachments, and priority settings |
-| outlook_get_messages | Retrieve messages from inbox, sent items, or specific folders with filtering options |
-| outlook_get_message_by_id | Get a specific email message by its unique ID |
-| outlook_reply_to_message | Reply to an existing email message |
-| outlook_forward_message | Forward an email message to other recipients |
-| outlook_delete_message | Delete an email message (move to deleted items) |
-| outlook_move_message | Move an email message to a different folder |
-| outlook_mark_as_read | Mark an email message as read |
-| outlook_mark_as_unread | Mark an email message as unread |
-| outlook_get_folders | List all mail folders in the account |
-| outlook_create_folder | Create a new mail folder |
-| outlook_search_messages | Search for messages using various criteria including keywords, sender, and date ranges |
+| Tool Name                               | Description                          |
+|----------------------------------------|--------------------------------------|
+| outlookMail_create_mail_folder         | Create a new mail folder             |
+| outlookMail_list_folders               | List all mail folders                |
+| outlookMail_get_mail_folder_details    | Get details of a mail folder         |
+| outlookMail_update_folder_display_name | Rename a mail folder                 |
+| outlookMail_delete_folder              | Delete a mail folder                 |
+| outlookMail_read_message               | Read the content of an email         |
+| outlookMail_send_draft                 | Send an existing draft email         |
+| outlookMail_create_draft               | Create a new draft email             |
+| outlookMail_create_reply_draft         | Create a reply to an email           |
+| outlookMail_create_reply_all_draft     | Create a reply-all draft             |
+| outlookMail_create_forward_draft       | Create a forward draft               |
+| outlookMail_update_draft               | Update an existing draft             |
+| outlookMail_delete_draft               | Delete a draft email                 |
+| outlookMail_list_messages              | List messages from the inbox         |
+| outlookMail_list_messages_from_folder  | List messages from a specific folder |
+| outlookMail_move_message               | Move message to a different folder   |
 </Accordion>
 
 <Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>
