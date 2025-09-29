@@ -29,9 +29,7 @@ def main():
     print("🔧 Creating MCP server instance...")
     mcp_instance = klavis_client.mcp_server.create_server_instance(
         server_name=McpServerName.NOTION,
-        user_id="1234",
-        platform_name="Klavis",
-    )
+        user_id="1234")
     print("--- mcp_instance --- \n", mcp_instance)
     
     # Handle OAuth if needed
@@ -44,7 +42,7 @@ def main():
     # Get tools from Klavis
     mcp_tools = klavis_client.mcp_server.list_tools(
         server_url=mcp_instance.server_url,
-        format=ToolFormat.GEMINI,
+        format=ToolFormat.GEMINI
     )
     
     contents = []
@@ -83,7 +81,7 @@ def main():
                             function_result = klavis_client.mcp_server.call_tools(
                                 server_url=mcp_instance.server_url,
                                 tool_name=part.function_call.name,
-                                tool_args=dict(part.function_call.args),
+                                tool_args=dict(part.function_call.args)
                             )
                             
                             # Create function response in the proper format
@@ -95,7 +93,7 @@ def main():
                         
                         function_response_part = types.Part.from_function_response(
                             name=part.function_call.name,
-                            response=function_response,
+                            response=function_response
                         )
                         function_response_content = types.Content(
                             role='tool', 

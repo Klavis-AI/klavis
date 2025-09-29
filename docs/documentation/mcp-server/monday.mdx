@@ -24,8 +24,7 @@ klavis_client = Klavis(api_key="<YOUR_API_KEY>")
 
 monday_server = klavis_client.mcp_server.create_server_instance(
 server_name=McpServerName.MONDAY,
-user_id="<YOUR_USER_ID>",
-platform_name="<YOUR_PLATFORM_NAME>",
+user_id="<YOUR_USER_ID>"
 )
 
 ```
@@ -38,8 +37,7 @@ const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
 // Create a Monday.com MCP server instance
 const mondayServer = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Monday,
-    userId: "<YOUR_USER_ID>",
-    platformName: "<YOUR_PLATFORM_NAME>",
+    userId: "<YOUR_USER_ID>"
 });
 ```
 
@@ -50,9 +48,7 @@ curl --request POST \
   --header 'Content-Type: application/json' \
   --data '{
   "serverName": "Monday",
-  "userId": "<YOUR_USER_ID>",
-  "platformName": "<YOUR_PLATFORM_NAME>",
-}'
+  "userId": "<YOUR_USER_ID>"}'
 ```
 
 ```go Go
@@ -69,7 +65,7 @@ func main() {
 
 	url := "https://api.klavis.ai/mcp-server/instance/create"
 
-	payload := strings.NewReader("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n }")
+	payload := strings.NewReader("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -91,7 +87,7 @@ func main() {
 HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
   .header("Authorization", "Bearer <YOUR_API_KEY>")
   .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\",\n  \"platformName\": \"<YOUR_PLATFORM_NAME>\",\n}")
+  .body("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
   .asString();
 ```
 
@@ -206,4 +202,40 @@ public class MondayOAuth {
   | monday_create_update                     | Create a new update (comment) for an item in a Monday.com board            |
 </Accordion>
 
-<Note>For more details about tool input schema, use the [list_tool](https://docs.klavis.ai/api-reference/mcp-server/list-tools) API.</Note>
+<Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

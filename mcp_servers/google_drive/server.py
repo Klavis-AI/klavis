@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json
@@ -60,6 +61,35 @@ def get_docs_service(access_token: str):
     """Create Google Docs service with access token."""
     credentials = Credentials(token=access_token)
     return build('docs', 'v1', credentials=credentials)
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
 
 def get_auth_token() -> str:
     """Get the authentication token from context."""
@@ -375,6 +405,61 @@ async def search_and_retrieve_documents(
         logger.exception(f"Error executing tool search_and_retrieve_documents: {e}")
         raise e
 
+async def empty_trash(
+    drive_id: str | None = None,
+) -> Dict[str, Any]:
+    """Permanently delete all of the user's trashed files."""
+    logger.info(f"Executing tool: empty_trash with drive_id: {drive_id}")
+    try:
+        access_token = get_auth_token()
+        
+        # Use v2 API for empty trash operation
+        credentials = Credentials(token=access_token)
+        service = build('drive', 'v2', credentials=credentials)
+        
+        params = {}
+        if drive_id:
+            params['driveId'] = drive_id
+            
+        service.files().emptyTrash(**params).execute()
+        
+        return {"success": True, "message": "Trash emptied successfully"}
+    except HttpError as e:
+        logger.error(f"Google Drive API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool empty_trash: {e}")
+        raise e
+
+async def create_shared_drive(
+    name: str,
+    request_id: str,
+) -> Dict[str, Any]:
+    """Create a new shared drive."""
+    logger.info(f"Executing tool: create_shared_drive with name: {name}, request_id: {request_id}")
+    try:
+        access_token = get_auth_token()
+        service = get_drive_service(access_token)
+        
+        drive_metadata = {
+            'name': name
+        }
+        
+        result = service.drives().create(
+            body=drive_metadata,
+            requestId=request_id
+        ).execute()
+        
+        return result
+    except HttpError as e:
+        logger.error(f"Google Drive API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool create_shared_drive: {e}")
+        raise e
+
 async def get_file_tree_structure(
     include_shared_drives: bool = False,
     restrict_to_shared_drive_id: str | None = None,
@@ -535,6 +620,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_drive_search_and_retrieve_documents",
@@ -591,6 +679,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                ),
             ),
             types.Tool(
                 name="google_drive_get_file_tree_structure",
@@ -626,6 +717,46 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
+            ),
+            types.Tool(
+                name="google_drive_empty_trash",
+                description="Permanently delete all of the user's trashed files.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "drive_id": {
+                            "type": "string",
+                            "description": "If set, empties the trash of the provided shared drive.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
+            ),
+            types.Tool(
+                name="google_drive_create_shared_drive",
+                description="Create a new shared drive.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the shared drive to create.",
+                        },
+                        "request_id": {
+                            "type": "string",
+                            "description": "Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a shared drive.",
+                        },
+                    },
+                    "required": ["name", "request_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_FILE"}
+                ),
             ),
         ]
 
@@ -711,7 +842,54 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_drive_empty_trash":
+            try:
+                result = await empty_trash(
+                    drive_id=arguments.get("drive_id"),
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_drive_create_shared_drive":
+            try:
+                name = arguments.get("name", "")
+                if not name:
+                    raise ValueError("The 'name' argument is required.")
+                request_id = arguments.get("request_id")
+                if not request_id:
+                    raise ValueError("The 'request_id' argument is required.")
+                result = await create_shared_drive(
+                    name=name,
+                    request_id=request_id
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",
@@ -725,11 +903,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
         
-        # Set the auth token in context for this request (can be None)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -755,14 +933,11 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
         
-        # Set the auth token in context for this request (can be None/empty)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

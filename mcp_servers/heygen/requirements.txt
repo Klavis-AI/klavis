@@ -1,0 +1,6 @@
+click>=8.0.0
+httpx>=0.25.0
+mcp==1.11.0
+python-dotenv>=1.0.0
+starlette>=0.32.0
+uvicorn>=0.24.0

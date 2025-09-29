@@ -24,6 +24,7 @@ PROJECT_OPT_FIELDS = [
     "workspace",
     "color",
     "created_at",
+    "modified_at",
     "current_status_update",
     "due_on",
     "members",

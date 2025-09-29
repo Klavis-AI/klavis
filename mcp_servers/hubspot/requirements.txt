@@ -3,7 +3,7 @@ anyio==4.9.0
 certifi==2025.6.15
 charset-normalizer==3.4.2
 click==8.2.1
-fastapi==0.115.12
+fastapi>=0.115.12
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
@@ -11,7 +11,7 @@ httpx-sse==0.4.0
 hubspot-api-client==12.0.0
 idna==3.10
 markdown-it-py==3.0.0
-mcp>=1.12.0
+mcp==1.11.0
 mdurl==0.1.2
 protobuf==6.31.1
 pydantic==2.11.7

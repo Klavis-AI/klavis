@@ -1,0 +1,5 @@
+mcp[cli]==1.11.0
+fastapi
+uvicorn[standard]
+starlette
+httpx

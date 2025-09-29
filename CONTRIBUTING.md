@@ -149,4 +149,4 @@ refactor(supabase): simplify authentication flow
 
 ## License
 
-By contributing to Klavis AI, you agree that your contributions will be licensed under the project's [MIT License](LICENSE).
+By contributing to Klavis AI, you agree that your contributions will be licensed under the project's [Apache 2.0 license](LICENSE).

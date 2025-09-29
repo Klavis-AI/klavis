@@ -105,8 +105,7 @@ klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
 # Create YouTube MCP server
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}")
@@ -167,8 +166,7 @@ const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 // Create YouTube MCP server
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}`);
@@ -252,14 +250,12 @@ import webbrowser
 # Create YouTube and Gmail MCP servers
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="Klavis",
+    user_id="1234"
 )
 
 # Handle OAuth for Gmail
@@ -293,7 +289,7 @@ try:
             backstory="You are an expert at analyzing video content and extracting key insights.",
             tools=all_mcp_tools,
             reasoning=False,
-            verbose=False,
+            verbose=False
         )
         
         # Create Email Communication Agent
@@ -303,7 +299,7 @@ try:
             backstory="You are skilled at crafting professional emails with clear, impactful messaging.",
             tools=all_mcp_tools,
             reasoning=True,
-            verbose=False,
+            verbose=False
         )
         
         # Define workflow tasks
@@ -339,14 +335,12 @@ except Exception as e:
 // Create YouTube and Gmail MCP servers
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // Handle OAuth for Gmail
@@ -379,7 +373,7 @@ try {
         backstory: "You are an expert at analyzing video content and extracting key insights.",
         tools: allMcpTools,
         reasoning: false,
-        verbose: false,
+        verbose: false
     });
     
     // Create Email Communication Agent
@@ -389,7 +383,7 @@ try {
         backstory: "You are skilled at crafting professional emails with clear, impactful messaging.",
         tools: allMcpTools,
         reasoning: true,
-        verbose: false,
+        verbose: false
     });
     
     // Define workflow tasks
@@ -555,7 +549,6 @@ CrewAI works with all Klavis MCP servers. Here are some popular options:
 ## Summary
 
 CrewAI + Klavis integration enables you to build sophisticated multi-agent AI systems with real-world capabilities. Key benefits include:
-
 
 ### 🚀 **CrewAI + Klavis Benefits:**
 

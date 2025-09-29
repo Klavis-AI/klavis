@@ -1,0 +1,9 @@
+tavily-python
+python-dotenv
+pydantic
+mcp[cli]==1.11.0
+starlette
+uvicorn[standard]
+click
+typing-extensions
+httpx

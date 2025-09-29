@@ -79,10 +79,191 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
+    "/mcp-server/strata/create": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Create",
+        "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis MCP servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
+        "operationId": "create_strata_server_mcp_server_strata_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StrataCreateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/strata/add": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Add",
+        "description": "Add servers to an existing Strata MCP server.\n\nNote: After adding servers, you need to reconnect the MCP server so that list_tool can be updated with the new servers.\n\nParameters:\n- servers: Can be 'ALL' to add all available servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
+        "operationId": "add_servers_to_strata_mcp_server_strata_add_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrataAddServersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataAddServersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/strata/{strataId}/servers": {
+      "delete": {
+        "tags": ["mcp-server"],
+        "summary": "Delete",
+        "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis MCP servers, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
+        "operationId": "delete_servers_from_strata_mcp_server_strata__strataId__servers_delete",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Strataid" }
+          },
+          {
+            "name": "servers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      { "$ref": "#/components/schemas/McpServerName" },
+                      { "const": "ALL", "type": "string" }
+                    ]
+                  }
+                },
+                { "type": "null" }
+              ],
+              "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers.",
+              "title": "Servers"
+            },
+            "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers."
+          },
+          {
+            "name": "externalServers",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Comma-separated list of external server names to delete",
+              "title": "Externalservers"
+            },
+            "description": "Comma-separated list of external server names to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataDeleteServersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp-server/strata/{strataId}": {
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get",
+        "description": "Get information about an existing Strata MCP server instance.\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
+        "operationId": "get_strata_instance_mcp_server_strata__strataId__get",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Strataid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StrataGetResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp-server/instance/create": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Create a Server Instance",
+        "summary": "Create Server Instance",
         "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
         "operationId": "createServerInstance",
         "requestBody": {
@@ -100,6 +281,45 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateServerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/self-hosted/instance/create": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Create",
+        "description": "Creates an instance id for a self-hosted MCP server,\nvalidating the request with an API key and user details.\nThe main purpose of this endpoint is to create an instance id for a self-hosted MCP server.\nThe instance id is used to identify and store the auth metadata in the database.\nReturns the existing instance id if it already exists for the user.",
+        "operationId": "createSelfHostedServerInstance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSelfHostedServerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSelfHostedServerResponse"
                 }
               }
             }
@@ -160,8 +380,8 @@
     "/mcp-server/instance/delete-auth/{instance_id}": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete Auth data for a Server Instance",
-        "description": "Deletes authentication metadata for a specific server connection instance.",
+        "summary": "Delete",
+        "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
@@ -201,7 +421,7 @@
     "/mcp-server/instance/delete/{instance_id}": {
       "delete": {
         "tags": ["mcp-server"],
-        "summary": "Delete a Server Instance",
+        "summary": "Delete Server Instance",
         "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
         "operationId": "deleteServerInstance",
         "security": [{ "HTTPBearer": [] }],
@@ -243,7 +463,7 @@
       "get": {
         "tags": ["mcp-server"],
         "summary": "Get Tools",
-        "description": "Get list of tool names for a specific MCP server.\nMainly used for querying metadata about the MCP server.",
+        "description": "Get tools information for any MCP server.",
         "operationId": "getServerTools",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
@@ -256,6 +476,17 @@
               "description": "The name of the target MCP server. Case-insensitive (e.g., 'google calendar', 'GOOGLE_CALENDAR', 'Google Calendar' are all valid)."
             },
             "description": "The name of the target MCP server. Case-insensitive (e.g., 'google calendar', 'GOOGLE_CALENDAR', 'Google Calendar' are all valid)."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ToolFormat",
+              "description": "The format to return tools in. Default is MCP Native format for maximum compatibility.",
+              "default": "mcp_native"
+            },
+            "description": "The format to return tools in. Default is MCP Native format for maximum compatibility."
           }
         ],
         "responses": {
@@ -263,7 +494,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/GetToolsResponse" }
+                "schema": { "$ref": "#/components/schemas/ListToolsResponse" }
               }
             }
           },
@@ -299,16 +530,16 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
-    "/mcp-server/instance/set-auth-token": {
+    "/mcp-server/instance/set-auth": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Set Auth Token",
-        "description": "Sets an authentication token for a specific instance.\nThis updates the auth_metadata for the specified instance.",
-        "operationId": "setInstanceAuthToken",
+        "summary": "Set Authentication Data",
+        "description": "Sets authentication data for a specific instance.\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified instance.",
+        "operationId": "setInstanceAuth",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SetAuthTokenRequest" }
+              "schema": { "$ref": "#/components/schemas/SetAuthRequest" }
             }
           },
           "required": true
@@ -337,9 +568,9 @@
     "/mcp-server/instance/get-auth/{instance_id}": {
       "get": {
         "tags": ["mcp-server"],
-        "summary": "Get Authentication Metadata",
-        "description": "Retrieves the auth metadata for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication metadata.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
-        "operationId": "getInstanceAuthMetadata",
+        "summary": "Get Authentication Data",
+        "description": "Retrieves the auth data for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthData",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
@@ -349,10 +580,10 @@
             "schema": {
               "type": "string",
               "format": "uuid",
-              "description": "The ID of the connection instance to get auth metadata for.",
+              "description": "The ID of the connection instance to get auth data for.",
               "title": "Instance Id"
             },
-            "description": "The ID of the connection instance to get auth metadata for."
+            "description": "The ID of the connection instance to get auth data for."
           }
         ],
         "responses": {
@@ -360,9 +591,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthMetadataResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
               }
             }
           },
@@ -415,7 +644,7 @@
     "/white-labeling/create": {
       "post": {
         "tags": ["white-labeling"],
-        "summary": "Create",
+        "summary": "Create White Label",
         "description": "Saves OAuth white labeling information, or updates existing information if the `client_id` matches.",
         "operationId": "createWhiteLabeling",
         "requestBody": {
@@ -454,7 +683,7 @@
     "/white-labeling/get/{client_id}": {
       "get": {
         "tags": ["white-labeling"],
-        "summary": "Get",
+        "summary": "Get White Label",
         "description": "Retrieves white labeling information for a specific OAuth client ID.",
         "operationId": "getWhiteLabelingByClientId",
         "security": [{ "HTTPBearer": [] }],
@@ -491,7 +720,7 @@
     "/user/instances": {
       "get": {
         "tags": ["user"],
-        "summary": "Get user instances",
+        "summary": "Get User Instances",
         "description": "Get all MCP server instances information by user ID and platform name.",
         "operationId": "getServerInstancesByUser",
         "security": [{ "HTTPBearer": [] }],
@@ -510,13 +739,13 @@
           {
             "name": "platform_name",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "description": "The platform name",
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "The platform name (optional)",
               "title": "Platform Name"
             },
-            "description": "The platform name"
+            "description": "The platform name (optional)"
           }
         ],
         "responses": {
@@ -527,6 +756,47 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetServerInstancesResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/delete/{user_id}": {
+      "delete": {
+        "tags": ["user"],
+        "summary": "Delete User",
+        "description": "Delete a user and all associated data by user_id.\nUsers cannot delete their own accounts.\nThis operation will permanently remove all user data.",
+        "operationId": "deleteUserByUserId",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The identifier for the user to delete.",
+              "title": "User Id"
+            },
+            "description": "The identifier for the user to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DeleteUserResponse" }
               }
             }
           },
@@ -620,79 +890,6 @@
         }
       }
     },
-    "/oauth/slack/callback": {
-      "get": {
-        "tags": ["slack-oauth"],
-        "summary": "Slack Callback",
-        "description": "Handles the callback from Slack OAuth authorization.",
-        "operationId": "slackOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Slack",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Slack"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Slack, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Slack, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SlackOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SlackOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/github/authorize": {
       "get": {
         "tags": ["github-oauth"],
@@ -761,72 +958,62 @@
         }
       }
     },
-    "/oauth/github/callback": {
+    "/oauth/gitlab/authorize": {
       "get": {
-        "tags": ["github-oauth"],
-        "summary": "Github Callback",
-        "description": "Handles the callback from GitHub OAuth authorization.",
-        "operationId": "githubOAuthCallback",
+        "tags": ["gitlab-oauth"],
+        "summary": "Authorize Gitlab",
+        "description": "Start GitLab OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeGitlab",
         "parameters": [
           {
-            "name": "code",
+            "name": "instance_id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by GitHub",
-              "title": "Code"
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
             },
-            "description": "Authorization code returned by GitHub"
+            "description": "Unique identifier for the client instance requesting authorization"
           },
           {
-            "name": "state",
+            "name": "client_id",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
             },
-            "description": "State parameter containing encoded authorization data"
+            "description": "Client ID for white labeling, if not provided will use default credentials"
           },
           {
-            "name": "error",
+            "name": "scope",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by GitHub, if any",
-              "title": "Error"
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
             },
-            "description": "Error code returned by GitHub, if any"
+            "description": "Optional OAuth scopes to request (space-separated string)"
           },
           {
-            "name": "error_description",
+            "name": "redirect_url",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from GitHub, if any",
-              "title": "Error Description"
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
             },
-            "description": "Detailed error description from GitHub, if any"
+            "description": "Optional URL to redirect to after authorization completes"
           }
         ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GitHubOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -884,141 +1071,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/supabase/callback": {
-      "get": {
-        "tags": ["supabase-oauth"],
-        "summary": "Supabase Callback",
-        "description": "Handles the callback from Supabase OAuth authorization.",
-        "operationId": "supabaseOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Supabase",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Supabase"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Supabase, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Supabase, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Supabase, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Supabase, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SupabaseOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SupabaseOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/supabase/refresh_token": {
-      "post": {
-        "tags": ["supabase-oauth"],
-        "summary": "Refresh Supabase Token",
-        "description": "Refresh an expired Supabase access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_supabase_token_oauth_supabase_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SupabaseOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SupabaseOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -1099,79 +1151,6 @@
         }
       }
     },
-    "/oauth/notion/callback": {
-      "get": {
-        "tags": ["notion-oauth"],
-        "summary": "Notion Callback",
-        "description": "Handles the callback from Notion OAuth authorization.",
-        "operationId": "notionOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Notion",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Notion"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Notion, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Notion, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotionOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotionOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/jira/authorize": {
       "get": {
         "tags": ["jira-oauth"],
@@ -1228,141 +1207,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/jira/callback": {
-      "get": {
-        "tags": ["jira-oauth"],
-        "summary": "Jira Callback",
-        "description": "Handles the callback from Jira OAuth authorization.",
-        "operationId": "jiraOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Jira",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Jira"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Jira, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Jira, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Jira, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Jira, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JiraOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JiraOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/jira/refresh_token": {
-      "post": {
-        "tags": ["jira-oauth"],
-        "summary": "Refresh Jira Token",
-        "description": "Refresh an expired Jira access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_jira_token_oauth_jira_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JiraOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JiraOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -1443,141 +1287,6 @@
         }
       }
     },
-    "/oauth/confluence/callback": {
-      "get": {
-        "tags": ["confluence-oauth"],
-        "summary": "Confluence Callback",
-        "description": "Handles the callback from Confluence OAuth authorization.",
-        "operationId": "confluenceOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Confluence",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Confluence"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Confluence, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Confluence, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Confluence, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Confluence, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfluenceOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfluenceOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/confluence/refresh_token": {
-      "post": {
-        "tags": ["confluence-oauth"],
-        "summary": "Refresh Confluence Token",
-        "description": "Refresh an expired Confluence access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_confluence_token_oauth_confluence_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfluenceOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfluenceOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/wordpress/authorize": {
       "get": {
         "tags": ["wordpress-oauth"],
@@ -1634,90 +1343,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/wordpress/callback": {
-      "get": {
-        "tags": ["wordpress-oauth"],
-        "summary": "Wordpress Callback",
-        "description": "Handles the callback from WordPress OAuth authorization.",
-        "operationId": "wordpressOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by WordPress",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by WordPress"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by WordPress, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by WordPress, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from WordPress, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from WordPress, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WordPressOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WordPressOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -1798,141 +1423,6 @@
         }
       }
     },
-    "/oauth/gmail/callback": {
-      "get": {
-        "tags": ["gmail-oauth"],
-        "summary": "Gmail Callback",
-        "description": "Handles the callback from Gmail OAuth authorization.",
-        "operationId": "gmailOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Gmail",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Gmail"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Gmail, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Gmail, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Gmail, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Gmail, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GmailOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GmailOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gmail/refresh_token": {
-      "post": {
-        "tags": ["gmail-oauth"],
-        "summary": "Refresh Gmail Token",
-        "description": "Refresh an expired Gmail access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_gmail_token_oauth_gmail_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GmailOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GmailOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/gdrive/authorize": {
       "get": {
         "tags": ["gdrive-oauth"],
@@ -1983,198 +1473,6 @@
               "title": "Redirect Url"
             },
             "description": "Optional URL to redirect to after authorization completes"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gdrive/callback": {
-      "get": {
-        "tags": ["gdrive-oauth"],
-        "summary": "Gdrive Callback",
-        "description": "Handles the callback from Google Drive OAuth authorization.",
-        "operationId": "gdriveOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Google Drive",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Google Drive"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Google Drive, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Google Drive, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Google Drive, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Google Drive, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDriveOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDriveOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gdrive/refresh_token": {
-      "post": {
-        "tags": ["gdrive-oauth"],
-        "summary": "Refresh Gdrive Token",
-        "description": "Refresh an expired Google Drive access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_gdrive_token_oauth_gdrive_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDriveOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDriveOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gdrive/picker": {
-      "get": {
-        "tags": ["gdrive-oauth"],
-        "summary": "Gdrive Picker Page",
-        "description": "Serve the Google Drive picker page with the appropriate credentials",
-        "operationId": "gdrivePickerPage",
-        "parameters": [
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Client ID to use for the picker",
-              "title": "Client Id"
-            },
-            "description": "Client ID to use for the picker"
-          },
-          {
-            "name": "api_key",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "API key to use for the picker",
-              "title": "Api Key"
-            },
-            "description": "API key to use for the picker"
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "OAuth scopes for the picker",
-              "title": "Scope"
-            },
-            "description": "OAuth scopes for the picker"
           }
         ],
         "responses": {
@@ -2261,141 +1559,6 @@
         }
       }
     },
-    "/oauth/gcalendar/callback": {
-      "get": {
-        "tags": ["gcalendar-oauth"],
-        "summary": "Gcalendar Callback",
-        "description": "Handles the callback from Google Calendar OAuth authorization.",
-        "operationId": "gcalendarOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Google Calendar",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Google Calendar"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Google Calendar, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Google Calendar, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Google Calendar, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Google Calendar, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GCalendarOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GCalendarOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gcalendar/refresh_token": {
-      "post": {
-        "tags": ["gcalendar-oauth"],
-        "summary": "Refresh Gcalendar Token",
-        "description": "Refresh an expired Google Calendar access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_gcalendar_token_oauth_gcalendar_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GCalendarOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GCalendarOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/gsheets/authorize": {
       "get": {
         "tags": ["gsheets-oauth"],
@@ -2452,141 +1615,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gsheets/callback": {
-      "get": {
-        "tags": ["gsheets-oauth"],
-        "summary": "Gsheets Callback",
-        "description": "Handles the callback from Google Sheets OAuth authorization.",
-        "operationId": "gsheetsOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Google Sheets",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Google Sheets"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Google Sheets, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Google Sheets, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Google Sheets, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Google Sheets, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GSheetsOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GSheetsOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gsheets/refresh_token": {
-      "post": {
-        "tags": ["gsheets-oauth"],
-        "summary": "Refresh Gsheets Token",
-        "description": "Refresh an expired Google Sheets access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_gsheets_token_oauth_gsheets_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GSheetsOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GSheetsOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -2667,141 +1695,6 @@
         }
       }
     },
-    "/oauth/gdocs/callback": {
-      "get": {
-        "tags": ["gdocs-oauth"],
-        "summary": "Gdocs Callback",
-        "description": "Handles the callback from Google Docs OAuth authorization.",
-        "operationId": "gdocsOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Google Docs",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Google Docs"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Google Docs, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Google Docs, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Google Docs, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Google Docs, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDocsOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDocsOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/gdocs/refresh_token": {
-      "post": {
-        "tags": ["gdocs-oauth"],
-        "summary": "Refresh Gdocs Token",
-        "description": "Refresh an expired Google Docs access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_gdocs_token_oauth_gdocs_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDocsOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GDocsOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/attio/authorize": {
       "get": {
         "tags": ["attio-oauth"],
@@ -2847,90 +1740,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/attio/callback": {
-      "get": {
-        "tags": ["attio-oauth"],
-        "summary": "Attio Callback",
-        "description": "Handles the callback from Attio OAuth authorization.",
-        "operationId": "attioOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Attio",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Attio"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Attio, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Attio, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Attio, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Attio, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttioOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AttioOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -3022,141 +1831,6 @@
         }
       }
     },
-    "/oauth/salesforce/callback": {
-      "get": {
-        "tags": ["salesforce-oauth"],
-        "summary": "Salesforce Callback",
-        "description": "Handles the callback from Salesforce OAuth authorization.",
-        "operationId": "salesforceOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Salesforce",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Salesforce"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Salesforce, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Salesforce, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Salesforce, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Salesforce, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SalesforceOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SalesforceOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/salesforce/refresh_token": {
-      "post": {
-        "tags": ["salesforce-oauth"],
-        "summary": "Refresh Salesforce Token",
-        "description": "Refresh an expired Salesforce access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_salesforce_token_oauth_salesforce_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SalesforceOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SalesforceOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/asana/authorize": {
       "get": {
         "tags": ["asana-oauth"],
@@ -3213,130 +1887,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/asana/callback": {
-      "get": {
-        "tags": ["asana-oauth"],
-        "summary": "Asana Callback",
-        "description": "Handles the callback from Asana OAuth authorization.",
-        "operationId": "asanaOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Asana",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Asana"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Asana, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Asana, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AsanaOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AsanaOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/asana/refresh_token": {
-      "post": {
-        "tags": ["asana-oauth"],
-        "summary": "Refresh Asana Token",
-        "description": "Refresh an expired Asana access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_asana_token_oauth_asana_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AsanaOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AsanaOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -3417,90 +1967,6 @@
         }
       }
     },
-    "/oauth/linear/callback": {
-      "get": {
-        "tags": ["linear-oauth"],
-        "summary": "Linear Callback",
-        "description": "Handles the callback from Linear OAuth authorization.",
-        "operationId": "linearOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Linear",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Linear"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Linear, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Linear, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Linear, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Linear, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LinearOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LinearOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/close/authorize": {
       "get": {
         "tags": ["close-oauth"],
@@ -3569,181 +2035,6 @@
         }
       }
     },
-    "/oauth/close/callback": {
-      "get": {
-        "tags": ["close-oauth"],
-        "summary": "Close Callback",
-        "description": "Handles the callback from Close OAuth authorization.",
-        "operationId": "closeOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Close",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Close"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Close, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Close, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/close/refresh_token": {
-      "post": {
-        "tags": ["close-oauth"],
-        "summary": "Refresh Close Token",
-        "description": "Refresh an expired Close access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_close_token_oauth_close_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/close/revoke": {
-      "post": {
-        "tags": ["close-oauth"],
-        "summary": "Revoke Close Token",
-        "description": "Revoke Close access and refresh tokens\n\nParameters:\n- instance_id: Identifier for the instance requesting token revocation\n\nReturns:\n- Success response if token was revoked successfully, error response otherwise",
-        "operationId": "revoke_close_token_oauth_close_revoke_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token revocation",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token revocation"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloseOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/clickup/authorize": {
       "get": {
         "tags": ["clickup-oauth"],
@@ -3789,90 +2080,6 @@
           "200": {
             "description": "Successful Response",
             "content": { "application/json": { "schema": {} } }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/clickup/callback": {
-      "get": {
-        "tags": ["clickup-oauth"],
-        "summary": "Clickup Callback",
-        "description": "Handles the callback from ClickUp OAuth authorization.",
-        "operationId": "clickUpOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by ClickUp",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by ClickUp"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by ClickUp, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by ClickUp, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from ClickUp, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from ClickUp, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClickUpOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClickUpOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -3953,135 +2160,6 @@
         }
       }
     },
-    "/oauth/airtable/callback": {
-      "get": {
-        "tags": ["airtable-oauth"],
-        "summary": "Airtable Callback",
-        "description": "Handles the callback from Airtable OAuth authorization.",
-        "operationId": "airtableOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by Airtable",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by Airtable"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by Airtable, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by Airtable, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from Airtable, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from Airtable, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AirtableOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/airtable/refresh_token": {
-      "post": {
-        "tags": ["airtable-oauth"],
-        "summary": "Refresh Airtable Token",
-        "description": "Refresh an expired Airtable access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_airtable_token_oauth_airtable_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AirtableOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AirtableOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/hubspot/authorize": {
       "get": {
         "tags": ["hubspot-oauth"],
@@ -4150,139 +2228,10 @@
         }
       }
     },
-    "/oauth/hubspot/callback": {
-      "get": {
-        "tags": ["hubspot-oauth"],
-        "summary": "Hubspot Callback",
-        "description": "Handles the callback from HubSpot OAuth authorization.",
-        "operationId": "hubspotOAuthCallback",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by HubSpot",
-              "title": "Code"
-            },
-            "description": "Authorization code returned by HubSpot"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
-            },
-            "description": "State parameter containing encoded authorization data"
-          },
-          {
-            "name": "error",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by HubSpot, if any",
-              "title": "Error"
-            },
-            "description": "Error code returned by HubSpot, if any"
-          },
-          {
-            "name": "error_description",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Detailed error description from HubSpot, if any",
-              "title": "Error Description"
-            },
-            "description": "Detailed error description from HubSpot, if any"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": { "application/json": { "schema": {} } }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HubSpotOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/hubspot/refresh_token": {
-      "post": {
-        "tags": ["hubspot-oauth"],
-        "summary": "Refresh Hubspot Token",
-        "description": "Refresh an expired HubSpot access token using the stored refresh token\n\nParameters:\n- instance_id: Identifier for the instance requesting token refresh\n\nReturns:\n- Success response if token was refreshed successfully, error response otherwise",
-        "operationId": "refresh_hubspot_token_oauth_hubspot_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting token refresh",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting token refresh"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HubSpotOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HubSpotOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/linkedin/authorize": {
       "get": {
         "tags": ["linkedin-oauth"],
-        "summary": "Authorize LinkedIn",
+        "summary": "Authorize Linkedin",
         "description": "Start LinkedIn OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeLinkedIn",
         "parameters": [
@@ -4347,56 +2296,578 @@
         }
       }
     },
-    "/oauth/linkedin/callback": {
+    "/oauth/canva/authorize": {
       "get": {
-        "tags": ["linkedin-oauth"],
-        "summary": "LinkedIn Callback",
-        "description": "Handles the callback from LinkedIn OAuth authorization.",
-        "operationId": "linkedInOAuthCallback",
+        "tags": ["canva-oauth"],
+        "summary": "Authorize Canva",
+        "description": "Start Canva OAuth flow with PKCE\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated, e.g., \"design:meta:read profile:read\")\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeCanva",
         "parameters": [
           {
-            "name": "code",
+            "name": "instance_id",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Authorization code returned by LinkedIn",
-              "title": "Code"
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
             },
-            "description": "Authorization code returned by LinkedIn"
+            "description": "Unique identifier for the client instance requesting authorization"
           },
           {
-            "name": "state",
+            "name": "client_id",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "State parameter containing encoded authorization data",
-              "title": "State"
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
             },
-            "description": "State parameter containing encoded authorization data"
+            "description": "Client ID for white labeling, if not provided will use default credentials"
           },
           {
-            "name": "error",
+            "name": "scope",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error code returned by LinkedIn, if any",
-              "title": "Error"
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
             },
-            "description": "Error code returned by LinkedIn, if any"
+            "description": "Optional OAuth scopes to request (space-separated string)"
           },
           {
-            "name": "error_description",
+            "name": "redirect_url",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [{ "type": "string" }, { "type": "null" }],
-              "description": "Error description returned by LinkedIn, if any",
-              "title": "Error Description"
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
             },
-            "description": "Error description returned by LinkedIn, if any"
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/xero/authorize": {
+      "get": {
+        "tags": ["xero-oauth"],
+        "summary": "Authorize Xero",
+        "description": "Start Xero OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeXero",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/dropbox/authorize": {
+      "get": {
+        "tags": ["dropbox-oauth"],
+        "summary": "Authorize Dropbox",
+        "description": "Start Dropbox OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeDropbox",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/box/authorize": {
+      "get": {
+        "tags": ["box-oauth"],
+        "summary": "Authorize Box",
+        "description": "Start Box OAuth 2.0 flow",
+        "operationId": "authorizeBox",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/quickbooks/authorize": {
+      "get": {
+        "tags": ["quickbooks-oauth"],
+        "summary": "Authorize Quickbooks",
+        "description": "Start QuickBooks OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated). Default is 'com.intuit.quickbooks.accounting'\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeQuickBooks",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/zendesk/authorize": {
+      "get": {
+        "tags": ["zendesk-oauth"],
+        "summary": "Authorize Zendesk",
+        "description": "Start Zendesk OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeZendesk",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/stripe/authorize": {
+      "get": {
+        "tags": ["stripe-connect-oauth"],
+        "summary": "Authorize Stripe Connect",
+        "description": "Start Stripe Connect OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeStripeConnect",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/calcom/authorize": {
+      "get": {
+        "tags": ["calcom-oauth"],
+        "summary": "Authorize Calcom",
+        "description": "Start Cal.com OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeCalcom",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/calcom/client-credentials": {
+      "get": {
+        "tags": ["calcom-oauth"],
+        "summary": "Calcom Client Credentials Auth",
+        "description": "Authenticate using Cal.com OAuth client credentials flow for platform-level API access\n\nThis endpoint is used for:\n- Managing managed users\n- Creating OAuth client webhooks\n- Refreshing managed user tokens\n- Managing organization teams and memberships\n\nParameters:\n- instance_id: Identifier for the instance requesting authentication\n- x-cal-client-id: OAuth client ID (header)\n- x-cal-secret-key: OAuth client secret (header)",
+        "operationId": "calcom_client_credentials_auth_oauth_calcom_client_credentials_get",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance"
+          },
+          {
+            "name": "x-cal-client-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Cal.com OAuth client ID",
+              "title": "X-Cal-Client-Id"
+            },
+            "description": "Cal.com OAuth client ID"
+          },
+          {
+            "name": "x-cal-secret-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Cal.com OAuth client secret",
+              "title": "X-Cal-Secret-Key"
+            },
+            "description": "Cal.com OAuth client secret"
           }
         ],
         "responses": {
@@ -4405,7 +2876,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkedInOAuthSuccessResponse"
+                  "$ref": "#/components/schemas/CalcomOAuthSuccessResponse"
                 }
               }
             }
@@ -4414,7 +2885,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LinkedInOAuthErrorResponse"
+                  "$ref": "#/components/schemas/CalcomOAuthErrorResponse"
                 }
               }
             },
@@ -4430,60 +2901,539 @@
           }
         }
       }
+    },
+    "/oauth/vercel/authorize": {
+      "get": {
+        "tags": ["vercel-oauth"],
+        "summary": "Authorize Vercel",
+        "description": "Start Vercel OAuth flow using integration pattern\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- client_slug: Vercel integration slug (required for integration-based OAuth)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeVercel",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "client_slug",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Vercel integration slug (required for integration-based OAuth)",
+              "title": "Client Slug"
+            },
+            "description": "Vercel integration slug (required for integration-based OAuth)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/pipedrive/authorize": {
+      "get": {
+        "tags": ["pipedrive-oauth"],
+        "summary": "Authorize Pipedrive",
+        "description": "Start Pipedrive OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizePipedrive",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/figma/authorize": {
+      "get": {
+        "tags": ["figma-oauth"],
+        "summary": "Authorize Figma",
+        "description": "Start Figma OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeFigma",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/klaviyo/authorize": {
+      "get": {
+        "tags": ["klaviyo-oauth"],
+        "summary": "Authorize Klaviyo",
+        "operationId": "authorizeKlaviyo",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/pagerduty/authorize": {
+      "get": {
+        "tags": ["pagerduty-oauth"],
+        "summary": "Authorize Pagerduty",
+        "description": "Start PagerDuty OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizePagerDuty",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/docusign/authorize": {
+      "get": {
+        "tags": ["docusign-oauth"],
+        "summary": "Authorize Docusign",
+        "description": "Start DocuSign OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeDocuSign",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/dialpad/authorize": {
+      "get": {
+        "tags": ["dialpad-oauth"],
+        "summary": "Authorize Dialpad",
+        "description": "Start Dialpad OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes\n- code_challenge: PKCE code challenge for enhanced security\n- code_challenge_method: PKCE code challenge method",
+        "operationId": "authorizeDialpad",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "PKCE code challenge for enhanced security",
+              "title": "Code Challenge"
+            },
+            "description": "PKCE code challenge for enhanced security"
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "PKCE code challenge method (default: S256)",
+              "default": "S256",
+              "title": "Code Challenge Method"
+            },
+            "description": "PKCE code challenge method (default: S256)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "AirtableOAuthErrorResponse": {
+      "ApiKeyAuth": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "The API key to save"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["token"],
+        "title": "Option 1: API Key"
+      },
+      "CalcomOAuthErrorResponse": {
         "properties": {
           "error": {
             "type": "string",
             "title": "Error",
             "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "AirtableOAuthErrorResponse"
-      },
-      "AirtableOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
           },
           "message": {
-            "type": "string",
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "AirtableOAuthSuccessResponse"
-      },
-      "AsanaOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
+            "description": "Additional error details"
           }
         },
         "type": "object",
         "required": ["error"],
-        "title": "AsanaOAuthErrorResponse"
+        "title": "CalcomOAuthErrorResponse"
       },
-      "AsanaOAuthSuccessResponse": {
+      "CalcomOAuthSuccessResponse": {
         "properties": {
           "status": {
             "type": "string",
@@ -4499,44 +3449,7 @@
         },
         "type": "object",
         "required": ["message"],
-        "title": "AsanaOAuthSuccessResponse"
-      },
-      "AttioOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "AttioOAuthErrorResponse"
-      },
-      "AttioOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "AttioOAuthSuccessResponse"
+        "title": "CalcomOAuthSuccessResponse"
       },
       "CallToolRequest": {
         "properties": {
@@ -4560,6 +3473,17 @@
             "$ref": "#/components/schemas/ConnectionType",
             "description": "The connection type to use for the MCP server. Default is STREAMABLE_HTTP.",
             "default": "StreamableHttp"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
@@ -4610,107 +3534,44 @@
         "title": "CallToolResult",
         "description": "The server's response to a tool call."
       },
-      "ClickUpOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "ClickUpOAuthErrorResponse"
-      },
-      "ClickUpOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "ClickUpOAuthSuccessResponse"
-      },
-      "CloseOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "CloseOAuthErrorResponse"
-      },
-      "CloseOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "CloseOAuthSuccessResponse"
-      },
-      "ConfluenceOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "ConfluenceOAuthErrorResponse"
-      },
-      "ConfluenceOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "ConfluenceOAuthSuccessResponse"
-      },
       "ConnectionType": {
         "type": "string",
         "enum": ["SSE", "StreamableHttp"],
         "title": "ConnectionType"
+      },
+      "CreateSelfHostedServerRequest": {
+        "properties": {
+          "serverName": {
+            "$ref": "#/components/schemas/McpServerName",
+            "description": "The name of the target MCP server. Case-insensitive (e.g., 'google calendar', 'GOOGLE_CALENDAR', 'Google Calendar' are all valid)."
+          },
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Userid",
+            "description": "The unique identifier for the user. The server instance along with the all the authentication data will belong to that specific user only. It can be a UUID from the database, a unique email address from the user, etc."
+          }
+        },
+        "type": "object",
+        "required": ["serverName", "userId"],
+        "title": "CreateSelfHostedServerRequest"
+      },
+      "CreateSelfHostedServerResponse": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid",
+            "description": "The unique identifier for this specific server connection instance."
+          },
+          "oauthUrl": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Oauthurl",
+            "description": "The OAuth authorization URL for the specified server, if OAuth is configured."
+          }
+        },
+        "type": "object",
+        "required": ["instanceId"],
+        "title": "CreateSelfHostedServerResponse"
       },
       "CreateServerRequest": {
         "properties": {
@@ -4722,13 +3583,12 @@
             "type": "string",
             "minLength": 1,
             "title": "Userid",
-            "description": "The identifier for the user requesting the server URL."
+            "description": "The unique identifier for the user. The server instance along with the all the authentication data will belong to that specific user only. It can be a UUID from the database, a unique email address from the user, etc."
           },
           "platformName": {
-            "type": "string",
-            "minLength": 1,
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
             "title": "Platformname",
-            "description": "The name of the platform associated with the user."
+            "description": "The name of the platform associated with the user. Optional."
           },
           "connectionType": {
             "$ref": "#/components/schemas/ConnectionType",
@@ -4737,7 +3597,7 @@
           }
         },
         "type": "object",
-        "required": ["serverName", "userId", "platformName"],
+        "required": ["serverName", "userId"],
         "title": "CreateServerRequest"
       },
       "CreateServerResponse": {
@@ -4793,6 +3653,15 @@
         "required": ["client_id", "client_secret", "server_name"],
         "title": "CreateWhiteLabelingRequest"
       },
+      "DeleteUserResponse": {
+        "properties": {
+          "success": { "type": "boolean", "title": "Success" },
+          "message": { "type": "string", "title": "Message" }
+        },
+        "type": "object",
+        "required": ["success", "message"],
+        "title": "DeleteUserResponse"
+      },
       "ExtendedMcpServer": {
         "properties": {
           "id": { "type": "string", "format": "uuid", "title": "Id" },
@@ -4820,165 +3689,85 @@
             "type": "boolean",
             "title": "Isauthenticated",
             "default": false
-          }
+          },
+          "serverUrl": { "type": "string", "title": "Serverurl", "default": "" }
         },
         "type": "object",
         "required": ["id", "name"],
         "title": "ExtendedMcpServer"
       },
-      "GCalendarOAuthErrorResponse": {
+      "ExternalServerInfo": {
         "properties": {
-          "error": {
+          "name": {
             "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GCalendarOAuthErrorResponse"
-      },
-      "GCalendarOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
+            "title": "Name",
+            "description": "The name of the external server"
           },
-          "message": {
+          "url": {
             "type": "string",
-            "title": "Message",
-            "description": "Success message"
+            "title": "Url",
+            "description": "The URL of the external MCP server"
           },
-          "data": {
+          "headers": {
             "anyOf": [
-              { "additionalProperties": true, "type": "object" },
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
               { "type": "null" }
             ],
-            "title": "Data",
-            "description": "Additional data related to the response"
+            "title": "Headers",
+            "description": "Optional HTTP headers used when connecting to the external server"
           }
         },
         "type": "object",
-        "required": ["message"],
-        "title": "GCalendarOAuthSuccessResponse"
+        "required": ["name", "url"],
+        "title": "ExternalServerInfo"
       },
-      "GDocsOAuthErrorResponse": {
+      "ExternalServerRequest": {
         "properties": {
-          "error": {
+          "name": {
             "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GDocsOAuthErrorResponse"
-      },
-      "GDocsOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
+            "minLength": 1,
+            "title": "Name",
+            "description": "The name of the external server"
           },
-          "message": {
+          "url": {
             "type": "string",
-            "title": "Message",
-            "description": "Success message"
+            "minLength": 1,
+            "title": "Url",
+            "description": "The URL of the external MCP server"
           },
-          "data": {
+          "headers": {
             "anyOf": [
-              { "additionalProperties": true, "type": "object" },
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
               { "type": "null" }
             ],
-            "title": "Data",
-            "description": "Additional data related to the response"
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the external server (e.g., for bearer authentication)"
           }
         },
         "type": "object",
-        "required": ["message"],
-        "title": "GDocsOAuthSuccessResponse"
+        "required": ["name", "url"],
+        "title": "ExternalServerRequest"
       },
-      "GDriveOAuthErrorResponse": {
+      "GeneralAuth": {
         "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GDriveOAuthErrorResponse"
-      },
-      "GDriveOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
           "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Data",
-            "description": "Additional data related to the response"
+            "description": "Any other general authentication data to save"
           }
         },
+        "additionalProperties": false,
         "type": "object",
-        "required": ["message"],
-        "title": "GDriveOAuthSuccessResponse"
+        "title": "Option 2: General Auth Data"
       },
-      "GSheetsOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GSheetsOAuthErrorResponse"
-      },
-      "GSheetsOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "GSheetsOAuthSuccessResponse"
-      },
-      "GetAuthMetadataResponse": {
+      "GetAuthDataResponse": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -4991,7 +3780,7 @@
               { "type": "null" }
             ],
             "title": "Authdata",
-            "description": "Complete authentication metadata including access token, refresh token, scope, expiration, and platform-specific data"
+            "description": "Complete authentication data including access token, refresh token, scope, expiration, and platform-specific data"
           },
           "error": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
@@ -5001,7 +3790,7 @@
         },
         "type": "object",
         "required": ["success"],
-        "title": "GetAuthMetadataResponse"
+        "title": "GetAuthDataResponse"
       },
       "GetInstanceResponse": {
         "properties": {
@@ -5111,68 +3900,6 @@
         "required": ["instances"],
         "title": "GetServerInstancesResponse"
       },
-      "GetToolsResponse": {
-        "properties": {
-          "tools": {
-            "items": { "$ref": "#/components/schemas/ServerTool" },
-            "type": "array",
-            "title": "Tools",
-            "description": "List of available tools with their descriptions"
-          }
-        },
-        "type": "object",
-        "title": "GetToolsResponse"
-      },
-      "GitHubOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GitHubOAuthErrorResponse"
-      },
-      "GmailOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "GmailOAuthErrorResponse"
-      },
-      "GmailOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "GmailOAuthSuccessResponse"
-      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -5183,140 +3910,6 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
-      },
-      "HubSpotOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "HubSpotOAuthErrorResponse"
-      },
-      "HubSpotOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "HubSpotOAuthSuccessResponse"
-      },
-      "JiraOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "JiraOAuthErrorResponse"
-      },
-      "JiraOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "JiraOAuthSuccessResponse"
-      },
-      "LinearOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "LinearOAuthErrorResponse"
-      },
-      "LinearOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "LinearOAuthSuccessResponse"
-      },
-      "LinkedInOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "LinkedInOAuthErrorResponse"
-      },
-      "LinkedInOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "LinkedInOAuthSuccessResponse"
       },
       "ListToolsRequest": {
         "properties": {
@@ -5334,6 +3927,17 @@
             "$ref": "#/components/schemas/ToolFormat",
             "description": "The format to return tools in. Default is MCP Native format for maximum compatibility.",
             "default": "mcp_native"
+          },
+          "headers": {
+            "anyOf": [
+              {
+                "additionalProperties": { "type": "string" },
+                "type": "object"
+              },
+              { "type": "null" }
+            ],
+            "title": "Headers",
+            "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
@@ -5401,68 +4005,72 @@
           "Airtable",
           "Asana",
           "Attio",
+          "Box",
+          "Brave Search",
+          "Cal.com",
           "ClickUp",
           "Close",
+          "Cloudflare",
+          "Coinbase",
           "Confluence",
+          "Dialpad",
           "Discord",
           "Doc2markdown",
+          "DocuSign",
+          "Dropbox",
+          "ElevenLabs",
+          "Exa",
+          "Figma",
           "Firecrawl Deep Research",
           "Firecrawl Web Search",
+          "Freshdesk",
           "GitHub",
+          "GitLab",
           "Gmail",
           "Gong",
           "Google Calendar",
           "Google Docs",
           "Google Drive",
+          "Google Jobs",
           "Google Sheets",
+          "Hacker News",
+          "Heygen",
           "HubSpot",
           "Jira",
+          "Klaviyo",
           "Klavis ReportGen",
           "Linear",
           "LinkedIn",
           "Markdown2doc",
+          "Mem0",
+          "Mixpanel",
+          "Monday",
+          "Moneybird",
+          "Motion",
           "Notion",
+          "OneDrive",
+          "Openrouter",
+          "PagerDuty",
+          "Pipedrive",
           "Plai",
           "Postgres",
+          "PostHog",
+          "QuickBooks",
           "Resend",
           "Salesforce",
+          "SendGrid",
+          "Shopify",
           "Slack",
+          "Stripe",
           "Supabase",
+          "Tavily",
+          "Vercel",
           "WhatsApp",
           "WordPress",
-          "YouTube"
+          "YouTube",
+          "Zendesk"
         ],
         "title": "McpServerName"
-      },
-      "NotionOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "NotionOAuthErrorResponse"
-      },
-      "NotionOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "NotionOAuthSuccessResponse"
       },
       "OAuthServerName": {
         "type": "string",
@@ -5470,10 +4078,18 @@
           "Airtable",
           "Asana",
           "Attio",
+          "Box",
+          "Cal.com",
+          "Canva",
           "ClickUp",
           "Close",
           "Confluence",
+          "Dialpad",
+          "DocuSign",
+          "Dropbox",
+          "Figma",
           "GitHub",
+          "GitLab",
           "Gmail",
           "Google Calendar",
           "Google Docs",
@@ -5481,52 +4097,27 @@
           "Google Sheets",
           "HubSpot",
           "Jira",
+          "Klaviyo",
           "Linear",
           "LinkedIn",
+          "Monday",
+          "Moneybird",
           "Notion",
+          "Onedrive",
+          "PagerDuty",
+          "Pipedrive",
+          "QuickBooks",
           "Salesforce",
+          "Shopify",
           "Slack",
+          "Stripe",
           "Supabase",
-          "WordPress"
+          "Vercel",
+          "WordPress",
+          "Xero",
+          "Zendesk"
         ],
         "title": "OAuthServerName"
-      },
-      "SalesforceOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "SalesforceOAuthErrorResponse"
-      },
-      "SalesforceOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": ["status", "message"],
-        "title": "SalesforceOAuthSuccessResponse"
       },
       "ServerTool": {
         "properties": {
@@ -5537,52 +4128,25 @@
         "required": ["name", "description"],
         "title": "ServerTool"
       },
-      "SetAuthTokenRequest": {
+      "SetAuthRequest": {
         "properties": {
           "instanceId": {
             "type": "string",
             "title": "Instanceid",
             "description": "The unique identifier for the connection instance"
           },
-          "authToken": {
-            "type": "string",
-            "title": "Authtoken",
-            "description": "The authentication token to save"
+          "authData": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
+            ],
+            "title": "Authdata",
+            "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": ["instanceId", "authToken"],
-        "title": "SetAuthTokenRequest"
-      },
-      "SlackOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "SlackOAuthErrorResponse"
-      },
-      "SlackOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "SlackOAuthSuccessResponse"
+        "required": ["instanceId", "authData"],
+        "title": "SetAuthRequest"
       },
       "StatusResponse": {
         "properties": {
@@ -5596,35 +4160,224 @@
         "required": ["success"],
         "title": "StatusResponse"
       },
-      "SupabaseOAuthErrorResponse": {
+      "StrataAddServersRequest": {
         "properties": {
-          "error": {
+          "strataId": {
             "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "SupabaseOAuthErrorResponse"
-      },
-      "SupabaseOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
+            "minLength": 1,
+            "title": "Strataid",
+            "description": "The strata server ID"
           },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
+          "servers": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/McpServerName" },
+                "type": "array"
+              },
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
+            ],
+            "title": "Servers",
+            "description": "List of Klavis MCP servers to add (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
+          },
+          "externalServers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalServerRequest"
+                },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Externalservers",
+            "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
           }
         },
         "type": "object",
-        "required": ["message"],
-        "title": "SupabaseOAuthSuccessResponse"
+        "required": ["strataId"],
+        "title": "StrataAddServersRequest"
+      },
+      "StrataAddServersResponse": {
+        "properties": {
+          "addedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Addedservers",
+            "description": "List of Klavis MCP servers that were added"
+          },
+          "addedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Addedexternalservers",
+            "description": "List of external MCP servers that were added with name and URL"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of server name to OAuth URL for newly added servers"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of server name to API key setup URL for newly added servers"
+          }
+        },
+        "type": "object",
+        "required": ["addedServers"],
+        "title": "StrataAddServersResponse"
+      },
+      "StrataCreateRequest": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Userid",
+            "description": "The unique identifier for the user. The server instance along with the all the authentication data will belong to that specific user only. It can be a UUID from the database, a unique email address from the user, etc."
+          },
+          "servers": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/McpServerName" },
+                "type": "array"
+              },
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
+            ],
+            "title": "Servers",
+            "description": "List of Klavis MCP servers to enable (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
+          },
+          "externalServers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExternalServerRequest"
+                },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Externalservers",
+            "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
+          },
+          "enable_auth_handling": {
+            "type": "boolean",
+            "title": "Enable Auth Handling",
+            "description": "Whether to enable authentication handling. Default is True.",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": ["userId"],
+        "title": "StrataCreateRequest"
+      },
+      "StrataCreateResponse": {
+        "properties": {
+          "strataServerUrl": {
+            "type": "string",
+            "title": "Strataserverurl",
+            "description": "URL to connect to the Strata MCP server"
+          },
+          "strataId": {
+            "type": "string",
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "addedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Addedservers",
+            "description": "List of Klavis MCP servers that were added"
+          },
+          "addedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Addedexternalservers",
+            "description": "List of external MCP servers that were added with name and URL"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of server name to OAuth URL"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of server name to API key setup URL"
+          }
+        },
+        "type": "object",
+        "required": ["strataServerUrl", "strataId", "addedServers"],
+        "title": "StrataCreateResponse"
+      },
+      "StrataDeleteServersResponse": {
+        "properties": {
+          "deletedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Deletedservers",
+            "description": "List of Klavis MCP server names that were deleted"
+          },
+          "deletedExternalServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Deletedexternalservers",
+            "description": "List of external MCP server names that were deleted"
+          }
+        },
+        "type": "object",
+        "required": ["deletedServers", "deletedExternalServers"],
+        "title": "StrataDeleteServersResponse"
+      },
+      "StrataGetResponse": {
+        "properties": {
+          "strataServerUrl": {
+            "type": "string",
+            "title": "Strataserverurl",
+            "description": "URL to connect to the Strata MCP server"
+          },
+          "strataId": {
+            "type": "string",
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "connectedServers": {
+            "items": { "type": "string" },
+            "type": "array",
+            "title": "Connectedservers",
+            "description": "List of Klavis MCP servers currently connected to this strata"
+          },
+          "connectedExternalServers": {
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
+            "type": "array",
+            "title": "Connectedexternalservers",
+            "description": "List of external servers with name and URL currently connected to this strata"
+          },
+          "oauthUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Oauthurls",
+            "description": "Mapping of Klavis MCP server name to OAuth URL"
+          },
+          "apiKeyUrls": {
+            "additionalProperties": { "type": "string" },
+            "type": "object",
+            "title": "Apikeyurls",
+            "description": "Mapping of Klavis MCP server name to API key setup URL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "strataServerUrl",
+          "strataId",
+          "connectedServers",
+          "connectedExternalServers"
+        ],
+        "title": "StrataGetResponse"
       },
       "ToolFormat": {
         "type": "string",
@@ -5669,36 +4422,6 @@
         "type": "object",
         "required": ["success"],
         "title": "WhiteLabelingResponse"
-      },
-      "WordPressOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          }
-        },
-        "type": "object",
-        "required": ["error"],
-        "title": "WordPressOAuthErrorResponse"
-      },
-      "WordPressOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": ["message"],
-        "title": "WordPressOAuthSuccessResponse"
       }
     },
     "securitySchemes": {
