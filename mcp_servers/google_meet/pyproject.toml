@@ -1,0 +1,33 @@
+[project]
+name = "google-meet-mcp-server"
+version = "0.1.0"
+description = "MCP server for Google Meet video conferencing"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp==1.11.0",
+    "pydantic",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-dotenv",
+    "typing-extensions",
+    "google-auth",
+    "google-auth-oauthlib",
+    "google-auth-httplib2",
+    "google-api-python-client",
+    "click",
+    "starlette",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.uv]
+dev-dependencies = []
+
+[project.scripts]
+google-meet-mcp-server = "server:main"

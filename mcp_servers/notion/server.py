@@ -4,7 +4,7 @@ import logging
 import os
 from collections.abc import AsyncIterator
 from typing import Any, Dict
-from contextvars import ContextVar
+import base64
 
 import click
 import mcp.types as types
@@ -48,6 +48,35 @@ logger = logging.getLogger(__name__)
 
 NOTION_MCP_SERVER_PORT = int(os.getenv("NOTION_MCP_SERVER_PORT", "5000"))
 
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            header_value = request_or_scope.headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            header_value = headers.get(b'x-auth-data')
+            if header_value:
+                auth_data = base64.b64decode(header_value).decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
 
 @click.command()
 @click.option(
@@ -83,22 +112,47 @@ def main(
         return [
             types.Tool(
                 name="notion_create_page",
-                description="Create a new page in Notion",
+                description="Create a new page in Notion. If parent is not specified, a private page will be created in the workspace",
                 inputSchema={
                     "type": "object",
                     "properties": {
+                        "page": {
+                            "type": "object",
+                            "description": "Page configuration",
+                            "properties": {
+                                "content": {
+                                    "type": "string",
+                                    "description": "Markdown content for the page",
+                                },
+                                "properties": {
+                                    "type": "object",
+                                    "description": "Page properties",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string",
+                                            "description": "Page title",
+                                        }
+                                    }
+                                },
+                            },
+                        },
                         "parent": {
                             "type": "object",
-                            "description": "Parent object (page_id or database_id)",
-                        },
-                        "properties": {
-                            "type": "object",
-                            "description": "Page properties",
-                        },
-                        "children": {
-                            "type": "array",
-                            "items": {"type": "object"},
-                            "description": "Optional array of block objects",
+                            "description": "Optional parent object with page_id, database_id, or workspace. If not specified, a private page will be created",
+                            "properties": {
+                                "page_id": {
+                                    "type": "string",
+                                    "description": "Parent page ID",
+                                },
+                                "database_id": {
+                                    "type": "string",
+                                    "description": "Parent database ID",
+                                },
+                                "workspace": {
+                                    "type": "boolean",
+                                    "description": "Whether parent is workspace",
+                                },
+                            },
                         },
                         "icon": {
                             "type": "object",
@@ -109,8 +163,11 @@ def main(
                             "description": "Optional page cover",
                         },
                     },
-                    "required": ["parent", "properties"],
+                    "required": ["page"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_get_page",
@@ -130,6 +187,9 @@ def main(
                     },
                     "required": ["page_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_update_page_properties",
@@ -164,6 +224,9 @@ def main(
                     },
                     "required": ["page_id", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_query_database",
@@ -208,6 +271,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_get_database",
@@ -222,6 +288,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_create_database",
@@ -258,6 +327,9 @@ def main(
                     },
                     "required": ["parent", "title", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_update_database",
@@ -298,6 +370,9 @@ def main(
                     },
                     "required": ["database_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
             types.Tool(
                 name="notion_create_database_item",
@@ -329,6 +404,9 @@ def main(
                     },
                     "required": ["database_id", "properties"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_DATABASE"}
+                ),
             ),
 
             types.Tool(
@@ -360,6 +438,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_SEARCH"}
+                ),
             ),
             types.Tool(
                 name="notion_get_user",
@@ -374,6 +455,9 @@ def main(
                     },
                     "required": ["user_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
             types.Tool(
                 name="notion_list_users",
@@ -392,6 +476,9 @@ def main(
                     },
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
 
             types.Tool(
@@ -416,6 +503,9 @@ def main(
                     },
                     "required": ["rich_text"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="notion_get_comments",
@@ -438,6 +528,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_COMMENT"}
+                ),
             ),
             types.Tool(
                 name="notion_get_me",
@@ -447,6 +540,9 @@ def main(
                     "properties": {},
                     "required": [],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_USER"}
+                ),
             ),
             types.Tool(
                 name="notion_retrieve_page_property",
@@ -473,6 +569,9 @@ def main(
                     },
                     "required": ["page_id", "property_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_PAGE"}
+                ),
             ),
             types.Tool(
                 name="notion_retrieve_block",
@@ -487,6 +586,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_update_block",
@@ -509,6 +611,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_delete_block",
@@ -523,6 +628,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_get_block_children",
@@ -545,6 +653,9 @@ def main(
                     },
                     "required": ["block_id"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
             types.Tool(
                 name="notion_append_block_children",
@@ -568,6 +679,9 @@ def main(
                     },
                     "required": ["block_id", "children"],
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "NOTION_BLOCK"}
+                ),
             ),
         ]
 
@@ -582,9 +696,10 @@ def main(
         if name == "notion_create_page":
             try:
                 result = await create_page(
+                    page=arguments.get("page"),
                     parent=arguments.get("parent"),
-                    properties=arguments.get("properties"),
-                    children=arguments.get("children"),
+                    properties=arguments.get("properties"),  # Support old format
+                    children=arguments.get("children"),  # Support old format
                     icon=arguments.get("icon"),
                     cover=arguments.get("cover"),
                 )
@@ -1015,11 +1130,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
         
-        # Set the auth token in context for this request (can be None)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -1045,14 +1160,11 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
         
-        # Set the auth token in context for this request (can be None/empty)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

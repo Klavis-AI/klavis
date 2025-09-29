@@ -93,6 +93,9 @@ const getPostgresMcpServer = () => {
               sql: { type: "string" },
             },
           },
+          annotations: {
+            category: "POSTGRES_QUERY",
+          },
         },
       ],
     };
@@ -150,6 +153,30 @@ function getPool() {
   });
 }
 
+function extractApiKey(req: Request): string {
+  let authData = process.env.API_KEY;
+
+  if (authData) {
+    return authData;
+  }
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Postgres database URL is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.token ?? authDataJson.api_key ?? '';
+}
+
 const app = express();
 
 
@@ -158,11 +185,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const databaseUrl = process.env.DATABASE_URL || req.headers['x-auth-token'] as string;
-
-  if (!databaseUrl) {
-    console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
-  }
+  const databaseUrl = extractApiKey(req);
 
   const server = getPostgresMcpServer();
   try {
@@ -248,12 +271,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    // Use DATABASE_URL from environment if available, otherwise fall back to header
-    const databaseUrl = process.env.DATABASE_URL || req.headers['x-auth-token'] as string;
-
-    if (!databaseUrl) {
-      console.error('Error: Postgres database URL is missing. Provide it via DATABASE_URL env var or x-auth-token header.');
-    }
+    const databaseUrl = extractApiKey(req);
 
     asyncLocalStorage.run({ databaseUrl }, async () => {
       await transport.handlePostMessage(req, res);

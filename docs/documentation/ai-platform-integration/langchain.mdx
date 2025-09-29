@@ -98,8 +98,7 @@ Let's start with creating a simple AI agent that can summarize YouTube videos us
 # Create a YouTube MCP server and get the server URL
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="klavis",
+    user_id="1234"
 )
 
 youtube_mcp_server_url = youtube_mcp_instance.server_url
@@ -110,8 +109,7 @@ print(f"🔗 YouTube MCP server created at: {youtube_mcp_server_url}")
 // Create a YouTube MCP server and get the server URL
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 const youtubeMcpServerUrl = youtubeMcpInstance.serverUrl;
@@ -221,15 +219,13 @@ import webbrowser
 # Create YouTube MCP server
 youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.YOUTUBE,
-    user_id="1234",
-    platform_name="klavis",
+    user_id="1234"
 )
 
 # Create Gmail MCP server with OAuth authorization
 gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
     server_name=McpServerName.GMAIL,
-    user_id="1234",
-    platform_name="klavis",
+    user_id="1234"
 )
 
 print("✅ Created YouTube and Gmail MCP instances")
@@ -243,15 +239,13 @@ print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, p
 // Create YouTube MCP server
 const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Youtube,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 // Create Gmail MCP server with OAuth authorization
 const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
     serverName: Klavis.McpServerName.Gmail,
-    userId: "1234",
-    platformName: "Klavis",
+    userId: "1234"
 });
 
 console.log("✅ Created YouTube and Gmail MCP instances");
@@ -483,8 +477,6 @@ try {
 ```
 
 </CodeGroup>
-
-
 
 ## Next Steps
 

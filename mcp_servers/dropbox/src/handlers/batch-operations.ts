@@ -444,17 +444,17 @@ export async function handleBatchOperation(request: CallToolRequest): Promise<Ca
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "batch_delete":
+        case "dropbox_batch_delete":
             return await handleBatchDelete(args) as CallToolResult;
-        case "batch_move":
+        case "dropbox_batch_move":
             return await handleBatchMove(args) as CallToolResult;
-        case "batch_copy":
+        case "dropbox_batch_copy":
             return await handleBatchCopy(args) as CallToolResult;
-        case "check_batch_job_status":
+        case "dropbox_check_batch_job_status":
             return await handleCheckBatchJobStatus(args) as CallToolResult;
-        case "lock_file_batch":
+        case "dropbox_lock_file_batch":
             return await handleLockFileBatch(args) as CallToolResult;
-        case "unlock_file_batch":
+        case "dropbox_unlock_file_batch":
             return await handleUnlockFileBatch(args) as CallToolResult;
         default:
             throw new Error(`Unknown batch operation: ${name}`);

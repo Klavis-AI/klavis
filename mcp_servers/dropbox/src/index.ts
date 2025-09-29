@@ -14,7 +14,6 @@ import { Dropbox } from 'dropbox';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const DROPBOX_ACCESS_TOKEN = process.env.DROPBOX_ACCESS_TOKEN;
 
 // Import utilities
 import { patchFetchResponse } from './utils/fetch-polyfill.js';
@@ -37,6 +36,26 @@ import {
 
 // Apply the fetch polyfill immediately
 patchFetchResponse();
+
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Dropbox access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
+}
 
 /**
  * Create Dropbox client with access token
@@ -90,27 +109,27 @@ const getDropboxMcpServer = () => {
 
         try {
             // Determine which handler to use based on the tool name
-            if (['list_folder', 'list_folder_continue', 'create_folder', 'delete_file', 'move_file', 'copy_file', 'search_files', 'search_files_continue', 'get_file_info'].includes(name)) {
+            if (['dropbox_list_folder', 'dropbox_list_folder_continue', 'dropbox_create_folder', 'dropbox_delete_file', 'dropbox_move_file', 'dropbox_copy_file', 'dropbox_search_files', 'dropbox_search_files_continue', 'dropbox_get_file_info'].includes(name)) {
                 return await handleFilesOperation(request);
             }
 
-            if (['upload_file', 'download_file', 'get_thumbnail', 'list_revisions', 'restore_file', 'get_temporary_link', 'save_url', 'save_url_check_job_status'].includes(name)) {
+            if (['dropbox_upload_file', 'dropbox_download_file', 'dropbox_get_thumbnail', 'dropbox_list_revisions', 'dropbox_restore_file', 'dropbox_get_temporary_link', 'dropbox_save_url', 'dropbox_save_url_check_job_status'].includes(name)) {
                 return await handleFileOperation(request);
             }
 
-            if (['add_file_member', 'list_file_members', 'remove_file_member', 'share_folder', 'list_folder_members', 'add_folder_member', 'remove_folder_member', 'list_shared_folders', 'list_shared_folders_continue', 'list_received_files', 'check_job_status', 'unshare_file', 'unshare_folder', 'share_file', 'get_shared_links'].includes(name)) {
+            if (['dropbox_add_file_member', 'dropbox_list_file_members', 'dropbox_remove_file_member', 'dropbox_share_folder', 'dropbox_list_folder_members', 'dropbox_add_folder_member', 'dropbox_remove_folder_member', 'dropbox_list_shared_folders', 'dropbox_list_shared_folders_continue', 'dropbox_list_received_files', 'dropbox_check_job_status', 'dropbox_unshare_file', 'dropbox_unshare_folder', 'dropbox_share_file', 'dropbox_get_shared_links'].includes(name)) {
                 return await handleSharingOperation(request);
             }
 
-            if (['create_file_request', 'get_file_request', 'list_file_requests', 'delete_file_request', 'update_file_request'].includes(name)) {
+            if (['dropbox_create_file_request', 'dropbox_get_file_request', 'dropbox_list_file_requests', 'dropbox_delete_file_request', 'dropbox_update_file_request'].includes(name)) {
                 return await handleFileRequestOperation(request);
             }
 
-            if (['batch_delete', 'batch_move', 'batch_copy', 'check_batch_job_status', 'lock_file_batch', 'unlock_file_batch'].includes(name)) {
+            if (['dropbox_batch_delete', 'dropbox_batch_move', 'dropbox_batch_copy', 'dropbox_check_batch_job_status', 'dropbox_lock_file_batch', 'dropbox_unlock_file_batch'].includes(name)) {
                 return await handleBatchOperation(request);
             }
 
-            if (['get_current_account', 'get_space_usage'].includes(name)) {
+            if (['dropbox_get_current_account', 'dropbox_get_space_usage'].includes(name)) {
                 return await handleAccountOperation(request);
             }
 
@@ -160,7 +179,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleMcpRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         // Initialize Dropbox client only if access token is available
         const dropboxClient = accessToken ? createDropboxClient(accessToken as string) : null;
@@ -227,7 +246,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     });
 
     async function handleSseRequest(req: Request, res: Response) {
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         const transport = new SSEServerTransport(`/messages`, res);
 
@@ -253,7 +272,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     async function handleMessagesRequest(req: Request, res: Response) {
         const sessionId = req.query.sessionId as string;
-        const accessToken = req.headers['x-auth-token'] || DROPBOX_ACCESS_TOKEN;
+        const accessToken = extractAccessToken(req);
 
         let transport: SSEServerTransport | undefined;
         transport = sessionId ? transports.get(sessionId) : undefined;

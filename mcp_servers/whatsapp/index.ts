@@ -109,6 +109,9 @@ const SEND_TEXT_MESSAGE_TOOL: Tool = {
         },
         required: ['phone_number_id', 'to', 'text'],
     },
+    annotations: {
+        category: 'WHATSAPP_MESSAGE',
+    },
 };
 
 function safeLog(level: 'error' | 'debug' | 'info' | 'notice' | 'warning' | 'critical' | 'alert' | 'emergency', data: any): void {
@@ -185,6 +188,30 @@ const getWhatsAppMcpServer = () => {
     return server;
 };
 
+function extractApiKey(req: Request): string {
+    let authData = process.env.API_KEY;
+
+    if (authData) {
+        return authData;
+    }
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: WhatsApp API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.token ?? authDataJson.api_key ?? '';
+}
+
 const app = express();
 
 //=============================================================================
@@ -192,11 +219,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const accessToken = process.env.WHATSAPP_ACCESS_TOKEN || req.headers['x-auth-token'] as string;
-
-    if (!accessToken) {
-        console.error('Error: WhatsApp access token is missing. Provide it via WHATSAPP_ACCESS_TOKEN env var or x-auth-token header.');
-    }
+    const accessToken = extractApiKey(req);
 
     const server = getWhatsAppMcpServer();
     try {
@@ -283,11 +306,7 @@ app.post("/messages", async (req, res) => {
     const sessionId = req.query.sessionId as string;
     const transport = transports.get(sessionId);
     if (transport) {
-        const accessToken = process.env.WHATSAPP_ACCESS_TOKEN || req.headers['x-auth-token'] as string;
-
-        if (!accessToken) {
-            console.error('Error: WhatsApp access token is missing. Provide it via WHATSAPP_ACCESS_TOKEN env var or x-auth-token header.');
-        }
+        const accessToken = extractApiKey(req);
 
         asyncLocalStorage.run({ accessToken }, async () => {
             await transport.handlePostMessage(req, res);

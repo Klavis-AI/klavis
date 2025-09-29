@@ -177,6 +177,26 @@ const asyncLocalStorage = new AsyncLocalStorage<{
   authToken: string;
 }>();
 
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Jira access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
+
 // Helper function to get Jira client from async local storage
 async function getJiraClient(): Promise<JiraClient> {
   const store = asyncLocalStorage.getStore();
@@ -291,6 +311,9 @@ const searchIssuesTool: Tool = {
     },
     required: ["jql"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const createIssueTool: Tool = {
@@ -338,6 +361,9 @@ const createIssueTool: Tool = {
     },
     required: ["project_key", "summary", "issue_type"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const getIssueTool: Tool = {
@@ -378,6 +404,9 @@ const getIssueTool: Tool = {
     },
     required: ["issue_key"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const updateIssueTool: Tool = {
@@ -406,6 +435,9 @@ const updateIssueTool: Tool = {
     },
     required: ["issue_key", "fields"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const addCommentTool: Tool = {
@@ -424,6 +456,9 @@ const addCommentTool: Tool = {
       },
     },
     required: ["issue_key", "comment"],
+  },
+  annotations: {
+    category: "JIRA_COMMENT",
   },
 };
 
@@ -469,6 +504,9 @@ const searchTool: Tool = {
     },
     required: ["jql"],
   },
+  annotations: {
+    category: "JIRA_SEARCH",
+  },
 };
 
 const searchFieldsTool: Tool = {
@@ -495,6 +533,9 @@ const searchFieldsTool: Tool = {
       },
     },
     required: [],
+  },
+  annotations: {
+    category: "JIRA_FIELD",
   },
 };
 
@@ -524,6 +565,9 @@ const getProjectIssuesTool: Tool = {
     },
     required: ["project_key"],
   },
+  annotations: {
+    category: "JIRA_PROJECT",
+  },
 };
 
 const getEpicIssuesTool: Tool = {
@@ -551,6 +595,9 @@ const getEpicIssuesTool: Tool = {
       },
     },
     required: ["epic_key"],
+  },
+  annotations: {
+    category: "JIRA_ISSUE",
   },
 };
 
@@ -581,6 +628,9 @@ const getSprintsFromBoardTool: Tool = {
         maximum: 50,
       },
     },
+  },
+  annotations: {
+    category: "JIRA_SPRINT",
   },
 };
 
@@ -618,6 +668,9 @@ const createSprintTool: Tool = {
       "end_date",
     ],
   },
+  annotations: {
+    category: "JIRA_SPRINT",
+  },
 };
 
 const getSprintIssuesTool: Tool = {
@@ -649,6 +702,9 @@ const getSprintIssuesTool: Tool = {
       },
     },
     required: ["sprint_id"],
+  },
+  annotations: {
+    category: "JIRA_SPRINT",
   },
 };
 
@@ -685,6 +741,9 @@ const updateSprintTool: Tool = {
     },
     required: ["sprint_id"],
   },
+  annotations: {
+    category: "JIRA_SPRINT",
+  },
 };
 
 const deleteIssueTool: Tool = {
@@ -700,6 +759,9 @@ const deleteIssueTool: Tool = {
     },
     required: ["issue_key"],
   },
+  annotations: {
+    category: "JIRA_ISSUE",
+  },
 };
 
 const getLinkTypesTool: Tool = {
@@ -709,6 +771,9 @@ const getLinkTypesTool: Tool = {
     type: "object",
     properties: {},
     required: [],
+  },
+  annotations: {
+    category: "JIRA_LINK",
   },
 };
 
@@ -760,8 +825,6 @@ const getJiraMcpServer = () => {
 
         const jira = await getJiraClient();
 
-        console.log("--- request.params.name", request.params.name);
-
         // Process the tool call based on the tool name
         switch (request.params.name) {
           case "jira_search": {
@@ -812,8 +875,6 @@ const getJiraMcpServer = () => {
             }
 
             const response = await jira.fetch<any>(`/rest/api/3/search?${searchParams.toString()}`);
-
-            console.log("--- response", JSON.stringify(response, null, 2));
 
             return {
               content: [
@@ -1394,11 +1455,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const authToken = req.headers['x-auth-token'] as string;
-
-  if (!authToken) {
-    console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-  }
+  const authToken = extractAccessToken(req);
 
   const server = getJiraMcpServer();
   try {
@@ -1481,11 +1538,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const authToken = req.headers['x-auth-token'] as string;
-
-    if (!authToken) {
-      console.error('Error: Jira API token is missing. Provide it via x-auth-token header.');
-    }
+    const authToken = extractAccessToken(req);
 
     asyncLocalStorage.run({ authToken }, async () => {
       await transport!.handlePostMessage(req, res);

@@ -1,0 +1,227 @@
+name: Build and Publish MCP Servers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mcp_servers/**'
+      - '_oauth_support/**'
+  workflow_dispatch:
+    inputs:
+      servers:
+        description: 'Comma-separated list of MCP servers to build (e.g., mem0,openai,github)'
+        required: true
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}
+  BUILD_ARCHS: amd64
+
+jobs:
+  detect-changes:
+    name: Detect Changed MCP Servers
+    runs-on: ubuntu-latest
+    outputs:
+      changed-servers: ${{ steps.changes.outputs.changed-servers }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed MCP servers
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use input servers
+            CHANGED_SERVERS="${{ github.event.inputs.servers }}"
+            echo "Manual build requested for: $CHANGED_SERVERS"
+          else
+            # Auto trigger - detect changed files
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            
+            # Check if _oauth_support changed - if so, build all OAuth-supported servers
+            OAUTH_CHANGED=false
+            for file in $CHANGED_FILES; do
+              if [[ $file == _oauth_support/* ]]; then
+                OAUTH_CHANGED=true
+                break
+              fi
+            done
+            
+            # Extract unique MCP server directories that have changes
+            CHANGED_SERVERS=""
+            if [ "$OAUTH_CHANGED" = "true" ]; then
+              # _oauth_support changed - build all OAuth-supported servers
+              echo "_oauth_support changed, building all OAuth-supported servers"
+              OAUTH_SERVERS=$(jq -r 'keys[]' _oauth_support/server_name.json)
+              for server in $OAUTH_SERVERS; do
+                if [ -f "mcp_servers/${server}/Dockerfile" ]; then
+                  CHANGED_SERVERS="$CHANGED_SERVERS$server,"
+                fi
+              done
+            else
+              # Normal change detection for individual servers
+              for file in $CHANGED_FILES; do
+                if [[ $file == mcp_servers/* ]]; then
+                  # Extract server folder path (mcp_servers/server_name/)
+                  server_path=$(echo "$file" | cut -d'/' -f1-2)
+                  server_name=$(echo "$file" | cut -d'/' -f2)
+                  
+                  # Check if Dockerfile exists in the server path
+                  if [ -f "${server_path}/Dockerfile" ]; then
+                    # Add to list if not already present
+                    if [[ "$CHANGED_SERVERS" != *"$server_name"* ]]; then
+                      CHANGED_SERVERS="$CHANGED_SERVERS$server_name,"
+                    fi
+                  fi
+                fi
+              done
+            fi
+            
+            # Remove trailing comma
+            CHANGED_SERVERS=${CHANGED_SERVERS%,}
+          fi
+          
+          echo "Changed servers: $CHANGED_SERVERS"
+          
+          if [ -n "$CHANGED_SERVERS" ]; then
+            # Convert comma-separated to JSON array
+            SERVERS_JSON=$(echo "[$CHANGED_SERVERS]" | sed 's/,/","/g' | sed 's/\[/["/' | sed 's/\]/"]/')
+          else
+            SERVERS_JSON="[]"
+          fi
+          
+          echo "changed-servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
+          echo "Servers to build: $SERVERS_JSON"
+
+  build-and-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    strategy:
+      fail-fast: false
+      matrix:
+        server: ${{ fromJson(needs.detect-changes.outputs.changed-servers) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get image URL
+        id: get-image-url
+        run: |
+          # Check if custom mapping exists, otherwise use original name
+          if [ -f ".github/workflows/server-name-mapping.json" ]; then
+            MAPPED_NAME=$(jq -r --arg name "${{ matrix.server }}" '.[$name] // empty' .github/workflows/server-name-mapping.json)
+          fi
+          
+          if [ -z "$MAPPED_NAME" ]; then
+            # Default: use original server name
+            SERVER_NAME="${{ matrix.server }}"
+          else
+            # Use custom mapping
+            SERVER_NAME="$MAPPED_NAME"
+          fi
+          
+          echo "Using server name: $SERVER_NAME for ${{ matrix.server }}"
+          echo "BASE_IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${SERVER_NAME}-mcp-server" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Build and tag basic image
+        id: build-base
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
+          tags: |
+            ${{ github.sha }}
+            latest
+          context: .
+          containerfiles: |
+            mcp_servers/${{ matrix.server }}/Dockerfile
+          archs: ${{ env.BUILD_ARCHS }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      - name: Push basic image to registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
+          tags: |
+            ${{ github.sha }}
+            latest
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if server needs OAuth and get command
+        id: get-command
+        run: |
+          # Check if this server needs OAuth support
+          OAUTH_SERVER_NAME=$(jq -r --arg name "${{ matrix.server }}" '.[$name] // empty' _oauth_support/server_name.json)
+          
+          if [ -z "$OAUTH_SERVER_NAME" ]; then
+            echo "Server ${{ matrix.server }} does not need OAuth support, skipping..."
+            echo "oauth-server-name=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Server ${{ matrix.server }} needs OAuth support, OAuth name: $OAUTH_SERVER_NAME"
+          echo "oauth-server-name=$OAUTH_SERVER_NAME" >> $GITHUB_OUTPUT
+          
+          # Get original entrypoint and cmd
+          BASE_IMAGE="${{ steps.get-image-url.outputs.BASE_IMAGE }}"
+          ORIGINAL_ENTRYPOINT=$(podman inspect --format '{{if .Config.Entrypoint}}{{json .Config.Entrypoint}}{{else}}[]{{end}}' "$BASE_IMAGE" 2>/dev/null || echo '[]')
+          ORIGINAL_CMD=$(podman inspect --format '{{if .Config.Cmd}}{{json .Config.Cmd}}{{else}}[]{{end}}' "$BASE_IMAGE" 2>/dev/null || echo '[]')
+          
+          # Combine them into final command
+          FINAL_COMMAND=$(echo -e "$ORIGINAL_ENTRYPOINT\n$ORIGINAL_CMD" | jq -sc 'add')
+          
+          echo "Original entrypoint: $ORIGINAL_ENTRYPOINT"
+          echo "Original cmd: $ORIGINAL_CMD" 
+          echo "Final command: $FINAL_COMMAND"
+          
+          # Set outputs for next step
+          echo "final-command=$FINAL_COMMAND" >> $GITHUB_OUTPUT
+
+      - name: Prepare OAuth Dockerfile
+        if: steps.get-command.outputs.oauth-server-name != ''
+        run: |
+          sed -i 's|\${MCP_SERVER_NAME}|${{ steps.get-command.outputs.oauth-server-name }}|g' _oauth_support/docker/Dockerfile.template
+          sed -i 's|\${ENTRYPOINT_COMMAND}|${{ steps.get-command.outputs.final-command }}|g' _oauth_support/docker/Dockerfile.template
+
+      - name: Build OAuth wrapper image
+        id: build
+        if: steps.get-command.outputs.oauth-server-name != ''
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
+          tags: |
+            ${{ github.sha }}-oauth
+            latest
+          context: _oauth_support
+          containerfiles: |
+            _oauth_support/docker/Dockerfile.template
+          archs: ${{ env.BUILD_ARCHS }}
+          build-args: |
+            BASE_IMAGE=${{ steps.get-image-url.outputs.BASE_IMAGE }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      - name: Push to registry
+        if: steps.get-command.outputs.oauth-server-name != ''
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.get-image-url.outputs.BASE_IMAGE }}
+          tags: |
+            ${{ github.sha }}-oauth
+            latest
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

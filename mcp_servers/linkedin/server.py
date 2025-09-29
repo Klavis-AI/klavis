@@ -2,6 +2,7 @@ import os
 import logging
 import contextlib
 import json
+import base64
 from collections.abc import AsyncIterator
 from typing import Any, Dict, List, Optional
 
@@ -20,6 +21,8 @@ from tools import (
     linkedin_token_context,
     get_profile_info,
     create_post,
+    format_rich_post,
+    create_url_share,
 )
 
 load_dotenv()
@@ -30,6 +33,35 @@ logger = logging.getLogger("linkedin-mcp-server")
 
 LINKEDIN_ACCESS_TOKEN = os.getenv("LINKEDIN_ACCESS_TOKEN") or "" # for local use
 LINKEDIN_MCP_SERVER_PORT = int(os.getenv("LINKEDIN_MCP_SERVER_PORT", "5000"))
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
 
 @click.command()
 @click.option("--port", default=LINKEDIN_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -72,7 +104,8 @@ def main(
                             "description": "The LinkedIn person ID to retrieve information for. Leave empty for current user."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_PROFILE"})
             ),
             types.Tool(
                 name="linkedin_create_post",
@@ -89,13 +122,96 @@ def main(
                             "type": "string",
                             "description": "Optional title for article-style posts. When provided, creates an article format."
                         },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional list of hashtags to add to the post (# will be added automatically)."
+                        },
                         "visibility": {
                             "type": "string",
                             "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
                             "default": "PUBLIC"
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
+            ),
+            types.Tool(
+                name="linkedin_format_rich_post",
+                description="Format rich text for LinkedIn posts with bold, italic, lists, mentions, and hashtags (utility function - doesn't post).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["text"],
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "The base text content to format."
+                        },
+                        "bold_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make bold (will be wrapped with **)."
+                        },
+                        "italic_text": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Text phrases to make italic (will be wrapped with *)."
+                        },
+                        "bullet_points": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of bullet points to add."
+                        },
+                        "numbered_list": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of numbered items to add."
+                        },
+                        "hashtags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of hashtags to add."
+                        },
+                        "mentions": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of usernames to mention (@ will be added automatically)."
+                        }
+                    }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
+            ),
+            types.Tool(
+                name="linkedin_create_url_share",
+                description="Share URLs with metadata preview on LinkedIn.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["url", "text"],
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "description": "The URL to share (must be a valid URL)."
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Commentary text to accompany the shared URL."
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Optional title for the shared URL content."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional description for the shared URL content."
+                        },
+                        "visibility": {
+                            "type": "string",
+                            "description": "Post visibility (PUBLIC, CONNECTIONS, LOGGED_IN_USERS).",
+                            "default": "PUBLIC"
+                        }
+                    }
+                },
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_POST"})
             ),
         ]
 
@@ -107,6 +223,7 @@ def main(
         if name == "linkedin_create_post":
             text = arguments.get("text")
             title = arguments.get("title")
+            hashtags = arguments.get("hashtags")
             visibility = arguments.get("visibility", "PUBLIC")
             if not text:
                 return [
@@ -116,7 +233,86 @@ def main(
                     )
                 ]
             try:
-                result = await create_post(text, title, visibility)
+                result = await create_post(text, title, visibility, hashtags)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_format_rich_post":
+            text = arguments.get("text")
+            bold_text = arguments.get("bold_text")
+            italic_text = arguments.get("italic_text")
+            bullet_points = arguments.get("bullet_points")
+            numbered_list = arguments.get("numbered_list")
+            hashtags = arguments.get("hashtags")
+            mentions = arguments.get("mentions")
+            
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = format_rich_post(
+                    text=text,
+                    bold_text=bold_text,
+                    italic_text=italic_text,
+                    bullet_points=bullet_points,
+                    numbered_list=numbered_list,
+                    hashtags=hashtags,
+                    mentions=mentions
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linkedin_create_url_share":
+            url = arguments.get("url")
+            text = arguments.get("text")
+            title = arguments.get("title")
+            description = arguments.get("description")
+            visibility = arguments.get("visibility", "PUBLIC")
+            
+            if not url:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: url parameter is required",
+                    )
+                ]
+            if not text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: text parameter is required",
+                    )
+                ]
+            try:
+                result = await create_url_share(url, text, title, description, visibility)
                 return [
                     types.TextContent(
                         type="text",
@@ -151,7 +347,6 @@ def main(
                     )
                 ]
         
-        
         else:
             return [
                 types.TextContent(
@@ -166,11 +361,13 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract LinkedIn access token from headers (fallback to environment)
-        linkedin_token = request.headers.get('x-linkedin-token') or LINKEDIN_ACCESS_TOKEN
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
+        if not auth_token:
+            auth_token = LINKEDIN_ACCESS_TOKEN  # Fallback to environment
         
         # Set the LinkedIn token in context for this request
-        token = linkedin_token_context.set(linkedin_token or "")
+        token = linkedin_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -196,16 +393,13 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (fallback to environment)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
-        else:
-            auth_token = LINKEDIN_ACCESS_TOKEN
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
+        if not auth_token:
+            auth_token = LINKEDIN_ACCESS_TOKEN  # Fallback to environment
         
         # Set the LinkedIn token in context for this request
-        token = linkedin_token_context.set(auth_token or "")
+        token = linkedin_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

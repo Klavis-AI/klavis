@@ -1,0 +1,162 @@
+---
+title: "Gemini CLI"
+description: "Connect Klavis MCP Servers with Gemini CLI in minutes and supercharge your AI coding experience"
+---
+<img
+  className="block dark:hidden"
+  src="/images/knowledge-base/gemini_cli/Gemini_CLI.png"
+  alt="Gemini CLI with Klavis MCP Servers"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/knowledge-base/gemini_cli/Gemini_CLI.png"
+  alt="Gemini CLI with Klavis MCP Servers"
+/>
+
+## Quick Setup Guide
+
+<Steps>
+  <Step title="Access Klavis MCP Servers">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
+    
+    <img
+      src="/images/knowledge-base/gemini_cli/step1.png"
+      alt="Klavis home page"
+    />    
+    Click the **"Create"** button next to your chosen server.
+  </Step>
+
+  <Step title="Complete Authentication">
+    <img
+      src="/images/knowledge-base/gemini_cli/step2.png"
+      alt="Klavis MCP Servers page"
+    />
+    
+    <img
+      src="/images/knowledge-base/gemini_cli/step3.png"
+      alt="OAuth authentication flow"
+    />
+    
+    <img
+      src="/images/knowledge-base/gemini_cli/step4.png"
+      alt="Server URL generated"
+    />
+    
+    <Accordion title="🔐 OAuth Services (Most Common)">
+      - Automatically redirected to OAuth authorization
+      - Sign in to your account (GitHub, Google, Slack, etc.)
+      - Grant necessary permissions
+      - Redirected back to Klavis automatically
+    </Accordion>
+    
+    <Accordion title="🔑 API Key Services">
+      - Prompted to enter an API key
+      - Follow service-specific instructions to generate key
+      - Paste key in the provided field
+      - Click **"Save"** to continue
+    </Accordion>
+  </Step>
+
+
+
+  <Step title="Configure Gemini CLI">
+    Copy Your Server URL and navigate to `~/.gemini/settings.json` on your computer
+
+    
+    Paste Your Server URL to **settings.json** file like the screenshot below
+
+
+    <img
+      src="/images/knowledge-base/gemini_cli/step5.png"
+      alt="Gemini CLI Settings"
+    />
+
+  </Step>
+
+  <Step title="Verify Tools Loading">
+     
+    <img
+      src="/images/knowledge-base/gemini_cli/step6.png"
+      alt="MCP Configuration in Gemini CLI"
+    />
+    
+    <Note>
+      📋 **Restart** Gemini CLI to apply the new configuration
+    </Note>
+    
+  </Step>
+
+  <Step title="Start Using in Gemini CLI Chat">
+    <img
+      src="/images/knowledge-base/gemini_cli/step7.png"
+      alt="Using MCP Server in Gemini CLI Chat"
+    />
+    
+    Open Gemini CLI Chat and start using natural language:
+    
+    <CodeGroup>
+    ```text GitHub
+    "Create a new issue titled 'Add dark mode' with priority label"
+    ```
+    
+    ```text Slack
+    "Send a message to #general: 'Standup meeting in 5 minutes!'"
+    ```
+    
+    ```text Gmail
+    "Send email to john@company.com about project update"
+    ```
+    
+    ```text Notion
+    "Create a new page called 'Meeting Notes' with today's date"
+    ```
+    </CodeGroup>
+    
+    <Tip>
+      🎯 Gemini CLI Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+    </Tip>
+  </Step>
+
+  <Step title="Happy Building! 🎉">
+    You're all set! Your MCP server is now integrated with Gemini CLI.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="🔧 Tools Not Appearing">
+    - Double-check your Server URL for typos
+    - Ensure stable internet connection
+    - Verify authentication in Klavis dashboard
+    - Check Gemini CLI logs for error messages
+    - Try completely restarting Gemini CLI
+  </Accordion>
+  
+  <Accordion title="🔐 Authentication Issues">
+    - Re-authenticate in the Klavis dashboard
+    - Check if your OAuth tokens have expired
+    - Verify API key permissions (for API key services)
+    - Ensure you've granted all necessary permissions
+  </Accordion>
+  
+  <Accordion title="⚡ Performance Issues">
+    - Limit the number of active MCP servers
+    - Check your internet connection speed
+    - Restart Gemini CLI periodically
+    - Contact support if issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Community" icon="discord">
+    Join our Discord for community support and discussions
+  </Card>
+  <Card title="Support" icon="headphones">
+    Contact our technical support team for assistance
+  </Card>
+</CardGroup>
+
+---

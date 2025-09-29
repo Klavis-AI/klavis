@@ -144,19 +144,19 @@ export async function handleFileRequestOperation(request: CallToolRequest): Prom
     const { name, arguments: args } = request.params;
 
     switch (name) {
-        case "create_file_request":
+        case "dropbox_create_file_request":
             return await handleCreateFileRequest(args);
 
-        case "get_file_request":
+        case "dropbox_get_file_request":
             return await handleGetFileRequest(args);
 
-        case "list_file_requests":
+        case "dropbox_list_file_requests":
             return await handleListFileRequests(args);
 
-        case "delete_file_request":
+        case "dropbox_delete_file_request":
             return await handleDeleteFileRequest(args);
 
-        case "update_file_request":
+        case "dropbox_update_file_request":
             return await handleUpdateFileRequest(args);
 
         default:

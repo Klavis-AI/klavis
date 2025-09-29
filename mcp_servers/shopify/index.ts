@@ -420,6 +420,26 @@ const getShopifyMcpServer = (): Server => {
 
 const asyncLocalStorage = new AsyncLocalStorage<AsyncLocalStorageState>();
 
+function extractAuthData(req: Request): { access_token?: string; shop_domain?: string } {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Shopify access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return JSON.parse('{}');
+  }
+
+  const authDataJson = JSON.parse(authData) as { access_token?: string; shop_domain?: string };
+  return authDataJson;
+}
+
 function getShopifyCredentials(): ShopifyCredentials {
   if (process.env.SHOPIFY_ACCESS_TOKEN && process.env.SHOPIFY_SHOP_DOMAIN) {
     return {
@@ -438,12 +458,9 @@ const app = express();
 app.use(express.json());
 
 app.post('/mcp', async (req: Request, res: ExpressResponse) => {
-  const accessToken = req.headers['x-shopify-access-token'] as string;
-  const shopDomain = req.headers['x-shopify-shop-domain'] as string;
-
-  if (!accessToken || !shopDomain) {
-    console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-  }
+  const authData = extractAuthData(req);
+  const accessToken = authData.access_token ?? '';
+  const shopDomain = authData.shop_domain ?? '';
 
   const server = getShopifyMcpServer();
   try {
@@ -528,12 +545,9 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const accessToken = req.headers['x-shopify-access-token'] as string;
-    const shopDomain = req.headers['x-shopify-shop-domain'] as string;
-
-    if (!accessToken || !shopDomain) {
-      console.error('Error: Shopify credentials are missing. Provide them via x-shopify-access-token and x-shopify-shop-domain headers.');
-    }
+    const authData = extractAuthData(req);
+    const accessToken = authData.access_token ?? '';
+    const shopDomain = authData.shop_domain ?? '';
 
     asyncLocalStorage.run({ 
       shopify_access_token: accessToken, 

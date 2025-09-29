@@ -344,7 +344,10 @@ def main(
                             "description": "The ID of the Discord server (guild) to retrieve information for."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_SERVER"}
+                ),
             ),
             types.Tool(
                 name="discord_list_members",
@@ -363,7 +366,10 @@ def main(
                             "default": 100
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_SERVER"}
+                ),
             ),
             types.Tool(
                 name="discord_create_text_channel",
@@ -389,7 +395,10 @@ def main(
                             "description": "The topic for the new channel."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_SERVER"}
+                ),
             ),
             types.Tool(
                 name="discord_add_reaction",
@@ -411,7 +420,10 @@ def main(
                             "description": "The emoji to add as a reaction. Can be a standard Unicode emoji or a custom emoji in the format `name:id`."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="discord_add_multiple_reactions",
@@ -436,7 +448,10 @@ def main(
                             "description": "A list of emojis to add. Each can be Unicode or custom format `name:id`."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_REACTION"}
+                ),
             ),
             types.Tool(
                 name="discord_remove_reaction",
@@ -458,7 +473,10 @@ def main(
                             "description": "The emoji reaction to remove. Can be Unicode or custom format `name:id`."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_REACTION"}
+                ),
             ),
             types.Tool(
                 name="discord_send_message",
@@ -476,7 +494,10 @@ def main(
                             "description": "The text content of the message."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="discord_read_messages",
@@ -495,7 +516,10 @@ def main(
                             "default": 50
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_MESSAGE"}
+                ),
             ),
             types.Tool(
                 name="discord_get_user_info",
@@ -509,7 +533,10 @@ def main(
                             "description": "The ID of the Discord user to retrieve information for."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "DISCORD_USER"}
+                ),
             )
         ]
 
