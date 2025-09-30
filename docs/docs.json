@@ -144,6 +144,12 @@
               "documentation/mcp-server/youtube",
               "documentation/mcp-server/zendesk"
             ]
+          },
+          {
+            "group": "Legacy",
+            "pages": [
+              "documentation/legacy/instance"
+            ]
           }
         ]
       },
