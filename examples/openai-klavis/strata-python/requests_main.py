@@ -59,12 +59,11 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
         iteration += 1
         
         stream = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1",
             messages=messages,
             tools=tools_info,
             tool_choice="auto",
             stream=True,
-            temperature=0.7
         )
         
         tool_calls = []
@@ -154,7 +153,7 @@ def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_clien
         iteration += 1
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1",
             messages=messages,
             tools=tools_info,
             tool_choice="auto",
