@@ -122,7 +122,8 @@ def main(
                         "folder_id": {"type": "string", "description": "The ID of the folder to delete"}
                     },
                     "required": ["folder_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
             ),
             types.Tool(
                 name="outlookMail_create_mail_folder",
@@ -134,7 +135,8 @@ def main(
                         "is_hidden": {"type": "boolean", "description": "Whether the folder is hidden (default False)"}
                     },
                     "required": ["display_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
             ),
             types.Tool(
                 name="outlookMail_list_folders",
@@ -145,7 +147,8 @@ def main(
                         "include_hidden": {"type": "boolean",
                                            "description": "Whether to include hidden folders (default True)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
             ),
 
             types.Tool(
@@ -157,7 +160,8 @@ def main(
                         "folder_id": {"type": "string", "description": "Unique ID of the mail folder"}
                     },
                     "required": ["folder_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
             ),
 
             types.Tool(
@@ -170,7 +174,8 @@ def main(
                         "display_name": {"type": "string", "description": "New display name"}
                     },
                     "required": ["folder_id", "display_name"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
             ),
 
             #messages.py-----------------------------------------------------------
@@ -187,7 +192,8 @@ def main(
                     },
                     "required": ["message_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_list_messages",
@@ -233,7 +239,8 @@ def main(
                         }
                     },
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_list_messages_from_folder",
@@ -284,7 +291,8 @@ def main(
                     },
                     "required": ["folder_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_update_draft",
@@ -322,7 +330,8 @@ def main(
                     },
                     "required": ["message_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
 
             types.Tool(
@@ -338,7 +347,8 @@ def main(
                     },
                     "required": ["message_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_create_forward_draft",
@@ -365,7 +375,8 @@ def main(
                     },
                     "required": ["message_id", "comment", "to_recipients"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_create_reply_draft",
@@ -384,7 +395,8 @@ def main(
                     },
                     "required": ["message_id", "comment"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_create_reply_all_draft",
@@ -404,7 +416,8 @@ def main(
                     },
                     "required": ["message_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_send_draft",
@@ -416,7 +429,8 @@ def main(
                     },
                     "required": ["message_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_create_draft",
@@ -459,7 +473,8 @@ def main(
                     },
                     "required": ["subject", "body_content", "to_recipients"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             ),
             types.Tool(
                 name="outlookMail_move_message",
@@ -478,7 +493,8 @@ def main(
                     },
                     "required": ["message_id", "destination_folder_id"],
                     "additionalProperties": False
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
             )
 
         ]

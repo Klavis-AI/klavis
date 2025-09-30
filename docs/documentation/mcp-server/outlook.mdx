@@ -1,6 +1,6 @@
 ---
-title: 'Outlook Mail'
-description: 'Connect AI agents to Outlook Mail for email management and automation'
+title: 'Outlook'
+description: 'Connect AI agents to Outlook for email management and automation'
 ---
 
 <Info>
@@ -10,7 +10,7 @@ description: 'Connect AI agents to Outlook Mail for email management and automat
 
 ## Getting started
 
-Connect to Outlook Mail to read, send, organize emails, and automate email workflows through AI agents.
+Connect to Outlook to read, send, organize emails, and automate email workflows through AI agents.
 
 <Tabs>
   <Tab title="API">
@@ -34,9 +34,9 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create an Outlook Mail MCP server instance
+          # Create an Outlook MCP server instance
           outlook_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.OUTLOOK_MAIL,
+              server_name=McpServerName.OUTLOOK,
               user_id="user123"
           )
           ```
@@ -46,9 +46,9 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
           
           const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
           
-          // Create an Outlook Mail MCP server instance
+          // Create an Outlook MCP server instance
           const outlookServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.OutlookMail,
+              serverName: Klavis.McpServerName.Outlook,
               userId: "user123"
           });
           ```
@@ -58,7 +58,7 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Outlook Mail",
+              "serverName": "Outlook",
               "userId": "user123"
             }'
           ```
@@ -66,9 +66,9 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
         
         <Info>
           **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Outlook Mail
+          - `serverUrl`: The URL for connecting your MCP client to Outlook
           - `instanceId`: Unique identifier for your server instance
-          - `oauthUrl`: OAuth authorization URL for Outlook Mail authentication
+          - `oauthUrl`: OAuth authorization URL for Outlook authentication
         </Info>
       </Step>
       
@@ -93,7 +93,7 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
         </CodeGroup>
         
         <Check>
-          🎉 **Your Outlook Mail MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Outlook MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -108,7 +108,7 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
       </Step>
       
       <Step title="Choose Outlook Mail">
-        Select Outlook Mail from the list of available integrations.
+        Select Outlook from the list of available integrations.
       </Step>
       
       <Step title="Authenticate">
@@ -126,19 +126,19 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
       <Step title="Clone repository (for developers to build from source)">
         ```bash
         git clone https://github.com/klavis-ai/klavis
-        cd klavis/mcp_servers/outlook_mail
+        cd klavis/mcp_servers/outlook
         ```
       </Step>
       
       <Step title="Run with Docker">
         ```bash
         # Pull the Docker image
-        docker pull ghcr.io/klavis-ai/outlook-mail-mcp-server:latest
+        docker pull ghcr.io/klavis-ai/outlook-mcp-server:latest
         
         # Run with OAuth support (requires Klavis API key)
         docker run -p 5000:5000 \
           -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
-          ghcr.io/klavis-ai/outlook-mail-mcp-server:latest
+          ghcr.io/klavis-ai/outlook-mcp-server:latest
         ```
       </Step>
       
@@ -146,7 +146,7 @@ Connect to Outlook Mail to read, send, organize emails, and automate email workf
         ```json
         {
           "mcpServers": {
-            "outlook_mail": {
+            "outlook": {
               "url": "http://localhost:5000/mcp/"
             }
           }
