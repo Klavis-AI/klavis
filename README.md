@@ -180,6 +180,17 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 - 🐛 [Report Issues](https://github.com/klavis-ai/klavis/issues)
 - 🌐 [Klavis AI Website](https://www.klavis.ai)
 
+## ❤️ Contributing
+
+We welcome contributions! See our full [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Reporting bugs & requesting features  
+- Local development setup & running MCP servers  
+- Creating Pull Requests & commit conventions  
+- Code of Conduct & community expectations  
+- How to add a new MCP server (`MCP_SERVER_GUIDE.md`)  
+- Reporting security issues & signing the CLA
+
 ## 📜 License
 
 - **Root Repository**: Apache 2.0 license - see [LICENSE](LICENSE)
