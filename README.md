@@ -188,7 +188,7 @@ We welcome contributions! See our full [Contributing Guide](CONTRIBUTING.md) for
 - Local development setup & running MCP servers  
 - Creating Pull Requests & commit conventions  
 - Code of Conduct & community expectations  
-- How to add a new MCP server (`MCP_SERVER_GUIDE.md`)  
+- How to add a new MCP server ([`MCP_SERVER_GUIDE.md`](MCP_SERVER_GUIDE.md))  
 - Reporting security issues & signing the CLA
 
 ## 📜 License
