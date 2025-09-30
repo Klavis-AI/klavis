@@ -1,26 +1,10 @@
 ---
 title: "OpenAI"
-description: "Learn how to build AI agents that integrate OpenAI's models with Klavis MCP Servers for enhanced functionality"
+description: "This tutorial demonstrates how to integrate OpenAI's function calling capabilities with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
 ---
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/klavis-ai/klavis/blob/main/examples/openai/Use_Klavis_with_OpenAI.ipynb)
-
-# OpenAI + Klavis AI Integration
-
-This tutorial demonstrates how to use OpenAI function calling with Klavis MCP (Model Context Protocol) servers.
-
 ## Prerequisites
 
-Before we begin, you'll need:
-
-<CardGroup cols={2}>
-  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
-    Get your API key from OpenAI Platform
-  </Card>
-  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
-    Get your API key from Klavis AI
-  </Card>
-</CardGroup>
+Before we begin, you'll need [OpenAI API key]((https://platform.openai.com/api-keys)) and [Klavis API key](https://www.klavis.ai/home/api-keys).
 
 ## Installation
 
@@ -29,7 +13,7 @@ First, install the required packages:
 <CodeGroup>
 
 ```bash Python
-pip install openai klavis requests
+pip install openai klavis
 ```
 
 ```bash TypeScript
@@ -44,14 +28,9 @@ npm install openai klavis
 
 ```python Python
 import os
-import json
-from openai import OpenAI
-from klavis import Klavis
-from klavis.types import McpServerName, ToolFormat
 
-# Set environment variables
-os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace with your actual OpenAI API key
-os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
 ```
 
 ```typescript TypeScript
@@ -65,41 +44,68 @@ process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";   // Replace with your actua
 
 </CodeGroup>
 
-## Case Study 1: OpenAI + YouTube MCP Server
 
-### Step 1 - Create YouTube MCP Server using Klavis
+### Step 1 - Create Strata MCP Server with Gmail and Slack
 
 <CodeGroup>
 
 ```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
+import webbrowser
+
 klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
 
-youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.YOUTUBE,
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
     user_id="1234"
 )
 
-# print(f"🔗 YouTube MCP server created at: {youtube_mcp_instance.server_url}, and the instance id is {youtube_mcp_instance.instance_id}")
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
 ```
 
 ```typescript TypeScript
 const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 
-const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Youtube,
+const response = await klavisClient.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
     userId: "1234"
 });
 
-// console.log(`🔗 YouTube MCP server created at: ${youtubeMcpInstance.serverUrl}, and the instance id is ${youtubeMcpInstance.instanceId}`);
+// Handle OAuth authorization for each services
+if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+        window.open(oauthUrl);
+        // Wait for user to complete OAuth
+        await new Promise(resolve => {
+            const input = prompt(`Press OK after completing ${serverName} OAuth authorization...`);
+            resolve(input);
+        });
+    }
+}
+
 ```
 
 </CodeGroup>
 
-### Step 2 - Create general method to use MCP Server with OpenAI
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create method to use MCP Server with OpenAI
+
+This method handles multiple rounds of tool calls until a final response is ready, allowing the AI to chain tool executions for complex tasks.
 
 <CodeGroup>
 
 ```python Python
+import json
+from openai import OpenAI
+
 def openai_with_mcp_server(mcp_server_url: str, user_query: str):
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -108,44 +114,67 @@ def openai_with_mcp_server(mcp_server_url: str, user_query: str):
         {"role": "user", "content": f"{user_query}"}
     ]
     
-    mcp_server_tools = klavis_client.mcp_server.list_tools(
+    tools_info = klavis_client.mcp_server.list_tools(
         server_url=mcp_server_url,
         format=ToolFormat.OPENAI
     )
     
-    response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages,
-        tools=mcp_server_tools.tools
-    )
+    max_iterations = 10
+    iteration = 0
     
-    messages.append(response.choices[0].message)
-
-    if response.choices[0].message.tool_calls:
-        for tool_call in response.choices[0].message.tool_calls:
-            function_name = tool_call.function.name
-            function_args = json.loads(tool_call.function.arguments)
-            
-            print(f"🔧 Calling: {function_name}, with args: {function_args}")
-            
-            result = klavis_client.mcp_server.call_tools(
-                server_url=mcp_server_url,
-                tool_name=function_name,
-                tool_args=function_args
-            )
-            
+    while iteration < max_iterations:
+        iteration += 1
+        
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=tools_info.tools,
+            tool_choice="auto",
+        )
+        
+        assistant_message = response.choices[0].message
+        
+        if assistant_message.tool_calls:
             messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": str(result)
+                "role": "assistant",
+                "content": assistant_message.content,
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    }
+                    for tc in assistant_message.tool_calls
+                ]
             })
             
-    final_response = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages
-    )
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+                
+                print(f"Calling: {tool_name}")
+                print(f"Arguments: {json.dumps(tool_args, indent=2)}")
+                
+                function_result = klavis_client.mcp_server.call_tools(
+                    server_url=mcp_server_url,
+                    tool_name=tool_name,
+                    tool_args=tool_args
+                )
+                                
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": str(function_result)
+                })
+            continue
+        else:
+            messages.append({"role": "assistant", "content": assistant_message.content})
+            return assistant_message.content
     
-    return final_response.choices[0].message.content
+    return "Max iterations reached without final response"
 ```
 
 ```typescript TypeScript
@@ -157,182 +186,116 @@ async function openaiWithMcpServer(mcpServerUrl: string, userQuery: string) {
         { role: "user", content: userQuery }
     ];
     
-    const mcpServerTools = await klavisClient.mcpServer.listTools({
+    const toolsInfo = await klavisClient.mcpServer.listTools({
         serverUrl: mcpServerUrl,
         format: Klavis.ToolFormat.Openai
     });
     
-    const response = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: messages,
-        tools: mcpServerTools.tools
-    });
+    const maxIterations = 10;
+    let iteration = 0;
     
-    messages.push(response.choices[0].message);
-
-    if (response.choices[0].message.tool_calls) {
-        for (const toolCall of response.choices[0].message.tool_calls) {
-            const functionName = toolCall.function.name;
-            const functionArgs = JSON.parse(toolCall.function.arguments);
-            
-            console.log(`🔧 Calling: ${functionName}, with args:`, functionArgs);
-            
-            const result = await klavisClient.mcpServer.callTools({
-                serverUrl: mcpServerUrl,
-                toolName: functionName,
-                toolArgs: functionArgs
-            });
-            
+    while (iteration < maxIterations) {
+        iteration++;
+        
+        const response = await openaiClient.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: messages,
+            tools: toolsInfo.tools,
+            tool_choice: "auto"
+        });
+        
+        const assistantMessage = response.choices[0].message;
+        
+        if (assistantMessage.tool_calls) {
             messages.push({
-                role: "tool",
-                tool_call_id: toolCall.id,
-                content: JSON.stringify(result)
+                role: "assistant",
+                content: assistantMessage.content,
+                tool_calls: assistantMessage.tool_calls.map(tc => ({
+                    id: tc.id,
+                    type: "function",
+                    function: {
+                        name: tc.function.name,
+                        arguments: tc.function.arguments
+                    }
+                }))
             });
+            
+            for (const toolCall of assistantMessage.tool_calls) {
+                const toolName = toolCall.function.name;
+                const toolArgs = JSON.parse(toolCall.function.arguments);
+                
+                console.log(`🔧 Calling: ${toolName}`);
+                console.log(`   Arguments:`, JSON.stringify(toolArgs, null, 2));
+                
+                const functionResult = await klavisClient.mcpServer.callTools({
+                    serverUrl: mcpServerUrl,
+                    toolName: toolName,
+                    toolArgs: toolArgs
+                });
+                                
+                messages.push({
+                    role: "tool",
+                    tool_call_id: toolCall.id,
+                    content: JSON.stringify(functionResult)
+                });
+            }
+            continue;
+        } else {
+            messages.push({ role: "assistant", content: assistantMessage.content });
+            return assistantMessage.content;
         }
     }
-            
-    const finalResponse = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: messages
-    });
     
-    return finalResponse.choices[0].message.content;
+    return "Max iterations reached without final response";
 }
 ```
 
 </CodeGroup>
 
-### Step 3 - Summarize your favorite video!
+### Step 3 - Run!
 
 <CodeGroup>
 
 ```python Python
-YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # pick a video you like!
-
 result = openai_with_mcp_server(
-    mcp_server_url=youtube_mcp_instance.server_url, 
-    user_query=f"Summarize this YouTube video with timestamps: {YOUTUBE_VIDEO_URL}"
+    mcp_server_url=response.strata_server_url, 
+    user_query="Check my latest 5 emails and summarize them in a Slack message to #general"
 )
 
-print(result)
+print(f"\n🤖 Final Response: {result}")
 ```
 
 ```typescript TypeScript
-const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ";  // pick a video you like!
-
-const result = await openaiWithMcpServer(
-    youtubeMcpInstance.serverUrl, 
-    `Summarize this YouTube video with timestamps: ${YOUTUBE_VIDEO_URL}`
+result = await openaiWithMcpServer(
+    response.strataServerUrl, 
+    "Check my latest emails and summarize them in a Slack message to #updates"
 );
 
-console.log(result);
+console.log(`\n🤖 Final Response: ${result}`);
 ```
 
 </CodeGroup>
 
-✅ Great! You've successfully created an AI agent that uses OpenAI function calling with Klavis MCP servers to summarize YouTube videos!
-
-## Case Study 2: OpenAI + Gmail MCP Server (OAuth needed)
-
-<CodeGroup>
-
-```python Python
-import webbrowser
-
-gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.GMAIL,
-    user_id="1234"
-)
-
-webbrowser.open(gmail_mcp_server.oauth_url)
-
-print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: {gmail_mcp_server.oauth_url}")
-```
-
-```typescript TypeScript
-const gmailMcpServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Gmail,
-    userId: "1234"
-});
-
-// In a web environment, you might redirect the user
-window.open(gmailMcpServer.oauthUrl);
-
-console.log(`🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: ${gmailMcpServer.oauthUrl}`);
-```
-
-</CodeGroup>
-
-<Note>
-After completing the OAuth authorization, you can send emails using the agent.
-</Note>
-
-<CodeGroup>
-
-```python Python
-EMAIL_RECIPIENT = "zihaolin@klavis.ai" # Replace with your email
-EMAIL_SUBJECT = "Test OpenAI + Gmail MCP Server"
-EMAIL_BODY = "Hello World"
-
-result = openai_with_mcp_server(
-    mcp_server_url=gmail_mcp_server.server_url, 
-    user_query=f"Please send an email to {EMAIL_RECIPIENT} with subject {EMAIL_SUBJECT} and body {EMAIL_BODY}"
-)
-
-print(result)
-```
-
-```typescript TypeScript
-const EMAIL_RECIPIENT = "zihaolin@klavis.ai"; // Replace with your email
-const EMAIL_SUBJECT = "Test OpenAI + Gmail MCP Server";
-const EMAIL_BODY = "Hello World";
-
-const result = await openaiWithMcpServer(
-    gmailMcpServer.serverUrl, 
-    `Please send an email to ${EMAIL_RECIPIENT} with subject ${EMAIL_SUBJECT} and body ${EMAIL_BODY}`
-);
-
-console.log(result);
-```
-
-</CodeGroup>
-
-## Summary
-
-This tutorial demonstrated how to integrate OpenAI's function calling capabilities with Klavis MCP servers to create powerful AI applications. We covered two practical examples:
-
-**🎥 YouTube Integration**: Built an AI assistant that can automatically summarize YouTube videos by extracting transcripts and providing detailed, timestamped summaries.
-
-**📧 Gmail Integration**: Created an AI-powered email assistant that can send emails through Gmail with OAuth authentication.
-
-### Key Takeaways:
-- **Easy Setup**: Klavis MCP servers can be created with just a few lines of code
-- **OpenAI Compatible**: All tools are formatted for seamless OpenAI function calling
-- **Versatile**: Support for both simple APIs (YouTube) and OAuth-authenticated services (Gmail)
-- **Scalable**: The same pattern can be applied to any of the MCP servers available in Klavis
+<Check>
+Perfect! You've integrated OpenAI with Klavis MCP servers.
+</Check>
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Explore More MCP Servers" icon="server">
-    Try other available servers like Notion, Salesforce, Google Drive, etc.
+  <Card title="Integrations" icon="server" href="/documentation/mcp-server/github">
+    Explore available MCP servers
   </Card>
-  <Card title="Build Complex Workflows" icon="workflow">
-    Create sophisticated agents that combine multiple services
-  </Card>
-  <Card title="Production Deployment" icon="rocket">
-    Scale these patterns for production applications
-  </Card>
-  <Card title="Custom MCP Servers" icon="code">
-    Build your own MCP servers for custom integrations
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
   </Card>
 </CardGroup>
+
 
 ## Useful Resources
 
 - [OpenAI API Documentation](https://platform.openai.com/docs)
-- [Klavis AI Documentation](https://docs.klavis.ai/)
-- [MCP Protocol Specification](https://modelcontextprotocol.io/)
 - [OpenAI Function Calling Guide](https://platform.openai.com/docs/guides/function-calling)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
 
 **Happy building!** 🚀 

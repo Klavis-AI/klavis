@@ -229,7 +229,7 @@
       "get": {
         "tags": ["mcp-server"],
         "summary": "Get",
-        "description": "Get information about an existing Strata MCP server instance.\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
+        "description": "Get information about an existing Strata MCP server instance.\n\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
         "operationId": "get_strata_instance_mcp_server_strata__strataId__get",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
@@ -258,6 +258,41 @@
             }
           }
         }
+      }
+    },
+    "/mcp-server/strata/set-auth": {
+      "post": {
+        "tags": ["mcp-server"],
+        "summary": "Set Strata Auth",
+        "description": "Sets authentication data for a specific integration within a Strata MCP server.\n\nAccepts either API key authentication or general authentication data.",
+        "operationId": "set_strata_auth_mcp_server_strata_set_auth_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StrataSetAuthRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/instance/create": {
@@ -533,7 +568,7 @@
     "/mcp-server/instance/set-auth": {
       "post": {
         "tags": ["mcp-server"],
-        "summary": "Set Authentication Data",
+        "summary": "Set Instance Auth",
         "description": "Sets authentication data for a specific instance.\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified instance.",
         "operationId": "setInstanceAuth",
         "requestBody": {
@@ -568,7 +603,7 @@
     "/mcp-server/instance/get-auth/{instance_id}": {
       "get": {
         "tags": ["mcp-server"],
-        "summary": "Get Authentication Data",
+        "summary": "Get Instance Auth",
         "description": "Retrieves the auth data for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
         "operationId": "getInstanceAuthData",
         "security": [{ "HTTPBearer": [] }],
@@ -3399,6 +3434,219 @@
           }
         }
       }
+    },
+    "/oauth/shopify/authorize": {
+      "get": {
+        "tags": ["shopify-oauth"],
+        "summary": "Authorize Shopify",
+        "description": "Start Shopify OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- shop: Shopify shop domain (e.g., mystore.myshopify.com)\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeShopify",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "shop",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Shopify shop domain (e.g., mystore.myshopify.com)",
+              "title": "Shop"
+            },
+            "description": "Shopify shop domain (e.g., mystore.myshopify.com)"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/onedrive/authorize": {
+      "get": {
+        "tags": ["onedrive-oauth"],
+        "summary": "Authorize",
+        "operationId": "authorizeOneDrive",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/outlook/authorize": {
+      "get": {
+        "tags": ["outlook-oauth"],
+        "summary": "Authorize",
+        "operationId": "authorizeOutlook",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4050,6 +4298,7 @@
           "Notion",
           "OneDrive",
           "Openrouter",
+          "Outlook",
           "PagerDuty",
           "Pipedrive",
           "Plai",
@@ -4104,6 +4353,7 @@
           "Moneybird",
           "Notion",
           "Onedrive",
+          "Outlook",
           "PagerDuty",
           "Pipedrive",
           "QuickBooks",
@@ -4378,6 +4628,30 @@
           "connectedExternalServers"
         ],
         "title": "StrataGetResponse"
+      },
+      "StrataSetAuthRequest": {
+        "properties": {
+          "strataId": {
+            "type": "string",
+            "title": "Strataid",
+            "description": "The strata server ID"
+          },
+          "serverName": {
+            "$ref": "#/components/schemas/McpServerName",
+            "description": "The name of the Klavis MCP server to set authentication for (e.g., 'GitHub', 'Jira')"
+          },
+          "authData": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
+            ],
+            "title": "Authdata",
+            "description": "Authentication data"
+          }
+        },
+        "type": "object",
+        "required": ["strataId", "serverName", "authData"],
+        "title": "StrataSetAuthRequest"
       },
       "ToolFormat": {
         "type": "string",
