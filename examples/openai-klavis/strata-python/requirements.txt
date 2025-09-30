@@ -1,0 +1,3 @@
+openai>=1.109.1
+klavis>=2.0.3
+python-dotenv>=1.1.0
