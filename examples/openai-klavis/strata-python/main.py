@@ -171,7 +171,7 @@ def main():
     klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
     
     response = klavis_client.mcp_server.create_strata_server(
-        servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+        servers=[McpServerName.AFFINITY], 
         user_id="4321"
     )
     
@@ -179,6 +179,8 @@ def main():
         for server_name, oauth_url in response.oauth_urls.items():
             webbrowser.open(oauth_url)
             input(f"Press Enter after completing {server_name} OAuth authorization...")
+            
+    klavis_client.mcp_server.strata_server.set
     
     messages = [{"role": "system", "content": "You are a helpful assistant with access to various MCP tools"}]
     

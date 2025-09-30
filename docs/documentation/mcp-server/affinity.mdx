@@ -35,8 +35,8 @@ Connect to Affinity CRM to manage relationships, track deals, and organize conta
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
           # Create an Affinity MCP server instance
-          affinity_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.AFFINITY,
+          affinity_server = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.AFFINITY],
               user_id="user123"
           )
           ```
@@ -64,12 +64,9 @@ Connect to Affinity CRM to manage relationships, track deals, and organize conta
           ```
         </CodeGroup>
         
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Affinity
-          - `instanceId`: Unique identifier for your server instance
-          - `oauthUrl`: OAuth authorization URL for Affinity authentication
-        </Info>
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
       <Step title="Authenticate">
