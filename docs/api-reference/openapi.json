@@ -4044,83 +4044,6 @@
         }
       }
     },
-    "/oauth/calcom/client-credentials": {
-      "get": {
-        "tags": [
-          "calcom-oauth"
-        ],
-        "summary": "Calcom Client Credentials Auth",
-        "description": "Authenticate using Cal.com OAuth client credentials flow for platform-level API access\n\nThis endpoint is used for:\n- Managing managed users\n- Creating OAuth client webhooks\n- Refreshing managed user tokens\n- Managing organization teams and memberships\n\nParameters:\n- instance_id: Identifier for the instance requesting authentication\n- x-cal-client-id: OAuth client ID (header)\n- x-cal-secret-key: OAuth client secret (header)",
-        "operationId": "calcom_client_credentials_auth_oauth_calcom_client_credentials_get",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance"
-          },
-          {
-            "name": "x-cal-client-id",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Cal.com OAuth client ID",
-              "title": "X-Cal-Client-Id"
-            },
-            "description": "Cal.com OAuth client ID"
-          },
-          {
-            "name": "x-cal-secret-key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Cal.com OAuth client secret",
-              "title": "X-Cal-Secret-Key"
-            },
-            "description": "Cal.com OAuth client secret"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CalcomOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CalcomOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/vercel/authorize": {
       "get": {
         "tags": [
@@ -4965,7 +4888,7 @@
         "tags": [
           "onedrive-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize OneDrive",
         "operationId": "authorizeOneDrive",
         "parameters": [
           {
@@ -5063,7 +4986,7 @@
         "tags": [
           "outlook-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Outlook",
         "operationId": "authorizeOutlook",
         "parameters": [
           {
@@ -5173,52 +5096,6 @@
           "token"
         ],
         "title": "Option 1: API Key"
-      },
-      "CalcomOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message",
-            "description": "Additional error details"
-          }
-        },
-        "type": "object",
-        "required": [
-          "error"
-        ],
-        "title": "CalcomOAuthErrorResponse"
-      },
-      "CalcomOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "CalcomOAuthSuccessResponse"
       },
       "CallToolRequest": {
         "properties": {
