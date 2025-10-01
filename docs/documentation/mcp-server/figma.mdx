@@ -42,9 +42,9 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
           // Create a Figma MCP server instance
           const figmaServer = await klavis.mcpServer.createServerInstance({

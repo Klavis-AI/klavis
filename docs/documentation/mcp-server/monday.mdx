@@ -1,205 +1,189 @@
 ---
-title: "Monday.com"
-description: "Learn how to use Klavis to connect your AI application to Monday.com MCP Server"
+title: 'Monday.com'
+description: 'Connect AI agents to Monday.com for project management and workflow automation'
 ---
 
-### Prerequisites
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
 
-- [Create an API key](https://www.klavis.ai/home/api-keys)
+## Getting started
 
-### 1. Create a Monday.com MCP Server
+Connect to Monday.com to manage projects, track tasks, and automate workflows through AI agents.
 
-Use the following endpoint to create a new remote Monday.com MCP server instance:
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Monday.com">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.MONDAY],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Strata MCP server with Monday.com
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Monday],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Monday"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+        
+        <Info>
+          **Response Information**: The API returns:
+          - `strataServerUrl`: The unified URL for connecting your MCP client to all servers
+          - `oauthUrls`: Dictionary mapping server names to their OAuth authorization URLs
+        </Info>
 
-#### Request
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(response.oauth_urls[McpServerName.MONDAY])
+          ```
+          
+          ```typescript TypeScript
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.Monday]);
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/monday/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Monday.com MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Monday.com">
+        Select Monday.com from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Monday.com account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/monday
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/monday-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/monday-mcp-server:latest
+        
+        # Or run with manual API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"access_token":"your_monday_api_token"}' \
+          ghcr.io/klavis-ai/monday-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "monday": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-<CodeGroup>
-```python Python
-from klavis import Klavis
-from klavis.types import McpServerName
-
-klavis_client = Klavis(api_key="<YOUR_API_KEY>")
-
-# Create a Monday.com MCP server instance
-
-monday_server = klavis_client.mcp_server.create_server_instance(
-server_name=McpServerName.MONDAY,
-user_id="<YOUR_USER_ID>"
-)
-
-```
-
-```javascript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-
-const klavisClient = new KlavisClient({ apiKey: '<YOUR_API_KEY>' });
-
-// Create a Monday.com MCP server instance
-const mondayServer = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Monday,
-    userId: "<YOUR_USER_ID>"
-});
-```
-
-```bash cURL
-curl --request POST \
-  --url https://api.klavis.ai/mcp-server/instance/create \
-  --header 'Authorization: Bearer <YOUR_API_KEY>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "serverName": "Monday",
-  "userId": "<YOUR_USER_ID>"}'
-```
-
-```go Go
-package main
-
-import (
-	"fmt"
-	"strings"
-	"net/http"
-	"io/ioutil"
-)
-
-func main() {
-
-	url := "https://api.klavis.ai/mcp-server/instance/create"
-
-	payload := strings.NewReader("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-
-	req, _ := http.NewRequest("POST", url, payload)
-
-	req.Header.Add("Authorization", "Bearer <YOUR_API_KEY>")
-	req.Header.Add("Content-Type", "application/json")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-}
-```
-
-```java Java
-HttpResponse<String> response = Unirest.post("https://api.klavis.ai/mcp-server/instance/create")
-  .header("Authorization", "Bearer <YOUR_API_KEY>")
-  .header("Content-Type", "application/json")
-  .body("{\n  \"serverName\": \"Monday\",\n  \"userId\": \"<YOUR_USER_ID>\"\n}")
-  .asString();
-```
-
-</CodeGroup>
-
-#### Response
-
-<CodeGroup>
-```json SDK Response
-{
-  "serverUrl": "https://monday-mcp-server.klavis.ai/mcp/?instance_id=<instance-id>",
-  "instanceId": "<instance-id>",
-  "oauthUrl": "https://api.klavis.ai/oauth/monday/authorize?instance_id=<instance-id>"
-}
-```
-</CodeGroup>
-
-<Check>
-  **serverUrl** specifies the endpoint of the Monday.com MCP server, which you can
-  connect with the MCP client of your application.
-</Check>
-<Note>
-  **instanceId** is used for authentication and identification of your server instance.
-  After you complete the next steps, this token allows the MCP server to access user's
-  private Monday.com information.
-</Note>
-
-### 2. Implement OAuth Authorization
-
-Redirect users to the OAuth authorization flow:
-
-<CodeGroup>
-```python Python
-import webbrowser
-
-webbrowser.open(monday_server.oauth_url)
-
-```
-
-```javascript TypeScript
-// The OAuth URL is provided in the server response
-console.log('OAuth URL:', mondayServer.oauthUrl);
-
-// Redirect user to authorize
-window.location.href = mondayServer.oauthUrl;
-```
-
-```go Go
-package main
-
-import (
-    "fmt"
-    "net/url"
-)
-
-func main() {
-    instanceId := "<your-instance-id>"
-    baseUrl := "https://api.klavis.ai/oauth/monday/authorize"
-
-    params := url.Values{}
-    params.Add("instance_id", instanceId)
-
-    authUrl := baseUrl + "?" + params.Encode()
-    fmt.Printf("Redirect to: %s\n", authUrl)
-
-    // In a web application, you would redirect the user:
-    // http.Redirect(w, r, authUrl, http.StatusFound)
-}
-```
-
-```java Java
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-public class MondayOAuth {
-    public static void main(String[] args) {
-        String instanceId = "<your-instance-id>";
-        String authUrl = "https://api.klavis.ai/oauth/monday/authorize?instance_id=" +
-                        URLEncoder.encode(instanceId, StandardCharsets.UTF_8);
-
-        System.out.println("Redirect to: " + authUrl);
-
-        // In a web application, you would redirect the user:
-        // response.sendRedirect(authUrl);
-    }
-}
-```
-
-</CodeGroup>
-
-<Tip>
-  You can also specify scope and redirect_url in the authUrl, and we also
-  support white-label. Check the API reference for more details.
-</Tip>
-
-### Explore MCP Server Tools
+## Available Tools
 
 <Accordion title="Tools Information">
-  | Tool Name                                | Description                                                               |
-  |------------------------------------------|---------------------------------------------------------------------------|
-  | monday_get_users_by_name                 | Retrieve user information by name or partial name                          |
-  | monday_get_boards                        | Get all Monday.com boards accessible to the authenticated user             |
-  | monday_create_board                      | Create a new Monday.com board with specified configuration                 |
-  | monday_get_board_schema                  | Get board schema (columns and groups) by board ID                          |
-  | monday_create_column                     | Create a new column in a Monday.com board                                  |
-  | monday_delete_column                     | Delete a column from a Monday.com board                                    |
-  | monday_create_item                       | Create a new item in a Monday.com board                                    |
-  | monday_get_board_items_by_name           | Get items by name from a Monday.com board                                  |
-  | monday_delete_item                       | Delete an item from a Monday.com board                                     |
-  | monday_change_item_column_values         | Change the column values of an item in a Monday.com board                  |
-  | monday_move_item_to_group                | Move an item to a different group within a Monday.com board                |
-  | monday_create_update                     | Create a new update (comment) for an item in a Monday.com board            |
+| Tool Name                    | Description                                                              |
+|------------------------------|--------------------------------------------------------------------------|
+| monday_list_boards | List all boards in your Monday.com workspace |
+| monday_get_board | Get details of a specific board |
+| monday_create_board | Create a new board |
+| monday_list_items | Get items from a board |
+| monday_create_item | Create a new item in a board |
+| monday_update_item | Update an existing item |
+| monday_delete_item | Delete an item from a board |
+| monday_list_columns | Get columns from a board |
+| monday_create_column | Create a new column in a board |
+| monday_update_column_value | Update a column value for an item |
+| monday_list_groups | Get groups from a board |
+| monday_create_group | Create a new group in a board |
+| monday_list_users | List all users in your workspace |
+| monday_list_workspaces | List all workspaces |
 </Accordion>
 
 <Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>

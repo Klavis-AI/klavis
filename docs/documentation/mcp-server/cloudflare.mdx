@@ -42,9 +42,9 @@ Connect to Cloudflare to manage DNS records, deploy Workers, configure firewalls
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
           // Create a Cloudflare MCP server instance
           const cloudflareServer = await klavis.mcpServer.createServerInstance({
