@@ -141,46 +141,46 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
             break
 
 
-def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_client: KlavisClient, server_url: str) -> None:
-    """Non-streaming chat completion from OpenAI with function calling support."""
+def chat_completion(openai_api_key: str, messages: List[Dict[str, str]], klavis_client: KlavisClient, server_url: str) -> None:
+    """Non-streaming chat completion from OpenAI with function calling support using HTTP requests."""
     tools_response = klavis_client.list_tools(server_url=server_url, format="openai")
     tools_info = tools_response.get("tools", [])
     
     max_iterations = 10
     iteration = 0
     
+    openai_url = "https://api.openai.com/v1/chat/completions"
+    openai_headers = {
+        "Authorization": f"Bearer {openai_api_key}",
+        "Content-Type": "application/json"
+    }
+    
     while iteration < max_iterations:
         iteration += 1
         
-        response = client.chat.completions.create(
-            model="gpt-4.1",
-            messages=messages,
-            tools=tools_info,
-            tool_choice="auto",
-        )
+        payload = {
+            "model": "gpt-4.1",
+            "messages": messages,
+            "tools": tools_info,
+            "tool_choice": "auto"
+        }
         
-        assistant_message = response.choices[0].message
+        response = requests.post(openai_url, headers=openai_headers, json=payload)
+        response.raise_for_status()
+        response_data = response.json()
         
-        if assistant_message.tool_calls:
+        assistant_message = response_data["choices"][0]["message"]
+        
+        if assistant_message.get("tool_calls"):
             messages.append({
                 "role": "assistant",
-                "content": assistant_message.content,
-                "tool_calls": [
-                    {
-                        "id": tc.id,
-                        "type": "function",
-                        "function": {
-                            "name": tc.function.name,
-                            "arguments": tc.function.arguments
-                        }
-                    }
-                    for tc in assistant_message.tool_calls
-                ]
+                "content": assistant_message.get("content"),
+                "tool_calls": assistant_message["tool_calls"]
             })
             
-            for tool_call in assistant_message.tool_calls:
-                tool_name = tool_call.function.name
-                tool_args = json.loads(tool_call.function.arguments)
+            for tool_call in assistant_message["tool_calls"]:
+                tool_name = tool_call["function"]["name"]
+                tool_args = json.loads(tool_call["function"]["arguments"])
                 
                 print(f"\n🔧 Calling tool: {tool_name}")
                 print(f"   Arguments: {json.dumps(tool_args, indent=2)}")
@@ -203,13 +203,13 @@ def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_clien
                                 
                 messages.append({
                     "role": "tool",
-                    "tool_call_id": tool_call.id,
+                    "tool_call_id": tool_call["id"],
                     "content": json.dumps(function_result) if isinstance(function_result, dict) else str(function_result)
                 })
             continue
         else:
-            messages.append({"role": "assistant", "content": assistant_message.content})
-            print(f"\n🤖 Assistant: {assistant_message.content}")
+            messages.append({"role": "assistant", "content": assistant_message.get("content")})
+            print(f"\n🤖 Assistant: {assistant_message.get('content')}")
             break
 
 
@@ -218,7 +218,7 @@ def main():
     klavis_client = KlavisClient(api_key=os.getenv("KLAVIS_API_KEY"))
     
     response = klavis_client.create_strata_server(
-        servers=["gmail", "slack"],
+        servers=["github"],
         user_id="4321"
     )
     
