@@ -1,20 +1,10 @@
 ---
 title: "LangChain"
-description: "Learn how to build multi-agent workflows using LangChain's agent framework with Klavis MCP Servers"
+description: "This tutorial demonstrates how to integrate LangChain's agent framework with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
 ---
-
 ## Prerequisites
 
-Before we begin, you'll need:
-
-<CardGroup cols={2}>
-  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
-    Get your API key from OpenAI Platform (LangChain uses OpenAI as the default LLM)
-  </Card>
-  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
-    Get your API key from Klavis AI
-  </Card>
-</CardGroup>
+Before we begin, you'll need [OpenAI API key]((https://platform.openai.com/api-keys)) and [Klavis API key](https://www.klavis.ai/home/api-keys).
 
 ## Installation
 
@@ -22,13 +12,13 @@ First, install the required packages:
 
 <CodeGroup>
 
-```bash Python
+bash Python
 pip install langchain-mcp-adapters langgraph langchain-openai klavis
-```
 
-```bash TypeScript
+
+bash TypeScript
 npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai klavis
-```
+
 
 </CodeGroup>
 
@@ -36,472 +26,189 @@ npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai klavi
 
 <CodeGroup>
 
-```python Python
+python Python
 import os
 
-# Set environment variables
-os.environ["OPENAI_API_KEY"] = "your-openai-api-key-here"    # Replace with your actual OpenAI API key
-os.environ["KLAVIS_API_KEY"] = "your-klavis-api-key-here"   # Replace with your actual Klavis API key
-```
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
 
-```typescript TypeScript
-// Set environment variables in your .env file
-process.env.OPENAI_API_KEY = "your-openai-api-key-here";    // Replace with your actual OpenAI API key
-process.env.KLAVIS_API_KEY = "your-klavis-api-key-here";   // Replace with your actual Klavis API key
-```
+
+typescript TypeScript
+// Set environment variables
+process.env.OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";  // Replace with your actual OpenAI API key
+process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";   // Replace with your actual Klavis API key
+
 
 </CodeGroup>
 
-## Basic Setup
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
 
 <CodeGroup>
 
-```python Python
-import os
-import asyncio
+python Python
 from klavis import Klavis
-from klavis.types import McpServerName
+from klavis.types import McpServerName, ToolFormat
+import webbrowser
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+    user_id="1234"
+)
+
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+
+
+typescript TypeScript
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const response = await klavisClient.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId: "1234"
+});
+
+// Handle OAuth authorization for each services
+if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+        window.open(oauthUrl);
+        // Wait for user to complete OAuth
+        await new Promise(resolve => {
+            const input = prompt(`Press OK after completing ${serverName} OAuth authorization...`);
+            resolve(input);
+        });
+    }
+}
+
+
+
+</CodeGroup>
+
+<Note>
+*OAuth Authorization Required*: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create LangChain Agent with Strata MCP Server
+
+<CodeGroup>
+
+python Python
+import asyncio
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 
-# Initialize clients
-klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+# Initialize LLM
 llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
-```
 
-```typescript TypeScript
-import { KlavisClient, Klavis } from 'klavis';
-import { MultiServerMCPClient } from "@langchain/mcp-adapters";
-import { ChatOpenAI } from "@langchain/openai";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
-
-// Initialize clients
-const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
-const llm = new ChatOpenAI({ 
-    modelName: "gpt-4o-mini", 
-    apiKey: process.env.OPENAI_API_KEY 
-});
-```
-
-</CodeGroup>
-
-## Single MCP Server Integration
-
-Let's start with creating a simple AI agent that can summarize YouTube videos using LangChain and a single Klavis MCP Server.
-
-### Step 1: Create MCP Server Instance
-
-<CodeGroup>
-
-```python Python
-# Create a YouTube MCP server and get the server URL
-youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.YOUTUBE,
-    user_id="1234"
-)
-
-youtube_mcp_server_url = youtube_mcp_instance.server_url
-print(f"🔗 YouTube MCP server created at: {youtube_mcp_server_url}")
-```
-
-```typescript TypeScript
-// Create a YouTube MCP server and get the server URL
-const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Youtube,
-    userId: "1234"
-});
-
-const youtubeMcpServerUrl = youtubeMcpInstance.serverUrl;
-console.log(`🔗 YouTube MCP server created at: ${youtubeMcpServerUrl}`);
-```
-
-</CodeGroup>
-
-### Step 2: Create LangChain Agent with MCP Tools
-
-<CodeGroup>
-
-```python Python
-# Create MCP client with YouTube server
+# Create MCP client with Strata server
 mcp_client = MultiServerMCPClient({
-    "youtube": {
+    "strata": {
         "transport": "streamable_http",
-        "url": youtube_mcp_server_url
+        "url": response.strata_server_url
     }
 })
 
-# Get tools from MCP server
+# Get tools from Strata MCP server
 tools = asyncio.run(mcp_client.get_tools())
 
 # Create agent with MCP-based tools
-youtube_agent = create_react_agent(
+agent = create_react_agent(
     model=llm,
     tools=tools,
-    prompt="You are an AI assistant that uses MCP tools to analyze YouTube videos."
+    prompt="You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
 )
 
-print("🤖 YouTube AI agent created successfully!")
-```
+print("🤖 LangChain agent created successfully!")
 
-```typescript TypeScript
-// Create MCP client with YouTube server
+
+typescript TypeScript
+// Initialize LLM
+const llm = new ChatOpenAI({
+    modelName: "gpt-4o-mini",
+    apiKey: process.env.OPENAI_API_KEY
+});
+
+// Create MCP client with Strata server
 const mcpClient = new MultiServerMCPClient({
     throwOnLoadError: true,
     useStandardContentBlocks: true,
     mcpServers: {
-        youtube: {
-            url: youtubeMcpServerUrl,
+        strata: {
+            url: response.strataServerUrl,
             transport: "streamable_http"
         }
     }
 });
 
-// Get tools from MCP server
+// Get tools from Strata MCP server
 const tools = await mcpClient.getTools();
 
 // Create agent with MCP-based tools
-const youtubeAgent = createReactAgent({
+const agent = createReactAgent({
     llm: llm,
     tools: tools,
-    systemMessage: "You are an AI assistant that uses MCP tools to analyze YouTube videos."
+    systemMessage: "You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
 });
 
-console.log("🤖 YouTube AI agent created successfully!");
-```
+console.log("🤖 LangChain agent created successfully!");
+
 
 </CodeGroup>
 
-### Step 3: Use the Agent
+### Step 3 - Run!
 
 <CodeGroup>
 
-```python Python
-YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # pick a video you like!
-
-response = asyncio.run(youtube_agent.ainvoke({
-    "messages": [{"role": "user", "content": f"Summarize this video: {YOUTUBE_VIDEO_URL}"}]
+python Python
+response_message = asyncio.run(agent.ainvoke({
+    "messages": [{"role": "user", "content": "Check my latest 5 emails and summarize them in a Slack message to #general"}]
 }))
-print("✅ Video Summary:", response["messages"][-1].content)
-```
 
-```typescript TypeScript
-const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=MmiveeGxfX0";  // pick a video you like!
+print(f"\n🤖 Final Response: {response_message['messages'][-1].content}")
 
+
+typescript TypeScript
 try {
-    const response = await youtubeAgent.invoke({
-        messages: [{ role: "user", content: `Summarize this video: ${YOUTUBE_VIDEO_URL}` }]
+    const response = await agent.invoke({
+        messages: [{ role: "user", content: "Check my latest emails and summarize them in a Slack message to #updates" }]
     });
-    console.log("✅ Video Summary:", response);
+    console.log(`\n🤖 Final Response:`, response);
 } catch (error) {
     console.error("Error during agent execution:", error);
-    if (error.name === "ToolException") {
-        console.error("Tool execution failed:", error.message);
-    }
 } finally {
     await mcpClient.close();
 }
-```
+
 
 </CodeGroup>
 
-## Multiple MCP Servers Integration
-
-Now let's build a more sophisticated multi-agent workflow that summarizes YouTube videos and sends the summary via email using multiple MCP servers.
-
-### Step 1: Create Multiple MCP Server Instances
-
-<CodeGroup>
-
-```python Python
-import webbrowser
-
-# Create YouTube MCP server
-youtube_mcp_instance = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.YOUTUBE,
-    user_id="1234"
-)
-
-# Create Gmail MCP server with OAuth authorization
-gmail_mcp_instance = klavis_client.mcp_server.create_server_instance(
-    server_name=McpServerName.GMAIL,
-    user_id="1234"
-)
-
-print("✅ Created YouTube and Gmail MCP instances")
-
-# Open Gmail OAuth authorization
-webbrowser.open(gmail_mcp_instance.oauth_url)
-print(f"🔐 Opening OAuth authorization for Gmail, if you are not redirected, please open the following URL in your browser: {gmail_mcp_instance.oauth_url}")
-```
-
-```typescript TypeScript
-// Create YouTube MCP server
-const youtubeMcpInstance = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Youtube,
-    userId: "1234"
-});
-
-// Create Gmail MCP server with OAuth authorization
-const gmailMcpInstance = await klavisClient.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Gmail,
-    userId: "1234"
-});
-
-console.log("✅ Created YouTube and Gmail MCP instances");
-
-// Open Gmail OAuth authorization
-console.log("🔐 Opening OAuth authorization for Gmail");
-console.log(`If you are not redirected, please open the following URL in your browser: ${gmailMcpInstance.oauthUrl}`);
-// In a web environment, you might redirect the user
-if (typeof window !== 'undefined') {
-    window.open(gmailMcpInstance.oauthUrl);
-}
-```
-
-</CodeGroup>
-
-### Step 2: Create Multi-Agent Workflow
-
-<CodeGroup>
-
-```python Python
-from langgraph.graph import StateGraph, MessagesState
-from typing import Annotated, Literal
-from langchain_core.messages import BaseMessage
-
-# Get MCP server URLs
-youtube_mcp_server_url = youtube_mcp_instance.server_url
-gmail_mcp_server_url = gmail_mcp_instance.server_url
-
-# Create a single MCP client with both servers
-mcp_client = MultiServerMCPClient({
-    "youtube": {
-        "transport": "streamable_http",
-        "url": youtube_mcp_server_url
-    },
-    "gmail": {
-        "transport": "streamable_http", 
-        "url": gmail_mcp_server_url
-    }
-})
-
-# Get tools from all MCP servers
-all_tools = asyncio.run(mcp_client.get_tools())
-
-# Create agents with access to all tools
-youtube_agent = create_react_agent(
-    model=llm,
-    tools=all_tools,
-    prompt="You are a YouTube video summarization expert. Use MCP tools to analyze and summarize videos. After summarizing, pass the summary to the gmail agent."
-)
-
-gmail_agent = create_react_agent(
-    model=llm,
-    tools=all_tools,
-    prompt="You are an email assistant. Use MCP tools to send emails via Gmail."
-)
-
-print("🤖 Multi-agent workflow created with YouTube and Gmail agents!")
-```
-
-```typescript TypeScript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
-
-// Get MCP server URLs
-const youtubeMcpServerUrl = youtubeMcpInstance.serverUrl;
-const gmailMcpServerUrl = gmailMcpInstance.serverUrl;
-
-// Create a single MCP client with both servers
-const mcpClient = new MultiServerMCPClient({
-    throwOnLoadError: true,
-    useStandardContentBlocks: true,
-    mcpServers: {
-        youtube: {
-            url: youtubeMcpServerUrl,
-            transport: "streamable_http"
-        },
-        gmail: {
-            url: gmailMcpServerUrl,
-            transport: "streamable_http"
-        }
-    }
-});
-
-// Get tools from all MCP servers
-const allTools = await mcpClient.getTools();
-
-// Create agents with access to all tools
-const youtubeAgent = createReactAgent({
-    llm: llm,
-    tools: allTools,
-    systemMessage: "You are a YouTube video summarization expert. Use MCP tools to analyze and summarize videos. After summarizing, pass the summary to the gmail agent."
-});
-
-const gmailAgent = createReactAgent({
-    llm: llm,
-    tools: allTools,
-    systemMessage: "You are an email assistant. Use MCP tools to send emails via Gmail."
-});
-
-console.log("🤖 Multi-agent workflow created with YouTube and Gmail agents!");
-```
-
-</CodeGroup>
-
-### Step 3: Create Workflow Graph
-
-<CodeGroup>
-
-```python Python
-# Define workflow state
-class WorkflowState(MessagesState):
-    summary: str = ""
-    email_sent: bool = False
-
-# Define workflow functions
-def youtube_summarizer(state: WorkflowState):
-    """Summarize YouTube video"""
-    response = asyncio.run(youtube_agent.ainvoke(state))
-    return {
-        "messages": response["messages"],
-        "summary": response["messages"][-1].content
-    }
-
-def email_sender(state: WorkflowState):
-    """Send email with summary"""
-    email_prompt = f"Send the following summary via email: {state['summary']}"
-    response = asyncio.run(gmail_agent.ainvoke({
-        "messages": [{"role": "user", "content": email_prompt}]
-    }))
-    return {
-        "messages": response["messages"],
-        "email_sent": True
-    }
-
-# Create the workflow graph
-workflow = StateGraph(WorkflowState)
-workflow.add_node("youtube_summarizer", youtube_summarizer)
-workflow.add_node("email_sender", email_sender)
-
-# Define the flow
-workflow.set_entry_point("youtube_summarizer")
-workflow.add_edge("youtube_summarizer", "email_sender")
-workflow.set_finish_point("email_sender")
-
-# Compile the workflow
-app = workflow.compile()
-
-print("📊 Multi-agent workflow graph created!")
-```
-
-```typescript TypeScript
-// Define workflow functions
-const youtubeSummarizer = async (state: typeof MessagesAnnotation.State) => {
-    const response = await youtubeAgent.invoke(state);
-    return {
-        messages: response.messages,
-        summary: response.messages[response.messages.length - 1].content
-    };
-};
-
-const emailSender = async (state: typeof MessagesAnnotation.State & { summary: string }) => {
-    const emailPrompt = `Send the following summary via email: ${state.summary}`;
-    const response = await gmailAgent.invoke({
-        messages: [{ role: "user", content: emailPrompt }]
-    });
-    return {
-        messages: response.messages,
-        emailSent: true
-    };
-};
-
-// Create the workflow graph
-const workflow = new StateGraph(MessagesAnnotation)
-    .addNode("youtubeSummarizer", youtubeSummarizer)
-    .addNode("emailSender", emailSender)
-    .setEntryPoint("youtubeSummarizer")
-    .addEdge("youtubeSummarizer", "emailSender")
-    .setFinishPoint("emailSender");
-
-// Compile the workflow
-const app = workflow.compile();
-
-console.log("📊 Multi-agent workflow graph created!");
-```
-
-</CodeGroup>
-
-### Step 4: Run the Multi-Agent Workflow
-
-<CodeGroup>
-
-```python Python
-YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=LCEmiRjPEtQ"  # pick a video you like!
-EMAIL_RECIPIENT = "example@email.com"  # Replace with your email
-
-initial_state = {
-    "messages": [{
-        "role": "user", 
-        "content": f"Summarize this video {YOUTUBE_VIDEO_URL} and send it to {EMAIL_RECIPIENT}"
-    }]
-}
-
-# Run the workflow
-result = asyncio.run(app.ainvoke(initial_state))
-
-print("\n✅ Workflow Result:", result)
-```
-
-```typescript TypeScript
-const YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=MmiveeGxfX0";  // pick a video you like!
-const EMAIL_RECIPIENT = "example@email.com";  // Replace with your email
-
-const initialState = {
-    messages: [{
-        role: "user" as const,
-        content: `Summarize this video ${YOUTUBE_VIDEO_URL} and send it to ${EMAIL_RECIPIENT}`
-    }]
-};
-
-try {
-    // Run the workflow
-    const result = await app.invoke(initialState);
-    console.log("\n✅ Workflow Result:", result);
-} catch (error) {
-    console.error("Error during workflow execution:", error);
-} finally {
-    // Close MCP client
-    await mcpClient.close();
-}
-```
-
-</CodeGroup>
+<Check>
+Perfect! You've integrated LangChain with Klavis MCP servers.
+</Check>
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="Explore More MCP Servers" icon="server">
-    Try other available servers like Slack, Notion, GitHub, etc.
+  <Card title="Integrations" icon="server" href="/documentation/mcp-server/github">
+    Explore available MCP servers
   </Card>
-  <Card title="Advanced Workflows" icon="laptop">
-    Build more complex multi-agent systems with conditional routing
-  </Card>
-  <Card title="Custom Tools" icon="code">
-    Create custom tools and integrate them with your workflows
-  </Card>
-  <Card title="Production Deployment" icon="rocket">
-    Scale these patterns for production applications with proper error handling
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
   </Card>
 </CardGroup>
+
 
 ## Useful Resources
 
 - [LangChain Documentation](https://python.langchain.com/docs/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [LangChain MCP Adapters](https://pypi.org/project/langchain-mcp-adapters/)
-- [Klavis AI Documentation](https://docs.klavis.ai/)
 - [MCP Protocol Specification](https://modelcontextprotocol.io/)
-- [Klavis MCP Servers](/documentation/mcp-server)
 
-**Happy building with LangChain and Klavis!** 🚀 
+*Happy building* 🚀
