@@ -42,9 +42,9 @@ Connect to Moneybird to manage accounting data, contacts, invoices, and financia
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
           // Create a Moneybird MCP server instance
           const moneybirdServer = await klavis.mcpServer.createServerInstance({

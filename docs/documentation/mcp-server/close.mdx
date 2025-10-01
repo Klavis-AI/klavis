@@ -26,7 +26,7 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Close">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,31 +34,30 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Close CRM MCP server instance
-          close_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.CLOSE,
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.CLOSE],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Close CRM MCP server instance
-          const closeServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Close,
+          // Create a Strata MCP server with Close
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Close],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Close",
+              "servers": ["Close"],
               "userId": "user123"
             }'
           ```
@@ -66,10 +65,13 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
         
         <Info>
           **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Close CRM
-          - `instanceId`: Unique identifier for your server instance
-          - `oauthUrl`: OAuth authorization URL for Close CRM authentication
+          - `strataServerUrl`: The unified URL for connecting your MCP client to all servers
+          - `oauthUrls`: Dictionary mapping server names to their OAuth authorization URLs
         </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
       <Step title="Authenticate">
@@ -78,12 +80,14 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
           import webbrowser
           
           # Open OAuth authorization page
-          webbrowser.open(close_server.oauth_url)
+          webbrowser.open(response.oauth_urls[McpServerName.CLOSE])
           ```
           
           ```typescript TypeScript
-          // Redirect user to OAuth authorization
-          window.location.href = closeServer.oauthUrl;
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.Close]);
           ```
           
           ```bash cURL

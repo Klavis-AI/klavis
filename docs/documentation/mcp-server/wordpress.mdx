@@ -26,7 +26,7 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with WordPress">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,31 +34,30 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a WordPress MCP server instance
-          wordpress_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.WORDPRESS,
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.WORDPRESS],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a WordPress MCP server instance
-          const wordpressServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.WordPress,
+          // Create a Strata MCP server with WordPress
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.WordPress],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "WordPress",
+              "servers": ["WordPress"],
               "userId": "user123"
             }'
           ```
@@ -66,10 +65,13 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
         
         <Info>
           **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to WordPress
-          - `instanceId`: Unique identifier for your server instance
-          - `oauthUrl`: OAuth authorization URL for WordPress authentication
+          - `strataServerUrl`: The unified URL for connecting your MCP client to all servers
+          - `oauthUrls`: Dictionary mapping server names to their OAuth authorization URLs
         </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
       <Step title="Authenticate">
@@ -78,12 +80,14 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
           import webbrowser
           
           # Open OAuth authorization page
-          webbrowser.open(wordpress_server.oauth_url)
+          webbrowser.open(response.oauth_urls[McpServerName.WORDPRESS])
           ```
           
           ```typescript TypeScript
-          // Redirect user to OAuth authorization
-          window.location.href = wordpressServer.oauthUrl;
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.WordPress]);
           ```
           
           ```bash cURL

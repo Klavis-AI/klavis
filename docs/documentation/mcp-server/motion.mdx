@@ -42,9 +42,9 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
           // Create a Motion MCP server instance
           const motionServer = await klavis.mcpServer.createServerInstance({
