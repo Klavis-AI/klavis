@@ -2,6 +2,7 @@ import json
 import os
 import webbrowser
 from typing import Dict, Any, List
+import requests
 from openai import OpenAI
 from klavis import Klavis
 from klavis.types import McpServerName, ToolFormat
@@ -99,9 +100,9 @@ def stream_chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavi
             break
 
 
-def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_client: Klavis, server_url: str) -> None:
+def chat_completion(openai_api_key: str, messages: List[Dict[str, str]], klavis_client: Klavis, server_url: str) -> None:
     """
-    Non-streaming chat completion from OpenAI with function calling support.
+    Non-streaming chat completion using direct HTTP requests with function calling support.
     Handles multiple rounds of tool calls until a final response is ready.
     """
     tools_info = klavis_client.mcp_server.list_tools(
@@ -115,35 +116,50 @@ def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_clien
     while iteration < max_iterations:
         iteration += 1
         
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=tools_info.tools,
-            tool_choice="auto",
+        # Make direct HTTP request to OpenAI API
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {openai_api_key}"
+        }
+        
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": messages,
+            "tools": tools_info.tools,
+            "tool_choice": "auto",
+        }
+        
+        http_response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload
         )
         
-        assistant_message = response.choices[0].message
+        http_response.raise_for_status()
+        response_data = http_response.json()
         
-        if assistant_message.tool_calls:
+        assistant_message = response_data["choices"][0]["message"]
+        
+        if assistant_message.get("tool_calls"):
             messages.append({
                 "role": "assistant",
-                "content": assistant_message.content,
+                "content": assistant_message.get("content"),
                 "tool_calls": [
                     {
-                        "id": tc.id,
+                        "id": tc["id"],
                         "type": "function",
                         "function": {
-                            "name": tc.function.name,
-                            "arguments": tc.function.arguments
+                            "name": tc["function"]["name"],
+                            "arguments": tc["function"]["arguments"]
                         }
                     }
-                    for tc in assistant_message.tool_calls
+                    for tc in assistant_message["tool_calls"]
                 ]
             })
             
-            for tool_call in assistant_message.tool_calls:
-                tool_name = tool_call.function.name
-                tool_args = json.loads(tool_call.function.arguments)
+            for tool_call in assistant_message["tool_calls"]:
+                tool_name = tool_call["function"]["name"]
+                tool_args = json.loads(tool_call["function"]["arguments"])
                 
                 print(f"Calling: {tool_name}")
                 print(f"Arguments: {json.dumps(tool_args, indent=2)}")
@@ -156,13 +172,13 @@ def chat_completion(client: OpenAI, messages: List[Dict[str, str]], klavis_clien
                                 
                 messages.append({
                     "role": "tool",
-                    "tool_call_id": tool_call.id,
+                    "tool_call_id": tool_call["id"],
                     "content": str(function_result)
                 })
             continue
         else:
-            messages.append({"role": "assistant", "content": assistant_message.content})
-            print(f"\n🤖 Assistant: {assistant_message.content}")
+            messages.append({"role": "assistant", "content": assistant_message.get("content")})
+            print(f"\n🤖 Assistant: {assistant_message.get('content')}")
             break
 
 
@@ -171,7 +187,7 @@ def main():
     klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
     
     response = klavis_client.mcp_server.create_strata_server(
-        servers=[McpServerName.AFFINITY], 
+        servers=[McpServerName.GITHUB], 
         user_id="4321"
     )
     
@@ -179,9 +195,7 @@ def main():
         for server_name, oauth_url in response.oauth_urls.items():
             webbrowser.open(oauth_url)
             input(f"Press Enter after completing {server_name} OAuth authorization...")
-            
-    klavis_client.mcp_server.strata_server.set
-    
+                
     messages = [{"role": "system", "content": "You are a helpful assistant with access to various MCP tools"}]
     
     while True:
