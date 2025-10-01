@@ -6,6 +6,30 @@ components:
           name: GITHUB 
         "YouTube":
           name: YOUTUBE
+        "ClickUp":
+          name: CLICKUP
+        "DocuSign":
+          name: DOCUSIGN
+        "GitLab":
+          name: GITLAB
+        "HubSpot":
+          name: HUBSPOT
+        "LinkedIn":
+          name: LINKEDIN
+        "OneDrive":
+          name: ONEDRIVE
+        "PagerDuty":
+          name: PAGERDUTY
+        "PostHog":
+          name: POSTHOG
+        "QuickBooks":
+          name: QUICKBOOKS
+        "SendGrid":
+          name: SENDGRID
+        "WhatsApp":
+          name: WHATSAPP
+        "WordPress":
+          name: WORDPRESS
 
 paths:
   "/mcp-server/call-tool":
