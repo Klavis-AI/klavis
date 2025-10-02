@@ -94,7 +94,7 @@ class MixpanelIngestionClient:
         # Use Basic Auth with service account credentials
         auth = httpx.BasicAuth(username, secret)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             if method.upper() == "POST":
                 response = await client.post(url, auth=auth, headers=headers, json=data, params=params)
             elif method.upper() == "GET":
@@ -153,7 +153,7 @@ class MixpanelExportClient:
         # MIXPANEL_EXPORT_ENDPOINT already includes the full path /api/2.0/export
         url = MIXPANEL_EXPORT_ENDPOINT
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             if method.upper() == "GET":
                 response = await client.get(url, auth=auth, headers=headers, params=params)
             elif method.upper() == "POST":
@@ -215,7 +215,7 @@ class MixpanelQueryClient:
         
         url = f"{MIXPANEL_QUERY_ENDPOINT}{endpoint}"
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             if method.upper() == "GET":
                 response = await client.get(url, auth=auth, headers=headers, params=params)
             elif method.upper() == "POST":
@@ -271,7 +271,7 @@ class MixpanelAppAPIClient:
         
         url = f"{MIXPANEL_APP_ENDPOINT}{endpoint}"
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             if method.upper() == "GET":
                 response = await client.get(url, auth=auth, headers=headers, params=params)
             elif method.upper() == "POST":
