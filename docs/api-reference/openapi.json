@@ -3604,15 +3604,19 @@
     "schemas": {
       "ApiKeyAuth": {
         "properties": {
+          "token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Token",
+            "description": "The API key to save (token field)"
+          },
           "api_key": {
-            "type": "string",
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Api Key",
-            "description": "The API key to save"
+            "description": "The API key to save (api_key field)"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": ["api_key"],
         "title": "Option 1: API Key"
       },
       "CallToolRequest": {
