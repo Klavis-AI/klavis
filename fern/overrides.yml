@@ -35,12 +35,19 @@ paths:
   "/mcp-server/call-tool":
     post:
       operationId: call_tools
-      x-fern-method-name: call_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: call_tools
   "/mcp-server/list-tools":
     post:
       operationId: list_tools
-      x-fern-method-name: list_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: list_tools
   "/mcp-server/tools/{server_name}":
     get:
       operationId: get_tools
-      x-fern-method-name: get_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: get_tools
+  "/mcp-server/oauth-url":
+    post:
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: get_oauth_url
