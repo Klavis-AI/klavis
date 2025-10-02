@@ -83,7 +83,7 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
           response = klavis_client.mcp_server.set_instance_auth(
               instance_id=firecrawl_server.instance_id,
               auth_data={
-                  "token": "YOUR_FIRECRAWL_API_KEY"
+                  "api_key": "YOUR_FIRECRAWL_API_KEY"
               }
           )
           ```
@@ -93,7 +93,7 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
           const response = await klavis.mcpServer.setInstanceAuth({
               instanceId: firecrawlServer.instanceId,
               authData: {
-                  token: "YOUR_FIRECRAWL_API_KEY"
+                  api_key: "YOUR_FIRECRAWL_API_KEY"
               }
           });
           ```
@@ -105,7 +105,7 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
             -d '{
               "instanceId": "YOUR_INSTANCE_ID",
               "authData": {
-                "token": "YOUR_FIRECRAWL_API_KEY"
+                "api_key": "YOUR_FIRECRAWL_API_KEY"
               }
             }'
           ```
@@ -156,7 +156,7 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
         
         # Run with Firecrawl API key
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_firecrawl_api_key"}' \
+          -e AUTH_DATA='{"api_key":"your_firecrawl_api_key"}' \
           ghcr.io/klavis-ai/firecrawl-web-search-mcp-server:latest
         ```
       </Step>

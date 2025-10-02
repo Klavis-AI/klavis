@@ -26,7 +26,7 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with YouTube">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,44 +34,42 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a YouTube MCP server instance
-          youtube_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.YOUTUBE,
+          # Create a Strata MCP server with YouTube
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.YOUTUBE],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a YouTube MCP server instance
-          const youtubeServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Youtube,
+          // Create a Strata MCP server with YouTube
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.YouTube],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "YouTube",
+              "servers": ["YouTube"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to YouTube
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
         
         <Check>
-          Your YouTube MCP Server is ready! No additional authentication is required for public video transcript extraction.
+          🎉 **Your YouTube MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -89,8 +87,8 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
         Select YouTube from the list of available integrations.
       </Step>
       
-      <Step title="Start Using">
-        No authentication required! YouTube MCP server works with public video data.
+      <Step title="Ready to use">
+        No authentication required - your server is immediately ready.
       </Step>
       
       <Step title="Use in your app">
@@ -169,5 +167,12 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

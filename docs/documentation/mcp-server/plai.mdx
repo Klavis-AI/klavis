@@ -78,7 +78,7 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
           response = klavis_client.mcp_server.set_instance_auth(
               instance_id=plai_server.instance_id,
               auth_data={
-                  "token": "YOUR_PLAI_API_KEY"
+                  "api_key": "YOUR_PLAI_API_KEY"
               }
           )
           ```
@@ -88,7 +88,7 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
           const response = await klavis.mcpServer.setInstanceAuth({
               instanceId: plaiServer.instanceId,
               authData: {
-                  token: "YOUR_PLAI_API_KEY"
+                  api_key: "YOUR_PLAI_API_KEY"
               }
           });
           ```
@@ -100,7 +100,7 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
             -d '{
               "instanceId": "YOUR_INSTANCE_ID",
               "authData": {
-                "token": "YOUR_PLAI_API_KEY"
+                "api_key": "YOUR_PLAI_API_KEY"
               }
             }'
           ```
@@ -151,7 +151,7 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
         
         # Run with API key
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_plai_api_key"}' \
+          -e AUTH_DATA='{"api_key":"your_plai_api_key"}' \
           ghcr.io/klavis-ai/plai-mcp-server:latest
         ```
       </Step>

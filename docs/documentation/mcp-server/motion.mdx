@@ -78,7 +78,7 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           auth_response = klavis_client.mcp_server.set_instance_auth(
               instance_id=motion_server.instance_id,
               auth_data={
-                  "token": "YOUR_MOTION_API_KEY"
+                  "api_key": "YOUR_MOTION_API_KEY"
               }
           )
           ```
@@ -88,7 +88,7 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           const authResponse = await klavis.mcpServer.setInstanceAuth({
               instanceId: motionServer.instanceId,
               authData: {
-                  token: "YOUR_MOTION_API_KEY"
+                  api_key: "YOUR_MOTION_API_KEY"
               }
           });
           ```
@@ -100,7 +100,7 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
             -d '{
               "instanceId": "YOUR_INSTANCE_ID",
               "authData": {
-                "token": "YOUR_MOTION_API_KEY"
+                "api_key": "YOUR_MOTION_API_KEY"
               }
             }'
           ```
