@@ -26,7 +26,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with OpenRouter">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,42 +34,39 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create an OpenRouter MCP server instance
-          openrouter_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.OPENROUTER,
+          # Create a Strata MCP server with OpenRouter
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.OPENROUTER],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create an OpenRouter MCP server instance
-          const openrouterServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.OpenRouter,
+          // Create a Strata MCP server with OpenRouter
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.OpenRouter],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "OpenRouter",
+              "servers": ["OpenRouter"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to OpenRouter
-          - `instanceId`: Unique identifier for your server instance
-          - Note: OpenRouter requires an API key which should be configured after creation
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
       <Step title="Configure authentication">
@@ -83,7 +80,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
           response = klavis_client.mcp_server.set_instance_auth(
               instance_id=openrouter_server.instance_id,
               auth_data={
-                  "token": "YOUR_OPENROUTER_API_KEY"
+                  "api_key": "YOUR_OPENROUTER_API_KEY"
               }
           )
           ```
@@ -93,7 +90,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
           const response = await klavis.mcpServer.setInstanceAuth({
               instanceId: openrouterServer.instanceId,
               authData: {
-                  token: "YOUR_OPENROUTER_API_KEY"
+                  api_key: "YOUR_OPENROUTER_API_KEY"
               }
           });
           ```
@@ -105,7 +102,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
             -d '{
               "instanceId": "YOUR_INSTANCE_ID",
               "authData": {
-                "token": "YOUR_OPENROUTER_API_KEY"
+                "api_key": "YOUR_OPENROUTER_API_KEY"
               }
             }'
           ```
@@ -156,7 +153,7 @@ Connect to OpenRouter to access multiple AI models, compare model performance, a
         
         # Run with OpenRouter API key
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_openrouter_api_key"}' \
+          -e AUTH_DATA='{"api_key":"your_openrouter_api_key"}' \
           ghcr.io/klavis-ai/openrouter-mcp-server:latest
         ```
       </Step>

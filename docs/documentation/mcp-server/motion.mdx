@@ -26,7 +26,7 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Motion">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,9 +34,9 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Motion MCP server instance
-          motion_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.MOTION,
+          # Create a Strata MCP server with Motion
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.MOTION],
               user_id="user123"
           )
           ```
@@ -46,61 +46,60 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           
           const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Motion MCP server instance
-          const motionServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Motion,
+          // Create a Strata MCP server with Motion
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Motion],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Motion",
+              "servers": ["Motion"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Motion
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
       <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set your Motion API key for the instance
-          auth_response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=motion_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.MOTION,
               auth_data={
-                  "token": "YOUR_MOTION_API_KEY"
+                  "api_key": "YOUR_MOTION_API_KEY"
               }
           )
           ```
           
           ```typescript TypeScript
-          // Set your Motion API key for the instance
-          const authResponse = await klavis.mcpServer.setInstanceAuth({
-              instanceId: motionServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Motion,
               authData: {
-                  token: "YOUR_MOTION_API_KEY"
+                  api_key: "YOUR_MOTION_API_KEY"
               }
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Motion",
               "authData": {
-                "token": "YOUR_MOTION_API_KEY"
+                "api_key": "YOUR_MOTION_API_KEY"
               }
             }'
           ```
@@ -219,5 +218,12 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

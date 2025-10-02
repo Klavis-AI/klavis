@@ -26,7 +26,7 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Perplexity">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,49 +34,47 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Perplexity MCP server instance
-          perplexity_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.PERPLEXITY,
+          # Create a Strata MCP server with Perplexity
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.PERPLEXITY],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Perplexity MCP server instance
-          const perplexityServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Perplexity,
+          // Create a Strata MCP server with Perplexity
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Perplexity],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Perplexity",
+              "servers": ["Perplexity"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Perplexity
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set the Perplexity API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=perplexity_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.PERPLEXITY,
               auth_data={
                   "api_key": "YOUR_PERPLEXITY_API_KEY"
               }
@@ -84,9 +82,9 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
           ```
           
           ```typescript TypeScript
-          // Set the Perplexity API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: perplexityServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Perplexity,
               authData: {
                   api_key: "YOUR_PERPLEXITY_API_KEY"
               }
@@ -94,11 +92,12 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Perplexity",
               "authData": {
                 "api_key": "YOUR_PERPLEXITY_API_KEY"
               }
@@ -107,7 +106,7 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
         </CodeGroup>
         
         <Check>
-          🎉 **Your Perplexity MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Perplexity MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -149,9 +148,9 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/perplexity-mcp-server:latest
         
-        # Run with API key
+        # Run with API key support (requires Klavis API key)
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"api_key":"your_perplexity_api_key"}' \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/perplexity-mcp-server:latest
         ```
       </Step>
@@ -217,5 +216,12 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

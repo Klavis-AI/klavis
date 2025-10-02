@@ -26,7 +26,7 @@ Connect to Markdown2doc to convert markdown text to different file formats (PDF,
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Markdown2doc">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,77 +34,39 @@ Connect to Markdown2doc to convert markdown text to different file formats (PDF,
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Markdown2doc MCP server instance
-          markdown2doc_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.MARKDOWN2DOC,
+          # Create a Strata MCP server with Markdown2doc
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.MARKDOWN2DOC],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Markdown2doc MCP server instance
-          const markdown2docServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Markdown2doc,
+          // Create a Strata MCP server with Markdown2doc
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Markdown2doc],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Markdown2doc",
+              "servers": ["Markdown2doc"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Markdown2doc
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
-      </Step>
-      
-      <Step title="Configure API Key">
-        <CodeGroup>
-          ```python Python
-          # Set the Markdown2doc API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=markdown2doc_server.instance_id,
-              auth_data={
-                  "api_key": "YOUR_MARKDOWN2DOC_API_KEY"
-              }
-          )
-          ```
-          
-          ```typescript TypeScript
-          // Set the Markdown2doc API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: markdown2docServer.instanceId,
-              authData: {
-                  api_key: "YOUR_MARKDOWN2DOC_API_KEY"
-              }
-          });
-          ```
-          
-          ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
-              "authData": {
-                "api_key": "YOUR_MARKDOWN2DOC_API_KEY"
-              }
-            }'
-          ```
-        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
         
         <Check>
           🎉 **Your Markdown2doc MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
@@ -206,5 +168,12 @@ Connect to Markdown2doc to convert markdown text to different file formats (PDF,
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

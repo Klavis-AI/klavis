@@ -187,7 +187,7 @@ def main():
     klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
     
     response = klavis_client.mcp_server.create_strata_server(
-        servers=[McpServerName.GITHUB], 
+        servers=[McpServerName.AFFINITY], 
         user_id="4321"
     )
     

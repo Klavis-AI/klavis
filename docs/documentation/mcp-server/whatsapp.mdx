@@ -26,7 +26,7 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with WhatsApp">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,77 +34,39 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a WhatsApp MCP server instance
-          whatsapp_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.WHATSAPP,
+          # Create a Strata MCP server with WhatsApp
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.WHATSAPP],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a WhatsApp MCP server instance
-          const whatsappServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.WhatsApp,
+          // Create a Strata MCP server with WhatsApp
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.WhatsApp],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "WhatsApp",
+              "servers": ["WhatsApp"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to WhatsApp
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
-      </Step>
-      
-      <Step title="Configure API Key">
-        <CodeGroup>
-          ```python Python
-          # Set the WhatsApp API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=whatsapp_server.instance_id,
-              auth_data={
-                  "token": "YOUR_WHATSAPP_API_KEY"
-              }
-          )
-          ```
-          
-          ```typescript TypeScript
-          // Set the WhatsApp API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: whatsappServer.instanceId,
-              authData: {
-                  token: "YOUR_WHATSAPP_API_KEY"
-              }
-          });
-          ```
-          
-          ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
-              "authData": {
-                "token": "YOUR_WHATSAPP_API_KEY"
-              }
-            }'
-          ```
-        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
         
         <Check>
           🎉 **Your WhatsApp MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
@@ -125,7 +87,7 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
         Select WhatsApp from the list of available integrations.
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Configure Authentication">
         Enter your WhatsApp Business API key to authenticate the connection.
       </Step>
       
@@ -149,7 +111,7 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/whatsapp-mcp-server:latest
         
-        # Run with API key
+        # Run with WhatsApp API key
         docker run -p 5000:5000 \
           -e AUTH_DATA='{"token":"your_whatsapp_api_key"}' \
           ghcr.io/klavis-ai/whatsapp-mcp-server:latest
@@ -206,5 +168,12 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

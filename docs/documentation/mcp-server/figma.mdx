@@ -26,7 +26,7 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Figma">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,9 +34,8 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Figma MCP server instance
-          figma_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.FIGMA,
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.FIGMA],
               user_id="user123"
           )
           ```
@@ -46,68 +45,53 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
           
           const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Figma MCP server instance
-          const figmaServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Figma,
+          // Create a Strata MCP server with Figma
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Figma],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Figma",
+              "servers": ["Figma"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Figma
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Authenticate">
         <CodeGroup>
           ```python Python
-          # Set the Figma API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=figma_server.instance_id,
-              auth_data={
-                  "api_key": "YOUR_FIGMA_API_KEY"
-              }
-          )
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(response.oauth_urls[McpServerName.FIGMA])
           ```
           
           ```typescript TypeScript
-          // Set the Figma API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: figmaServer.instanceId,
-              authData: {
-                  api_key: "YOUR_FIGMA_API_KEY"
-              }
-          });
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.Figma]);
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
-              "authData": {
-                "api_key": "YOUR_FIGMA_API_KEY"
-              }
-            }'
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/figma/authorize?instance_id=YOUR_INSTANCE_ID"
           ```
         </CodeGroup>
         
         <Check>
-          🎉 **Your Figma MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Figma MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -125,8 +109,8 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
         Select Figma from the list of available integrations.
       </Step>
       
-      <Step title="Configure API Key">
-        Enter your Figma API key to authenticate the connection.
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Figma account.
       </Step>
       
       <Step title="Use in your app">
@@ -149,7 +133,12 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/figma-mcp-server:latest
         
-        # Run with API key
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/figma-mcp-server:latest
+        
+        # Or run with manual API key
         docker run -p 5000:5000 \
           -e AUTH_DATA='{"api_key":"your_figma_api_key"}' \
           ghcr.io/klavis-ai/figma-mcp-server:latest
@@ -188,6 +177,14 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
 ## Next Steps
 
 <CardGroup>
+  <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
   <Card
     title="AI Platform Integrations"
     icon="robot"

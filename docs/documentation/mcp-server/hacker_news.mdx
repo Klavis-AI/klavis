@@ -26,7 +26,7 @@ Connect to Hacker News to fetch stories, user profiles, and analyze technology n
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Hacker News">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,44 +34,42 @@ Connect to Hacker News to fetch stories, user profiles, and analyze technology n
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Hacker News MCP server instance
-          hacker_news_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.HACKER_NEWS,
+          # Create a Strata MCP server with Hacker News
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.HACKER_NEWS],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Hacker News MCP server instance
-          const hackerNewsServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.HackerNews,
+          // Create a Strata MCP server with Hacker News
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.HackerNews],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Hacker News",
+              "servers": ["Hacker News"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Hacker News
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
         
         <Check>
-          🎉 **Your Hacker News MCP Server is ready!** No additional authentication required - you can use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Hacker News MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -177,5 +175,12 @@ Connect to Hacker News to fetch stories, user profiles, and analyze technology n
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

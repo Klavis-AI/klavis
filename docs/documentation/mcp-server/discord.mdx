@@ -26,7 +26,7 @@ Connect to Discord to manage servers, send messages, and interact with communiti
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Discord">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,58 +34,89 @@ Connect to Discord to manage servers, send messages, and interact with communiti
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Discord MCP server instance
-          discord_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.DISCORD,
+          # Create a Strata MCP server with Discord
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.DISCORD],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Discord MCP server instance
-          const discordServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Discord,
+          // Create a Strata MCP server with Discord
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Discord],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Discord",
+              "servers": ["Discord"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Discord
-          - `instanceId`: Unique identifier for your server instance
-          - Note: Discord requires bot authorization to access servers
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Authorize Discord Bot">
-        <Info>
-          To enable your MCP server to access Discord, you need to add the [Klavis AI bot](https://discord.com/oauth2/authorize?client_id=1349237156065050674) to your Discord Server.
-        </Info>
+      <Step title="Authenticate with Bot Token">
+        <CodeGroup>
+          ```python Python
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.DISCORD,
+              auth_data={
+                  "data": {
+                      "bot_token": "YOUR_DISCORD_BOT_TOKEN"
+                  }
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Discord,
+              authData: {
+                  data: {
+                      bot_token: "YOUR_DISCORD_BOT_TOKEN"
+                  }
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Discord",
+              "authData": {
+                "data": {
+                  "bot_token": "YOUR_DISCORD_BOT_TOKEN"
+                }
+              }
+            }'
+          ```
+        </CodeGroup>
         
-        **Bot Permissions**: The bot will request the following permissions:
-        - Read messages/view channels
-        - Send messages  
-        - Read message history
-        - Attach files
-        - Embed links
+        <Note>
+          Get your Discord bot token from the [Discord Developer Portal](https://discord.com/developers/applications). You'll also need to add the bot to your Discord server with the required permissions.
+        </Note>
         
         <Check>
-          🎉 **Your Discord MCP Server is ready!** Once the bot is added to your server, you can use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Discord MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -103,8 +134,8 @@ Connect to Discord to manage servers, send messages, and interact with communiti
         Select Discord from the list of available integrations.
       </Step>
       
-      <Step title="Authorize Bot">
-        Add the Klavis AI bot to your Discord server with the required permissions.
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Discord bot.
       </Step>
       
       <Step title="Use in your app">
@@ -127,7 +158,12 @@ Connect to Discord to manage servers, send messages, and interact with communiti
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/discord-mcp-server:latest
         
-        # Run with Discord bot token
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/discord-mcp-server:latest
+        
+        # Or run with manual bot token
         docker run -p 5000:5000 \
           -e AUTH_DATA='{"bot_token":"your_discord_bot_token"}' \
           ghcr.io/klavis-ai/discord-mcp-server:latest
@@ -171,14 +207,6 @@ Connect to Discord to manage servers, send messages, and interact with communiti
 
 <CardGroup>
   <Card
-    title="White-label Authentication"
-    icon="palette"
-    href="/documentation/auth/white-label"
-  >
-    Customize OAuth flows with your own branding
-  </Card>
-  
-  <Card
     title="AI Platform Integrations"
     icon="robot"
     href="/documentation/ai-platform-integration/overview"
@@ -200,5 +228,12 @@ Connect to Discord to manage servers, send messages, and interact with communiti
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

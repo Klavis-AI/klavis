@@ -26,7 +26,7 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Stripe">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,9 +34,8 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Stripe MCP server instance
-          stripe_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.STRIPE,
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.STRIPE],
               user_id="user123"
           )
           ```
@@ -46,71 +45,47 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
           
           const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Stripe MCP server instance
-          const stripeServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Stripe,
+          // Create a Strata MCP server with Stripe
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Stripe],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Stripe",
+              "servers": ["Stripe"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Stripe
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure Stripe API Key">
+      <Step title="Configure API Key">
         <CodeGroup>
           ```python Python
-          from klavis import Klavis
-          
-          klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
-          
-          # Set the Stripe API key
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id="YOUR_INSTANCE_ID",
-              auth_data={
-                  "token": "sk_test_your_stripe_secret_key_here"
-              }
-          )
+          # Configure your Stripe API key in the Klavis dashboard or via API
+          # Get your Stripe secret key from https://dashboard.stripe.com/apikeys
+          stripe_api_key = "sk_test_your_stripe_secret_key_here"
           ```
           
           ```typescript TypeScript
-          import { KlavisClient } from 'klavis';
-          
-          const klavis = new KlavisClient({ apiKey: 'YOUR_KLAVIS_API_KEY' });
-          
-          // Set the Stripe API key
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: "YOUR_INSTANCE_ID",
-              authData: {
-                  token: "sk_test_your_stripe_secret_key_here"
-              }
-          });
+          // Configure your Stripe API key in the Klavis dashboard or via API
+          // Get your Stripe secret key from https://dashboard.stripe.com/apikeys
+          const stripeApiKey = "sk_test_your_stripe_secret_key_here";
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
-              "authData": {
-                "token": "sk_test_your_stripe_secret_key_here"
-              }
-            }'
+          # Configure your Stripe API key in the Klavis dashboard
+          # Get your Stripe secret key from https://dashboard.stripe.com/apikeys
+          echo "Configure your API key at: https://www.klavis.ai/home/mcp-servers"
           ```
         </CodeGroup>
         
@@ -119,7 +94,7 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
         </Note>
         
         <Check>
-          Your Stripe MCP Server is ready! Once the API key is configured, you can use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Stripe MCP Server is ready!** Once the API key is configured, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -183,6 +158,17 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
   </Tab>
 </Tabs>
 
+## Watch the Example
+<iframe
+  width="725"
+  height="450"
+  src="https://www.youtube.com/embed/K7NnYbEhmyM"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+></iframe>
+
 ## Available Tools
 
 <Accordion title="Tools Information">
@@ -200,6 +186,14 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
 ## Next Steps
 
 <CardGroup>
+  <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
   <Card
     title="AI Platform Integrations"
     icon="robot"

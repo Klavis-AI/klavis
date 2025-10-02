@@ -26,7 +26,7 @@ Connect to PostgreSQL databases to execute queries, analyze data, manage tables,
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with PostgreSQL">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,81 +34,72 @@ Connect to PostgreSQL databases to execute queries, analyze data, manage tables,
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a PostgreSQL MCP server instance
-          postgres_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.POSTGRES,
+          # Create a Strata MCP server with PostgreSQL
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.POSTGRES],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a PostgreSQL MCP server instance
-          const postgresServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Postgres,
+          # Create a Strata MCP server with PostgreSQL
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Postgres],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Postgres",
+              "servers": ["Postgres"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to PostgreSQL
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure database connection">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          from klavis import Klavis
-          
-          klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
-          
-          # Set the PostgreSQL connection string
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id="YOUR_INSTANCE_ID",
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.POSTGRES,
               auth_data={
-                  "token": "postgresql://username:password@host:port/database"
+                  "api_key": "postgresql://username:password@host:port/database"
               }
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient } from 'klavis';
-          
-          const klavis = new KlavisClient({ apiKey: 'YOUR_KLAVIS_API_KEY' });
-          
-          // Set the PostgreSQL connection string
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: "YOUR_INSTANCE_ID",
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Postgres,
               authData: {
-                  token: "postgresql://username:password@host:port/database"
+                  api_key: "postgresql://username:password@host:port/database"
               }
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
             -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Postgres",
               "authData": {
-                "token": "postgresql://username:password@host:port/database"
+                "api_key": "postgresql://username:password@host:port/database"
               }
             }'
           ```
@@ -119,7 +110,7 @@ Connect to PostgreSQL databases to execute queries, analyze data, manage tables,
         </Note>
         
         <Check>
-          Your PostgreSQL MCP Server is ready! Once the connection is configured, you can use your MCP server URL with any MCP-compatible client.
+          🎉 **Your PostgreSQL MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -218,5 +209,12 @@ Connect to PostgreSQL databases to execute queries, analyze data, manage tables,
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

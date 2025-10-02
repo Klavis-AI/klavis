@@ -222,9 +222,14 @@ def main():
         user_id="4321"
     )
     
-    oauth_urls = response.get("oauthUrls", {})
-    if oauth_urls:
-        for server_name, oauth_url in oauth_urls.items():
+    github_oauth_url = response.get("oauthUrls", {}).get("github")
+    if github_oauth_url:
+        webbrowser.open(github_oauth_url)
+        input(f"Press Enter after completing GitHub OAuth authorization...")
+    
+    all_oauth_urls = response.get("oauthUrls", {})
+    if all_oauth_urls:
+        for server_name, oauth_url in all_oauth_urls.items():
             webbrowser.open(oauth_url)
             input(f"Press Enter after completing {server_name} OAuth authorization...")
     

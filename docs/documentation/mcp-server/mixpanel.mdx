@@ -26,7 +26,7 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Mixpanel">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,54 +34,47 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Mixpanel MCP server instance
-          mixpanel_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.MIXPANEL,
+          # Create a Strata MCP server with Mixpanel
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.MIXPANEL],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Mixpanel MCP server instance
-          const mixpanelServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Mixpanel,
+          // Create a Strata MCP server with Mixpanel
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Mixpanel],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Mixpanel",
+              "servers": ["Mixpanel"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Mixpanel
-          - `instanceId`: Unique identifier for your server instance
-          - Note: Mixpanel requires service account credentials for authentication
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure authentication">
-        <Info>
-          You can create service account credentials from your [Mixpanel project settings](https://mixpanel.com/settings/project/).
-        </Info>
-        
+      <Step title="Authenticate with Service Account Credentials">
         <CodeGroup>
           ```python Python
-          # Set the Mixpanel service account credentials for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=mixpanel_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.MIXPANEL,
               auth_data={
                   "data": {
                       "serviceaccount_username": "YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME",
@@ -92,9 +85,9 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
           ```
           
           ```typescript TypeScript
-          // Set the Mixpanel service account credentials for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: mixpanelServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Mixpanel,
               authData: {
                   data: {
                       serviceaccount_username: "YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME",
@@ -105,11 +98,12 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Mixpanel",
               "authData": {
                 "data": {
                   "serviceaccount_username": "YOUR_MIXPANEL_SERVICE_ACCOUNT_USERNAME",
@@ -120,8 +114,12 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
           ```
         </CodeGroup>
         
+        <Note>
+          Get your Mixpanel service account credentials from your [Mixpanel project settings](https://mixpanel.com/settings/project/). These credentials are required to access your analytics data.
+        </Note>
+        
         <Check>
-          🎉 **Your Mixpanel MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client to analyze user behavior and track events.
+          🎉 **Your Mixpanel MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -139,8 +137,8 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
         Select Mixpanel from the list of available integrations.
       </Step>
       
-      <Step title="Configure Service Account">
-        Enter your Mixpanel service account credentials to enable analytics access.
+      <Step title="Authenticate">
+        Complete the authentication flow to connect your Mixpanel service account.
       </Step>
       
       <Step title="Use in your app">
@@ -228,5 +226,12 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>
