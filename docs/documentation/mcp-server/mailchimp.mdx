@@ -26,7 +26,7 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Mailchimp">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,9 +34,9 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Mailchimp MCP server instance
-          mailchimp_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.MAILCHIMP,
+          # Create a Strata MCP server with Mailchimp
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.MAILCHIMP],
               user_id="user123"
           )
           ```
@@ -46,37 +46,35 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
           
           const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Mailchimp MCP server instance
-          const mailchimpServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.Mailchimp,
+          // Create a Strata MCP server with Mailchimp
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Mailchimp],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Mailchimp",
+              "servers": ["Mailchimp"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Mailchimp
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set the Mailchimp API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=mailchimp_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.MAILCHIMP,
               auth_data={
                   "data": {
                       "api_key": "YOUR_MAILCHIMP_API_KEY"
@@ -86,9 +84,9 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
           ```
           
           ```typescript TypeScript
-          // Set the Mailchimp API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: mailchimpServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Mailchimp,
               authData: {
                   data: {
                       api_key: "YOUR_MAILCHIMP_API_KEY"
@@ -98,11 +96,12 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Mailchimp",
               "authData": {
                 "data": {
                   "api_key": "YOUR_MAILCHIMP_API_KEY"
@@ -113,7 +112,7 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
         </CodeGroup>
         
         <Check>
-          🎉 **Your Mailchimp MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Mailchimp MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -155,9 +154,9 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/mailchimp-mcp-server:latest
         
-        # Run with API key
+        # Run with API key support (requires Klavis API key)
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"data":{"api_key":"your_mailchimp_api_key"}}' \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/mailchimp-mcp-server:latest
         ```
       </Step>
@@ -233,5 +232,12 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

@@ -26,7 +26,7 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Klavis ReportGen">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,49 +34,47 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Klavis ReportGen MCP server instance
-          klavis_reportgen_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.KLAVIS_REPORTGEN,
+          # Create a Strata MCP server with Klavis ReportGen
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.KLAVIS_REPORTGEN],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Klavis ReportGen MCP server instance
-          const klavisReportgenServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.KlavisReportgen,
+          // Create a Strata MCP server with Klavis ReportGen
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.KlavisReportgen],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Klavis ReportGen",
+              "servers": ["Klavis ReportGen"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Klavis ReportGen
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set the Klavis ReportGen API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=klavis_reportgen_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.KLAVIS_REPORTGEN,
               auth_data={
                   "api_key": "YOUR_KLAVIS_REPORTGEN_API_KEY"
               }
@@ -84,9 +82,9 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
           ```
           
           ```typescript TypeScript
-          // Set the Klavis ReportGen API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: klavisReportgenServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.KlavisReportgen,
               authData: {
                   api_key: "YOUR_KLAVIS_REPORTGEN_API_KEY"
               }
@@ -94,11 +92,12 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Klavis ReportGen",
               "authData": {
                 "api_key": "YOUR_KLAVIS_REPORTGEN_API_KEY"
               }
@@ -107,7 +106,7 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
         </CodeGroup>
         
         <Check>
-          🎉 **Your Klavis ReportGen MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your Klavis ReportGen MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -149,9 +148,9 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/klavis-reportgen-mcp-server:latest
         
-        # Run with API key
+        # Run with API key support (requires Klavis API key)
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"api_key":"your_klavis_reportgen_api_key"}' \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/klavis-reportgen-mcp-server:latest
         ```
       </Step>
@@ -206,5 +205,12 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>
