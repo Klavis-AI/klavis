@@ -40,4 +40,6 @@ groups:
           skipResponseValidation: true
           includeApiReference: true
           noSerdeLayer: true
+          extraDevDependencies:
+            msw: '2.11.2'
         smart-casing: true
