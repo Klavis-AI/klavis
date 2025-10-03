@@ -12,13 +12,13 @@ First, install the required packages:
 
 <CodeGroup>
 
-bash Python
+```bash Python
 pip install langchain-mcp-adapters langgraph langchain-openai klavis
+```
 
-
-bash TypeScript
+```bash TypeScript
 npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai klavis
-
+```
 
 </CodeGroup>
 
@@ -26,18 +26,18 @@ npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai klavi
 
 <CodeGroup>
 
-python Python
+```python Python
 import os
 
 os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace
 os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
+```
 
-
-typescript TypeScript
+```typescript TypeScript
 // Set environment variables
 process.env.OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";  // Replace with your actual OpenAI API key
 process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";   // Replace with your actual Klavis API key
-
+```
 
 </CodeGroup>
 
@@ -46,7 +46,7 @@ process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";   // Replace with your actua
 
 <CodeGroup>
 
-python Python
+```python Python
 from klavis import Klavis
 from klavis.types import McpServerName, ToolFormat
 import webbrowser
@@ -63,9 +63,9 @@ if response.oauth_urls:
     for server_name, oauth_url in response.oauth_urls.items():
         webbrowser.open(oauth_url)
         print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+```
 
-
-typescript TypeScript
+```typescript TypeScript
 const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 
 const response = await klavisClient.mcpServer.createStrataServer({
@@ -84,8 +84,7 @@ if (response.oauthUrls) {
         });
     }
 }
-
-
+```
 
 </CodeGroup>
 
@@ -97,7 +96,7 @@ if (response.oauthUrls) {
 
 <CodeGroup>
 
-python Python
+```python Python
 import asyncio
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
@@ -125,9 +124,9 @@ agent = create_react_agent(
 )
 
 print("🤖 LangChain agent created successfully!")
+```
 
-
-typescript TypeScript
+```typescript TypeScript
 // Initialize LLM
 const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
@@ -157,7 +156,7 @@ const agent = createReactAgent({
 });
 
 console.log("🤖 LangChain agent created successfully!");
-
+```
 
 </CodeGroup>
 
@@ -165,15 +164,15 @@ console.log("🤖 LangChain agent created successfully!");
 
 <CodeGroup>
 
-python Python
+```python Python
 response_message = asyncio.run(agent.ainvoke({
     "messages": [{"role": "user", "content": "Check my latest 5 emails and summarize them in a Slack message to #general"}]
 }))
 
 print(f"\n🤖 Final Response: {response_message['messages'][-1].content}")
+```
 
-
-typescript TypeScript
+```typescript TypeScript
 try {
     const response = await agent.invoke({
         messages: [{ role: "user", content: "Check my latest emails and summarize them in a Slack message to #updates" }]
@@ -184,7 +183,7 @@ try {
 } finally {
     await mcpClient.close();
 }
-
+```
 
 </CodeGroup>
 

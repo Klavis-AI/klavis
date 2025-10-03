@@ -171,11 +171,70 @@
             ]
           },
           {
-            "group": "Individual MCP Server",
+            "group": "MCP Server Instance",
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
               "api-reference/mcp-server/get-server-instance",
               "api-reference/mcp-server/delete-a-server-instance"
+            ]
+          },
+          {
+            "group": "Auth",
+            "pages": [
+              "api-reference/strata/set-strata-auth",
+              "api-reference/mcp-server/set-authentication-data",
+              "api-reference/mcp-server/get-authentication-data",
+              "api-reference/mcp-server/delete-auth-data-for-a-server-instance"
+            ]
+          },
+          {
+            "group": "OAuth",
+            "pages": [
+              {
+                "group": "OAuth Servers",
+                "pages": [
+                  "api-reference/oauth/airtable-oauth/authorize-airtable",
+                  "api-reference/oauth/asana-oauth/authorize-asana",
+                  "api-reference/oauth/attio-oauth/authorize-attio",
+                  "api-reference/oauth/box-oauth/authorize-box",
+                  "api-reference/oauth/calcom-oauth/authorize-calcom",
+                  "api-reference/oauth/canva-oauth/authorize-canva",
+                  "api-reference/oauth/clickup-oauth/authorize-clickup",
+                  "api-reference/oauth/close-oauth/authorize-close",
+                  "api-reference/oauth/confluence-oauth/authorize-confluence",
+                  "api-reference/oauth/dialpad-oauth/authorize-dialpad",
+                  "api-reference/oauth/docusign-oauth/authorize-docusign",
+                  "api-reference/oauth/dropbox-oauth/authorize-dropbox",
+                  "api-reference/oauth/figma-oauth/authorize-figma",
+                  "api-reference/oauth/gcalendar-oauth/authorize-gcalendar",
+                  "api-reference/oauth/gdocs-oauth/authorize-gdocs",
+                  "api-reference/oauth/gdrive-oauth/authorize-gdrive",
+                  "api-reference/oauth/github-oauth/authorize-github",
+                  "api-reference/oauth/gitlab-oauth/authorize-gitlab",
+                  "api-reference/oauth/gmail-oauth/authorize-gmail",
+                  "api-reference/oauth/gsheets-oauth/authorize-gsheets",
+                  "api-reference/oauth/hubspot-oauth/authorize-hubspot",
+                  "api-reference/oauth/jira-oauth/authorize-jira",
+                  "api-reference/oauth/klaviyo-oauth/authorize-klaviyo",
+                  "api-reference/oauth/linear-oauth/authorize-linear",
+                  "api-reference/oauth/linkedin-oauth/authorize-linkedin",
+                  "api-reference/oauth/notion-oauth/authorize-notion",
+                  "api-reference/oauth/onedrive-oauth/authorize-onedrive",
+                  "api-reference/oauth/outlook-oauth/authorize-outlook",
+                  "api-reference/oauth/pagerduty-oauth/authorize-pagerduty",
+                  "api-reference/oauth/pipedrive-oauth/authorize-pipedrive",
+                  "api-reference/oauth/quickbooks-oauth/authorize-quickbooks",
+                  "api-reference/oauth/salesforce-oauth/authorize-salesforce",
+                  "api-reference/oauth/shopify-oauth/authorize-shopify",
+                  "api-reference/oauth/slack-oauth/authorize-slack",
+                  "api-reference/oauth/stripe-connect-oauth/authorize-stripe-connect",
+                  "api-reference/oauth/supabase-oauth/authorize-supabase",
+                  "api-reference/oauth/vercel-oauth/authorize-vercel",
+                  "api-reference/oauth/wordpress-oauth/authorize-wordpress",
+                  "api-reference/oauth/xero-oauth/authorize-xero",
+                  "api-reference/oauth/zendesk-oauth/authorize-zendesk"
+                ]
+              }
             ]
           },
           {
@@ -204,66 +263,6 @@
             "pages": [
               "api-reference/white-labeling/create",
               "api-reference/white-labeling/get"
-            ]
-          },
-          {
-            "group": "Auth",
-            "pages": [
-              "api-reference/strata/set-strata-auth",
-              "api-reference/mcp-server/set-authentication-data",
-              "api-reference/mcp-server/get-authentication-data",
-              "api-reference/mcp-server/delete-auth-data-for-a-server-instance"
-            ]
-          },
-          {
-            "group": "OAuth",
-            "pages": [
-              "api-reference/mcp-server/get-oauth-url",
-              {
-                "group": "OAuth Servers",
-                "pages": [
-                  "api-reference/airtable-oauth/authorize-airtable",
-                  "api-reference/asana-oauth/authorize-asana",
-                  "api-reference/attio-oauth/authorize-attio",
-                  "api-reference/box-oauth/authorize-box",
-                  "api-reference/calcom-oauth/authorize-calcom",
-                  "api-reference/canva-oauth/authorize-canva",
-                  "api-reference/clickup-oauth/authorize-clickup",
-                  "api-reference/close-oauth/authorize-close",
-                  "api-reference/confluence-oauth/authorize-confluence",
-                  "api-reference/dialpad-oauth/authorize-dialpad",
-                  "api-reference/docusign-oauth/authorize-docusign",
-                  "api-reference/dropbox-oauth/authorize-dropbox",
-                  "api-reference/figma-oauth/authorize-figma",
-                  "api-reference/gcalendar-oauth/authorize-gcalendar",
-                  "api-reference/gdocs-oauth/authorize-gdocs",
-                  "api-reference/gdrive-oauth/authorize-gdrive",
-                  "api-reference/github-oauth/authorize-github",
-                  "api-reference/gitlab-oauth/authorize-gitlab",
-                  "api-reference/gmail-oauth/authorize-gmail",
-                  "api-reference/gsheets-oauth/authorize-gsheets",
-                  "api-reference/hubspot-oauth/authorize-hubspot",
-                  "api-reference/jira-oauth/authorize-jira",
-                  "api-reference/klaviyo-oauth/authorize-klaviyo",
-                  "api-reference/linear-oauth/authorize-linear",
-                  "api-reference/linkedin-oauth/authorize-linkedin",
-                  "api-reference/notion-oauth/authorize-notion",
-                  "api-reference/onedrive-oauth/authorize-onedrive",
-                  "api-reference/outlook-oauth/authorize-outlook",
-                  "api-reference/pagerduty-oauth/authorize-pagerduty",
-                  "api-reference/pipedrive-oauth/authorize-pipedrive",
-                  "api-reference/quickbooks-oauth/authorize-quickbooks",
-                  "api-reference/salesforce-oauth/authorize-salesforce",
-                  "api-reference/shopify-oauth/authorize-shopify",
-                  "api-reference/slack-oauth/authorize-slack",
-                  "api-reference/stripe-connect-oauth/authorize-stripe-connect",
-                  "api-reference/supabase-oauth/authorize-supabase",
-                  "api-reference/vercel-oauth/authorize-vercel",
-                  "api-reference/wordpress-oauth/authorize-wordpress",
-                  "api-reference/xero-oauth/authorize-xero",
-                  "api-reference/zendesk-oauth/authorize-zendesk"
-                ]
-              }
             ]
           },
           {
