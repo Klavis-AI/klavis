@@ -641,41 +641,6 @@
         }
       }
     },
-    "/mcp-server/oauth-url": {
-      "post": {
-        "tags": ["mcp-server"],
-        "summary": "Get OAuth URL",
-        "description": "Gets the OAuth authorization URL for a specific MCP server and instance.\nReturns the complete OAuth URL with the instance ID as a query parameter.",
-        "operationId": "getOAuthUrl",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/GetOAuthUrlRequest" }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/GetOAuthUrlResponse" }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        },
-        "security": [{ "HTTPBearer": [] }]
-      }
-    },
     "/white-labeling/create": {
       "post": {
         "tags": ["white-labeling"],
@@ -3996,6 +3961,11 @@
             "title": "Externaluserid",
             "description": "The user's identifier on the external platform.",
             "default": ""
+          },
+          "oauthUrl": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Oauthurl",
+            "description": "The OAuth URL for authentication if available, supports white label if configured."
           }
         },
         "type": "object",
@@ -4012,49 +3982,6 @@
         "type": "object",
         "required": ["servers"],
         "title": "GetMcpServersResponse"
-      },
-      "GetOAuthUrlRequest": {
-        "properties": {
-          "serverName": {
-            "$ref": "#/components/schemas/McpServerName",
-            "description": "The name of the target MCP server. Case-insensitive (e.g., 'google calendar', 'GOOGLE_CALENDAR', 'Google Calendar' are all valid)."
-          },
-          "instanceId": {
-            "type": "string",
-            "title": "Instanceid",
-            "description": "The unique identifier for the connection instance."
-          },
-          "clientId": {
-            "anyOf": [{ "type": "string" }, { "type": "null" }],
-            "title": "Clientid",
-            "description": "Optional client ID for white labeling. If not provided, will use default credentials."
-          },
-          "scope": {
-            "anyOf": [{ "type": "string" }, { "type": "null" }],
-            "title": "Scope",
-            "description": "Optional OAuth scopes to request (comma-separated string)."
-          },
-          "redirectUrl": {
-            "anyOf": [{ "type": "string" }, { "type": "null" }],
-            "title": "Redirecturl",
-            "description": "Optional URL to redirect to after authorization completes."
-          }
-        },
-        "type": "object",
-        "required": ["serverName", "instanceId"],
-        "title": "GetOAuthUrlRequest"
-      },
-      "GetOAuthUrlResponse": {
-        "properties": {
-          "oauthUrl": {
-            "type": "string",
-            "title": "Oauthurl",
-            "description": "The OAuth authorization URL for the specified server."
-          }
-        },
-        "type": "object",
-        "required": ["oauthUrl"],
-        "title": "GetOAuthUrlResponse"
       },
       "GetServerInstancesResponse": {
         "properties": {
