@@ -95,6 +95,7 @@ const getPostgresMcpServer = () => {
           },
           annotations: {
             category: "POSTGRES_QUERY",
+            readOnlyHint: true,
           },
         },
       ],

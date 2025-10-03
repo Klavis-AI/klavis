@@ -160,7 +160,7 @@ get_vendor_tool = Tool(
         },
         "required": ["Id"]
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 list_vendors_tool = Tool(
@@ -175,7 +175,7 @@ list_vendors_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 search_vendors_tool = Tool(
@@ -203,7 +203,7 @@ search_vendors_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 update_vendor_tool = Tool(

@@ -130,7 +130,7 @@ def main(
                     },
                     "required": ["query", "type"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_track_info",
@@ -146,7 +146,7 @@ def main(
                     },
                     "required": ["ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_user_saved_tracks",
@@ -167,7 +167,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_check_user_saved_tracks",
@@ -183,7 +183,7 @@ def main(
                     },
                     "required": ["track_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_TRACK", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_save_tracks_for_current_user",
@@ -231,7 +231,7 @@ def main(
                     },
                     "required": ["album_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_album_tracks",
@@ -246,7 +246,7 @@ def main(
                     },
                     "required": ["album_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_user_saved_albums",
@@ -267,7 +267,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_save_albums_for_current_user",
@@ -315,7 +315,7 @@ def main(
                     },
                     "required": ["album_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ALBUM", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_artists_info",
@@ -331,7 +331,7 @@ def main(
                     },
                     "required": ["artist_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_artist_albums",
@@ -346,7 +346,7 @@ def main(
                     },
                     "required": ["artist_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_artist_top_tracks",
@@ -365,7 +365,7 @@ def main(
                     },
                     "required": ["artist_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_ARTIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_episodes_info",
@@ -386,7 +386,7 @@ def main(
                     },
                     "required": ["episode_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_save_episodes_for_current_user",
@@ -423,7 +423,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_remove_episodes_for_current_user",
@@ -455,7 +455,7 @@ def main(
                     },
                     "required": ["episode_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_EPISODE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_playlist_by_id",
@@ -475,7 +475,7 @@ def main(
                     },
                     "required": ["playlist_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_user_owned_playlists",
@@ -500,7 +500,7 @@ def main(
                     },
                     "required": ["user_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_update_playlist_details",
@@ -537,7 +537,7 @@ def main(
                     "properties": {},
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_current_user_top_items",
@@ -568,7 +568,7 @@ def main(
                     },
                     "required": ["item_type"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_spotify_user_public_profile",
@@ -583,7 +583,7 @@ def main(
                     },
                     "required": ["user_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_follow_playlist",
@@ -637,7 +637,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_follow_artists_or_users",
@@ -697,7 +697,7 @@ def main(
                     },
                     "required": ["ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_add_items_to_playlist",
@@ -762,7 +762,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_PLAYLIST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_multiple_shows",
@@ -778,7 +778,7 @@ def main(
                     },
                     "required": ["show_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_show_episodes",
@@ -808,7 +808,7 @@ def main(
                     },
                     "required": ["show_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_get_current_user_saved_shows",
@@ -829,7 +829,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW", "readOnlyHint": True})
             ),
             types.Tool(
                 name="spotify_save_shows_to_user_library",
@@ -877,7 +877,7 @@ def main(
                     },
                     "required": ["show_ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW"})
+                annotations=types.ToolAnnotations(**{"category": "SPOTIFY_SHOW", "readOnlyHint": True})
             ),
         ]
 

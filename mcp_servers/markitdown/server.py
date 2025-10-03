@@ -98,7 +98,7 @@ def main(
                         }
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MARKITDOWN_CONVERT"}),
+                annotations=types.ToolAnnotations(**{"category": "MARKITDOWN_CONVERT", "readOnlyHint": True}),
             )
         ]
 

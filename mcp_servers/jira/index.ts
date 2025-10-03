@@ -313,6 +313,7 @@ const searchIssuesTool: Tool = {
   },
   annotations: {
     category: "JIRA_ISSUE",
+    readOnlyHint: true,
   },
 };
 
@@ -406,6 +407,7 @@ const getIssueTool: Tool = {
   },
   annotations: {
     category: "JIRA_ISSUE",
+    readOnlyHint: true,
   },
 };
 
@@ -506,6 +508,7 @@ const searchTool: Tool = {
   },
   annotations: {
     category: "JIRA_SEARCH",
+    readOnlyHint: true,
   },
 };
 
@@ -536,6 +539,7 @@ const searchFieldsTool: Tool = {
   },
   annotations: {
     category: "JIRA_FIELD",
+    readOnlyHint: true,
   },
 };
 
@@ -567,6 +571,7 @@ const getProjectIssuesTool: Tool = {
   },
   annotations: {
     category: "JIRA_PROJECT",
+    readOnlyHint: true,
   },
 };
 
@@ -598,6 +603,7 @@ const getEpicIssuesTool: Tool = {
   },
   annotations: {
     category: "JIRA_ISSUE",
+    readOnlyHint: true,
   },
 };
 
@@ -631,6 +637,7 @@ const getSprintsFromBoardTool: Tool = {
   },
   annotations: {
     category: "JIRA_SPRINT",
+    readOnlyHint: true,
   },
 };
 
@@ -705,6 +712,7 @@ const getSprintIssuesTool: Tool = {
   },
   annotations: {
     category: "JIRA_SPRINT",
+    readOnlyHint: true,
   },
 };
 
@@ -774,6 +782,7 @@ const getLinkTypesTool: Tool = {
   },
   annotations: {
     category: "JIRA_LINK",
+    readOnlyHint: true,
   },
 };
 

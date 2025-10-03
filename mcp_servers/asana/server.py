@@ -169,7 +169,7 @@ def main(
                     "required": ["task_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TASK"}
+                    **{"category": "ASANA_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -251,7 +251,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TASK"}
+                    **{"category": "ASANA_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -336,7 +336,7 @@ def main(
                     "required": ["task_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TASK"}
+                    **{"category": "ASANA_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -454,7 +454,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_PROJECT"}
+                    **{"category": "ASANA_PROJECT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -471,7 +471,7 @@ def main(
                     "required": ["project_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_PROJECT"}
+                    **{"category": "ASANA_PROJECT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -494,7 +494,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_WORKSPACE"}
+                    **{"category": "ASANA_WORKSPACE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -511,7 +511,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_WORKSPACE"}
+                    **{"category": "ASANA_WORKSPACE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -538,7 +538,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_USER"}
+                    **{"category": "ASANA_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -555,7 +555,7 @@ def main(
                     "required": ["user_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_USER"}
+                    **{"category": "ASANA_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -582,7 +582,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TEAM"}
+                    **{"category": "ASANA_TEAM", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -599,7 +599,7 @@ def main(
                     "required": ["team_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TEAM"}
+                    **{"category": "ASANA_TEAM", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -626,7 +626,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TEAM"}
+                    **{"category": "ASANA_TEAM", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -653,7 +653,7 @@ def main(
                     "required": ["workspace_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TAG"}
+                    **{"category": "ASANA_TAG", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -670,7 +670,7 @@ def main(
                     "required": ["tag_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "ASANA_TAG"}
+                    **{"category": "ASANA_TAG", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

@@ -89,7 +89,8 @@ def main(
                         }
                     },
                     "required": ["query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="reddit_search_posts",
@@ -107,7 +108,8 @@ def main(
                         }
                     },
                     "required": ["subreddit", "query"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="reddit_get_post_comments",
@@ -125,7 +127,8 @@ def main(
                         }
                     },
                     "required": ["post_id", "subreddit"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_POST", "readOnlyHint": True})
             ),
             types.Tool(
                 name="reddit_find_similar_posts",
@@ -144,7 +147,8 @@ def main(
                         }
                     },
                     "required": ["post_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="reddit_create_post",
@@ -166,7 +170,8 @@ def main(
                         }
                     },
                     "required": ["subreddit", "title", "text"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_POST"})
             ),
             types.Tool(
                 name="reddit_get_user_posts",
@@ -181,7 +186,8 @@ def main(
                         }
                     },
                     "required": []
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_USER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="reddit_create_comment",
@@ -199,7 +205,8 @@ def main(
                         }
                     },
                     "required": ["post_id", "text"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_COMMENT"})
             ),
             types.Tool(
                 name="reddit_upvote",
@@ -213,7 +220,8 @@ def main(
                         }
                     },
                     "required": ["post_id"]
-                }
+                },
+                annotations=types.ToolAnnotations(**{"category": "REDDIT_ACTION"})
             )
         ]
 

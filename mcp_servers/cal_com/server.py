@@ -111,7 +111,7 @@ def main(
                     "required": []
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CAL_SCHEDULE"}
+                    **{"category": "CAL_SCHEDULE", "readOnlyHint": True}
                 ),
             ),
 
@@ -268,7 +268,7 @@ def main(
                     "required": []
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CAL_SCHEDULE"}
+                    **{"category": "CAL_SCHEDULE", "readOnlyHint": True}
                 ),
             ),
 
@@ -287,7 +287,7 @@ def main(
                     "required": ["schedule_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CAL_SCHEDULE"}
+                    **{"category": "CAL_SCHEDULE", "readOnlyHint": True}
                 ),
             ),
 

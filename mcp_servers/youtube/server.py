@@ -222,7 +222,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "YOUTUBE_TRANSCRIPT"}),
+                annotations=types.ToolAnnotations(**{"category": "YOUTUBE_TRANSCRIPT", "readOnlyHint": True}),
             )
         ]
 

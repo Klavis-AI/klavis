@@ -282,7 +282,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                    **{"category": "GOOGLE_DOCS_DOCUMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -293,7 +293,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                    **{"category": "GOOGLE_DOCS_DOCUMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

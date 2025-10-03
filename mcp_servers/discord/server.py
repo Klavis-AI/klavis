@@ -346,7 +346,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "DISCORD_SERVER"}
+                    **{"category": "DISCORD_SERVER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -368,7 +368,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "DISCORD_SERVER"}
+                    **{"category": "DISCORD_SERVER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -518,7 +518,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "DISCORD_MESSAGE"}
+                    **{"category": "DISCORD_MESSAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -535,7 +535,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "DISCORD_USER"}
+                    **{"category": "DISCORD_USER", "readOnlyHint": True}
                 ),
             )
         ]

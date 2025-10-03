@@ -105,7 +105,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_PROFILE"})
+                annotations=types.ToolAnnotations(**{"category": "LINKEDIN_PROFILE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="linkedin_create_post",

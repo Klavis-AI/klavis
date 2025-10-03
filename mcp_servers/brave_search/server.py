@@ -136,7 +136,7 @@ def main(
                     "required": ["query"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "BRAVE_SEARCH"}
+                    **{"category": "BRAVE_SEARCH", "readOnlyHint": True}
                 ),
             ),
 
@@ -179,7 +179,7 @@ def main(
                     "required": ["query"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "BRAVE_SEARCH"}
+                    **{"category": "BRAVE_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -225,7 +225,7 @@ def main(
                     "required": ["query"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "BRAVE_SEARCH"}
+                    **{"category": "BRAVE_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -270,7 +270,7 @@ def main(
                     "required": ["query"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "BRAVE_SEARCH"}
+                    **{"category": "BRAVE_SEARCH", "readOnlyHint": True}
                 ),
             )
 

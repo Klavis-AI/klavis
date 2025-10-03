@@ -23,6 +23,7 @@ export const listProductsTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_PRODUCT",
+      readOnlyHint: true,
     },
 };
   
@@ -41,6 +42,7 @@ export const getProductTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_PRODUCT",
+      readOnlyHint: true,
     },
 };
   
@@ -185,6 +187,7 @@ export const listOrdersTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_ORDER",
+      readOnlyHint: true,
     },
 };
   
@@ -203,6 +206,7 @@ export const getOrderTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_ORDER",
+      readOnlyHint: true,
     },
 };
   
@@ -303,6 +307,7 @@ export const listCustomersTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_CUSTOMER",
+      readOnlyHint: true,
     },
 };
 
@@ -321,5 +326,6 @@ export const getCustomerTool: Tool = {
     },
     annotations: {
       category: "SHOPIFY_CUSTOMER",
+      readOnlyHint: true,
     },
 };

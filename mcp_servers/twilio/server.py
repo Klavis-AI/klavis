@@ -77,7 +77,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["to", "from_", "body"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_MESSAGING"}),
         ),
         types.Tool(
             name="twilio_send_mms",
@@ -108,7 +109,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["to", "from_"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_MESSAGING"}),
         ),
         types.Tool(
             name="twilio_get_messages",
@@ -139,7 +141,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_MESSAGING", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_get_message_by_sid",
@@ -153,7 +156,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["message_sid"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_MESSAGING", "readOnlyHint": True}),
         ),
 
         # Voice Call Tools
@@ -232,7 +236,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_VOICE", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_get_call_by_sid",
@@ -246,7 +251,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["call_sid"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_VOICE", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_get_recordings",
@@ -272,7 +278,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_VOICE", "readOnlyHint": True}),
         ),
 
         # Phone Number Management Tools
@@ -309,7 +316,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_PHONE", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_purchase_phone_number",
@@ -339,7 +347,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["phone_number"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_PHONE"}),
         ),
         types.Tool(
             name="twilio_list_phone_numbers",
@@ -353,7 +362,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_PHONE", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_update_phone_number",
@@ -383,7 +393,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["phone_number_sid"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_PHONE"}),
         ),
         types.Tool(
             name="twilio_release_phone_number",
@@ -397,7 +408,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["phone_number_sid"]
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_PHONE"}),
         ),
 
         # Account & Usage Tools
@@ -408,7 +420,8 @@ def get_all_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {},
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_ACCOUNT", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_get_balance",
@@ -417,7 +430,8 @@ def get_all_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {},
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_ACCOUNT", "readOnlyHint": True}),
         ),
         types.Tool(
             name="twilio_get_usage_records",
@@ -449,7 +463,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": []
-            }
+            },
+            annotations=types.ToolAnnotations(**{"category": "TWILIO_USAGE", "readOnlyHint": True}),
         ),
     ]
 

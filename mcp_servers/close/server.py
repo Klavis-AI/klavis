@@ -187,7 +187,7 @@ def main(
                     "required": ["lead_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_LEAD"}
+                    **{"category": "CLOSE_LEAD", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -214,7 +214,7 @@ def main(
                     "required": ["query"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_LEAD"}
+                    **{"category": "CLOSE_LEAD", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -295,7 +295,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_LEAD"}
+                    **{"category": "CLOSE_LEAD", "readOnlyHint": True}
                 ),
             ),
             
@@ -361,7 +361,7 @@ def main(
                     "required": ["contact_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_CONTACT"}
+                    **{"category": "CLOSE_CONTACT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -388,7 +388,7 @@ def main(
                     "required": ["query"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_CONTACT"}
+                    **{"category": "CLOSE_CONTACT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -514,7 +514,7 @@ def main(
                     "required": ["opportunity_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_OPPORTUNITY"}
+                    **{"category": "CLOSE_OPPORTUNITY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -626,7 +626,7 @@ def main(
                     "required": ["task_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_TASK"}
+                    **{"category": "CLOSE_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -720,7 +720,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_TASK"}
+                    **{"category": "CLOSE_TASK", "readOnlyHint": True}
                 ),
             ),
             
@@ -733,7 +733,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_USER"}
+                    **{"category": "CLOSE_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -756,7 +756,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_USER"}
+                    **{"category": "CLOSE_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -773,7 +773,7 @@ def main(
                     "required": ["user_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLOSE_USER"}
+                    **{"category": "CLOSE_USER", "readOnlyHint": True}
                 ),
             ),
         ]

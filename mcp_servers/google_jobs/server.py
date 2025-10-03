@@ -137,7 +137,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="google_jobs_get_details",
@@ -152,7 +152,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_DETAILS"})
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_DETAILS", "readOnlyHint": True})
             ),
             types.Tool(
                 name="google_jobs_search_by_company",
@@ -181,7 +181,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="google_jobs_search_remote",
@@ -215,7 +215,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH"})
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SEARCH", "readOnlyHint": True})
             ),
             types.Tool(
                 name="google_jobs_get_suggestions",
@@ -230,7 +230,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SUGGESTION"})
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_JOBS_SUGGESTION", "readOnlyHint": True})
             ),
         ]
 

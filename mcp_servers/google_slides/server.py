@@ -496,7 +496,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="get_presentation",
@@ -515,7 +515,7 @@ def main(
                         }
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="batch_update_presentation",
@@ -553,7 +553,7 @@ def main(
                         }
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION"}),
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_SLIDES_PRESENTATION", "readOnlyHint": True}),
             )
         ]
 

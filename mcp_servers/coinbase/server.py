@@ -126,7 +126,7 @@ def main(
                     "required": ["symbols"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_MARKET"}
+                    **{"category": "COINBASE_MARKET", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -149,7 +149,7 @@ def main(
                     "required": ["symbols"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_MARKET"}
+                    **{"category": "COINBASE_MARKET", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -184,7 +184,7 @@ def main(
                     "required": ["symbol", "start", "end"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_MARKET"}
+                    **{"category": "COINBASE_MARKET", "readOnlyHint": True}
                 ),
             ),
             # Account & Portfolio Tools (requires API key)
@@ -201,7 +201,7 @@ def main(
                     "properties": {}
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_ACCOUNT"}
+                    **{"category": "COINBASE_ACCOUNT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -223,7 +223,7 @@ def main(
                     "required": ["account_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_ACCOUNT"}
+                    **{"category": "COINBASE_ACCOUNT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -258,7 +258,7 @@ def main(
                     "required": ["account_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_ACCOUNT"}
+                    **{"category": "COINBASE_ACCOUNT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -273,7 +273,7 @@ def main(
                     "properties": {}
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_ACCOUNT"}
+                    **{"category": "COINBASE_ACCOUNT", "readOnlyHint": True}
                 ),
             ),
             # Product Information Tools (Cryptocurreny)
@@ -295,7 +295,7 @@ def main(
                     "required": ["product_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "COINBASE_MARKET"}
+                    **{"category": "COINBASE_MARKET", "readOnlyHint": True}
                 ),
             ),
         ]
