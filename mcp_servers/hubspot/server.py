@@ -138,7 +138,7 @@ def main(
                     "required": ["object_type"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_PROPERTY"}
+                    **{"category": "HUBSPOT_PROPERTY", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -156,7 +156,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_TASK"}
+                    **{"category": "HUBSPOT_TASK", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -173,7 +173,7 @@ def main(
                     "required": ["task_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_TASK"}
+                    **{"category": "HUBSPOT_TASK", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -327,7 +327,7 @@ def main(
                     "required": ["object_type", "property_name", "operator", "value", "properties"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_PROPERTY"}
+                    **{"category": "HUBSPOT_PROPERTY", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -345,7 +345,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_CONTACT"}
+                    **{"category": "HUBSPOT_CONTACT", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -362,7 +362,7 @@ def main(
                     "required": ["contact_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_CONTACT"}
+                    **{"category": "HUBSPOT_CONTACT", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -481,7 +481,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_COMPANY"}
+                    **{"category": "HUBSPOT_COMPANY", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -498,7 +498,7 @@ def main(
                     "required": ["company_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_COMPANY"}
+                    **{"category": "HUBSPOT_COMPANY", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -554,7 +554,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_DEAL"}
+                    **{"category": "HUBSPOT_DEAL", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -571,7 +571,7 @@ def main(
                     "required": ["deal_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_DEAL"}
+                    **{"category": "HUBSPOT_DEAL", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -644,7 +644,7 @@ def main(
                     }
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_TICKET"}
+                    **{"category": "HUBSPOT_TICKET", "readOnlyHint": True}
                 )
             ),
             types.Tool(
@@ -661,7 +661,7 @@ def main(
                     "required": ["ticket_id"]
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "HUBSPOT_TICKET"}
+                    **{"category": "HUBSPOT_TICKET", "readOnlyHint": True}
                 )
             ),
             types.Tool(

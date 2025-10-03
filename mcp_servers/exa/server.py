@@ -176,7 +176,7 @@ def main(
                     },
                     "required": ["query"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "EXA_SEARCH"})
+                annotations=types.ToolAnnotations(**{"category": "EXA_SEARCH", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -218,7 +218,7 @@ def main(
                     },
                     "required": ["ids"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "EXA_CONTENT"})
+                annotations=types.ToolAnnotations(**{"category": "EXA_CONTENT", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -288,7 +288,7 @@ def main(
                     },
                     "required": ["url"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "EXA_DISCOVERY"})
+                annotations=types.ToolAnnotations(**{"category": "EXA_DISCOVERY", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -359,7 +359,7 @@ def main(
                     },
                     "required": ["query"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "EXA_QA"})
+                annotations=types.ToolAnnotations(**{"category": "EXA_QA", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -434,7 +434,7 @@ def main(
                     },
                     "required": ["query"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "EXA_RESEARCH"})
+                annotations=types.ToolAnnotations(**{"category": "EXA_RESEARCH", "readOnlyHint": True})
             )
         ]
 

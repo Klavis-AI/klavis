@@ -160,7 +160,7 @@ get_customer_tool = Tool(
         },
         "required": ["Id"]
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
 )
 
 list_customers_tool = Tool(
@@ -173,7 +173,7 @@ list_customers_tool = Tool(
             "ActiveOnly": {"type": "boolean", "description": "Return only active customers", "default": True}
         }
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
 )
 
 update_customer_tool = Tool(
@@ -270,7 +270,7 @@ search_customers_tool = Tool(
         },
         "required": []
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True})
 )
 
 

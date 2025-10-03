@@ -135,7 +135,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mem0_search_memories",
@@ -159,7 +159,7 @@ def main(
                         }
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mem0_update_memory",

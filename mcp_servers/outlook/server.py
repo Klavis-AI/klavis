@@ -148,7 +148,7 @@ def main(
                                            "description": "Whether to include hidden folders (default True)"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -161,7 +161,7 @@ def main(
                     },
                     "required": ["folder_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER"})
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_FOLDER", "readOnlyHint": True})
             ),
 
             types.Tool(
@@ -193,7 +193,7 @@ def main(
                     "required": ["message_id"],
                     "additionalProperties": False
                 },
-                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="outlookMail_list_messages",
@@ -240,7 +240,7 @@ def main(
                     },
                     "additionalProperties": False
                 },
-                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="outlookMail_list_messages_from_folder",
@@ -292,7 +292,7 @@ def main(
                     "required": ["folder_id"],
                     "additionalProperties": False
                 },
-                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE"})
+                annotations=types.ToolAnnotations(**{"category": "OUTLOOK_MESSAGE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="outlookMail_update_draft",

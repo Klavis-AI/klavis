@@ -61,7 +61,7 @@ get_account_tool = Tool(
         },
         "required": ["Id"]
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 list_accounts_tool = Tool(
@@ -77,7 +77,7 @@ list_accounts_tool = Tool(
         },
         "required": []
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 update_account_tool = Tool(
@@ -122,7 +122,7 @@ search_accounts_tool = Tool(
         },
         "required": []
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 

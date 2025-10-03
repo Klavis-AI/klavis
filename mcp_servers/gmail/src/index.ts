@@ -199,13 +199,13 @@ const getGmailMcpServer = () => {
                 name: "gmail_read_email",
                 description: "Retrieves the content of a specific email",
                 inputSchema: zodToJsonSchema(ReadEmailSchema),
-                annotations: { category: "GMAIL_EMAIL" },
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
             {
                 name: "gmail_search_emails",
                 description: "Searches for emails using Gmail search syntax",
                 inputSchema: zodToJsonSchema(SearchEmailsSchema),
-                annotations: { category: "GMAIL_EMAIL" },
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
             {
                 name: "gmail_modify_email",
@@ -235,7 +235,7 @@ const getGmailMcpServer = () => {
                 name: "gmail_get_email_attachments",
                 description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
                 inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
-                annotations: { category: "GMAIL_EMAIL" },
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
         ],
     }));

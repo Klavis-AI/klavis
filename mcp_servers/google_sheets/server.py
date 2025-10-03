@@ -336,7 +336,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_SHEETS_SPREADSHEET"}
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -380,7 +380,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_SHEETS_SPREADSHEET"}
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
                 ),
             ),
         ]

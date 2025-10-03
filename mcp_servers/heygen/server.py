@@ -102,7 +102,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_ACCOUNT"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_ACCOUNT", "readOnlyHint": True}),
             ),
             # Assets - Voices
             types.Tool(
@@ -119,7 +119,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="heygen_get_voice_locales",
@@ -134,7 +134,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VOICE", "readOnlyHint": True}),
             ),
             # Assets - Avatars
             types.Tool(
@@ -144,7 +144,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="heygen_get_avatars_in_avatar_group",
@@ -159,7 +159,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="heygen_list_avatars",
@@ -174,7 +174,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_AVATAR", "readOnlyHint": True}),
             ),
             # Generation
             types.Tool(
@@ -234,7 +234,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO", "readOnlyHint": True}),
             ),
             # Management
             types.Tool(
@@ -255,7 +255,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO"}),
+                annotations=types.ToolAnnotations(**{"category": "HEYGEN_VIDEO", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="heygen_delete_video",

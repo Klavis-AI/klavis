@@ -67,13 +67,13 @@ async def run_server(log_level: str = "INFO"):
                 name="mailchimp_ping",
                 description="Test Mailchimp Connection - verify API authentication is working correctly.",
                 inputSchema={"type": "object", "properties": {}},
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_get_account_info",
                 description="Get Account Information - retrieve comprehensive account details.",
                 inputSchema={"type": "object", "properties": {}},
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_ACCOUNT", "readOnlyHint": True})
             ),
             
             # Audience/List management tools
@@ -87,7 +87,7 @@ async def run_server(log_level: str = "INFO"):
                         "offset": {"type": "integer", "default": 0, "minimum": 0}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_create_audience",
@@ -130,7 +130,7 @@ async def run_server(log_level: str = "INFO"):
                     "required": ["list_id"],
                     "properties": {"list_id": {"type": "string"}}
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_AUDIENCE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_update_audience",
@@ -183,7 +183,7 @@ async def run_server(log_level: str = "INFO"):
                         "since_timestamp_opt": {"type": "string"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_add_member_to_audience",
@@ -223,7 +223,7 @@ async def run_server(log_level: str = "INFO"):
                         "email_address": {"type": "string"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_update_member",
@@ -301,7 +301,7 @@ async def run_server(log_level: str = "INFO"):
                         "count": {"type": "integer", "default": 10, "minimum": 1, "maximum": 50}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_MEMBER", "readOnlyHint": True})
             ),
             
             # Campaign management tools
@@ -325,7 +325,7 @@ async def run_server(log_level: str = "INFO"):
                         "sort_dir": {"type": "string", "enum": ["ASC", "DESC"]}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_create_campaign",
@@ -361,7 +361,7 @@ async def run_server(log_level: str = "INFO"):
                     "required": ["campaign_id"],
                     "properties": {"campaign_id": {"type": "string"}}
                 },
-                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN"})
+                annotations=types.ToolAnnotations(**{"category": "MAILCHIMP_CAMPAIGN", "readOnlyHint": True})
             ),
             types.Tool(
                 name="mailchimp_set_campaign_content",

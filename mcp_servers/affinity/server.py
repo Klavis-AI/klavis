@@ -103,7 +103,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_USER"}
+                    **{"category": "AFFINITY_USER", "readOnlyHint": True}
                 ),
             ),
             # Lists
@@ -139,7 +139,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_LIST"}
+                    **{"category": "AFFINITY_LIST", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -159,7 +159,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_LIST"}
+                    **{"category": "AFFINITY_LIST", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -176,7 +176,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_LIST"}
+                    **{"category": "AFFINITY_LIST", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -201,7 +201,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_LIST"}
+                    **{"category": "AFFINITY_LIST", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -232,7 +232,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_LIST"}
+                    **{"category": "AFFINITY_LIST", "readOnlyHint": True}
                 ),
             ),
             # Persons
@@ -268,7 +268,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"} 
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True} 
                 ),
             ),
             types.Tool(
@@ -295,7 +295,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"}
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -315,7 +315,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"}
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -340,7 +340,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"}
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -365,7 +365,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"}
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True}
                 ),
             ),
             # Companies
@@ -401,7 +401,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_COMPANY"}
+                    **{"category": "AFFINITY_COMPANY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -428,7 +428,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_COMPANY"}
+                    **{"category": "AFFINITY_COMPANY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -448,7 +448,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_COMPANY"}
+                    **{"category": "AFFINITY_COMPANY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -473,7 +473,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_COMPANY"}
+                    **{"category": "AFFINITY_COMPANY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -498,7 +498,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_COMPANY"}
+                    **{"category": "AFFINITY_COMPANY", "readOnlyHint": True}
                 ),
             ),
             # Opportunities
@@ -524,7 +524,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_OPPORTUNITY"}
+                    **{"category": "AFFINITY_OPPORTUNITY", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -541,7 +541,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_OPPORTUNITY"}
+                    **{"category": "AFFINITY_OPPORTUNITY", "readOnlyHint": True}
                 ),
             ),
             # Search Tools
@@ -582,7 +582,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_PERSON"}
+                    **{"category": "AFFINITY_PERSON", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -618,7 +618,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_ORGANIZATION"}
+                    **{"category": "AFFINITY_ORGANIZATION", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -642,7 +642,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_OPPORTUNITY"}
+                    **{"category": "AFFINITY_OPPORTUNITY", "readOnlyHint": True}
                 ),
             ),
             # Notes
@@ -675,7 +675,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_NOTE"}
+                    **{"category": "AFFINITY_NOTE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -692,7 +692,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AFFINITY_NOTE"}
+                    **{"category": "AFFINITY_NOTE", "readOnlyHint": True}
                 ),
             ),
         ]

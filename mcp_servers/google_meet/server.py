@@ -118,6 +118,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "end_before": {"type": "string", "description": "Only meetings starting before this RFC3339 UTC time"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="google_meet_list_past_meetings",
@@ -129,6 +130,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "since": {"type": "string", "description": "Only include meetings starting after this RFC3339 UTC time"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="google_meet_get_meeting_details",
@@ -140,6 +142,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "event_id": {"type": "string", "description": "The calendar event ID of the meeting"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="google_meet_update_meeting",
@@ -157,6 +160,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "notify_attendees": {"type": "boolean", "description": "Send updated invitations / notifications (default true)", "default": True},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING"}),
             ),
             types.Tool(
                 name="google_meet_delete_meeting",
@@ -168,6 +172,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "event_id": {"type": "string", "description": "The calendar event ID of the meeting to delete"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING"}),
             ),
             types.Tool(
                 name="google_meet_get_past_meeting_attendees",
@@ -179,6 +184,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "event_id": {"type": "string", "description": "The calendar event ID of the past meeting"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_MEETING", "readOnlyHint": True}),
             ),
         ]
         tools.extend([
@@ -186,6 +192,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                 name="google_meet_v2_create_instant",
                 description="Create an instant ad-hoc Google Meet (Meet API v2, Workspace/EDU only)",
                 inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_V2"}),
             ),
             types.Tool(
                 name="google_meet_v2_get_meeting",
@@ -195,6 +202,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                     "required": ["space_id"],
                     "properties": {"space_id": {"type": "string", "description": "Space ID or spaces/<id>"}},
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_V2", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="google_meet_v2_list_meetings",
@@ -203,6 +211,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                     "type": "object",
                     "properties": {"max_results": {"type": "integer", "default": 10, "description": "1-100"}},
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_V2", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="google_meet_v2_get_participants",
@@ -215,6 +224,7 @@ def main(port: int, log_level: str, json_response: bool, stdio: bool) -> int:
                         "max_results": {"type": "integer", "default": 50, "description": "1-300"},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GOOGLE_MEET_V2", "readOnlyHint": True}),
             ),
         ])
         return tools

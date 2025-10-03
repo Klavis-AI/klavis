@@ -621,7 +621,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -680,7 +680,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_DRIVE_DOCUMENT"}
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -718,7 +718,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_DRIVE_FILE"}
+                    **{"category": "GOOGLE_DRIVE_FILE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

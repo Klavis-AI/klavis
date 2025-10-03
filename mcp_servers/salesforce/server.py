@@ -104,7 +104,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "account_type": {"type": "string", "description": "Filter accounts by type"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_account",
@@ -159,7 +159,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "title_contains": {"type": "string", "description": "Filter contacts by title containing this text (case-insensitive)"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_contact",
@@ -214,7 +214,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_OPPORTUNITY", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_opportunity",
@@ -276,7 +276,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "industry": {"type": "string", "description": "Filter leads by industry"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_lead",
@@ -345,7 +345,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "case_type": {"type": "string", "description": "Filter cases by type"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_case",
@@ -398,7 +398,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_create_campaign",
@@ -449,7 +449,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "query": {"type": "string", "description": "SOQL query to execute"}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_QUERY"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_QUERY", "readOnlyHint": True})
             ),
             types.Tool(
                 name="salesforce_describe_object",
@@ -462,7 +462,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "detailed": {"type": "boolean", "description": "Whether to return additional metadata for custom objects", "default": False}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_METADATA"})
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_METADATA", "readOnlyHint": True})
             ),
         ]
 

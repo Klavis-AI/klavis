@@ -53,7 +53,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site"]
           },
-          annotations: { category: 'WORDPRESS_POST' },
+          annotations: { category: 'WORDPRESS_POST', readOnlyHint: true },
         },
         {
           name: "wordpress_update_post",

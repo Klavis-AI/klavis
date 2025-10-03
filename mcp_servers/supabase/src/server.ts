@@ -717,7 +717,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
         name: 'supabase_list_projects',
         description: 'Lists all Supabase projects for the user.',
         inputSchema: zodToJsonSchema(z.object({})),
-        annotations: { category: 'SUPABASE_PROJECT' },
+        annotations: { category: 'SUPABASE_PROJECT', readOnlyHint: true },
       },
       {
         name: 'supabase_get_project',
@@ -727,7 +727,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             id: z.string().describe('The project ID'),
           })
         ),
-        annotations: { category: 'SUPABASE_PROJECT' },
+        annotations: { category: 'SUPABASE_PROJECT', readOnlyHint: true },
       },
       {
         name: 'supabase_create_project',
@@ -781,7 +781,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_PROJECT' },
+        annotations: { category: 'SUPABASE_PROJECT', readOnlyHint: true },
       },
       {
         name: 'supabase_get_anon_key',
@@ -791,7 +791,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_PROJECT' },
+        annotations: { category: 'SUPABASE_PROJECT', readOnlyHint: true },
       },
 
       // ORGANIZATION
@@ -799,7 +799,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
         name: 'supabase_list_organizations',
         description: 'Lists all organizations that the user is a member of.',
         inputSchema: zodToJsonSchema(z.object({})),
-        annotations: { category: 'SUPABASE_ORGANIZATION' },
+        annotations: { category: 'SUPABASE_ORGANIZATION', readOnlyHint: true },
       },
       {
         name: 'supabase_get_organization',
@@ -809,7 +809,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             id: z.string().describe('The organization ID'),
           })
         ),
-        annotations: { category: 'SUPABASE_ORGANIZATION' },
+        annotations: { category: 'SUPABASE_ORGANIZATION', readOnlyHint: true },
       },
 
       // PRICING
@@ -823,7 +823,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             organization_id: z.string().describe('The organization ID. Always ask the user.'),
           })
         ),
-        annotations: { category: 'SUPABASE_PRICING' },
+        annotations: { category: 'SUPABASE_PRICING', readOnlyHint: true },
       },
       {
         name: 'supabase_confirm_cost',
@@ -836,7 +836,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             amount: z.number(),
           })
         ),
-        annotations: { category: 'SUPABASE_PRICING' },
+        annotations: { category: 'SUPABASE_PRICING', readOnlyHint: true },
       },
 
       // DATABASE
@@ -851,7 +851,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
               .describe('Optional list of schemas to include. Defaults to all schemas.'),
           })
         ),
-        annotations: { category: 'SUPABASE_DATABASE' },
+        annotations: { category: 'SUPABASE_DATABASE', readOnlyHint: true },
       },
       {
         name: 'supabase_list_extensions',
@@ -861,7 +861,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_DATABASE' },
+        annotations: { category: 'SUPABASE_DATABASE', readOnlyHint: true },
       },
       {
         name: 'supabase_list_migrations',
@@ -871,7 +871,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_DATABASE' },
+        annotations: { category: 'SUPABASE_DATABASE', readOnlyHint: true },
       },
       {
         name: 'supabase_apply_migration',
@@ -919,7 +919,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
               .describe('The service to fetch logs for'),
           })
         ),
-        annotations: { category: 'SUPABASE_LOGS' },
+        annotations: { category: 'SUPABASE_LOGS', readOnlyHint: true },
       },
 
       // TYPES
@@ -931,7 +931,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_TYPES' },
+        annotations: { category: 'SUPABASE_TYPES', readOnlyHint: true },
       },
 
       // BRANCH
@@ -962,7 +962,7 @@ export function createSupabaseMcpServer(options: SupabaseMcpServerOptions) {
             project_id: z.string(),
           })
         ),
-        annotations: { category: 'SUPABASE_BRANCH' },
+        annotations: { category: 'SUPABASE_BRANCH', readOnlyHint: true },
       },
       {
         name: 'supabase_delete_branch',

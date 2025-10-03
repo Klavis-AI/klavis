@@ -188,7 +188,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the audience to retrieve"),
     },
-    { category: "RESEND_AUDIENCE" },
+    { category: "RESEND_AUDIENCE", readOnlyHint: true },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.audiences.get(id);
@@ -242,7 +242,7 @@ const getResendMcpServer = () => {
     "resend_list_audiences",
     "List all audiences in Resend",
     {},
-    { category: "RESEND_AUDIENCE" },
+    { category: "RESEND_AUDIENCE", readOnlyHint: true },
     async () => {
       const resend = getResendClient();
       const response = await resend.audiences.list();
@@ -310,7 +310,7 @@ const getResendMcpServer = () => {
       id: z.string().optional().describe("ID of the contact to retrieve"),
       email: z.string().email().optional().describe("Email of the contact to retrieve"),
     },
-    { category: "RESEND_CONTACT" },
+    { category: "RESEND_CONTACT", readOnlyHint: true },
     async ({ audienceId, id, email }) => {
       if (!id && !email) {
         throw new Error("Either contact ID or email must be provided");
@@ -511,7 +511,7 @@ const getResendMcpServer = () => {
     {
       audienceId: z.string().describe("ID of the audience to list contacts from"),
     },
-    { category: "RESEND_CONTACT" },
+    { category: "RESEND_CONTACT", readOnlyHint: true },
     async ({ audienceId }) => {
       const resend = getResendClient();
       const response = await resend.contacts.list({
@@ -583,7 +583,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the broadcast to retrieve"),
     },
-    { category: "RESEND_BROADCAST" },
+    { category: "RESEND_BROADCAST", readOnlyHint: true },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.broadcasts.get(id);
@@ -670,7 +670,7 @@ const getResendMcpServer = () => {
     "resend_list_broadcasts",
     "List all broadcasts in Resend",
     {},
-    { category: "RESEND_BROADCAST" },
+    { category: "RESEND_BROADCAST", readOnlyHint: true },
     async () => {
       const resend = getResendClient();
       const response = await resend.broadcasts.list();
