@@ -83,7 +83,7 @@
       "post": {
         "tags": ["mcp-server"],
         "summary": "Create",
-        "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis MCP servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
+        "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis integration, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "create_strata_server_mcp_server_strata_create_post",
         "requestBody": {
           "content": {
@@ -159,7 +159,7 @@
       "delete": {
         "tags": ["mcp-server"],
         "summary": "Delete",
-        "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis MCP servers, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
+        "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis integration, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
         "operationId": "delete_servers_from_strata_mcp_server_strata__strataId__servers_delete",
         "security": [{ "HTTPBearer": [] }],
         "parameters": [
@@ -186,10 +186,10 @@
                 },
                 { "type": "null" }
               ],
-              "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers.",
+              "description": "List of Klavis integration to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis integration, or null to delete no servers.",
               "title": "Servers"
             },
-            "description": "List of Klavis MCP servers to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis MCP servers, or null to delete no servers."
+            "description": "List of Klavis integration to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis integration, or null to delete no servers."
           },
           {
             "name": "externalServers",
@@ -4275,7 +4275,7 @@
               { "type": "null" }
             ],
             "title": "Servers",
-            "description": "List of Klavis MCP servers to add (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
+            "description": "List of Klavis integration to add (e.g., 'jira', 'linear'), 'ALL' to add all Klavis integration, or null to add no servers."
           },
           "externalServers": {
             "anyOf": [
@@ -4301,7 +4301,7 @@
             "items": { "type": "string" },
             "type": "array",
             "title": "Addedservers",
-            "description": "List of Klavis MCP servers that were added"
+            "description": "List of Klavis integration that were added"
           },
           "addedExternalServers": {
             "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
@@ -4313,13 +4313,13 @@
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
-            "description": "Mapping of server name to OAuth URL for newly added servers"
+            "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
-            "description": "Mapping of server name to API key setup URL for newly added servers"
+            "description": "Map of connected integration to API key setup URL"
           }
         },
         "type": "object",
@@ -4386,7 +4386,7 @@
             "items": { "type": "string" },
             "type": "array",
             "title": "Addedservers",
-            "description": "List of Klavis MCP servers that were added"
+            "description": "List of Klavis integration that were added"
           },
           "addedExternalServers": {
             "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
@@ -4398,13 +4398,13 @@
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
-            "description": "Mapping of server name to OAuth URL"
+            "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
-            "description": "Mapping of server name to API key setup URL"
+            "description": "Map of connected integration to API key setup URL"
           }
         },
         "type": "object",
@@ -4417,7 +4417,7 @@
             "items": { "type": "string" },
             "type": "array",
             "title": "Deletedservers",
-            "description": "List of Klavis MCP server names that were deleted"
+            "description": "List of integration that were deleted"
           },
           "deletedExternalServers": {
             "items": { "type": "string" },
@@ -4446,7 +4446,7 @@
             "items": { "type": "string" },
             "type": "array",
             "title": "Connectedservers",
-            "description": "List of Klavis MCP servers currently connected to this strata"
+            "description": "List of available integration currently connected to this strata"
           },
           "connectedExternalServers": {
             "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
@@ -4458,13 +4458,13 @@
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
-            "description": "Mapping of Klavis MCP server name to OAuth URL"
+            "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
             "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
-            "description": "Mapping of Klavis MCP server name to API key setup URL"
+            "description": "Map of connected integration to API key setup URL"
           }
         },
         "type": "object",
