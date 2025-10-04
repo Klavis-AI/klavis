@@ -1,0 +1,9 @@
+mcp
+google-api-python-client
+google-auth
+python-dotenv
+starlette
+uvicorn[standard]
+click
+tenacity
+anyio
