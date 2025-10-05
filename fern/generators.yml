@@ -4,6 +4,7 @@ api:
   specs:
     - openapi: ../docs/api-reference/openapi.json
       overrides: overrides.yml
+      origin: https://api.klavis.ai/openapi.json # URL to fetch latest spec from
 
 groups:
   python-sdk:
