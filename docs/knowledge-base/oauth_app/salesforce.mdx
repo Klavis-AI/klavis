@@ -17,65 +17,64 @@ description: "Complete guide to creating and configuring a Salesforce OAuth appl
 <img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step1_login.png" alt="Salesforce Developer Login" />
 
 
-## Step 2: Create a New App
+## Step 2: Enable Connected Apps
 
 1. Once logged in, go to **"Setup Menu"** (Gear Icon) and click **"Setup"**
-2. Search **"App Manager"** in the **"Quick Find"** search box
-3. In **"App Manager"**, choose **"New External Client App"**
+2. Search **"External Client Apps"** in the **"Quick Find"** search box
+3. In **"External Client App Settings"**, enable **"Allow creation of connected apps"**
+4. Click **"New Connected App"**
 
 <img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step2_create_app.png" alt="Salesforce App Creation" />
 
 ## Step 3: Fill Basic App Information
 
 1. Fill the necessary app details:
-   - **App name**: Your application name (e.g., your brand name)
-   - **API Name**: Your API Name (e.g similar to app name)
-   - **Distribution State**: Local/Packaged (recommended to set as **Local**)
-   - **Other Information**: **Contact Mail**, **Contact Phone**, **Description**, **Info Url**, **Logo Image Url**, and **Icon Url**
+   - **Connected App Name**: Your application name (e.g., your brand name)
+   - **API Name**: Auto-generated from app name (only letters, numbers, and underscores allowed)
+   - **Contact Email**: Your contact email for Salesforce support
+   - **Contact Phone**: Your contact phone for Salesforce support
+   - **Logo Image URL**: (Optional) HTTPS URL for your app logo (max 100 KB, preferably under 20 KB)
+   - **Info URL**: (Optional) Web page with more information about your app
+   - **Description**: (Optional) Up to 256 characters describing your app
 
    <img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step3_basic_info.png" alt="Basic App Information" />
-
-## Step 4: Configure OAuth Settings
 
 <Note>
 Klavis Salesforce MCP Server uses the following OAuth scopes: `api,refresh_token,offline_access`
 </Note>
 
-1. **Redirect URIs**: Add your callback URL:
-   - `https://api.klavis.ai/oauth/salesforce/callback`
+1. In the **API (Enable OAuth Settings)** section:
+   - Select **"Enable OAuth Settings"**
+   - **Callback URL**: Enter `https://api.klavis.ai/oauth/salesforce/callback`
+   
+2. **Select OAuth Scopes**: Move required scopes from **"Available OAuth Scopes"** to **"Selected OAuth Scopes"**:
+   - `Manage User Data via APIs (api)` - required to manage user data via APIs
+   - `Perform requests on your behalf at any time (refresh_token, offline_access)` - required to perform requests at any time
 
-2. **Scopes**: Move required scopes from **"Available"** to **"Selected"** Oauth scope menu:
-   - `api` (required to manage user data via APIs)
-   - `refresh_token,offline_access` (required to perform requests at any time)
-3. Click on **"Create"** app
+3. **Additional Settings**:
+   - Enable **"Require Secret for Web Server Flow"** if your app can keep the client secret confidential
+   - Enable **"Require Secret for Refresh Token Flow"**
+   - Enable **"Enable Authorization Code and Credentials Flow"**
 
-<img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step4_callback_and_scopes.png" alt="OAuth Settings and Connection Configuration" />
+4. Click **"Save"** to create the app
 
-## Step 5: Get Consumer Key and Secret
+## Step 4: Get Consumer Key and Secret
 
 After creating the app, follow these steps to get the credentials.
 
 1. From dashboard, go to **"Setup Menu"** (Gear Icon) and click **"Setup"**
-2. Search **"External Client App Manager"** in the **"Quick Find"** search box
-3. Click on App that you created. Navigate to Setting -> OAuth Settings
-4. Under **"App Settings"**, click on **"Consumer Key and Secret"**
-5. To access credentials, verify your identity using **verification code** sent to your connected mail.
-6. Copy **Consumer Key** and **Consumer Secret** from consumer details menu (keep it secure!)
+2. Search **"App Manager"** in the **"Quick Find"** search box
+3. Find your connected app in the list and click the dropdown arrow, then select **"View"**
 
-<img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step5_get_consumer_key_and_secret.png" alt="Get Consumer Key and Secret" />
+<img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step4_view_connected_apps.png" alt="View Connected Apps" />
 
-## Step 6: Get Remaining credentials (Security Token, Username, Password, Instance Id)
+4. In the **API (Enable OAuth Settings)** section, click **"Manage Consumer Details"**
+5. Verify your identity using the **verification code** sent to your email
+6. Copy the **Consumer Key** and **Consumer Secret** (keep them secure!)
 
-1. In user settings, **"My Personal Information"** -> **"Advanced User Details"**
-- Get **Username** from User Details section
-- Use **Password** that you set while creating the account.
-- Copy **Instance ID** from address bar or Login History -> Login Url tab
-2. Go to user setting, **"My Personal Information"** -> **"Reset My Security Token"**
- - Click **Reset Security Token**
- - Security Token is sent to you via mail (keep it secure!)
- <img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step6_security_token.png" alt="Get Security Token" />
+<img src="/images/knowledge-base/salesforce_oauth_app/salesforce_step4_view_consumer_key_and_secret.png" alt="Get Consumer Key and Secret" />
 
-## (Optional) Step 7: White Labeling 
+## (Optional) Step 5: White Labeling 
 
 <Note>
 White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
