@@ -1,4 +1,4 @@
 openai>=1.109.1
-klavis>=2.1.0
+klavis>=2.5.0
 python-dotenv>=1.1.0
 requests>=2.31.0
