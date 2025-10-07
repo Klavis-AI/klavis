@@ -272,11 +272,15 @@ const getGmailMcpServer = () => {
                     userId: 'me',
                     requestBody: messageRequest,
                 });
+                const resultPayload = {
+                    message: `Email sent successfully with ID: ${response.data.id}`,
+                    messageId: response.data.id ?? null,
+                };
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Email sent successfully with ID: ${response.data.id}`,
+                            text: JSON.stringify(resultPayload, null, 2),
                         },
                     ],
                 };
@@ -287,11 +291,15 @@ const getGmailMcpServer = () => {
                         message: messageRequest,
                     },
                 });
+                const resultPayload = {
+                    message: `Email draft created successfully with ID: ${response.data.id}`,
+                    draftId: response.data.id ?? null,
+                };
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Email draft created successfully with ID: ${response.data.id}`,
+                            text: JSON.stringify(resultPayload, null, 2),
                         },
                     ],
                 };
@@ -357,14 +365,6 @@ const getGmailMcpServer = () => {
                     // Extract email content using the recursive function
                     const { text, html } = extractEmailContent(response.data.payload as GmailMessagePart || {});
 
-                    // Use plain text content if available, otherwise use HTML content
-                    // (optionally, you could implement HTML-to-text conversion here)
-                    let body = text || html || '';
-
-                    // If we only have HTML content, add a note for the user
-                    const contentTypeNote = !text && html ?
-                        '[Note: This email is HTML-formatted. Plain text version not available.]\n\n' : '';
-
                     // Get attachment information
                     const attachments: EmailAttachment[] = [];
                     const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
@@ -389,16 +389,27 @@ const getGmailMcpServer = () => {
                         processAttachmentParts(response.data.payload as GmailMessagePart);
                     }
 
-                    // Add attachment info to output if any are present
-                    const attachmentInfo = attachments.length > 0 ?
-                        `\n\nAttachments (${attachments.length}):\n` +
-                        attachments.map(a => `- ${a.filename} (${a.mimeType}, ${Math.round(a.size / 1024)} KB)`).join('\n') : '';
+                    const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
+                    const resultPayload = {
+                        threadId,
+                        subject,
+                        from,
+                        to,
+                        date,
+                        body: {
+                            text: text || '',
+                            html: html || '',
+                            preferredFormat,
+                            note: !text && html ? 'Email body available only in HTML format; plain text representation not available.' : undefined,
+                        },
+                        attachments,
+                    };
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Thread ID: ${threadId}\nSubject: ${subject}\nFrom: ${from}\nTo: ${to}\nDate: ${date}\n\n${contentTypeNote}${body}${attachmentInfo}`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -435,9 +446,7 @@ const getGmailMcpServer = () => {
                         content: [
                             {
                                 type: "text",
-                                text: results.map((r: any) =>
-                                    `ID: ${r.id}\nSubject: ${r.subject}\nFrom: ${r.from}\nDate: ${r.date}\n`
-                                ).join('\n'),
+                                text: JSON.stringify(results, null, 2),
                             },
                         ],
                     };
@@ -462,12 +471,22 @@ const getGmailMcpServer = () => {
                         id: validatedArgs.messageId,
                         requestBody: requestBody,
                     });
+                    const resultPayload: Record<string, unknown> = {
+                        message: `Email ${validatedArgs.messageId} labels updated successfully`,
+                        messageId: validatedArgs.messageId,
+                    };
+                    if (validatedArgs.addLabelIds) {
+                        resultPayload.addedLabels = validatedArgs.addLabelIds;
+                    }
+                    if (validatedArgs.removeLabelIds) {
+                        resultPayload.removedLabels = validatedArgs.removeLabelIds;
+                    }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Email ${validatedArgs.messageId} labels updated successfully`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -479,12 +498,16 @@ const getGmailMcpServer = () => {
                         userId: 'me',
                         id: validatedArgs.messageId,
                     });
+                    const resultPayload = {
+                        message: `Email ${validatedArgs.messageId} deleted successfully`,
+                        messageId: validatedArgs.messageId,
+                    };
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Email ${validatedArgs.messageId} deleted successfully`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -528,21 +551,24 @@ const getGmailMcpServer = () => {
                     // Generate summary of the operation
                     const successCount = successes.length;
                     const failureCount = failures.length;
-
-                    let resultText = `Batch label modification complete.\n`;
-                    resultText += `Successfully processed: ${successCount} messages\n`;
-
-                    if (failureCount > 0) {
-                        resultText += `Failed to process: ${failureCount} messages\n\n`;
-                        resultText += `Failed message IDs:\n`;
-                        resultText += failures.map(f => `- ${(f.item as string).substring(0, 16)}... (${f.error.message})`).join('\n');
+                    const failureDetails = failures.map(({ item, error }) => ({
+                        messageId: typeof item === 'string' ? item : String(item),
+                        error: error.message,
+                    }));
+                    const resultPayload: Record<string, unknown> = {
+                        message: "Batch label modification complete.",
+                        successCount,
+                        failureCount,
+                    };
+                    if (failureDetails.length > 0) {
+                        resultPayload.failures = failureDetails;
                     }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: resultText,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -574,21 +600,24 @@ const getGmailMcpServer = () => {
                     // Generate summary of the operation
                     const successCount = successes.length;
                     const failureCount = failures.length;
-
-                    let resultText = `Batch delete operation complete.\n`;
-                    resultText += `Successfully deleted: ${successCount} messages\n`;
-
-                    if (failureCount > 0) {
-                        resultText += `Failed to delete: ${failureCount} messages\n\n`;
-                        resultText += `Failed message IDs:\n`;
-                        resultText += failures.map(f => `- ${(f.item as string).substring(0, 16)}... (${f.error.message})`).join('\n');
+                    const failureDetails = failures.map(({ item, error }) => ({
+                        messageId: typeof item === 'string' ? item : String(item),
+                        error: error.message,
+                    }));
+                    const resultPayload: Record<string, unknown> = {
+                        message: "Batch delete operation complete.",
+                        successCount,
+                        failureCount,
+                    };
+                    if (failureDetails.length > 0) {
+                        resultPayload.failures = failureDetails;
                     }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: resultText,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -632,11 +661,16 @@ const getGmailMcpServer = () => {
                     
 
                     if (attachmentsMeta.length === 0) {
+                        const resultPayload = {
+                            message: `No attachments found for message ${messageId}`,
+                            messageId,
+                            attachmentCount: 0,
+                        };
                         return {
                             content: [
                                 {
                                     type: 'text',
-                                    text: `No attachments found for message ${messageId}`,
+                                    text: JSON.stringify(resultPayload, null, 2),
                                 },
                             ],
                         };
@@ -654,6 +688,23 @@ const getGmailMcpServer = () => {
                             const base64 = base64UrlToBase64(base64Url);
 
                             const mime = meta.mimeType || 'application/octet-stream';
+                            const commonMeta = {
+                                attachmentId: meta.attachmentId,
+                                filename: meta.filename,
+                                mimeType: mime,
+                                size: meta.size,
+                            };
+                            const asJsonText = (extra: Record<string, unknown>) => ({
+                                type: 'text' as const,
+                                text: JSON.stringify(
+                                    {
+                                        ...commonMeta,
+                                        ...extra,
+                                    },
+                                    null,
+                                    2
+                                ),
+                            });
                             
                             // Handle PDF files using pdf-parse
                             if (mime === 'application/pdf' || meta.filename.toLowerCase().endsWith('.pdf')) {
@@ -709,6 +760,7 @@ const getGmailMcpServer = () => {
                                     type: 'image' as const,
                                     data: base64,
                                     mimeType: mime,
+                                    name: meta.filename,
                                 };
                             }
 
@@ -717,6 +769,7 @@ const getGmailMcpServer = () => {
                                     type: 'audio' as const,
                                     data: base64,
                                     mimeType: mime,
+                                    name: meta.filename,
                                 };
                             }
 
@@ -732,7 +785,16 @@ const getGmailMcpServer = () => {
                     // Optionally prepend a short summary line
                     const summary = {
                         type: 'text' as const,
-                        text: `Attachments for message ${messageId}: ${attachmentsMeta.length}`,
+                        text: JSON.stringify(
+                            {
+                                message: `Attachments for message ${messageId}`,
+                                messageId,
+                                attachmentCount: attachmentsMeta.length,
+                                attachments: attachmentsMeta,
+                            },
+                            null,
+                            2
+                        ),
                     };
 
                     return {
@@ -744,11 +806,12 @@ const getGmailMcpServer = () => {
                     throw new Error(`Unknown tool: ${name}`);
             }
         } catch (error: any) {
+            const errorPayload = { error: error.message };
             return {
                 content: [
                     {
                         type: "text",
-                        text: `Error: ${error.message}`,
+                        text: JSON.stringify(errorPayload, null, 2),
                     },
                 ],
             };
