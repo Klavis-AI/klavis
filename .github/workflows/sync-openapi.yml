@@ -7,22 +7,18 @@ on:                                              # additional custom triggers ca
   schedule:
     - cron: '0 3 * * *'                          # everyday at 3:00 AM UTC
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   update-from-source:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.OPENAPI_SYNC_TOKEN }}
       - name: Update API with Fern
         uses: fern-api/sync-openapi@v2
         with:
           update_from_source: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.OPENAPI_SYNC_TOKEN }}
           branch: 'update-api'
           auto_merge: false                        # you MUST use auto_merge: true with branch: main
           add_timestamp: true
