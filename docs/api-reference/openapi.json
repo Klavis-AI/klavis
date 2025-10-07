@@ -663,27 +663,6 @@
             "description": "The name of the target MCP server. Case-insensitive. Provide a comma-separated list (e.g., 'google calendar,slack') to fetch tools for multiple servers."
           },
           {
-            "name": "serverNames",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Additional MCP server names to include. Accepts repeated query parameters or comma-separated values.",
-              "title": "Servernames"
-            },
-            "description": "Additional MCP server names to include. Accepts repeated query parameters or comma-separated values."
-          },
-          {
             "name": "format",
             "in": "query",
             "required": false,
