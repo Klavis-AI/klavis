@@ -4163,6 +4163,7 @@
           "Resend",
           "Salesforce",
           "SendGrid",
+          "ServiceNow",
           "Shopify",
           "Slack",
           "Stripe",
@@ -4172,8 +4173,7 @@
           "WhatsApp",
           "WordPress",
           "YouTube",
-          "Zendesk",
-          "ServiceNow"
+          "Zendesk"
         ],
         "title": "McpServerName"
       },
