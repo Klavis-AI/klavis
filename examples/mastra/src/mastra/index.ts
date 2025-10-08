@@ -6,47 +6,45 @@ import { KlavisClient, Klavis } from 'klavis';
 import open from 'open';
 
 /**
- * Creates a Gmail MCP Agent with tools from a Klavis-hosted server
+ * Creates an MCP Agent with tools from Klavis Strata server
+ * Strata servers support multiple MCP servers (Here use Gmail, Slack)
  */
-export const createGmailMcpAgent = async (userId: string = 'test-user'): Promise<Agent> => {
+export const createMcpAgent = async (userId: string = 'test-user'): Promise<Agent> => {
   const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
 
-  // Create a new Gmail MCP server instance
-  const instance = await klavis.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Gmail,
-    userId,
-    platformName
+  // Create a Strata MCP Server with Gmail and Slack
+  const response = await klavis.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId
   });
 
-  // Redirect user to authorize
-  const response = await klavis.mcpServer.getOAuthUrl({
-    serverName: Klavis.McpServerName.Gmail,
-    instanceId: instance.instanceId
-  });
-  open(response.oauthUrl);
+  // Handle OAuth authorization for each service
+  if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+      open(oauthUrl);
+      console.log(`Please complete ${serverName} OAuth authorization at: ${oauthUrl}`);
+    }
+  }
 
-  // Initialize the MCP client
+  // Initialize the MCP client with Strata server URL
   const mcpClient = new MCPClient({
     servers: {
-      gmail: {
-        url: new URL(instance.serverUrl)
+      strata: {
+        url: new URL(response.strataServerUrl)
       }
     }
   });
 
-  // Get tools from the server
-  const tools = await mcpClient.getTools();
-
   // Create agent
   return new Agent({
-    name: 'Gmail MCP Agent',
-    instructions: `You are a Gmail agent with access to Gmail tools: read, send, search emails, and manage labels.`,
+    name: 'MCP Agent',
+    instructions: `You are an AI agent with access to MCP tools.`,
     model: openai('gpt-4o-mini'),
-    tools
+    tools: await mcpClient.getTools()
   });
 };
 
-const agent = await createGmailMcpAgent();
+const agent = await createMcpAgent();
 
 export const mastra = new Mastra({
   agents: { agent }
