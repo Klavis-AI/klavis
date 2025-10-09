@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '../docs/api-reference/openapi.json'  # Adjust path to your spec files
+      - 'docs/api-reference/openapi.json'
       - 'fern/generators.yml'
 
 jobs:
