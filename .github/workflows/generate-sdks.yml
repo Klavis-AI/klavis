@@ -25,6 +25,6 @@ jobs:
         run: npm install -g fern-api
         
       - name: Generate SDKs
-        run: fern generate
+        run: fern generate --group python-sdk --group ts-sdk
         env:
           FERN_TOKEN: ${{ secrets.FERN_TOKEN }}
