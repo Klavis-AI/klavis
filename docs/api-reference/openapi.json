@@ -404,6 +404,59 @@
         }
       }
     },
+    "/mcp-server/strata/{strataId}/auth/{serverName}": {
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get Strata Auth",
+        "description": "Retrieves authentication data for a specific integration within a Strata MCP server.\n\nReturns the authentication data if available, along with authentication status.",
+        "operationId": "getStrataAuth",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The strata server ID",
+              "title": "Strataid"
+            },
+            "description": "The strata server ID"
+          },
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the Klavis MCP server to get authentication for (e.g., 'GitHub', 'Jira')",
+              "title": "Servername"
+            },
+            "description": "The name of the Klavis MCP server to get authentication for (e.g., 'GitHub', 'Jira')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrataGetAuthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp-server/strata/set-auth": {
       "post": {
         "tags": [
@@ -512,12 +565,61 @@
         }
       }
     },
+    "/mcp-server/strata/{strata_id}/server/{server_name}/auth": {
+      "delete": {
+        "tags": ["mcp-server"],
+        "summary": "Delete Strata Auth",
+        "description": "Deletes authentication data for a specific integration within a Strata MCP server.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the server.",
+        "operationId": "deleteStrataAuth",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "strata_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The strata server ID",
+              "title": "Strata Id"
+            },
+            "description": "The strata server ID"
+          },
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')",
+              "title": "Server Name"
+            },
+            "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mcp-server/instance/create": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
-        "summary": "Create",
+        "tags": ["mcp-server"],
+        "summary": "Create Server Instance",
         "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
         "operationId": "createServerInstance",
         "requestBody": {
@@ -608,10 +710,8 @@
     },
     "/mcp-server/instance/get/{instance_id}": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
-        "summary": "Get",
+        "tags": ["mcp-server"],
+        "summary": "Get Server Instance",
         "description": "Checks the details of a specific server connection instance using its unique ID and API key,\nreturning server details like authentication status and associated server/platform info.",
         "operationId": "getServerInstance",
         "security": [
@@ -659,10 +759,8 @@
     },
     "/mcp-server/instance/{instance_id}/auth": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
-        "summary": "Delete Instance Auth",
+        "tags": ["mcp-server"],
+        "summary": "Delete",
         "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
         "security": [
@@ -755,14 +853,51 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get Instance Auth",
+        "description": "Retrieves the auth data for a specific integration instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for integration instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthData",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The ID of the connection integration instance to get auth data for.",
+              "title": "Instance Id"
+            },
+            "description": "The ID of the connection integration instance to get auth data for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
       }
     },
     "/mcp-server/instance/delete/{instance_id}": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
-        "summary": "Delete",
+        "tags": ["mcp-server"],
+        "summary": "Delete Server Instance",
         "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
         "operationId": "deleteServerInstance",
         "security": [
@@ -937,26 +1072,59 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/mcp-server/instance/get-auth/{instance_id}": {
+      "get": {
+        "tags": ["mcp-server"],
+        "summary": "Get Instance Auth",
+        "description": "Retrieves the auth data for a specific instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for instances they own. It also handles token refresh if needed.",
+        "operationId": "getInstanceAuthData",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
           {
-            "HTTPBearer": []
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The ID of the connection instance to get auth data for.",
+              "title": "Instance Id"
+            },
+            "description": "The ID of the connection instance to get auth data for."
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
       }
     },
     "/white-labeling/create": {
       "post": {
-        "tags": [
-          "white-labeling"
-        ],
-        "summary": "Create",
+        "tags": ["white-labeling"],
+        "summary": "Create White Label",
         "description": "Saves OAuth white labeling information, or updates existing information if the `client_id` matches.",
         "operationId": "createWhiteLabeling",
         "requestBody": {
@@ -1000,10 +1168,8 @@
     },
     "/white-labeling/get/{client_id}": {
       "get": {
-        "tags": [
-          "white-labeling"
-        ],
-        "summary": "Get",
+        "tags": ["white-labeling"],
+        "summary": "Get White Label",
         "description": "Retrieves white labeling information for a specific OAuth client ID.",
         "operationId": "getWhiteLabelingByClientId",
         "security": [
@@ -1048,17 +1214,11 @@
     },
     "/user/integrations": {
       "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Get User Integrations",
-        "description": "Get all available integrations (MCP server names) by user ID.\nReturns a list of integration names as McpServerName types.",
-        "operationId": "getUserIntegrations",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "tags": ["user"],
+        "summary": "Get User Instances",
+        "description": "Get all MCP server instances information by user ID and platform name.",
+        "operationId": "getServerInstancesByUser",
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1070,50 +1230,11 @@
               "title": "User Id"
             },
             "description": "The external user ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserIntegrationsResponse"
-                }
-              }
-            }
           },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/user/{user_id}": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Get User",
-        "description": "Get user information by user_id.",
-        "operationId": "getUserByUserId",
-        "security": [
           {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "path",
-            "required": true,
+            "name": "platform_name",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
               "minLength": 1,
@@ -1129,7 +1250,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetUserResponse"
+                  "$ref": "#/components/schemas/GetServerInstancesResponse"
                 }
               }
             }
@@ -1363,6 +1484,145 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/set-auth": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Set User Auth",
+        "description": "Sets authentication data for a specific integration for a user.\n\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified user's integration instance.",
+        "operationId": "setUserAuth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SetUserAuthRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "HTTPBearer": [] }]
+      }
+    },
+    "/user/{user_id}/auth/{server_name}": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Get User Auth",
+        "description": "Retrieves authentication data for a specific integration for a user.\n\nReturns the authentication data if available, along with authentication status.\nIncludes token refresh handling if needed.",
+        "operationId": "getUserAuth",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The identifier for the user",
+              "title": "User Id"
+            },
+            "description": "The identifier for the user"
+          },
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the MCP server (e.g., 'GitHub', 'Jira')",
+              "title": "Server Name"
+            },
+            "description": "The name of the MCP server (e.g., 'GitHub', 'Jira')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetUserAuthResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/user/{user_id}/server/{server_name}/auth": {
+      "delete": {
+        "tags": ["user"],
+        "summary": "Delete User Auth",
+        "description": "Deletes authentication data for a specific integration for a user.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the integration.",
+        "operationId": "deleteUserAuth",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The unique identifier for the user",
+              "title": "User Id"
+            },
+            "description": "The unique identifier for the user"
+          },
+          {
+            "name": "server_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the MCP server to delete authentication for (e.g., 'github', 'jira')",
+              "title": "Server Name"
+            },
+            "description": "The name of the MCP server to delete authentication for (e.g., 'github', 'jira')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -5695,21 +5955,46 @@
       },
       "DeleteUserResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          }
+          "success": { "type": "boolean", "title": "Success" },
+          "message": { "type": "string", "title": "Message" }
         },
         "type": "object",
-        "required": [
-          "success",
-          "message"
-        ],
+        "required": ["success", "message"],
         "title": "DeleteUserResponse"
+      },
+      "ExtendedMcpServer": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "tools": {
+            "anyOf": [
+              {
+                "items": { "$ref": "#/components/schemas/ServerTool" },
+                "type": "array"
+              },
+              { "type": "null" }
+            ],
+            "title": "Tools"
+          },
+          "authNeeded": {
+            "type": "boolean",
+            "title": "Authneeded",
+            "default": true
+          },
+          "isAuthenticated": {
+            "type": "boolean",
+            "title": "Isauthenticated",
+            "default": false
+          },
+          "serverUrl": { "type": "string", "title": "Serverurl", "default": "" }
+        },
+        "type": "object",
+        "required": ["id", "name"],
+        "title": "ExtendedMcpServer"
       },
       "ExternalServerInfo": {
         "properties": {
@@ -5913,103 +6198,15 @@
       },
       "GetUserAuthResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
-          "userId": {
-            "type": "string",
-            "title": "Userid",
-            "description": "The user identifier"
-          },
-          "serverName": {
-            "type": "string",
-            "title": "Servername",
-            "description": "The name of the server"
-          },
-          "authData": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authdata",
-            "description": "The authentication data if available"
-          },
-          "isAuthenticated": {
-            "type": "boolean",
-            "title": "Isauthenticated",
-            "description": "Whether the server has authentication data configured"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "success",
-          "userId",
-          "serverName",
-          "isAuthenticated"
-        ],
-        "title": "GetUserAuthResponse"
-      },
-      "GetUserIntegrationsResponse": {
-        "properties": {
-          "integrations": {
-            "items": {
-              "$ref": "#/components/schemas/McpServerName"
-            },
+          "instances": {
+            "items": { "$ref": "#/components/schemas/ExtendedMcpServer" },
             "type": "array",
             "title": "Integrations"
           }
         },
         "type": "object",
-        "required": [
-          "integrations"
-        ],
-        "title": "GetUserIntegrationsResponse"
-      },
-      "GetUserResponse": {
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "title": "User Id"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
-          "last_used_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Used At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user_id",
-          "created_at"
-        ],
-        "title": "GetUserResponse"
+        "required": ["instances"],
+        "title": "GetServerInstancesResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -6412,39 +6609,6 @@
         ],
         "title": "SetAuthRequest"
       },
-      "SetUserAuthRequest": {
-        "properties": {
-          "userId": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Userid",
-            "description": "The unique identifier for the user"
-          },
-          "serverName": {
-            "$ref": "#/components/schemas/McpServerName",
-            "description": "The name of the MCP server to set authentication for (e.g., 'GitHub', 'Jira')"
-          },
-          "authData": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiKeyAuth"
-              },
-              {
-                "$ref": "#/components/schemas/GeneralAuth"
-              }
-            ],
-            "title": "Authdata",
-            "description": "Authentication data"
-          }
-        },
-        "type": "object",
-        "required": [
-          "userId",
-          "serverName",
-          "authData"
-        ],
-        "title": "SetUserAuthRequest"
-      },
       "StatusResponse": {
         "properties": {
           "success": {
@@ -6692,55 +6856,6 @@
           "deletedExternalServers"
         ],
         "title": "StrataDeleteServersResponse"
-      },
-      "StrataGetAuthResponse": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
-          "serverName": {
-            "type": "string",
-            "title": "Servername",
-            "description": "The name of the server"
-          },
-          "authData": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authdata",
-            "description": "The authentication data if available"
-          },
-          "isAuthenticated": {
-            "type": "boolean",
-            "title": "Isauthenticated",
-            "description": "Whether the server has authentication data configured"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "success",
-          "serverName",
-          "isAuthenticated"
-        ],
-        "title": "StrataGetAuthResponse"
       },
       "StrataGetResponse": {
         "properties": {

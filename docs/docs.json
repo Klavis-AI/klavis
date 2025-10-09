@@ -191,7 +191,15 @@
               "api-reference/strata/create",
               "api-reference/strata/get",
               "api-reference/strata/add",
-              "api-reference/strata/delete"
+              "api-reference/strata/delete",
+              {
+                "group": "Strata Auth / OAuth",
+                "pages": [
+                  "api-reference/strata/set-strata-auth",
+                  "api-reference/strata/get-strata-auth",
+                  "api-reference/strata/delete-strata-auth"
+                ]
+              }
             ]
           },
           {
@@ -199,20 +207,62 @@
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
               "api-reference/mcp-server/get-server-instance",
-              "api-reference/mcp-server/delete-a-server-instance"
+              "api-reference/mcp-server/delete-a-server-instance",
+              {
+                "group": "Instance Auth / OAuth",
+                "pages": [
+                  "api-reference/mcp-server/set-instance_auth",
+                  "api-reference/mcp-server/get-instance_auth",
+                  "api-reference/mcp-server/delete-instance_auth"
+                ]
+              }
             ]
           },
           {
-            "group": "Auth",
+            "group": "User",
             "pages": [
-              "api-reference/strata/set-strata-auth",
-              "api-reference/mcp-server/set-authentication-data",
-              "api-reference/mcp-server/get-authentication-data",
-              "api-reference/mcp-server/delete-auth-data-for-a-server-instance"
+              "api-reference/user/get-user",
+              "api-reference/user/get-user-integrations",
+              "api-reference/user/delete-user",
+              {
+                "group": "User Auth / OAuth",
+                "pages": [
+                  "api-reference/user/set-user-auth",
+                  "api-reference/user/get-user-auth",
+                  "api-reference/user/delete-user-auth"
+                ]
+              }
             ]
           },
           {
-            "group": "OAuth",
+            "group": "MCP Server Metadata",
+            "pages": [
+              "api-reference/mcp-server/get-all-servers",
+              "api-reference/mcp-server/get-tools"
+            ]
+          },
+          {
+            "group": "Function Calling with MCP",
+            "pages": [
+              "api-reference/mcp-server/list-tools",
+              "api-reference/mcp-server/call-tool"
+            ]
+          },
+          {
+            "group": "White Label OAuth",
+            "pages": [
+              "api-reference/white-labeling/create",
+              "api-reference/white-labeling/get"
+            ]
+          },
+          {
+            "group": "Self Hosted MCP Server",
+            "pages": [
+              "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
+            ]
+          },
+          {
+            "group": "Individual OAuth",
             "pages": [
               {
                 "group": "OAuth Servers",
@@ -259,40 +309,6 @@
                   "api-reference/oauth/zendesk-oauth/authorize-zendesk"
                 ]
               }
-            ]
-          },
-          {
-            "group": "MCP Server Metadata",
-            "pages": [
-              "api-reference/mcp-server/get-all-servers",
-              "api-reference/mcp-server/get-tools"
-            ]
-          },
-          {
-            "group": "Function Calling with MCP",
-            "pages": [
-              "api-reference/mcp-server/list-tools",
-              "api-reference/mcp-server/call-tool"
-            ]
-          },
-          {
-            "group": "User",
-            "pages": [
-              "api-reference/user/get-user-instances",
-              "api-reference/user/delete-user"
-            ]
-          },
-          {
-            "group": "White Labeling",
-            "pages": [
-              "api-reference/white-labeling/create",
-              "api-reference/white-labeling/get"
-            ]
-          },
-          {
-            "group": "Self Hosted MCP Server",
-            "pages": [
-              "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
             ]
           }
         ]
