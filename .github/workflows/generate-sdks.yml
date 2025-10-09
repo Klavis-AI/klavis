@@ -1,0 +1,29 @@
+name: Generate SDKs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/api-reference/openapi.json'
+      - 'fern/generators.yml'
+
+jobs:
+  generate-sdks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Fern
+        run: npm install -g fern-api
+        
+      - name: Generate SDKs
+        run: fern generate
+        env:
+          FERN_TOKEN: ${{ secrets.FERN_TOKEN }}

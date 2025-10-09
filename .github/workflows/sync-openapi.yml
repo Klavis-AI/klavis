@@ -20,5 +20,5 @@ jobs:
           update_from_source: true
           token: ${{ secrets.OPENAPI_SYNC_TOKEN }}
           branch: 'update-api'
-          auto_merge: false                        # you MUST use auto_merge: true with branch: main
+          auto_merge: true
           add_timestamp: true
