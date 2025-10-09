@@ -76,9 +76,11 @@ Connect to ServiceNow for a central database and application suite to build cust
               strata_id=response.strata_id,
               server_name=McpServerName.SERVICENOW,
               auth_data={
-                  "instance": "YOUR_SERVICENOW_INSTANCE"
-                  "username": "YOUR_SERVICENOW_USERNAME",
-                  "password": "YOUR_SERVICENOW_PASSWORD"
+                data={
+                    "instance": "YOUR_SERVICENOW_INSTANCE",
+                    "username": "YOUR_SERVICENOW_USERNAME",
+                    "password": "YOUR_SERVICENOW_PASSWORD"
+                }
               }
           )
           ```
@@ -88,9 +90,11 @@ Connect to ServiceNow for a central database and application suite to build cust
               strataId: response.strataId,
               serverName: Klavis.McpServerName.Cloudflare,
               authData: {
+                data: {
                   instance: "YOUR_SERVICENOW_INSTANCE",
                   username: "YOUR_SERVICENOW_USERNAME",
                   password: "YOUR_SERVICENOW_PASSWORD"
+                }
               }
           });
           ```
@@ -103,9 +107,11 @@ Connect to ServiceNow for a central database and application suite to build cust
               "strataId": "YOUR_STRATA_ID",
               "serverName": "ServiceNow",
               "authData": {
-                "instance": "YOUR_SERVICENOW_INSTANCE",
-                "username": "YOUR_SERVICENOW_USERNAME",
-                "password": "YOUR_SERVICENOW_PASSWORD"
+                "data": {
+                  "instance": "YOUR_SERVICENOW_INSTANCE",
+                  "username": "YOUR_SERVICENOW_USERNAME",
+                  "password": "YOUR_SERVICENOW_PASSWORD"
+                }
               }
             }'
           ```
