@@ -6,26 +6,19 @@
     "version": "0.1.0"
   },
   "servers": [
-    {
-      "url": "https://api.klavis.ai",
-      "description": "Production server"
-    }
+    { "url": "https://api.klavis.ai", "description": "Production server" }
   ],
   "paths": {
     "/mcp-server/call-tool": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Call Tool",
         "description": "Calls a tool on a specific remote MCP server, used for function calling. Eliminates the need for manual MCP code implementation.\nUnder the hood, Klavis will instantiates an MCP client and establishes a connection with the remote MCP server to call the tool.",
         "operationId": "callServerTool",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CallToolRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CallToolRequest" }
             }
           },
           "required": true
@@ -35,9 +28,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CallToolResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/CallToolResponse" }
               }
             }
           },
@@ -45,34 +36,24 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/list-tools": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "List Tools",
         "description": "Lists all tools available for a specific remote MCP server in various AI model formats.\n\nThis eliminates the need for manual MCP code implementation and format conversion.\nUnder the hood, Klavis instantiates an MCP client and establishes a connection \nwith the remote MCP server to retrieve available tools.",
         "operationId": "listServerTools",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ListToolsRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/ListToolsRequest" }
             }
           },
           "required": true
@@ -82,9 +63,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListToolsResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/ListToolsResponse" }
               }
             }
           },
@@ -92,34 +71,24 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/strata/create": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Create",
         "description": "Create a Strata MCP server.\n\nParameters:\n- servers: Can be 'ALL' to add all available Klavis integration, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "create_strata_server_mcp_server_strata_create_post",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StrataCreateRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/StrataCreateRequest" }
             }
           },
           "required": true
@@ -139,25 +108,17 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/strata/add": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Add",
         "description": "Add servers to an existing Strata MCP server.\n\nNote: After adding servers, you need to reconnect the MCP server so that list_tool can be updated with the new servers.\n\nParameters:\n- servers: Can be 'ALL' to add all available servers, a list of specific server names, or null to add no servers\n- externalServers: Optional list of external MCP servers to validate and add",
         "operationId": "add_servers_to_strata_mcp_server_strata_add_post",
@@ -186,42 +147,27 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/strata/{strataId}/servers": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Delete",
         "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis integration, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
         "operationId": "delete_servers_from_strata_mcp_server_strata__strataId__servers_delete",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "strataId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Strataid"
-            }
+            "schema": { "type": "string", "title": "Strataid" }
           },
           {
             "name": "servers",
@@ -233,19 +179,12 @@
                   "type": "array",
                   "items": {
                     "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/McpServerName"
-                      },
-                      {
-                        "const": "ALL",
-                        "type": "string"
-                      }
+                      { "$ref": "#/components/schemas/McpServerName" },
+                      { "const": "ALL", "type": "string" }
                     ]
                   }
                 },
-                {
-                  "type": "null"
-                }
+                { "type": "null" }
               ],
               "description": "List of Klavis integration to delete (e.g., 'jira', 'linear'), 'ALL' to delete all Klavis integration, or null to delete no servers.",
               "title": "Servers"
@@ -257,14 +196,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Comma-separated list of external server names to delete",
               "title": "Externalservers"
             },
@@ -286,9 +218,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -297,26 +227,17 @@
     },
     "/mcp-server/strata/{strataId}": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get",
         "description": "Get information about an existing Strata MCP server instance.\n\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
         "operationId": "get_strata_server_mcp_server_strata__strataId__get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "strataId",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Strataid"
-            }
+            "schema": { "type": "string", "title": "Strataid" }
           }
         ],
         "responses": {
@@ -324,9 +245,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StrataGetResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StrataGetResponse" }
               }
             }
           },
@@ -334,9 +253,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -345,17 +262,11 @@
     },
     "/mcp-server/strata/{strataId}/auth/{serverName}": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get Strata Auth",
         "description": "Retrieves authentication data for a specific integration within a Strata MCP server.\n\nReturns the authentication data if available, along with authentication status.",
         "operationId": "getStrataAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "strataId",
@@ -395,9 +306,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -406,18 +315,14 @@
     },
     "/mcp-server/strata/set-auth": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Set Strata Auth",
         "description": "Sets authentication data for a specific integration within a Strata MCP server.\n\nAccepts either API key authentication or general authentication data.",
         "operationId": "set_strata_auth_mcp_server_strata_set_auth_post",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StrataSetAuthRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/StrataSetAuthRequest" }
             }
           },
           "required": true
@@ -427,9 +332,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -437,33 +340,21 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/strata/{strata_id}/server/{server_name}/auth": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Delete Strata Auth",
         "description": "Deletes authentication data for a specific integration within a Strata MCP server.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the server.",
         "operationId": "deleteStrataAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "strata_id",
@@ -493,9 +384,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -503,9 +392,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -514,18 +401,14 @@
     },
     "/mcp-server/instance/create": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Create",
         "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
         "operationId": "createServerInstance",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateServerRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateServerRequest" }
             }
           },
           "required": true
@@ -545,25 +428,17 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/self-hosted/instance/create": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Create",
         "description": "Creates an instance id for a self-hosted MCP server,\nvalidating the request with an API key and user details.\nThe main purpose of this endpoint is to create an instance id for a self-hosted MCP server.\nThe instance id is used to identify and store the auth metadata in the database.\nReturns the existing instance id if it already exists for the user.",
         "operationId": "createSelfHostedServerInstance",
@@ -592,33 +467,21 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/instance/get/{instance_id}": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get",
         "description": "Checks the details of a specific server connection instance using its unique ID and API key,\nreturning server details like authentication status and associated server/platform info.",
         "operationId": "getServerInstance",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "instance_id",
@@ -638,9 +501,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetInstanceResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetInstanceResponse" }
               }
             }
           },
@@ -648,9 +509,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -659,17 +518,11 @@
     },
     "/mcp-server/instance/{instance_id}/auth": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Delete Instance Auth",
         "description": "Deletes authentication data for a specific server connection instance.",
         "operationId": "deleteInstanceAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "instance_id",
@@ -689,9 +542,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -699,26 +550,18 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         }
       },
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get Instance Auth",
         "description": "Retrieves the auth data for a specific integration instance that the API key owner controls.\nIncludes access token, refresh token, and other authentication data.\n\nThis endpoint includes proper ownership verification to ensure users can only access\nauthentication data for integration instances they own. It also handles token refresh if needed.",
         "operationId": "getInstanceAuthData",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "instance_id",
@@ -738,9 +581,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAuthDataResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
               }
             }
           },
@@ -748,9 +589,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -759,17 +598,11 @@
     },
     "/mcp-server/instance/delete/{instance_id}": {
       "delete": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Delete",
         "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
         "operationId": "deleteServerInstance",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "instance_id",
@@ -789,9 +622,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -799,9 +630,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -810,17 +639,11 @@
     },
     "/mcp-server/tools/{server_name}": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get Tools",
         "description": "Get tools information for one or multiple MCP servers.",
         "operationId": "getServerTools",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "server_name",
@@ -852,12 +675,8 @@
               "application/json": {
                 "schema": {
                   "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ListToolsResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/MultiServerToolsResponse"
-                    }
+                    { "$ref": "#/components/schemas/ListToolsResponse" },
+                    { "$ref": "#/components/schemas/MultiServerToolsResponse" }
                   ],
                   "title": "Response Getservertools"
                 }
@@ -868,9 +687,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -879,9 +696,7 @@
     },
     "/mcp-server/servers": {
       "get": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Get All Servers",
         "description": "Get all MCP servers with their basic information including id, name, and description.",
         "operationId": "getAllMcpServers",
@@ -897,27 +712,19 @@
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/mcp-server/instance/set-auth": {
       "post": {
-        "tags": [
-          "mcp-server"
-        ],
+        "tags": ["mcp-server"],
         "summary": "Set Instance Auth",
         "description": "Sets authentication data for a specific integration instance.\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified integration instance.",
         "operationId": "setInstanceAuth",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetAuthRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/SetAuthRequest" }
             }
           },
           "required": true
@@ -927,9 +734,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -937,25 +742,17 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/white-labeling/create": {
       "post": {
-        "tags": [
-          "white-labeling"
-        ],
+        "tags": ["white-labeling"],
         "summary": "Create",
         "description": "Saves OAuth white labeling information, or updates existing information if the `client_id` matches.",
         "operationId": "createWhiteLabeling",
@@ -984,42 +781,27 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/white-labeling/get/{client_id}": {
       "get": {
-        "tags": [
-          "white-labeling"
-        ],
+        "tags": ["white-labeling"],
         "summary": "Get",
         "description": "Retrieves white labeling information for a specific OAuth client ID.",
         "operationId": "getWhiteLabelingByClientId",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "client_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Client Id"
-            }
+            "schema": { "type": "string", "title": "Client Id" }
           }
         ],
         "responses": {
@@ -1037,9 +819,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1048,17 +828,11 @@
     },
     "/user/integrations": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Get User Integrations",
         "description": "Get all available integrations (MCP server names) by user ID.\nReturns a list of integration names as McpServerName types.",
         "operationId": "getUserIntegrations",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1087,9 +861,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1098,17 +870,11 @@
     },
     "/user/{user_id}": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Get User",
         "description": "Get user information by user_id.",
         "operationId": "getUserByUserId",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1128,9 +894,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetUserResponse" }
               }
             }
           },
@@ -1138,9 +902,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1149,17 +911,11 @@
     },
     "/user/delete/{user_id}": {
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Delete User",
         "description": "Delete a user and all associated data by user_id.\nUsers cannot delete their own accounts.\nThis operation will permanently remove all user data.",
         "operationId": "deleteUserByUserId",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1179,9 +935,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteUserResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/DeleteUserResponse" }
               }
             }
           },
@@ -1189,9 +943,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1200,18 +952,14 @@
     },
     "/user/set-auth": {
       "post": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Set User Auth",
         "description": "Sets authentication data for a specific integration for a user.\n\nAccepts either API key authentication or general authentication data.\nThis updates the auth_metadata for the specified user's integration instance.",
         "operationId": "setUserAuth",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetUserAuthRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/SetUserAuthRequest" }
             }
           },
           "required": true
@@ -1221,9 +969,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -1231,33 +977,21 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        "security": [{ "HTTPBearer": [] }]
       }
     },
     "/user/{user_id}/auth/{server_name}": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Get User Auth",
         "description": "Retrieves authentication data for a specific integration for a user.\n\nReturns the authentication data if available, along with authentication status.\nIncludes token refresh handling if needed.",
         "operationId": "getUserAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1288,9 +1022,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserAuthResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/GetUserAuthResponse" }
               }
             }
           },
@@ -1298,9 +1030,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1309,17 +1039,11 @@
     },
     "/user/user/{user_id}/server/{server_name}/auth": {
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Delete User Auth",
         "description": "Deletes authentication data for a specific integration for a user.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the integration.",
         "operationId": "deleteUserAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
+        "security": [{ "HTTPBearer": [] }],
         "parameters": [
           {
             "name": "user_id",
@@ -1350,9 +1074,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -1360,9 +1082,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1371,9 +1091,7 @@
     },
     "/oauth/slack/authorize": {
       "get": {
-        "tags": [
-          "slack-oauth"
-        ],
+        "tags": ["slack-oauth"],
         "summary": "Authorize Slack",
         "description": "Start Slack OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- user_scope: Optional user-specific scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeSlack",
@@ -1394,14 +1112,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1412,14 +1123,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -1430,14 +1134,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional user-specific OAuth scopes to request (comma-separated string)",
               "title": "User Scope"
             },
@@ -1448,14 +1145,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1465,19 +1155,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1486,9 +1170,7 @@
     },
     "/oauth/github/authorize": {
       "get": {
-        "tags": [
-          "github-oauth"
-        ],
+        "tags": ["github-oauth"],
         "summary": "Authorize Github",
         "description": "Start GitHub OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGithub",
@@ -1509,14 +1191,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1527,14 +1202,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -1545,14 +1213,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1562,19 +1223,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1583,9 +1238,7 @@
     },
     "/oauth/gitlab/authorize": {
       "get": {
-        "tags": [
-          "gitlab-oauth"
-        ],
+        "tags": ["gitlab-oauth"],
         "summary": "Authorize Gitlab",
         "description": "Start GitLab OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGitlab",
@@ -1606,14 +1259,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1624,14 +1270,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -1642,14 +1281,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1659,19 +1291,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1680,9 +1306,7 @@
     },
     "/oauth/supabase/authorize": {
       "get": {
-        "tags": [
-          "supabase-oauth"
-        ],
+        "tags": ["supabase-oauth"],
         "summary": "Authorize Supabase",
         "description": "Start Supabase OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeSupabase",
@@ -1703,14 +1327,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1721,14 +1338,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1738,19 +1348,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1759,9 +1363,7 @@
     },
     "/oauth/notion/authorize": {
       "get": {
-        "tags": [
-          "notion-oauth"
-        ],
+        "tags": ["notion-oauth"],
         "summary": "Authorize Notion",
         "description": "Start Notion OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeNotion",
@@ -1782,14 +1384,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1800,14 +1395,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -1818,14 +1406,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1835,19 +1416,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1856,9 +1431,7 @@
     },
     "/oauth/jira/authorize": {
       "get": {
-        "tags": [
-          "jira-oauth"
-        ],
+        "tags": ["jira-oauth"],
         "summary": "Authorize Jira",
         "description": "Start Jira OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeJira",
@@ -1879,14 +1452,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1897,14 +1463,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -1915,14 +1474,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -1932,19 +1484,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1953,9 +1499,7 @@
     },
     "/oauth/confluence/authorize": {
       "get": {
-        "tags": [
-          "confluence-oauth"
-        ],
+        "tags": ["confluence-oauth"],
         "summary": "Authorize Confluence",
         "description": "Start Confluence OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeConfluence",
@@ -1976,14 +1520,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -1994,14 +1531,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2012,14 +1542,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2029,19 +1552,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2050,9 +1567,7 @@
     },
     "/oauth/wordpress/authorize": {
       "get": {
-        "tags": [
-          "wordpress-oauth"
-        ],
+        "tags": ["wordpress-oauth"],
         "summary": "Authorize Wordpress",
         "description": "Start WordPress OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeWordpress",
@@ -2073,14 +1588,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2091,14 +1599,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2109,14 +1610,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2126,19 +1620,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2147,9 +1635,7 @@
     },
     "/oauth/gmail/authorize": {
       "get": {
-        "tags": [
-          "gmail-oauth"
-        ],
+        "tags": ["gmail-oauth"],
         "summary": "Authorize Gmail",
         "description": "Start Gmail OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGmail",
@@ -2170,14 +1656,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2188,14 +1667,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2206,14 +1678,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2223,19 +1688,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2244,9 +1703,7 @@
     },
     "/oauth/gdrive/authorize": {
       "get": {
-        "tags": [
-          "gdrive-oauth"
-        ],
+        "tags": ["gdrive-oauth"],
         "summary": "Authorize Gdrive",
         "description": "Start Google Drive OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGDrive",
@@ -2267,14 +1724,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2285,14 +1735,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2303,14 +1746,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2320,19 +1756,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2341,9 +1771,7 @@
     },
     "/oauth/gcalendar/authorize": {
       "get": {
-        "tags": [
-          "gcalendar-oauth"
-        ],
+        "tags": ["gcalendar-oauth"],
         "summary": "Authorize Gcalendar",
         "description": "Start Google Calendar OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGCalendar",
@@ -2364,14 +1792,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2382,14 +1803,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2400,14 +1814,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2417,19 +1824,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2438,9 +1839,7 @@
     },
     "/oauth/gsheets/authorize": {
       "get": {
-        "tags": [
-          "gsheets-oauth"
-        ],
+        "tags": ["gsheets-oauth"],
         "summary": "Authorize Gsheets",
         "description": "Start Google Sheets OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGSheets",
@@ -2461,14 +1860,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2479,14 +1871,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2497,14 +1882,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2514,19 +1892,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2535,9 +1907,7 @@
     },
     "/oauth/gdocs/authorize": {
       "get": {
-        "tags": [
-          "gdocs-oauth"
-        ],
+        "tags": ["gdocs-oauth"],
         "summary": "Authorize Gdocs",
         "description": "Start Google Docs OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeGDocs",
@@ -2558,14 +1928,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2576,14 +1939,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2594,14 +1950,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2611,19 +1960,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2632,9 +1975,7 @@
     },
     "/oauth/attio/authorize": {
       "get": {
-        "tags": [
-          "attio-oauth"
-        ],
+        "tags": ["attio-oauth"],
         "summary": "Authorize Attio",
         "description": "Start Attio OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeAttio",
@@ -2655,14 +1996,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2673,14 +2007,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2690,19 +2017,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2711,9 +2032,7 @@
     },
     "/oauth/salesforce/authorize": {
       "get": {
-        "tags": [
-          "salesforce-oauth"
-        ],
+        "tags": ["salesforce-oauth"],
         "summary": "Authorize Salesforce",
         "description": "Start Salesforce OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes\n- instance_url: Optional Salesforce instance URL for sandbox or custom domains",
         "operationId": "authorizeSalesforce",
@@ -2734,14 +2053,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2752,14 +2064,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -2770,14 +2075,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2788,14 +2086,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Salesforce instance URL (e.g., https://mycompany.salesforce.com). If not provided, will use default login.salesforce.com",
               "title": "Instance Url"
             },
@@ -2805,19 +2096,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2826,9 +2111,7 @@
     },
     "/oauth/asana/authorize": {
       "get": {
-        "tags": [
-          "asana-oauth"
-        ],
+        "tags": ["asana-oauth"],
         "summary": "Authorize Asana",
         "description": "Start Asana OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeAsana",
@@ -2849,14 +2132,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2867,14 +2143,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2885,14 +2154,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2902,19 +2164,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -2923,9 +2179,7 @@
     },
     "/oauth/linear/authorize": {
       "get": {
-        "tags": [
-          "linear-oauth"
-        ],
+        "tags": ["linear-oauth"],
         "summary": "Authorize Linear",
         "description": "Start Linear OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeLinear",
@@ -2946,14 +2200,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -2964,14 +2211,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -2982,14 +2222,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -2999,19 +2232,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3020,9 +2247,7 @@
     },
     "/oauth/close/authorize": {
       "get": {
-        "tags": [
-          "close-oauth"
-        ],
+        "tags": ["close-oauth"],
         "summary": "Authorize Close",
         "description": "Start Close OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeClose",
@@ -3043,14 +2268,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3061,14 +2279,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -3079,14 +2290,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3096,19 +2300,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3117,9 +2315,7 @@
     },
     "/oauth/clickup/authorize": {
       "get": {
-        "tags": [
-          "clickup-oauth"
-        ],
+        "tags": ["clickup-oauth"],
         "summary": "Authorize Clickup",
         "description": "Start ClickUp OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeClickUp",
@@ -3140,14 +2336,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3158,14 +2347,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3175,19 +2357,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3196,9 +2372,7 @@
     },
     "/oauth/airtable/authorize": {
       "get": {
-        "tags": [
-          "airtable-oauth"
-        ],
+        "tags": ["airtable-oauth"],
         "summary": "Authorize Airtable",
         "description": "Start Airtable OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeAirtable",
@@ -3219,14 +2393,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3237,14 +2404,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -3255,14 +2415,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3272,19 +2425,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3293,9 +2440,7 @@
     },
     "/oauth/hubspot/authorize": {
       "get": {
-        "tags": [
-          "hubspot-oauth"
-        ],
+        "tags": ["hubspot-oauth"],
         "summary": "Authorize Hubspot",
         "description": "Start HubSpot OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeHubspot",
@@ -3316,14 +2461,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3334,14 +2472,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3352,14 +2483,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3369,19 +2493,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3390,9 +2508,7 @@
     },
     "/oauth/linkedin/authorize": {
       "get": {
-        "tags": [
-          "linkedin-oauth"
-        ],
+        "tags": ["linkedin-oauth"],
         "summary": "Authorize Linkedin",
         "description": "Start LinkedIn OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeLinkedIn",
@@ -3413,14 +2529,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3431,14 +2540,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -3449,14 +2551,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3466,19 +2561,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3487,9 +2576,7 @@
     },
     "/oauth/canva/authorize": {
       "get": {
-        "tags": [
-          "canva-oauth"
-        ],
+        "tags": ["canva-oauth"],
         "summary": "Authorize Canva",
         "description": "Start Canva OAuth flow with PKCE\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated, e.g., \"design:meta:read profile:read\")\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeCanva",
@@ -3510,14 +2597,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3528,14 +2608,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3546,14 +2619,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3563,19 +2629,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3584,9 +2644,7 @@
     },
     "/oauth/xero/authorize": {
       "get": {
-        "tags": [
-          "xero-oauth"
-        ],
+        "tags": ["xero-oauth"],
         "summary": "Authorize Xero",
         "description": "Start Xero OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeXero",
@@ -3607,14 +2665,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3625,14 +2676,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3643,14 +2687,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3660,19 +2697,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3681,9 +2712,7 @@
     },
     "/oauth/dropbox/authorize": {
       "get": {
-        "tags": [
-          "dropbox-oauth"
-        ],
+        "tags": ["dropbox-oauth"],
         "summary": "Authorize Dropbox",
         "description": "Start Dropbox OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeDropbox",
@@ -3704,14 +2733,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3722,14 +2744,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3740,14 +2755,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3757,19 +2765,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3778,9 +2780,7 @@
     },
     "/oauth/box/authorize": {
       "get": {
-        "tags": [
-          "box-oauth"
-        ],
+        "tags": ["box-oauth"],
         "summary": "Authorize Box",
         "description": "Start Box OAuth 2.0 flow",
         "operationId": "authorizeBox",
@@ -3801,14 +2801,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3819,14 +2812,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3837,14 +2823,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3854,19 +2833,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3875,9 +2848,7 @@
     },
     "/oauth/quickbooks/authorize": {
       "get": {
-        "tags": [
-          "quickbooks-oauth"
-        ],
+        "tags": ["quickbooks-oauth"],
         "summary": "Authorize Quickbooks",
         "description": "Start QuickBooks OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- environment: QuickBooks environment to authorize ('sandbox' default)\n- scope: Optional scopes to request (space-separated). Default is 'com.intuit.quickbooks.accounting'\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeQuickBooks",
@@ -3898,14 +2869,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -3916,10 +2880,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "sandbox",
-                "production"
-              ],
+              "enum": ["sandbox", "production"],
               "type": "string",
               "description": "QuickBooks environment to authorize ('sandbox' or 'production')",
               "default": "sandbox",
@@ -3932,14 +2893,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -3950,14 +2904,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -3967,19 +2914,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -3988,9 +2929,7 @@
     },
     "/oauth/zendesk/authorize": {
       "get": {
-        "tags": [
-          "zendesk-oauth"
-        ],
+        "tags": ["zendesk-oauth"],
         "summary": "Authorize Zendesk",
         "description": "Start Zendesk OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes\n- subdomain: Zendesk subdomain for the account being connected",
         "operationId": "authorizeZendesk",
@@ -4022,14 +2961,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4040,14 +2972,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -4058,14 +2983,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4075,19 +2993,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4096,9 +3008,7 @@
     },
     "/oauth/stripe/authorize": {
       "get": {
-        "tags": [
-          "stripe-connect-oauth"
-        ],
+        "tags": ["stripe-connect-oauth"],
         "summary": "Authorize Stripe Connect",
         "description": "Start Stripe Connect OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeStripeConnect",
@@ -4119,14 +3029,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4137,14 +3040,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -4155,14 +3051,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4172,19 +3061,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4193,9 +3076,7 @@
     },
     "/oauth/calcom/authorize": {
       "get": {
-        "tags": [
-          "calcom-oauth"
-        ],
+        "tags": ["calcom-oauth"],
         "summary": "Authorize Calcom",
         "description": "Start Cal.com OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeCalcom",
@@ -4216,14 +3097,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4234,14 +3108,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4251,19 +3118,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4272,9 +3133,7 @@
     },
     "/oauth/vercel/authorize": {
       "get": {
-        "tags": [
-          "vercel-oauth"
-        ],
+        "tags": ["vercel-oauth"],
         "summary": "Authorize Vercel",
         "description": "Start Vercel OAuth flow using integration pattern\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- client_slug: Vercel integration slug (required for integration-based OAuth)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeVercel",
@@ -4295,14 +3154,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4313,14 +3165,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Vercel integration slug (required for integration-based OAuth)",
               "title": "Client Slug"
             },
@@ -4331,14 +3176,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4348,19 +3186,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4369,9 +3201,7 @@
     },
     "/oauth/pipedrive/authorize": {
       "get": {
-        "tags": [
-          "pipedrive-oauth"
-        ],
+        "tags": ["pipedrive-oauth"],
         "summary": "Authorize Pipedrive",
         "description": "Start Pipedrive OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizePipedrive",
@@ -4392,14 +3222,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4410,14 +3233,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -4428,14 +3244,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4445,19 +3254,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4466,9 +3269,7 @@
     },
     "/oauth/figma/authorize": {
       "get": {
-        "tags": [
-          "figma-oauth"
-        ],
+        "tags": ["figma-oauth"],
         "summary": "Authorize Figma",
         "description": "Start Figma OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeFigma",
@@ -4489,14 +3290,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4507,14 +3301,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request",
               "title": "Scope"
             },
@@ -4525,14 +3312,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4542,19 +3322,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4563,9 +3337,7 @@
     },
     "/oauth/klaviyo/authorize": {
       "get": {
-        "tags": [
-          "klaviyo-oauth"
-        ],
+        "tags": ["klaviyo-oauth"],
         "summary": "Authorize Klaviyo",
         "operationId": "authorizeKlaviyo",
         "parameters": [
@@ -4585,14 +3357,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4603,14 +3368,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -4621,14 +3379,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4638,19 +3389,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4659,9 +3404,7 @@
     },
     "/oauth/pagerduty/authorize": {
       "get": {
-        "tags": [
-          "pagerduty-oauth"
-        ],
+        "tags": ["pagerduty-oauth"],
         "summary": "Authorize Pagerduty",
         "description": "Start PagerDuty OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizePagerDuty",
@@ -4682,14 +3425,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4700,14 +3436,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -4718,14 +3447,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4735,19 +3457,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4756,9 +3472,7 @@
     },
     "/oauth/docusign/authorize": {
       "get": {
-        "tags": [
-          "docusign-oauth"
-        ],
+        "tags": ["docusign-oauth"],
         "summary": "Authorize Docusign",
         "description": "Start DocuSign OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeDocuSign",
@@ -4779,14 +3493,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4797,14 +3504,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -4815,14 +3515,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4832,19 +3525,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4853,9 +3540,7 @@
     },
     "/oauth/dialpad/authorize": {
       "get": {
-        "tags": [
-          "dialpad-oauth"
-        ],
+        "tags": ["dialpad-oauth"],
         "summary": "Authorize Dialpad",
         "description": "Start Dialpad OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes\n- code_challenge: PKCE code challenge for enhanced security\n- code_challenge_method: PKCE code challenge method",
         "operationId": "authorizeDialpad",
@@ -4876,14 +3561,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -4894,14 +3572,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -4912,14 +3583,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -4930,14 +3594,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "PKCE code challenge for enhanced security",
               "title": "Code Challenge"
             },
@@ -4948,14 +3605,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "PKCE code challenge method (default: S256)",
               "default": "S256",
               "title": "Code Challenge Method"
@@ -4966,19 +3616,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -4987,9 +3631,7 @@
     },
     "/oauth/shopify/authorize": {
       "get": {
-        "tags": [
-          "shopify-oauth"
-        ],
+        "tags": ["shopify-oauth"],
         "summary": "Authorize Shopify",
         "description": "Start Shopify OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- shop: Shopify shop domain (e.g., mystore.myshopify.com)\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
         "operationId": "authorizeShopify",
@@ -5021,14 +3663,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -5039,14 +3674,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (comma-separated string)",
               "title": "Scope"
             },
@@ -5057,14 +3685,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -5074,19 +3695,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -5095,9 +3710,7 @@
     },
     "/oauth/onedrive/authorize": {
       "get": {
-        "tags": [
-          "onedrive-oauth"
-        ],
+        "tags": ["onedrive-oauth"],
         "summary": "Authorize OneDrive",
         "operationId": "authorizeOneDrive",
         "parameters": [
@@ -5117,14 +3730,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -5135,14 +3741,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -5153,14 +3752,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -5170,19 +3762,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -5191,9 +3777,7 @@
     },
     "/oauth/outlook/authorize": {
       "get": {
-        "tags": [
-          "outlook-oauth"
-        ],
+        "tags": ["outlook-oauth"],
         "summary": "Authorize Outlook",
         "operationId": "authorizeOutlook",
         "parameters": [
@@ -5213,14 +3797,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -5231,14 +3808,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -5249,14 +3819,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -5266,19 +3829,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -5287,9 +3844,7 @@
     },
     "/oauth/teams/authorize": {
       "get": {
-        "tags": [
-          "teams-oauth"
-        ],
+        "tags": ["teams-oauth"],
         "summary": "Authorize Teams",
         "operationId": "authorizeTeams",
         "parameters": [
@@ -5309,14 +3864,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Client ID for white labeling, if not provided will use default credentials",
               "title": "Client Id"
             },
@@ -5327,14 +3875,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional OAuth scopes to request (space-separated string)",
               "title": "Scope"
             },
@@ -5345,14 +3886,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "description": "Optional URL to redirect to after authorization completes",
               "title": "Redirect Url"
             },
@@ -5362,19 +3896,13 @@
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           },
           "422": {
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -5387,26 +3915,12 @@
       "ApiKeyAuth": {
         "properties": {
           "token": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Token",
             "description": "The API key to save (token field)"
           },
           "api_key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Api Key",
             "description": "The API key to save (api_key field)"
           }
@@ -5441,24 +3955,17 @@
           "headers": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "string"
-                },
+                "additionalProperties": { "type": "string" },
                 "type": "object"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Headers",
             "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
-        "required": [
-          "serverUrl",
-          "toolName"
-        ],
+        "required": ["serverUrl", "toolName"],
         "title": "CallToolRequest"
       },
       "CallToolResponse": {
@@ -5470,32 +3977,19 @@
           },
           "result": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/CallToolResult"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/CallToolResult" },
+              { "type": "null" }
             ],
             "description": "The result of the tool call, if successful"
           },
           "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Error",
             "description": "Error message, if the tool call failed"
           }
         },
         "type": "object",
-        "required": [
-          "success"
-        ],
+        "required": ["success"],
         "title": "CallToolResponse"
       },
       "CallToolResult": {
@@ -5514,18 +4008,13 @@
           }
         },
         "type": "object",
-        "required": [
-          "content"
-        ],
+        "required": ["content"],
         "title": "CallToolResult",
         "description": "The server's response to a tool call."
       },
       "ConnectionType": {
         "type": "string",
-        "enum": [
-          "SSE",
-          "StreamableHttp"
-        ],
+        "enum": ["SSE", "StreamableHttp"],
         "title": "ConnectionType"
       },
       "CreateSelfHostedServerRequest": {
@@ -5542,10 +4031,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "serverName",
-          "userId"
-        ],
+        "required": ["serverName", "userId"],
         "title": "CreateSelfHostedServerRequest"
       },
       "CreateSelfHostedServerResponse": {
@@ -5556,22 +4042,13 @@
             "description": "The unique identifier for this specific server connection integration instance."
           },
           "oauthUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Oauthurl",
             "description": "The OAuth authorization URL for the specified server, if OAuth is configured."
           }
         },
         "type": "object",
-        "required": [
-          "instanceId"
-        ],
+        "required": ["instanceId"],
         "title": "CreateSelfHostedServerResponse"
       },
       "CreateServerRequest": {
@@ -5587,15 +4064,7 @@
             "description": "The unique identifier for the user. The server instance along with the all the authentication data will belong to that specific user only. It can be a UUID from the database, a unique email address from the user, etc."
           },
           "platformName": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
             "title": "Platformname",
             "description": "The name of the platform associated with the user. Optional."
           },
@@ -5606,10 +4075,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "serverName",
-          "userId"
-        ],
+        "required": ["serverName", "userId"],
         "title": "CreateServerRequest"
       },
       "CreateServerResponse": {
@@ -5625,23 +4091,13 @@
             "description": "The unique identifier for this specific server connection integration instance."
           },
           "oauthUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Oauthurl",
             "description": "The OAuth URL for authentication if available, supports white label if configured."
           }
         },
         "type": "object",
-        "required": [
-          "serverUrl",
-          "instanceId"
-        ],
+        "required": ["serverUrl", "instanceId"],
         "title": "CreateServerResponse"
       },
       "CreateWhiteLabelingRequest": {
@@ -5661,54 +4117,27 @@
             "description": "Optional. The name of the server"
           },
           "callback_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Callback Url",
             "description": "Optional. OAuth callback URL"
           },
           "account_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Account Id",
             "description": "Optional. The UUID of the account"
           }
         },
         "type": "object",
-        "required": [
-          "client_id",
-          "client_secret",
-          "server_name"
-        ],
+        "required": ["client_id", "client_secret", "server_name"],
         "title": "CreateWhiteLabelingRequest"
       },
       "DeleteUserResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          }
+          "success": { "type": "boolean", "title": "Success" },
+          "message": { "type": "string", "title": "Message" }
         },
         "type": "object",
-        "required": [
-          "success",
-          "message"
-        ],
+        "required": ["success", "message"],
         "title": "DeleteUserResponse"
       },
       "ExternalServerInfo": {
@@ -5726,24 +4155,17 @@
           "headers": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "string"
-                },
+                "additionalProperties": { "type": "string" },
                 "type": "object"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Headers",
             "description": "Optional HTTP headers used when connecting to the external server"
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "url"
-        ],
+        "required": ["name", "url"],
         "title": "ExternalServerInfo"
       },
       "ExternalServerRequest": {
@@ -5763,24 +4185,17 @@
           "headers": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "string"
-                },
+                "additionalProperties": { "type": "string" },
                 "type": "object"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Headers",
             "description": "Optional HTTP headers to include when connecting to the external server (e.g., for bearer authentication)"
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "url"
-        ],
+        "required": ["name", "url"],
         "title": "ExternalServerRequest"
       },
       "GeneralAuth": {
@@ -5805,47 +4220,26 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
             ],
             "title": "Authdata",
             "description": "Complete authentication data including access token, refresh token, scope, expiration, and platform-specific data"
           },
           "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Error",
             "description": "Error message if the request failed"
           }
         },
         "type": "object",
-        "required": [
-          "success"
-        ],
+        "required": ["success"],
         "title": "GetAuthDataResponse"
       },
       "GetInstanceResponse": {
         "properties": {
           "instanceId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Instanceid",
             "description": "The unique identifier of the connection integration instance."
           },
@@ -5880,14 +4274,7 @@
             "default": ""
           },
           "oauthUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Oauthurl",
             "description": "The OAuth URL for authentication if available, supports white label if configured."
           }
@@ -5898,25 +4285,18 @@
       "GetMcpServersResponse": {
         "properties": {
           "servers": {
-            "items": {
-              "$ref": "#/components/schemas/McpServer"
-            },
+            "items": { "$ref": "#/components/schemas/McpServer" },
             "type": "array",
             "title": "Servers"
           }
         },
         "type": "object",
-        "required": [
-          "servers"
-        ],
+        "required": ["servers"],
         "title": "GetMcpServersResponse"
       },
       "GetUserAuthResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
+          "success": { "type": "boolean", "title": "Success" },
           "userId": {
             "type": "string",
             "title": "Userid",
@@ -5929,13 +4309,8 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
             ],
             "title": "Authdata",
             "description": "The authentication data if available"
@@ -5946,77 +4321,43 @@
             "description": "Whether the server has authentication data configured"
           },
           "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Message"
           }
         },
         "type": "object",
-        "required": [
-          "success",
-          "userId",
-          "serverName",
-          "isAuthenticated"
-        ],
+        "required": ["success", "userId", "serverName", "isAuthenticated"],
         "title": "GetUserAuthResponse"
       },
       "GetUserIntegrationsResponse": {
         "properties": {
           "integrations": {
-            "items": {
-              "$ref": "#/components/schemas/McpServerName"
-            },
+            "items": { "$ref": "#/components/schemas/McpServerName" },
             "type": "array",
             "title": "Integrations"
           }
         },
         "type": "object",
-        "required": [
-          "integrations"
-        ],
+        "required": ["integrations"],
         "title": "GetUserIntegrationsResponse"
       },
       "GetUserResponse": {
         "properties": {
-          "user_id": {
-            "type": "string",
-            "title": "User Id"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
+          "user_id": { "type": "string", "title": "User Id" },
+          "created_at": { "type": "string", "title": "Created At" },
           "last_used_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Last Used At"
           }
         },
         "type": "object",
-        "required": [
-          "user_id",
-          "created_at"
-        ],
+        "required": ["user_id", "created_at"],
         "title": "GetUserResponse"
       },
       "HTTPValidationError": {
         "properties": {
           "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
+            "items": { "$ref": "#/components/schemas/ValidationError" },
             "type": "array",
             "title": "Detail"
           }
@@ -6044,23 +4385,17 @@
           "headers": {
             "anyOf": [
               {
-                "additionalProperties": {
-                  "type": "string"
-                },
+                "additionalProperties": { "type": "string" },
                 "type": "object"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Headers",
             "description": "Optional HTTP headers to include when connecting to the server"
           }
         },
         "type": "object",
-        "required": [
-          "serverUrl"
-        ],
+        "required": ["serverUrl"],
         "title": "ListToolsRequest"
       },
       "ListToolsResponse": {
@@ -6071,15 +4406,7 @@
             "description": "Whether the list tools request was successful"
           },
           "tools": {
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "items": {}, "type": "array" }, { "type": "null" }],
             "title": "Tools",
             "description": "List of tools in the requested format"
           },
@@ -6088,58 +4415,30 @@
             "description": "The format of the returned tools"
           },
           "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Error",
             "description": "Error message, if the request failed"
           }
         },
         "type": "object",
-        "required": [
-          "success",
-          "format"
-        ],
+        "required": ["success", "format"],
         "title": "ListToolsResponse"
       },
       "McpServer": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
           "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Description"
           },
           "tools": {
             "anyOf": [
               {
-                "items": {
-                  "$ref": "#/components/schemas/ServerTool"
-                },
+                "items": { "$ref": "#/components/schemas/ServerTool" },
                 "type": "array"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Tools"
           },
@@ -6150,10 +4449,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "title": "McpServer"
       },
       "McpServerName": {
@@ -6246,31 +4542,19 @@
             "description": "The format of the returned tools for all servers."
           },
           "results": {
-            "items": {
-              "$ref": "#/components/schemas/ServerToolsResult"
-            },
+            "items": { "$ref": "#/components/schemas/ServerToolsResult" },
             "type": "array",
             "title": "Results",
             "description": "Per-server results including any partial failures."
           },
           "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Error",
             "description": "Aggregated error message when one or more servers fail."
           }
         },
         "type": "object",
-        "required": [
-          "success",
-          "format"
-        ],
+        "required": ["success", "format"],
         "title": "MultiServerToolsResponse"
       },
       "OAuthServerName": {
@@ -6324,20 +4608,11 @@
       },
       "ServerTool": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          }
+          "name": { "type": "string", "title": "Name" },
+          "description": { "type": "string", "title": "Description" }
         },
         "type": "object",
-        "required": [
-          "name",
-          "description"
-        ],
+        "required": ["name", "description"],
         "title": "ServerTool"
       },
       "ServerToolsResult": {
@@ -6353,36 +4628,18 @@
             "description": "Whether the tools were retrieved successfully for this server."
           },
           "tools": {
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "items": {}, "type": "array" }, { "type": "null" }],
             "title": "Tools",
             "description": "Tools available for the server when the request succeeds."
           },
           "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Error",
             "description": "The error message if the request failed for this server."
           }
         },
         "type": "object",
-        "required": [
-          "serverName",
-          "success"
-        ],
+        "required": ["serverName", "success"],
         "title": "ServerToolsResult"
       },
       "SetAuthRequest": {
@@ -6394,22 +4651,15 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiKeyAuth"
-              },
-              {
-                "$ref": "#/components/schemas/GeneralAuth"
-              }
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
             ],
             "title": "Authdata",
             "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": [
-          "instanceId",
-          "authData"
-        ],
+        "required": ["instanceId", "authData"],
         "title": "SetAuthRequest"
       },
       "SetUserAuthRequest": {
@@ -6426,47 +4676,27 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiKeyAuth"
-              },
-              {
-                "$ref": "#/components/schemas/GeneralAuth"
-              }
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
             ],
             "title": "Authdata",
             "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": [
-          "userId",
-          "serverName",
-          "authData"
-        ],
+        "required": ["userId", "serverName", "authData"],
         "title": "SetUserAuthRequest"
       },
       "StatusResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
+          "success": { "type": "boolean", "title": "Success" },
           "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Message"
           }
         },
         "type": "object",
-        "required": [
-          "success"
-        ],
+        "required": ["success"],
         "title": "StatusResponse"
       },
       "StrataAddServersRequest": {
@@ -6480,18 +4710,11 @@
           "servers": {
             "anyOf": [
               {
-                "items": {
-                  "$ref": "#/components/schemas/McpServerName"
-                },
+                "items": { "$ref": "#/components/schemas/McpServerName" },
                 "type": "array"
               },
-              {
-                "type": "string",
-                "const": "ALL"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
             ],
             "title": "Servers",
             "description": "List of Klavis integration to add (e.g., 'jira', 'linear'), 'ALL' to add all Klavis integration, or null to add no servers."
@@ -6504,59 +4727,45 @@
                 },
                 "type": "array"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Externalservers",
             "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
           }
         },
         "type": "object",
-        "required": [
-          "strataId"
-        ],
+        "required": ["strataId"],
         "title": "StrataAddServersRequest"
       },
       "StrataAddServersResponse": {
         "properties": {
           "addedServers": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Addedservers",
             "description": "List of Klavis integration that were added"
           },
           "addedExternalServers": {
-            "items": {
-              "$ref": "#/components/schemas/ExternalServerInfo"
-            },
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
             "type": "array",
             "title": "Addedexternalservers",
             "description": "List of external MCP servers that were added with name and URL"
           },
           "oauthUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
             "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
             "description": "Map of connected integration to API key setup URL"
           }
         },
         "type": "object",
-        "required": [
-          "addedServers"
-        ],
+        "required": ["addedServers"],
         "title": "StrataAddServersResponse"
       },
       "StrataCreateRequest": {
@@ -6570,18 +4779,11 @@
           "servers": {
             "anyOf": [
               {
-                "items": {
-                  "$ref": "#/components/schemas/McpServerName"
-                },
+                "items": { "$ref": "#/components/schemas/McpServerName" },
                 "type": "array"
               },
-              {
-                "type": "string",
-                "const": "ALL"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "const": "ALL" },
+              { "type": "null" }
             ],
             "title": "Servers",
             "description": "List of Klavis MCP servers to enable (e.g., 'jira', 'linear'), 'ALL' to add all Klavis MCP servers, or null to add no servers."
@@ -6594,9 +4796,7 @@
                 },
                 "type": "array"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ],
             "title": "Externalservers",
             "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
@@ -6609,9 +4809,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "userId"
-        ],
+        "required": ["userId"],
         "title": "StrataCreateRequest"
       },
       "StrataCreateResponse": {
@@ -6627,78 +4825,56 @@
             "description": "The strata server ID"
           },
           "addedServers": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Addedservers",
             "description": "List of Klavis integration that were added"
           },
           "addedExternalServers": {
-            "items": {
-              "$ref": "#/components/schemas/ExternalServerInfo"
-            },
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
             "type": "array",
             "title": "Addedexternalservers",
             "description": "List of external MCP servers that were added with name and URL"
           },
           "oauthUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
             "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
             "description": "Map of connected integration to API key setup URL"
           }
         },
         "type": "object",
-        "required": [
-          "strataServerUrl",
-          "strataId",
-          "addedServers"
-        ],
+        "required": ["strataServerUrl", "strataId", "addedServers"],
         "title": "StrataCreateResponse"
       },
       "StrataDeleteServersResponse": {
         "properties": {
           "deletedServers": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Deletedservers",
             "description": "List of integration that were deleted"
           },
           "deletedExternalServers": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Deletedexternalservers",
             "description": "List of external MCP server names that were deleted"
           }
         },
         "type": "object",
-        "required": [
-          "deletedServers",
-          "deletedExternalServers"
-        ],
+        "required": ["deletedServers", "deletedExternalServers"],
         "title": "StrataDeleteServersResponse"
       },
       "StrataGetAuthResponse": {
         "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success"
-          },
+          "success": { "type": "boolean", "title": "Success" },
           "serverName": {
             "type": "string",
             "title": "Servername",
@@ -6706,13 +4882,8 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
             ],
             "title": "Authdata",
             "description": "The authentication data if available"
@@ -6723,23 +4894,12 @@
             "description": "Whether the server has authentication data configured"
           },
           "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Message"
           }
         },
         "type": "object",
-        "required": [
-          "success",
-          "serverName",
-          "isAuthenticated"
-        ],
+        "required": ["success", "serverName", "isAuthenticated"],
         "title": "StrataGetAuthResponse"
       },
       "StrataGetResponse": {
@@ -6755,33 +4915,25 @@
             "description": "The strata server ID"
           },
           "connectedServers": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Connectedservers",
             "description": "List of available integration currently connected to this strata"
           },
           "connectedExternalServers": {
-            "items": {
-              "$ref": "#/components/schemas/ExternalServerInfo"
-            },
+            "items": { "$ref": "#/components/schemas/ExternalServerInfo" },
             "type": "array",
             "title": "Connectedexternalservers",
             "description": "List of external servers with name and URL currently connected to this strata"
           },
           "oauthUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Oauthurls",
             "description": "Map of connected integration to OAuth URL, supports white labeling if configured"
           },
           "apiKeyUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
+            "additionalProperties": { "type": "string" },
             "type": "object",
             "title": "Apikeyurls",
             "description": "Map of connected integration to API key setup URL"
@@ -6809,66 +4961,34 @@
           },
           "authData": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiKeyAuth"
-              },
-              {
-                "$ref": "#/components/schemas/GeneralAuth"
-              }
+              { "$ref": "#/components/schemas/ApiKeyAuth" },
+              { "$ref": "#/components/schemas/GeneralAuth" }
             ],
             "title": "Authdata",
             "description": "Authentication data"
           }
         },
         "type": "object",
-        "required": [
-          "strataId",
-          "serverName",
-          "authData"
-        ],
+        "required": ["strataId", "serverName", "authData"],
         "title": "StrataSetAuthRequest"
       },
       "ToolFormat": {
         "type": "string",
-        "enum": [
-          "openai",
-          "anthropic",
-          "gemini",
-          "mcp_native"
-        ],
+        "enum": ["openai", "anthropic", "gemini", "mcp_native"],
         "title": "ToolFormat"
       },
       "ValidationError": {
         "properties": {
           "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
             "type": "array",
             "title": "Location"
           },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          }
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       },
       "WhiteLabelingResponse": {
@@ -6880,34 +5000,20 @@
           },
           "data": {
             "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
             ],
             "title": "Data",
             "description": "The white labeling data if successful"
           },
           "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Message",
             "description": "Error message if unsuccessful"
           }
         },
         "type": "object",
-        "required": [
-          "success"
-        ],
+        "required": ["success"],
         "title": "WhiteLabelingResponse"
       }
     },
@@ -6916,9 +5022,7 @@
         "type": "http",
         "description": "Your Klavis AI API key.",
         "scheme": "bearer",
-        "x-fern-bearer": {
-          "name": "api_key"
-        }
+        "x-fern-bearer": { "name": "api_key" }
       }
     }
   }
