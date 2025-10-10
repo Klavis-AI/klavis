@@ -200,14 +200,14 @@
         ]
       }
     },
-    "/mcp-server/strata/{strata_id}/servers": {
+    "/mcp-server/strata/{strataId}/servers": {
       "delete": {
         "tags": [
           "mcp-server"
         ],
         "summary": "Delete",
-        "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strata_id: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis integration, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
-        "operationId": "delete_servers_from_strata_mcp_server_strata__strata_id__servers_delete",
+        "description": "Delete servers from an existing Strata MCP server.\n\nNote: After deleting servers, you need to reconnect the MCP server so that list_tool can be updated to reflect the removed servers.\n\nParameters:\n- strataId: The strata server ID (path parameter)\n- servers: Can be 'ALL' to delete all available Klavis integration, a list of specific server names, or null to delete no servers\n- externalServers: Query parameter - comma-separated list of external server names to delete\n\nReturns separate lists for deleted Klavis servers and deleted external servers.",
+        "operationId": "delete_servers_from_strata_mcp_server_strata__strataId__servers_delete",
         "security": [
           {
             "HTTPBearer": []
@@ -215,12 +215,12 @@
         ],
         "parameters": [
           {
-            "name": "strata_id",
+            "name": "strataId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Strata Id"
+              "title": "Strataid"
             }
           },
           {
@@ -295,14 +295,14 @@
         }
       }
     },
-    "/mcp-server/strata/{strata_id}": {
+    "/mcp-server/strata/{strataId}": {
       "get": {
         "tags": [
           "mcp-server"
         ],
         "summary": "Get",
         "description": "Get information about an existing Strata MCP server instance.\n\nReturns the strata URL, connected klavis servers, connected external servers (with URLs), \nand authentication URLs for klavis servers.",
-        "operationId": "get_strata_server_mcp_server_strata__strata_id__get",
+        "operationId": "get_strata_server_mcp_server_strata__strataId__get",
         "security": [
           {
             "HTTPBearer": []
@@ -310,12 +310,12 @@
         ],
         "parameters": [
           {
-            "name": "strata_id",
+            "name": "strataId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Strata Id"
+              "title": "Strataid"
             }
           }
         ],
@@ -343,7 +343,7 @@
         }
       }
     },
-    "/mcp-server/strata/{strata_id}/auth/{serverName}": {
+    "/mcp-server/strata/{strataId}/auth/{serverName}": {
       "get": {
         "tags": [
           "mcp-server"
@@ -358,13 +358,13 @@
         ],
         "parameters": [
           {
-            "name": "strata_id",
+            "name": "strataId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "description": "The strata server ID",
-              "title": "Strata Id"
+              "title": "Strataid"
             },
             "description": "The strata server ID"
           },
@@ -387,6 +387,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/StrataGetAuthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "mcp-server"
+        ],
+        "summary": "Delete Strata Auth",
+        "description": "Deletes authentication data for a specific integration within a Strata MCP server.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the server.",
+        "operationId": "deleteStrataAuth",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "strataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The strata server ID",
+              "title": "Strataid"
+            },
+            "description": "The strata server ID"
+          },
+          {
+            "name": "serverName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')",
+              "title": "Servername"
+            },
+            "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             }
@@ -449,67 +508,6 @@
             "HTTPBearer": []
           }
         ]
-      }
-    },
-    "/mcp-server/strata/{strata_id}/server/{server_name}/auth": {
-      "delete": {
-        "tags": [
-          "mcp-server"
-        ],
-        "summary": "Delete Strata Auth",
-        "description": "Deletes authentication data for a specific integration within a Strata MCP server.\n\nThis will clear the stored authentication credentials, effectively unauthenticating the server.",
-        "operationId": "deleteStrataAuth",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "strata_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The strata server ID",
-              "title": "Strata Id"
-            },
-            "description": "The strata server ID"
-          },
-          {
-            "name": "server_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')",
-              "title": "Server Name"
-            },
-            "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StatusResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/mcp-server/instance/create": {
@@ -1302,9 +1300,7 @@
             }
           }
         }
-      }
-    },
-    "/user/user/{user_id}/server/{server_name}/auth": {
+      },
       "delete": {
         "tags": [
           "user"
@@ -6223,7 +6219,6 @@
           "Resend",
           "Salesforce",
           "SendGrid",
-          "ServiceNow",
           "Shopify",
           "Slack",
           "Stripe",
@@ -6233,7 +6228,8 @@
           "WhatsApp",
           "WordPress",
           "YouTube",
-          "Zendesk"
+          "Zendesk",
+          "ServiceNow"
         ],
         "title": "McpServerName"
       },
@@ -6474,10 +6470,10 @@
       },
       "StrataAddServersRequest": {
         "properties": {
-          "strata_id": {
+          "strataId": {
             "type": "string",
             "minLength": 1,
-            "title": "Strata Id",
+            "title": "Strataid",
             "description": "The strata server ID"
           },
           "servers": {
@@ -6517,7 +6513,7 @@
         },
         "type": "object",
         "required": [
-          "strata_id"
+          "strataId"
         ],
         "title": "StrataAddServersRequest"
       },
@@ -6624,9 +6620,9 @@
             "title": "Strataserverurl",
             "description": "URL to connect to the Strata MCP server"
           },
-          "strata_id": {
+          "strataId": {
             "type": "string",
-            "title": "Strata Id",
+            "title": "Strataid",
             "description": "The strata server ID"
           },
           "addedServers": {
@@ -6665,7 +6661,7 @@
         "type": "object",
         "required": [
           "strataServerUrl",
-          "strata_id",
+          "strataId",
           "addedServers"
         ],
         "title": "StrataCreateResponse"
@@ -6717,7 +6713,7 @@
                 "type": "null"
               }
             ],
-            "title": "StrataGetAuthResponseAuthData",
+            "title": "Authdata",
             "description": "The authentication data if available"
           },
           "isAuthenticated": {
@@ -6752,9 +6748,9 @@
             "title": "Strataserverurl",
             "description": "URL to connect to the Strata MCP server"
           },
-          "strata_id": {
+          "strataId": {
             "type": "string",
-            "title": "Strata Id",
+            "title": "Strataid",
             "description": "The strata server ID"
           },
           "connectedServers": {
@@ -6793,7 +6789,7 @@
         "type": "object",
         "required": [
           "strataServerUrl",
-          "strata_id",
+          "strataId",
           "connectedServers",
           "connectedExternalServers"
         ],
@@ -6801,9 +6797,9 @@
       },
       "StrataSetAuthRequest": {
         "properties": {
-          "strata_id": {
+          "strataId": {
             "type": "string",
-            "title": "Strata Id",
+            "title": "Strataid",
             "description": "The strata server ID"
           },
           "serverName": {
@@ -6819,13 +6815,13 @@
                 "$ref": "#/components/schemas/GeneralAuth"
               }
             ],
-            "title": "StrataSetAuthRequestAuthData",
+            "title": "Authdata",
             "description": "Authentication data"
           }
         },
         "type": "object",
         "required": [
-          "strata_id",
+          "strataId",
           "serverName",
           "authData"
         ],
