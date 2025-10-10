@@ -373,9 +373,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "description": "The name of the Klavis MCP server to get authentication for (e.g., 'GitHub', 'Jira')",
-              "title": "Servername"
+              "$ref": "#/components/schemas/McpServerName",
+              "description": "The name of the Klavis MCP server to get authentication for (e.g., 'GitHub', 'Jira')"
             },
             "description": "The name of the Klavis MCP server to get authentication for (e.g., 'GitHub', 'Jira')"
           }
@@ -432,9 +431,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')",
-              "title": "Servername"
+              "$ref": "#/components/schemas/McpServerName",
+              "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')"
             },
             "description": "The name of the Klavis MCP server to delete authentication for (e.g., 'github', 'jira')"
           }
@@ -604,7 +602,7 @@
         ]
       }
     },
-    "/mcp-server/instance/{instance_id}": {
+    "/mcp-server/instance/{instanceId}": {
       "get": {
         "tags": [
           "mcp-server"
@@ -619,14 +617,14 @@
         ],
         "parameters": [
           {
-            "name": "instance_id",
+            "name": "instanceId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
               "description": "The ID of the connection integration instance whose status is being checked. This is returned by the Create API.",
-              "title": "Instance Id"
+              "title": "Instanceid"
             },
             "description": "The ID of the connection integration instance whose status is being checked. This is returned by the Create API."
           }
@@ -668,14 +666,14 @@
         ],
         "parameters": [
           {
-            "name": "instance_id",
+            "name": "instanceId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
               "description": "The ID of the connection instance to delete.",
-              "title": "Instance Id"
+              "title": "Instanceid"
             },
             "description": "The ID of the connection instance to delete."
           }
@@ -704,7 +702,7 @@
         }
       }
     },
-    "/mcp-server/instance/{instance_id}/auth": {
+    "/mcp-server/instance/{instanceId}/auth": {
       "delete": {
         "tags": [
           "mcp-server"
@@ -719,14 +717,14 @@
         ],
         "parameters": [
           {
-            "name": "instance_id",
+            "name": "instanceId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
               "description": "The ID of the connection instance to delete auth for.",
-              "title": "Instance Id"
+              "title": "Instanceid"
             },
             "description": "The ID of the connection instance to delete auth for."
           }
@@ -768,14 +766,14 @@
         ],
         "parameters": [
           {
-            "name": "instance_id",
+            "name": "instanceId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
               "description": "The ID of the connection integration instance to get auth data for.",
-              "title": "Instance Id"
+              "title": "Instanceid"
             },
             "description": "The ID of the connection integration instance to get auth data for."
           }
@@ -804,7 +802,7 @@
         }
       }
     },
-    "/mcp-server/tools/{server_name}": {
+    "/mcp-server/tools/{serverName}": {
       "get": {
         "tags": [
           "mcp-server"
@@ -819,13 +817,13 @@
         ],
         "parameters": [
           {
-            "name": "server_name",
+            "name": "serverName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "description": "The name of the target MCP server. Case-insensitive. Provide a comma-separated list (e.g., 'google calendar,slack') to fetch tools for multiple servers.",
-              "title": "Server Name"
+              "title": "Servername"
             },
             "description": "The name of the target MCP server. Case-insensitive. Provide a comma-separated list (e.g., 'google calendar,slack') to fetch tools for multiple servers."
           },
@@ -1042,7 +1040,7 @@
         }
       }
     },
-    "/user/{user_id}/integrations": {
+    "/user/{userId}/integrations": {
       "get": {
         "tags": [
           "user"
@@ -1057,14 +1055,14 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "minLength": 1,
               "description": "The external user ID",
-              "title": "User Id"
+              "title": "Userid"
             },
             "description": "The external user ID"
           }
@@ -1093,7 +1091,7 @@
         }
       }
     },
-    "/user/{user_id}": {
+    "/user/{userId}": {
       "get": {
         "tags": [
           "user"
@@ -1108,14 +1106,14 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "minLength": 1,
               "description": "The identifier for the user to fetch.",
-              "title": "User Id"
+              "title": "Userid"
             },
             "description": "The identifier for the user to fetch."
           }
@@ -1157,14 +1155,14 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "minLength": 1,
               "description": "The identifier for the user to delete.",
-              "title": "User Id"
+              "title": "Userid"
             },
             "description": "The identifier for the user to delete."
           }
@@ -1240,7 +1238,7 @@
         ]
       }
     },
-    "/user/{user_id}/auth/{server_name}": {
+    "/user/{userId}/auth/{serverName}": {
       "get": {
         "tags": [
           "user"
@@ -1255,25 +1253,24 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "minLength": 1,
               "description": "The identifier for the user",
-              "title": "User Id"
+              "title": "Userid"
             },
             "description": "The identifier for the user"
           },
           {
-            "name": "server_name",
+            "name": "serverName",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "description": "The name of the MCP server (e.g., 'GitHub', 'Jira')",
-              "title": "Server Name"
+              "$ref": "#/components/schemas/McpServerName",
+              "description": "The name of the MCP server (e.g., 'GitHub', 'Jira')"
             },
             "description": "The name of the MCP server (e.g., 'GitHub', 'Jira')"
           }
@@ -1315,25 +1312,24 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "minLength": 1,
               "description": "The unique identifier for the user",
-              "title": "User Id"
+              "title": "Userid"
             },
             "description": "The unique identifier for the user"
           },
           {
-            "name": "server_name",
+            "name": "serverName",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "description": "The name of the MCP server to delete authentication for (e.g., 'github', 'jira')",
-              "title": "Server Name"
+              "$ref": "#/components/schemas/McpServerName",
+              "description": "The name of the MCP server to delete authentication for (e.g., 'github', 'jira')"
             },
             "description": "The name of the MCP server to delete authentication for (e.g., 'github', 'jira')"
           }
@@ -6204,15 +6200,15 @@
       },
       "GetUserResponse": {
         "properties": {
-          "user_id": {
+          "userId": {
             "type": "string",
-            "title": "User Id"
+            "title": "Userid"
           },
-          "created_at": {
+          "createdAt": {
             "type": "string",
-            "title": "Created At"
+            "title": "Createdat"
           },
-          "last_used_at": {
+          "lastUsedAt": {
             "anyOf": [
               {
                 "type": "string"
@@ -6221,13 +6217,13 @@
                 "type": "null"
               }
             ],
-            "title": "Last Used At"
+            "title": "Lastusedat"
           }
         },
         "type": "object",
         "required": [
-          "user_id",
-          "created_at"
+          "userId",
+          "createdAt"
         ],
         "title": "GetUserResponse"
       },
@@ -6821,9 +6817,9 @@
             "title": "Externalservers",
             "description": "Optional list of external MCP servers to add with their URLs. Each server will be validated before being added."
           },
-          "enable_auth_handling": {
+          "enableAuthHandling": {
             "type": "boolean",
-            "title": "Enable Auth Handling",
+            "title": "Enableauthhandling",
             "description": "Whether to enable authentication handling. Default is True.",
             "default": true
           }
