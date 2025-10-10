@@ -5182,6 +5182,60 @@
         }
       }
     },
+    "/oauth/onedrive/refresh_token": {
+      "post": {
+        "tags": [
+          "onedrive-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_onedrive_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/oauth/outlook/authorize": {
       "get": {
         "tags": [
@@ -5264,6 +5318,60 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/outlook/refresh_token": {
+      "post": {
+        "tags": [
+          "outlook-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_outlook_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -5373,6 +5481,60 @@
           }
         }
       }
+    },
+    "/oauth/teams/refresh_token": {
+      "post": {
+        "tags": [
+          "teams-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_teams_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5407,6 +5569,65 @@
         "additionalProperties": false,
         "type": "object",
         "title": "Option 1: API Key"
+      },
+      "AzureADOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Additional error message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "AzureADOAuthErrorResponse"
+      },
+      "AzureADOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "AzureADOAuthSuccessResponse"
       },
       "CallToolRequest": {
         "properties": {
