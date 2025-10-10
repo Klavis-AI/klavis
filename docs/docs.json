@@ -157,6 +157,7 @@
               "documentation/mcp-server/resend",
               "documentation/mcp-server/salesforce",
               "documentation/mcp-server/sendgrid",
+              "documentation/mcp-server/servicenow",
               "documentation/mcp-server/shopify",
               "documentation/mcp-server/slack",
               "documentation/mcp-server/stripe",
