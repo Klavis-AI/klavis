@@ -126,6 +126,11 @@ def chat_completion(openai_client: OpenAI, messages: List[Dict[str, str]], klavi
         user_id=user_id
     )
     
+    test = klavis_client.mcp_server.get_server_instance(
+        instance_id="21cc9bcb-a6a5-4b7e-93ed-7ea227978df4"
+    )
+    print(test)
+    
     # Handle OAuth if required
     if response.oauth_urls:
         for server_name, oauth_url in response.oauth_urls.items():
