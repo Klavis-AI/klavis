@@ -21,4 +21,3 @@ jobs:
           token: ${{ secrets.OPENAPI_SYNC_TOKEN }}
           branch: 'update-api'
           auto_merge: true
-          add_timestamp: true
