@@ -802,7 +802,7 @@
         }
       }
     },
-    "/mcp-server/tools/{server_name}": {
+    "/mcp-server/tools/{serverName}": {
       "get": {
         "tags": [
           "mcp-server"
