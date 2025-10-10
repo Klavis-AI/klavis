@@ -11,28 +11,14 @@ Mastra has officially featured Klavis AI in [their MCP registry documentation](h
   <img src="/images/ai-platform/mastra-klavis.png" alt="Mastra and Klavis Integration - Connect to MCP servers through registry" />
 </Frame>
 
-# Mastra + Klavis AI Integration
-
-This tutorial demonstrates how to use Mastra, an open-source TypeScript framework for building AI agents, with Klavis MCP (Model Context Protocol) servers.
-
 ## Prerequisites
 
-Before we begin, you'll need:
+Before we begin, you'll need [OpenAI API key](https://platform.openai.com/api-keys) and [Klavis API key](https://www.klavis.ai/home/api-keys).
 
-<CardGroup cols={2}>
-  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
-    Get your API key from OpenAI Platform
-  </Card>
-  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
-    Get your API key from Klavis AI
-  </Card>
-</CardGroup>
 
-## Getting Started
-
-You can find the complete example code in Klavis GitHub repository:
-
-**[📁 Checkout the code here](https://github.com/Klavis-AI/klavis/tree/main/examples/mastra)**
+<Tip>
+You can find the complete example code in Klavis GitHub repository: **[📁 Checkout here](https://github.com/Klavis-AI/klavis/tree/main/examples/mastra-klavis)**
+</Tip>
 
 ## Setup Environment Variables
 
@@ -64,48 +50,43 @@ import { MCPClient } from '@mastra/mcp';
 import { KlavisClient, Klavis } from 'klavis';
 import open from 'open';
 
-/**
- * Creates a Gmail MCP Agent with tools from a Klavis-hosted server
- */
-export const createGmailMcpAgent = async (userId: string = 'test-user', platformName: string = 'test-platform'): Promise<Agent> => {
+// Creates an MCP Agent with tools from Klavis Strata server
+export const createMcpAgent = async (userId: string = 'test-user'): Promise<Agent> => {
   const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
 
-  // Create a new Gmail MCP server instance
-  const instance = await klavis.mcpServer.createServerInstance({
-    serverName: Klavis.McpServerName.Gmail,
-    userId,
-    platformName
+  // Create a Strata MCP Server with Gmail and Slack
+  const response = await klavis.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId
   });
 
-  // Redirect user to authorize
-  const response = await klavis.mcpServer.getOAuthUrl({
-    serverName: Klavis.McpServerName.Gmail,
-    instanceId: instance.instanceId
-  });
-  open(response.oauthUrl);
+  // Handle OAuth authorization for each service
+  if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+      await open(oauthUrl);
+      console.log(`Please complete ${serverName} OAuth authorization at: ${oauthUrl}`);
+    }
+  }
 
-  // Initialize the MCP client
+  // Initialize the MCP client with Strata server URL
   const mcpClient = new MCPClient({
     servers: {
-      gmail: {
-        url: new URL(instance.serverUrl)
+      strata: {
+        url: new URL(response.strataServerUrl)
       }
     }
   });
 
-  // Get tools from the server
-  const tools = await mcpClient.getTools();
-
   // Create agent
   return new Agent({
-    name: 'Gmail MCP Agent',
-    instructions: `You are a Gmail agent with access to Gmail tools: read, send, search emails, and manage labels.`,
+    name: 'MCP Agent',
+    instructions: `You are an AI agent with access to MCP tools.`,
     model: openai('gpt-4o-mini'),
-    tools
+    tools: await mcpClient.getTools()
   });
 };
 
-const agent = await createGmailMcpAgent();
+const agent = await createMcpAgent();
 
 export const mastra = new Mastra({
   agents: { agent }
@@ -135,7 +116,7 @@ npm run dev
 
 ## Summary
 
-This implementation demonstrates a clean and focused approach to integrating Mastra with Klavis MCP servers for Gmail functionality. The agent can handle Gmail operations like reading, sending, searching emails, and managing labels through the MCP protocol.
+This implementation demonstrates how to integrate Mastra with Klavis Strata servers to access multiple MCP services (Gmail and Slack) through a single unified server. The agent is configured with MCP tools and can interact with various services through the MCP protocol.
 
 ## Useful Resources
 
