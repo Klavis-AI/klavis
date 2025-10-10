@@ -220,7 +220,7 @@ get_invoice_tool = Tool(
         },
         "required": ["Id"]
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 list_invoices_tool = Tool(
@@ -235,7 +235,7 @@ list_invoices_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 search_invoices_tool = Tool(
@@ -290,7 +290,7 @@ search_invoices_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 update_invoice_tool = Tool(

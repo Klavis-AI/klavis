@@ -1,0 +1,266 @@
+---
+title: 'Fireflies'
+description: 'Connect AI agents to Fireflies for automated meeting transcription, note-taking, and conversation analysis'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Fireflies to transcribe meetings, extract insights, search conversations, and automate meeting workflows through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Fireflies">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Strata MCP server with Fireflies
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.FIREFLIES],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Strata MCP server with Fireflies
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Fireflies],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Fireflies"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate with API Key">
+        <CodeGroup>
+          ```python Python
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.FIREFLIES,
+              auth_data={
+                  "api_key": "YOUR_FIREFLIES_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Fireflies,
+              authData: {
+                  api_key: "YOUR_FIREFLIES_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Fireflies",
+              "authData": {
+                "api_key": "YOUR_FIREFLIES_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Fireflies MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Fireflies">
+        Select Fireflies from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Enter your Fireflies API key to connect.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/fireflies
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/fireflies-mcp-server:latest
+        
+        # Run with API key support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/fireflies-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "fireflies": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Accordion title="Transcript Management">
+| Tool Name | Description |
+|-----------|-------------|
+| list_transcripts | List transcripts with optional filters by date range, keywords, participants, organizers, and more. Returns comprehensive transcript data including analytics, sentences, and summaries |
+| get_transcript | Get comprehensive information about a specific transcript by ID, including sentences with AI filters, detailed analytics, summary with action items, and meeting attendance |
+| delete_transcript | Delete a specific transcript by ID (requires transcript ownership or edit permissions) |
+| update_meeting_title | Update the title of a meeting transcript (requires transcript ownership or edit permissions) |
+</Accordion>
+
+<Accordion title="Meeting Operations">
+| Tool Name | Description |
+|-----------|-------------|
+| upload_audio | Upload audio/video file for transcription from a publicly accessible URL. Supports mp3, mp4, wav, m4a, ogg formats |
+| add_to_live_meeting | Add Fireflies bot to an ongoing meeting (Google Meet, Zoom, Microsoft Teams, etc.). Rate limited to 3 requests per 20 minutes |
+</Accordion>
+
+<Accordion title="User Management">
+| Tool Name | Description |
+|-----------|-------------|
+| get_user | Get user details by ID. If no ID provided, returns details for API key owner |
+| list_users | List all users in the team |
+| set_user_role | Set user role (admin or user). Requires admin privileges |
+</Accordion>
+
+<Accordion title="User Groups">
+| Tool Name | Description |
+|-----------|-------------|
+| list_user_groups | List user groups in the team with optional filtering |
+</Accordion>
+
+<Accordion title="Soundbites/Clips">
+| Tool Name | Description |
+|-----------|-------------|
+| list_bites | List bites/soundbites with filters by owner, transcript, or team |
+| get_bite | Get detailed information about a specific bite by ID |
+| create_bite | Create a new bite/soundbite from a transcript (requires appropriate permissions) |
+</Accordion>
+
+<Accordion title="Analytics">
+| Tool Name | Description |
+|-----------|-------------|
+| get_analytics | Get comprehensive team and user analytics for a date range. Includes conversation metrics, meeting metrics, and comparison data. Requires Business or Enterprise plan and admin privileges for team analytics |
+</Accordion>
+
+<Accordion title="AI Apps">
+| Tool Name | Description |
+|-----------|-------------|
+| list_apps | List AI App outputs with optional filters by app ID or transcript ID |
+</Accordion>
+
+<Accordion title="Webhooks">
+| Tool Name | Description |
+|-----------|-------------|
+| get_webhook_schema | Get the schema and example payload for Fireflies webhooks |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+</CardGroup>

@@ -188,7 +188,7 @@ def main(
                     "required": ["page_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_PAGE"}
+                    **{"category": "NOTION_PAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -272,7 +272,7 @@ def main(
                     "required": ["database_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_DATABASE"}
+                    **{"category": "NOTION_DATABASE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -289,7 +289,7 @@ def main(
                     "required": ["database_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_DATABASE"}
+                    **{"category": "NOTION_DATABASE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -439,7 +439,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_SEARCH"}
+                    **{"category": "NOTION_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -456,7 +456,7 @@ def main(
                     "required": ["user_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_USER"}
+                    **{"category": "NOTION_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -477,7 +477,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_USER"}
+                    **{"category": "NOTION_USER", "readOnlyHint": True}
                 ),
             ),
 
@@ -529,7 +529,7 @@ def main(
                     "required": ["block_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_COMMENT"}
+                    **{"category": "NOTION_COMMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -541,7 +541,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_USER"}
+                    **{"category": "NOTION_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -570,7 +570,7 @@ def main(
                     "required": ["page_id", "property_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_PAGE"}
+                    **{"category": "NOTION_PAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -587,7 +587,7 @@ def main(
                     "required": ["block_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_BLOCK"}
+                    **{"category": "NOTION_BLOCK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -654,7 +654,7 @@ def main(
                     "required": ["block_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "NOTION_BLOCK"}
+                    **{"category": "NOTION_BLOCK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

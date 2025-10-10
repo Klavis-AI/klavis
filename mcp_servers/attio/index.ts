@@ -331,7 +331,8 @@ const SEARCH_PEOPLE_TOOL: Tool = {
         },
     },
     annotations: {
-        category: 'ATTIO_PERSON'
+        category: 'ATTIO_PERSON',
+        readOnlyHint: true
     },
 };
 
@@ -361,7 +362,8 @@ const SEARCH_COMPANIES_TOOL: Tool = {
         },
     },
     annotations: {
-        category: 'ATTIO_COMPANY'
+        category: 'ATTIO_COMPANY',
+        readOnlyHint: true
     },
 };
 
@@ -399,7 +401,8 @@ const SEARCH_DEALS_TOOL: Tool = {
         },
     },
     annotations: {
-        category: 'ATTIO_DEAL'
+        category: 'ATTIO_DEAL',
+        readOnlyHint: true
     },
 };
 
@@ -421,7 +424,8 @@ const SEARCH_NOTES_TOOL: Tool = {
         },
     },
     annotations: {
-        category: 'ATTIO_NOTE'
+        category: 'ATTIO_NOTE',
+        readOnlyHint: true
     },
 };
 

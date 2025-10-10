@@ -70,7 +70,7 @@ server.addTool({
   name: 'monday_get_users_by_name',
   description: 'Retrieve user information by name or partial name',
   parameters: getUsersToolSchema,
-  annotations: { category: 'MONDAY_USER' } as any,
+  annotations: { category: 'MONDAY_USER', readOnlyHint: true } as any,
   execute: async (args, { session }) => await getUsersByName(args, session?.token as string),
 });
 
@@ -78,7 +78,7 @@ server.addTool({
   name: 'monday_get_board_schema',
   description: 'Get board schema (columns and groups) by board id',
   parameters: getBoardSchemaToolSchema,
-  annotations: { category: 'MONDAY_BOARD' } as any,
+  annotations: { category: 'MONDAY_BOARD', readOnlyHint: true } as any,
   execute: async (args, { session }) => await getBoardSchema(args, session?.token as string),
 });
 
@@ -93,7 +93,7 @@ server.addTool({
 server.addTool({
   name: 'monday_get_boards',
   description: 'Get all the monday.com boards',
-  annotations: { category: 'MONDAY_BOARD' } as any,
+  annotations: { category: 'MONDAY_BOARD', readOnlyHint: true } as any,
   execute: async (args, { session }) => await getBoards(session?.token as string),
 });
 
@@ -125,7 +125,7 @@ server.addTool({
   name: 'monday_get_board_items_by_name',
   description: 'Get items by name from a monday.com board',
   parameters: getBoardItemsByNameToolSchema,
-  annotations: { category: 'MONDAY_ITEM' } as any,
+  annotations: { category: 'MONDAY_ITEM', readOnlyHint: true } as any,
   execute: async (args, { session }) => await getBoardItemsByName(args, session?.token as string),
 });
 

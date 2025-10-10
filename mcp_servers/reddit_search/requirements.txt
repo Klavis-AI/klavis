@@ -1,0 +1,9 @@
+mcp>=1.12.0
+pydantic
+typing-extensions
+httpx
+click
+python-dotenv
+starlette
+uvicorn[standard]
+# praw

@@ -190,7 +190,7 @@ const SCRAPE_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_SEARCH' },
+    annotations: { category: 'FIRECRAWL_SEARCH', readOnlyHint: true },
 };
 
 const MAP_TOOL: Tool = {
@@ -227,7 +227,7 @@ const MAP_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const CRAWL_TOOL: Tool = {
@@ -340,7 +340,7 @@ const CRAWL_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const BATCH_SCRAPE_TOOL: Tool = {
@@ -392,7 +392,7 @@ const BATCH_SCRAPE_TOOL: Tool = {
         },
         required: ['urls'],
     },
-    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const CHECK_BATCH_STATUS_TOOL: Tool = {
@@ -408,7 +408,7 @@ const CHECK_BATCH_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
-    annotations: { category: 'FIRECRAWL_METADATA' },
+    annotations: { category: 'FIRECRAWL_METADATA', readOnlyHint: true },
 };
 
 const CHECK_CRAWL_STATUS_TOOL: Tool = {
@@ -424,7 +424,7 @@ const CHECK_CRAWL_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
-    annotations: { category: 'FIRECRAWL_METADATA' },
+    annotations: { category: 'FIRECRAWL_METADATA', readOnlyHint: true },
 };
 
 const SEARCH_TOOL: Tool = {
@@ -499,7 +499,7 @@ const SEARCH_TOOL: Tool = {
         },
         required: ['query'],
     },
-    annotations: { category: 'FIRECRAWL_WEB_SEARCH' },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const EXTRACT_TOOL: Tool = {
@@ -542,7 +542,7 @@ const EXTRACT_TOOL: Tool = {
         },
         required: ['urls'],
     },
-    annotations: { category: 'FIRECRAWL_AI_SEARCH' },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH', readOnlyHint: true },
 };
 
 const GENERATE_LLMSTXT_TOOL: Tool = {
@@ -567,7 +567,7 @@ const GENERATE_LLMSTXT_TOOL: Tool = {
         },
         required: ['url'],
     },
-    annotations: { category: 'FIRECRAWL_AI_SEARCH' },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH', readOnlyHint: true },
 };
 
 // Type definitions

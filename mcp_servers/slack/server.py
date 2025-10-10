@@ -142,7 +142,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_CHANNEL"}
+                    **{"category": "SLACK_CHANNEL", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -164,7 +164,7 @@ def main(
                     "required": ["channel_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_CHANNEL"}
+                    **{"category": "SLACK_CHANNEL", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -219,7 +219,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_USER"}
+                    **{"category": "SLACK_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -240,7 +240,7 @@ def main(
                     "required": ["user_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_USER"}
+                    **{"category": "SLACK_USER", "readOnlyHint": True}
                 ),
             ),
             
@@ -292,7 +292,7 @@ def main(
                     "required": ["query"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_MESSAGE"}
+                    **{"category": "SLACK_MESSAGE", "readOnlyHint": True}
                 ),
             ),
             

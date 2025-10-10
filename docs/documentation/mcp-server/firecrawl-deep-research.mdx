@@ -26,7 +26,7 @@ Connect to Firecrawl Deep Research to perform comprehensive web-based research, 
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Firecrawl Deep Research">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,85 +34,83 @@ Connect to Firecrawl Deep Research to perform comprehensive web-based research, 
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Firecrawl Deep Research MCP server instance
-          firecrawl_deep_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.FIRECRAWL_DEEP_RESEARCH,
+          # Create a Strata MCP server with Firecrawl Deep Research
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.FIRECRAWL_DEEP_RESEARCH],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Firecrawl Deep Research MCP server instance
-          const firecrawlDeepServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.FirecrawlDeepResearch,
+          // Create a Strata MCP server with Firecrawl Deep Research
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.FirecrawlDeepResearch],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "Firecrawl Deep Research",
+              "servers": ["Firecrawl Deep Research"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Firecrawl Deep Research
-          - `instanceId`: Unique identifier for your server instance
-          - Note: Firecrawl requires an API key which should be configured after creation
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure authentication">
+      <Step title="Authenticate with API Key">
         <Info>
           You can get your Firecrawl API key from the [Firecrawl website](https://firecrawl.dev/).
         </Info>
         
         <CodeGroup>
           ```python Python
-          # Set the Firecrawl API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=firecrawl_deep_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.FIRECRAWL_DEEP_RESEARCH,
               auth_data={
-                  "token": "YOUR_FIRECRAWL_API_KEY"
+                  "api_key": "YOUR_FIRECRAWL_API_KEY"
               }
           )
           ```
           
           ```typescript TypeScript
-          // Set the Firecrawl API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: firecrawlDeepServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.FirecrawlDeepResearch,
               authData: {
-                  token: "YOUR_FIRECRAWL_API_KEY"
+                  api_key: "YOUR_FIRECRAWL_API_KEY"
               }
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Firecrawl Deep Research",
               "authData": {
-                "token": "YOUR_FIRECRAWL_API_KEY"
+                "api_key": "YOUR_FIRECRAWL_API_KEY"
               }
             }'
           ```
         </CodeGroup>
         
         <Check>
-          🎉 **Your Firecrawl Deep Research MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client to perform comprehensive research.
+          🎉 **Your Firecrawl Deep Research MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -154,9 +152,9 @@ Connect to Firecrawl Deep Research to perform comprehensive web-based research, 
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/firecrawl-deep-research-mcp-server:latest
         
-        # Run with Firecrawl API key
+        # Run with API key support (requires Klavis API key)
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_firecrawl_api_key"}' \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/firecrawl-deep-research-mcp-server:latest
         ```
       </Step>
@@ -211,5 +209,12 @@ Connect to Firecrawl Deep Research to perform comprehensive web-based research, 
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

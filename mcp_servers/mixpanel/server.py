@@ -155,7 +155,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_get_event_properties",
@@ -177,7 +177,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_get_event_property_values",
@@ -203,7 +203,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_EVENT_METADATA", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_run_funnels_query",
@@ -233,7 +233,7 @@ def main(
                         "project_id": {"type": ["string", "integer"]}
                     }
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_run_segmentation_query",
@@ -300,7 +300,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_run_retention_query",
@@ -366,7 +366,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_run_frequency_query",
@@ -441,7 +441,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_ANALYTICS", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mixpanel_get_projects",
@@ -450,7 +450,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_PROJECT"}),
+                annotations=types.ToolAnnotations(**{"category": "MIXPANEL_PROJECT", "readOnlyHint": True}),
             )
         ]
 

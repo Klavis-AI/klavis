@@ -97,53 +97,84 @@
               "documentation/mcp-server/airtable",
               "documentation/mcp-server/asana",
               "documentation/mcp-server/attio",
-              "documentation/mcp-server/openrouter",
+              "documentation/mcp-server/box",
               "documentation/mcp-server/brave_search",
               "documentation/mcp-server/cal_com",
               "documentation/mcp-server/calendly",
               "documentation/mcp-server/clickup",
               "documentation/mcp-server/close",
+              "documentation/mcp-server/cloudflare",
               "documentation/mcp-server/coinbase",
               "documentation/mcp-server/confluence",
+              "documentation/mcp-server/dialpad",
               "documentation/mcp-server/discord",
               "documentation/mcp-server/doc2markdown",
+              "documentation/mcp-server/docusign",
               "documentation/mcp-server/dropbox",
+              "documentation/mcp-server/elevenlabs",
               "documentation/mcp-server/exa",
+              "documentation/mcp-server/fathom",
+              "documentation/mcp-server/figma",
               "documentation/mcp-server/firecrawl-deep-research",
               "documentation/mcp-server/firecrawl-web-search",
+              "documentation/mcp-server/fireflies",
+              "documentation/mcp-server/freshdesk",
               "documentation/mcp-server/github",
+              "documentation/mcp-server/gitlab",
               "documentation/mcp-server/gmail",
               "documentation/mcp-server/gong",
               "documentation/mcp-server/google_calendar",
               "documentation/mcp-server/google_docs",
               "documentation/mcp-server/google_drive",
+              "documentation/mcp-server/google_jobs",
               "documentation/mcp-server/google_sheets",
               "documentation/mcp-server/hacker_news",
+              "documentation/mcp-server/heygen",
               "documentation/mcp-server/hubspot",
               "documentation/mcp-server/jira",
               "documentation/mcp-server/klavis-reportgen",
+              "documentation/mcp-server/klaviyo",
               "documentation/mcp-server/linear",
               "documentation/mcp-server/linkedin",
               "documentation/mcp-server/markdown2doc",
+              "documentation/mcp-server/mem0",
+              "documentation/mcp-server/metabase",
               "documentation/mcp-server/microsoft_teams",
               "documentation/mcp-server/mixpanel",
+              "documentation/mcp-server/monday",
+              "documentation/mcp-server/moneybird",
               "documentation/mcp-server/motion",
               "documentation/mcp-server/notion",
               "documentation/mcp-server/onedrive",
+              "documentation/mcp-server/openrouter",
               "documentation/mcp-server/outlook",
+              "documentation/mcp-server/pagerduty",
               "documentation/mcp-server/perplexity",
+              "documentation/mcp-server/pipedrive",
               "documentation/mcp-server/plai",
               "documentation/mcp-server/postgres",
+              "documentation/mcp-server/posthog",
               "documentation/mcp-server/quickbooks",
               "documentation/mcp-server/resend",
               "documentation/mcp-server/salesforce",
+              "documentation/mcp-server/sendgrid",
+              "documentation/mcp-server/servicenow",
+              "documentation/mcp-server/shopify",
               "documentation/mcp-server/slack",
               "documentation/mcp-server/stripe",
               "documentation/mcp-server/supabase",
+              "documentation/mcp-server/tavily",
+              "documentation/mcp-server/vercel",
               "documentation/mcp-server/whatsapp",
               "documentation/mcp-server/wordpress",
               "documentation/mcp-server/youtube",
               "documentation/mcp-server/zendesk"
+            ]
+          },
+          {
+            "group": "Legacy",
+            "pages": [
+              "documentation/legacy/instance"
             ]
           }
         ]
@@ -162,15 +193,47 @@
               "api-reference/strata/create",
               "api-reference/strata/get",
               "api-reference/strata/add",
-              "api-reference/strata/delete"
+              "api-reference/strata/delete",
+              {
+                "group": "Strata Auth / OAuth",
+                "pages": [
+                  "api-reference/strata/set-strata-auth",
+                  "api-reference/strata/get-strata-auth",
+                  "api-reference/strata/delete-strata-auth"
+                ]
+              }
             ]
           },
           {
-            "group": "Individual MCP Server",
+            "group": "MCP Server Instance",
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
               "api-reference/mcp-server/get-server-instance",
-              "api-reference/mcp-server/delete-a-server-instance"
+              "api-reference/mcp-server/delete-a-server-instance",
+              {
+                "group": "Instance Auth / OAuth",
+                "pages": [
+                  "api-reference/mcp-server/set-instance_auth",
+                  "api-reference/mcp-server/get-instance_auth",
+                  "api-reference/mcp-server/delete-instance_auth"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "User",
+            "pages": [
+              "api-reference/user/get-user",
+              "api-reference/user/get-user-integrations",
+              "api-reference/user/delete-user",
+              {
+                "group": "User Auth / OAuth",
+                "pages": [
+                  "api-reference/user/set-user-auth",
+                  "api-reference/user/get-user-auth",
+                  "api-reference/user/delete-user-auth"
+                ]
+              }
             ]
           },
           {
@@ -188,14 +251,7 @@
             ]
           },
           {
-            "group": "User",
-            "pages": [
-              "api-reference/user/get-user-instances",
-              "api-reference/user/delete-user"
-            ]
-          },
-          {
-            "group": "White Labeling",
+            "group": "White Label OAuth",
             "pages": [
               "api-reference/white-labeling/create",
               "api-reference/white-labeling/get"
@@ -208,111 +264,52 @@
             ]
           },
           {
-            "group": "Auth / OAuth",
+            "group": "Individual OAuth",
             "pages": [
-              "api-reference/mcp-server/get-oauth-url",
-              "api-reference/mcp-server/set-authentication-data",
-              "api-reference/mcp-server/get-authentication-data",
-              "api-reference/mcp-server/delete-auth-data-for-a-server-instance",
               {
-                "group": "GitHub OAuth",
-                "pages": ["api-reference/oauth/github-oauth/authorize-github"]
-              },
-              {
-                "group": "Slack OAuth",
-                "pages": ["api-reference/oauth/slack-oauth/authorize-slack"]
-              },
-              {
-                "group": "Jira OAuth",
-                "pages": ["api-reference/oauth/jira-oauth/authorize-jira"]
-              },
-              {
-                "group": "Notion OAuth",
-                "pages": ["api-reference/oauth/notion-oauth/authorize-notion"]
-              },
-              {
-                "group": "Supabase OAuth",
-                "pages": ["api-reference/oauth/supabase-oauth/authorize-supabase"]
-              },
-              {
-                "group": "WordPress OAuth",
-                "pages": ["api-reference/oauth/wordpress-oauth/authorize-wordpress"]
-              },
-              {
-                "group": "Gmail OAuth",
-                "pages": ["api-reference/oauth/gmail-oauth/authorize-gmail"]
-              },
-              {
-                "group": "Google Calendar OAuth",
+                "group": "OAuth Servers",
                 "pages": [
-                  "api-reference/oauth/gcalendar-oauth/authorize-gcalendar"
+                  "api-reference/oauth/airtable-oauth/authorize-airtable",
+                  "api-reference/oauth/asana-oauth/authorize-asana",
+                  "api-reference/oauth/attio-oauth/authorize-attio",
+                  "api-reference/oauth/box-oauth/authorize-box",
+                  "api-reference/oauth/calcom-oauth/authorize-calcom",
+                  "api-reference/oauth/canva-oauth/authorize-canva",
+                  "api-reference/oauth/clickup-oauth/authorize-clickup",
+                  "api-reference/oauth/close-oauth/authorize-close",
+                  "api-reference/oauth/confluence-oauth/authorize-confluence",
+                  "api-reference/oauth/dialpad-oauth/authorize-dialpad",
+                  "api-reference/oauth/docusign-oauth/authorize-docusign",
+                  "api-reference/oauth/dropbox-oauth/authorize-dropbox",
+                  "api-reference/oauth/figma-oauth/authorize-figma",
+                  "api-reference/oauth/gcalendar-oauth/authorize-gcalendar",
+                  "api-reference/oauth/gdocs-oauth/authorize-gdocs",
+                  "api-reference/oauth/gdrive-oauth/authorize-gdrive",
+                  "api-reference/oauth/github-oauth/authorize-github",
+                  "api-reference/oauth/gitlab-oauth/authorize-gitlab",
+                  "api-reference/oauth/gmail-oauth/authorize-gmail",
+                  "api-reference/oauth/gsheets-oauth/authorize-gsheets",
+                  "api-reference/oauth/hubspot-oauth/authorize-hubspot",
+                  "api-reference/oauth/jira-oauth/authorize-jira",
+                  "api-reference/oauth/klaviyo-oauth/authorize-klaviyo",
+                  "api-reference/oauth/linear-oauth/authorize-linear",
+                  "api-reference/oauth/linkedin-oauth/authorize-linkedin",
+                  "api-reference/oauth/notion-oauth/authorize-notion",
+                  "api-reference/oauth/onedrive-oauth/authorize-onedrive",
+                  "api-reference/oauth/outlook-oauth/authorize-outlook",
+                  "api-reference/oauth/pagerduty-oauth/authorize-pagerduty",
+                  "api-reference/oauth/pipedrive-oauth/authorize-pipedrive",
+                  "api-reference/oauth/quickbooks-oauth/authorize-quickbooks",
+                  "api-reference/oauth/salesforce-oauth/authorize-salesforce",
+                  "api-reference/oauth/shopify-oauth/authorize-shopify",
+                  "api-reference/oauth/slack-oauth/authorize-slack",
+                  "api-reference/oauth/stripe-connect-oauth/authorize-stripe-connect",
+                  "api-reference/oauth/supabase-oauth/authorize-supabase",
+                  "api-reference/oauth/vercel-oauth/authorize-vercel",
+                  "api-reference/oauth/wordpress-oauth/authorize-wordpress",
+                  "api-reference/oauth/xero-oauth/authorize-xero",
+                  "api-reference/oauth/zendesk-oauth/authorize-zendesk"
                 ]
-              },
-              {
-                "group": "Google Drive OAuth",
-                "pages": [
-                  "api-reference/oauth/gdrive-oauth/authorize-gdrive"
-                ]
-              },
-              {
-                "group": "Google Docs OAuth",
-                "pages": [
-                  "api-reference/oauth/gdocs-oauth/authorize-gdocs"
-                ]
-              },
-              {
-                "group": "Google Sheets OAuth",
-                "pages": [
-                  "api-reference/oauth/gsheets-oauth/authorize-gsheets"
-                ]
-              },
-              {
-                "group": "Airtable OAuth",
-                "pages": ["api-reference/oauth/airtable-oauth/authorize-airtable"]
-              },
-              {
-                "group": "Asana OAuth",
-                "pages": ["api-reference/oauth/asana-oauth/authorize-asana"]
-              },
-              {
-                "group": "Close OAuth",
-                "pages": ["api-reference/oauth/close-oauth/authorize-close"]
-              },
-              {
-                "group": "Confluence OAuth",
-                "pages": ["api-reference/oauth/confluence-oauth/authorize-confluence"]
-              },
-              {
-                "group": "Salesforce OAuth",
-                "pages": ["api-reference/oauth/salesforce-oauth/authorize-salesforce"]
-              },
-              {
-                "group": "Linear OAuth",
-                "pages": ["api-reference/oauth/linear-oauth/authorize-linear"]
-              },
-              {
-                "group": "Linkedin OAuth",
-                "pages": ["api-reference/oauth/linkedin-oauth/authorize-linkedin"]
-              },
-              {
-                "group": "Attio OAuth",
-                "pages": ["api-reference/oauth/attio-oauth/authorize-attio"]
-              },
-              {
-                "group": "Canva OAuth",
-                "pages": ["api-reference/oauth/canva-oauth/authorize-canva"]
-              },
-              {
-                "group": "Xero OAuth",
-                "pages": ["api-reference/oauth/xero-oauth/authorize-xero"]
-              },
-              {
-                "group": "Dropbox OAuth",
-                "pages": ["api-reference/oauth/dropbox-oauth/authorize-dropbox"]
-              },
-              {
-                "group": "QuickBooks OAuth",
-                "pages": ["api-reference/oauth/quickbooks-oauth/authorize-quickbooks"]
               }
             ]
           }

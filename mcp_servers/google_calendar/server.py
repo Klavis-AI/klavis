@@ -569,7 +569,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_CALENDAR_CALENDAR"}
+                    **{"category": "GOOGLE_CALENDAR_CALENDAR", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -660,7 +660,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                    **{"category": "GOOGLE_CALENDAR_EVENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

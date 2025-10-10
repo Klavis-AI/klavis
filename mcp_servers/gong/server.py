@@ -83,7 +83,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT"}),
+                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_get_extensive_data",
@@ -113,7 +113,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GONG_CALL"}),
+                annotations=types.ToolAnnotations(**{"category": "GONG_CALL", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_get_call_transcripts",
@@ -129,7 +129,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT"}),
+                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_list_calls",
@@ -142,7 +142,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "limit": {"type": "integer", "description": "Maximum calls to return (default 50).", "default": 50},
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "GONG_CALL"}),
+                annotations=types.ToolAnnotations(**{"category": "GONG_CALL", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_add_new_call",

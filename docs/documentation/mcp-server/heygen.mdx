@@ -26,7 +26,7 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with HeyGen">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,49 +34,47 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a HeyGen MCP server instance
-          heygen_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.HEYGEN,
+          # Create a Strata MCP server with HeyGen
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.HEYGEN],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a HeyGen MCP server instance
-          const heygenServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.HeyGen,
+          // Create a Strata MCP server with HeyGen
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.HeyGen],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "HeyGen",
+              "servers": ["HeyGen"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to HeyGen
-          - `instanceId`: Unique identifier for your server instance
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure API Key">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set the HeyGen API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=heygen_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.HEYGEN,
               auth_data={
                   "token": "YOUR_HEYGEN_API_KEY"
               }
@@ -84,9 +82,9 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
           ```
           
           ```typescript TypeScript
-          // Set the HeyGen API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: heygenServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.HeyGen,
               authData: {
                   token: "YOUR_HEYGEN_API_KEY"
               }
@@ -94,11 +92,12 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "HeyGen",
               "authData": {
                 "token": "YOUR_HEYGEN_API_KEY"
               }
@@ -107,7 +106,7 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
         </CodeGroup>
         
         <Check>
-          🎉 **Your HeyGen MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your HeyGen MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -149,9 +148,9 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/heygen-mcp-server:latest
         
-        # Run with API key
+        # Run with API key support (requires Klavis API key)
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_heygen_api_key"}' \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/heygen-mcp-server:latest
         ```
       </Step>
@@ -215,5 +214,12 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

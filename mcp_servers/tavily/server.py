@@ -153,7 +153,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_WEB_SEARCH"}
+                    **{"category": "TAVILY_WEB_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -180,7 +180,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_WEB_SEARCH"}
+                    **{"category": "TAVILY_WEB_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -209,7 +209,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_WEB_SEARCH"}
+                    **{"category": "TAVILY_WEB_SEARCH", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -235,7 +235,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "TAVILY_WEB_SEARCH"}
+                    **{"category": "TAVILY_WEB_SEARCH", "readOnlyHint": True}
                 ),
             ),
         ]

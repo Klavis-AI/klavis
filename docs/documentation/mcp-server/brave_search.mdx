@@ -26,7 +26,7 @@ Connect to Brave Search to perform comprehensive web searches, including web res
         </CodeGroup>
       </Step>
       
-      <Step title="Create a server instance">
+      <Step title="Create a Strata MCP Server with Brave Search">
         <CodeGroup>
           ```python Python
           from klavis import Klavis
@@ -34,81 +34,79 @@ Connect to Brave Search to perform comprehensive web searches, including web res
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Brave Search MCP server instance
-          brave_search_server = klavis_client.mcp_server.create_server_instance(
-              server_name=McpServerName.BRAVE_SEARCH,
+          # Create a Strata MCP server with Brave Search
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.BRAVE_SEARCH],
               user_id="user123"
           )
           ```
           
           ```typescript TypeScript
-          import { KlavisClient, Klavis } from 'klavis';
+          import { Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
           
-          // Create a Brave Search MCP server instance
-          const braveSearchServer = await klavis.mcpServer.createServerInstance({
-              serverName: Klavis.McpServerName.BraveSearch,
+          // Create a Strata MCP server with Brave Search
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.BraveSearch],
               userId: "user123"
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
             -H "Authorization: Bearer YOUR_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "serverName": "BraveSearch",
+              "servers": ["Brave Search"],
               "userId": "user123"
             }'
           ```
         </CodeGroup>
-        
-        <Info>
-          **Response Information**: The API returns:
-          - `serverUrl`: The URL for connecting your MCP client to Brave Search
-          - `instanceId`: Unique identifier for your server instance
-          - Note: Brave Search requires an API key which should be configured after creation
-        </Info>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
       </Step>
       
-      <Step title="Configure authentication">
+      <Step title="Authenticate with API Key">
         <CodeGroup>
           ```python Python
-          # Set the Brave Search API key for your instance
-          response = klavis_client.mcp_server.set_instance_auth(
-              instance_id=brave_search_server.instance_id,
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.BRAVE_SEARCH,
               auth_data={
-                  "token": "YOUR_BRAVE_SEARCH_API_KEY"
+                  "api_key": "YOUR_BRAVE_SEARCH_API_KEY"
               }
           )
           ```
           
           ```typescript TypeScript
-          // Set the Brave Search API key for your instance
-          const response = await klavis.mcpServer.setInstanceAuth({
-              instanceId: braveSearchServer.instanceId,
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.BraveSearch,
               authData: {
-                  token: "YOUR_BRAVE_SEARCH_API_KEY"
+                  api_key: "YOUR_BRAVE_SEARCH_API_KEY"
               }
           });
           ```
           
           ```bash cURL
-          curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
-            -H "Authorization: Bearer YOUR_API_KEY" \
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
-              "instanceId": "YOUR_INSTANCE_ID",
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Brave Search",
               "authData": {
-                "token": "YOUR_BRAVE_SEARCH_API_KEY"
+                "api_key": "YOUR_BRAVE_SEARCH_API_KEY"
               }
             }'
           ```
         </CodeGroup>
         
         <Check>
-          🎉 **Your Brave Search MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client to perform searches.
+          🎉 **Your Brave Search MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -151,7 +149,7 @@ Connect to Brave Search to perform comprehensive web searches, including web res
         
         # Run with Brave Search API key
         docker run -p 5000:5000 \
-          -e AUTH_DATA='{"token":"your_brave_search_api_key"}' \
+          -e AUTH_DATA='{"api_key":"your_brave_search_api_key"}' \
           ghcr.io/klavis-ai/brave-search-mcp-server:latest
         ```
       </Step>
@@ -209,5 +207,12 @@ Connect to Brave Search to perform comprehensive web searches, including web res
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>

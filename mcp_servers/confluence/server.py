@@ -158,7 +158,7 @@ def main(
                     "required": ["page_identifier"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_PAGE"}
+                    **{"category": "CONFLUENCE_PAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -176,7 +176,7 @@ def main(
                     "required": ["page_ids"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_PAGE"}
+                    **{"category": "CONFLUENCE_PAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -210,7 +210,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_PAGE"}
+                    **{"category": "CONFLUENCE_PAGE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -309,7 +309,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_SPACE"}
+                    **{"category": "CONFLUENCE_SPACE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -326,7 +326,7 @@ def main(
                     "required": ["space_identifier"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_SPACE"}
+                    **{"category": "CONFLUENCE_SPACE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -343,7 +343,7 @@ def main(
                     "required": ["space_identifier"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_SPACE"}
+                    **{"category": "CONFLUENCE_SPACE", "readOnlyHint": True}
                 ),
             ),
             # Search tools
@@ -376,7 +376,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_SEARCH"}
+                    **{"category": "CONFLUENCE_SEARCH", "readOnlyHint": True}
                 ),
             ),
             # Attachment tools
@@ -405,7 +405,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                    **{"category": "CONFLUENCE_ATTACHMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -432,7 +432,7 @@ def main(
                     "required": ["page_identifier"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                    **{"category": "CONFLUENCE_ATTACHMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -449,7 +449,7 @@ def main(
                     "required": ["attachment_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CONFLUENCE_ATTACHMENT"}
+                    **{"category": "CONFLUENCE_ATTACHMENT", "readOnlyHint": True}
                 ),
             ),
         ]

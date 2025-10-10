@@ -110,7 +110,7 @@ def main(
                     "required": [],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AIRTABLE_BASE"}
+                    **{"category": "AIRTABLE_BASE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -127,7 +127,7 @@ def main(
                     "required": ["base_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AIRTABLE_TABLE"}
+                    **{"category": "AIRTABLE_TABLE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -312,7 +312,7 @@ def main(
                     "required": ["base_id", "table_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AIRTABLE_RECORD"}
+                    **{"category": "AIRTABLE_RECORD", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -337,7 +337,7 @@ def main(
                     "required": ["base_id", "table_id", "record_id"],
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "AIRTABLE_RECORD"}
+                    **{"category": "AIRTABLE_RECORD", "readOnlyHint": True}
                 ),
             ),
             types.Tool(

@@ -144,7 +144,7 @@ get_payment_tool = Tool(
         },
         "required": ["Id"]
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 list_payments_tool = Tool(
@@ -159,7 +159,7 @@ list_payments_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 search_payments_tool = Tool(
@@ -193,7 +193,7 @@ search_payments_tool = Tool(
         },
         "required": [],
     },
-    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 update_payment_tool = Tool(

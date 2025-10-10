@@ -100,7 +100,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_get_users",
@@ -114,7 +114,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_WORKSPACE", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_get_my_user",
@@ -123,7 +123,7 @@ def main(
                     "type": "object",
                     "properties": {},
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_USER"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_USER", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_get_tasks",
@@ -137,7 +137,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_get_task",
@@ -152,7 +152,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_TASK", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_create_task",
@@ -287,7 +287,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_get_project",
@@ -302,7 +302,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_PROJECT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_create_project",
@@ -344,7 +344,7 @@ def main(
                         },
                     },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MOTION_COMMENT"}),
+                annotations=types.ToolAnnotations(**{"category": "MOTION_COMMENT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="motion_create_comment",

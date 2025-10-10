@@ -76,7 +76,7 @@ def main(
                     },
                     "required": ["item_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_ITEM"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_ITEM", "readOnlyHint": True})
             ),
 
             # For hackerNews_user
@@ -93,7 +93,7 @@ def main(
                     },
                     "required": ["username"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_USER"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_USER", "readOnlyHint": True})
             ),
             # For hackerNews_topstories
             types.Tool(
@@ -110,7 +110,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_beststories
@@ -128,7 +128,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_newstories
@@ -146,7 +146,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_showstories
@@ -164,7 +164,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_askstories
@@ -182,7 +182,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_jobstories
@@ -200,7 +200,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_STORY_LIST", "readOnlyHint": True})
             ),
 
             # For hackerNews_updates
@@ -218,7 +218,7 @@ def main(
                     },
                     "required": []
                 },
-                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_UPDATES"})
+                annotations=types.ToolAnnotations(**{"category": "HACKER_NEWS_UPDATES", "readOnlyHint": True})
             )
         ]
 

@@ -221,7 +221,7 @@ def main(
                     "type": "object",
                     "properties": {}
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="onedrive_list_inside_folder",
@@ -233,7 +233,7 @@ def main(
                     },
                     "required": ["folder_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="onedrive_search_item_by_name",
@@ -245,7 +245,7 @@ def main(
                     },
                     "required": ["itemname"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM", "readOnlyHint": True})
             ),
             types.Tool(
                 name="onedrive_search_folder_by_name",
@@ -257,7 +257,7 @@ def main(
                     },
                     "required": ["folder_name"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_FOLDER", "readOnlyHint": True})
             ),
             types.Tool(
                 name="onedrive_get_item_by_id",
@@ -269,7 +269,7 @@ def main(
                     },
                     "required": ["item_id"]
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM", "readOnlyHint": True})
             ),
 
             # Sharing & Permissions
@@ -280,7 +280,7 @@ def main(
                     "type": "object",
                     "properties": {}
                 },
-                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM"})
+                annotations=types.ToolAnnotations(**{"category": "ONEDRIVE_ITEM", "readOnlyHint": True})
             )
         ]
 

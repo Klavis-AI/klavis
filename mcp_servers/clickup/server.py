@@ -106,7 +106,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_TEAM"}
+                    **{"category": "CLICKUP_TEAM", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -117,7 +117,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_WORKSPACE"}
+                    **{"category": "CLICKUP_WORKSPACE", "readOnlyHint": True}
                 ),
             ),
             
@@ -136,7 +136,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_SPACE"}
+                    **{"category": "CLICKUP_SPACE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -214,7 +214,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_FOLDER"}
+                    **{"category": "CLICKUP_FOLDER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -278,7 +278,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_LIST"}
+                    **{"category": "CLICKUP_LIST", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -404,7 +404,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_TASK"}
+                    **{"category": "CLICKUP_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -426,7 +426,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_TASK"}
+                    **{"category": "CLICKUP_TASK", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -536,7 +536,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_TASK"}
+                    **{"category": "CLICKUP_TASK", "readOnlyHint": True}
                 ),
             ),
             
@@ -555,7 +555,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_COMMENT"}
+                    **{"category": "CLICKUP_COMMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -615,7 +615,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_USER"}
+                    **{"category": "CLICKUP_USER", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -632,7 +632,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "CLICKUP_USER"}
+                    **{"category": "CLICKUP_USER", "readOnlyHint": True}
                 ),
             ),
         ]

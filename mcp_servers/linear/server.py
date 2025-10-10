@@ -100,7 +100,7 @@ def main(
                     "properties": {},
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_TEAM"}
+                    **{"category": "LINEAR_TEAM", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -153,7 +153,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_ISSUE"}
+                    **{"category": "LINEAR_ISSUE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -170,7 +170,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_ISSUE"}
+                    **{"category": "LINEAR_ISSUE", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -301,7 +301,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_PROJECT"}
+                    **{"category": "LINEAR_PROJECT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -389,7 +389,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_COMMENT"}
+                    **{"category": "LINEAR_COMMENT", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -457,7 +457,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "LINEAR_ISSUE"}
+                    **{"category": "LINEAR_ISSUE", "readOnlyHint": True}
                 ),
             ),
         ]

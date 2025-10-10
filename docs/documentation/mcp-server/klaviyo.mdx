@@ -1,0 +1,212 @@
+---
+title: 'Klaviyo'
+description: 'Connect AI agents to Klaviyo for managing marketing campaigns and customer data'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Klaviyo to manage marketing campaigns and customer data through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Klaviyo">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+
+          # Create a Strata MCP server with Klaviyo
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.KLAVIYO],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+
+          // Create a Strata MCP server with Klaviyo
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Klaviyo],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Klaviyo"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(response.oauth_urls[McpServerName.KLAVIYO])
+          ```
+          
+          ```typescript TypeScript
+            import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.Klaviyo]);
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/klaviyo/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
+        
+        <Note>
+          Get your Klaviyo API key from your [Klaviyo Developer Console](https://developers.klaviyo.com/).
+        </Note>
+        
+        <Check>
+          🎉 **Your Klaviyo MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Klaviyo">
+        Select Klaviyo from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Klaviyo account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/klaviyo
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/klaviyo-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/klaviyo-mcp-server:latest
+        
+        # Or run with manual API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"access_token":"your_klaviyo_api_key"}' \
+          ghcr.io/klavis-ai/klaviyo-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "klaviyo": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Accordion title="Tools Information">
+| Tool Name   | Description                                                              |
+|-------------|--------------------------------------------------------------------------|
+<Note>
+  Coming Soon
+</Note>
+</Accordion>
+
+<Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+</CardGroup>
