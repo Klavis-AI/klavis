@@ -473,7 +473,7 @@
         "security": [{ "HTTPBearer": [] }]
       }
     },
-    "/mcp-server/instance/get/{instance_id}": {
+    "/mcp-server/instance/{instance_id}": {
       "get": {
         "tags": ["mcp-server"],
         "summary": "Get",
@@ -500,6 +500,45 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/GetInstanceResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["mcp-server"],
+        "summary": "Delete",
+        "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
+        "operationId": "deleteServerInstance",
+        "security": [{ "HTTPBearer": [] }],
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The ID of the connection instance to delete.",
+              "title": "Instance Id"
+            },
+            "description": "The ID of the connection instance to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
@@ -580,47 +619,6 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/GetAuthDataResponse" }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mcp-server/instance/delete/{instance_id}": {
-      "delete": {
-        "tags": ["mcp-server"],
-        "summary": "Delete",
-        "description": "Completely removes a server connection instance using its unique ID,\ndeleting all associated data from the system.",
-        "operationId": "deleteServerInstance",
-        "security": [{ "HTTPBearer": [] }],
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "description": "The ID of the connection instance to delete.",
-              "title": "Instance Id"
-            },
-            "description": "The ID of the connection instance to delete."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/StatusResponse" }
               }
             }
           },
