@@ -39,7 +39,7 @@ export const createMcpAgent = async (userId: string = 'test-user'): Promise<Agen
   return new Agent({
     name: 'MCP Agent',
     instructions: `You are an AI agent with access to MCP tools.`,
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-4o'),
     tools: await mcpClient.getTools()
   });
 };
