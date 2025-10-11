@@ -868,7 +868,7 @@
           "mcp-server"
         ],
         "summary": "Get All Servers",
-        "description": "Get all MCP servers with their basic information including id, name, and description.",
+        "description": "Get all MCP servers with their basic information including id, name, description, and tools.",
         "operationId": "getAllMcpServers",
         "responses": {
           "200": {
@@ -1447,9 +1447,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1546,9 +1544,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1645,9 +1641,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1726,9 +1720,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1825,9 +1817,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1924,9 +1914,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2023,9 +2011,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2122,9 +2108,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2221,9 +2205,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2320,9 +2302,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2419,9 +2399,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2518,9 +2496,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2617,9 +2593,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2698,9 +2672,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2815,9 +2787,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2914,9 +2884,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3013,9 +2981,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3112,9 +3078,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3193,9 +3157,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3292,9 +3254,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3391,9 +3351,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3490,9 +3448,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3589,9 +3545,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3688,9 +3642,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3787,9 +3739,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3886,9 +3836,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4001,9 +3949,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4111,9 +4057,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4210,9 +4154,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4291,9 +4233,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4390,9 +4330,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4489,9 +4427,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4588,9 +4524,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4686,9 +4620,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4785,9 +4717,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4884,9 +4814,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5020,9 +4948,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5130,9 +5056,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5228,9 +5152,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5380,9 +5302,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5532,9 +5452,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5784,9 +5702,7 @@
       "CallToolResult": {
         "properties": {
           "content": {
-            "items": {
-
-            },
+            "items": {},
             "type": "array",
             "title": "Content",
             "description": "The content of the tool call"
@@ -6364,9 +6280,7 @@
           "tools": {
             "anyOf": [
               {
-                "items": {
-
-                },
+                "items": {},
                 "type": "array"
               },
               {
