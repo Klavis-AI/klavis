@@ -42,7 +42,7 @@ paths:
       operationId: list_tools
       x-fern-sdk-group-name: mcp_server
       x-fern-sdk-method-name: list_tools
-  "/mcp-server/tools/{server_name}":
+  "/mcp-server/tools/{serverName}":
     get:
       operationId: get_tools
       x-fern-sdk-group-name: mcp_server
