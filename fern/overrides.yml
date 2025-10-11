@@ -215,3 +215,7 @@ paths:
     get:
       x-fern-sdk-group-name: oauth
       x-fern-sdk-method-name: authorize_teams
+  "/oauth/fathom/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_fathom
