@@ -836,6 +836,18 @@
               "default": "mcp_native"
             },
             "description": "The format to return tools in. Default is MCP Native format for maximum compatibility."
+          },
+          {
+            "name": "legacy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Whether to use the legacy server. Default is False.",
+              "default": false,
+              "title": "Legacy"
+            },
+            "description": "Whether to use the legacy server. Default is False."
           }
         ],
         "responses": {
