@@ -194,6 +194,7 @@
               "api-reference/strata/get",
               "api-reference/strata/add",
               "api-reference/strata/delete",
+              "api-reference/strata/list-raw-actions",
               {
                 "group": "Strata Auth / OAuth",
                 "pages": [
