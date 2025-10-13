@@ -94,7 +94,7 @@ def main(
         return [
             types.Tool(
                 name="linear_get_teams",
-                description="Get all teams in the Linear workspace.",
+                description="Get all teams in the Linear workspace including workflow states and team members.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
@@ -484,7 +484,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "linear_get_issues":
             team_id = arguments.get("team_id")
             limit = arguments.get("limit", 10)

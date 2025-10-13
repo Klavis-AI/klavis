@@ -6,7 +6,7 @@ from .base import make_graphql_request
 logger = logging.getLogger(__name__)
 
 async def get_teams() -> Dict[str, Any]:
-    """Get all teams."""
+    """Get all teams in the Linear workspace including workflow states and team members."""
     logger.info("Executing tool: get_teams")
     try:
         query = """
@@ -20,6 +20,22 @@ async def get_teams() -> Dict[str, Any]:
               private
               createdAt
               updatedAt
+              states {
+                nodes {
+                  id
+                  name
+                  type
+                  color
+                }
+              }
+              members {
+                nodes {
+                  id
+                  name
+                  displayName
+                  email
+                }
+              }
             }
           }
         }
