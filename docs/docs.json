@@ -226,6 +226,7 @@
             "pages": [
               "api-reference/user/get-user",
               "api-reference/user/get-user-integrations",
+              "api-reference/user/get-all-users",
               "api-reference/user/delete-user",
               {
                 "group": "User Auth / OAuth",
