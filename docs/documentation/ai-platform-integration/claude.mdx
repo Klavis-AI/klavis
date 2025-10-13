@@ -136,7 +136,7 @@ def claude_with_mcp_server(mcp_server_url: str, user_query: str):
         iteration += 1
 
         response = claude_client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=4000,
             system="You are a helpful assistant. Use the available tools to answer the user's question.",
             messages=messages,
@@ -195,7 +195,7 @@ async function claudeWithMcpServer(mcpServerUrl: string, userQuery: string) {
         iteration++;
 
         const response = await claudeClient.messages.create({
-            model: "claude-3-5-sonnet-20241022",
+            model: "claude-sonnet-4-5-20250929",
             max_tokens: 4000,
             system: "You are a helpful assistant. Use the available tools to answer the user's question.",
             messages: messages,
