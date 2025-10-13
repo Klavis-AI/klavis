@@ -575,7 +575,7 @@
           "mcp-server"
         ],
         "summary": "Create",
-        "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.",
+        "description": "Creates a URL for a specified MCP server,\nvalidating the request with an API key and user details.\nReturns the existing server URL if it already exists for the user.\nIf OAuth is configured for the server, also returns the base OAuth authorization URL.\nNote that some servers have hundreds of tools and therefore only expose the Strata tools.",
         "operationId": "createServerInstance",
         "requestBody": {
           "content": {
