@@ -585,11 +585,11 @@ def main(
                         },
                         "start_datetime": {
                             "type": "string",
-                            "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+                            "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00' or '2024-12-31T15:30:00-07:00' with timezone.",
                         },
                         "end_datetime": {
                             "type": "string",
-                            "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+                            "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00' or '2024-12-31T17:30:00-07:00' with timezone.",
                         },
                         "calendar_id": {
                             "type": "string",
@@ -641,11 +641,11 @@ def main(
                     "properties": {
                         "min_end_datetime": {
                             "type": "string",
-                            "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.",
+                            "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00' or '2024-09-15T09:00:00-07:00' with timezone.",
                         },
                         "max_start_datetime": {
                             "type": "string",
-                            "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.",
+                            "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00' or '2024-09-16T17:00:00-07:00' with timezone.",
                         },
                         "calendar_id": {
                             "type": "string",
@@ -676,11 +676,11 @@ def main(
                         },
                         "updated_start_datetime": {
                             "type": "string",
-                            "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+                            "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00' or '2024-12-31T15:30:00-07:00' with timezone.",
                         },
                         "updated_end_datetime": {
                             "type": "string",
-                            "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+                            "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00' or '2024-12-31T17:30:00-07:00' with timezone.",
                         },
                         "updated_summary": {
                             "type": "string",
