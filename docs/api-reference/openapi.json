@@ -1255,6 +1255,72 @@
         }
       }
     },
+    "/user/": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get All Users",
+        "description": "Get all MCP client users associated with accounts owned by the API key owner.\nReturns paginated results with the latest client per account if multiple exist.\n\nThis endpoint allows you to retrieve all users that have been created under your account,\nwith support for pagination to handle large numbers of users.",
+        "operationId": "getAllUsers",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "Number of results per page (max 1000)",
+              "default": 50,
+              "title": "Page Size"
+            },
+            "description": "Number of results per page (max 1000)"
+          },
+          {
+            "name": "page_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number to retrieve (starting from 1)",
+              "default": 1,
+              "title": "Page Number"
+            },
+            "description": "Page number to retrieve (starting from 1)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllUsersResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user/set-auth": {
       "post": {
         "tags": [
@@ -6173,6 +6239,47 @@
         "type": "object",
         "title": "Option 2: General Auth Data"
       },
+      "GetAllUsersResponse": {
+        "properties": {
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/UserInfo"
+            },
+            "type": "array",
+            "title": "Users",
+            "description": "List of users"
+          },
+          "totalCount": {
+            "type": "integer",
+            "title": "Totalcount",
+            "description": "Total number of users across all pages"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "description": "Number of results per page"
+          },
+          "totalPages": {
+            "type": "integer",
+            "title": "Totalpages",
+            "description": "Total number of pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "users",
+          "totalCount",
+          "page",
+          "pageSize",
+          "totalPages"
+        ],
+        "title": "GetAllUsersResponse"
+      },
       "GetAuthDataResponse": {
         "properties": {
           "success": {
@@ -7158,6 +7265,26 @@
           "mcp_native"
         ],
         "title": "ToolFormat"
+      },
+      "UserInfo": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid",
+            "description": "The external user ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat",
+            "description": "The timestamp when the user was created"
+          }
+        },
+        "type": "object",
+        "required": [
+          "userId",
+          "createdAt"
+        ],
+        "title": "UserInfo"
       },
       "ValidationError": {
         "properties": {
