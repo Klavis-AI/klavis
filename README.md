@@ -55,9 +55,7 @@
 
 [Quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
 
-### Option 2: Open Source
-
-Self-host everything on your own infrastructure:
+### Option 2: Self-host
 
 ```bash
 # Run any MCP Integration
