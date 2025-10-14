@@ -51,12 +51,9 @@
 
 ## Quick Start
 
-### Option 1: Cloud-hosted
+### Option 1: Cloud-hosted - [klavis.ai](https://www.klavis.ai)
 
-Get instant access without any setup:
-
-- Sign Up - [Create account →](https://www.klavis.ai/auth/sign-up)
-- Get Started - [Follow quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
+[Quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
 
 ### Option 2: Open Source
 
