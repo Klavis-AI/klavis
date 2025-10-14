@@ -1261,7 +1261,7 @@
           "user"
         ],
         "summary": "Get All Users",
-        "description": "Get all MCP client users associated with accounts owned by the API key owner.\nReturns paginated results with the latest client per account if multiple exist.\n\nThis endpoint allows you to retrieve all users that have been created under your account,\nwith support for pagination to handle large numbers of users.",
+        "description": "Retrieve all users that have been created under your account, with support for pagination.",
         "operationId": "getAllUsers",
         "security": [
           {
