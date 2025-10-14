@@ -1,18 +1,14 @@
 <div align="center">
   <picture>
-    <img src="https://raw.githubusercontent.com/klavis-ai/klavis/main/static/klavis-ai.png" width="100">
+    <img src="./docs/images/logo/cover.png" width="100%">
   </picture>
 </div>
-
-<h1 align="center">Klavis AI</h1>
-<p align="center"><strong>📦 MCP integration layers that let AI agents use tools reliably at any scale</strong></p>
 
 <div align="center">
 
 [![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 <a href="https://www.producthunt.com/products/strata-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_source=badge-strata&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1016948&theme=light&period=daily&t=1758639605639" alt="Strata - One&#0032;MCP&#0032;server&#0032;for&#0032;AI&#0032;agents&#0032;to&#0032;handle&#0032;thousands&#0032;of&#0032;tools | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
@@ -27,11 +23,10 @@
         <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <h2>📦 Strata</h2>
-            <p><strong>Unified MCP Router</strong></p>
-            <p>One MCP server for AI agents to use tools reliably at any scale</p>
+            <p><strong>off-the-shelf intelligent connectors for your AI agent</strong></p>
           </div>
           <div>
-            <a href="open-strata/README.md">
+            <a href="https://docs.klavis.ai/documentation/concepts/strata">
               <img src="https://img.shields.io/badge/Explore-Strata-blue?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIgcnk9IjQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxyZWN0IHg9IjYiIHk9IjYiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTQiIHk9IjYiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iNiIgeT0iMTQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiByeD0iMSIgcnk9IjEiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==" height="40">
             </a>
           </div>
@@ -41,11 +36,10 @@
         <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <h2>🛠️ MCP Integrations</h2>
-            <p><strong>50+ Production MCP Servers</strong></p>
-            <p>Self-hosted or managed MCP servers with enterprise OAuth support for all major services</p>
+            <p><strong>100+ prebuilt integrations out-of-the-box, with OAuth support</strong></p>
           </div>
           <div>
-            <a href="mcp_servers/README.md">
+            <a href="https://docs.klavis.ai/documentation/mcp-server/overview">
               <img src="https://img.shields.io/badge/Explore-MCP%20Servers-purple?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwLjUgN0gzLjVDMi42NzE1NyA3IDIgNy42NzE1NyAyIDguNVYxNS41QzIgMTYuMzI4NCAyLjY3MTU3IDE3IDMuNSAxN0gyMC41QzIxLjMyODQgMTcgMjIgMTYuMzI4NCAyMiAxNS41VjguNUMyMiA3LjY3MTU3IDIxLjMyODQgNyAyMC41IDdaIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNNiAxMkgxOCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPGNpcmNsZSBjeD0iNSIgY3k9IjEyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIxOSIgY3k9IjEyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=" height="40">
             </a>
           </div>
@@ -55,31 +49,16 @@
   </table>
 </div>
 
-## Strata
+## Quick Start
 
-Strata is one MCP server that guides your AI agents use tools reliably progressively at any scale.
+### Option 1: Cloud-hosted
 
-### Why Strata?
+Get instant access without any setup:
 
-🎯 **Scalable Tool Integration** → Beyond 40-50 tool limits  
-🚀 **Progressive Discovery** → Guides agents from intent to action, step-by-step.
+- Sign Up - [Create account →](https://www.klavis.ai/auth/sign-up)
+- Get Started - [Follow quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
 
-[📖 **Learn More** →](https://docs.klavis.ai/documentation/concepts/strata)
-
-## MCP Integrations
-
-**50+ production MCP servers. OAuth included. Deploy anywhere.**
-
-Connect your AI to GitHub, Gmail, Slack, Salesforce, and more - all with enterprise OAuth and Docker support.
-
-🔐 **Real OAuth** → Not just API keys  
-🐳 **Docker ready** → One-line deploy  
-
-[🌐 **Browse All Servers** →](https://docs.klavis.ai/documentation/mcp-server/overview)
-
-## 🚀 Quick Start
-
-### Option 1: Open Source
+### Option 2: Open Source
 
 Self-host everything on your own infrastructure:
 
@@ -93,19 +72,7 @@ pipx install strata-mcp
 strata add --type stdio playwright npx @playwright/mcp@latest
 ```
 
-### Option 2: Use Hosted Service by WebUI
-
-Get instant access without any setup:
-
-1. **Sign Up**: [Create account →](https://www.klavis.ai/auth/sign-up)
-2. **Get Started**: [Follow quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
-3. **Use Strata or individual MCP servers** in Claude Code, Cursor, VSCode, etc.
-
-Ready in under 2 minutes! 🚀
-
 ### Option 3: SDK
-
-Build custom applications with our SDKs:
 
 ```python
 # Python SDK
@@ -115,9 +82,9 @@ from klavis.types import McpServerName
 klavis = Klavis(api_key="your-key")
 
 # Create Strata instance
-strata = klavis.mcp_server.create_strata_server(
+strata = klavis_client.mcp_server.create_strata_server(
     user_id="user123",
-    servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+    servers=[McpServerName.GMAIL, McpServerName.SLACK],
 )
 
 # Or use individual MCP servers
@@ -136,7 +103,7 @@ const klavis = new KlavisClient({ apiKey: 'your-api-key' });
 // Create Strata instance
 const strata = await klavis.mcpServer.createStrataServer({
     userId: "user123",
-    servers: [McpServerName.GMAIL, McpServerName.YOUTUBE]
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
 });
 
 // Or use individual MCP servers
@@ -146,9 +113,8 @@ const gmail = await klavis.mcpServer.createServerInstance({
 });
 ```
 
-### Option 4: Direct API
+### Option 4: REST API
 
-Use REST API for any programming language:
 
 ```bash
 # Create Strata server
@@ -157,7 +123,7 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/strata" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user123",
-    "servers": ["GMAIL", "YOUTUBE"]
+    "servers": ["GMAIL", "SLACK"]
   }'
 
 # Create individual MCP server
@@ -170,22 +136,16 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
   }'
 ```
 
-[📖 **Complete Documentation** →](https://docs.klavis.ai/documentation/quickstart)
 
-
-## 📚 Resources
+## Resources
 
 - 📖 [Documentation](https://docs.klavis.ai)
 - 💬 [Discord Community](https://discord.gg/p7TuTEcssn)
 - 🐛 [Report Issues](https://github.com/klavis-ai/klavis/issues)
 - 🌐 [Klavis AI Website](https://www.klavis.ai)
 
-## 📜 License
-
-- **Root Repository**: Apache 2.0 license - see [LICENSE](LICENSE)
-
 ---
 
 <div align="center">
-  <p><strong>Klavis AI (YC X25) 🚀 Empowering AI with Seamless Integration</strong></p>
+  <p><strong>Made with ❤️ by the Klavis Team</strong></p>
 </div>
