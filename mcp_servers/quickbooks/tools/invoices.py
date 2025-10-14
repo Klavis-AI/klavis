@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for invoice creation (required by QuickBooks)
@@ -197,18 +198,19 @@ invoice_properties = {
 
 # MCP Tool definitions
 create_invoice_tool = Tool(
-    name="create_invoice",
+    name="quickbooks_create_invoice",
     title="Create Invoice",
     description="Create New Invoice - Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line (SalesItemLine or DescriptionOnlyLine).",
     inputSchema={
         "type": "object",
         "properties": invoice_properties_minimal,
         "required": ["CustomerRefValue", "LineItems"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 get_invoice_tool = Tool(
-    name="get_invoice",
+    name="quickbooks_get_invoice",
     title="Get Invoice",
     description="Get Single Invoice - Retrieve a specific invoice by ID from QuickBooks with all its details including line items, amounts, and status",
     inputSchema={
@@ -217,11 +219,12 @@ get_invoice_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks invoice ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 list_invoices_tool = Tool(
-    name="list_invoices",
+    name="quickbooks_list_invoices",
     title="List Invoices",
     description="List All Invoices - Retrieve all invoices from QuickBooks with pagination support. Use for browsing or getting overview of invoices",
     inputSchema={
@@ -231,11 +234,12 @@ list_invoices_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 search_invoices_tool = Tool(
-    name="search_invoices",
+    name="quickbooks_search_invoices",
     title="Search Invoices",
     description="Advanced Invoice Search - Search invoices with powerful filters including dates, amounts, addresses, customer info, and status. Perfect for finding specific invoices based on criteria",
     inputSchema={
@@ -285,22 +289,24 @@ search_invoices_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
 
 update_invoice_tool = Tool(
-    name="update_invoice",
+    name="quickbooks_update_invoice",
     title="Update Invoice",
     description="Update Existing Invoice - Modify an existing invoice in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
         "properties": invoice_properties,
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 delete_invoice_tool = Tool(
-    name="delete_invoice",
+    name="quickbooks_delete_invoice",
     title="Delete Invoice",
     description="️Delete Invoice - Permanently delete an invoice from QuickBooks. Use with caution as this action cannot be undone",
     inputSchema={
@@ -309,11 +315,12 @@ delete_invoice_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks invoice ID to delete"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 send_invoice_tool = Tool(
-    name="send_invoice",
+    name="quickbooks_send_invoice",
     title="Send Invoice",
     description="Send Invoice via Email - Send an invoice to customer via email with delivery tracking. Updates email status and delivery info automatically",
     inputSchema={
@@ -329,11 +336,12 @@ send_invoice_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 void_invoice_tool = Tool(
-    name="void_invoice",
+    name="quickbooks_void_invoice",
     title="Void Invoice",
     description="Void Invoice - Void an existing invoice in QuickBooks. Sets all amounts to zero and marks as 'Voided' while keeping the record for audit trail",
     inputSchema={
@@ -345,7 +353,8 @@ void_invoice_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
 
 

@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import json
 import logging
 import os
@@ -18,6 +19,7 @@ from starlette.types import Receive, Scope, Send
 
 from tools import (
     auth_token_context,
+    extract_access_token,
     get_transcripts_by_user,
     get_call_transcripts,
     get_extensive_data,
@@ -81,6 +83,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_get_extensive_data",
@@ -110,6 +113,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GONG_CALL", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_get_call_transcripts",
@@ -125,6 +129,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GONG_TRANSCRIPT", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_list_calls",
@@ -137,6 +142,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "limit": {"type": "integer", "description": "Maximum calls to return (default 50).", "default": 50},
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GONG_CALL", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="gong_add_new_call",
@@ -151,6 +157,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         }
                     },
                 },
+                annotations=types.ToolAnnotations(**{"category": "GONG_CALL"}),
             ),
         ]
 
@@ -232,8 +239,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        auth_token = request.headers.get("x-auth-token")
-        token = auth_token_context.set(auth_token or "")
+        auth_token = extract_access_token(request)
+        token = auth_token_context.set(auth_token)
         try:
             async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
                 await app.run(streams[0], streams[1], app.create_initialization_options())
@@ -250,11 +257,8 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info("Handling StreamableHTTP request")
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b"x-auth-token")
-        if auth_token:
-            auth_token = auth_token.decode("utf-8")
-        token = auth_token_context.set(auth_token or "")
+        auth_token = extract_access_token(scope)
+        token = auth_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

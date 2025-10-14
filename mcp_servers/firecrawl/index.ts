@@ -190,6 +190,7 @@ const SCRAPE_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_SEARCH', readOnlyHint: true },
 };
 
 const MAP_TOOL: Tool = {
@@ -226,6 +227,7 @@ const MAP_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const CRAWL_TOOL: Tool = {
@@ -338,6 +340,7 @@ const CRAWL_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const BATCH_SCRAPE_TOOL: Tool = {
@@ -389,6 +392,7 @@ const BATCH_SCRAPE_TOOL: Tool = {
         },
         required: ['urls'],
     },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const CHECK_BATCH_STATUS_TOOL: Tool = {
@@ -404,6 +408,7 @@ const CHECK_BATCH_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
+    annotations: { category: 'FIRECRAWL_METADATA', readOnlyHint: true },
 };
 
 const CHECK_CRAWL_STATUS_TOOL: Tool = {
@@ -419,6 +424,7 @@ const CHECK_CRAWL_STATUS_TOOL: Tool = {
         },
         required: ['id'],
     },
+    annotations: { category: 'FIRECRAWL_METADATA', readOnlyHint: true },
 };
 
 const SEARCH_TOOL: Tool = {
@@ -493,6 +499,7 @@ const SEARCH_TOOL: Tool = {
         },
         required: ['query'],
     },
+    annotations: { category: 'FIRECRAWL_WEB_SEARCH', readOnlyHint: true },
 };
 
 const EXTRACT_TOOL: Tool = {
@@ -535,6 +542,7 @@ const EXTRACT_TOOL: Tool = {
         },
         required: ['urls'],
     },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH', readOnlyHint: true },
 };
 
 const GENERATE_LLMSTXT_TOOL: Tool = {
@@ -559,6 +567,7 @@ const GENERATE_LLMSTXT_TOOL: Tool = {
         },
         required: ['url'],
     },
+    annotations: { category: 'FIRECRAWL_AI_SEARCH', readOnlyHint: true },
 };
 
 // Type definitions
@@ -1471,6 +1480,30 @@ function trimResponseText(text: string): string {
     return text.trim();
 }
 
+function extractApiKey(req: Request): string {
+    let authData = process.env.API_KEY;
+    
+    if (authData) {
+        return authData;
+    }
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Firecrawl API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.token ?? authDataJson.api_key ?? '';
+}
+
 const app = express();
 
 
@@ -1481,11 +1514,7 @@ const app = express();
 app.post('/mcp', async (req: Request, res: Response) => {
 
     // Added: Get API key from env or header
-    const apiKey = process.env.FIRECRAWL_API_KEY || req.headers['x-auth-token'] as string;
-
-    if (!apiKey && !FIRECRAWL_API_URL) {
-        console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
-    }
+    const apiKey = extractApiKey(req);
 
     // Added: Instantiate client within request context
     const firecrawlClient = new FirecrawlApp({
@@ -1579,11 +1608,7 @@ app.post("/messages", async (req, res) => {
     const transport = transports.get(sessionId);
     if (transport) {
         // Added: Get API key from env or header
-        const apiKey = process.env.FIRECRAWL_API_KEY || req.headers['x-auth-token'] as string;
-
-        if (!apiKey && !FIRECRAWL_API_URL) {
-            console.error('Error: Firecrawl API key is missing. Provide it via FIRECRAWL_API_KEY env var or x-auth-token header.');
-        }
+        const apiKey = extractApiKey(req);
 
         // Added: Instantiate client within request context
         const firecrawlClient = new FirecrawlApp({

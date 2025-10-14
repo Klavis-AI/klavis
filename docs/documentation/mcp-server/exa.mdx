@@ -1,0 +1,224 @@
+---
+title: 'Exa'
+description: 'Connect AI agents to Exa for AI-powered semantic search and content discovery'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Exa to perform AI-powered semantic search, content retrieval, and comprehensive research through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Exa">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Strata MCP server with Exa
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.EXA],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Strata MCP server with Exa
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Exa],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Exa"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate with API Key">
+        <CodeGroup>
+          ```python Python
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.EXA,
+              auth_data={
+                  "api_key": "YOUR_EXA_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Exa,
+              authData: {
+                  api_key: "YOUR_EXA_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Exa",
+              "authData": {
+                "api_key": "YOUR_EXA_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Note>
+          Get your Exa API key from the [Exa AI website](https://docs.exa.ai/reference/getting-started).
+        </Note>
+        
+        <Check>
+          🎉 **Your Exa MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Exa">
+        Select Exa from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure API Key">
+        Enter your Exa API key to enable semantic search functionality.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/exa
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/exa-mcp-server:latest
+        
+        # Run with Exa API key
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"api_key":"your_exa_api_key"}' \
+          ghcr.io/klavis-ai/exa-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "exa": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Accordion title="Tools Information">
+| Tool Name | Description |
+|-----------|-------------|
+| exa_search | Perform AI-powered semantic search across the web using neural or keyword search with advanced filtering options including domains, dates, and content patterns |
+| exa_get_contents | Retrieve clean, parsed HTML content from web pages using their Exa result IDs with optional highlighting and summarization |
+| exa_find_similar | Discover web pages that are semantically similar to a given URL based on content meaning and context |
+| exa_answer | Get direct, focused answers to specific questions by searching and analyzing web sources with citations |
+| exa_research | Conduct comprehensive, multi-source research on topics with structured analysis and detailed citations |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [get_tools](https://docs.klavis.ai/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/documentation/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/documentation/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/documentation/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+</CardGroup>

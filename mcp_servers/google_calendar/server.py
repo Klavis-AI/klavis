@@ -1,4 +1,5 @@
 import contextlib
+import base64
 import logging
 import os
 import json
@@ -33,6 +34,35 @@ GOOGLE_CALENDAR_MCP_SERVER_PORT = int(os.getenv("GOOGLE_CALENDAR_MCP_SERVER_PORT
 
 # Context variable to store the access token for each request
 auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+    
+    if not auth_data:
+        return ""
+    
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
 
 # Define enums that are referenced in context.py
 class EventVisibility(Enum):
@@ -538,6 +568,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_CALENDAR", "readOnlyHint": True}
+                ),
             ),
             types.Tool(
                 name="google_calendar_create_event",
@@ -552,11 +585,11 @@ def main(
                         },
                         "start_datetime": {
                             "type": "string",
-                            "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+                            "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00' or '2024-12-31T15:30:00-07:00' with timezone.",
                         },
                         "end_datetime": {
                             "type": "string",
-                            "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+                            "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00' or '2024-12-31T17:30:00-07:00' with timezone.",
                         },
                         "calendar_id": {
                             "type": "string",
@@ -595,6 +628,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_list_events",
@@ -605,11 +641,11 @@ def main(
                     "properties": {
                         "min_end_datetime": {
                             "type": "string",
-                            "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.",
+                            "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00' or '2024-09-15T09:00:00-07:00' with timezone.",
                         },
                         "max_start_datetime": {
                             "type": "string",
-                            "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.",
+                            "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00' or '2024-09-16T17:00:00-07:00' with timezone.",
                         },
                         "calendar_id": {
                             "type": "string",
@@ -623,6 +659,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT", "readOnlyHint": True}
+                ),
             ),
             types.Tool(
                 name="google_calendar_update_event",
@@ -637,11 +676,11 @@ def main(
                         },
                         "updated_start_datetime": {
                             "type": "string",
-                            "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+                            "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00' or '2024-12-31T15:30:00-07:00' with timezone.",
                         },
                         "updated_end_datetime": {
                             "type": "string",
-                            "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+                            "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00' or '2024-12-31T17:30:00-07:00' with timezone.",
                         },
                         "updated_summary": {
                             "type": "string",
@@ -678,6 +717,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_delete_event",
@@ -703,6 +745,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
             types.Tool(
                 name="google_calendar_add_attendees_to_event",
@@ -733,6 +778,9 @@ def main(
                         },
                     },
                 },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_EVENT"}
+                ),
             ),
         ]
 
@@ -964,11 +1012,11 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        auth_token = request.headers.get('x-auth-token')
+        # Extract auth token from headers
+        auth_token = extract_access_token(request)
         
-        # Set the auth token in context for this request (can be None)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -994,14 +1042,11 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers (allow None - will be handled at tool level)
-        headers = dict(scope.get("headers", []))
-        auth_token = headers.get(b'x-auth-token')
-        if auth_token:
-            auth_token = auth_token.decode('utf-8')
+        # Extract auth token from headers
+        auth_token = extract_access_token(scope)
         
-        # Set the auth token in context for this request (can be None/empty)
-        token = auth_token_context.set(auth_token or "")
+        # Set the auth token in context for this request
+        token = auth_token_context.set(auth_token)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:

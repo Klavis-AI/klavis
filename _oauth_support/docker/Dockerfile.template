@@ -1,0 +1,30 @@
+# OAuth Support Layer Dockerfile Template
+# This template adds OAuth token acquisition capabilities to existing MCP servers
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Install required dependencies for OAuth support
+USER root
+
+RUN if command -v apt-get >/dev/null 2>&1; then \
+        apt-get update && apt-get install -y curl bash jq coreutils && apt-get clean; \
+    elif command -v apk >/dev/null 2>&1; then \
+        apk add --no-cache curl bash jq coreutils; \
+    elif command -v yum >/dev/null 2>&1; then \
+        yum install -y curl bash jq coreutils && yum clean all; \
+    else \
+        echo "Warning: Could not install dependencies. No support package manager found."; \
+    fi
+
+# Copy OAuth support scripts and server name mapping
+COPY ./oauth_acquire.sh /klavis_oauth/oauth_acquire.sh
+COPY ./docker/entrypoint_wrapper.sh /klavis_oauth/entrypoint_wrapper.sh
+
+# Make scripts executable
+RUN chmod +x /klavis_oauth/oauth_acquire.sh && \
+    chmod +x /klavis_oauth/entrypoint_wrapper.sh
+
+# Set our wrapper as the new entrypoint
+ENTRYPOINT ["/klavis_oauth/entrypoint_wrapper.sh", "--server-name", "${MCP_SERVER_NAME}", "--exec"]
+CMD ${ENTRYPOINT_COMMAND}

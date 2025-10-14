@@ -80,6 +80,7 @@ const getResendMcpServer = () => {
           "Optional email addresses for the email readers to reply to. You MUST ask the user for this parameter. Under no circumstance provide it yourself"
         ),
     },
+    { category: "RESEND_EMAIL" },
     async ({ from, to, subject, text, html, replyTo, scheduledAt, cc, bcc }) => {
       const fromEmailAddress = from;
       const replyToEmailAddresses = replyTo;
@@ -159,6 +160,7 @@ const getResendMcpServer = () => {
     {
       name: z.string().describe("Name of the audience to create"),
     },
+    { category: "RESEND_AUDIENCE" },
     async ({ name }) => {
       const resend = getResendClient();
       const response = await resend.audiences.create({ name });
@@ -186,6 +188,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the audience to retrieve"),
     },
+    { category: "RESEND_AUDIENCE", readOnlyHint: true },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.audiences.get(id);
@@ -213,6 +216,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the audience to delete"),
     },
+    { category: "RESEND_AUDIENCE" },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.audiences.remove(id);
@@ -238,6 +242,7 @@ const getResendMcpServer = () => {
     "resend_list_audiences",
     "List all audiences in Resend",
     {},
+    { category: "RESEND_AUDIENCE", readOnlyHint: true },
     async () => {
       const resend = getResendClient();
       const response = await resend.audiences.list();
@@ -269,6 +274,7 @@ const getResendMcpServer = () => {
       lastName: z.string().optional().describe("Last name of the contact"),
       unsubscribed: z.boolean().optional().describe("Whether the contact is unsubscribed"),
     },
+    { category: "RESEND_CONTACT" },
     async ({ email, audienceId, firstName, lastName, unsubscribed }) => {
       const resend = getResendClient();
       const response = await resend.contacts.create({
@@ -304,6 +310,7 @@ const getResendMcpServer = () => {
       id: z.string().optional().describe("ID of the contact to retrieve"),
       email: z.string().email().optional().describe("Email of the contact to retrieve"),
     },
+    { category: "RESEND_CONTACT", readOnlyHint: true },
     async ({ audienceId, id, email }) => {
       if (!id && !email) {
         throw new Error("Either contact ID or email must be provided");
@@ -372,6 +379,7 @@ const getResendMcpServer = () => {
       lastName: z.string().optional().describe("Updated last name"),
       unsubscribed: z.boolean().optional().describe("Updated unsubscribed status"),
     },
+    { category: "RESEND_CONTACT" },
     async ({ audienceId, id, email, firstName, lastName, unsubscribed }) => {
       if (!id && !email) {
         throw new Error("Either contact ID or email must be provided");
@@ -440,6 +448,7 @@ const getResendMcpServer = () => {
       id: z.string().optional().describe("ID of the contact to delete"),
       email: z.string().email().optional().describe("Email of the contact to delete"),
     },
+    { category: "RESEND_CONTACT" },
     async ({ audienceId, id, email }) => {
       if (!id && !email) {
         throw new Error("Either contact ID or email must be provided");
@@ -502,6 +511,7 @@ const getResendMcpServer = () => {
     {
       audienceId: z.string().describe("ID of the audience to list contacts from"),
     },
+    { category: "RESEND_CONTACT", readOnlyHint: true },
     async ({ audienceId }) => {
       const resend = getResendClient();
       const response = await resend.contacts.list({
@@ -537,6 +547,7 @@ const getResendMcpServer = () => {
       replyTo: z.string().optional().describe("Optional reply-to email address"),
       previewText: z.string().optional().describe("Optional preview text that appears in email clients"),
     },
+    { category: "RESEND_BROADCAST" },
     async ({ audienceId, from, subject, html, name, replyTo, previewText }) => {
       const resend = getResendClient();
       const response = await resend.broadcasts.create({
@@ -572,6 +583,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the broadcast to retrieve"),
     },
+    { category: "RESEND_BROADCAST", readOnlyHint: true },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.broadcasts.get(id);
@@ -600,6 +612,7 @@ const getResendMcpServer = () => {
       id: z.string().describe("ID of the broadcast to send"),
       scheduledAt: z.string().optional().describe("Optional scheduling time in natural language (e.g., 'in 1 hour', 'tomorrow at 9am')"),
     },
+    { category: "RESEND_BROADCAST" },
     async ({ id, scheduledAt }) => {
       const resend = getResendClient();
 
@@ -631,6 +644,7 @@ const getResendMcpServer = () => {
     {
       id: z.string().describe("ID of the broadcast to delete"),
     },
+    { category: "RESEND_BROADCAST" },
     async ({ id }) => {
       const resend = getResendClient();
       const response = await resend.broadcasts.remove(id);
@@ -656,6 +670,7 @@ const getResendMcpServer = () => {
     "resend_list_broadcasts",
     "List all broadcasts in Resend",
     {},
+    { category: "RESEND_BROADCAST", readOnlyHint: true },
     async () => {
       const resend = getResendClient();
       const response = await resend.broadcasts.list();
@@ -680,6 +695,30 @@ const getResendMcpServer = () => {
   return server;
 }
 
+function extractApiKey(req: Request): string {
+  let authData = process.env.API_KEY;
+
+  if (authData) {
+    return authData;
+  }
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: Resend API key is missing. Provide it via API_KEY env var or x-auth-data header with token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.token ?? authDataJson.api_key ?? '';
+}
+
 const app = express();
 
 
@@ -688,10 +727,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
-  if (!apiKey) {
-    console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
-  }
+  const apiKey = extractApiKey(req);
 
   const server = getResendMcpServer();
   try {
@@ -777,11 +813,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    // Use environment variable for API key if available, otherwise use header
-    const apiKey = process.env.RESEND_API_KEY || req.headers['x-auth-token'] as string;
-    if (!apiKey) {
-      console.error('Error: Resend API key is missing. Provide it via x-auth-token header.');
-    }
+    const apiKey = extractApiKey(req);
 
     asyncLocalStorage.run({ apiKey }, async () => {
       await transport!.handlePostMessage(req, res);

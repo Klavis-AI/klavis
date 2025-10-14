@@ -1,32 +1,22 @@
-FROM node:22-alpine AS builder
+FROM python:3.12-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to install dependencies
-COPY mcp_servers/slack/package.json mcp_servers/slack/package-lock.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies (ignoring scripts to prevent running the prepare script)
-RUN npm install --ignore-scripts
+# Copy only the requirements first to leverage Docker cache
+COPY mcp_servers/slack/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application source code
-COPY mcp_servers/slack .
+COPY mcp_servers/slack/server.py .
+COPY mcp_servers/slack/bot_tools/ ./bot_tools/
+COPY mcp_servers/slack/user_tools/ ./user_tools/
 
-# Build the application using TypeScript
-RUN npm run build
-
-FROM node:22-alpine AS release
-
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
-
-ENV NODE_ENV=production
-
+# Expose the port the server runs on
 EXPOSE 5000
 
-WORKDIR /app
-
-RUN npm ci --ignore-scripts --omit-dev
-
-ENTRYPOINT ["node", "dist/index.js"]
+# Command to run the server
+CMD ["python", "server.py"] 

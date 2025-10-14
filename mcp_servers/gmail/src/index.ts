@@ -11,7 +11,7 @@ import {
 import { google } from 'googleapis';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { createEmailMessage } from "./utl.js";
+import { createEmailMessage, extractPdfText, extractDocxText, extractXlsxText } from "./utl.js";
 import { AsyncLocalStorage } from 'async_hooks';
 
 // Create AsyncLocalStorage for request context
@@ -48,9 +48,39 @@ interface EmailContent {
     html: string;
 }
 
+// Convert base64url (Gmail) -> standard base64
+function base64UrlToBase64(input: string): string {
+    let output = input.replace(/-/g, '+').replace(/_/g, '/');
+    const padLen = output.length % 4;
+    if (padLen === 2) output += '==';
+    else if (padLen === 3) output += '=';
+    else if (padLen === 1) output += '==='; // extremely rare, but safe guard
+    return output;
+}
+
 // Helper function to get Gmail client from context
 function getGmailClient() {
     return asyncLocalStorage.getStore()!.gmailClient;
+}
+
+function extractAccessToken(req: Request): string {
+    let authData = process.env.AUTH_DATA;
+    
+    if (!authData && req.headers['x-auth-data']) {
+        try {
+            authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+        } catch (error) {
+            console.error('Error parsing x-auth-data JSON:', error);
+        }
+    }
+
+    if (!authData) {
+        console.error('Error: Gmail access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+        return '';
+    }
+
+    const authDataJson = JSON.parse(authData);
+    return authDataJson.access_token ?? '';
 }
 
 /**
@@ -120,6 +150,11 @@ const DeleteEmailSchema = z.object({
     messageId: z.string().describe("ID of the email message to delete"),
 });
 
+// Schema for getting attachments of an email
+const GetEmailAttachmentsSchema = z.object({
+    messageId: z.string().describe("ID of the email message to retrieve attachments for"),
+});
+
 // Schemas for batch operations
 const BatchModifyEmailsSchema = z.object({
     messageIds: z.array(z.string()).describe("List of message IDs to modify"),
@@ -152,41 +187,55 @@ const getGmailMcpServer = () => {
                 name: "gmail_send_email",
                 description: "Sends a new email",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
+                annotations: { category: "GMAIL_EMAIL" },
             },
             {
                 name: "gmail_draft_email",
                 description: "Draft a new email",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
+                annotations: { category: "GMAIL_EMAIL" },
             },
             {
                 name: "gmail_read_email",
                 description: "Retrieves the content of a specific email",
                 inputSchema: zodToJsonSchema(ReadEmailSchema),
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
             {
                 name: "gmail_search_emails",
                 description: "Searches for emails using Gmail search syntax",
                 inputSchema: zodToJsonSchema(SearchEmailsSchema),
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
             {
                 name: "gmail_modify_email",
                 description: "Modifies email labels (move to different folders)",
                 inputSchema: zodToJsonSchema(ModifyEmailSchema),
+                annotations: { category: "GMAIL_EMAIL" },
             },
             {
                 name: "gmail_delete_email",
                 description: "Permanently deletes an email",
                 inputSchema: zodToJsonSchema(DeleteEmailSchema),
+                annotations: { category: "GMAIL_EMAIL" },
             },
             {
                 name: "gmail_batch_modify_emails",
                 description: "Modifies labels for multiple emails in batches",
                 inputSchema: zodToJsonSchema(BatchModifyEmailsSchema),
+                annotations: { category: "GMAIL_BATCH_EMAIL" },
             },
             {
                 name: "gmail_batch_delete_emails",
                 description: "Permanently deletes multiple emails in batches",
                 inputSchema: zodToJsonSchema(BatchDeleteEmailsSchema),
+                annotations: { category: "GMAIL_BATCH_EMAIL" },
+            },
+            {
+                name: "gmail_get_email_attachments",
+                description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
+                inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
         ],
     }));
@@ -223,11 +272,15 @@ const getGmailMcpServer = () => {
                     userId: 'me',
                     requestBody: messageRequest,
                 });
+                const resultPayload = {
+                    message: `Email sent successfully with ID: ${response.data.id}`,
+                    messageId: response.data.id ?? null,
+                };
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Email sent successfully with ID: ${response.data.id}`,
+                            text: JSON.stringify(resultPayload, null, 2),
                         },
                     ],
                 };
@@ -238,11 +291,15 @@ const getGmailMcpServer = () => {
                         message: messageRequest,
                     },
                 });
+                const resultPayload = {
+                    message: `Email draft created successfully with ID: ${response.data.id}`,
+                    draftId: response.data.id ?? null,
+                };
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Email draft created successfully with ID: ${response.data.id}`,
+                            text: JSON.stringify(resultPayload, null, 2),
                         },
                     ],
                 };
@@ -280,7 +337,8 @@ const getGmailMcpServer = () => {
             return { successes, failures };
         }
 
-        try {
+        try {               
+
             switch (name) {
                 case "gmail_send_email":
                 case "gmail_draft_email": {
@@ -307,14 +365,6 @@ const getGmailMcpServer = () => {
                     // Extract email content using the recursive function
                     const { text, html } = extractEmailContent(response.data.payload as GmailMessagePart || {});
 
-                    // Use plain text content if available, otherwise use HTML content
-                    // (optionally, you could implement HTML-to-text conversion here)
-                    let body = text || html || '';
-
-                    // If we only have HTML content, add a note for the user
-                    const contentTypeNote = !text && html ?
-                        '[Note: This email is HTML-formatted. Plain text version not available.]\n\n' : '';
-
                     // Get attachment information
                     const attachments: EmailAttachment[] = [];
                     const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
@@ -339,16 +389,27 @@ const getGmailMcpServer = () => {
                         processAttachmentParts(response.data.payload as GmailMessagePart);
                     }
 
-                    // Add attachment info to output if any are present
-                    const attachmentInfo = attachments.length > 0 ?
-                        `\n\nAttachments (${attachments.length}):\n` +
-                        attachments.map(a => `- ${a.filename} (${a.mimeType}, ${Math.round(a.size / 1024)} KB)`).join('\n') : '';
+                    const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
+                    const resultPayload = {
+                        threadId,
+                        subject,
+                        from,
+                        to,
+                        date,
+                        body: {
+                            text: text || '',
+                            html: html || '',
+                            preferredFormat,
+                            note: !text && html ? 'Email body available only in HTML format; plain text representation not available.' : undefined,
+                        },
+                        attachments,
+                    };
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Thread ID: ${threadId}\nSubject: ${subject}\nFrom: ${from}\nTo: ${to}\nDate: ${date}\n\n${contentTypeNote}${body}${attachmentInfo}`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -385,9 +446,7 @@ const getGmailMcpServer = () => {
                         content: [
                             {
                                 type: "text",
-                                text: results.map((r: any) =>
-                                    `ID: ${r.id}\nSubject: ${r.subject}\nFrom: ${r.from}\nDate: ${r.date}\n`
-                                ).join('\n'),
+                                text: JSON.stringify(results, null, 2),
                             },
                         ],
                     };
@@ -412,12 +471,22 @@ const getGmailMcpServer = () => {
                         id: validatedArgs.messageId,
                         requestBody: requestBody,
                     });
+                    const resultPayload: Record<string, unknown> = {
+                        message: `Email ${validatedArgs.messageId} labels updated successfully`,
+                        messageId: validatedArgs.messageId,
+                    };
+                    if (validatedArgs.addLabelIds) {
+                        resultPayload.addedLabels = validatedArgs.addLabelIds;
+                    }
+                    if (validatedArgs.removeLabelIds) {
+                        resultPayload.removedLabels = validatedArgs.removeLabelIds;
+                    }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Email ${validatedArgs.messageId} labels updated successfully`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -429,12 +498,16 @@ const getGmailMcpServer = () => {
                         userId: 'me',
                         id: validatedArgs.messageId,
                     });
+                    const resultPayload = {
+                        message: `Email ${validatedArgs.messageId} deleted successfully`,
+                        messageId: validatedArgs.messageId,
+                    };
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: `Email ${validatedArgs.messageId} deleted successfully`,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -478,21 +551,24 @@ const getGmailMcpServer = () => {
                     // Generate summary of the operation
                     const successCount = successes.length;
                     const failureCount = failures.length;
-
-                    let resultText = `Batch label modification complete.\n`;
-                    resultText += `Successfully processed: ${successCount} messages\n`;
-
-                    if (failureCount > 0) {
-                        resultText += `Failed to process: ${failureCount} messages\n\n`;
-                        resultText += `Failed message IDs:\n`;
-                        resultText += failures.map(f => `- ${(f.item as string).substring(0, 16)}... (${f.error.message})`).join('\n');
+                    const failureDetails = failures.map(({ item, error }) => ({
+                        messageId: typeof item === 'string' ? item : String(item),
+                        error: error.message,
+                    }));
+                    const resultPayload: Record<string, unknown> = {
+                        message: "Batch label modification complete.",
+                        successCount,
+                        failureCount,
+                    };
+                    if (failureDetails.length > 0) {
+                        resultPayload.failures = failureDetails;
                     }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: resultText,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
                     };
@@ -524,23 +600,205 @@ const getGmailMcpServer = () => {
                     // Generate summary of the operation
                     const successCount = successes.length;
                     const failureCount = failures.length;
-
-                    let resultText = `Batch delete operation complete.\n`;
-                    resultText += `Successfully deleted: ${successCount} messages\n`;
-
-                    if (failureCount > 0) {
-                        resultText += `Failed to delete: ${failureCount} messages\n\n`;
-                        resultText += `Failed message IDs:\n`;
-                        resultText += failures.map(f => `- ${(f.item as string).substring(0, 16)}... (${f.error.message})`).join('\n');
+                    const failureDetails = failures.map(({ item, error }) => ({
+                        messageId: typeof item === 'string' ? item : String(item),
+                        error: error.message,
+                    }));
+                    const resultPayload: Record<string, unknown> = {
+                        message: "Batch delete operation complete.",
+                        successCount,
+                        failureCount,
+                    };
+                    if (failureDetails.length > 0) {
+                        resultPayload.failures = failureDetails;
                     }
 
                     return {
                         content: [
                             {
                                 type: "text",
-                                text: resultText,
+                                text: JSON.stringify(resultPayload, null, 2),
                             },
                         ],
+                    };
+                }
+
+                case "gmail_get_email_attachments": {
+                    const validatedArgs = GetEmailAttachmentsSchema.parse(args);
+                    const messageId = validatedArgs.messageId;
+                
+
+                    // Get the message in full to inspect parts and attachment IDs
+                    const messageResponse = await gmail.users.messages.get({
+                        userId: 'me',
+                        id: messageId,
+                        format: 'full',
+                    });                 
+
+                    const attachmentsMeta: Array<{
+                        attachmentId: string;
+                        filename: string;
+                        mimeType: string;
+                        size: number;
+                    }> = [];
+
+                    const collectAttachments = (part: GmailMessagePart | undefined) => {
+                        if (!part) return;
+                        if (part.body && part.body.attachmentId) {
+                            attachmentsMeta.push({
+                                attachmentId: part.body.attachmentId,
+                                filename: part.filename || `attachment-${part.body.attachmentId}`,
+                                mimeType: part.mimeType || 'application/octet-stream',
+                                size: part.body.size || 0,
+                            });
+                        }
+                        if (part.parts && part.parts.length) {
+                            part.parts.forEach(collectAttachments);
+                        }
+                    };
+
+                    collectAttachments(messageResponse.data.payload as GmailMessagePart | undefined);
+                    
+
+                    if (attachmentsMeta.length === 0) {
+                        const resultPayload = {
+                            message: `No attachments found for message ${messageId}`,
+                            messageId,
+                            attachmentCount: 0,
+                        };
+                        return {
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: JSON.stringify(resultPayload, null, 2),
+                                },
+                            ],
+                        };
+                    }
+
+                    // Retrieve each attachment's data and emit real content
+                    const attachmentContents = await Promise.all(
+                        attachmentsMeta.map(async (meta) => {
+                            const att = await gmail.users.messages.attachments.get({
+                                userId: 'me',
+                                messageId,
+                                id: meta.attachmentId,
+                            });
+                            const base64Url = att.data.data || '';
+                            const base64 = base64UrlToBase64(base64Url);
+
+                            const mime = meta.mimeType || 'application/octet-stream';
+                            const commonMeta = {
+                                attachmentId: meta.attachmentId,
+                                filename: meta.filename,
+                                mimeType: mime,
+                                size: meta.size,
+                            };
+                            const asJsonText = (extra: Record<string, unknown>) => ({
+                                type: 'text' as const,
+                                text: JSON.stringify(
+                                    {
+                                        ...commonMeta,
+                                        ...extra,
+                                    },
+                                    null,
+                                    2
+                                ),
+                            });
+                            
+                            // Handle PDF files using pdf-parse
+                            if (mime === 'application/pdf' || meta.filename.toLowerCase().endsWith('.pdf')) {
+                                const pdfText = await extractPdfText(base64, meta.filename);
+                                
+                                return {
+                                    type: 'text' as const,
+                                    text: pdfText,
+                                };
+                            }
+
+                            // Handle Word DOCX files using mammoth
+                            if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || meta.filename.toLowerCase().endsWith('.docx')) {
+                                const docxText = await extractDocxText(base64, meta.filename);
+                                return {
+                                    type: 'text' as const,
+                                    text: docxText,
+                                };
+                            }
+
+                            // Handle Excel XLSX files using exceljs; legacy .xls is not supported
+                            if (
+                                mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                                meta.filename.toLowerCase().endsWith('.xlsx')
+                            ) {
+                                const xlsxText = await extractXlsxText(base64, meta.filename);
+                                return {
+                                    type: 'text' as const,
+                                    text: xlsxText,
+                                };
+                            }
+                            if (
+                                mime === 'application/vnd.ms-excel' ||
+                                meta.filename.toLowerCase().endsWith('.xls')
+                            ) {
+                                return {
+                                    type: 'text' as const,
+                                    text: `[Info] Attachment ${meta.filename}: legacy .xls format is not supported for text extraction. Please convert to .xlsx and retry.`,
+                                };
+                            }
+                            
+                            if (mime.startsWith('text/') ||
+                                ['application/json', 'application/xml', 'application/javascript', 'application/typescript'].includes(mime)) {
+                                const text = Buffer.from(base64, 'base64').toString('utf8');
+                                return {
+                                    type: 'text' as const,
+                                    text,
+                                };
+                            }
+
+                            if (mime.startsWith('image/')) {
+                                return {
+                                    type: 'image' as const,
+                                    data: base64,
+                                    mimeType: mime,
+                                    name: meta.filename,
+                                };
+                            }
+
+                            if (mime.startsWith('audio/')) {
+                                return {
+                                    type: 'audio' as const,
+                                    data: base64,
+                                    mimeType: mime,
+                                    name: meta.filename,
+                                };
+                            }
+
+                            // Fallback for other binaries: return a data URI reference in text
+                            const dataUri = `data:${mime};base64,${base64}`;
+                            return {
+                                type: 'text' as const,
+                                text: `Attachment: ${meta.filename} (${mime}, ${meta.size} bytes)\n${dataUri}`,
+                            };
+                        })
+                    );
+
+                    // Optionally prepend a short summary line
+                    const summary = {
+                        type: 'text' as const,
+                        text: JSON.stringify(
+                            {
+                                message: `Attachments for message ${messageId}`,
+                                messageId,
+                                attachmentCount: attachmentsMeta.length,
+                                attachments: attachmentsMeta,
+                            },
+                            null,
+                            2
+                        ),
+                    };
+
+                    return {
+                        content: [summary, ...attachmentContents],
                     };
                 }
 
@@ -548,11 +806,12 @@ const getGmailMcpServer = () => {
                     throw new Error(`Unknown tool: ${name}`);
             }
         } catch (error: any) {
+            const errorPayload = { error: error.message };
             return {
                 content: [
                     {
                         type: "text",
-                        text: `Error: ${error.message}`,
+                        text: JSON.stringify(errorPayload, null, 2),
                     },
                 ],
             };
@@ -570,10 +829,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     // Initialize Gmail client with the access token
     const auth = new google.auth.OAuth2();
@@ -641,10 +897,7 @@ app.delete('/mcp', async (req: Request, res: Response) => {
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req: Request, res: Response) => {
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     const transport = new SSEServerTransport(`/messages`, res);
 
@@ -667,10 +920,7 @@ app.get("/sse", async (req: Request, res: Response) => {
 
 app.post("/messages", async (req: Request, res: Response) => {
     const sessionId = req.query.sessionId as string;
-    const accessToken = req.headers['x-auth-token'] as string;
-    if (!accessToken) {
-        console.error('Error: Access token is missing. Provide it via x-auth-token header.');
-    }
+    const accessToken = extractAccessToken(req);
 
     let transport: SSEServerTransport | undefined;
     transport = sessionId ? transports.get(sessionId) : undefined;

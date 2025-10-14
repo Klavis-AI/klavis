@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for payment creation (required by QuickBooks)
@@ -121,18 +122,19 @@ payment_properties = {
 
 # MCP Tool definitions
 create_payment_tool = Tool(
-    name="create_payment",
+    name="quickbooks_create_payment",
     title="Create Payment",
     description="Create New Payment - Create a new payment in QuickBooks. Requires TotalAmt and CustomerRef. Can be applied to specific invoices/credit memos or created as unapplied credit.",
     inputSchema={
         "type": "object",
         "properties": payment_properties_minimal,
         "required": ["TotalAmt", "CustomerRefValue"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 get_payment_tool = Tool(
-    name="get_payment",
+    name="quickbooks_get_payment",
     title="Get Payment",
     description="Get Single Payment - Retrieve a specific payment by ID from QuickBooks with all its details including line items, amounts, and linked transactions",
     inputSchema={
@@ -141,11 +143,12 @@ get_payment_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks payment ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 list_payments_tool = Tool(
-    name="list_payments",
+    name="quickbooks_list_payments",
     title="List Payments",
     description="List All Payments - Retrieve all payments from QuickBooks with pagination support. Use for browsing or getting overview of payments",
     inputSchema={
@@ -155,11 +158,12 @@ list_payments_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 search_payments_tool = Tool(
-    name="search_payments",
+    name="quickbooks_search_payments",
     title="Search Payments",
     description="Advanced Payment Search - Search payments with powerful filters including dates, amounts, customer info, and status. Perfect for finding specific payments based on criteria",
     inputSchema={
@@ -188,22 +192,24 @@ search_payments_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
 
 update_payment_tool = Tool(
-    name="update_payment",
+    name="quickbooks_update_payment",
     title="Update Payment",
     description="Update Existing Payment - Modify an existing payment in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
     inputSchema={
         "type": "object",
         "properties": payment_properties,
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 delete_payment_tool = Tool(
-    name="delete_payment",
+    name="quickbooks_delete_payment",
     title="Delete Payment",
     description="️Delete Payment - Permanently delete a payment from QuickBooks. Use with caution as this action cannot be undone",
     inputSchema={
@@ -212,11 +218,12 @@ delete_payment_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks payment ID to delete"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 send_payment_tool = Tool(
-    name="send_payment",
+    name="quickbooks_send_payment",
     title="Send Payment",
     description="Send Payment via Email - Send a payment receipt to customer via email",
     inputSchema={
@@ -232,11 +239,12 @@ send_payment_tool = Tool(
             }
         },
         "required": ["Id", "SendTo"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 void_payment_tool = Tool(
-    name="void_payment",
+    name="quickbooks_void_payment",
     title="Void Payment",
     description="Void Payment - Void an existing payment in QuickBooks. Sets all amounts to zero and marks as 'Voided' while keeping the record for audit trail. If funds have been deposited, you must delete the associated deposit object before voiding the payment.",
     inputSchema={
@@ -248,7 +256,8 @@ void_payment_tool = Tool(
             }
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
 
 

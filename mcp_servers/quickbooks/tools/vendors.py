@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for vendor creation (required by QuickBooks)
@@ -137,18 +138,19 @@ vendor_properties = {
 
 # MCP Tool definitions
 create_vendor_tool = Tool(
-    name="create_vendor",
+    name="quickbooks_create_vendor",
     title="Create Vendor",
     description="Create a new vendor in QuickBooks. Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required.",
     inputSchema={
         "type": "object",
         "properties": vendor_properties_minimal,
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 get_vendor_tool = Tool(
-    name="get_vendor",
+    name="quickbooks_get_vendor",
     title="Get Vendor",
     description="Get a specific vendor by ID from QuickBooks",
     inputSchema={
@@ -157,11 +159,12 @@ get_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 list_vendors_tool = Tool(
-    name="list_vendors",
+    name="quickbooks_list_vendors",
     title="List Vendors",
     description="List all vendors from QuickBooks",
     inputSchema={
@@ -171,11 +174,12 @@ list_vendors_tool = Tool(
             "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 search_vendors_tool = Tool(
-    name="search_vendors",
+    name="quickbooks_search_vendors",
     title="Search Vendors",
     description="Search vendors with various filters including name, company, contact info, and status",
     inputSchema={
@@ -198,11 +202,12 @@ search_vendors_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": [],
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
 
 update_vendor_tool = Tool(
-    name="update_vendor",
+    name="quickbooks_update_vendor",
     title="Update Vendor",
     description="Update an existing vendor in QuickBooks. Use activate_vendor/deactivate_vendor for status changes.",
     inputSchema={
@@ -212,11 +217,12 @@ update_vendor_tool = Tool(
             if key != "Active"  # Remove Active from update inputs
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 activate_vendor_tool = Tool(
-    name="activate_vendor",
+    name="quickbooks_activate_vendor",
     title="Activate Vendor",
     description="Activate a vendor in QuickBooks (set Active to true)",
     inputSchema={
@@ -225,11 +231,12 @@ activate_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID to activate"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 deactivate_vendor_tool = Tool(
-    name="deactivate_vendor",
+    name="quickbooks_deactivate_vendor",
     title="Deactivate Vendor",
     description="Deactivate a vendor from QuickBooks (set Active to false)",
     inputSchema={
@@ -238,7 +245,8 @@ deactivate_vendor_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks vendor ID to deactivate"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
 
 

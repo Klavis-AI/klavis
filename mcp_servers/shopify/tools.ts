@@ -21,6 +21,10 @@ export const listProductsTool: Tool = {
         },
       },
     },
+    annotations: {
+      category: "SHOPIFY_PRODUCT",
+      readOnlyHint: true,
+    },
 };
   
 export const getProductTool: Tool = {
@@ -35,6 +39,10 @@ export const getProductTool: Tool = {
         },
       },
       required: ["product_id"],
+    },
+    annotations: {
+      category: "SHOPIFY_PRODUCT",
+      readOnlyHint: true,
     },
 };
   
@@ -103,9 +111,12 @@ export const createProductTool: Tool = {
             required: ["price"],
           },
         },
-      },
-      required: ["title"],
-    },
+          },
+    required: ["title"],
+  },
+  annotations: {
+    category: "SHOPIFY_PRODUCT",
+  },
 };
   
 export const updateProductTool: Tool = {
@@ -146,6 +157,9 @@ export const updateProductTool: Tool = {
       },
       required: ["product_id"],
     },
+    annotations: {
+      category: "SHOPIFY_PRODUCT",
+    },
 };
   
 export const listOrdersTool: Tool = {
@@ -171,6 +185,10 @@ export const listOrdersTool: Tool = {
         },
       },
     },
+    annotations: {
+      category: "SHOPIFY_ORDER",
+      readOnlyHint: true,
+    },
 };
   
 export const getOrderTool: Tool = {
@@ -185,6 +203,10 @@ export const getOrderTool: Tool = {
         },
       },
       required: ["order_id"],
+    },
+    annotations: {
+      category: "SHOPIFY_ORDER",
+      readOnlyHint: true,
     },
 };
   
@@ -261,24 +283,31 @@ export const createOrderTool: Tool = {
         },
         required: ["line_items"],
     },
+    annotations: {
+      category: "SHOPIFY_ORDER",
+    },
 };
 
 export const listCustomersTool: Tool = {
     name: "shopify_list_customers",
     description: "List customers in the Shopify store with pagination",
     inputSchema: {
-        type: "object",
-        properties: {
+      type: "object",
+      properties: {
         limit: {
-            type: "number",
-            description: "Maximum number of customers to return (default 50, max 250)",
-            default: 50,
+          type: "number",
+          description: "Maximum number of customers to return (default 50, max 250)",
+          default: 50,
         },
         cursor: {
-            type: "string",
-            description: "Pagination cursor for next page of results",
+          type: "string",
+          description: "Pagination cursor for next page of results",
         },
-        },
+      },
+    },
+    annotations: {
+      category: "SHOPIFY_CUSTOMER",
+      readOnlyHint: true,
     },
 };
 
@@ -286,13 +315,17 @@ export const getCustomerTool: Tool = {
     name: "shopify_get_customer",
     description: "Get detailed information about a specific customer",
     inputSchema: {
-        type: "object",
-        properties: {
+      type: "object",
+      properties: {
         customer_id: {
-            type: "string",
-            description: "The ID of the customer to retrieve",
+          type: "string",
+          description: "The ID of the customer to retrieve",
         },
-        },
-        required: ["customer_id"],
+      },
+      required: ["customer_id"],
+    },
+    annotations: {
+      category: "SHOPIFY_CUSTOMER",
+      readOnlyHint: true,
     },
 };

@@ -1,0 +1,197 @@
+---
+title: "Claude Web/Desktop"
+description: "Connect Strata with Claude Web/Desktop in minutes and supercharge your AI coding experience"
+---
+<img
+  className="block dark:hidden"
+  src="/images/knowledge-base/claude_web_desktop/claude_web_desktop.png"
+  alt="Claude Web/Desktop"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/knowledge-base/claude_web_desktop/claude_web_desktop.png"
+  alt="Claude Web/Desktop"
+/>
+
+## Quick Setup Guide
+
+<Steps>
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step1.png"
+      alt="Klavis home page"
+    />    
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
+
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step2.png"
+      alt="Authorize MCP Servers"
+    />
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    From Klavis Dashboard, click **Add to Claude** button to get your Strata Server URL.
+  
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step3.png"
+      alt="Copy Strata Server URL"
+    />
+
+    **Copy** the strata URL to clipboard - you'll need this in the next step.
+
+
+    <Accordion title="🔐 OAuth Services (Most Common)">
+      - Automatically redirected to OAuth authorization
+      - Sign in to your account (GitHub, Google, Slack, etc.)
+      - Grant necessary permissions
+      - Redirected back to Klavis automatically
+    </Accordion>
+    
+    <Accordion title="🔑 API Key Services">
+      - Prompted to enter an API key
+      - Follow service-specific instructions to generate key
+      - Paste key in the provided field
+      - Click **"Save"** to continue
+    </Accordion>
+  </Step>
+
+
+
+  <Step title="Configure Claude Web/Desktop">
+    Copy Your Strata Server URL, open Claude Web/Desktop settings:
+    - **macOS**: `Cmd + ,` or **Claude Desktop > Settings > Connectors**
+    - **Windows/Linux**: `Ctrl + ,` or **Claude Desktop > Settings > Connectors**
+
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step4.png"
+      alt="Claude Web/Desktop Settings"
+    />
+    
+    Select **"Add Custom Connector"**:
+    - **Name**: `strata`
+    - **Remote MCP Server URL**: Paste your Strata Server URL that you copied earlier
+
+    Click **Add** to save the configuration. You can see strata added to the list.
+
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step5.png"
+      alt="Strata Added in Web/Desktop Settings"
+    />
+
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in Claude Web/Desktop settings as described above
+
+    </Tip>
+
+    
+  </Step>
+
+  <Step title="Verify Tools Loading">
+
+    To verify **Strata** tools are loading correctly, open new chat and click **Search and Tools** button (settings icon) and you will see **strata** enabled.
+     
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step6.png"
+      alt="Verify Strata Tools in Claude Web/Desktop"
+    />
+
+    Open **strata** to see the list of tools available from your Strata MCP server.
+
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step7.png"
+      alt="Strata Tools List in Claude Web/Desktop"
+    />
+    
+    <Note>
+      📋 **Reopen Claude Web/Desktop Settings** to apply the new configuration
+    </Note>
+    
+  </Step>
+
+  <Step title="Start Using Strata in Claude Web/Desktop Chat">
+    
+    <img
+      src="/images/knowledge-base/claude_web_desktop/step8.jpg"
+      alt="Using Strata in Claude Web/Desktop Chat"
+    />
+    
+    Open Claude Web/Desktop Chat (`Cmd/Ctrl + L`) and start using natural language:
+    
+    <CodeGroup>
+    ```text GitHub
+    "Create a new issue titled 'Add dark mode' with priority label"
+    ```
+    
+    ```text Slack
+    "Send a message to #general: 'Standup meeting in 5 minutes!'"
+    ```
+    
+    ```text Gmail
+    "Send email to john@company.com about project update"
+    ```
+    
+    ```text Notion
+    "Create a new page called 'Meeting Notes' with today's date"
+    ```
+    </CodeGroup>
+    
+    <Tip>
+      🎯 Claude Web/Desktop Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
+    </Tip>
+  </Step>
+
+  <Step title="Happy Building! 🎉">
+    You're all set! Your **Strata** MCP server is now integrated with Claude Web/Desktop.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="🔧 Tools Not Appearing">
+    - Double-check your Server URL for typos
+    - Ensure stable internet connection
+    - Verify authentication in Klavis dashboard
+    - Check Claude Web/Desktop logs for error messages
+    - Try completely restarting Claude Web/Desktop
+  </Accordion>
+  
+  <Accordion title="🔐 Authentication Issues">
+    - Re-authenticate in the Klavis dashboard
+    - Check if your OAuth tokens have expired
+    - Verify API key permissions (for API key services)
+    - Ensure you've granted all necessary permissions
+  </Accordion>
+  
+  <Accordion title="⚡ Performance Issues">
+    - Limit the number of active MCP servers
+    - Check your internet connection speed
+    - Restart Claude Web/Desktop periodically
+    - Contact support if issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Community" icon="discord">
+    Join our Discord for community support and discussions
+  </Card>
+  <Card title="Support" icon="headphones">
+    Contact our technical support team for assistance
+  </Card>
+</CardGroup>
+
+---

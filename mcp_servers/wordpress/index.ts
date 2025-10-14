@@ -39,6 +39,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site", "title", "content"]
           },
+          annotations: { category: 'WORDPRESS_POST' },
         },
         {
           name: "wordpress_get_posts",
@@ -52,6 +53,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site"]
           },
+          annotations: { category: 'WORDPRESS_POST', readOnlyHint: true },
         },
         {
           name: "wordpress_update_post",
@@ -67,6 +69,7 @@ const getWordPressMcpServer = () => {
             },
             required: ["site", "postId"]
           },
+          annotations: { category: 'WORDPRESS_POST' },
         },
         {
           name: "wordpress_get_top_posts",
@@ -77,7 +80,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_POST' }
         },
         {
           name: "wordpress_get_site_info",
@@ -88,7 +92,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_SITE' }
         },
         {
           name: "wordpress_get_site_stats",
@@ -99,7 +104,8 @@ const getWordPressMcpServer = () => {
               site: { type: "string", description: "Site identifier (e.g. example.wordpress.com)" },
             },
             required: ["site"]
-          }
+          },
+          annotations: { category: 'WORDPRESS_SITE' }
         },
         {
           name: "wordpress_get_user_sites",
@@ -108,7 +114,8 @@ const getWordPressMcpServer = () => {
             type: "object",
             properties: {},
             required: []
-          }
+          },
+          annotations: { category: 'WORDPRESS_USER' }
         }
       ],
     };
@@ -289,6 +296,26 @@ function getClient() {
   };
 }
 
+function extractAccessToken(req: Request): string {
+  let authData = process.env.AUTH_DATA;
+  
+  if (!authData && req.headers['x-auth-data']) {
+    try {
+      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+    } catch (error) {
+      console.error('Error parsing x-auth-data JSON:', error);
+    }
+  }
+
+  if (!authData) {
+    console.error('Error: WordPress access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
+    return '';
+  }
+
+  const authDataJson = JSON.parse(authData);
+  return authDataJson.access_token ?? '';
+}
+
 const app = express();
 
 
@@ -297,11 +324,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string || '';
-
-  if (!auth_token) {
-    console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
-  }
+  const auth_token = extractAccessToken(req);
 
 
   const server = getWordPressMcpServer();
@@ -389,12 +412,7 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    // Use WordPress credentials from environment or headers
-    const auth_token = process.env.WORDPRESS_API_KEY || req.headers['x-auth-token'] as string || '';
-
-    if (!auth_token) {
-      console.error('Error: WordPress credentials are missing. Provide them via environment variables or headers.');
-    }
+    const auth_token = extractAccessToken(req);
 
     asyncLocalStorage.run({
       auth_token

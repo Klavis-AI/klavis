@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 customer_properties_user_define = {
@@ -140,16 +141,17 @@ customer_properties = {
 
 # MCP Tool definitions
 create_customer_tool = Tool(
-    name="create_customer",
+    name="quickbooks_create_customer",
     description="Create a new customer in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": customer_properties_user_define,
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 get_customer_tool = Tool(
-    name="get_customer",
+    name="quickbooks_get_customer",
     description="Get a specific customer by ID from QuickBooks",
     inputSchema={
         "type": "object",
@@ -158,10 +160,11 @@ get_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
 )
 
 list_customers_tool = Tool(
-    name="list_customers",
+    name="quickbooks_list_customers",
     description="List all customers from QuickBooks",
     inputSchema={
         "type": "object",
@@ -170,20 +173,22 @@ list_customers_tool = Tool(
             "ActiveOnly": {"type": "boolean", "description": "Return only active customers", "default": True}
         }
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
 )
 
 update_customer_tool = Tool(
-    name="update_customer",
+    name="quickbooks_update_customer",
     description="Update an existing customer in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": customer_properties,
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 deactivate_customer_tool = Tool(
-    name="deactivate_customer",
+    name="quickbooks_deactivate_customer",
     description="Deactivate a customer from QuickBooks (set Active to false)",
     inputSchema={
         "type": "object",
@@ -192,10 +197,11 @@ deactivate_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 activate_customer_tool = Tool(
-    name="activate_customer",
+    name="quickbooks_activate_customer",
     description="Activate a customer in QuickBooks (set Active to true)",
     inputSchema={
         "type": "object",
@@ -204,10 +210,11 @@ activate_customer_tool = Tool(
         },
         "required": ["Id"]
     },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
 
 search_customers_tool = Tool(
-    name="search_customers",
+    name="quickbooks_search_customers",
     title="Search Customers",
     description="Advanced Customer Search - Search customers with powerful filters including name, contact info, address, balance, status, and other criteria. Perfect for finding specific customers based on various parameters",
     inputSchema={
@@ -262,7 +269,8 @@ search_customers_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True})
 )
 
 

@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from mcp.types import Tool
+import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for account creation (required by QuickBooks)
@@ -38,18 +39,19 @@ account_properties = {
 
 # MCP Tool definitions
 create_account_tool = Tool(
-    name="create_account",
+    name="quickbooks_create_account",
     title="Create Account",
     description="Create a new account in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": account_properties_minimal,
         "required": ["Name"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 get_account_tool = Tool(
-    name="get_account",
+    name="quickbooks_get_account",
     title="Get Account",
     description="Get a specific account by ID from QuickBooks",
     inputSchema={
@@ -58,11 +60,12 @@ get_account_tool = Tool(
             "Id": {"type": "string", "description": "The QuickBooks account ID"}
         },
         "required": ["Id"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 list_accounts_tool = Tool(
-    name="list_accounts",
+    name="quickbooks_list_accounts",
     title="List Accounts",
     description="List all chart of accounts from QuickBooks",
     inputSchema={
@@ -73,22 +76,24 @@ list_accounts_tool = Tool(
             "ActiveOnly": {"type": "boolean", "description": "Return only active accounts", "default": True}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 update_account_tool = Tool(
-    name="update_account",
+    name="quickbooks_update_account",
     title="Update Account",
     description="Update an existing account in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": account_properties,
         "required": ["Id", "Name"]
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT"})
 )
 
 search_accounts_tool = Tool(
-    name="search_accounts",
+    name="quickbooks_search_accounts",
     title="Search Accounts",
     description="Advanced Account Search - Search accounts with powerful filters including name, type, classification, status, and other criteria. Perfect for finding specific accounts based on various parameters",
     inputSchema={
@@ -116,7 +121,8 @@ search_accounts_tool = Tool(
             "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
         },
         "required": []
-    }
+    },
+    annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_ACCOUNT", "readOnlyHint": True})
 )
 
 

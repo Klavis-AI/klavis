@@ -1,0 +1,290 @@
+---
+title: 'MCP Servers Overview'
+description: 'Quickstart to Klavis-hosted MCP servers and available integrations.'
+---
+
+import KlavisReportgenCard from '/snippets/mcp-server-card/klavis-reportgen-card.mdx';
+import GithubCard from '/snippets/mcp-server-card/github-card.mdx';
+import YoutubeCard from '/snippets/mcp-server-card/youtube-card.mdx';
+import SupabaseCard from '/snippets/mcp-server-card/supabase-card.mdx';
+import SlackCard from '/snippets/mcp-server-card/slack-card.mdx';
+import JiraCard from '/snippets/mcp-server-card/jira-card.mdx';
+import SalesforceCard from '/snippets/mcp-server-card/salesforce-card.mdx';
+import ResendCard from '/snippets/mcp-server-card/resend-card.mdx';
+import PostgresCard from '/snippets/mcp-server-card/postgres-card.mdx';
+import WordpressCard from '/snippets/mcp-server-card/wordpress-card.mdx';
+import NotionCard from '/snippets/mcp-server-card/notion-card.mdx';
+import GmailCard from '/snippets/mcp-server-card/gmail-card.mdx';
+import GoogleCalendarCard from '/snippets/mcp-server-card/google-calendar-card.mdx';
+import GoogleDriveCard from '/snippets/mcp-server-card/google-drive-card.mdx';
+import GoogleDocsCard from '/snippets/mcp-server-card/google-docs-card.mdx';
+import GoogleSheetsCard from '/snippets/mcp-server-card/google-sheets-card.mdx';
+import LinearCard from '/snippets/mcp-server-card/linear-card.mdx';
+import DiscordCard from '/snippets/mcp-server-card/discord-card.mdx';
+import StripeCard from '/snippets/mcp-server-card/stripe-card.mdx';
+import ConfluenceCard from '/snippets/mcp-server-card/confluence-card.mdx';
+import AffinityCard from '/snippets/mcp-server-card/affinity-card.mdx';
+import AirtableCard from '/snippets/mcp-server-card/airtable-card.mdx';
+import AsanaCard from '/snippets/mcp-server-card/asana-card.mdx';
+import CloseCard from '/snippets/mcp-server-card/close-card.mdx';
+import AttioCard from '/snippets/mcp-server-card/attio-card.mdx';
+import CalendlyCard from '/snippets/mcp-server-card/calendly-card.mdx';
+import ClickupCard from '/snippets/mcp-server-card/clickup-card.mdx';
+import CoinbaseCard from '/snippets/mcp-server-card/coinbase-card.mdx';
+import DropboxCard from '/snippets/mcp-server-card/dropbox-card.mdx';
+import QuickbooksCard from '/snippets/mcp-server-card/quickbooks-card.mdx';
+import HubspotCard from '/snippets/mcp-server-card/hubspot-card.mdx';
+import LinkedinCard from '/snippets/mcp-server-card/linkedin-card.mdx';
+import OnedriveCard from '/snippets/mcp-server-card/onedrive-card.mdx';
+import OutlookCard from '/snippets/mcp-server-card/outlook-card.mdx';
+import MicrosoftTeamsCard from '/snippets/mcp-server-card/microsoft-teams-card.mdx';
+import PerplexityCard from '/snippets/mcp-server-card/perplexity-card.mdx';
+import ZendeskCard from '/snippets/mcp-server-card/zendesk-card.mdx';
+import GongCard from '/snippets/mcp-server-card/gong-card.mdx';
+import MotionCard from '/snippets/mcp-server-card/motion-card.mdx';
+import DeepResearchCard from '/snippets/mcp-server-card/deep-research-card.mdx';
+import WebSearchCard from '/snippets/mcp-server-card/web-search-card.mdx';
+import Doc2markdownCard from '/snippets/mcp-server-card/doc2markdown-card.mdx';
+import Markdown2docCard from '/snippets/mcp-server-card/markdown2doc-card.mdx';
+import MixpanelCard from '/snippets/mcp-server-card/mixpanel-card.mdx';
+import BraveSearchCard from '/snippets/mcp-server-card/brave-search-card.mdx';
+import BoxCard from '/snippets/mcp-server-card/box-card.mdx';
+import CloudflareCard from '/snippets/mcp-server-card/cloudflare-card.mdx';
+import DialpadCard from '/snippets/mcp-server-card/dialpad-card.mdx';
+import DocusignCard from '/snippets/mcp-server-card/docusign-card.mdx';
+import ElevenlabsCard from '/snippets/mcp-server-card/elevenlabs-card.mdx';
+import ExaCard from '/snippets/mcp-server-card/exa-card.mdx';
+import FigmaCard from '/snippets/mcp-server-card/figma-card.mdx';
+import FirefliesCard from '/snippets/mcp-server-card/fireflies-card.mdx';
+import FreshdeskCard from '/snippets/mcp-server-card/freshdesk-card.mdx';
+import GitlabCard from '/snippets/mcp-server-card/gitlab-card.mdx';
+import GoogleJobsCard from '/snippets/mcp-server-card/google-jobs-card.mdx';
+import HackerNewsCard from '/snippets/mcp-server-card/hacker-news-card.mdx';
+import HeygenCard from '/snippets/mcp-server-card/heygen-card.mdx';
+import KlaviyoCard from '/snippets/mcp-server-card/klaviyo-card.mdx';
+import MemoCard from '/snippets/mcp-server-card/memo-card.mdx';
+import MetabaseCard from '/snippets/mcp-server-card/metabase-card.mdx';
+import MondayCard from '/snippets/mcp-server-card/monday-card.mdx';
+import MoneybirdCard from '/snippets/mcp-server-card/moneybird-card.mdx';
+import OpenrouterCard from '/snippets/mcp-server-card/openrouter-card.mdx';
+import PagerdutyCard from '/snippets/mcp-server-card/pagerduty-card.mdx';
+import PipedriveCard from '/snippets/mcp-server-card/pipedrive-card.mdx';
+import PlaiCard from '/snippets/mcp-server-card/plai-card.mdx';
+import PosthogCard from '/snippets/mcp-server-card/posthog-card.mdx';
+import SendgridCard from '/snippets/mcp-server-card/sendgrid-card.mdx';
+import ShopifyCard from '/snippets/mcp-server-card/shopify-card.mdx';
+import TavilyCard from '/snippets/mcp-server-card/tavily-card.mdx';
+import UnifiedMcpCard from '/snippets/mcp-server-card/unified-mcp-card.mdx';
+import VercelCard from '/snippets/mcp-server-card/vercel-card.mdx';
+import WhatsappCard from '/snippets/mcp-server-card/whatsapp-card.mdx';
+import CalComCard from '/snippets/mcp-server-card/calcom-card.mdx';
+import FathomCard from '/snippets/mcp-server-card/fathom-card.mdx';
+import ServiceNowCard from '/snippets/mcp-server-card/servicenow-card.mdx';
+
+Learn how to easily integrate with Klavis remote hosted MCP Servers.
+
+<Tabs>
+  <Tab title="ALL">
+    <CardGroup cols={4}>
+      <AffinityCard />
+      <AirtableCard />
+      <AsanaCard />
+      <AttioCard />
+      <BoxCard />
+      <BraveSearchCard />
+      <CalComCard />
+      <CalendlyCard />
+      <ClickupCard />
+      <CloseCard />
+      <CloudflareCard />
+      <CoinbaseCard />
+      <ConfluenceCard />
+      <DeepResearchCard />
+      <DialpadCard />
+      <DiscordCard />
+      <Doc2markdownCard />
+      <DocusignCard />
+      <DropboxCard />
+      <ElevenlabsCard />
+      <ExaCard />
+      <FathomCard />
+      <FigmaCard />
+      <FirefliesCard />
+      <FreshdeskCard />
+      <GithubCard />
+      <GitlabCard />
+      <GmailCard />
+      <GongCard />
+      <GoogleCalendarCard />
+      <GoogleDocsCard />
+      <GoogleDriveCard />
+      <GoogleJobsCard />
+      <GoogleSheetsCard />
+      <HackerNewsCard />
+      <HeygenCard />
+      <HubspotCard />
+      <JiraCard />
+      <KlavisReportgenCard />
+      <KlaviyoCard />
+      <LinearCard />
+      <LinkedinCard />
+      <Markdown2docCard />
+      <MemoCard />
+      <MetabaseCard />
+      <MicrosoftTeamsCard />
+      <MixpanelCard />
+      <MondayCard />
+      <MoneybirdCard />
+      <MotionCard />
+      <NotionCard />
+      <OnedriveCard />
+      <OpenrouterCard />
+      <OutlookCard />
+      <PagerdutyCard />
+      <PerplexityCard />
+      <PipedriveCard />
+      <PlaiCard />
+      <PostgresCard />
+      <PosthogCard />
+      <QuickbooksCard />
+      <ResendCard />
+      <SalesforceCard />
+      <SendgridCard />
+      <ServiceNowCard />
+      <ShopifyCard />
+      <SlackCard />
+      <StripeCard />
+      <SupabaseCard />
+      <TavilyCard />
+      <UnifiedMcpCard />
+      <VercelCard />
+      <WhatsappCard />
+      <WebSearchCard />
+      <WordpressCard />
+      <YoutubeCard />
+      <ZendeskCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="CRM">
+    <CardGroup cols={4}>
+      <AffinityCard />
+      <AttioCard />
+      <CloseCard />
+      <FreshdeskCard />
+      <HubspotCard />
+      <PipedriveCard />
+      <SalesforceCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Project Management">
+    <CardGroup cols={4}>
+      <AsanaCard />
+      <ClickupCard />
+      <JiraCard />
+      <LinearCard />
+      <MondayCard />
+      <PlaiCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Office Suite">
+    <CardGroup cols={4}>
+      <ConfluenceCard />
+      <DropboxCard />
+      <GmailCard />
+      <GoogleCalendarCard />
+      <GoogleDocsCard />
+      <GoogleDriveCard />
+      <GoogleSheetsCard />
+      <MicrosoftTeamsCard />
+      <NotionCard />
+      <OnedriveCard />
+      <OutlookCard />
+      <SlackCard />
+      <WordpressCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Dev Tools">
+    <CardGroup cols={4}>
+      <CloudflareCard />
+      <GithubCard />
+      <GitlabCard />
+      <MemoCard />
+      <MetabaseCard />
+      <OpenrouterCard />
+      <PagerdutyCard />
+      <PostgresCard />
+      <PosthogCard />
+      <SupabaseCard />
+      <VercelCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Meeting">
+    <CardGroup cols={4}>
+      <CalComCard />
+      <CalendlyCard />
+      <FirefliesCard />
+      <GoogleCalendarCard />
+      <FathomCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Sales">
+    <CardGroup cols={4}>
+      <SendgridCard />
+      <ShopifyCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Productivity">
+    <CardGroup cols={4}>
+      <AirtableCard />
+      <ElevenlabsCard />
+      <FigmaCard />
+      <KlavisReportgenCard />
+      <MixpanelCard />
+      <MotionCard />
+      <ZendeskCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Search">
+    <CardGroup cols={4}>
+      <BraveSearchCard />
+      <DeepResearchCard />
+      <ExaCard />
+      <PerplexityCard />
+      <TavilyCard />
+      <WebSearchCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Social & Communication">
+    <CardGroup cols={4}>
+      <DialpadCard />
+      <DiscordCard />
+      <HackerNewsCard />
+      <LinkedinCard />
+      <ResendCard />
+      <YoutubeCard />
+      <WhatsappCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Documents">
+    <CardGroup cols={4}>
+      <BoxCard />
+      <Doc2markdownCard />
+      <DocusignCard />
+      <Markdown2docCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Payment">
+    <CardGroup cols={4}>
+      <StripeCard />
+      <MoneybirdCard />
+    </CardGroup>
+  </Tab>
+  <Tab title="Finance & Accounting">
+    <CardGroup cols={4}>
+      <CoinbaseCard />
+      <QuickbooksCard />
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+
