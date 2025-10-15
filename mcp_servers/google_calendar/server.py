@@ -509,6 +509,169 @@ async def delete_event(
         logger.exception(f"Error executing tool delete_event: {e}")
         raise e
 
+async def find_free_slots(
+    items: list[str] | None = None,
+    time_min: str | None = None,
+    time_max: str | None = None,
+    timezone: str = "UTC",
+    min_slot_duration_minutes: int = 30,
+) -> Dict[str, Any]:
+    """
+    Find free and busy time slots for specified calendar users.
+    
+    Returns a simple structure with busy and free time slots for each user.
+    Defaults to the current day if time_min/time_max are omitted.
+    """
+    logger.info(f"Executing tool: find_free_slots for items: {items}")
+    try:
+        access_token = get_auth_token()
+        service = get_calendar_service(access_token)
+        
+        # Default to primary calendar if none specified
+        if not items:
+            items = ["primary"]
+        
+        # Parse timezone
+        try:
+            tz = ZoneInfo(timezone)
+        except Exception:
+            logger.warning(f"Invalid timezone {timezone}, defaulting to UTC")
+            tz = ZoneInfo("UTC")
+            timezone = "UTC"
+        
+        # Default to current day in specified timezone if time range not provided
+        now = datetime.now(tz)
+        if not time_min:
+            time_min_dt = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            time_min_dt = datetime.fromisoformat(time_min.replace('Z', '+00:00'))
+            if time_min_dt.tzinfo is None:
+                time_min_dt = time_min_dt.replace(tzinfo=tz)
+            else:
+                # Convert to requested timezone
+                time_min_dt = time_min_dt.astimezone(tz)
+        
+        if not time_max:
+            time_max_dt = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+        else:
+            time_max_dt = datetime.fromisoformat(time_max.replace('Z', '+00:00'))
+            if time_max_dt.tzinfo is None:
+                time_max_dt = time_max_dt.replace(tzinfo=tz)
+            else:
+                # Convert to requested timezone
+                time_max_dt = time_max_dt.astimezone(tz)
+        
+        # Validate time range
+        if time_min_dt >= time_max_dt:
+            raise ValueError(f"time_min must precede time_max")
+        
+        # Prepare freebusy query
+        body = {
+            "timeMin": time_min_dt.isoformat(),
+            "timeMax": time_max_dt.isoformat(),
+            "items": [{"id": item} for item in items],
+        }
+        
+        # Query freebusy information
+        freebusy_result = service.freebusy().query(body=body).execute()
+        
+        # Process results for each calendar - create simple structure
+        calendars = {}
+        
+        for item in items:
+            calendar_data = freebusy_result.get("calendars", {}).get(item, {})
+            
+            # Check for errors
+            if "errors" in calendar_data:
+                calendars[item] = {
+                    "error": calendar_data["errors"][0].get("reason", "Unknown error"),
+                    "busy": [],
+                    "free": [],
+                }
+                continue
+            
+            busy_periods = calendar_data.get("busy", [])
+            
+            # Convert busy periods to simple format with timezone
+            busy_slots = []
+            for busy in busy_periods:
+                busy_start = datetime.fromisoformat(busy["start"].replace('Z', '+00:00')).astimezone(tz)
+                busy_end = datetime.fromisoformat(busy["end"].replace('Z', '+00:00')).astimezone(tz)
+                busy_slots.append({
+                    "start": busy_start.isoformat(),
+                    "end": busy_end.isoformat(),
+                })
+            
+            # Calculate free slots (gaps between busy periods)
+            free_slots = []
+            
+            # Sort busy periods by start time
+            sorted_busy = sorted(
+                [(datetime.fromisoformat(b["start"].replace('Z', '+00:00')).astimezone(tz),
+                  datetime.fromisoformat(b["end"].replace('Z', '+00:00')).astimezone(tz))
+                 for b in busy_periods],
+                key=lambda x: x[0]
+            )
+            
+            # Check for free slot at the beginning
+            if not sorted_busy or sorted_busy[0][0] > time_min_dt:
+                gap_end = sorted_busy[0][0] if sorted_busy else time_max_dt
+                duration_minutes = int((gap_end - time_min_dt).total_seconds() / 60)
+                if duration_minutes >= min_slot_duration_minutes:
+                    free_slots.append({
+                        "start": time_min_dt.isoformat(),
+                        "end": gap_end.isoformat(),
+                    })
+            
+            # Find gaps between busy periods
+            for i in range(len(sorted_busy) - 1):
+                gap_start = sorted_busy[i][1]  # End of current busy period
+                gap_end = sorted_busy[i + 1][0]  # Start of next busy period
+                
+                if gap_start < gap_end:
+                    duration_minutes = int((gap_end - gap_start).total_seconds() / 60)
+                    if duration_minutes >= min_slot_duration_minutes:
+                        free_slots.append({
+                            "start": gap_start.isoformat(),
+                            "end": gap_end.isoformat(),
+                        })
+            
+            # Check for free slot at the end
+            if sorted_busy and sorted_busy[-1][1] < time_max_dt:
+                gap_start = sorted_busy[-1][1]
+                duration_minutes = int((time_max_dt - gap_start).total_seconds() / 60)
+                if duration_minutes >= min_slot_duration_minutes:
+                    free_slots.append({
+                        "start": gap_start.isoformat(),
+                        "end": time_max_dt.isoformat(),
+                    })
+            
+            # If no busy periods, the entire time range is free
+            if not sorted_busy:
+                duration_minutes = int((time_max_dt - time_min_dt).total_seconds() / 60)
+                if duration_minutes >= min_slot_duration_minutes:
+                    free_slots.append({
+                        "start": time_min_dt.isoformat(),
+                        "end": time_max_dt.isoformat(),
+                    })
+            
+            calendars[item] = {
+                "busy": busy_slots,
+                "free": free_slots,
+            }
+        
+        return {
+            "calendars": calendars,
+        }
+        
+    except HttpError as e:
+        logger.error(f"Google Calendar API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Calendar API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool find_free_slots: {e}")
+        raise e
+
 @click.command()
 @click.option("--port", default=GOOGLE_CALENDAR_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -782,6 +945,42 @@ def main(
                     **{"category": "GOOGLE_CALENDAR_EVENT"}
                 ),
             ),
+            types.Tool(
+                name="google_calendar_find_free_slots",
+                description="Find both free and busy time slots in Google Calendars for specified calendars within a defined time range (defaults to the current day UTC if time_min/time_max are omitted). Returns busy intervals and calculated free slots by finding gaps between busy periods; time_min must precede time_max if both are provided. This action retrieves free and busy time slots for the specified calendars over a given time period. It analyzes the busy intervals from the calendars and provides calculated free slots based on the gaps in the busy periods.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "items": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of calendar email addresses to check for availability. Use 'primary' for the user's primary calendar, or specify email addresses like 'user@domain.com'. Defaults to ['primary'] if not provided.",
+                        },
+                        "time_min": {
+                            "type": "string",
+                            "description": "The start of the time range to search in ISO 8601 format (e.g., '2024-12-31T09:00:00' or '2024-12-31T09:00:00-07:00' with timezone). If omitted, defaults to the start of the current day (00:00:00) in the specified timezone.",
+                        },
+                        "time_max": {
+                            "type": "string",
+                            "description": "The end of the time range to search in ISO 8601 format (e.g., '2024-12-31T17:00:00' or '2024-12-31T17:00:00-07:00' with timezone). If omitted, defaults to the end of the current day (23:59:59) in the specified timezone. Must be after time_min.",
+                        },
+                        "timezone": {
+                            "type": "string",
+                            "description": "Timezone for the time range and output (e.g., 'America/Los_Angeles', 'Europe/London', 'Asia/Tokyo'). Defaults to 'UTC'. All returned times will be in this timezone.",
+                            "default": "UTC",
+                        },
+                        "min_slot_duration_minutes": {
+                            "type": "integer",
+                            "description": "Minimum duration in minutes for a time slot to be considered as a valid free slot. Free slots shorter than this duration will be filtered out. Defaults to 30 minutes.",
+                            "default": 30,
+                            "minimum": 1,
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_AVAILABILITY", "readOnlyHint": True}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -988,6 +1187,36 @@ def main(
                     types.TextContent(
                         type="text",
                         text=result,
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "google_calendar_find_free_slots":
+            try:
+                items = arguments.get("items")
+                time_min = arguments.get("time_min")
+                time_max = arguments.get("time_max")
+                timezone = arguments.get("timezone", "UTC")
+                min_slot_duration_minutes = arguments.get("min_slot_duration_minutes", 30)
+                
+                result = await find_free_slots(
+                    items=items,
+                    time_min=time_min,
+                    time_max=time_max,
+                    timezone=timezone,
+                    min_slot_duration_minutes=min_slot_duration_minutes
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
