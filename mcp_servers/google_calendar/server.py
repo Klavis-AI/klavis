@@ -569,6 +569,7 @@ async def find_free_slots(
         body = {
             "timeMin": time_min_dt.isoformat(),
             "timeMax": time_max_dt.isoformat(),
+            "timeZone": timezone,
             "items": [{"id": item} for item in items],
         }
         
@@ -947,7 +948,7 @@ def main(
             ),
             types.Tool(
                 name="google_calendar_find_free_slots",
-                description="Find both free and busy time slots in Google Calendars for specified calendars within a defined time range (defaults to the current day UTC if time_min/time_max are omitted). Returns busy intervals and calculated free slots by finding gaps between busy periods; time_min must precede time_max if both are provided. This action retrieves free and busy time slots for the specified calendars over a given time period. It analyzes the busy intervals from the calendars and provides calculated free slots based on the gaps in the busy periods.",
+                description="Find both free and busy time slots in Google Calendars for specified calendars within a defined time range (defaults to the current day UTC if time_min/time_max are omitted). Returns busy intervals and calculated free slots by finding gaps between busy periods; time_min must precede time_max if both are provided. This action retrieves free and busy time slots for the specified calendars over a given time period. It analyzes the busy intervals from the calendars and provides calculated free slots based on the gaps in the busy periods. All returned times include timezone information and are formatted in the requested timezone for easy interpretation and scheduling.",
                 inputSchema={
                     "type": "object",
                     "properties": {
