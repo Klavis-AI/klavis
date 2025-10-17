@@ -219,3 +219,7 @@ paths:
     get:
       x-fern-sdk-group-name: oauth
       x-fern-sdk-method-name: authorize_fathom
+  "/oauth/monday/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_monday
