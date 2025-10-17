@@ -5758,6 +5758,103 @@
           }
         }
       }
+    },
+    "/oauth/monday/authorize": {
+      "get": {
+        "tags": [
+          "monday-oauth"
+        ],
+        "summary": "Authorize Monday",
+        "description": "Start Monday OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (space-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeMonday",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
