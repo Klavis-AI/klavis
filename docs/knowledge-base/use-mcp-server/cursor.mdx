@@ -1,47 +1,94 @@
 ---
 title: "Cursor"
-description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercharge your AI coding experience"
+description: "Connect Strata with Cursor IDE in minutes and supercharge your AI coding experience"
 ---
 <img
   className="block dark:hidden"
   src="/images/knowledge-base/cursor/Cursor.png"
-  alt="Cursor IDE with Klavis MCP Servers"
+  alt="Cursor IDE"
 />
 <img
   className="hidden dark:block"
   src="/images/knowledge-base/cursor/Cursor.png"
-  alt="Cursor IDE with Klavis MCP Servers"
+  alt="Cursor IDE"
 />
 
 ## Quick Setup Guide
 
 <Steps>
-  <Step title="Access Klavis MCP Servers">
-    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
-    
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
     <img
       src="/images/knowledge-base/cursor/step1.png"
       alt="Klavis home page"
     />    
-    Click the **"Create"** button next to your chosen server.
-  </Step>
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
 
-  <Step title="Complete Authentication">
     <img
       src="/images/knowledge-base/cursor/step2.png"
-      alt="Klavis MCP Servers page"
+      alt="Authorize MCP Servers"
     />
-    
-    <img
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Configure Cursor IDE with Strata">
+
+    <Tabs>
+      <Tab title="Via Dashboard">
+
+        From Klavis Dashboard, click **Add to Cursor** and you will be redirected to Cursor.
+
+        <img
       src="/images/knowledge-base/cursor/step3.png"
-      alt="OAuth authentication flow"
-    />
-    
-    <img
-      src="/images/knowledge-base/cursor/step4.JPG"
-      alt="Server URL generated"
-    />
-    
+      alt="Copy Strata Server URL"
+       />
+
+        Cursor will automatically open the **MCP** dialog with Strata Server URL pre-filled. Click **Install** to save the configuration.
+
+        <img
+      src="/images/knowledge-base/cursor/step4.png"
+      alt="Install Strata in Cursor"
+       />
+      </Tab>
+
+      <Tab title="Via Code">
+
+        Alternatively, you can configure **Strata** directly.
+        1. Go to **Setting** -> **MCP & Tools**
+        2. Click **Add Custom MCP**
+
+         <img
+      src="/images/knowledge-base/cursor/step5.png"
+      alt="MCP & Tools in Cursor Settings"
+        />
+
+        3. Paste the below code in **mcp.json** file (See Screenshot below)
+
+         <img
+      src="/images/knowledge-base/cursor/step6.png"
+      alt="Paste Strata code in mcp.json"
+        />
+        
+
+      </Tab>
+    </Tabs>
+
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in Cursor settings as described above
+
+    </Tip>
+
+
+
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
       - Sign in to your account (GitHub, Google, Slack, etc.)
@@ -58,33 +105,22 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
   </Step>
 
 
-
-  <Step title="Configure Cursor IDE">
-    Copy Your Server URL, open Cursor IDE settings:
-    - **macOS**: `Cmd + ,` or **Cursor > Settings**
-    - **Windows/Linux**: `Ctrl + ,` or **File > Preferences > Settings**
-    
-    Paste Your Server URL to **mcp.json** file like the screenshot below
-
-
-    <img
-      src="/images/knowledge-base/cursor/step5.JPG"
-      alt="Cursor IDE Settings"
-    />
-    <img
-      src="/images/knowledge-base/cursor/step6.JPG"
-      alt="mcp.json file in Cursor IDE"
-    />
-
-  </Step>
-
   <Step title="Verify Tools Loading">
+
+    In Cursor Settings, navigate to **Tools & MCP**. You will see **klavis-strata** listed under **Installed MCP Servers**.
      
     <img
-      src="/images/knowledge-base/cursor/step7.JPG"
-      alt="MCP Configuration in Cursor"
+      src="/images/knowledge-base/cursor/step7.png"
+      alt="Strata Configuration in Cursor"
     />
-    
+
+    Tap on **klavis-strata** to view the list of tools loaded from Strata server.
+
+    <img
+      src="/images/knowledge-base/cursor/step8.png"
+      alt="Strata Tools List in Cursor IDE"
+    />
+
     <Note>
       📋 **Reopen Cursor Settings** to apply the new configuration
     </Note>
@@ -93,8 +129,8 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
 
   <Step title="Start Using in Cursor Chat">
     <img
-      src="/images/knowledge-base/cursor/step8.JPG"
-      alt="Using MCP Server in Cursor Chat"
+      src="/images/knowledge-base/cursor/step9.jpg"
+      alt="Using Strata in Cursor Chat"
     />
     
     Open Cursor Chat (`Cmd/Ctrl + L`) and start using natural language:
@@ -118,12 +154,12 @@ description: "Connect Klavis MCP Servers with Cursor IDE in minutes and supercha
     </CodeGroup>
     
     <Tip>
-      🎯 Cursor Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Cursor Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Cursor IDE.
+    You're all set! Your **Strata** is now integrated with Cursor IDE.
   </Step>
 </Steps>
 
