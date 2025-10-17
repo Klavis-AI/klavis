@@ -29,7 +29,7 @@
     "zod-to-json-schema": "^3.22.1",
     "express": "^5.1.0",
     "pdf-parse": "^1.1.1",
-    "mammoth": "^1.8.0",
+    "mammoth": "^1.11.0",
     "exceljs": "^4.4.0"
   },
   "devDependencies": {
