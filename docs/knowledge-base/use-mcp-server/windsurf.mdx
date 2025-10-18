@@ -1,47 +1,58 @@
 ---
 title: "Windsurf"
-description: "Connect Klavis MCP Servers with Windsurf IDE in minutes and supercharge your AI coding experience"
+description: "Connect Strata with Windsurf IDE in minutes and supercharge your AI coding experience"
 ---
 <img
   className="block dark:hidden"
   src="/images/knowledge-base/windsurf/windsurf.png"
-  alt=" Windsurf IDE with Klavis MCP Servers"
+  alt="Windsurf IDE"
 />
 <img
   className="hidden dark:block"
   src="/images/knowledge-base/windsurf/windsurf.png"
-  alt="Windsurf IDE with Klavis MCP Servers"
+  alt="Windsurf IDE"
 />
 
 ## Quick Setup Guide
 
 <Steps>
-  <Step title="Access Klavis MCP Servers">
-    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
-    
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
     <img
       src="/images/knowledge-base/windsurf/step1.png"
       alt="Klavis home page"
     />    
-    Click the **"Create"** button next to your chosen server.
-  </Step>
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
 
-  <Step title="Complete Authentication">
     <img
       src="/images/knowledge-base/windsurf/step2.png"
-      alt="Klavis MCP Servers page"
+      alt="Authorize MCP Servers"
     />
-    
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+  
     <img
       src="/images/knowledge-base/windsurf/step3.png"
-      alt="OAuth authentication flow"
+      alt="Klavis Dashboard"
     />
-    
+
+    **Copy** the strata URL to clipboard - you'll need this in the next step.
+
     <img
       src="/images/knowledge-base/windsurf/step4.png"
-      alt="Server URL generated"
+      alt="Copy Strata Server URL"
     />
-    
+
+
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
       - Sign in to your account (GitHub, Google, Slack, etc.)
@@ -59,7 +70,7 @@ description: "Connect Klavis MCP Servers with Windsurf IDE in minutes and superc
 
 
 
-  <Step title="Configure Windsurf IDE">
+  <Step title="Configure Windsurf">
     Copy Your Server URL, open Windsurf IDE settings:
     - **macOS**: `Cmd + ,` or **Windsurf > Settings > Advanced Settings**
     - **Windows/Linux**: `Ctrl + ,` or **Windsurf > Settings > Advanced Settings**
@@ -85,16 +96,26 @@ description: "Connect Klavis MCP Servers with Windsurf IDE in minutes and superc
 
     <img
       src="/images/knowledge-base/windsurf/step8.png"
-      alt="mcp_config.json file in Windsurf IDE"
+      alt="Paste strata URL in mcp_config.json file of Windsurf IDE"
     />
 
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in Windsurf settings as described above
+
+    </Tip>
+
+    
   </Step>
 
   <Step title="Verify Tools Loading">
      
     <img
       src="/images/knowledge-base/windsurf/step9.png"
-      alt="MCP Configuration in Windsurf"
+      alt="Strata Configuration in Windsurf"
     />
     
     <Note>
@@ -105,8 +126,8 @@ description: "Connect Klavis MCP Servers with Windsurf IDE in minutes and superc
 
   <Step title="Start Using in Windsurf Chat">
     <img
-      src="/images/knowledge-base/windsurf/step10.JPG"
-      alt="Using MCP Server in Windsurf Chat"
+      src="/images/knowledge-base/windsurf/step10.jpg"
+      alt="Using Strata in Windsurf Chat"
     />
     
     Open Windsurf Chat (`Cmd/Ctrl + Shift + L`) and start using natural language:
@@ -130,12 +151,12 @@ description: "Connect Klavis MCP Servers with Windsurf IDE in minutes and superc
     </CodeGroup>
     
     <Tip>
-      🎯 Windsurf Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Windsurf Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Windsurf IDE.
+    You're all set! Your **Strata** MCP server is now integrated with Windsurf IDE.
   </Step>
 </Steps>
 
