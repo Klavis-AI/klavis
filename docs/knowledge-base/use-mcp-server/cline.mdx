@@ -1,47 +1,66 @@
 ---
 title: "Cline"
-description: "Connect Klavis MCP Servers with Cline in minutes and supercharge your AI coding experience"
+description: "Connect Strata with Cline in minutes and supercharge your AI coding experience"
 ---
 <img
   className="block dark:hidden"
   src="/images/knowledge-base/cline/Cline.png"
-  alt="Cline with Klavis MCP Servers"
+  alt="Cline"
 />
 <img
   className="hidden dark:block"
   src="/images/knowledge-base/cline/Cline.png"
-  alt="Cline with Klavis MCP Servers"
+  alt="Cline"
 />
 
 ## Quick Setup Guide
 
 <Steps>
-  <Step title="Access Klavis MCP Servers">
-    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
-    
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
     <img
       src="/images/knowledge-base/cline/step1.png"
       alt="Klavis home page"
     />    
-    Click the **"Create"** button next to your chosen server.
-  </Step>
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
 
-  <Step title="Complete Authentication">
     <img
       src="/images/knowledge-base/cline/step2.png"
-      alt="Klavis MCP Servers page"
+      alt="Authorize MCP Servers"
     />
-    
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+  
     <img
       src="/images/knowledge-base/cline/step3.png"
-      alt="OAuth authentication flow"
+      alt="Klavis Dashboard"
     />
-    
+
+    **Copy** the strata URL to clipboard - you'll need this in the next step.
+
     <img
       src="/images/knowledge-base/cline/step4.png"
-      alt="Server URL generated"
+      alt="Copy Strata Server URL"
     />
-    
+
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in Cline settings as described above
+
+    </Tip>
+
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
       - Sign in to your account (GitHub, Google, Slack, etc.)
@@ -60,32 +79,36 @@ description: "Connect Klavis MCP Servers with Cline in minutes and supercharge y
 
 
   <Step title="Configure Cline">
-    Copy Your Server URL, click **Manage MCP Servers** > **Configure MCP Servers**
+    Copy Your Server URL, click **Settings** ->  **Manage MCP Servers**
 
     <img
       src="/images/knowledge-base/cline/step5.png"
       alt="Manage MCP Servers in Cline"
     />
 
+    Tap on **"Configure MCP Servers"** to open the configuration file.
+
     <img
       src="/images/knowledge-base/cline/step6.png"
       alt="Configure MCP Servers in Cline"
     />
     
-    Paste Your Server URL to **cline_mcp_settings.json** file like the screenshot below
+    Paste Your Server URL to **`cline_mcp_settings.json`** file like the screenshot below
 
     <img
       src="/images/knowledge-base/cline/step7.png"
-      alt="cline_mcp_settings.json file in Cline"
+      alt="Paste Strata code in cline_mcp_settings.json file of Cline"
     />
 
   </Step>
 
   <Step title="Verify Tools Loading">
+
+    To verify that Strata tools are loaded correctly, navigate to **Manage MCP Servers** > **Configure MCP Servers**.
      
     <img
       src="/images/knowledge-base/cline/step8.png"
-      alt="MCP Configuration in Cline"
+      alt="Strata Tools Configuration in Cline"
     />
     
     <Note>
@@ -96,8 +119,8 @@ description: "Connect Klavis MCP Servers with Cline in minutes and supercharge y
 
   <Step title="Start Using in Cline Chat">
     <img
-      src="/images/knowledge-base/cline/step9.png"
-      alt="Using MCP Server in Cline Chat"
+      src="/images/knowledge-base/cline/step9.jpg"
+      alt="Using Strata in Cline Chat"
     />
     
     Open Cline Chat and start using natural language:
@@ -121,12 +144,12 @@ description: "Connect Klavis MCP Servers with Cline in minutes and supercharge y
     </CodeGroup>
     
     <Tip>
-      🎯 Cline Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Cline Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Cline in VS Code IDE.
+    You're all set! Your **Strata** MCP server is now integrated with Cline in VS Code IDE.
   </Step>
 </Steps>
 

@@ -1,46 +1,52 @@
 ---
 title: "Gemini CLI"
-description: "Connect Klavis MCP Servers with Gemini CLI in minutes and supercharge your AI coding experience"
+description: "Connect Strata with Gemini CLI in minutes and supercharge your AI coding experience"
 ---
 <img
   className="block dark:hidden"
   src="/images/knowledge-base/gemini_cli/Gemini_CLI.png"
-  alt="Gemini CLI with Klavis MCP Servers"
+  alt="Gemini CLI"
 />
 <img
   className="hidden dark:block"
   src="/images/knowledge-base/gemini_cli/Gemini_CLI.png"
-  alt="Gemini CLI with Klavis MCP Servers"
+  alt="Gemini CLI"
 />
 
 ## Quick Setup Guide
 
 <Steps>
-  <Step title="Access Klavis MCP Servers">
-    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
-    
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
     <img
       src="/images/knowledge-base/gemini_cli/step1.png"
       alt="Klavis home page"
-    />    
-    Click the **"Create"** button next to your chosen server.
-  </Step>
+    />  
 
-  <Step title="Complete Authentication">
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
+
     <img
       src="/images/knowledge-base/gemini_cli/step2.png"
-      alt="Klavis MCP Servers page"
+      alt="Authorize MCP Servers"
     />
-    
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+  
     <img
       src="/images/knowledge-base/gemini_cli/step3.png"
-      alt="OAuth authentication flow"
+      alt="Copy Strata Server URL"
     />
-    
-    <img
-      src="/images/knowledge-base/gemini_cli/step4.png"
-      alt="Server URL generated"
-    />
+
+    **Copy** the strata URL to clipboard - you'll need this in the next step.
     
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
@@ -67,17 +73,28 @@ description: "Connect Klavis MCP Servers with Gemini CLI in minutes and supercha
 
 
     <img
-      src="/images/knowledge-base/gemini_cli/step5.png"
-      alt="Gemini CLI Settings"
+      src="/images/knowledge-base/gemini_cli/step4.png"
+      alt="Paste Strata Server URL in settings.json"
     />
+
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in Gemini CLI settings as described above
+
+    </Tip>
 
   </Step>
 
   <Step title="Verify Tools Loading">
+
+    To verify that Strata is properly configured in Gemini CLI, run **`/mcp`** command in Gemini CLI Chat.
      
     <img
-      src="/images/knowledge-base/gemini_cli/step6.png"
-      alt="MCP Configuration in Gemini CLI"
+      src="/images/knowledge-base/gemini_cli/step5.png"
+      alt="Strata Tools Loading in Gemini CLI"
     />
     
     <Note>
@@ -88,8 +105,8 @@ description: "Connect Klavis MCP Servers with Gemini CLI in minutes and supercha
 
   <Step title="Start Using in Gemini CLI Chat">
     <img
-      src="/images/knowledge-base/gemini_cli/step7.png"
-      alt="Using MCP Server in Gemini CLI Chat"
+      src="/images/knowledge-base/gemini_cli/step6.jpg"
+      alt="Using Strata in Gemini CLI Chat"
     />
     
     Open Gemini CLI Chat and start using natural language:
@@ -113,12 +130,12 @@ description: "Connect Klavis MCP Servers with Gemini CLI in minutes and supercha
     </CodeGroup>
     
     <Tip>
-      🎯 Gemini CLI Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Gemini CLI Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Gemini CLI.
+    You're all set! Your **Strata** is now integrated with Gemini CLI.
   </Step>
 </Steps>
 
