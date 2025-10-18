@@ -1,47 +1,100 @@
 ---
 title: "VS Code"
-description: "Connect Klavis MCP Servers with VS Code in minutes and supercharge your AI coding experience"
+description: "Connect Strata with VS Code in minutes and supercharge your AI coding experience"
 ---
 <img
   className="block dark:hidden"
   src="/images/knowledge-base/vs_code/VS_Code.png"
-  alt="VS Code with Klavis MCP Servers"
+  alt="VS Code IDE"
 />
 <img
   className="hidden dark:block"
   src="/images/knowledge-base/vs_code/VS_Code.png"
-  alt="VS Code with Klavis MCP Servers"
+  alt="VS Code IDE"
 />
 
 ## Quick Setup Guide
 
 <Steps>
-  <Step title="Access Klavis MCP Servers">
-    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar, pick MCP Server you like.
-    
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
     <img
       src="/images/knowledge-base/vs_code/step1.png"
       alt="Klavis home page"
     />    
-    Click the **"Create"** button next to your chosen server.
-  </Step>
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
 
-  <Step title="Complete Authentication">
     <img
       src="/images/knowledge-base/vs_code/step2.png"
-      alt="Klavis MCP Servers page"
+      alt="Authorize MCP Servers"
     />
-    
-    <img
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Configure VS Code IDE with Strata">
+
+    <Tabs>
+      <Tab title="Via Dashboard">
+
+        From Klavis Dashboard, click **Add to VS Code** and you will be redirected to VS Code IDE.
+
+        <img
       src="/images/knowledge-base/vs_code/step3.png"
-      alt="OAuth authentication flow"
-    />
-    
-    <img
+      alt="Copy Strata Server URL"
+       />
+
+        VS Code will automatically open the **MCP** dialog with Strata Server URL pre-filled. Click **Install** to save the configuration.
+
+        <img
       src="/images/knowledge-base/vs_code/step4.png"
-      alt="Server URL generated"
+      alt="Install Strata in VS Code"
+       />
+      </Tab>
+
+      <Tab title="Via Code">
+
+        Copy Your Strata URL, open **Command Palette** in VS Code settings:
+    - **macOS**: `Cmd + Shift + P`
+    - **Windows/Linux**: `Ctrl + Shift + P`
+    - Or **Settings > Command Palette > Preferences: Open User Setting (JSON)**
+
+    <img
+      src="/images/knowledge-base/vs_code/step5.png"
+      alt="VS Code IDE Settings"
     />
     
+    Paste Your Server URL to **settings.json** file like the screenshot below
+
+
+    <img
+      src="/images/knowledge-base/vs_code/step6.png"
+      alt="Open User Setting (JSON) in VS Code"
+    />
+    <img
+      src="/images/knowledge-base/vs_code/step7.png"
+      alt="settings.json file in VS Code IDE"
+    />
+        
+
+      </Tab>
+    </Tabs>
+
+    <Tip>
+      You can add **Single** MCP Server URL directly here as well:
+
+      1. Navigate to **Target Server** and click **Three Dots** next to your server
+      2. Tap **Show Individual Server URL** and copy the URL
+      3. Paste this URL in VS Code settings as described above
+
+    </Tip>
+
+
+
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
       - Sign in to your account (GitHub, Google, Slack, etc.)
@@ -57,38 +110,11 @@ description: "Connect Klavis MCP Servers with VS Code in minutes and supercharge
     </Accordion>
   </Step>
 
-
-
-  <Step title="Configure VS Code IDE">
-    Copy Your Server URL, open **Command Palette** in VS Code settings:
-    - **macOS**: `Cmd + Shift + P`
-    - **Windows/Linux**: `Ctrl + Shift + P`
-    - Or **Settings > Command Palette > Preferences: Open User Setting (JSON)**
-
-    <img
-      src="/images/knowledge-base/vs_code/step5.png"
-      alt="VS Code IDE Settings"
-    />
-    
-    Paste Your Server URL to **settings.json** file like the screenshot below
-
-
-    <img
-      src="/images/knowledge-base/vs_code/step6.png"
-      alt="VS Code IDE Settings"
-    />
-    <img
-      src="/images/knowledge-base/vs_code/step7.png"
-      alt="settings.json file in VS Code IDE"
-    />
-
-  </Step>
-
   <Step title="Verify Tools Loading">
-    
+    In Github Copilot Chat, open **"Configure Tools"** (Tools icon) and scroll down to **MCP Server: klavis-strata**. You will see the list of available tools in Strata.
     <img
       src="/images/knowledge-base/vs_code/step8.png"
-      alt="MCP Configuration in VS Code"
+      alt="Strata Tools loading in VS Code"
     />
     
     <Note>
@@ -99,7 +125,7 @@ description: "Connect Klavis MCP Servers with VS Code in minutes and supercharge
 
   <Step title="Start Using in Github Copilot Chat inside VS Code IDE">
     <img
-      src="/images/knowledge-base/vs_code/step9.png"
+      src="/images/knowledge-base/vs_code/step9.jpg"
       alt="Using MCP Server in Github Copilot Chat"
     />
     
@@ -124,12 +150,12 @@ description: "Connect Klavis MCP Servers with VS Code in minutes and supercharge
     </CodeGroup>
     
     <Tip>
-      🎯 Github Copilot Chat automatically detects when to use your MCP server tools based on context - no need to specify tool names!
+      🎯 Github Copilot Chat automatically detects when to use **Strata** based on context - no need to specify explicitly!
     </Tip>
   </Step>
 
   <Step title="Happy Building! 🎉">
-    You're all set! Your MCP server is now integrated with Github Copilot in VS Code IDE.
+    You're all set! Your **Strata** is now integrated with Github Copilot in VS Code IDE.
   </Step>
 </Steps>
 
