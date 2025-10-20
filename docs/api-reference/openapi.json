@@ -8,11 +8,7 @@
   "servers": [
     {
       "url": "https://api.klavis.ai",
-      "description": "Global (US) - Production server"
-    },
-    {
-      "url": "https://api.eu.klavis.ai/",
-      "description": "Europe - Production server"
+      "description": "Production server"
     }
   ],
   "paths": {
