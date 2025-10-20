@@ -32,7 +32,7 @@ function extractAccessToken(req: Request): string {
 const getSupabaseMcpServer = () => {
   const server = createSupabaseMcpServer({
     platform: {},
-    readOnly: true,
+    readOnly: false,
   });
   return server;
 }
