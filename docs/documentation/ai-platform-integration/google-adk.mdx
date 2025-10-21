@@ -1,0 +1,153 @@
+---
+title: "Google ADK"
+description: "This tutorial demonstrates how to integrate Google Agent Development Kit (ADK) with Klavis MCP servers to build AI agents that can interact with Gmail and Slack."
+---
+
+<Frame>
+  <img src="/images/ai-platform/google-adk.png" alt="Google ADK and Klavis Integration - Build AI agents with MCP tools" />
+</Frame>
+
+<Tip>
+You can find the complete example code in Klavis GitHub repository **[here ->](https://github.com/Klavis-AI/klavis/tree/main/examples/google_adk/python)**
+</Tip>
+
+## Prerequisites
+
+Before we begin, you'll need: [Google API key](https://console.cloud.google.com/apis/credentials) and [Klavis API key](https://www.klavis.ai/home/api-keys).
+
+## Installation
+
+First, install the required packages:
+
+```bash
+pip install google-adk klavis
+```
+
+## Setup Environment Variables
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
+```
+
+### Step 1 - Create an Agent Project
+
+Run the ADK create command to start a new agent project:
+
+```bash
+adk create my_agent
+```
+
+This will create the following project structure:
+
+```
+my_agent/
+    agent.py      # main agent code
+    .env          # API keys or project IDs
+    __init__.py
+```
+
+### Step 2 - Configure Agent with Klavis MCP
+
+The `agent.py` file contains a `root_agent` definition which is the only required element of an ADK agent. 
+
+Update your `agent.py` to integrate Klavis MCP servers:
+
+```python
+import os
+import webbrowser
+
+from google.adk.agents.llm_agent import Agent
+from google.adk.tools.mcp_tool import StreamableHTTPConnectionParams
+from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
+from klavis import Klavis
+from klavis.types import McpServerName
+
+from dotenv import load_dotenv
+load_dotenv()
+
+KLAVIS_API_KEY = os.getenv("KLAVIS_API_KEY")
+
+# Initialize Klavis and set up Strata server
+klavis_client = Klavis(api_key=KLAVIS_API_KEY)
+
+user_id = "user_123"
+
+# Create Strata server with multiple MCP servers
+strata_response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK],
+    user_id=user_id
+)
+
+# Handle OAuth authentication
+if strata_response.oauth_urls:
+    for server_name, oauth_url in strata_response.oauth_urls.items():
+        user_integration_auth = klavis_client.user.get_user_auth(
+            user_id=user_id,
+            server_name=server_name
+        )
+        if not user_integration_auth.is_authenticated:
+            print(f"🔐 Opening OAuth for {server_name}...")
+            webbrowser.open(oauth_url)
+            input(f"Press Enter after completing {server_name} OAuth authorization...")
+
+mcp_server_url = strata_response.strata_server_url
+
+# Create AI agent with MCP toolset (exposed at module level for ADK)
+root_agent = Agent(
+    name="my_agent",
+    model="gemini-2.5-flash",
+    description="An agent with access to tools through Klavis MCP",
+    instruction="You are a helpful assistant with access to MCP tools.",
+    tools=[
+        McpToolset(
+            connection_params=StreamableHTTPConnectionParams(
+                url=mcp_server_url,
+            ),
+        )
+    ],
+)
+```
+
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 3 - Run Your Agent
+
+Launch the web interface to interact with your agent:
+
+```bash
+adk web
+```
+
+This will start a local web server where you can chat with your agent and watch it use the Gmail and Slack MCP tools.
+
+<Check>
+Perfect! You've integrated Google ADK with Klavis MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/documentation/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+
+## Useful Resources
+
+- [Google ADK Documentation](https://google.github.io/adk/)
+- [Google ADK GitHub](https://github.com/google/adk)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+**Happy building!** 🚀
+

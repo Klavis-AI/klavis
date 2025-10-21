@@ -82,6 +82,7 @@
               "documentation/ai-platform-integration/crewai",
               "documentation/ai-platform-integration/fireworks-ai",
               "documentation/ai-platform-integration/gemini",
+              "documentation/ai-platform-integration/google-adk",
               "documentation/ai-platform-integration/langchain",
               "documentation/ai-platform-integration/llamaindex",
               "documentation/ai-platform-integration/mastra",
