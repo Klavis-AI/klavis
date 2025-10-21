@@ -360,5 +360,10 @@
       "linkedin": "https://www.linkedin.com/company/klavis-ai",
       "discord": "https://discord.gg/p7TuTEcssn"
     }
-  }
+  },
+  "seo": {
+    "metatags": {
+        "canonical": "https://www.klavis.ai/docs"
+    }
+}
 }
