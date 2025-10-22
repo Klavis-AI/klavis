@@ -14,12 +14,23 @@ var runCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		tool := args[0]
-
 		image := fmt.Sprintf("ghcr.io/klavis-ai/%s-mcp-server:latest", tool)
+
 		fmt.Println("Running Server:", tool)
 
-		// Run Docker with interactive terminal
-		run := exec.Command("docker", "run", "--rm", "-it", "-p", "5000:5000", image)
+		// Build Docker command arguments
+		dockerArgs := []string{"run", "--rm", "-it", "-p", "5000:5000"}
+
+		// Only pass KLAVIS_API_KEY if set
+		if apiKey := os.Getenv("KLAVIS_API_KEY"); apiKey != "" {
+			dockerArgs = append(dockerArgs, "-e", fmt.Sprintf("KLAVIS_API_KEY=%s", apiKey))
+		}
+
+		// Append the image name
+		dockerArgs = append(dockerArgs, image)
+
+		// Execute Docker
+		run := exec.Command("docker", dockerArgs...)
 		run.Stdout = os.Stdout
 		run.Stderr = os.Stderr
 		run.Stdin = os.Stdin
