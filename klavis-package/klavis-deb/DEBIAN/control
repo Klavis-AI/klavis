@@ -1,0 +1,9 @@
+Package: klavis
+Version: 0.1-1
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Klavis AI
+Depends: docker-ce | docker.io
+Description: Klavis CLI for running AI MCP tools
+ A simple command-line tool to install and run MCP tools inside Docker.
