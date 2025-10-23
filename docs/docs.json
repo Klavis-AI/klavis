@@ -41,141 +41,141 @@
           {
             "group": "Get Started",
             "pages": [
-              "documentation/introduction",
-              "documentation/quickstart",
-              "documentation/installation"
+              "introduction",
+              "quickstart",
+              "installation"
             ]
           },
           {
             "group": "Core Concepts",
             "pages": [
-              "documentation/concepts/mcp",
-              "documentation/concepts/strata"
+              "concepts/mcp",
+              "concepts/strata"
             ]
           },
           {
             "group": "Auth with Klavis",
             "pages": [
-              "documentation/auth/api-key",
-              "documentation/auth/oauth",
-              "documentation/auth/white-label"
+              "auth/api-key",
+              "auth/oauth",
+              "auth/white-label"
             ]
           },
           {
             "group": "Enterprise Security",
             "pages": [
-              "documentation/enterprise-security/klavis-security"
+              "enterprise-security/klavis-security"
             ]
           },
           {
             "group": "SDK",
             "pages": [
-              "documentation/sdk/python",
-              "documentation/sdk/typescript"
+              "sdk/python",
+              "sdk/typescript"
             ]
           },
           {
             "group": "AI Platform Integrations",
             "pages": [
-              "documentation/ai-platform-integration/overview",
-              "documentation/ai-platform-integration/claude",
-              "documentation/ai-platform-integration/crewai",
-              "documentation/ai-platform-integration/fireworks-ai",
-              "documentation/ai-platform-integration/gemini",
-              "documentation/ai-platform-integration/google-adk",
-              "documentation/ai-platform-integration/langchain",
-              "documentation/ai-platform-integration/llamaindex",
-              "documentation/ai-platform-integration/mastra",
-              "documentation/ai-platform-integration/openai",
-              "documentation/ai-platform-integration/together-ai"
+              "ai-platform-integration/overview",
+              "ai-platform-integration/claude",
+              "ai-platform-integration/crewai",
+              "ai-platform-integration/fireworks-ai",
+              "ai-platform-integration/gemini",
+              "ai-platform-integration/google-adk",
+              "ai-platform-integration/langchain",
+              "ai-platform-integration/llamaindex",
+              "ai-platform-integration/mastra",
+              "ai-platform-integration/openai",
+              "ai-platform-integration/together-ai"
             ]
           },
           {
             "group": "MCP Integrations",
             "pages": [
-              "documentation/mcp-server/overview",
-              "documentation/mcp-server/affinity",
-              "documentation/mcp-server/airtable",
-              "documentation/mcp-server/asana",
-              "documentation/mcp-server/attio",
-              "documentation/mcp-server/box",
-              "documentation/mcp-server/brave_search",
-              "documentation/mcp-server/cal_com",
-              "documentation/mcp-server/calendly",
-              "documentation/mcp-server/clickup",
-              "documentation/mcp-server/close",
-              "documentation/mcp-server/cloudflare",
-              "documentation/mcp-server/coinbase",
-              "documentation/mcp-server/confluence",
-              "documentation/mcp-server/dialpad",
-              "documentation/mcp-server/discord",
-              "documentation/mcp-server/doc2markdown",
-              "documentation/mcp-server/docusign",
-              "documentation/mcp-server/dropbox",
-              "documentation/mcp-server/elevenlabs",
-              "documentation/mcp-server/exa",
-              "documentation/mcp-server/fathom",
-              "documentation/mcp-server/figma",
-              "documentation/mcp-server/firecrawl-deep-research",
-              "documentation/mcp-server/firecrawl-web-search",
-              "documentation/mcp-server/fireflies",
-              "documentation/mcp-server/freshdesk",
-              "documentation/mcp-server/github",
-              "documentation/mcp-server/gitlab",
-              "documentation/mcp-server/gmail",
-              "documentation/mcp-server/gong",
-              "documentation/mcp-server/google_calendar",
-              "documentation/mcp-server/google_docs",
-              "documentation/mcp-server/google_drive",
-              "documentation/mcp-server/google_jobs",
-              "documentation/mcp-server/google_sheets",
-              "documentation/mcp-server/hacker_news",
-              "documentation/mcp-server/heygen",
-              "documentation/mcp-server/hubspot",
-              "documentation/mcp-server/jira",
-              "documentation/mcp-server/klavis-reportgen",
-              "documentation/mcp-server/klaviyo",
-              "documentation/mcp-server/linear",
-              "documentation/mcp-server/linkedin",
-              "documentation/mcp-server/markdown2doc",
-              "documentation/mcp-server/mem0",
-              "documentation/mcp-server/metabase",
-              "documentation/mcp-server/microsoft_teams",
-              "documentation/mcp-server/mixpanel",
-              "documentation/mcp-server/monday",
-              "documentation/mcp-server/moneybird",
-              "documentation/mcp-server/motion",
-              "documentation/mcp-server/notion",
-              "documentation/mcp-server/onedrive",
-              "documentation/mcp-server/openrouter",
-              "documentation/mcp-server/outlook",
-              "documentation/mcp-server/pagerduty",
-              "documentation/mcp-server/perplexity",
-              "documentation/mcp-server/pipedrive",
-              "documentation/mcp-server/plai",
-              "documentation/mcp-server/postgres",
-              "documentation/mcp-server/posthog",
-              "documentation/mcp-server/quickbooks",
-              "documentation/mcp-server/resend",
-              "documentation/mcp-server/salesforce",
-              "documentation/mcp-server/sendgrid",
-              "documentation/mcp-server/servicenow",
-              "documentation/mcp-server/shopify",
-              "documentation/mcp-server/slack",
-              "documentation/mcp-server/stripe",
-              "documentation/mcp-server/supabase",
-              "documentation/mcp-server/tavily",
-              "documentation/mcp-server/vercel",
-              "documentation/mcp-server/whatsapp",
-              "documentation/mcp-server/wordpress",
-              "documentation/mcp-server/youtube",
-              "documentation/mcp-server/zendesk"
+              "mcp-server/overview",
+              "mcp-server/affinity",
+              "mcp-server/airtable",
+              "mcp-server/asana",
+              "mcp-server/attio",
+              "mcp-server/box",
+              "mcp-server/brave_search",
+              "mcp-server/cal_com",
+              "mcp-server/calendly",
+              "mcp-server/clickup",
+              "mcp-server/close",
+              "mcp-server/cloudflare",
+              "mcp-server/coinbase",
+              "mcp-server/confluence",
+              "mcp-server/dialpad",
+              "mcp-server/discord",
+              "mcp-server/doc2markdown",
+              "mcp-server/docusign",
+              "mcp-server/dropbox",
+              "mcp-server/elevenlabs",
+              "mcp-server/exa",
+              "mcp-server/fathom",
+              "mcp-server/figma",
+              "mcp-server/firecrawl-deep-research",
+              "mcp-server/firecrawl-web-search",
+              "mcp-server/fireflies",
+              "mcp-server/freshdesk",
+              "mcp-server/github",
+              "mcp-server/gitlab",
+              "mcp-server/gmail",
+              "mcp-server/gong",
+              "mcp-server/google_calendar",
+              "mcp-server/google_docs",
+              "mcp-server/google_drive",
+              "mcp-server/google_jobs",
+              "mcp-server/google_sheets",
+              "mcp-server/hacker_news",
+              "mcp-server/heygen",
+              "mcp-server/hubspot",
+              "mcp-server/jira",
+              "mcp-server/klavis-reportgen",
+              "mcp-server/klaviyo",
+              "mcp-server/linear",
+              "mcp-server/linkedin",
+              "mcp-server/markdown2doc",
+              "mcp-server/mem0",
+              "mcp-server/metabase",
+              "mcp-server/microsoft_teams",
+              "mcp-server/mixpanel",
+              "mcp-server/monday",
+              "mcp-server/moneybird",
+              "mcp-server/motion",
+              "mcp-server/notion",
+              "mcp-server/onedrive",
+              "mcp-server/openrouter",
+              "mcp-server/outlook",
+              "mcp-server/pagerduty",
+              "mcp-server/perplexity",
+              "mcp-server/pipedrive",
+              "mcp-server/plai",
+              "mcp-server/postgres",
+              "mcp-server/posthog",
+              "mcp-server/quickbooks",
+              "mcp-server/resend",
+              "mcp-server/salesforce",
+              "mcp-server/sendgrid",
+              "mcp-server/servicenow",
+              "mcp-server/shopify",
+              "mcp-server/slack",
+              "mcp-server/stripe",
+              "mcp-server/supabase",
+              "mcp-server/tavily",
+              "mcp-server/vercel",
+              "mcp-server/whatsapp",
+              "mcp-server/wordpress",
+              "mcp-server/youtube",
+              "mcp-server/zendesk"
             ]
           },
           {
             "group": "Legacy",
             "pages": [
-              "documentation/legacy/instance"
+              "legacy/instance"
             ]
           }
         ]
@@ -186,7 +186,10 @@
         "groups": [
           {
             "group": "API References",
-            "pages": ["api-reference/introduction", "api-reference/api_key"]
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/api_key"
+            ]
           },
           {
             "group": "Strata",
@@ -324,19 +327,60 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["knowledge-base/introduction"]
+            "pages": [
+              "knowledge-base/introduction"
+            ]
           },
           {
             "group": "Onboarding",
-            "pages": ["knowledge-base/onboarding/create-your-first-mcp-server", "knowledge-base/onboarding/use-your-first-mcp-server", "knowledge-base/develop-with-ai"]
+            "pages": [
+              "knowledge-base/onboarding/create-your-first-mcp-server",
+              "knowledge-base/onboarding/use-your-first-mcp-server",
+              "knowledge-base/develop-with-ai"
+            ]
           },
           {
             "group": "Use MCP Server",
-            "pages": ["knowledge-base/use-mcp-server/overview", "knowledge-base/use-mcp-server/chatgpt","knowledge-base/use-mcp-server/claude_code", "knowledge-base/use-mcp-server/claude_web_desktop", "knowledge-base/use-mcp-server/cline", "knowledge-base/use-mcp-server/continue",  "knowledge-base/use-mcp-server/cursor","knowledge-base/use-mcp-server/gemini_cli","knowledge-base/use-mcp-server/kiro","knowledge-base/use-mcp-server/vs_code", "knowledge-base/use-mcp-server/windsurf"]
+            "pages": [
+              "knowledge-base/use-mcp-server/overview",
+              "knowledge-base/use-mcp-server/chatgpt",
+              "knowledge-base/use-mcp-server/claude_code",
+              "knowledge-base/use-mcp-server/claude_web_desktop",
+              "knowledge-base/use-mcp-server/cline",
+              "knowledge-base/use-mcp-server/continue",
+              "knowledge-base/use-mcp-server/cursor",
+              "knowledge-base/use-mcp-server/gemini_cli",
+              "knowledge-base/use-mcp-server/kiro",
+              "knowledge-base/use-mcp-server/vs_code",
+              "knowledge-base/use-mcp-server/windsurf"
+            ]
           },
           {
             "group": "OAuth Apps",
-            "pages": ["knowledge-base/oauth_app/oauth-scopes", "knowledge-base/oauth_app/airtable","knowledge-base/oauth_app/asana","knowledge-base/oauth_app/calendly","knowledge-base/oauth_app/canva","knowledge-base/oauth_app/discord","knowledge-base/oauth_app/dropbox","knowledge-base/oauth_app/figma","knowledge-base/oauth_app/gmail","knowledge-base/oauth_app/google_calendar","knowledge-base/oauth_app/google_docs","knowledge-base/oauth_app/google_drive","knowledge-base/oauth_app/google_sheets","knowledge-base/oauth_app/hubspot","knowledge-base/oauth_app/linkedin","knowledge-base/oauth_app/monday", "knowledge-base/oauth_app/moneybird","knowledge-base/oauth_app/onedrive","knowledge-base/oauth_app/quickbooks","knowledge-base/oauth_app/salesforce","knowledge-base/oauth_app/slack","knowledge-base/oauth_app/xero"]
+            "pages": [
+              "knowledge-base/oauth_app/oauth-scopes",
+              "knowledge-base/oauth_app/airtable",
+              "knowledge-base/oauth_app/asana",
+              "knowledge-base/oauth_app/calendly",
+              "knowledge-base/oauth_app/canva",
+              "knowledge-base/oauth_app/discord",
+              "knowledge-base/oauth_app/dropbox",
+              "knowledge-base/oauth_app/figma",
+              "knowledge-base/oauth_app/gmail",
+              "knowledge-base/oauth_app/google_calendar",
+              "knowledge-base/oauth_app/google_docs",
+              "knowledge-base/oauth_app/google_drive",
+              "knowledge-base/oauth_app/google_sheets",
+              "knowledge-base/oauth_app/hubspot",
+              "knowledge-base/oauth_app/linkedin",
+              "knowledge-base/oauth_app/monday",
+              "knowledge-base/oauth_app/moneybird",
+              "knowledge-base/oauth_app/onedrive",
+              "knowledge-base/oauth_app/quickbooks",
+              "knowledge-base/oauth_app/salesforce",
+              "knowledge-base/oauth_app/slack",
+              "knowledge-base/oauth_app/xero"
+            ]
           }
         ]
       }
@@ -363,7 +407,13 @@
   },
   "seo": {
     "metatags": {
-        "canonical": "https://www.klavis.ai/docs"
+      "canonical": "https://www.klavis.ai/docs"
     }
-}
+  },
+  "redirects": [
+    {
+      "source": "/:slug*",
+      "destination": "/:slug*"
+    }
+  ]
 }

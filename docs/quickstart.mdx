@@ -1,97 +1,430 @@
 ---
-title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+title: Quickstart
+description: Let your agent connect any tools reliably in minutes via MCP
+icon: rocket
+mode: "wide"
 ---
 
-## Setup your development
+<Info>
 
-Learn how to update your docs locally and deploy them to the public.
+**Prerequisites** Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get the API Key.
 
-### Edit and preview
+</Info>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 
-    1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `docs.json` is): ``` mintlify dev ```
-    <Note>
-      If you’re currently using the legacy ```mint.json``` configuration file, please update the Mintlify CLI:
+## Strata
+One MCP server that lets AI agents handle any tools progressively.
+
+<Tabs>
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your <a href="https://www.klavis.ai/home/mcp-servers">Dashboard</a>.
+        
+        <Tip>
+        Klavis enables all integrations for you by default. Click the ellipsis button if you want to disable a specific integration.
+        </Tip>
+        
+        <img
+          className="block dark:hidden"
+          src="/images/get-started/quickstart/strata_ui.png"
+          alt="Strata UI Dashboard"
+        />
+        <img
+          className="hidden dark:block"
+          src="/images/get-started/quickstart/strata_ui.png"
+          alt="Strata UI Dashboard"
+        />
+      </Step>
+      <Step title="(Optional) Authenticate">
+        Complete authentication by clicking the "Authorize" button. You can also skip this step since we have an authentication handler tool that will prompt to authenticate when needed.
+      </Step>
+      <Step title="Use in your app">
+        Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Create Strata MCP Server">
+        <CodeGroup>
+          ```bash Curl
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "userId": "user123",
+              "servers": ["Gmail", "YouTube"]
+            }'
+          ```
+
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+
+          klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+
+          response = klavis_client.mcp_server.create_strata_server(
+              user_id="user123",
+              servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+          )
+          ```
+
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+
+          const klavis = new Klavis.Client({ apiKey: 'YOUR_KLAVIS_API_KEY' });
+          const strata = await klavis.strata.create({
+            userId: 'user123',
+            servers: ['GMAIL', 'YOUTUBE'],
+          });
+          ```
+        </CodeGroup>
+        <Info>
+        **Response Information**: The API returns:
+        - `strataServerUrl`: The URL you'll use to connect your MCP client to the Strata MCP Server
+        - `oauthUrls`: Authorization links for services that require OAuth authentication
+        - `apiKeyUrls`: Links to configure API keys for services that use API key authentication
+        </Info>
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      <Step title="Authenticate required apps">
+        <CodeGroup>
+          ```bash Curl
+          Copy and paste the OAuth URL into your web browser
+          ```
+          ```python Python
+          import webbrowser
+
+          # Handle OAuth authorization if needed
+          if response.oauth_urls:
+              for server_name, oauth_url in response.oauth_urls.items():
+                  webbrowser.open(oauth_url)
+                  input(f"Press Enter after completing {server_name} OAuth authorization...")
+          ```
+
+          ```typescript TypeScript
+          // Handle OAuth authorization if needed
+          if (response.oauthUrls) {
+              for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+                  if (typeof window !== 'undefined') {
+                      window.open(oauthUrl);
+                  }
+                  console.log(`Please complete ${serverName} OAuth authorization at: ${oauthUrl}`);
+                  // In a real application, you'd wait for OAuth completion via callback
+                  await new Promise(resolve => {
+                      console.log(`Press any key after completing ${serverName} OAuth authorization...`);
+                      // This would be replaced with proper OAuth flow handling
+                      resolve(null);
+                  });
+              }
+          }
+          ```
+        </CodeGroup>
+        
+        <Info>
+        **Authentication Methods**:
+        - **API Key**: See [API Key authentication guide](/documentation/auth/api-key) for details.
+        - **OAuth**: See [OAuth authentication guide](/documentation/auth/oauth) for details.
+        </Info>
+        
+        <Check>
+        🎉 **Your MCP Server URL is ready to use!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      <Step title="(Optional) Connect to your AI application">
+        <Tabs>
+          <Tab title="LangChain">
+            <CodeGroup>
+              ```python Python
+              import os
+              import asyncio
+              import webbrowser
+
+              from klavis import Klavis
+              from klavis.types import McpServerName
+              from langchain_openai import ChatOpenAI
+              from langchain_mcp_adapters.client import MultiServerMCPClient
+              from langgraph.prebuilt import create_react_agent
+
+              from dotenv import load_dotenv
+              load_dotenv()
+
+              async def main():
+                  klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+                  # Step 1: Create a Strata MCP server with Gmail and YouTube integrations
+                  response = klavis_client.mcp_server.create_strata_server(
+                      user_id="demo_user",
+                      servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+                  )
+
+                  # Step 2: Handle OAuth authorization if needed
+                  if response.oauth_urls:
+                      for server_name, oauth_url in response.oauth_urls.items():
+                          webbrowser.open(oauth_url)
+                          input(f"Press Enter after completing {server_name} OAuth authorization...")
+
+                  # Step 3: Create LangChain Agent with MCP Tools
+                  mcp_client = MultiServerMCPClient({
+                      "strata": {
+                          "transport": "streamable_http",
+                          "url": response.strata_server_url,
+                      }
+                  })
+
+                  # Get all available tools from Strata
+                  tools = await mcp_client.get_tools()
+                  # Setup LLM
+                  llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+                  
+                  # Step 4: Create LangChain agent with MCP tools
+                  agent = create_react_agent(
+                      model=llm,
+                      tools=tools,
+                      prompt=(
+                          "You are a helpful assistant that can use MCP tools. "
+                      ),
+                  )
+
+                  my_email = "golden-kpop@example.com" # TODO: Replace with your email
+                  # Step 5: Invoke the agent
+                  result = await agent.ainvoke({
+                      "messages": [{"role": "user", "content": f"summarize this video - https://youtu.be/yebNIHKAC4A?si=1Rz_ZsiVRz0YfOR7 and send the summary to my email {my_email}"}],
+                  })
+                  
+                  # Print only the final AI response content
+                  print(result["messages"][-1].content)
+
+              if __name__ == "__main__":
+                  asyncio.run(main())
+              ```
+            </CodeGroup>
+          </Tab>
+          <Tab title="LlamaIndex">
+           <CodeGroup>
+              ```python Python
+              import os
+              import asyncio
+              import webbrowser
+              
+              from klavis import Klavis
+              from klavis.types import McpServerName
+              from llama_index.llms.openai import OpenAI
+              from llama_index.core.agent.workflow import FunctionAgent
+              from llama_index.tools.mcp import BasicMCPClient
+              from llama_index.tools.mcp import (
+                  aget_tools_from_mcp_url,
+              )
+              
+              from dotenv import load_dotenv
+              load_dotenv()
+              
+              async def main():
+                  klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+              
+                  # Step 1: Create a Strata MCP server with Gmail and YouTube integrations
+                  response = klavis_client.mcp_server.create_strata_server(
+                      user_id="1234",
+                      servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+                  )
+              
+                  # Step 2: Handle OAuth authorization if needed
+                  if response.oauth_urls:
+                      for server_name, oauth_url in response.oauth_urls.items():
+                          webbrowser.open(oauth_url)
+                          input(f"Press Enter after completing {server_name} OAuth authorization...")
+              
+                  # Get all available tools from Strata
+                  tools = await aget_tools_from_mcp_url(
+                      response.strata_server_url, 
+                      client=BasicMCPClient(response.strata_server_url)
+                  )
+              
+                  # Setup LLM
+                  llm = OpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+              
+                  # Step 3: Create LlamaIndex agent with MCP tools
+                  agent = FunctionAgent(
+                      name="my_first_agent",
+                      description="Agent using MCP-based tools",
+                      tools=tools,
+                      llm=llm,
+                      system_prompt="You are an AI assistant that uses MCP tools.",
+                  )
+              
+                  my_email = "golden-kpop@example.com" # TODO: Replace with your email
+                  youtube_video_url = "https://youtu.be/yebNIHKAC4A?si=1Rz_ZsiVRz0YfOR7" # TODO: Replace with your favorite youtube video URL
+                  # Step 4: Invoke the agent
+                  response = await agent.run(
+                      f"summarize this video - {youtube_video_url} and mail this summary to my email {my_email}"
+                  )
+              
+                  print(response)
+              
+              if __name__ == "__main__":
+                  asyncio.run(main())
+              
+              ```
+            </CodeGroup>
+          </Tab>
+          <Tab title="CrewAI">
+            <Info>Coming soon</Info>
+          </Tab>
+          <Tab title="AutoGen">
+            <CodeGroup>
+                ```python Python
+                import os
+                import asyncio
+                import webbrowser
+
+                from dotenv import load_dotenv
+                from klavis import Klavis
+                from klavis.types import McpServerName
+                from autogen_agentchat.agents import AssistantAgent
+                from autogen_agentchat.ui import Console
+                from autogen_core import CancellationToken
+                from autogen_ext.models.openai import OpenAIChatCompletionClient
+                from autogen_ext.tools.mcp import StreamableHttpServerParams
+                from autogen_ext.tools.mcp import mcp_server_tools
 
 
-      ```npm i -g mintlify@latest```
-      And run the new upgrade command in your docs repository:
+                load_dotenv()
 
-      ```mintlify upgrade```
-      You should now be using the new ```docs.json``` configuration file. Feel free to delete the ```mint.json``` file from your repository.
-    </Note>
-  </Accordion>
-</AccordionGroup>
+                async def main() -> None:
+                    klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
 
-### Deploy your changes
+                    # Step 1: Create a Strata MCP server with Gmail and YouTube integrations
+                    response = klavis_client.mcp_server.create_strata_server(
+                        user_id="demo_user",
+                        servers=[McpServerName.GMAIL, McpServerName.YOUTUBE],
+                    )
 
-<AccordionGroup>
+                    # Handle OAuth authorization if required
+                    if response.oauth_urls:
+                        for server_name, oauth_url in response.oauth_urls.items():
+                            webbrowser.open(oauth_url)
+                            input(f"Press Enter after completing {server_name} OAuth authorization...")
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+                    server_params = StreamableHttpServerParams(
+                        url=response.strata_server_url,
+                        timeout=30.0,
+                        sse_read_timeout=300.0,
+                        terminate_on_close=True,
+                    )
 
-</AccordionGroup>
+                    adapters = await mcp_server_tools(server_params)
 
-## Update your docs
+                    model_client = OpenAIChatCompletionClient(model="gpt-4")
+                    agent = AssistantAgent(
+                        name="MultiAI",
+                        model_client=model_client,
+                        tools=adapters,
+                        system_message="You are a helpful AI assistant.",
+                    )
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+                    await Console(
+                        agent.run_stream(
+                            task="Get my latest mails.",
+                            cancellation_token=CancellationToken(),
+                        )
+                    )
+                if __name__ == "__main__":
+                    asyncio.run(main())
+                ```
+            </CodeGroup>
+          </Tab>
+        </Tabs>
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Open Source">
+    <Tip>
+    Visit https://github.com/Klavis-AI/klavis to view the source code and find more information
+    </Tip>
+    <Steps>
+      <Step title="Install Strata MCP">
+        <CodeGroup>
+          ```bash pipx
+          pipx install strata-mcp
+          ```
+          ```bash pip
+          pip install strata-mcp
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Add your MCP servers">
+        Configure your MCP servers using the CLI tool.
+        <CodeGroup>
+          ```bash Add Server
+          strata add
+          ```
+          ```bash List Servers
+          strata list
+          ```
+          ```bash Enable Server
+          strata enable <server-name>
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Run Strata MCP Server">
+        Start the Strata server to manage all your tools.
+        <CodeGroup>
+          ```bash Stdio Mode (Default)
+          strata
+          ```
+          ```bash HTTP/SSE Mode
+          strata run --port 8080
+          ```
+        </CodeGroup>
+      </Step>
+      <Step title="Connect to your AI application">
+        Use the Strata tool to add your AI client.
+        <CodeGroup>
+          ```bash Claude Code
+          strata tool add claude
+          ```
+          ```bash Cursor
+          strata tool add cursor
+          ```
+          ```bash VSCode
+          strata tool add vscode
+          ```
+        </CodeGroup>
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
 
-<CardGroup>
+<Info>
+  If you're interested in 1:1 mapping between API and tool using our MCP Server Instance, [check here](/documentation/legacy/instance).
+</Info>
 
-<Card title="Add Content With MDX" icon="file" href="/essentials/markdown">
-  Add content to your docs with MDX syntax.
-</Card>
+## Next steps
 
-<Card
-  title="Add Code Blocks"
-  icon="square-code"
-  href="/essentials/code"
->
-  Add code directly to your docs with syntax highlighting.
-</Card>
-
-<Card
-  title="Add Images"
-  icon="image"
-  href="/essentials/images"
->
-  Add images to your docs to make them more engaging.
-</Card>
-
-<Card
-  title="Add Custom Components"
-  icon="puzzle-piece"
-  href="/essentials/reusable-snippets"
->
-  Add templates to your docs to make them more reusable.
-</Card>
-
+<CardGroup cols={2}>
+  <Card title="AI Platform Integrations" icon="handshake" href="/documentation/ai-platform-integration/overview">
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  <Card title="Integrations" icon="server" href="/documentation/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="Strata" icon="layer-group" href="/documentation/concepts/strata">
+    Progressive tool discovery across apps
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
 </CardGroup>
