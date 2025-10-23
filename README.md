@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
+[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://www.klavis.ai/docs)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
 
@@ -26,7 +26,7 @@
             <p><strong>off-the-shelf intelligent connectors for your AI agent</strong></p>
           </div>
           <div>
-            <a href="https://docs.klavis.ai/documentation/concepts/strata">
+            <a href="https://www.klavis.ai/docs/concepts/strata">
               <img src="https://img.shields.io/badge/Explore-Strata-blue?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiByeD0iNCIgcnk9IjQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxyZWN0IHg9IjYiIHk9IjYiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTQiIHk9IjYiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iNiIgeT0iMTQiIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHJ4PSIxIiByeT0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iNCIgaGVpZ2h0PSI0IiByeD0iMSIgcnk9IjEiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==" height="40">
             </a>
           </div>
@@ -39,7 +39,7 @@
             <p><strong>100+ prebuilt integrations out-of-the-box, with OAuth support</strong></p>
           </div>
           <div>
-            <a href="https://docs.klavis.ai/documentation/mcp-server/overview">
+            <a href="https://www.klavis.ai/docs/mcp-server/overview">
               <img src="https://img.shields.io/badge/Explore-MCP%20Servers-purple?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwLjUgN0gzLjVDMi42NzE1NyA3IDIgNy42NzE1NyAyIDguNVYxNS41QzIgMTYuMzI4NCAyLjY3MTU3IDE3IDMuNSAxN0gyMC41QzIxLjMyODQgMTcgMjIgMTYuMzI4NCAyMiAxNS41VjguNUMyMiA3LjY3MTU3IDIxLjMyODQgNyAyMC41IDdaIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNNiAxMkgxOCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPGNpcmNsZSBjeD0iNSIgY3k9IjEyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIxOSIgY3k9IjEyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=" height="40">
             </a>
           </div>
@@ -53,7 +53,7 @@
 
 ### Option 1: Cloud-hosted - [klavis.ai](https://www.klavis.ai)
 
-[Quickstart guide →](https://docs.klavis.ai/documentation/quickstart)
+[Quickstart guide →](https://www.klavis.ai/docs/quickstart)
 
 ### Option 2: Self-host
 
@@ -134,7 +134,7 @@ curl -X POST "https://api.klavis.ai/v1/mcp-server/instance" \
 
 ## Resources
 
-- 📖 [Documentation](https://docs.klavis.ai)
+- 📖 [Documentation](https://www.klavis.ai/docs)
 - 💬 [Discord Community](https://discord.gg/p7TuTEcssn)
 - 🐛 [Report Issues](https://github.com/klavis-ai/klavis/issues)
 - 🌐 [Klavis AI Website](https://www.klavis.ai)
