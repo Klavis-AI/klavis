@@ -412,7 +412,7 @@
   },
   "redirects": [
     {
-      "source": "documentation/:slug*",
+      "source": "/documentation/:slug*",
       "destination": "/:slug*"
     }
   ]
