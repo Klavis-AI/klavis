@@ -9,7 +9,7 @@
 
 <div align="center">
 
-[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://docs.klavis.ai)
+[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://www.klavis.ai/docs)
 [![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -174,7 +174,7 @@ pip install klavis  # or npm install klavis
 | ... | ... | ...| ... |
 
 And more! 
-[**🔍 View All 50+ Servers →**](https://docs.klavis.ai/documentation/introduction#mcp-server-quickstart) | [**🐳 Browse Docker Images →**](https://github.com/orgs/Klavis-AI/packages?repo_name=klavis)
+[**🔍 View All 50+ Servers →**](https://www.klavis.ai/docs/introduction#mcp-server-quickstart) | [**🐳 Browse Docker Images →**](https://github.com/orgs/Klavis-AI/packages?repo_name=klavis)
 
 ## 💡 Usage Examples
 
@@ -256,7 +256,7 @@ gmail_server = klavis.mcp_server.create_server_instance(
 print(f"Gmail MCP server ready: {gmail_server.server_url}")
 ```
 
-**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)** | **📖 [Complete Documentation →](https://docs.klavis.ai)**
+**🔗 [Get Free API Key →](https://www.klavis.ai/home/api-keys)** | **📖 [Complete Documentation →](https://www.klavis.ai/docs)**
 
 ## 🔐 OAuth Authentication (For OAuth-Enabled Servers)
 
@@ -286,7 +286,7 @@ Our OAuth wrapper simplifies this by handling all the complex OAuth implementati
 
 | Resource | Link | Description |
 |----------|------|-------------|
-| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) | Complete guides and API reference |
+| **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) | Complete guides and API reference |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) | Get help and connect with users |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) | Report bugs and request features |
 | **📦 Examples** | [examples/](examples/) | Working examples with popular AI frameworks |
@@ -312,7 +312,7 @@ Apache 2.0 license - see [LICENSE](LICENSE) for details.
   <p><strong>🚀 Supercharge AI Applications </strong></p>
   <p>
     <a href="https://www.klavis.ai">Get Free API Key</a> •
-    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://www.klavis.ai/docs">Documentation</a> •
     <a href="https://discord.gg/p7TuTEcssn">Discord</a> •
     <a href="examples/">Examples</a>
   </p>

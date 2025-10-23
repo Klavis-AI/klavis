@@ -264,7 +264,7 @@ KLAVIS_API_KEY=your_klavis_api_key
 
 ## Support & Resources
 
-- **Documentation**: [docs.klavis.ai](https://docs.klavis.ai)
+- **Documentation**: [www.klavis.ai/docs](https://www.klavis.ai/docs)
 - **OpenAPI** [klavis](https://api.klavis.ai/openapi.json)
 - **Website**: [klavis.ai](https://www.klavis.ai)
 - **PyPI**: [klavis](https://pypi.org/project/klavis/)

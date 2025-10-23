@@ -1,0 +1,289 @@
+---
+title: 'Supabase'
+description: 'Connect AI agents to Supabase for database management, project creation, and serverless backend automation'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Supabase to manage database projects, execute SQL queries, handle migrations, and automate backend development workflows through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Supabase">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.SUPABASE],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Strata MCP server with Supabase
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Supabase],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Supabase"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate">
+        <Tabs>
+          <Tab title="OAuth (Recommended)">
+            <CodeGroup>
+              ```python Python
+              import webbrowser
+              
+              # Open OAuth authorization page
+              webbrowser.open(response.oauth_urls[McpServerName.SUPABASE])
+              ```
+              
+              ```typescript TypeScript
+              import open from 'open';
+              
+              // Open OAuth authorization page
+              await open(response.oauthUrls[Klavis.McpServerName.Supabase]);
+              ```
+              
+              ```bash cURL
+              # Copy and paste the OAuth URL into your browser
+              echo "Visit this URL to authorize: https://api.klavis.ai/oauth/supabase/authorize?instance_id=YOUR_INSTANCE_ID"
+              ```
+            </CodeGroup>
+          </Tab>
+          
+          <Tab title="API Key">
+            <CodeGroup>
+              ```python Python
+              from klavis import Klavis
+              
+              klavis_client = Klavis(api_key="YOUR_KLAVIS_API_KEY")
+              
+              # Set the Supabase access token
+              response = klavis_client.mcp_server.set_instance_auth(
+                  instance_id="YOUR_INSTANCE_ID",
+                  auth_data={
+                      "token": "YOUR_SUPABASE_ACCESS_TOKEN"
+                  }
+              )
+              ```
+              
+              ```typescript TypeScript
+              import { KlavisClient } from 'klavis';
+              
+              const klavis = new KlavisClient({ apiKey: 'YOUR_KLAVIS_API_KEY' });
+              
+              // Set the Supabase access token
+              const response = await klavis.mcpServer.setInstanceAuth({
+                  instanceId: "YOUR_INSTANCE_ID",
+                  authData: {
+                      token: "YOUR_SUPABASE_ACCESS_TOKEN"
+                  }
+              });
+              ```
+              
+              ```bash cURL
+              curl -X POST "https://api.klavis.ai/mcp-server/instance/set-auth" \
+                -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d '{
+                  "instanceId": "YOUR_INSTANCE_ID",
+                  "authData": {
+                    "token": "YOUR_SUPABASE_ACCESS_TOKEN"
+                  }
+                }'
+              ```
+            </CodeGroup>
+            
+            <Note>
+              Get your Supabase access token from [Supabase Dashboard Account Tokens](https://supabase.com/dashboard/account/tokens).
+            </Note>
+          </Tab>
+        </Tabs>
+        
+        <Check>
+          Your Supabase MCP Server is ready! Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Supabase">
+        Select Supabase from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your Supabase account.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/supabase
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/supabase-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/supabase-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "supabase": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+### Video Tutorial
+
+<iframe
+  width="725"
+  height="450"
+  src="https://www.youtube.com/embed/K7NnYbEhmyM"
+  title="YouTube video player"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen
+></iframe>
+
+## Available Tools
+
+<Accordion title="Tools Information">
+| Tool Name | Description |
+|-----------|-------------|
+| supabase_list_projects | Lists all Supabase projects for the user |
+| supabase_get_project | Gets details for a Supabase project |
+| supabase_get_cost | Gets the cost of creating a new project or branch |
+| supabase_confirm_cost | Ask the user to confirm their understanding of the cost |
+| supabase_create_project | Creates a new Supabase project |
+| supabase_pause_project | Pauses a Supabase project |
+| supabase_restore_project | Restores a Supabase project |
+| supabase_list_organizations | Lists all organizations that the user is a member of |
+| supabase_get_organization | Gets details for an organization including subscription plan |
+| supabase_list_tables | Lists all tables in a schema |
+| supabase_list_extensions | Lists all extensions in the database |
+| supabase_list_migrations | Lists all migrations in the database |
+| supabase_apply_migration | Applies a migration to the database |
+| supabase_execute_sql | Executes raw SQL in the Postgres database |
+| supabase_get_logs | Gets logs for a Supabase project by service type |
+| supabase_get_project_url | Gets the API URL for a project |
+| supabase_get_anon_key | Gets the anonymous API key for a project |
+| supabase_generate_typescript_types | Generates TypeScript types for a project |
+| supabase_create_branch | Creates a development branch on a Supabase project |
+| supabase_list_branches | Lists all development branches of a Supabase project |
+| supabase_delete_branch | Deletes a development branch |
+| supabase_merge_branch | Merges migrations and edge functions from a development branch to production |
+| supabase_reset_branch | Resets migrations of a development branch |
+| supabase_rebase_branch | Rebases a development branch on production |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
