@@ -509,6 +509,50 @@ async def delete_event(
         logger.exception(f"Error executing tool delete_event: {e}")
         raise e
 
+async def get_current_time() -> Dict[str, Any]:
+    """
+    Get the current date and time using the user's Google Calendar timezone setting.
+    
+    This tool provides accurate current time information to prevent hallucinations
+    from LLM pre-training data. Always use this tool before scheduling events or
+    working with date/time operations.
+    """
+    logger.info(f"Executing tool: get_current_time")
+    try:
+        access_token = get_auth_token()
+        service = get_calendar_service(access_token)
+        
+        # Get user's timezone setting from Google Calendar settings - https://developers.google.com/workspace/calendar/api/v3/reference/settings#resource  
+        try:
+            timezone_setting = service.settings().get(setting='timezone').execute()
+            timezone = timezone_setting.get('value', 'UTC')
+            logger.info(f"Retrieved user timezone: {timezone}")
+        except Exception as e:
+            logger.warning(f"Failed to retrieve user timezone, defaulting to UTC: {e}")
+            timezone = "UTC"
+        
+        # Parse timezone
+        try:
+            tz = ZoneInfo(timezone)
+        except Exception as e:
+            logger.warning(f"Invalid timezone {timezone}, defaulting to UTC: {e}")
+            tz = ZoneInfo("UTC")
+            timezone = "UTC"
+        
+        # Get current time in user's timezone
+        now = datetime.now(tz).replace(microsecond=0)
+        
+        return {
+            "datetime": now.strftime("%Y-%m-%dT%H:%M:%S"),
+            "timezone": timezone,
+            "date": now.strftime("%Y-%m-%d"),
+            "time": now.strftime("%H:%M:%S"),
+            "day_of_week": now.strftime("%A"),
+        }
+    except Exception as e:
+        logger.exception(f"Error executing tool get_current_time: {e}")
+        raise e
+
 async def find_free_slots(
     items: list[str] | None = None,
     time_min: str | None = None,
@@ -703,6 +747,17 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
+            types.Tool(
+                name="google_calendar_get_current_time",
+                description="Get the accurate current date and time in the user's timezone. CRITICAL: Always call this tool FIRST before any calendar operations (creating, updating, listing, or scheduling events) to prevent using outdated time information.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_CONTEXT", "readOnlyHint": True}
+                ),
+            ),
             types.Tool(
                 name="google_calendar_list_calendars",
                 description="List all calendars accessible by the user.",
@@ -988,7 +1043,25 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        if name == "google_calendar_list_calendars":
+        if name == "google_calendar_get_current_time":
+            try:
+                result = await get_current_time()
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "google_calendar_list_calendars":
             try:
                 max_results = arguments.get("max_results", 10)
                 show_deleted = arguments.get("show_deleted", False)
