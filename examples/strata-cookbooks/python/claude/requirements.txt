@@ -1,0 +1,3 @@
+klavis>=2.0.2
+python-dotenv>=1.1.0
+anthropic>=0.42.0
