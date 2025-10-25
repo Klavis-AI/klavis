@@ -5,10 +5,10 @@
 Klavis AI is an open-source MCP (Model Context Protocol) integration platform that that let AI agents use any tools reliably at any scale.
 
 **Key Features:**
-- 🚀 Instant Integration with Python/TypeScript SDKs or REST API
-- 🔐 Built-in OAuth flows and API key management
-- 🛠️ 100+ tools across CRM, GSuite, dev tools, sales, search, etc.
-- 🌐 Multi-platform LLM provider support (OpenAI, Anthropic, Gemini, etc.)
+- Instant Integration with Python/TypeScript SDKs or REST API
+- Built-in OAuth flows and API key management
+- 100+ tools across CRM, GSuite, dev tools, sales, search, etc.
+- Multi-platform LLM provider support (OpenAI, Anthropic, Gemini, etc.)
 - Strata: One MCP server for AI agents to use tools progressively at any scale
 
 ## Installation
