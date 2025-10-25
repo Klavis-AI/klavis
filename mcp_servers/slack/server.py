@@ -32,7 +32,8 @@ from user_tools import (
     user_token_context,
     list_channels as user_list_channels,
     get_channel_history as user_get_channel_history,
-    invite_users_to_channel
+    invite_users_to_channel,
+    get_thread_replies
 )
 from user_tools.user_messages import (
     user_post_message,
@@ -165,6 +166,48 @@ def main(
                 },
                 annotations=types.ToolAnnotations(
                     **{"category": "SLACK_CHANNEL", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="slack_get_thread_replies",
+                description="Get all replies in a message thread. This retrieves all messages in a thread, including the parent message. You can extract the channel_id and thread_ts from Slack URLs (e.g., https://workspace.slack.com/archives/C123456/p1234567890123456 becomes channel_id='C123456', thread_ts='1234567890.123456').",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "channel_id": {
+                            "type": "string",
+                            "description": "The ID of the channel containing the thread (e.g., 'C1234567890')",
+                        },
+                        "thread_ts": {
+                            "type": "string",
+                            "description": "The timestamp of the parent message that started the thread (e.g., '1234567890.123456'). This can be extracted from Slack message URLs by converting p1234567890123456 to 1234567890.123456",
+                        },
+                        "limit": {
+                            "type": "number",
+                            "description": "Maximum number of messages to return (default 10, max 1000)",
+                            "default": 10,
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Pagination cursor for next page of results",
+                        },
+                        "oldest": {
+                            "type": "string",
+                            "description": "Only messages after this Unix timestamp (inclusive)",
+                        },
+                        "latest": {
+                            "type": "string",
+                            "description": "Only messages before this Unix timestamp (exclusive)",
+                        },
+                        "inclusive": {
+                            "type": "boolean",
+                            "description": "Include messages with oldest or latest timestamps in results",
+                        },
+                    },
+                    "required": ["channel_id", "thread_ts"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "SLACK_THREAD", "readOnlyHint": True}
                 ),
             ),
             types.Tool(
@@ -489,6 +532,57 @@ def main(
             
             try:
                 result = await user_get_channel_history(channel_id, limit)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "slack_get_thread_replies":
+            channel_id = arguments.get("channel_id")
+            thread_ts = arguments.get("thread_ts")
+            
+            if not channel_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: channel_id parameter is required",
+                    )
+                ]
+            
+            if not thread_ts:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: thread_ts parameter is required",
+                    )
+                ]
+            
+            limit = arguments.get("limit")
+            cursor = arguments.get("cursor")
+            oldest = arguments.get("oldest")
+            latest = arguments.get("latest")
+            inclusive = arguments.get("inclusive")
+            
+            try:
+                result = await get_thread_replies(
+                    channel_id, 
+                    thread_ts, 
+                    limit, 
+                    cursor,
+                    oldest,
+                    latest,
+                    inclusive
+                )
                 return [
                     types.TextContent(
                         type="text",
