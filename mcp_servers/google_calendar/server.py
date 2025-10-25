@@ -528,16 +528,15 @@ async def get_current_time() -> Dict[str, Any]:
             timezone = timezone_setting.get('value', 'UTC')
             logger.info(f"Retrieved user timezone: {timezone}")
         except Exception as e:
-            logger.warning(f"Failed to retrieve user timezone, defaulting to UTC: {e}")
-            timezone = "UTC"
+            logger.error(f"Failed to retrieve user timezone: {e}")
+            raise RuntimeError(f"Failed to retrieve user timezone from Google Calendar: {e}")
         
         # Parse timezone
         try:
             tz = ZoneInfo(timezone)
         except Exception as e:
-            logger.warning(f"Invalid timezone {timezone}, defaulting to UTC: {e}")
-            tz = ZoneInfo("UTC")
-            timezone = "UTC"
+            logger.error(f"Invalid timezone {timezone}: {e}")
+            raise RuntimeError(f"Invalid timezone '{timezone}' received from Google Calendar: {e}")
         
         # Get current time in user's timezone
         now = datetime.now(tz).replace(microsecond=0)
@@ -749,7 +748,7 @@ def main(
         return [
             types.Tool(
                 name="google_calendar_get_current_time",
-                description="Get the accurate current date and time in the user's timezone. CRITICAL: Always call this tool FIRST before any calendar operations (creating, updating, listing, or scheduling events) to prevent using outdated time information.",
+                description="Get the accurate current date and time in the user's timezone. CRITICAL: Always call this tool FIRST before any calendar operations (creating, updating, listing, or scheduling events) to prevent using outdated time information. NOTE: If current time information is already provided in the system prompt or context, you do NOT need to call this tool",
                 inputSchema={
                     "type": "object",
                     "properties": {},
