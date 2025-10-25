@@ -1,0 +1,232 @@
+---
+title: "n8n"
+description: "Connect Strata with n8n in minutes and unlock powerful workflow automation"
+---
+<img
+  className="block dark:hidden"
+  src="/images/knowledge-base/n8n/n8n.png"
+  alt="n8n"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/knowledge-base/n8n/n8n.png"
+  alt="n8n"
+/>
+
+## Quick Setup Guide
+
+<Steps>
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
+    <img
+      src="/images/knowledge-base/n8n/step1.png"
+      alt="Klavis home page"
+    />    
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
+
+    <img
+      src="/images/knowledge-base/n8n/step2.png"
+      alt="Authorize MCP Servers"
+    />
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    <img
+      src="/images/knowledge-base/n8n/step3.png"
+      alt="Klavis Dashboard consisting MCP Servers"
+    />
+
+    From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+  
+    <img
+      src="/images/knowledge-base/n8n/step4.png"
+      alt="Copy Strata Server URL"
+    />
+
+    **Copy** the strata URL to clipboard - you'll need this in the next step.
+
+
+    <Accordion title="🔐 OAuth Services (Most Common)">
+      - Automatically redirected to OAuth authorization
+      - Sign in to your account (GitHub, Google, Slack, etc.)
+      - Grant necessary permissions
+      - Redirected back to Klavis automatically
+    </Accordion>
+    
+    <Accordion title="🔑 API Key Services">
+      - Prompted to enter an API key
+      - Follow service-specific instructions to generate key
+      - Paste key in the provided field
+      - Click **"Save"** to continue
+    </Accordion>
+  </Step>
+</Steps>
+
+## Build AI Workflow using Strata
+
+<Steps>
+  <Step title="Launch Your First n8n Workflow">
+    Begin your automation by creating a **New Workflow** in your n8n personal workspace.
+    <img
+      src="/images/knowledge-base/n8n/step5.png"
+      alt="n8n workflow creation"
+    />
+    
+  </Step>
+  <Step title="Set Up Your Trigger Node">
+
+    <img
+      src="/images/knowledge-base/n8n/step6.png"
+      alt="First Node in n8n"
+    />
+
+    Click the **Add First Step ('+' icon)** and select **Trigger Manually** to kickstart your workflow and you should see your first node being created.
+  </Step>
+  <Step title="Integrate Your AI Agent">
+
+    <img
+      src="/images/knowledge-base/n8n/step7.png"
+      alt="Adding AI Agent Node in n8n"
+    />
+
+    1. Click **"+ (What happens next?)"**
+    2. Navigate to **AI** → **AI Agents** from the menu
+    3. Configure Your AI Agent:
+      - **Source for Prompt**: choose "Connected Chat Trigger Node"
+      - **Prompt**: `{{ $json.chatInput }}` (default setting)
+    4. Click **Back to Canvas** to save the agent
+
+    You should see **"When Chat Message Received"** and **"AI Agent"** nodes appear on the workflow diagram.
+
+    <img
+      src="/images/knowledge-base/n8n/step8.png"
+      alt="Next Nodes appearing in n8n workflow"
+    />
+  </Step>
+
+  <Step title="Add Chat Model to your AI Agent">
+
+    <img
+      src="/images/knowledge-base/n8n/step9.png"
+      alt="Including Chat Model"
+    />
+
+    1. Click **"+ (Chat Model)"** -> **Anthropic Chat Model** (or your preferred model)
+    2. Connect Chat Model to **n8n** using API Key
+    3. Select **Model**: Claude Sonnet 4.5 (for example)
+    4. Click **Back to Canvas** to lock in your chat model configuration
+
+     Your **Chat Model** node now elegantly connects to your **AI Agent** node.
+
+    <img
+      src="/images/knowledge-base/n8n/step10.png"
+      alt="n8n workflow now includes Chat Model"
+    />
+  </Step>
+
+  <Step title="Connect Strata Server to your AI Agent">
+
+    <img
+      src="/images/knowledge-base/n8n/step11.png"
+      alt="MCP Client in n8n"
+    />
+
+    1. Click **"+ (Tool)"** -> **"MCP Client Tool"**
+    2. Configure Your MCP Client:
+      - Endpoint: Paste **Strata** Server URL (URL that you copied earlier)
+      - Server Transport: **HTTP Streamable**
+      - Authentication: **None**
+      - Tools to Include: **All** (highly recommended for maximum capabilities)
+    3. Click **Back to Canvas** to save your MCP Client
+
+    <img
+      src="/images/knowledge-base/n8n/step12.png"
+      alt="Strata connected to n8n workflow"
+    />
+
+  </Step>
+
+  <Step title="Start Using Strata Server in n8n workflow">
+    Ready to test your workflow? Launch the chat interface in n8n by pressing **C** on your keyboard.
+
+    <img
+      src="/images/knowledge-base/n8n/step13.png"
+      alt="Using Chat in n8n"
+    />
+
+    <CodeGroup>
+    ```text GitHub
+    "Create a new issue titled 'Add dark mode' with priority label"
+    ```
+    
+    ```text Slack
+    "Send a message to #general: 'Standup meeting in 5 minutes!'"
+    ```
+    
+    ```text Gmail
+    "Send email to john@company.com about project update"
+    ```
+    
+    ```text Notion
+    "Create a new page called 'Meeting Notes' with today's date"
+    ```
+    </CodeGroup>
+
+    Once your chat executes successfully, celebrate as **Green Checkmarks** appear across all nodes—including your Model and MCP Client!
+
+    <img
+      src="/images/knowledge-base/n8n/step14.png"
+      alt="Final n8n workflow after executing the chat"
+    />
+  </Step>
+
+  <Step title="Happy Building! 🎉">
+    You're all set! Your **Strata** MCP server is now integrated with n8n.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="🔧 Tools Not Appearing">
+    - Double-check your Server URL for typos
+    - Ensure stable internet connection
+    - Verify authentication in Klavis dashboard
+    - Check n8n logs for error messages
+    - Try completely restarting n8n
+  </Accordion>
+  
+  <Accordion title="🔐 Authentication Issues">
+    - Re-authenticate in the Klavis dashboard
+    - Check if your OAuth tokens have expired
+    - Verify API key permissions (for API key services)
+    - Ensure you've granted all necessary permissions
+  </Accordion>
+  
+  <Accordion title="⚡ Performance Issues">
+    - Limit the number of active MCP servers (or Use Strata)
+    - Check your internet connection speed
+    - Restart n8n periodically
+    - Contact support if issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Community" icon="discord">
+    Join our Discord for community support and discussions
+  </Card>
+  <Card title="Support" icon="headphones">
+    Contact our technical support team for assistance
+  </Card>
+</CardGroup>
+
+---
