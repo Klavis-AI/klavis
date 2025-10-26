@@ -153,7 +153,7 @@ const DeleteEmailSchema = z.object({
 // Schema for searching contacts
 const SearchContactsSchema = z.object({
     query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
-    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
+    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
     pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
     pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
     directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
@@ -248,7 +248,7 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_search_contacts",
-                description: "Search for contacts by name or email address in your personal contact list",
+                description: "Search for contacts by name or email address. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
                 inputSchema: zodToJsonSchema(SearchContactsSchema),
                 annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
             },
@@ -943,15 +943,36 @@ const getGmailMcpServer = () => {
                                 };
                             });
 
-                            // Aggregate results - use a Map to avoid duplicates based on email
-                            const contactMap = new Map();
-                            [...personalResults, ...otherResults, ...directoryResults].forEach(contact => {
-                                const primaryEmail = contact.emailAddresses?.[0]?.email || contact.resourceName;
-                                if (!contactMap.has(primaryEmail)) {
-                                    contactMap.set(primaryEmail, contact);
-                                }
-                            });
-                            results = Array.from(contactMap.values());
+                            // Return three independent result sets with pagination info
+                            const resultPayload = {
+                                message: `Found contacts matching "${validatedArgs.query}" from all sources`,
+                                query: validatedArgs.query,
+                                contactType: 'all',
+                                personal: {
+                                    resultCount: personalResults.length,
+                                    nextPageToken: (personalRes.data as any).nextPageToken || undefined,
+                                    contacts: personalResults,
+                                },
+                                other: {
+                                    resultCount: otherResults.length,
+                                    nextPageToken: (otherRes.data as any).nextPageToken || undefined,
+                                    contacts: otherResults,
+                                },
+                                directory: {
+                                    resultCount: directoryResults.length,
+                                    nextPageToken: (directoryRes.data as any).nextPageToken || undefined,
+                                    contacts: directoryResults,
+                                },
+                            };
+
+                            return {
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: JSON.stringify(resultPayload, null, 2),
+                                    },
+                                ],
+                            };
 
                         } else if (contactType === 'personal') {
                             typeLabel = 'personal contact(s)';

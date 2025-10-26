@@ -53,18 +53,18 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 
 ### Contact Search
 - **Search Contacts**: Search for contacts by name or email address using `gmail_search_contacts`
-  - Supports three contact types:
-    - `all` (default): Searches all contact sources simultaneously and aggregates results
+  - Supports four contact types:
+    - `all` (default): Searches all sources in parallel, returns three independent result sets (personal, other, directory) each with its own pagination token
     - `personal`: Searches your saved contacts
     - `other`: Searches other contact sources (Gmail suggestions, etc.)
     - `directory`: Searches domain directory and domain contacts (requires directory.readonly scope)
-  - Directory source options:
+  - Directory source options (only used with `directory` or `all` type):
     - `UNSPECIFIED`: Searches both DOMAIN_PROFILE and DOMAIN_CONTACT (default)
     - `DOMAIN_DIRECTORY`: Searches domain profiles only
     - `DOMAIN_CONTACTS`: Searches domain contacts only
   - Flexible query matching against names, email addresses, and phone numbers
   - Returns contact details including display name, email addresses, phone numbers, and organizations
-  - Automatic deduplication when searching all sources
+  - **Pagination**: When `contactType` is `all`, returns separate pagination tokens for each source type, allowing flexible independent pagination
   - Paginated results with configurable page size (max 30 for personal/other, max 500 for directory)
 
 ## 📚 Documentation & Support
