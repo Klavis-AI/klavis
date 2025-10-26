@@ -17,6 +17,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
     gmailClient: any;
+    peopleClient: any;
 }>();
 
 // Type definitions for Gmail API responses
@@ -61,6 +62,11 @@ function base64UrlToBase64(input: string): string {
 // Helper function to get Gmail client from context
 function getGmailClient() {
     return asyncLocalStorage.getStore()!.gmailClient;
+}
+
+// Helper function to get People client from context
+function getPeopleClient() {
+    return asyncLocalStorage.getStore()!.peopleClient;
 }
 
 function extractAccessToken(req: Request): string {
@@ -819,13 +825,7 @@ const getGmailMcpServer = () => {
 
                 case "gmail_search_contacts": {
                     const validatedArgs = SearchContactsSchema.parse(args);
-                    const auth = new google.auth.OAuth2();
-
-                    // Extract access token from context or env
-                    let accessToken = process.env.AUTH_DATA ? JSON.parse(process.env.AUTH_DATA).access_token : '';
-                    auth.setCredentials({ access_token: accessToken });
-
-                    const peopleClient = google.people({ version: 'v1', auth });
+                    const peopleClient = getPeopleClient();
                     const contactType = validatedArgs.contactType || 'personal';
 
                     try {
@@ -1135,10 +1135,11 @@ const app = express();
 app.post('/mcp', async (req: Request, res: Response) => {
     const accessToken = extractAccessToken(req);
 
-    // Initialize Gmail client with the access token
+    // Initialize Gmail and People clients with the access token
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
     const gmailClient = google.gmail({ version: 'v1', auth });
+    const peopleClient = google.people({ version: 'v1', auth });
 
     const server = getGmailMcpServer();
     try {
@@ -1146,7 +1147,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
             sessionIdGenerator: undefined,
         });
         await server.connect(transport);
-        asyncLocalStorage.run({ gmailClient }, async () => {
+        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport.handleRequest(req, res, req.body);
         });
         res.on('close', () => {
@@ -1229,12 +1230,13 @@ app.post("/messages", async (req: Request, res: Response) => {
     let transport: SSEServerTransport | undefined;
     transport = sessionId ? transports.get(sessionId) : undefined;
     if (transport) {
-        // Initialize Gmail client with the access token
+        // Initialize Gmail and People clients with the access token
         const auth = new google.auth.OAuth2();
         auth.setCredentials({ access_token: accessToken });
         const gmailClient = google.gmail({ version: 'v1', auth });
+        const peopleClient = google.people({ version: 'v1', auth });
 
-        asyncLocalStorage.run({ gmailClient }, async () => {
+        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport!.handlePostMessage(req, res);
         });
     } else {
