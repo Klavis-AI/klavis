@@ -150,6 +150,15 @@ const DeleteEmailSchema = z.object({
     messageId: z.string().describe("ID of the email message to delete"),
 });
 
+// Schema for searching contacts
+const SearchContactsSchema = z.object({
+    query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
+    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
+    pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
+    pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
+    directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
+});
+
 // Schema for getting attachments of an email
 const GetEmailAttachmentsSchema = z.object({
     messageId: z.string().describe("ID of the email message to retrieve attachments for"),
@@ -236,6 +245,12 @@ const getGmailMcpServer = () => {
                 description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
                 inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
                 annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
+            },
+            {
+                name: "gmail_search_contacts",
+                description: "Search for contacts by name or email address in your personal contact list",
+                inputSchema: zodToJsonSchema(SearchContactsSchema),
+                annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
             },
         ],
     }));
@@ -800,6 +815,274 @@ const getGmailMcpServer = () => {
                     return {
                         content: [summary, ...attachmentContents],
                     };
+                }
+
+                case "gmail_search_contacts": {
+                    const validatedArgs = SearchContactsSchema.parse(args);
+                    const auth = new google.auth.OAuth2();
+
+                    // Extract access token from context or env
+                    let accessToken = process.env.AUTH_DATA ? JSON.parse(process.env.AUTH_DATA).access_token : '';
+                    auth.setCredentials({ access_token: accessToken });
+
+                    const peopleClient = google.people({ version: 'v1', auth });
+                    const contactType = validatedArgs.contactType || 'personal';
+
+                    try {
+                        let response: any;
+                        let results: any[] = [];
+                        let typeLabel = '';
+
+                        if (contactType === 'all') {
+                            typeLabel = 'contact(s) from all sources';
+                            // Execute all three searches in parallel
+                            const [personalRes, otherRes, directoryRes] = await Promise.all([
+                                // Personal contacts
+                                peopleClient.people.searchContacts({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                    readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                }),
+                                // Other contacts
+                                peopleClient.otherContacts.search({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                    readMask: 'emailAddresses,metadata,names,phoneNumbers',
+                                }),
+                                // Directory contacts
+                                peopleClient.people.searchDirectoryPeople({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 500),
+                                    readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                    sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                                }),
+                            ]);
+
+                            // Process personal results
+                            const personalResults = (personalRes.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'personal',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                    allFields: person,
+                                };
+                            });
+
+                            // Process other results
+                            const otherResults = (otherRes.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'other',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: [],
+                                    allFields: person,
+                                };
+                            });
+
+                            // Process directory results
+                            const directoryResults = (directoryRes.data.people || []).map((person: any) => {
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'directory',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'work',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'work',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                    allFields: person,
+                                };
+                            });
+
+                            // Aggregate results - use a Map to avoid duplicates based on email
+                            const contactMap = new Map();
+                            [...personalResults, ...otherResults, ...directoryResults].forEach(contact => {
+                                const primaryEmail = contact.emailAddresses?.[0]?.email || contact.resourceName;
+                                if (!contactMap.has(primaryEmail)) {
+                                    contactMap.set(primaryEmail, contact);
+                                }
+                            });
+                            results = Array.from(contactMap.values());
+
+                        } else if (contactType === 'personal') {
+                            typeLabel = 'personal contact(s)';
+                            response = await peopleClient.people.searchContacts({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                            });
+
+                            results = (response.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                    allFields: person,
+                                };
+                            });
+                        } else if (contactType === 'other') {
+                            typeLabel = 'other contact(s)';
+                            response = await peopleClient.otherContacts.search({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                readMask: 'emailAddresses,metadata,names,phoneNumbers',
+                            });
+
+                            results = (response.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: [],
+                                    allFields: person,
+                                };
+                            });
+                        } else if (contactType === 'directory') {
+                            typeLabel = 'directory contact(s)';
+                            const sourceMap: { [key: string]: string[] } = {
+                                'UNSPECIFIED': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                                'DOMAIN_DIRECTORY': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
+                                'DOMAIN_CONTACTS': ['DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                            };
+                            const directorySources = sourceMap[validatedArgs.directorySources || 'UNSPECIFIED'];
+
+                            response = await peopleClient.people.searchDirectoryPeople({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 500),
+                                readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                sources: directorySources,
+                                pageToken: validatedArgs.pageToken,
+                            });
+
+                            results = (response.data.people || []).map((person: any) => {
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'work',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'work',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                    allFields: person,
+                                };
+                            });
+                        }
+
+                        const resultPayload = {
+                            message: `Found ${results.length} ${typeLabel} matching "${validatedArgs.query}"`,
+                            query: validatedArgs.query,
+                            contactType: contactType,
+                            resultCount: results.length,
+                            contacts: results,
+                        };
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: JSON.stringify(resultPayload, null, 2),
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        throw new Error(`Failed to search ${contactType} contacts: ${error.message}`);
+                    }
                 }
 
                 default:
