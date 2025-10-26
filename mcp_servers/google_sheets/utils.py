@@ -4,6 +4,7 @@ from typing import Any
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build
 
+from exceptions import RetryableToolError, ToolExecutionError
 from models import (
     CellData,
     CellExtendedValue,
@@ -494,18 +495,24 @@ def validate_write_to_cell_params(  # type: ignore[no-any-unimported]
         )
         .execute()
     )
-    sheet_names = [sheet["properties"]["title"] for sheet in sheet_properties["sheets"]]
-    sheet_row_count = sheet_properties["sheets"][0]["properties"]["gridProperties"]["rowCount"]
-    sheet_column_count = sheet_properties["sheets"][0]["properties"]["gridProperties"][
-        "columnCount"
-    ]
 
-    if sheet_name not in sheet_names:
+    target_sheet = None
+    for sheet in sheet_properties["sheets"]:
+        if sheet["properties"]["title"] == sheet_name:
+            target_sheet = sheet
+            break
+
+    sheet_names = [sheet["properties"]["title"] for sheet in sheet_properties["sheets"]]
+
+    if target_sheet is None:
         raise RetryableToolError(
             message=f"Sheet name {sheet_name} not found in spreadsheet with id {spreadsheet_id}",
             additional_prompt_content=f"Sheet names in the spreadsheet: {sheet_names}",
             retry_after_ms=100,
         )
+
+    sheet_row_count = target_sheet["properties"]["gridProperties"]["rowCount"]
+    sheet_column_count = target_sheet["properties"]["gridProperties"]["columnCount"]
 
     if row > sheet_row_count:
         raise ToolExecutionError(

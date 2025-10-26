@@ -21,6 +21,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from exceptions import RetryableToolError
 from models import (
     SheetDataInput,
     Spreadsheet,
@@ -71,14 +72,6 @@ def extract_access_token(request_or_scope) -> str:
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
         return ""
-
-# Error class for retryable errors
-class RetryableToolError(Exception):
-    def __init__(self, message: str, additional_prompt_content: str = "", retry_after_ms: int = 1000, developer_message: str = ""):
-        super().__init__(message)
-        self.additional_prompt_content = additional_prompt_content
-        self.retry_after_ms = retry_after_ms
-        self.developer_message = developer_message
 
 def get_sheets_service(access_token: str):
     """Create Google Sheets service with access token."""
