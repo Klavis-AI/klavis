@@ -44,14 +44,15 @@ description: "Connect Strata with n8n in minutes and unlock powerful workflow au
     />
 
     From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+
+    1. Navigate to **n8n**
+    2. MCP URL with custom auth headers enabled: `https://strata.klavis.ai/mcp/` (Copy it)
+    3. Click on **"Generate Token"** to get **Bearer Token** (Copy token & keep it secret!)
   
     <img
       src="/images/knowledge-base/n8n/step4.png"
       alt="Copy Strata Server URL"
     />
-
-    **Copy** the strata URL to clipboard - you'll need this in the next step.
-
 
     <Accordion title="🔐 OAuth Services (Most Common)">
       - Automatically redirected to OAuth authorization
@@ -140,24 +141,42 @@ description: "Connect Strata with n8n in minutes and unlock powerful workflow au
 
     1. Click **"+ (Tool)"** -> **"MCP Client Tool"**
     2. Configure Your MCP Client:
-      - Endpoint: Paste **Strata** Server URL (URL that you copied earlier)
+      - Endpoint: Paste `https://strata.klavis.ai/mcp/`
       - Server Transport: **HTTP Streamable**
-      - Authentication: **None**
+      - Authentication: **Bearer Auth**
+      - Credentials for Bearer Auth: Paste **Bearer Token** that you copied earlier
       - Tools to Include: **All** (highly recommended for maximum capabilities)
     3. Click **Back to Canvas** to save your MCP Client
 
+  </Step>
+
+  <Step title="Connect Bearer Auth Account to n8n">
+
     <img
       src="/images/knowledge-base/n8n/step12.png"
+      alt="Bearer Auth connected to n8n workflow"
+    />
+
+    To connect your bearer account to n8n, simply paste **"Bearer Token"** that you copied from Klavis Dashboard.
+     1. Navigate to **Connection** menu
+     2. Bearer Token: Paste your **"Bearer Auth Token"**
+     3. Allowed HTTP Request Domains: **All** (default settings)
+
+     Now, AI workflow diagram has been completed and should look similar to screenshot below.
+
+     <img
+      src="/images/knowledge-base/n8n/step13.png"
       alt="Strata connected to n8n workflow"
     />
 
   </Step>
 
+
   <Step title="Start Using Strata Server in n8n workflow">
-    Ready to test your workflow? Launch the chat interface in n8n by pressing **C** on your keyboard.
+    Ready to test your workflow? Launch the chat interface in n8n by pressing **'C'** on your keyboard.
 
     <img
-      src="/images/knowledge-base/n8n/step13.png"
+      src="/images/knowledge-base/n8n/step14.png"
       alt="Using Chat in n8n"
     />
 
@@ -182,7 +201,7 @@ description: "Connect Strata with n8n in minutes and unlock powerful workflow au
     Once your chat executes successfully, celebrate as **Green Checkmarks** appear across all nodes—including your Model and MCP Client!
 
     <img
-      src="/images/knowledge-base/n8n/step14.png"
+      src="/images/knowledge-base/n8n/step15.png"
       alt="Final n8n workflow after executing the chat"
     />
   </Step>
