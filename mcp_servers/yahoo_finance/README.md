@@ -42,19 +42,6 @@ docker run -p 5000:5000 \
 - `get_yahoo_finance_option_chain` — Option chain (calls/puts/both) for a chosen expiration.
 - `search_yahoo_finance_entities` — Free-text search for tickers, funds, and companies.
 
-### 🔧 Code Layout
-
-```
-mcp_servers/yahoo_finance/
-├── server.py          # MCP wiring + Starlette transports
-└── tools/             # yfinance-backed implementations
-		├── quotes.py      # quote snapshots
-		├── history.py     # historical OHLCV
-		├── dividends.py   # dividend history
-		├── splits.py      # stock split history
-		├── options.py     # option chain helpers
-		└── search.py      # entity search helpers
-```
 
 ## 📚 Documentation & Support
 
