@@ -166,6 +166,7 @@ async def create_event(
     attendees: list[str] | None = None,
     send_updates: str = "all",
     add_google_meet: bool = False,
+    recurrence: list[str] | None = None,
 ) -> Dict[str, Any]:
     """Create a new event/meeting/sync/meetup in the specified calendar."""
     logger.info(f"Executing tool: create_event with summary: {summary}")
@@ -192,6 +193,10 @@ async def create_event(
 
         if attendees:
             event["attendees"] = [{"email": email} for email in attendees]
+
+        # Add recurrence rule if provided
+        if recurrence:
+            event["recurrence"] = recurrence
 
         # Add Google Meet conference if requested
         if add_google_meet:
@@ -269,6 +274,8 @@ async def list_events(
             "id",
             "location",
             "organizer",
+            "recurrence",
+            "recurringEventId",
             "start",
             "summary",
             "visibility",
@@ -298,6 +305,7 @@ async def update_event(
     updated_visibility: str | None = None,
     attendees_to_add: list[str] | None = None,
     attendees_to_remove: list[str] | None = None,
+    updated_recurrence: list[str] | None = None,
     send_updates: str = "all",
 ) -> str:
     """Update an existing event in the specified calendar with the provided details."""
@@ -345,6 +353,11 @@ async def update_event(
         
         if updated_visibility:
             update_fields["visibility"] = updated_visibility
+        
+        if updated_recurrence is not None:
+            # If updated_recurrence is an empty list, remove recurrence (convert to single event)
+            # If it has values, update the recurrence rule
+            update_fields["recurrence"] = updated_recurrence
 
         event.update({k: v for k, v in update_fields.items() if v is not None})
 
@@ -844,6 +857,11 @@ def main(
                             "description": "Whether to add a Google Meet conference to the event.",
                             "default": False,
                         },
+                        "recurrence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. Examples: ['RRULE:FREQ=DAILY;COUNT=5'] for 5 days, ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for 10 occurrences on Mon/Wed/Fri, ['RRULE:FREQ=MONTHLY;BYDAY=2TH'] for 2nd Thursday each month. Common frequencies: DAILY, WEEKLY, MONTHLY, YEARLY. Use COUNT for number of occurrences or UNTIL for end date (format: YYYYMMDDTHHMMSSZ).",
+                        },
                     },
                 },
                 annotations=types.ToolAnnotations(
@@ -926,6 +944,11 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+                        },
+                        "updated_recurrence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Updated recurrence rules in RRULE format (RFC5545). To convert a recurring event to a single event, pass an empty array []. To add/update recurrence, provide rules like: ['RRULE:FREQ=DAILY;COUNT=5'] for 5 days, ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for 10 occurrences on Mon/Wed/Fri, ['RRULE:FREQ=MONTHLY;BYDAY=2TH'] for 2nd Thursday each month. Common frequencies: DAILY, WEEKLY, MONTHLY, YEARLY. Use COUNT for number of occurrences or UNTIL for end date (format: YYYYMMDDTHHMMSSZ).",
                         },
                         "send_updates": {
                             "type": "string",
@@ -1104,11 +1127,12 @@ def main(
                 attendees = arguments.get("attendees")
                 send_updates = arguments.get("send_updates", "all")
                 add_google_meet = arguments.get("add_google_meet", False)
+                recurrence = arguments.get("recurrence")
                 
                 result = await create_event(
                     summary, start_datetime, end_datetime, calendar_id,
                     description, location, visibility, attendees, send_updates,
-                    add_google_meet
+                    add_google_meet, recurrence
                 )
                 return [
                     types.TextContent(
@@ -1177,13 +1201,14 @@ def main(
                 updated_visibility = arguments.get("updated_visibility")
                 attendees_to_add = arguments.get("attendees_to_add")
                 attendees_to_remove = arguments.get("attendees_to_remove")
+                updated_recurrence = arguments.get("updated_recurrence")
                 send_updates = arguments.get("send_updates", "all")
                 
                 result = await update_event(
                     event_id, updated_start_datetime, updated_end_datetime,
                     updated_summary, updated_description, updated_location,
                     updated_visibility, attendees_to_add, attendees_to_remove,
-                    send_updates
+                    updated_recurrence, send_updates
                 )
                 return [
                     types.TextContent(
