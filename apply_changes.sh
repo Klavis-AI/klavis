@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+cat > .github/workflows/typescript-sdk-release.yml.tmp << 'EOF'
 name: Typescript SDK Release
 
 on:
@@ -30,3 +33,5 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+EOF
+mv .github/workflows/typescript-sdk-release.yml.tmp .github/workflows/typescript-sdk-release.yml
