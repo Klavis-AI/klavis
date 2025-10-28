@@ -69,6 +69,39 @@ function getPeopleClient() {
     return asyncLocalStorage.getStore()!.peopleClient;
 }
 
+/**
+ * Send warmup request with empty query to update the cache.
+ *
+ * According to Google's documentation, searchContacts and otherContacts.search
+ * require a warmup request before actual searches for better performance.
+ * See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
+ * and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
+ */
+async function warmupContactSearch(peopleClient: any, contactType: 'personal' | 'other'): Promise<void> {
+    try {
+        if (contactType === 'personal') {
+            // Warmup for people.searchContacts
+            await peopleClient.people.searchContacts({
+                query: '',
+                pageSize: 1,
+                readMask: 'names',
+            });
+            console.log('Warmup request sent for personal contacts');
+        } else if (contactType === 'other') {
+            // Warmup for otherContacts.search
+            await peopleClient.otherContacts.search({
+                query: '',
+                pageSize: 1,
+                readMask: 'names',
+            });
+            console.log('Warmup request sent for other contacts');
+        }
+    } catch (error) {
+        // Don't fail if warmup fails, just log it
+        console.warn(`Warmup request failed for ${contactType} contacts:`, error);
+    }
+}
+
 function extractAccessToken(req: Request): string {
     let authData = process.env.AUTH_DATA;
     
@@ -835,13 +868,18 @@ const getGmailMcpServer = () => {
 
                         if (contactType === 'all') {
                             typeLabel = 'contact(s) from all sources';
+                            // Send warmup requests for personal and other contacts
+                            await Promise.all([
+                                warmupContactSearch(peopleClient, 'personal'),
+                                warmupContactSearch(peopleClient, 'other'),
+                            ]);
                             // Execute all three searches in parallel
                             const [personalRes, otherRes, directoryRes] = await Promise.all([
                                 // Personal contacts
                                 peopleClient.people.searchContacts({
                                     query: validatedArgs.query,
                                     pageSize: Math.min(validatedArgs.pageSize || 10, 30),
-                                    readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                    readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
                                 }),
                                 // Other contacts
                                 peopleClient.otherContacts.search({
@@ -853,7 +891,7 @@ const getGmailMcpServer = () => {
                                 peopleClient.people.searchDirectoryPeople({
                                     query: validatedArgs.query,
                                     pageSize: Math.min(validatedArgs.pageSize || 10, 500),
-                                    readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                    readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
                                     sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
                                 }),
                             ]);
@@ -884,7 +922,6 @@ const getGmailMcpServer = () => {
                                         name: o.name,
                                         title: o.title,
                                     })),
-                                    allFields: person,
                                 };
                             });
 
@@ -910,7 +947,6 @@ const getGmailMcpServer = () => {
                                         type: p.type || 'other',
                                     })),
                                     organizations: [],
-                                    allFields: person,
                                 };
                             });
 
@@ -939,7 +975,6 @@ const getGmailMcpServer = () => {
                                         name: o.name,
                                         title: o.title,
                                     })),
-                                    allFields: person,
                                 };
                             });
 
@@ -976,10 +1011,12 @@ const getGmailMcpServer = () => {
 
                         } else if (contactType === 'personal') {
                             typeLabel = 'personal contact(s)';
+                            // Send warmup request before search
+                            await warmupContactSearch(peopleClient, 'personal');
                             response = await peopleClient.people.searchContacts({
                                 query: validatedArgs.query,
                                 pageSize: Math.min(validatedArgs.pageSize || 10, 30),
-                                readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
                             });
 
                             results = (response.data.results || []).map((result: any) => {
@@ -1006,11 +1043,12 @@ const getGmailMcpServer = () => {
                                         name: o.name,
                                         title: o.title,
                                     })),
-                                    allFields: person,
                                 };
                             });
                         } else if (contactType === 'other') {
                             typeLabel = 'other contact(s)';
+                            // Send warmup request before search
+                            await warmupContactSearch(peopleClient, 'other');
                             response = await peopleClient.otherContacts.search({
                                 query: validatedArgs.query,
                                 pageSize: Math.min(validatedArgs.pageSize || 10, 30),
@@ -1037,7 +1075,6 @@ const getGmailMcpServer = () => {
                                         type: p.type || 'other',
                                     })),
                                     organizations: [],
-                                    allFields: person,
                                 };
                             });
                         } else if (contactType === 'directory') {
@@ -1052,7 +1089,7 @@ const getGmailMcpServer = () => {
                             response = await peopleClient.people.searchDirectoryPeople({
                                 query: validatedArgs.query,
                                 pageSize: Math.min(validatedArgs.pageSize || 10, 500),
-                                readMask: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined',
+                                readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
                                 sources: directorySources,
                                 pageToken: validatedArgs.pageToken,
                             });
@@ -1080,7 +1117,6 @@ const getGmailMcpServer = () => {
                                         name: o.name,
                                         title: o.title,
                                     })),
-                                    allFields: person,
                                 };
                             });
                         }
