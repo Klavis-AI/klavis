@@ -1,6 +1,6 @@
 [project]
 name = "strata-mcp"
-version = "1.0.1"
+version = "1.0.2"
 description = ""
 readme = "README.md"
 license = { text = "Apache-2.0" }
