@@ -1,0 +1,32 @@
+{
+  "name": "mastra-klavis-example",
+  "version": "1.0.0",
+  "description": "Mastra MCP agent example using Klavis",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "mastra dev",
+    "build": "mastra build",
+    "start": "mastra start"
+  },
+  "dependencies": {
+    "@mastra/core": "^0.21.1",
+    "@mastra/mcp": "^0.13.5",
+    "@ai-sdk/openai": "^1.3.23",
+    "klavis": "^2.10.2",
+    "dotenv": "^17.2.0",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3",
+    "tsx": "^4.19.0",
+    "mastra": "^0.17.0"
+  },
+  "overrides": {
+    "jsondiffpatch": "^0.7.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+} 

@@ -1,0 +1,10 @@
+mcp==1.11.0
+fastapi
+uvicorn[standard]
+click>=8.0.0
+pydantic>=2.5.0
+aiohttp>=3.8.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+typing-extensions
+starlette>=0.27.0

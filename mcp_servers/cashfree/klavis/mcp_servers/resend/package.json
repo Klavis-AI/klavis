@@ -1,0 +1,30 @@
+{
+  "name": "@klavis-ai/mcp-server-resend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [],
+  "author": "Klavis AI",
+  "license": "MIT",
+  "description": "Klavis MCP server for Resend",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@react-email/components": "^0.0.41",
+    "@react-email/render": "^1.0.5",
+    "dotenv": "^16.3.1",
+    "resend": "^4.1.2",
+    "zod": "^3.24.2",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.7.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "start": "node build/index.js"
+  }
+}

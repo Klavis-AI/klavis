@@ -1,0 +1,7 @@
+mcp[cli]==1.11.0
+aiohttp
+python-dotenv==1.0.0
+uvicorn[standard]
+starlette
+click
+coinbase-advanced-py

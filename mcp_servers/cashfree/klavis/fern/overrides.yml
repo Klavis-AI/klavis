@@ -1,0 +1,225 @@
+components:
+  schemas:
+    McpServerName:
+      x-fern-enum:
+        "GitHub":
+          name: GITHUB 
+        "YouTube":
+          name: YOUTUBE
+        "ClickUp":
+          name: CLICKUP
+        "DocuSign":
+          name: DOCUSIGN
+        "GitLab":
+          name: GITLAB
+        "HubSpot":
+          name: HUBSPOT
+        "LinkedIn":
+          name: LINKEDIN
+        "OneDrive":
+          name: ONEDRIVE
+        "PagerDuty":
+          name: PAGERDUTY
+        "PostHog":
+          name: POSTHOG
+        "QuickBooks":
+          name: QUICKBOOKS
+        "SendGrid":
+          name: SENDGRID
+        "WhatsApp":
+          name: WHATSAPP
+        "WordPress":
+          name: WORDPRESS
+
+paths:
+  "/mcp-server/call-tool":
+    post:
+      operationId: call_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: call_tools
+  "/mcp-server/list-tools":
+    post:
+      operationId: list_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: list_tools
+  "/mcp-server/tools/{serverName}":
+    get:
+      operationId: get_tools
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: get_tools
+  "/mcp-server/oauth-url":
+    post:
+      x-fern-sdk-group-name: mcp_server
+      x-fern-sdk-method-name: get_oauth_url
+  "/oauth/slack/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_slack
+  "/oauth/github/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_github
+  "/oauth/gitlab/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gitlab
+  "/oauth/supabase/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_supabase
+  "/oauth/notion/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_notion
+  "/oauth/jira/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_jira
+  "/oauth/confluence/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_confluence
+  "/oauth/wordpress/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_wordpress
+  "/oauth/gmail/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gmail
+  "/oauth/gdrive/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gdrive
+  "/oauth/gcalendar/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gcalendar
+  "/oauth/gsheets/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gsheets
+  "/oauth/gdocs/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_gdocs
+  "/oauth/attio/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_attio
+  "/oauth/salesforce/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_salesforce
+  "/oauth/asana/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_asana
+  "/oauth/linear/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_linear
+  "/oauth/close/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_close
+  "/oauth/clickup/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_clickup
+  "/oauth/airtable/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_airtable
+  "/oauth/hubspot/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_hubspot
+  "/oauth/linkedin/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_linkedin
+  "/oauth/canva/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_canva
+  "/oauth/xero/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_xero
+  "/oauth/dropbox/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_dropbox
+  "/oauth/box/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_box
+  "/oauth/quickbooks/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_quickbooks
+  "/oauth/zendesk/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_zendesk
+  "/oauth/stripe/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_stripe
+  "/oauth/calcom/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_calcom
+  "/oauth/vercel/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_vercel
+  "/oauth/pipedrive/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_pipedrive
+  "/oauth/figma/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_figma
+  "/oauth/klaviyo/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_klaviyo
+  "/oauth/pagerduty/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_pagerduty
+  "/oauth/docusign/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_docusign
+  "/oauth/dialpad/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_dialpad
+  "/oauth/shopify/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_shopify
+  "/oauth/onedrive/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_onedrive
+  "/oauth/outlook/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_outlook
+  "/oauth/teams/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_teams
+  "/oauth/fathom/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_fathom
+  "/oauth/monday/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_monday

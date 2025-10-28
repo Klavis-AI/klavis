@@ -1,0 +1,9 @@
+mcp==1.11.0
+pydantic
+typing-extensions
+aiohttp
+click
+python-dotenv
+starlette
+uvicorn[standard]
+notion-client 

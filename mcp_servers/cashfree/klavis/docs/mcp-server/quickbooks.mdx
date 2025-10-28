@@ -1,0 +1,241 @@
+---
+title: 'QuickBooks'
+description: 'Connect AI agents to QuickBooks for accounting automation and financial data management'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to QuickBooks to manage accounts, invoices, customers, payments, vendors, and automate accounting workflows through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with QuickBooks">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.QUICKBOOKS],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { Klavis } from 'klavis';
+          
+          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          
+          // Create a Strata MCP server with QuickBooks
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.QuickBooks],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["QuickBooks"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(response.oauth_urls[McpServerName.QUICKBOOKS])
+          ```
+          
+          ```typescript TypeScript
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.QuickBooks]);
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/quickbooks/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your QuickBooks MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose QuickBooks">
+        Select QuickBooks from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your QuickBooks company.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/quickbooks
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/quickbooks-mcp-server:latest
+        
+        # Run with OAuth support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/quickbooks-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "quickbooks": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Accordion title="Tools Information">
+| Tool Name | Description |
+|-----------|-------------|
+| **Account Management** |  |
+| create_account | Create a new account in QuickBooks |
+| get_account | Get a specific account by ID from QuickBooks |
+| list_accounts | List all chart of accounts from QuickBooks |
+| update_account | Update an existing account in QuickBooks |
+| search_accounts | Advanced Account Search with powerful filters including name, type, classification, status, and other criteria |
+| **Invoice Management** |  |
+| create_invoice | Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line |
+| get_invoice | Retrieve a specific invoice by ID with all its details including line items, amounts, and status |
+| list_invoices | Retrieve all invoices from QuickBooks with pagination support |
+| search_invoices | Advanced Invoice Search with powerful filters including dates, amounts, addresses, customer info, and status |
+| update_invoice | Modify an existing invoice in QuickBooks with automatic sync token handling |
+| delete_invoice | Permanently delete an invoice from QuickBooks (use with caution) |
+| send_invoice | Send an invoice to customer via email with delivery tracking |
+| void_invoice | Void an existing invoice while keeping the record for audit trail |
+| **Customer Management** |  |
+| create_customer | Create a new customer in QuickBooks |
+| get_customer | Get a specific customer by ID from QuickBooks |
+| list_customers | List all customers from QuickBooks |
+| update_customer | Update an existing customer in QuickBooks |
+| search_customers | Advanced Customer Search with powerful filters including name, contact info, address, balance, and status |
+| activate_customer | Activate a customer in QuickBooks (set Active to true) |
+| deactivate_customer | Deactivate a customer from QuickBooks (set Active to false) |
+| **Payment Management** |  |
+| create_payment | Create a new payment in QuickBooks. Can be applied to specific invoices or created as unapplied credit |
+| get_payment | Retrieve a specific payment by ID with all its details and linked transactions |
+| list_payments | Retrieve all payments from QuickBooks with pagination support |
+| search_payments | Advanced Payment Search with powerful filters including dates, amounts, customer info, and status |
+| update_payment | Modify an existing payment in QuickBooks with automatic sync token handling |
+| delete_payment | Permanently delete a payment from QuickBooks (use with caution) |
+| send_payment | Send a payment receipt to customer via email |
+| void_payment | Void an existing payment while keeping the record for audit trail |
+| **Vendor Management** |  |
+| create_vendor | Create a new vendor in QuickBooks. Requires DisplayName or name components |
+| get_vendor | Get a specific vendor by ID from QuickBooks |
+| list_vendors | List all vendors from QuickBooks |
+| search_vendors | Search vendors with various filters including name, company, contact info, and status |
+| update_vendor | Update an existing vendor in QuickBooks |
+| activate_vendor | Activate a vendor in QuickBooks (set Active to true) |
+| deactivate_vendor | Deactivate a vendor from QuickBooks (set Active to false) |
+</Accordion>
+
+<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+</CardGroup>

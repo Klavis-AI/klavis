@@ -1,0 +1,32 @@
+{
+  "name": "@klavis-ai/mcp-server-wordpress",
+  "version": "0.6.2",
+  "description": "MCP server for interacting with WordPress sites",
+  "license": "MIT",
+  "author": "Klavis AI (https://klavis.ai)",
+  "homepage": "https://klavis.ai",
+  "type": "module",
+  "bin": {
+    "mcp-server-wordpress": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsc && shx chmod +x dist/*.js && node dist/index.js",
+    "build": "tsc && shx chmod +x dist/*.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.17",
+    "@types/express": "^5.0.0",
+    "shx": "^0.3.4",
+    "typescript": "^5.6.2"
+  }
+}

@@ -1,0 +1,32 @@
+[project]
+name = "mcp-clients"
+version = "0.1.0"
+description = "Klavis AI: Open source MCP clients and Servers"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "discord.py>=2.3.0",
+    "anthropic>=0.54.0",
+    "python-dotenv>=1.1.0",
+    "anyio>=4.9.0",
+    "trio>=0.22.0",
+    "mcp>=1.9.3",
+    "supabase>=2.15.0",
+    "fastapi>=0.115.12",
+    "uvicorn>=0.34.0",
+    "slack-bolt>=1.23.0",
+    "httpx>=0.28.1",
+    "openai>=1.72.0",
+    "markitdown[all]",
+    "pywa>=0.7.0",
+    "uvloop>=0.17.0",
+]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+discord_bot = "mcp_clients.discord_bot:main"
+slack_bot = "mcp_clients.slack_bot:main"
+web_bot = "mcp_clients.web_bot:main"
+whatsapp_bot = "mcp_clients.whatsapp_bot:main"

@@ -1,0 +1,7 @@
+mcp==1.11.0
+starlette>=0.40.0
+uvicorn>=0.32.1
+click>=8.1.7
+python-dotenv>=1.0.1
+simple-salesforce>=1.12.6
+requests>=2.32.3 

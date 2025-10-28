@@ -1,0 +1,8 @@
+aiohttp>=3.8.0
+python-dotenv>=1.0.0
+mcp==1.11.0
+httpx>=0.27.0
+fastapi
+uvicorn[standard] 
+pydantic>=2.5.0
+discord.py>=2.5.0

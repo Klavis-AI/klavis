@@ -1,0 +1,263 @@
+---
+title: "LlamaIndex"
+description: "Learn how to build AI agents that integrate with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
+---
+
+## Partnership
+
+LlamaIndex has officially showcased their integration with Klavis AI in [this LinkedIn post](https://www.linkedin.com/posts/llamaindex_build-ai-agents-that-connect-to-youtube-activity-7344107221221355521-UrOl?utm_source=share&utm_medium=member_desktop&rcm=ACoAACh0ewEBh9MR1nb_U_x3e5bqgDYgETJ8d5Y), demonstrating how to build AI agents that connect to MCP Servers in just a few lines of code.
+
+<Frame>
+  <img src="/images/ai-platform/llamaindex-klavis.png" alt="LlamaIndex and Klavis Integration - Build AI agents that connect to MCP Servers" />
+</Frame>
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
+    Get your API key from OpenAI Platform (LlamaIndex uses OpenAI as the default LLM)
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install llama-index llama-index-tools-mcp klavis
+```
+
+```bash TypeScript
+npm install @llamaindex/tools @llamaindex/workflow @llamaindex/openai klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+# Set environment variables
+os.environ["OPENAI_API_KEY"] = "your-openai-api-key-here"    # Replace with your actual OpenAI API key
+os.environ["KLAVIS_API_KEY"] = "your-klavis-api-key-here"   # Replace with your actual Klavis API key
+```
+
+```typescript TypeScript
+// Set environment variables in your .env file
+process.env.OPENAI_API_KEY = "your-openai-api-key-here";    // Replace with your actual OpenAI API key
+process.env.KLAVIS_API_KEY = "your-klavis-api-key-here";   // Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+## Basic Setup
+
+<CodeGroup>
+
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName
+from llama_index.llms.openai import OpenAI
+from llama_index.tools.mcp import (
+    BasicMCPClient,
+    get_tools_from_mcp_url,
+    aget_tools_from_mcp_url
+)
+
+# Initialize clients
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+llm = OpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+```
+
+```typescript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+import { mcp } from "@llamaindex/tools";
+import { agent, multiAgent } from "@llamaindex/workflow";
+import { openai } from "@llamaindex/openai";
+
+// Initialize clients
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+```
+
+</CodeGroup>
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
+
+<CodeGroup>
+
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
+import webbrowser
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+    user_id="1234"
+)
+
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+```
+
+```typescript TypeScript
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const response = await klavisClient.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId: "1234"
+});
+
+// Handle OAuth authorization for each services
+if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+        window.open(oauthUrl);
+        // Wait for user to complete OAuth
+        await new Promise(resolve => {
+            const input = prompt(`Press OK after completing ${serverName} OAuth authorization...`);
+            resolve(input);
+        });
+    }
+}
+
+```
+
+</CodeGroup>
+
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create method to use MCP Server with LlamaIndex
+
+This method handles multiple rounds of tool calls until a final response is ready, allowing the AI to chain tool executions for complex tasks.
+
+<CodeGroup>
+
+```python Python
+import json
+from llama_index.core.agent.workflow import FunctionAgent, AgentWorkflow
+
+async def llamaindex_with_mcp_server(mcp_server_url: str, user_query: str):
+    llm = OpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+
+    all_tools = await aget_tools_from_mcp_url(
+        mcp_server_url,
+        client=BasicMCPClient(mcp_server_url)
+    )
+
+    communication_agent = FunctionAgent(
+        name="communication_agent",
+        description="Agent that can read emails from Gmail and send messages to Slack",
+        tools=all_tools,
+        llm=llm,
+        system_prompt="You are a helpful assistant. Use the available tools to answer the user's question.",
+        max_iterations=10
+    )
+
+    workflow = AgentWorkflow(
+        agents=[communication_agent],
+        root_agent="communication_agent"
+    )
+
+    resp = await workflow.run(user_msg=user_query)
+
+    return resp.response.content
+```
+
+```typescript TypeScript
+async function llamaindexWithMcpServer(mcpServerUrl: string, userQuery: string) {
+    const llm = new openai.OpenAI({
+        model: "gpt-4o-mini",
+        apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const allTools = await mcp.getToolsFromMcpUrl(
+        mcpServerUrl,
+        new mcp.BasicMCPClient(mcpServerUrl)
+    );
+
+    const communicationAgent = new agent.FunctionAgent({
+        name: "communication_agent",
+        description: "Agent that can read emails from Gmail and send messages to Slack",
+        tools: allTools,
+        llm: llm,
+        systemPrompt: "You are a helpful assistant. Use the available tools to answer the user's question.",
+        maxIterations: 10
+    });
+
+    const workflow = new agent.AgentWorkflow({
+        agents: [communicationAgent],
+        rootAgent: "communication_agent"
+    });
+
+    const resp = await workflow.run({ userMsg: userQuery });
+
+    return resp.response.content;
+}
+```
+
+</CodeGroup>
+
+
+### Step 3 - Run!
+
+<CodeGroup>
+
+```python Python
+result = await llamaindex_with_mcp_server(
+    mcp_server_url=response.strata_server_url, 
+    user_query="Check my latest 5 emails and summarize them in a Slack message to #general"
+)
+
+print(f"\nFinal Response: {result}")
+```
+
+```typescript TypeScript
+result = await llamaindexWithMcpServer(
+    response.strataServerUrl,
+    "Check my latest 5 emails and summarize them in a Slack message to #general"
+);
+
+console.log(`\nFinal Response: ${result}`);
+```
+
+</CodeGroup>
+
+<Check>
+Perfect! You've integrated LLamaIndex with Strata MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+## Useful Resources
+
+- [LlamaIndex Documentation](https://docs.llamaindex.ai/)
+- [Klavis AI Documentation](https://www.klavis.ai/docs/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+- [Klavis MCP Servers](/mcp-server)
+
+**Happy building with LlamaIndex and Klavis!** 🚀 

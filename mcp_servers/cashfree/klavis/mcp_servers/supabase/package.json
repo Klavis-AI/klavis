@@ -1,0 +1,60 @@
+{
+  "name": "@klavis-ai/mcp-server-supabase",
+  "version": "0.3.5",
+  "description": "MCP server for interacting with Supabase",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/mcp.cjs",
+  "types": "dist/mcp.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup --clean",
+    "start": "node dist/mcp.cjs",
+    "prepublishOnly": "npm run build",
+    "test": "vitest",
+    "test:e2e": "vitest --project e2e",
+    "test:unit": "vitest --project unit",
+    "generate:management-api-types": "openapi-typescript https://api.supabase.com/api/v1-json -o ./src/management-api/types.ts"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "bin": {
+    "supabase-mcp": "./dist/mcp.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/mcp.js",
+      "types": "./dist/mcp.d.ts",
+      "default": "./dist/mcp.cjs"
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@supabase/mcp-utils": "0.1.3",
+    "common-tags": "^1.8.2",
+    "openapi-fetch": "^0.13.4",
+    "zod": "^3.24.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@ai-sdk/anthropic": "^1.2.9",
+    "@electric-sql/pglite": "^0.2.17",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/common-tags": "^1.8.4",
+    "@types/node": "^22.8.6",
+    "@types/express": "^5.0.0",
+    "ai": "^5.0.76",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
+    "msw": "^2.7.3",
+    "nanoid": "^5.1.5",
+    "openapi-typescript": "^7.5.0",
+    "openapi-typescript-helpers": "^0.0.15",
+    "prettier": "^3.3.3",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.2"
+  }
+}

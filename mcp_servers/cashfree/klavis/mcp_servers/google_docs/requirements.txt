@@ -1,0 +1,12 @@
+mcp==1.11.0
+pydantic
+fastapi
+uvicorn[standard]
+python-dotenv
+typing-extensions
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+click
+starlette 

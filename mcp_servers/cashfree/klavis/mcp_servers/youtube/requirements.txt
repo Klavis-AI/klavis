@@ -1,0 +1,8 @@
+mcp==1.11.0
+pydantic
+fastapi
+uvicorn[standard]
+aiohttp
+python-dotenv
+typing-extensions
+youtube-transcript-api>=1.0.3

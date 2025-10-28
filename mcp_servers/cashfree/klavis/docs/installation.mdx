@@ -1,0 +1,26 @@
+---
+title: Installation
+description: Install Klavis SDK or use REST API directly
+icon: wrench
+---
+
+## SDK Installation
+
+<CodeGroup>
+```bash Python
+pip install klavis
+```
+
+```bash TypeScript
+npm install klavis
+```
+</CodeGroup>
+
+## REST API
+
+```bash
+curl -X POST "https://api.klavis.ai/mcp-server/instance/create" \
+  -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"serverName": "Gmail", "userId": "user123"}'
+```
