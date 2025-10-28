@@ -1,0 +1,3294 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "2024-01-01",
+    "title": "Cashfree Payout APIs",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "contact": {
+      "email": "developers@cashfree.com",
+      "name": "API Support",
+      "url": "https://discord.com/invite/QdZkNSxXsB"
+    },
+    "description": "Cashfree's Payout APIs provide developers with a streamlined pathway to integrate advanced payout capabilities into their applications, platforms and websites."
+  },
+  "externalDocs": {
+    "url": "https://api.cashfree.com/payout",
+    "description": "This url will have the information of all the APIs."
+  },
+  "servers": [
+    {
+      "url": "https://sandbox.cashfree.com/payout",
+      "description": "Sandbox server"
+    },
+    {
+      "url": "https://api.cashfree.com/payout",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "V2 Apis",
+      "description": "Collection of APIs to transfer funds to beneficiaries and manage beneficiaries."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "XClientID": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-id",
+        "description": "Client ID. You can find your app id in the [Merchant Dashboard](https://merchant.cashfree.com/payouts/developers/api-keys)."
+      },
+      "XClientSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-secret",
+        "description": "Client secret key. You can find your secret in the [Merchant Dashboard](https://merchant.cashfree.com/payouts/developers/api-keys)."
+      }
+    },
+    "schemas": {
+      "ErrorV2": {
+        "title": "Error",
+        "description": "Error Response for non-2XX cases",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of the error received"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code of the error received"
+          },
+          "message": {
+            "type": "string",
+            "description": "Detailed message explaining the response"
+          }
+        }
+      },
+      "Beneficiary": {
+        "title": "Create Beneficiary success response",
+        "description": "Contains the information of the created beneficiary",
+        "type": "object",
+        "properties": {
+          "beneficiary_id": {
+            "example": "JOHN18011343",
+            "type": "string",
+            "description": "It displays the unique Id you created to identify the beneficiary."
+          },
+          "beneficiary_name": {
+            "example": "John Doe",
+            "type": "string",
+            "description": "It displays the name of the beneficiary."
+          },
+          "beneficiary_instrument_details": {
+            "type": "object",
+            "description": "It displays the payment instrument details of the beneficiary.",
+            "properties": {
+              "bank_account_number": {
+                "example": "00111122233",
+                "type": "string",
+                "description": "It displays the bank account of the beneficiary."
+              },
+              "bank_ifsc": {
+                "example": "HDFC0000001",
+                "type": "string",
+                "description": "It displays the IFSC information of the beneficiary's bank account."
+              },
+              "vpa": {
+                "example": "test@upi",
+                "type": "string",
+                "description": "It displays the UPI VPA information of the beneficiary."
+              }
+            }
+          },
+          "beneficiary_contact_details": {
+            "type": "object",
+            "description": "It displays the contact details of the beneficiary.",
+            "properties": {
+              "beneficiary_email": {
+                "example": "johndoe1@cashfree.com",
+                "type": "string",
+                "description": "It displays the email address of the beneficiary."
+              },
+              "beneficiary_phone": {
+                "example": "9876543210",
+                "type": "string",
+                "description": "It displays the phone number of the beneficiary without the country code."
+              },
+              "beneficiary_country_code": {
+                "example": "+91",
+                "type": "string",
+                "description": "It displays the country code of the beneficiary's phone number."
+              },
+              "beneficiary_address": {
+                "example": "177A Bleecker Street",
+                "type": "string",
+                "description": "It displays the address of the beneficiary."
+              },
+              "beneficiary_city": {
+                "example": "New York City",
+                "type": "string",
+                "description": "It displays the name of the city as present in the beneficiary's address."
+              },
+              "beneficiary_state": {
+                "example": "New York",
+                "type": "string",
+                "description": "It displays the name of the state as present in the beneficiary's address."
+              },
+              "beneficiary_postal_code": {
+                "example": "560001",
+                "type": "string",
+                "description": "It displays the PIN code as present in the beneficiary's address."
+              }
+            }
+          },
+          "beneficiary_status": {
+            "example": "VERIFIED",
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "INVALID",
+              "INITIATED",
+              "CANCELLED",
+              "FAILED",
+              "DELETED"
+            ],
+            "description": "It displays the current status of the beneficiary. Possible values are as follows\n- `VERIFIED`: Beneficiary is verified and is available for payouts\n- `INVALID`: Beneficiary is invalid\n- `INITIATED`: Beneficiary verification initiated\n- `CANCELLED`: Beneficiary verification cancelled\n- `FAILED`: Failed to verify beneficiary\n- `DELETED`: Beneficiary is deleted"
+          },
+          "added_on": {
+            "example": "2023-11-22T12:38:22Z",
+            "type": "string",
+            "description": "It displays the time of the addition of the beneficiary in UTC."
+          }
+        }
+      },
+      "CreateBeneficiaryRequest": {
+        "title": "Create Beneficiary request body",
+        "description": "Find the request parameters to create a beneficiary",
+        "type": "object",
+        "required": [
+          "beneficiary_id",
+          "beneficiary_name"
+        ],
+        "properties": {
+          "beneficiary_id": {
+            "example": "JOHN18011343",
+            "type": "string",
+            "maxLength": 50,
+            "description": "It is the unique ID you create to identify the beneficiary. Alphanumeric, underscore ( _ ), pipe ( | ), and dot ( . ) are allowed."
+          },
+          "beneficiary_name": {
+            "example": "John Doe",
+            "type": "string",
+            "description": "It is the name of the beneficiary. The maximum character limit is 100. Only alphabets and whitespaces are allowed.",
+            "maxLength": 100
+          },
+          "beneficiary_instrument_details": {
+            "type": "object",
+            "description": "Beneficiary instrument details",
+            "properties": {
+              "bank_account_number": {
+                "example": "00111122233",
+                "type": "string",
+                "maxLength": 25,
+                "minLength": 4,
+                "description": "It is the beneficiary bank account number. The value should be between 9 and 18 characters. Alphanumeric characters are allowed. You need to input bank_ifsc if bank_account_number is passed."
+              },
+              "bank_ifsc": {
+                "example": "HDFC0000001",
+                "type": "string",
+                "description": "It is the IFSC information of the beneficiary's bank account in the standard IFSC format. The value should be 11 characters. (The first 4 characters should be alphabets, the 5th character should be a 0, and the remaining 6 characters should be numerals.). You need to input bank_account_number if bank_ifsc is passed."
+              },
+              "vpa": {
+                "example": "test@upi",
+                "type": "string",
+                "description": "It is the UPI VPA information of the beneficiary. Only valid UPI VPA information is accepted. It can be an Alphanumeric value with only period (.), hyphen (-), underscore ( _ ), and at the rate of (@). Hyphen (-) is accepted only before at the rate of (@)."
+              }
+            }
+          },
+          "beneficiary_contact_details": {
+            "type": "object",
+            "description": "It should contain the contact details of the beneficiary.",
+            "properties": {
+              "beneficiary_email": {
+                "example": "johndoe_1@cashfree.com",
+                "type": "string",
+                "maxLength": 200,
+                "description": "It is the email address of the beneficiary. The maximum character limit is 200. It should contain dot (.) and at the rate of (@)."
+              },
+              "beneficiary_phone": {
+                "example": "9876543210",
+                "type": "string",
+                "description": "It is the phone number of the beneficiary. Only reigstered Indian phone numbers are allowed. The value should be between 8 and 12 characters after stripping +91."
+              },
+              "beneficiary_country_code": {
+                "example": "+91",
+                "type": "string",
+                "description": "It is the country code (+91) of the beneficiary's phone number"
+              },
+              "beneficiary_address": {
+                "example": "177A Bleecker Street",
+                "type": "string",
+                "description": "It is the address information of the beneficiary."
+              },
+              "beneficiary_city": {
+                "example": "New York City",
+                "type": "string",
+                "description": "It is the name of the city as present in the beneficiary's address."
+              },
+              "beneficiary_state": {
+                "example": "New York",
+                "type": "string",
+                "description": "It is the name of the state as present in the beneficiary's address."
+              },
+              "beneficiary_postal_code": {
+                "example": "560001",
+                "type": "string",
+                "description": "It is the PIN code information as present in the beneficiary's address. The maximum character limit is 6. Only numbers are allowed."
+              }
+            }
+          }
+        }
+      },
+      "CreateTransferRequest": {
+        "title": "Standard Transfer V2",
+        "description": "Standard Transfer V2",
+        "type": "object",
+        "properties": {
+          "transfer_id": {
+            "type": "string",
+            "description": "It is the unique ID you create to identify the transfer. You can use a maximum of 40 characters to create a transfer_id.  Alphanumeric and underscore ( _ ) are allowed.",
+            "maxLength": 40
+          },
+          "transfer_amount": {
+            "type": "number",
+            "format": "double",
+            "description": "It is the transfer amount. Decimal values are allowed. The minimum value should be equal to or greater than 1.00. (>= 1.00)"
+          },
+          "transfer_currency": {
+            "type": "string",
+            "description": "It is the currency of the transfer amount. The default value is INR."
+          },
+          "transfer_mode": {
+            "type": "string",
+            "description": "It is the mode of transfer. Allowed values are banktransfer, imps, neft, rtgs, upi, paytm, amazonpay, card. The default transfer_mode is banktransfer.",
+            "enum": [
+              "banktransfer",
+              "imps",
+              "neft",
+              "rtgs",
+              "upi",
+              "paytm",
+              "amazonpay",
+              "card",
+              "cardupi"
+            ],
+            "maxLength": 20
+          },
+          "beneficiary_details": {
+            "type": "object",
+            "description": "It should contain the details of the beneficiary who receives the transfer amount.",
+            "properties": {
+              "beneficiary_id": {
+                "type": "string",
+                "description": "It is the unique ID you created to identify the beneficiary. Alphanumeric characters are allowed."
+              },
+              "beneficiary_name": {
+                "type": "string",
+                "description": "It is the name of the beneficiary. The maximum character limit is 100.  Only alphabets and whitespaces are allowed. It is required if beneficiary_id is not present."
+              },
+              "beneficiary_instrument_details": {
+                "type": "object",
+                "description": "It should contain the details of where the beneficiary will receive the money. You input these details if you haven't added the beneficiary in the Payouts dashboard.",
+                "properties": {
+                  "bank_account_number": {
+                    "type": "string",
+                    "description": "It is the beneficiary bank account number. The value should be between 9 and 18 characters. Alphanumeric characters are allowed. This value is required if beneficiary_id is not present and if the transfer_mode is banktransfer, imps, neft,rtgs mode."
+                  },
+                  "bank_ifsc": {
+                    "type": "string",
+                    "description": "It is the IFSC information of the beneficiary's bank account in the standard IFSC format. The value should be 11 characters. (The first 4 characters should be alphabets, the 5th character should be a 0, and the remaining 6 characters should be numerals.)"
+                  },
+                  "vpa": {
+                    "type": "string",
+                    "description": "It is the UPI VPA information of the beneficiary. Only valid UPI VPA information is accepted. It can be an Alphanumeric value with only period (.), hyphen (-), underscore ( _ ), and at the rate of (@). Hyphen (-) is accepted only before at the rate of (@). This value is required if the transfer_mode is upi."
+                  },
+                  "card_details": {
+                    "type": "object",
+                    "description": "It should contain the card details of the beneficiary.",
+                    "properties": {
+                      "card_token": {
+                        "type": "string",
+                        "description": "It is the tokenised card number or card token for this transfer."
+                      },
+                      "card_network_type": {
+                        "type": "string",
+                        "description": "It is the network type of the card - VISA/MASTERCARD.",
+                        "enum": [
+                          "VISA",
+                          "MASTERCARD"
+                        ]
+                      },
+                      "card_cryptogram": {
+                        "type": "string",
+                        "description": "It is the formatted chip/cryptogram data relating to the token cryptogram. The maximum character limit is 600. It is optional for MASTERCARD and not required for VISA."
+                      },
+                      "card_token_expiry": {
+                        "type": "string",
+                        "description": "It is applicable only for MASTERCARD. The format for the valid token expiry date should be YYYY-MM. It cannot be null. Provide a valid tokenExpiry if collected from the customers. If unavailable, populate a static value with a forward year and month in the correct format (YYYY-MM). The maximum character limit is 10."
+                      },
+                      "card_type": {
+                        "type": "string",
+                        "description": "It is the type of the card. DEBIT and CREDIT are the only values allowed. The default value is CREDIT if the parameter does not exist or not specified."
+                      },
+                      "card_token_PAN_sequence_number": {
+                        "type": "string",
+                        "description": "A maximum of 3 alphanumeric characters are allowed. It is an optional parameter for MASTERCARD."
+                      }
+                    }
+                  }
+                }
+              },
+              "beneficiary_contact_details": {
+                "type": "object",
+                "description": "It should contain the contact details of the beneficiary.",
+                "properties": {
+                  "beneficiary_email": {
+                    "type": "string",
+                    "description": "It is the email address of the beneficiary. The maximum character limit is 200. It should contain dot (.) and at the rate of (@)."
+                  },
+                  "beneficiary_phone": {
+                    "type": "string",
+                    "description": "It is the phone number of the beneficiary. Only registered Indian phone numbers are allowed. The value should be between 8 and 12 characters after stripping +91."
+                  },
+                  "beneficiary_country_code": {
+                    "type": "string",
+                    "description": "It is the country code (+91) of the beneficiary's phone number."
+                  },
+                  "beneficiary_address": {
+                    "type": "string",
+                    "description": "It should contain the address of the beneficiary. The maximum character limit is 150. Alphanumeric characters and whitespaces are allowed."
+                  },
+                  "beneficiary_city": {
+                    "type": "string",
+                    "description": "It is the name of the city as present in the beneficiary address. The maximum character limit is 50. Alphanumeric characters and whitespaces are allowed."
+                  },
+                  "beneficiary_state": {
+                    "type": "string",
+                    "description": "It is the name of the state as present in the beneficiary address. The maximum character limit is 50. Alphanumeric characters and whitespaces are allowed."
+                  },
+                  "beneficiary_postal_code": {
+                    "type": "string",
+                    "description": "It is the PIN code as present in the address. It should be a 6 character numeric value."
+                  }
+                }
+              }
+            }
+          },
+          "transfer_remarks": {
+            "type": "string",
+            "description": "It can contain any additional remarks for the transfer. Alphanumeric and whitespaces are allowed. The maximum character limit is 70.",
+            "maxLength": 70
+          },
+          "fundsource_id": {
+            "type": "string",
+            "description": "It is the ID of the fund source from which the transfer amount will be debited."
+          }
+        },
+        "required": [
+          "transfer_amount",
+          "transfer_id",
+          "beneficiary_details"
+        ]
+      },
+      "CreateBatchTransferRequest": {
+        "title": "Batch Transfer V2",
+        "description": "Batch Transfer V2",
+        "type": "object",
+        "properties": {
+          "batch_transfer_id": {
+            "type": "string",
+            "description": "It is the unique ID you create to identify the batch transfer request. The maximum character limit is 60. Alphanumeric and underscore ( _ ) characters are allowed.",
+            "maxLength": 60
+          },
+          "transfers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "transfer_id": {
+                  "type": "string",
+                  "description": "It is the unique ID you create to identify the transfer. You can use a maximum of 40 characters to create a transfer_id.  Alphanumeric and underscore ( _ ) are allowed.",
+                  "maxLength": 40
+                },
+                "transfer_amount": {
+                  "type": "number",
+                  "format": "double",
+                  "description": "It is the transfer amount. Decimal values are allowed. The minimum value should be equal to or greater than 1.00. (>= 1.00)"
+                },
+                "transfer_currency": {
+                  "type": "string",
+                  "description": "It is the currency of the transfer amount. The default value is INR."
+                },
+                "transfer_mode": {
+                  "type": "string",
+                  "description": "It is the mode of transfer. Allowed values are banktransfer, imps, neft, rtgs, upi, paytm, amazonpay, card. The default transfer_mode is banktransfer.",
+                  "enum": [
+                    "banktransfer",
+                    "imps",
+                    "neft",
+                    "rtgs",
+                    "upi",
+                    "paytm",
+                    "amazonpay",
+                    "card",
+                    "cardupi"
+                  ],
+                  "maxLength": 20
+                },
+                "beneficiary_details": {
+                  "type": "object",
+                  "description": "It should contain the details of the beneficiary who receives the transfer amount.",
+                  "properties": {
+                    "beneficiary_id": {
+                      "type": "string",
+                      "description": "It is the unique ID you created to identify the beneficiary. Alphanumeric characters are allowed."
+                    },
+                    "beneficiary_name": {
+                      "type": "string",
+                      "description": "It is the name of the beneficiary. The maximum character limit is 100."
+                    },
+                    "beneficiary_instrument_details": {
+                      "type": "object",
+                      "description": "It should contain the details of where the beneficiary will receive the money. You input these details if you haven't added the beneficiary in the Payouts dashboard.",
+                      "properties": {
+                        "bank_account_number": {
+                          "type": "string",
+                          "description": "It is the beneficiary bank account number. The value should be between 9 and 18 characters. Alphanumeric characters are allowed. This value is required if beneficiary_id is not present and if the transfer_mode is banktransfer, imps, neft, rtgs mode."
+                        },
+                        "bank_ifsc": {
+                          "type": "string",
+                          "description": "It is the IFSC information of the beneficiary's bank account in the standard IFSC format. The value should be 11 characters. (The first 4 characters should be alphabets, the 5th character should be a 0, and the remaining 6 characters should be numerals.)"
+                        },
+                        "vpa": {
+                          "type": "string",
+                          "description": "It is the UPI VPA information of the beneficiary. Only valid UPI VPA information is accepted. It can be an Alphanumeric value with only period (.), hyphen (-), underscore ( _ ), and at the rate of (@). Hyphen (-) is accepted only before at the rate of (@). This value is required if the transfer_mode is upi."
+                        }
+                      }
+                    },
+                    "beneficiary_contact_details": {
+                      "type": "object",
+                      "description": "It should contain the contact details of the beneficiary.",
+                      "properties": {
+                        "beneficiary_email": {
+                          "type": "string",
+                          "description": "It is the email address of the beneficiary. The maximum character limit is 200. It should contain dot (.) and at the rate of (@)."
+                        },
+                        "beneficiary_phone": {
+                          "type": "string",
+                          "description": "It is the phone number of the beneficiary. Only registered Indian phone numbers are allowed. The value should be between 8 and 12 characters after stripping +91."
+                        },
+                        "beneficiary_country_code": {
+                          "type": "string",
+                          "description": "It is the country code (+91) of the beneficiary's phone number."
+                        },
+                        "beneficiary_address": {
+                          "type": "string",
+                          "description": "It should contain the address of the beneficiary. The maximum character limit is 150. Alphanumeric characters and whitespaces are allowed."
+                        },
+                        "beneficiary_city": {
+                          "type": "string",
+                          "description": "It is the name of the city as present in the beneficiary address. The maximum character limit is 50. Alphanumeric characters and whitespaces are allowed."
+                        },
+                        "beneficiary_state": {
+                          "type": "string",
+                          "description": "It is the name of the state as present in the beneficiary address. The maximum character limit is 50. Alphanumeric characters and whitespaces are allowed."
+                        },
+                        "beneficiary_postal_code": {
+                          "type": "string",
+                          "description": "It is the PIN code as present in the address. It should be a 6 character numeric value."
+                        }
+                      }
+                    }
+                  }
+                },
+                "transfer_remarks": {
+                  "type": "string",
+                  "description": "It can contain any additional remarks for the transfer. Alphanumeric and whitespaces are allowed. The maximum character limit is 70.",
+                  "maxLength": 70
+                },
+                "fundsource_id": {
+                  "type": "string",
+                  "description": "It is the ID of the fund source from where you want to debit the transfer amount."
+                }
+              },
+              "required": [
+                "transfer_amount",
+                "transfer_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "batch_transfer_id"
+        ]
+      },
+      "CreateTransferResponse": {
+        "title": "Standard Transfer V2 Response",
+        "description": "Standard Transfer V2 Response",
+        "type": "object",
+        "properties": {
+          "transfer_id": {
+            "description": "It displays the unique ID you created to identify the transfer.",
+            "type": "string"
+          },
+          "cf_transfer_id": {
+            "description": "It displays the unique ID created by Cashfree Payments. You receive this ID in the response after initiating the standard transfer request.",
+            "type": "string"
+          },
+          "status": {
+            "description": "It displays the status of the transfer.",
+            "type": "string"
+          },
+          "beneficiary_details": {
+            "type": "object",
+            "description": "It displays the details of the beneficiary.",
+            "properties": {
+              "beneficiary_id": {
+                "description": "It displays the unique ID to identify the beneficiary to whom you initiated the transfer request.",
+                "type": "string"
+              },
+              "beneficiary_instrument_details": {
+                "type": "object",
+                "description": "It displays the details of where the beneficiary will receive the money.",
+                "properties": {
+                  "bank_account_number": {
+                    "type": "string",
+                    "description": "It displays the bank account number of the beneficiary."
+                  },
+                  "ifsc": {
+                    "type": "string",
+                    "description": "It displays the IFSC information of the beneficiary's bank account."
+                  },
+                  "vpa": {
+                    "type": "string",
+                    "description": "It displays the UPI VPA information of the beneficiary."
+                  }
+                }
+              }
+            }
+          },
+          "transfer_amount": {
+            "description": "It displays the transfer amount initiated in the request.",
+            "type": "number",
+            "format": "double"
+          },
+          "transfer_service_charge": {
+            "description": "It displays the service charge applicable for the successful transfer request.",
+            "type": "number",
+            "format": "double"
+          },
+          "transfer_service_tax": {
+            "description": "It displays the service tax applicable for the successful transfer request.",
+            "type": "number",
+            "format": "double"
+          },
+          "transfer_mode": {
+            "description": "It displays the mode of the transfer.",
+            "type": "string"
+          },
+          "transfer_utr": {
+            "description": "It displays the unique number that is generated to recognise any fund transfer that is created by the bank that facilitates the transfer.",
+            "type": "string"
+          },
+          "fundsource_id": {
+            "description": "It displays the ID of the fund source from where the money was debited for this transfer request.",
+            "type": "string"
+          },
+          "added_on": {
+            "description": "It displays the time of when the transfer request was added to the system.",
+            "type": "string"
+          },
+          "updated_on": {
+            "description": "It displays the updated time for the transfer.",
+            "type": "string"
+          }
+        }
+      },
+      "CreateBatchTransferResponse": {
+        "title": "Batch Transfer V2 Response",
+        "description": "Batch Transfer V2 Response",
+        "type": "object",
+        "properties": {
+          "batch_transfer_id": {
+            "type": "string",
+            "description": "It displays the unique ID you created to identify the batch transfer request."
+          },
+          "cf_batch_transfer_id": {
+            "type": "string",
+            "description": "It displays the unique ID created by Cashfree Payments. You receive this ID in the response after initiating the batch transfer request."
+          },
+          "status": {
+            "type": "string",
+            "description": "It displays the status of the API request."
+          }
+        }
+      },
+      "FetchBatchTransferResponse": {
+        "title": "Batch Transfer Status V2 Response",
+        "description": "Batch Transfer Status V2 Response",
+        "type": "object",
+        "properties": {
+          "batch_transfer_id": {
+            "description": "It displays the unique ID you created to identify the batch transfer.",
+            "type": "string"
+          },
+          "cf_batch_transfer_id": {
+            "description": "It displays the unique ID created by Cashfree Payments. You receive this ID in the response after initiating the batch transfer request.",
+            "type": "string"
+          },
+          "status": {
+            "description": "It displays the status of the batch transfer.",
+            "type": "string"
+          },
+          "transfers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateTransferResponse"
+            }
+          }
+        }
+      },
+      "inline_response_401": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ERROR"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "401"
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid clientId and clientSecret combination"
+          }
+        }
+      },
+      "inline_response_200_10": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "200"
+          },
+          "message": {
+            "type": "string",
+            "example": "Token is valid"
+          }
+        }
+      },
+      "v1_createCashgram_body": {
+        "required": [
+          "amount",
+          "cashgramId",
+          "linkExpiry",
+          "name",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "cashgramId": {
+            "type": "string",
+            "description": "Unique Id of the Cashgram. Alphanumeric, underscore (_), and hyphen (-) allowed (35 character limit)"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount to be transferred, >= 1.00",
+            "format": "float"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the contact"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the contact"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the contact"
+          },
+          "linkExpiry": {
+            "type": "string",
+            "description": "Date to expire the cashgram link, Date format YYYY/MM/DD, maximum 30 days from the date of creation."
+          },
+          "remarks": {
+            "type": "string",
+            "description": "Specify remarks, if any."
+          },
+          "notifyCustomer": {
+            "type": "integer",
+            "description": "If value is 1, a link is sent to customers phone and email."
+          }
+        }
+      },
+      "inline_response_200_8": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "200"
+          },
+          "message": {
+            "type": "string",
+            "example": "Cashgram Created"
+          },
+          "data": {
+            "$ref": "#/components/schemas/inline_response_200_8_data"
+          }
+        }
+      },
+      "inline_response_409_1": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ERROR"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "409"
+          },
+          "message": {
+            "type": "string",
+            "example": "Cashgram with id JOHaN10 already exists"
+          }
+        }
+      },
+      "v1_deactivateCashgram_body": {
+        "required": [
+          "cashgramId"
+        ],
+        "type": "object",
+        "properties": {
+          "cashgramId": {
+            "type": "string",
+            "description": "ID of the Cashgram to be deactivated. Alphanumeric and underscore (_) allowed (35 character limit)"
+          }
+        }
+      },
+      "inline_response_200_9": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "200"
+          },
+          "message": {
+            "type": "string",
+            "example": "Cashgram with id - JOHaN10 successfully deactivated!"
+          }
+        }
+      },
+      "inline_response_404_4": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ERROR"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "404"
+          },
+          "message": {
+            "type": "string",
+            "example": "Cashgram with id JOHaN10 does not exists"
+          }
+        }
+      },
+      "inline_response_200_11": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "subCode": {
+            "type": "string",
+            "example": "200"
+          },
+          "message": {
+            "type": "string",
+            "example": "Cashgram details retrieved"
+          },
+          "data": {
+            "$ref": "#/components/schemas/inline_response_200_11_data"
+          }
+        }
+      },
+      "inline_response_200_8_data": {
+        "type": "object",
+        "properties": {
+          "referenceId": {
+            "type": "integer",
+            "example": 123456,
+            "default": 0
+          },
+          "cashgramLink": {
+            "type": "string",
+            "example": "http://csgr.am/abcdefg"
+          }
+        }
+      },
+      "inline_response_200_11_data": {
+        "type": "object",
+        "properties": {
+          "cashgramStatus": {
+            "type": "string",
+            "example": "ACTIVE"
+          },
+          "referenceId": {
+            "type": "integer",
+            "example": 123456,
+            "default": 0
+          },
+          "cashgramId": {
+            "type": "string",
+            "example": "JOHaN10"
+          },
+          "cashgramLink": {
+            "type": "string",
+            "example": "http://csgr.am/abcdefg"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "xRequestIDHeader": {
+        "in": "header",
+        "name": "x-request-id",
+        "description": "It is the request ID for the API call. This ID can be used to resolve tech realted issues. Communicate this in your tech related queries to Cashfree Payments.",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "example": "4dfb9780-46fe-11ee-be56-0242ac120002"
+      },
+      "apiVersionHeader": {
+        "in": "header",
+        "name": "x-api-version",
+        "description": "It is the API version to be used. The accepted format is YYYY-MM-DD.",
+        "schema": {
+          "type": "string",
+          "description": "It is the API version to be used.",
+          "default": "2024-01-01"
+        },
+        "example": "2024-01-01"
+      }
+    },
+    "requestBodies": {},
+    "responses": {},
+    "examples": {
+      "all_three_params_given": {
+        "summary": "All three parameters provided",
+        "description": "All three parameters are provided to get beneficiary details",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "too_many_parameters_in_request",
+          "message": "Please provide either bank_account_number and bank_ifsc together or beneficiary_id alone. Do not include all three parameters in the request"
+        }
+      },
+      "bank_account_exists_with_a_different_ifsc_v2": {
+        "summary": "Beneficiary exists with the provided bank account number but a different IFSC",
+        "description": "beneficiary exists with given beneficiary_bank_account_number but beneficiary_ifsc is different",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_not_found",
+          "message": "Beneficiary exists with the given bank_account_number but a different bank_ifsc"
+        }
+      },
+      "bank_account_given_ifsc_not_given_in_get_v2": {
+        "description": "Bank account number is provided but ifsc is not provided",
+        "summary": "Missing IFSC but bank account number is provided",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_ifsc_missing",
+          "message": "bank_ifsc : should be provided with the request if bank_account_number is provided"
+        }
+      },
+      "bank_account_invalid": {
+        "description": "Bank account number contains characters that are not allowed",
+        "summary": "Provided bank account number contains characters that are not allowed",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_account_number_invalid",
+          "message": "bank_account_number : should be alphanumeric. value received: 123@"
+        }
+      },
+      "bank_account_number_too_large": {
+        "description": "Bank account number provided is too large",
+        "summary": "Provided bank account number is too large",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_account_number_length_exceeded",
+          "message": "bank_account_number : should not be more than 25 characters long. value received: 235142352346523462456345263452345"
+        }
+      },
+      "bank_account_number_too_short": {
+        "description": "Bank account number provided is too short",
+        "summary": "Provided bank account number is too short",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_account_number_length_short",
+          "message": "bank_account_number : should not be less than 4 characters long. value received: 12"
+        }
+      },
+      "bank_ifsc_given_account_not_given_in_get_v2": {
+        "summary": "Missing bank account number but IFSC is provided",
+        "description": "Bank ifsc is provided but bank account number is not provided",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_account_number_missing",
+          "message": "bank_account_number: should be provided with the request if bank_ifsc is provided"
+        }
+      },
+      "bene_creation_request_with_only_vpa": {
+        "description": "Beneficiary creation with only vpa",
+        "summary": "Create beneficiary with only VPA",
+        "value": {
+          "beneficiary_id": "JOHN18011343",
+          "beneficiary_name": "John Doe",
+          "beneficiary_instrument_details": {
+            "vpa": "test@upi"
+          },
+          "beneficiary_contact_details": {
+            "beneficiary_email": "sample@cashfree.com",
+            "beneficiary_phone": "9876543210",
+            "beneficiary_country_code": "+91",
+            "beneficiary_address": "177A Bleecker Street",
+            "beneficiary_city": "New York City",
+            "beneficiary_state": "New York",
+            "beneficiary_postal_code": "560011"
+          }
+        }
+      },
+      "bene_exist_for_bank_account_and_ifsc": {
+        "description": "Account number and ifsc are already registered as a beneficiary",
+        "summary": "Account number and IFSC are already registered for a beneficiary",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_already_exists",
+          "message": "Beneficiary already exists with the given beneficiary_bank_account_number and beneficiary_ifsc"
+        }
+      },
+      "bene_id_too_large_v2": {
+        "description": "Length of beneficiary_id is more than maximum allowed",
+        "summary": "Length of beneficiary_id exceeded the maximum limit",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_id_length_exceeded",
+          "message": "beneficiary_id : should not be more than 50 characters long. value received: kl12b3rkh1bv234lkbr3jl24tbrlk234bkt234t134kbr1hk34jr"
+        }
+      },
+      "beneficiary_id_not_found_v2": {
+        "summary": "Beneficiary with given beneficiary_id not found",
+        "description": "Beneficiary with the given beneficiary_id does not exist",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_not_found",
+          "message": "Beneficiary does not exist"
+        }
+      },
+      "beneficiary_id_not_passed": {
+        "description": "Beneficiary Id which is a mandatory parameter is not passed in the request",
+        "summary": "Missing beneficiary_id in the request",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_id_missing",
+          "message": "beneficiary_id : should contain only letters, numbers, hyphen, underscore, pipe, and dot. Value received: .\\qewqefwqev"
+        }
+      },
+      "beneficiary_with_account_does_not_exist_v2": {
+        "summary": "Beneficiary with given account details not found",
+        "description": "Beneficiary with given account details does not exist",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_not_found",
+          "message": "Beneficiary with the given bank_account_number and bank_ifsc does not exist"
+        }
+      },
+      "beneid_longer_than_max_limit_error": {
+        "summary": "Beneficiary Id can not have more than 50 characters",
+        "description": "Beneficiary ID cannot have more than 50 characters",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "invalid_beneficiary_id",
+          "message": "Beneficiary with the given combination of beneficiary_bank_account_number and beneficiary_ifsc does not exist"
+        }
+      },
+      "create_beneficiary_request_v2": {
+        "description": "Find the request body for creating a beneficiary with all the available information",
+        "summary": "Create beneficiary with all the available information",
+        "value": {
+          "beneficiary_id": "JOHN18011343",
+          "beneficiary_name": "John Doe",
+          "beneficiary_instrument_details": {
+            "bank_account_number": "1223334444",
+            "bank_ifsc": "HDFC0000001",
+            "vpa": "test@upi"
+          },
+          "beneficiary_contact_details": {
+            "beneficiary_email": "sample@cashfree.com",
+            "beneficiary_phone": "9876543210",
+            "beneficiary_country_code": "+91",
+            "beneficiary_address": "177A Bleecker Street",
+            "beneficiary_city": "New York City",
+            "beneficiary_state": "New York",
+            "beneficiary_postal_code": "560011"
+          }
+        }
+      },
+      "delete_bene_success_response_v2": {
+        "description": "Example values for Remove Beneficiary V2 success response",
+        "value": {
+          "beneficiary_id": "JOHN18011343",
+          "beneficiary_name": "John Doe",
+          "beneficiary_instrument_details": {
+            "bank_account_number": "1223334444",
+            "bank_ifsc": "HDFC0000001",
+            "vpa": "test@upi"
+          },
+          "beneficiary_contact_details": {
+            "beneficiary_email": "sample@cashfree.com",
+            "beneficiary_phone": "9876543210",
+            "beneficiary_country_code": "+91",
+            "beneficiary_address": "177A Bleecker Street",
+            "beneficiary_city": "New York City",
+            "beneficiary_state": "New York",
+            "beneficiary_postal_code": "560011"
+          },
+          "beneficiary_status": "DELETED",
+          "added_on": "2023-12-04T15:50:00Z"
+        }
+      },
+      "duplicate_bene_creation_response": {
+        "summary": "Beneficiary exists with the given beneficiary ID",
+        "description": "Beneficiary with given beneficiary id already exist",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_id_already_exists",
+          "message": "Beneficiary already exists with the given beneficiary_id"
+        }
+      },
+      "get_beneficiary_success_v2": {
+        "description": "Example values for Get Beneficiary V2 success response",
+        "value": {
+          "beneficiary_id": "JOHN18011343",
+          "beneficiary_name": "John Doe",
+          "beneficiary_instrument_details": {
+            "bank_account_number": "1223334444",
+            "bank_ifsc": "HDFC0000001",
+            "vpa": "test@upi"
+          },
+          "beneficiary_contact_details": {
+            "beneficiary_email": "sample@cashfree.com",
+            "beneficiary_phone": "9876543210",
+            "beneficiary_country_code": "+91",
+            "beneficiary_address": "177A Bleecker Street",
+            "beneficiary_city": "New York City",
+            "beneficiary_state": "New York",
+            "beneficiary_postal_code": "560011"
+          },
+          "beneficiary_status": "VERIFIED",
+          "added_on": "2023-12-04T15:50:00Z"
+        }
+      },
+      "internal_server_error_v2": {
+        "summary": "Internal server error",
+        "description": "Error at Cashfree Payments' server",
+        "value": {
+          "type": "api_error",
+          "code": "internal_server_error",
+          "message": "Error at cashfree's server"
+        }
+      },
+      "invalid_bene_id_due_unacceptable_characters": {
+        "description": "Beneficiary ID contains characters that are not allowed",
+        "summary": "Beneficiary ID contains characters that are not allowed",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_id_invalid",
+          "message": "beneficiary_id : should contain only letters, numbers, hyphen, underscore, pipe, and dot. Value received: .\\qewqefwqev"
+        }
+      },
+      "invalid_ifsc": {
+        "description": "Invalid value given for IFSC",
+        "summary": "Invalid IFSC",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "bank_ifsc_invalid",
+          "message": "bank_ifsc : please provide a valid IFSC. value received: SBIN00708410"
+        }
+      },
+      "no_bene_identifiers_provided_v2": {
+        "description": "No details are provided with the request to identifiy the beneficiary",
+        "summary": "Details are not provided with the request to identifiy the beneficiary",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_identifiers_missing",
+          "message": "beneficiary_identifiers : Either beneficiary_id or the combination of bank_account_number and bank_ifsc has to be provided with the request"
+        }
+      },
+      "same_bene_as_source_v2": {
+        "description": "Beneficiary account is the same as the source bank account",
+        "summary": "Beneficiary account is the same as the source bank account",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_account_same_as_source",
+          "message": "beneficiary_bank_account_number provided can not be same as source bank account"
+        }
+      },
+      "vba_beneiciary_not_allowed": {
+        "description": "Adding virtual bank account as a beneficiary is not allowed for the account",
+        "summary": "Virtual bank account is not allowed for the beneficiary",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "vba_bene_not_allowed",
+          "message": "Virtual bank account as beneficiary_bank_account_number is not allowed for the account"
+        }
+      },
+      "transfer_request_v2": {
+        "summary": "Transfer request with beneficiary_id",
+        "description": "The API request to iniate a transfer with beneficiary_id",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "transfer_amount": 1,
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011"
+          }
+        }
+      },
+      "transfer_request_v2_with_bene_details": {
+        "summary": "Transfer request with beneficiary_details",
+        "description": "The API request to iniate a transfer with beneficiary_details",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "transfer_amount": 1,
+          "transfer_mode": "imps",
+          "beneficiary_details": {
+            "beneficiary_details": {
+              "beneficiary_instrument_details": {
+                "bank_account_number": "1234554321",
+                "bank_ifsc": "SBIN0001161"
+              }
+            }
+          }
+        }
+      },
+      "transfer_request_v2_with_card_details": {
+        "summary": "Transfer request with card_details",
+        "description": "The API request to iniate a transfer with card_details",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "transfer_amount": 1,
+          "transfer_mode": "imps",
+          "beneficiary_details": {
+            "beneficiary_details": {
+              "beneficiary_instrument_details": {
+                "card_details": {
+                  "card_token": "4640837721072836",
+                  "card_network_type": "MASTERCARD",
+                  "card_cryptogram": "jjoutwsdgfdou124354ljlsdhgout968957",
+                  "card_token_expiry": "2032-10",
+                  "card_type": "CREDIT",
+                  "card_token_PAN_sequence_number": "001"
+                }
+              }
+            }
+          }
+        }
+      },
+      "transfer_request_v2_fundsource_id": {
+        "summary": "Transfer request with fundsource_id (when you want to debit money from a particular fund source)",
+        "description": "The API request to initiate a transfer and debit the money from a particular fund source",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "transfer_amount": 1,
+          "transfer_mode": "imps",
+          "beneficiary_details": {
+            "beneficiary_details": {
+              "beneficiary_id": "JOHN18011"
+            }
+          },
+          "fundsource_id": "CASHFREE_1"
+        }
+      },
+      "batch_transfer_request_v2": {
+        "summary": "Batch transfer request",
+        "description": "The API request to initiate a batch transfer",
+        "value": {
+          "batch_transfer_id": "test_batch_transfer_id",
+          "transfers": [
+            {
+              "transfer_id": "JUNOB2018",
+              "transfer_amount": 1,
+              "beneficiary_details": {
+                "beneficiary_id": "JOHN18011"
+              }
+            },
+            {
+              "transfer_id": "JUNOB2018",
+              "transfer_amount": 1,
+              "transfer_mode": "imps",
+              "beneficiary_details": {
+                "beneficiary_details": {
+                  "beneficiary_instrument_details": {
+                    "bank_account_number": "1234554321",
+                    "bank_ifsc": "SBIN0001161"
+                  }
+                }
+              }
+            },
+            {
+              "transfer_id": "JUNOB2018",
+              "transfer_amount": 1,
+              "transfer_mode": "imps",
+              "beneficiary_details": {
+                "beneficiary_details": {
+                  "beneficiary_id": "JOHN18011"
+                }
+              },
+              "fundsource_id": "CASHFREE_1"
+            }
+          ]
+        }
+      },
+      "transfer_received_response_v2": {
+        "summary": "Transfer received",
+        "description": "Transfer received by Cashfree Payments. Please check the status after some time.",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "RECEIVED",
+          "status_code": "RECEIVED",
+          "status_description": "The transfer has been received by Cashfree successfully for further processing. You should use Check Status API response or Webhooks to know the terminal state of the transfer request.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011"
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_pending_approval_response_v2": {
+        "summary": "Transfer is pending for approval",
+        "description": "Transfer is pending for approval.",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "APPROVAL_PENDING",
+          "status_code": "APPROVAL_PENDING",
+          "status_description": "The transfer requires approval. You can approve or reject the transfer request from the Cashfree Merchant Dashboard.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011"
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_completed_response_v2": {
+        "summary": "Transfer completed successfully",
+        "description": "Transfer completed successfully",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "SUCCESS",
+          "status_code": "COMPLETED",
+          "status_description": "The transfer has been initiated via the partner bank successfully, hence your account is debited and the request is successfuly processed by the beneficiary bank and has been credited to the end beneficiary.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011",
+            "beneficiary_instrument_details": {
+              "bank_account_number": "7766671501729",
+              "bank_ifsc": "SBIN0000003"
+            }
+          },
+          "transfer_amount": 1,
+          "transfer_service_charge": 1,
+          "transfer_service_tax": 0.18,
+          "transfer_mode": "BANK",
+          "transfer_utr": "TESTR92023012200543116",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_pending_response_v2": {
+        "summary": "Transfer pending at the bank",
+        "description": "Transfer initiated by Cashfree Payments and is pending at the bank's side",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "PENDING",
+          "status_code": "PENDING",
+          "status_description": "The transfer is currently in a Pending state, as Cashfree is awaiting a final confirmation from the partner bank for a terminal status. You should rely only on Check Status API response or Webhooks to know the terminal state of the transfer request.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011",
+            "beneficiary_instrument_details": {
+              "bank_account_number": "7766671501729",
+              "bank_ifsc": "SBIN0000003"
+            }
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "transfer_utr": "TESTR92023012200543116",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_failed_response_v2": {
+        "summary": "Transfer failed",
+        "description": "Amount cannot be transferred to beneficiary as the transfer failed",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "FAILED",
+          "status_code": "IMPS_MODE_FAIL",
+          "status_description": "The transfer has been reversed by the beneficiary bank because the beneficiary bank account doesnot support IMPS transfers. This rejection is done by the beneficiary bank for the specific beneficiary account. You can try NEFT or other channels to do the disbursals.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011",
+            "beneficiary_instrument_details": {
+              "bank_account_number": "7766671501729",
+              "bank_ifsc": "SBIN0000003"
+            }
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_rejected_response_v2": {
+        "summary": "Transfer rejected",
+        "description": "The transfer has been rejected by Cashfree Oatnebts. Please review the 'status_description' field to understand the reason for rejection.",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "REJECTED",
+          "status_code": "INVALID_MODE_FOR_PYID",
+          "status_description": "The transfer has been rejected because the payment instrument does not support this mode of transfer. You should get this mode activated on the payment instrument ID by contacting Cashfree, and then initiate a new transfer request.",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011"
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "transfer_reversed_response_v2": {
+        "summary": "Transfer reversed",
+        "description": "The transfer has been reversed by bank. Please review the status_description field to understand the reason reversal.",
+        "value": {
+          "transfer_id": "JUNOB2018",
+          "cf_transfer_id": "123456",
+          "status": "REVERSED",
+          "status_code": "INVALID_ACCOUNT_FAIL",
+          "status_description": "The transfer has been reversed by the beneficiary bank because the Account Number of the beneficiary is invalid. After correcting the account number, you can reinitiate the transfer via Cashfree so that the transfer can be reattempted again by Cashfree with the partner bank(s).",
+          "beneficiary_details": {
+            "beneficiary_id": "JOHN18011",
+            "beneficiary_instrument_details": {
+              "bank_account_number": "7766671501729",
+              "bank_ifsc": "SBIN0000003"
+            }
+          },
+          "transfer_amount": 1,
+          "transfer_mode": "BANK",
+          "fundsource_id": "CASHFREE_1",
+          "added_on": "2021-11-24T13:39:25Z",
+          "updated_on": "2021-11-24T13:40:27Z"
+        }
+      },
+      "batch_transfer_received_response_v2": {
+        "summary": "Batch transfer received successfully",
+        "description": "Batch transfer received successfully by Cashfree Payments. Please check the status of the batch transfer after some time.",
+        "value": {
+          "batch_transfer_id": "test_batch_transfer_id",
+          "cf_batch_transfer_id": "123456",
+          "status": "RECEIVED"
+        }
+      },
+      "batch_transfer_pending_response_v2": {
+        "summary": "Batch transfer pending",
+        "description": "Batch Transfer pending at the bank. Please check the status of batch transfer after some time.",
+        "value": {
+          "batch_transfer_id": "test_batch_transfer_id",
+          "cf_batch_transfer_id": "123456",
+          "status": "PENDING",
+          "transfers": [
+            {
+              "transfer_id": "JUNOB2018",
+              "cf_transfer_id": "123456",
+              "status": "SUCCESS",
+              "status_code": "COMPLETED",
+              "status_description": "The transfer has been initiated via the partner bank successfully, hence your account is debited and the request is successfuly processed by the beneficiary bank and has been credited to the end beneficiary.",
+              "beneficiary_details": {
+                "beneficiary_id": "JOHN18011",
+                "beneficiary_instrument_details": {
+                  "bank_account_number": "7766671501729",
+                  "bank_ifsc": "SBIN0000003"
+                }
+              },
+              "transfer_amount": 1,
+              "transfer_service_charge": 1,
+              "transfer_service_tax": 0.18,
+              "transfer_mode": "BANK",
+              "transfer_utr": "TESTUTR",
+              "fundsource_id": "CASHFREE_1",
+              "added_on": "2021-11-24T13:39:25Z",
+              "updated_on": "2021-11-24T13:40:27Z"
+            },
+            {
+              "transfer_id": "JUNOB2018",
+              "cf_transfer_id": "123457",
+              "status": "PENDING",
+              "status_code": "PENDING",
+              "status_description": "The transfer is currently in a Pending state, as Cashfree is awaiting a final confirmation from the partner bank for a terminal status. You should rely only on Check Status API response or Webhooks to know the terminal state of the transfer request.",
+              "beneficiary_details": {
+                "beneficiary_id": "JOHN18011",
+                "beneficiary_instrument_details": {
+                  "bank_account_number": "7766671501729",
+                  "bank_ifsc": "SBIN0000003"
+                }
+              },
+              "transfer_amount": 1,
+              "transfer_mode": "BANK",
+              "transfer_utr": "TESTUTR2",
+              "fundsource_id": "CASHFREE_1",
+              "added_on": "2021-11-24T13:39:25Z",
+              "updated_on": "2021-11-24T13:40:27Z"
+            },
+            {
+              "transfer_id": "JUNOB2018",
+              "cf_transfer_id": "123458",
+              "status": "REJECTED",
+              "status_code": "INVALID_MODE_FOR_PYID",
+              "status_description": "The transfer has been rejected because the payment instrument does not support this mode of transfer. You should get this mode activated on the payment instrument ID by contacting Cashfree, and then initiate a new transfer request.",
+              "beneficiary_details": {
+                "beneficiary_id": "JOHN18011"
+              },
+              "transfer_amount": 1,
+              "transfer_mode": "BANK",
+              "fundsource_id": "CASHFREE_1",
+              "added_on": "2021-11-24T13:39:25Z",
+              "updated_on": "2021-11-24T13:40:27Z"
+            }
+          ]
+        }
+      },
+      "APIsDisabledExampleV2": {
+        "summary": "APIs disabled",
+        "description": "Forbidden request. APIs are disabled",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "apis_not_enabled",
+          "message": "APIs not enabled. Please fill out the [Support Form](https://merchant.cashfree.com/merchants/landing?env=prod&raise_issue=1)"
+        }
+      },
+      "BeneficiaryNotFoundV2": {
+        "summary": "Beneficiary not found",
+        "description": "Beneficiary does not exist",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_not_found",
+          "message": "Beneficiary does not exist"
+        }
+      },
+      "authentication_internal_server_error": {
+        "summary": "Internal server error while authenticating request",
+        "description": "Internal server error while authenticating request",
+        "value": {
+          "type": "authentication_error",
+          "code": "internal_server_error",
+          "message": "Unable to authenticate the request. Please fill out the [Support Form](https://merchant.cashfree.com/merchants/landing?env=prod&raise_issue=1)"
+        }
+      },
+      "transfer_id_invalid": {
+        "description": "Invalid transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_id_invalid",
+          "message": "transfer_id should be alphanumeric"
+        }
+      },
+      "transfer_id_missing": {
+        "description": "Missing transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_id_missing",
+          "message": "transfer_id is missing in the request"
+        }
+      },
+      "transfer_amount_invalid": {
+        "description": "Invalid transfer_amount",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_amount_invalid",
+          "message": "transfer_amount should be greater then 1.00"
+        }
+      },
+      "transfer_amount_missing": {
+        "description": "Misisng transfer_amount",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_amount_missing",
+          "message": "transfer_amount is missing in the request"
+        }
+      },
+      "transfer_mode_invalid": {
+        "description": "Invalid transfer_mode",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_mode_invalid",
+          "message": "transfer_mode is invalid allowed values are : bank, imps, neft, rtgs, upi, paytm, amazonpay, card and cardupi"
+        }
+      },
+      "beneficiary_id_invalid": {
+        "description": "Invalid beneficiary_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_id_invalid",
+          "message": "beneficiary_id should be alphanumeric"
+        }
+      },
+      "beneficiary_name_invalid": {
+        "description": "Invalid beneficiary_name",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_name_invalid",
+          "message": "beneficiary_name is invalid. only alphabets and whitespaces are allowed"
+        }
+      },
+      "beneficiary_bank_account_invalid": {
+        "description": "Invalid beneficiary bank account details",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.bank_account_number_invalid",
+          "message": "bank_account_number should be alphanumeric"
+        }
+      },
+      "beneficiary_bank_account_invalid_2": {
+        "description": "Bank account number in the request does not match with the beneficiary's bank account number",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.bank_account_number_invalid",
+          "message": "Bank account number passed in the request does not match with the beneficiary with beneficiary_id :: test_beneId"
+        }
+      },
+      "beneficiary_bank_ifsc_invalid": {
+        "description": "Invalid IFSC",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.bank_ifsc_invalid",
+          "message": "bank_ifsc should be in standard ifsc format"
+        }
+      },
+      "beneficiary_bank_ifsc_invalid_2": {
+        "description": "IFSC in the request does not match with the beneficiary's IFSC",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.bank_ifsc_invalid",
+          "message": "Bank ifsc passed in the request does not match with the beneficiary with beneficiary_id :: test_beneId"
+        }
+      },
+      "beneficiary_vpa_invalid": {
+        "description": "Invalid beneficiary VPA",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.vpa_invalid",
+          "message": "vpa is in invalid format"
+        }
+      },
+      "beneficiary_vpa_invalid_2": {
+        "description": "VPA in the request does not match with the beneficiary's VPA",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "beneficiary_details.beneficiary_instrument_details.vpa_invalid",
+          "message": "Vpa passed in the request does not match with the beneficiary with beneficiary_id :: test_beneId"
+        }
+      },
+      "cf_transfer_id_not_found": {
+        "summary": "cf_transfer_id not found",
+        "description": "cf_transfer_id not found",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "cf_transfer_id_not_found",
+          "message": "cf_transfer_id does not exist"
+        }
+      },
+      "transfer_id_not_found": {
+        "summary": "transfer_id not found",
+        "description": "transfer_id not found",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfer_id_not_found",
+          "message": "transfer_id does not exist"
+        }
+      },
+      "cf_batch_transfer_id_not_found": {
+        "summary": "cf_batch_transfer_id not found",
+        "description": "cf_batch_transfer_id not found",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "cf_batch_transfer_id",
+          "message": "cf_batch_transfer_id does not exist"
+        }
+      },
+      "batch_transfer_id_not_found": {
+        "summary": "batch_transfer_id not found",
+        "description": "batch_transfer_id not found",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "batch_transfer_id_not_found",
+          "message": "batch_transfer_id does not exist"
+        }
+      },
+      "batch_transfer_id_already_exists": {
+        "summary": "batch_transfer_id not found",
+        "description": "batch_transfer_id not found",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "batch_transfer_id_already_exists",
+          "message": "batch_transfer_id already exists. please pass unique id in each request"
+        }
+      },
+      "batch_transfer_id_missing": {
+        "description": "Missing batch_transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "batch_transfer_id_missing",
+          "message": "batch_transfer_id is missing in the request"
+        }
+      },
+      "batch_transfer_id_invalid": {
+        "description": "Invalid batch_transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "batch_transfer_id_invalid",
+          "message": "batch_transfer_id should be alphanumeric"
+        }
+      },
+      "batchTransfer_transfer_id_invalid": {
+        "description": "Invalid transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].transfer_id_invalid",
+          "message": "transfer_id should be alphanumeric"
+        }
+      },
+      "batchTransfer_transfer_id_missing": {
+        "description": "Missing transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].transfer_id_missing",
+          "message": "transfer_id is missing in the request"
+        }
+      },
+      "batchTransfer_transfer_amount_invalid": {
+        "description": "Invalid transfer_amount",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].transfer_amount_invalid",
+          "message": "transfer_amount should be greater then 1.00"
+        }
+      },
+      "batchTransfer_transfer_amount_missing": {
+        "description": "Missing transfer_amount",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].transfer_amount_missing",
+          "message": "transfer_amount is missing in the request"
+        }
+      },
+      "batchTransfer_transfer_mode_invalid": {
+        "description": "Invalid transfer_mode",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].transfer_mode_invalid",
+          "message": "transfer_mode is invalid allowed values are : bank, imps, neft, rtgs, upi, paytm, amazonpay, card and cardupi"
+        }
+      },
+      "batchTransfer_beneficiary_id_invalid": {
+        "description": "Invalid beneficiary_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].beneficiary_details.beneficiary_id_invalid",
+          "message": "beneficiary_id should be alphanumeric"
+        }
+      },
+      "batchTransfer_beneficiary_name_invalid": {
+        "description": "Invalid transfer_id",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].beneficiary_details.beneficiary_name_invalid",
+          "message": "beneficiary_name is invalid. only alphabets and whitespaces are allowed"
+        }
+      },
+      "batchTransfer_beneficiary_bank_account_invalid": {
+        "description": "beneficiary bank account is invalid",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].beneficiary_details.beneficiary_instrument_details.bank_account_number_invalid",
+          "message": "bank_account_number should be alphanumeric"
+        }
+      },
+      "batchTransfer_beneficiary_bank_ifsc_invalid": {
+        "description": "Invalid bank account details",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].beneficiary_details.beneficiary_instrument_details.bank_ifsc_invalid",
+          "message": "bank_ifsc should be in standard ifsc format"
+        }
+      },
+      "batchTransfer_beneficiary_vpa_invalid": {
+        "description": "Invalid beneficiary VPA",
+        "value": {
+          "type": "invalid_request_error",
+          "code": "transfers[0].beneficiary_details.beneficiary_instrument_details.vpa_invalid",
+          "message": "vpa is in invalid format"
+        }
+      }
+    },
+    "headers": {
+      "x-api-version": {
+        "schema": {
+          "type": "string",
+          "format": "YYYY-MM-DD",
+          "enum": [
+            "2022-09-01"
+          ],
+          "default": "2024-01-01"
+        },
+        "description": "It displays the API version. The current version is `2022-09-01`."
+      },
+      "x-ratelimit-limit": {
+        "schema": {
+          "type": "integer"
+        },
+        "example": 200,
+        "description": "It displays the rate limit per minute set for your account for this API request."
+      },
+      "x-ratelimit-remaining": {
+        "schema": {
+          "type": "integer"
+        },
+        "example": 2,
+        "description": "It displays the remaining rate limit in the next minute for your account for this API requeste. Uses sliding window."
+      },
+      "x-ratelimit-retry": {
+        "schema": {
+          "type": "integer"
+        },
+        "example": 4,
+        "description": "It displays the number of seconds to wait if the rate limit is breached\n- Is 0 if withing the limit\n- Is between 1 and 59 if breached\n"
+      },
+      "x-request-id": {
+        "schema": {
+          "type": "string"
+        },
+        "example": "some-req-id",
+        "description": "It displays the request ID for the API request. Is blank or null if no `x-request-id` is sent during the request"
+      }
+    },
+    "x-elicitationConfig": {
+      "createTransfer": {
+        "enabled": true,
+        "fields": {
+          "transfer_amount": {
+            "required": true,
+            "message": "Please provide the amount to be transferred",
+            "schema": {
+              "type": "number",
+              "title": "Transfer Amount",
+              "description": "Amount to be transferred (minimum 1 INR)",
+              "minimum": 1
+            },
+            "mapping": {
+              "target": "body.transfer_amount",
+              "transform": "number"
+            }
+          }
+        }
+      },
+      "createCashgram": {
+        "enabled": true,
+        "fields": {
+          "amount": {
+            "required": true,
+            "message": "Please provide the amount for Cashgram",
+            "schema": {
+              "type": "number",
+              "title": "Cashgram Amount",
+              "description": "Amount for Cashgram (minimum 1 INR)",
+              "minimum": 1
+            },
+            "mapping": {
+              "target": "body.amount",
+              "transform": "number"
+            }
+          },
+          "phone": {
+            "required": true,
+            "message": "Please provide the beneficiary's phone number",
+            "schema": {
+              "type": "string",
+              "title": "Phone Number",
+              "description": "Beneficiary's phone number in E.164 format"
+            },
+            "mapping": {
+              "target": "body.phone",
+              "transform": "string"
+            }
+          }
+        }
+      },
+      "deactivateCashgram": {
+        "enabled": true,
+        "fields": {
+          "cashgram_id": {
+            "required": true,
+            "message": "Please provide the Cashgram ID to be deactivated",
+            "schema": {
+              "type": "string",
+              "title": "Cashgram ID",
+              "description": "The unique identifier of the Cashgram to be deactivated"
+            },
+            "mapping": {
+              "target": "path.cashgram_id",
+              "transform": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/transfers": {
+      "post": {
+        "summary": "Standard Transfer V2",
+        "x-mcp": {
+          "enabled":  true,
+          "config": {
+            "elicitation": {
+              "$ref": "#/components/x-elicitationConfig/createTransfer"
+            }
+          }
+        },
+        "description": "Use this API to initiate an amount transfer at Cashfree Payments. It is an async request by default.",
+        "tags": [
+          "Transfers v2"
+        ],
+        "operationId": "PayoutInitiateTransfer",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          }
+        ],
+        "requestBody": {
+          "description": "Find the request parameters of the API request to transfer money to a beneficiary.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransferRequest"
+              },
+              "examples": {
+                "transfer_request": {
+                  "$ref": "#/components/examples/transfer_request_v2"
+                },
+                "transfer_request_with_bene_details": {
+                  "$ref": "#/components/examples/transfer_request_v2_with_bene_details"
+                },
+                "transfer_request_with_card_details": {
+                  "$ref": "#/components/examples/transfer_request_v2_with_card_details"
+                },
+                "transfer_request_with_fundsource_id": {
+                  "$ref": "#/components/examples/transfer_request_v2_fundsource_id"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTransferResponse"
+                },
+                "examples": {
+                  "transfer_received_response_v2": {
+                    "$ref": "#/components/examples/transfer_received_response_v2"
+                  },
+                  "transfer_pending_approval_response_v2": {
+                    "$ref": "#/components/examples/transfer_pending_approval_response_v2"
+                  },
+                  "transfer_pending_response_v2": {
+                    "$ref": "#/components/examples/transfer_pending_response_v2"
+                  },
+                  "transfer_completed_response": {
+                    "$ref": "#/components/examples/transfer_completed_response_v2"
+                  },
+                  "transfer_failed_response_v2": {
+                    "$ref": "#/components/examples/transfer_failed_response_v2"
+                  },
+                  "transfer_rejected_response_v2": {
+                    "$ref": "#/components/examples/transfer_rejected_response_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-api-version": {
+                "$ref": "#/components/headers/x-api-version"
+              },
+              "x-ratelimit-limit": {
+                "$ref": "#/components/headers/x-ratelimit-limit"
+              },
+              "x-ratelimit-remaining": {
+                "$ref": "#/components/headers/x-ratelimit-remaining"
+              },
+              "x-ratelimit-retry": {
+                "$ref": "#/components/headers/x-ratelimit-retry"
+              },
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "400": {
+            "description": "invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "transfer_id_missing": {
+                    "$ref": "#/components/examples/transfer_id_missing"
+                  },
+                  "transfer_id_invalid": {
+                    "$ref": "#/components/examples/transfer_id_invalid"
+                  },
+                  "transfer_amount_invalid": {
+                    "$ref": "#/components/examples/transfer_amount_invalid"
+                  },
+                  "transfer_amount_missing": {
+                    "$ref": "#/components/examples/transfer_amount_missing"
+                  },
+                  "transfer_mode_invalid": {
+                    "$ref": "#/components/examples/transfer_mode_invalid"
+                  },
+                  "beneficiary_id_invalid": {
+                    "$ref": "#/components/examples/beneficiary_id_invalid"
+                  },
+                  "beneficiary_name_invalid": {
+                    "$ref": "#/components/examples/beneficiary_name_invalid"
+                  },
+                  "beneficiary_bank_account_invalid": {
+                    "$ref": "#/components/examples/beneficiary_bank_account_invalid"
+                  },
+                  "beneficiary_bank_account_invalid_2": {
+                    "$ref": "#/components/examples/beneficiary_bank_account_invalid_2"
+                  },
+                  "beneficiary_bank_ifsc_invalid": {
+                    "$ref": "#/components/examples/beneficiary_bank_ifsc_invalid"
+                  },
+                  "beneficiary_bank_ifsc_invalid_2": {
+                    "$ref": "#/components/examples/beneficiary_bank_ifsc_invalid_2"
+                  },
+                  "beneficiary_vpa_invalid": {
+                    "$ref": "#/components/examples/beneficiary_vpa_invalid"
+                  },
+                  "beneficiary_vpa_invalid_2": {
+                    "$ref": "#/components/examples/beneficiary_vpa_invalid_2"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/APIsDisabledExampleV2"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/BeneficiaryNotFoundV2"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  },
+                  "AuthenticationError": {
+                    "$ref": "#/components/examples/authentication_internal_server_error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Transfer Status V2",
+        "x-mcp": {
+          "enabled":  true
+        },
+        "description": "Use this API to get the status of the initiated transfer. You can use either the transfer_id or cf_transfer_id to fetch the details.",
+        "tags": [
+          "Transfers v2"
+        ],
+        "operationId": "PayoutFetchTransfer",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          },
+          {
+            "in": "query",
+            "name": "cf_transfer_id",
+            "description": "It is the unique ID created by Cashfree Payments. You receive it in the response of the initiated standard transfer request. (Either cf_transfer_id or transfer_id is mandatory)",
+            "example": "10023",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "transfer_id",
+            "description": "It is the unique ID you created to identify the standard transfer request.",
+            "example": "Sample_test",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTransferResponse"
+                },
+                "examples": {
+                  "transfer_received_response_v2": {
+                    "$ref": "#/components/examples/transfer_received_response_v2"
+                  },
+                  "transfer_pending_approval_response_v2": {
+                    "$ref": "#/components/examples/transfer_pending_approval_response_v2"
+                  },
+                  "transfer_pending_response_v2": {
+                    "$ref": "#/components/examples/transfer_pending_response_v2"
+                  },
+                  "transfer_completed_response": {
+                    "$ref": "#/components/examples/transfer_completed_response_v2"
+                  },
+                  "transfer_failed_response_v2": {
+                    "$ref": "#/components/examples/transfer_failed_response_v2"
+                  },
+                  "transfer_rejected_response_v2": {
+                    "$ref": "#/components/examples/transfer_rejected_response_v2"
+                  },
+                  "transfer_reversed_response_v2": {
+                    "$ref": "#/components/examples/transfer_reversed_response_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-api-version": {
+                "$ref": "#/components/headers/x-api-version"
+              },
+              "x-ratelimit-limit": {
+                "$ref": "#/components/headers/x-ratelimit-limit"
+              },
+              "x-ratelimit-remaining": {
+                "$ref": "#/components/headers/x-ratelimit-remaining"
+              },
+              "x-ratelimit-retry": {
+                "$ref": "#/components/headers/x-ratelimit-retry"
+              },
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/APIsDisabledExampleV2"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "CfTransferIdNotFound": {
+                    "$ref": "#/components/examples/cf_transfer_id_not_found"
+                  },
+                  "TransferIdNotFound": {
+                    "$ref": "#/components/examples/transfer_id_not_found"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  },
+                  "AuthenticationError": {
+                    "$ref": "#/components/examples/authentication_internal_server_error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfers/batch": {
+      "post": {
+        "summary": "Batch Transfer V2",
+        "x-mcp": {
+          "enabled":  true
+        },
+        "description": "Use this API to initiate a batch transfer request at Cashfree Payments. You can transfer money to multiple beneficiaries. The batch transfer limit is 5,000 in the production environment and 1,000 by default in the test environment.",
+        "tags": [
+          "Transfers v2"
+        ],
+        "operationId": "PayoutInitiateBatchTransfer",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          }
+        ],
+        "requestBody": {
+          "description": "Find the request parameters of the API request to transfer money to multiple beneficiaries.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBatchTransferRequest"
+              },
+              "examples": {
+                "transfer_request": {
+                  "$ref": "#/components/examples/batch_transfer_request_v2"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBatchTransferResponse"
+                },
+                "examples": {
+                  "batch_transfer_received_response_v2": {
+                    "$ref": "#/components/examples/batch_transfer_received_response_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-api-version": {
+                "$ref": "#/components/headers/x-api-version"
+              },
+              "x-ratelimit-limit": {
+                "$ref": "#/components/headers/x-ratelimit-limit"
+              },
+              "x-ratelimit-remaining": {
+                "$ref": "#/components/headers/x-ratelimit-remaining"
+              },
+              "x-ratelimit-retry": {
+                "$ref": "#/components/headers/x-ratelimit-retry"
+              },
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "batch_transfer_id_missing": {
+                    "$ref": "#/components/examples/batch_transfer_id_missing"
+                  },
+                  "batch_transfer_id_invalid": {
+                    "$ref": "#/components/examples/batch_transfer_id_invalid"
+                  },
+                  "transfer_id_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_transfer_id_invalid"
+                  },
+                  "transfer_id_missing": {
+                    "$ref": "#/components/examples/batchTransfer_transfer_id_missing"
+                  },
+                  "transfer_amount_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_transfer_amount_invalid"
+                  },
+                  "transfer_amount_missing": {
+                    "$ref": "#/components/examples/batchTransfer_transfer_amount_missing"
+                  },
+                  "transfer_mode_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_transfer_mode_invalid"
+                  },
+                  "beneficiary_id_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_beneficiary_id_invalid"
+                  },
+                  "beneficiary_name_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_beneficiary_name_invalid"
+                  },
+                  "beneficiary_bank_account_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_beneficiary_bank_account_invalid"
+                  },
+                  "beneficiary_bank_ifsc_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_beneficiary_bank_ifsc_invalid"
+                  },
+                  "beneficiary_vpa_invalid": {
+                    "$ref": "#/components/examples/batchTransfer_beneficiary_vpa_invalid"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Batch transfer_id already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/batch_transfer_id_already_exists"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  },
+                  "AuthenticationError": {
+                    "$ref": "#/components/examples/authentication_internal_server_error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Batch Transfer Status V2",
+        "x-mcp": {
+          "enabled":  true
+        },
+        "description": "Use this API to get the status of the initiated batch transfer. You can use either the batch_transfer_id or cf_batch_transfer_id to fetch the details.",
+        "tags": [
+          "Transfers v2"
+        ],
+        "operationId": "PayoutFetchBatchTransfer",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          },
+          {
+            "in": "query",
+            "name": "cf_batch_transfer_id",
+            "description": "It is the unique ID created by Cashfree Payments. You receive it in the response of the initiated batch transfer request. (Either cf_batch_transfer_id or batch_transfer_id is mandatory)",
+            "example": "10023",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "batch_transfer_id",
+            "description": "It is the unique ID you created to identify the batch transfer request.",
+            "example": "Sample_test",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FetchBatchTransferResponse"
+                },
+                "examples": {
+                  "transfer_received_response": {
+                    "$ref": "#/components/examples/batch_transfer_received_response_v2"
+                  },
+                  "transfer_pending_response": {
+                    "$ref": "#/components/examples/batch_transfer_pending_response_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-api-version": {
+                "$ref": "#/components/headers/x-api-version"
+              },
+              "x-ratelimit-limit": {
+                "$ref": "#/components/headers/x-ratelimit-limit"
+              },
+              "x-ratelimit-remaining": {
+                "$ref": "#/components/headers/x-ratelimit-remaining"
+              },
+              "x-ratelimit-retry": {
+                "$ref": "#/components/headers/x-ratelimit-retry"
+              },
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "CfBatchTransferIdNotFound": {
+                    "$ref": "#/components/examples/cf_batch_transfer_id_not_found"
+                  },
+                  "BatchTransferIdNotFound": {
+                    "$ref": "#/components/examples/batch_transfer_id_not_found"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  },
+                  "AuthenticationError": {
+                    "$ref": "#/components/examples/authentication_internal_server_error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/beneficiary": {
+      "post": {
+        "summary": "Create Beneficiary V2",
+        "x-mcp": {
+          "enabled":  false
+        },
+        "description": "Use this API to add a beneficiary to your Cashfree Payments account by providing the bank account number, IFSC, and other required details. Ensure the successful creation of the benficiary in your account before initiating a transfer.",
+        "tags": [
+          "Beneficiary v2"
+        ],
+        "operationId": "PayoutCreateBeneficiary",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          }
+        ],
+        "requestBody": {
+          "description": "Find the request parameters to create a beneficiary",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBeneficiaryRequest"
+              },
+              "examples": {
+                "bene_creation_request_v2": {
+                  "$ref": "#/components/examples/create_beneficiary_request_v2"
+                },
+                "bene_creation_request_with_only_vpa": {
+                  "$ref": "#/components/examples/bene_creation_request_with_only_vpa"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beneficiary"
+                },
+                "examples": {
+                  "create_beneficiary_success_response_v2": {
+                    "$ref": "#/components/examples/get_beneficiary_success_v2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "bene_id_too_long": {
+                    "$ref": "#/components/examples/bene_id_too_large_v2"
+                  },
+                  "invalid_bene_id_due_unacceptable_characters": {
+                    "$ref": "#/components/examples/invalid_bene_id_due_unacceptable_characters"
+                  },
+                  "bank_account_given_ifsc_not_given": {
+                    "$ref": "#/components/examples/bank_account_given_ifsc_not_given_in_get_v2"
+                  },
+                  "bank_ifsc_given_account_not_given": {
+                    "$ref": "#/components/examples/bank_ifsc_given_account_not_given_in_get_v2"
+                  },
+                  "bank_account_number_too_large": {
+                    "$ref": "#/components/examples/bank_account_number_too_large"
+                  },
+                  "bank_account_number_too_short": {
+                    "$ref": "#/components/examples/bank_account_number_too_short"
+                  },
+                  "bank_account_invalid": {
+                    "$ref": "#/components/examples/bank_account_invalid"
+                  },
+                  "invalid_ifsc": {
+                    "$ref": "#/components/examples/invalid_ifsc"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/APIsDisabledExampleV2"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "duplicate_bene_id": {
+                    "$ref": "#/components/examples/duplicate_bene_creation_response"
+                  },
+                  "bene_exist_for_bank_account": {
+                    "$ref": "#/components/examples/bene_exist_for_bank_account_and_ifsc"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "same_as_source_error": {
+                    "$ref": "#/components/examples/same_bene_as_source_v2"
+                  },
+                  "VBA_beneficiary_not_enabled": {
+                    "$ref": "#/components/examples/vba_beneiciary_not_allowed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Beneficiary V2",
+        "x-mcp": {
+          "enabled":  false
+        },
+        "description": "Use this API to get the details of a particular beneficiary from your account. You can pass either beneficiary_id or the combination of bank_account_number and bank_ifsc to fetch the details.",
+        "tags": [
+          "Beneficiary v2"
+        ],
+        "operationId": "PayoutFetchBeneficiary",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          },
+          {
+            "in": "query",
+            "name": "beneficiary_id",
+            "description": "It is the unique ID you created to identify the beneficiary while creating the beneficiary.",
+            "example": "JOHN18011343",
+            "schema": {
+              "type": "string",
+              "maxLength": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "bank_account_number",
+            "description": "It is the bank account number of the beneficiary. If bank_account_number is passed in query, bank_ifsc should also be passed.",
+            "example": "00001111222233",
+            "schema": {
+              "type": "string",
+              "maxLength": 25,
+              "minLength": 4
+            }
+          },
+          {
+            "in": "query",
+            "name": "bank_ifsc",
+            "description": "It is the IFSC information as present in the beneficiary's bank account information. If bank_ifsc is passed in query, bank_account_number should also be passed.",
+            "example": "HDFC0000001",
+            "schema": {
+              "type": "string",
+              "maxLength": 11,
+              "minLength": 11
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beneficiary"
+                },
+                "examples": {
+                  "valid_beneficiary_id": {
+                    "$ref": "#/components/examples/get_beneficiary_success_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "all_three_params_given": {
+                    "$ref": "#/components/examples/all_three_params_given"
+                  },
+                  "bank_account_given_ifsc_not_given": {
+                    "$ref": "#/components/examples/bank_account_given_ifsc_not_given_in_get_v2"
+                  },
+                  "bank_ifsc_given_account_not_given": {
+                    "$ref": "#/components/examples/bank_ifsc_given_account_not_given_in_get_v2"
+                  },
+                  "no_bene_identifiers_provided": {
+                    "$ref": "#/components/examples/no_bene_identifiers_provided_v2"
+                  },
+                  "bene_id_too_long": {
+                    "$ref": "#/components/examples/bene_id_too_large_v2"
+                  },
+                  "invalid_bene_id_due_unacceptable_characters": {
+                    "$ref": "#/components/examples/invalid_bene_id_due_unacceptable_characters"
+                  },
+                  "bank_account_number_too_large": {
+                    "$ref": "#/components/examples/bank_account_number_too_large"
+                  },
+                  "bank_account_number_too_short": {
+                    "$ref": "#/components/examples/bank_account_number_too_short"
+                  },
+                  "bank_account_invalid": {
+                    "$ref": "#/components/examples/bank_account_invalid"
+                  },
+                  "invalid_ifsc": {
+                    "$ref": "#/components/examples/invalid_ifsc"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/APIsDisabledExampleV2"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "BeneficiaryIdNotFound": {
+                    "$ref": "#/components/examples/beneficiary_id_not_found_v2"
+                  },
+                  "BeneficiaryBankAccountAndIfscDoesNotExist": {
+                    "$ref": "#/components/examples/beneficiary_with_account_does_not_exist_v2"
+                  },
+                  "BeneficiaryAccountExistWithDifferentIfsc": {
+                    "$ref": "#/components/examples/bank_account_exists_with_a_different_ifsc_v2"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "InternalServerError": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Beneficiary V2",
+        "x-mcp": {
+          "enabled":  false
+        },
+        "description": "Use this API to remove an existing beneficiary from the list of added beneficiaries.",
+        "tags": [
+          "Beneficiary v2"
+        ],
+        "operationId": "PayoutDeleteBeneficiary",
+        "deprecated": false,
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          },
+          {
+            "in": "query",
+            "name": "beneficiary_id",
+            "description": "It is the unique ID you create to identify the beneficiary. The maximum character limit is 50. Only alphabets and whitespaces are allowed.",
+            "example": "sample_test",
+            "schema": {
+              "type": "string",
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beneficiary"
+                },
+                "examples": {
+                  "delete_beneficiary_success_response_v2": {
+                    "$ref": "#/components/examples/delete_bene_success_response_v2"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/x-request-id"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "bene_id_too_long": {
+                    "$ref": "#/components/examples/bene_id_too_large_v2"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "APIDisabled": {
+                    "$ref": "#/components/examples/APIsDisabledExampleV2"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "BeneficiaryIdNotFound": {
+                    "$ref": "#/components/examples/beneficiary_id_not_found_v2"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV2"
+                },
+                "examples": {
+                  "InternalServerError": {
+                    "$ref": "#/components/examples/internal_server_error_v2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/authorize": {
+      "post": {
+        "summary": "Authorize",
+        "description": "Use this API to authenticate with the Cashfree system and obtain the authorization bearer token. All other API calls must have this token as Authorization header in the format 'Bearer &lt;token&gt;' (without quotes) for them to get processed. The generated token is valid for 6 minutes.",
+        "x-mcp": {
+          "enabled": true
+        },
+        "operationId": "authorize-2",
+        "security": [
+          {
+            "XClientID": [],
+            "XClientSecret": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/apiVersionHeader"
+          },
+          {
+            "$ref": "#/components/parameters/xRequestIDHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_10"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_401"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl -X POST \\\n  'http://{{Host%20Url}}/payout/v1/authorize' \\\n  -H 'X-Client-Id: {{client id}}' \\\n  -H 'X-Client-Secret: {{client secret}}' \\"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    },
+    "/v1/createCashgram": {
+      "post": {
+        "summary": "Create Cashgram",
+        "x-mcp": {
+          "enabled": true,
+          "config": {
+            "elicitation": {
+              "$ref": "#/components/x-elicitationConfig/createCashgram"
+            }
+          }
+        },
+        "description": "Use this API to create a Cashgram.",
+        "operationId": "create-cashgram1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer auth token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v1_createCashgram_body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_8"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_409_1"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [],
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl -X POST \\\n  'http://{{Host%20Url}}/payout/v1/createCashgram' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer {{Token}}'\n  -d '{\n            \"cashgramId\": \"JOHaN10\",\n            \"amount\": \"1.00\",\n            \"name\": \"John Doe\",\n            \"email\": \"johndoe@cashfree.com\",\n            \"phone\": \"9876543210\",\n            \"linkExpiry\": \"2020/04/01\",\n            \"remarks\": \"sample cashgram\",\n            \"notifyCustomer\": 1\n}'"
+            },
+            {
+              "language": "text",
+              "code": "const cfSdk = require('cashfree-sdk');\nconst {Cashgram} = cfSdk.Payouts;\n\nconst response = await Cashgram.CreateCashgram({\n            cashgramId: \"JOHaN10\",\n            amount: \"1.00\",\n            name: \"John Doe\",\n            email: \"johndoe@cashfree.com\",\n            phone: \"9876543210\",\n            linkExpiry: \"2020/04/01\",\n            remarks: \"sample cashgram\",\n            notifyCustomer: 1\n        });",
+              "name": "Node"
+            },
+            {
+              "language": "java",
+              "code": "import com.cashfree.lib.clients.Payouts;\nimport com.cashfree.lib.clients.Cashgram;\nimport com.cashfree.lib.domains.CashgramDetails\n\nPayouts payouts = Payouts.getInstance(\n    Environment.PRODUCTION, \"<client_id>\", \"<client_secret>\");\npayouts.init();\nCashgram cashgram = new Cashgram(payouts);\n\nCashgramDetails cashgramDetails = new CashgramDetails()\n        .setCashgramId(\"JOHaN10\")\n        .setAmount(new BigDecimal(\"1.00\"))\n        .setName(\"John Doe\")\n        .setEmail(\"johndoe@cashfree.com\")\n        .setPhone(\"9876543210\")\n        .setLinkExpiry(LocalDateTime.now().plusMinutes(0))\n        .setRemarks(\"sample cashgram\")\n        .setNotifyCustomer(1);\ncashgram.createCashgram(cashgramDetails);\n}"
+            },
+            {
+              "language": "python",
+              "code": "from cashfree_sdk.payouts import Payouts\nfrom cashfree_sdk.payouts.cashgram import Cashgram\nc = Cashgram.create_cashgram(cashgramId=\"JOHaN10\", amount=\"1.1\", name=\"john doe\", email=\"johndoe@cashfree.com\", phone=\"9876543210\", \nlinkExpiry=\"2020/04/01\", remarks=\"sample cashgram\", notifyCustomer=1)  "
+            }
+          ],
+          "samples-languages": [
+            "curl",
+            "text",
+            "java",
+            "python"
+          ]
+        }
+      }
+    },
+    "/v1/deactivateCashgram": {
+      "post": {
+        "summary": "Deactivate Cashgram",
+        "x-mcp": {
+          "enabled": true,
+          "config": {
+            "elicitation": {
+              "$ref": "#/components/x-elicitationConfig/deactivateCashgram"
+            }
+          }
+        },
+        "description": "",
+        "operationId": "deactivate-cashgram1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer auth token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v1_deactivateCashgram_body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_9"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_404_4"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [],
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl -X GET \\\n  'http://{{Host%20Url}}/payout/v1/deactivateCashgram?cashgramId=JOHaN10' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer {{Token}}'"
+            },
+            {
+              "language": "text",
+              "code": "const cfSdk = require('cashfree-sdk');\nconst {Cashgram} = cfSdk.Payouts;\nconst response = await Cashgram.DeactivateCashgram({\n            cashgramId: \"JOHaN10\"\n        });",
+              "name": "Node"
+            },
+            {
+              "language": "java",
+              "code": "import com.cashfree.lib.clients.Payouts;\nimport com.cashfree.lib.clients.Cashgram;\nimport com.cashfree.lib.domains.CashgramDetails\nPayouts payouts = Payouts.getInstance {\n    Environment.PRODUCTION, \"<client_id>\", \"<client_secret>\");\npayouts.init();\nCashgram cashgram = new Cashgram(payouts);\ncashgram.deactivateCashgram(\"JOHaN10\");\n}"
+            },
+            {
+              "language": "python",
+              "code": "from cashfree_sdk.payouts import Payouts\nfrom cashfree_sdk.payouts.cashgram import Cashgram\nstatus = Cashgram.deactivate_cashgram(cashgramId=\"JOHaN10\")"
+            }
+          ],
+          "samples-languages": [
+            "curl",
+            "text",
+            "java",
+            "python"
+          ]
+        }
+      }
+    },
+    "/v1/getCashgramStatus": {
+      "get": {
+        "summary": "Get Cashgram Status",
+        "x-mcp": {
+          "enabled": true
+        },
+        "description": "Use this API to get the status of the Cashgram created.",
+        "operationId": "get-cashgram-status1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer auth token",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cashgramId",
+            "in": "query",
+            "description": "ID of the Cashgram",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_11"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_404_4"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl -X GET \\\n  'http://{{Host%20Url}}/payout/v1/getCashgramStatus?cashgramId=JOHaN10' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer {{Token}}'"
+            },
+            {
+              "language": "text",
+              "code": "const cfSdk = require('cashfree-sdk');\nconst {Cashgram} = cfSdk.Payouts;\n\nconst response = await Cashgram.GetCashgramStatus({\n            cashgramId: \"JOHaN10\"\n        });",
+              "name": "Node"
+            },
+            {
+              "language": "java",
+              "code": "import com.cashfree.lib.clients.Payouts;\nimport com.cashfree.lib.clients.Cashgram;\nimport com.cashfree.lib.domains.CashgramDetails\nPayouts payouts = Payouts.getInstance(\n    Environment.PRODUCTION, \"<client_id>\", \"<client_secret>\");\npayouts.init();\nCashgram cashgram = new Cashgram(payouts);\ncashgram.getCashgramStatus(\"JOHaN10\");\n}"
+            },
+            {
+              "language": "python",
+              "code": "from cashfree_sdk.payouts import Payouts\nfrom cashfree_sdk.payouts.cashgram import Cashgram\nstatus = Cashgram.get_cashgram_status(cashgramId=\"JOHaN10\")"
+            }
+          ],
+          "samples-languages": [
+            "curl",
+            "text",
+            "java",
+            "python"
+          ]
+        }
+      }
+    }
+  }
+}
