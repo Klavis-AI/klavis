@@ -43,11 +43,29 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 
 ## 🛠️ Available Tools
 
+### Email Operations
 - **Email Reading**: Fetch emails, search messages, get message details
 - **Email Sending**: Send new emails with attachments and rich formatting
 - **Email Management**: Mark as read/unread, archive, delete emails
 - **Label Management**: Apply, remove, and manage Gmail labels
 - **Thread Management**: Handle email conversations and threads
+- **Attachments**: Download and extract content from email attachments (PDF, Word, Excel, images, etc.)
+
+### Contact Search
+- **Search Contacts**: Search for contacts by name or email address using `gmail_search_contacts`
+  - Supports four contact types:
+    - `all` (default): Searches all sources in parallel, returns three independent result sets (personal, other, directory) each with its own pagination token
+    - `personal`: Searches your saved contacts
+    - `other`: Searches other contact sources (Gmail suggestions, etc.)
+    - `directory`: Searches domain directory and domain contacts (requires directory.readonly scope)
+  - Directory source options (only used with `directory` or `all` type):
+    - `UNSPECIFIED`: Searches both DOMAIN_PROFILE and DOMAIN_CONTACT (default)
+    - `DOMAIN_DIRECTORY`: Searches domain profiles only
+    - `DOMAIN_CONTACTS`: Searches domain contacts only
+  - Flexible query matching against names, email addresses, and phone numbers
+  - Returns contact details including display name, email addresses, phone numbers, and organizations
+  - **Pagination**: When `contactType` is `all`, returns separate pagination tokens for each source type, allowing flexible independent pagination
+  - Paginated results with configurable page size (max 30 for personal/other, max 500 for directory)
 
 ## 📚 Documentation & Support
 
