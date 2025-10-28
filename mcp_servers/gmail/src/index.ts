@@ -245,7 +245,7 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_read_email",
-                description: "Retrieves the content of a specific email",
+                description: "Retrieves the content of a specific email and all messages in its thread. Returns a structured list of emails with individual metadata (messageId, subject, from, to, date, body, attachments) for each message in the conversation.",
                 inputSchema: zodToJsonSchema(ReadEmailSchema),
                 annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
@@ -409,54 +409,76 @@ const getGmailMcpServer = () => {
                         format: 'full',
                     });
 
-                    const headers = response.data.payload?.headers || [];
-                    const subject = headers.find((h: any) => h.name?.toLowerCase() === 'subject')?.value || '';
-                    const from = headers.find((h: any) => h.name?.toLowerCase() === 'from')?.value || '';
-                    const to = headers.find((h: any) => h.name?.toLowerCase() === 'to')?.value || '';
-                    const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
                     const threadId = response.data.threadId || '';
 
-                    // Extract email content using the recursive function
-                    const { text, html } = extractEmailContent(response.data.payload as GmailMessagePart || {});
+                    // Get all messages in the thread
+                    const threadResponse = await gmail.users.threads.get({
+                        userId: 'me',
+                        id: threadId,
+                        format: 'full',
+                    });
 
-                    // Get attachment information
-                    const attachments: EmailAttachment[] = [];
-                    const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
-                        if (part.body && part.body.attachmentId) {
-                            const filename = part.filename || `attachment-${part.body.attachmentId}`;
-                            attachments.push({
-                                id: part.body.attachmentId,
-                                filename: filename,
-                                mimeType: part.mimeType || 'application/octet-stream',
-                                size: part.body.size || 0
-                            });
+                    const threadMessages = threadResponse.data.messages || [];
+
+                    // Process each message in the thread
+                    const emails = threadMessages.map((msg: any) => {
+                        const headers = msg.payload?.headers || [];
+                        const subject = headers.find((h: any) => h.name?.toLowerCase() === 'subject')?.value || '';
+                        const from = headers.find((h: any) => h.name?.toLowerCase() === 'from')?.value || '';
+                        const to = headers.find((h: any) => h.name?.toLowerCase() === 'to')?.value || '';
+                        const cc = headers.find((h: any) => h.name?.toLowerCase() === 'cc')?.value || '';
+                        const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
+                        const messageId = msg.id || '';
+
+                        // Extract email content using the recursive function
+                        const { text, html } = extractEmailContent(msg.payload as GmailMessagePart || {});
+
+                        // Get attachment information
+                        const attachments: EmailAttachment[] = [];
+                        const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
+                            if (part.body && part.body.attachmentId) {
+                                const filename = part.filename || `attachment-${part.body.attachmentId}`;
+                                attachments.push({
+                                    id: part.body.attachmentId,
+                                    filename: filename,
+                                    mimeType: part.mimeType || 'application/octet-stream',
+                                    size: part.body.size || 0
+                                });
+                            }
+
+                            if (part.parts) {
+                                part.parts.forEach((subpart: GmailMessagePart) =>
+                                    processAttachmentParts(subpart, `${path}/parts`)
+                                );
+                            }
+                        };
+
+                        if (msg.payload) {
+                            processAttachmentParts(msg.payload as GmailMessagePart);
                         }
 
-                        if (part.parts) {
-                            part.parts.forEach((subpart: GmailMessagePart) =>
-                                processAttachmentParts(subpart, `${path}/parts`)
-                            );
-                        }
-                    };
+                        const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
+                        
+                        return {
+                            messageId,
+                            subject,
+                            from,
+                            to,
+                            cc: cc || undefined,
+                            date,
+                            body: {
+                                text: text || '',
+                                html: html || '',
+                                preferredFormat,
+                            },
+                            attachments: attachments.length > 0 ? attachments : undefined,
+                        };
+                    });
 
-                    if (response.data.payload) {
-                        processAttachmentParts(response.data.payload as GmailMessagePart);
-                    }
-
-                    const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
                     const resultPayload = {
                         threadId,
-                        subject,
-                        from,
-                        to,
-                        date,
-                        body: {
-                            text: text || '',
-                            html: html || '',
-                            preferredFormat,
-                            note: !text && html ? 'Email body available only in HTML format; plain text representation not available.' : undefined,
-                        },
-                        attachments,
+                        messageCount: emails.length,
+                        emails,
                     };
 
                     return {
