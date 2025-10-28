@@ -721,6 +721,36 @@ async def find_free_slots(
         logger.exception(f"Error executing tool find_free_slots: {e}")
         raise e
 
+def _warmup_contact_search(service, contact_type: str):
+    """
+    Send warmup request with empty query to update the cache.
+
+    According to Google's documentation, searchContacts and otherContacts.search
+    require a warmup request before actual searches for better performance.
+    See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
+    and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
+    """
+    try:
+        if contact_type == 'personal':
+            # Warmup for people.searchContacts
+            service.people().searchContacts(
+                query="",
+                pageSize=1,
+                readMask='names'
+            ).execute()
+            logger.info("Warmup request sent for personal contacts")
+        elif contact_type == 'other':
+            # Warmup for otherContacts.search
+            service.otherContacts().search(
+                query="",
+                pageSize=1,
+                readMask='names'
+            ).execute()
+            logger.info("Warmup request sent for other contacts")
+    except Exception as e:
+        # Don't fail if warmup fails, just log it
+        logger.warning(f"Warmup request failed for {contact_type} contacts: {e}")
+
 async def search_contacts(
     query: str,
     contact_type: str = "all",
@@ -741,13 +771,9 @@ async def search_contacts(
         access_token = get_auth_token()
         service = get_people_service(access_token)
 
-        # Define the comprehensive read mask for all person fields
-        comprehensive_read_mask = (
-            'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,'
-            'emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,'
-            'memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,'
-            'phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
-        )
+        # Define the read mask for calendar-relevant person fields
+        # Only includes fields necessary for calendar operations (creating events, adding attendees)
+        comprehensive_read_mask = 'names,emailAddresses,organizations,phoneNumbers,metadata'
 
         # Limited read mask for other contacts
         limited_read_mask = 'emailAddresses,metadata,names,phoneNumbers'
@@ -786,11 +812,10 @@ async def search_contacts(
                     }
                     for org in orgs
                 ],
-                'allFields': person,
             }
 
         if contact_type == 'all':
-            # Execute all three searches in parallel
+            # Execute all three searches in parallel (with warmup for personal and other)
             import asyncio
 
             # Use ThreadPoolExecutor for blocking Google API calls
@@ -818,9 +843,21 @@ async def search_contacts(
                     sources=['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
                 ).execute()
 
-            # Run all three searches in parallel
+            # Run warmup requests first, then all three searches in parallel
             loop = asyncio.get_event_loop()
-            with ThreadPoolExecutor(max_workers=3) as executor:
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                # Send warmup requests for personal and other contacts
+                warmup_personal_future = loop.run_in_executor(
+                    executor, _warmup_contact_search, service, 'personal'
+                )
+                warmup_other_future = loop.run_in_executor(
+                    executor, _warmup_contact_search, service, 'other'
+                )
+
+                # Wait for warmup to complete
+                await asyncio.gather(warmup_personal_future, warmup_other_future)
+
+                # Now execute actual searches in parallel
                 personal_future = loop.run_in_executor(executor, search_personal)
                 other_future = loop.run_in_executor(executor, search_other)
                 directory_future = loop.run_in_executor(executor, search_directory)
@@ -870,6 +907,14 @@ async def search_contacts(
             }
 
         elif contact_type == 'personal':
+            # Send warmup request before actual search
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                await loop.run_in_executor(executor, _warmup_contact_search, service, 'personal')
+
             response = service.people().searchContacts(
                 query=query,
                 pageSize=min(page_size, 30),
@@ -891,6 +936,14 @@ async def search_contacts(
             }
 
         elif contact_type == 'other':
+            # Send warmup request before actual search
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                await loop.run_in_executor(executor, _warmup_contact_search, service, 'other')
+
             response = service.otherContacts().search(
                 query=query,
                 pageSize=min(page_size, 30),
