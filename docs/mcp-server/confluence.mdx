@@ -41,9 +41,9 @@ Connect to Confluence to manage documents, create and edit pages, organize space
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Confluence
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,26 +162,9 @@ Connect to Confluence to manage documents, create and edit pages, organize space
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| confluence_create_page | Create a new page in Confluence |
-| confluence_get_page | Retrieve a SINGLE page's content by its ID or title. For retrieving MULTIPLE pages, use confluence_get_pages_by_id instead |
-| confluence_get_pages_by_id | Get the content of MULTIPLE pages by their ID in a single efficient request |
-| confluence_list_pages | Get the content of multiple pages with optional filtering and sorting |
-| confluence_update_page_content | Update a page's content |
-| confluence_rename_page | Rename a page by changing its title |
-| confluence_create_space | Create a new space in Confluence |
-| confluence_list_spaces | List all spaces sorted by name in ascending order |
-| confluence_get_space | Get the details of a space by its ID or key |
-| confluence_get_space_hierarchy | Retrieve the full hierarchical structure of a Confluence space as a tree structure |
-| confluence_search_content | Search for content in Confluence. The search is performed across all content in the authenticated user's Confluence workspace. All search terms in Confluence are case insensitive. |
-| confluence_list_attachments | List attachments in a workspace |
-| confluence_get_attachments_for_page | Get attachments for a page by its ID or title. If a page title is provided, then the first page with an exact matching title will be returned. |
-| confluence_get_attachment | Get a specific attachment by its ID |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Confluence. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

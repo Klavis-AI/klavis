@@ -42,9 +42,9 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Mailchimp
           const response = await klavis.mcpServer.createStrataServer({
@@ -178,34 +178,9 @@ Connect to Mailchimp to manage email marketing campaigns, audiences, and subscri
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name   | Description                                                              |
-|-------------|--------------------------------------------------------------------------|
-| mailchimp_ping | Test Mailchimp Connection - verify API authentication is working correctly |
-| mailchimp_get_account_info | Get Account Information - retrieve comprehensive account details |
-| mailchimp_get_all_audiences | Get All Audiences - retrieve all email lists in the account |
-| mailchimp_create_audience | Create New Audience - create a new email list |
-| mailchimp_get_audience_info | Get Audience Details - detailed information about a specific audience |
-| mailchimp_update_audience | Update Audience Settings - modify audience configuration |
-| mailchimp_delete_audience | Delete Audience - permanently delete an audience and all subscribers |
-| mailchimp_get_audience_members | Get Audience Members - retrieve contacts from an audience |
-| mailchimp_add_member_to_audience | Add Member to Audience - add a new contact to an audience |
-| mailchimp_get_member_info | Get Member Details - detailed information about a specific member |
-| mailchimp_update_member | Update Member - modify existing member information |
-| mailchimp_delete_member | Delete Member - permanently remove a member from an audience |
-| mailchimp_add_member_tags | Add Member Tags - add organizational tags to a member |
-| mailchimp_remove_member_tags | Remove Member Tags - remove tags from a specific member |
-| mailchimp_get_member_activity | Get Member Activity - retrieve recent activity history for a member |
-| mailchimp_get_all_campaigns | Get All Campaigns - retrieve campaigns with optional filtering |
-| mailchimp_create_campaign | Create Campaign - create a new email campaign in draft mode |
-| mailchimp_get_campaign_info | Get Campaign Details - detailed information about a campaign |
-| mailchimp_set_campaign_content | Set Campaign Content - add HTML content, plain text, or template to a campaign |
-| mailchimp_send_campaign | Send Campaign - send a campaign immediately to all recipients |
-| mailchimp_schedule_campaign | Schedule Campaign - schedule a campaign for delivery at a specific time |
-| mailchimp_delete_campaign | Delete Campaign - permanently delete a draft campaign |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Mailchimp. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

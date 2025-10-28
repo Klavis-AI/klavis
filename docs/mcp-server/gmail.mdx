@@ -41,9 +41,9 @@ Connect to Gmail to manage emails, organize conversations, and automate communic
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Gmail
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,30 +162,9 @@ Connect to Gmail to manage emails, organize conversations, and automate communic
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| gmail_list_messages | List messages in Gmail inbox with optional search queries |
-| gmail_get_message | Get full details of a specific Gmail message |
-| gmail_send_message | Send a new email message |
-| gmail_reply_message | Reply to an existing email message |
-| gmail_forward_message | Forward an existing email message |
-| gmail_delete_message | Move a message to trash |
-| gmail_mark_as_read | Mark messages as read |
-| gmail_mark_as_unread | Mark messages as unread |
-| gmail_add_label | Add labels to messages |
-| gmail_remove_label | Remove labels from messages |
-| gmail_list_labels | List all Gmail labels |
-| gmail_create_label | Create a new Gmail label |
-| gmail_search_messages | Search for messages using Gmail search syntax |
-| gmail_get_profile | Get Gmail profile information |
-| gmail_list_drafts | List draft messages |
-| gmail_create_draft | Create a new draft message |
-| gmail_update_draft | Update an existing draft message |
-| gmail_send_draft | Send a draft message |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Gmail. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

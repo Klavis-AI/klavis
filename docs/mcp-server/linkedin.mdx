@@ -41,9 +41,9 @@ Connect to LinkedIn to manage profiles, create posts, share content, and automat
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with LinkedIn
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,16 +161,9 @@ Connect to LinkedIn to manage profiles, create posts, share content, and automat
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| linkedin_get_profile_info | Retrieve LinkedIn profile information (current user or specified person) |
-| linkedin_create_post | Create a text/article post on LinkedIn with customizable visibility |
-| linkedin_create_url_share | Create a LinkedIn post that shares a URL with metadata preview |
-| linkedin_format_rich_post | Format rich text for LinkedIn posts with various formatting options |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for LinkedIn. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -41,9 +41,9 @@ Connect to Attio to manage your CRM data, track customer relationships, and auto
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Attio
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,17 +161,9 @@ Connect to Attio to manage your CRM data, track customer relationships, and auto
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| attio_search_people | Search for people in your Attio workspace with advanced filtering options |
-| attio_search_companies | Search for companies in your Attio workspace with filtering and sorting |
-| attio_search_deals | Search for deals in your Attio workspace with stage and value filtering |
-| attio_search_notes | Search for notes across all objects in your Attio workspace by fetching all notes and filtering by content |
-| attio_create_note | Create a new note for a given record in Attio |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Attio. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

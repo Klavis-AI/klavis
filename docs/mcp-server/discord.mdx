@@ -42,9 +42,9 @@ Connect to Discord to manage servers, send messages, and interact with communiti
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Discord
           const response = await klavis.mcpServer.createStrataServer({
@@ -187,21 +187,9 @@ Connect to Discord to manage servers, send messages, and interact with communiti
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| discord_get_server_info | Get information about a Discord server (guild) including name, member counts, and settings |
-| discord_list_members | Get a list of members in a server with their roles and join dates (Default 100, Max 1000) |
-| discord_create_text_channel | Create a new text channel with optional category and topic |
-| discord_add_reaction | Add a reaction emoji to a message. Supports Unicode and custom emojis |
-| discord_add_multiple_reactions | Add multiple reaction emojis to a message in a single operation |
-| discord_remove_reaction | Remove the bot's own reaction emoji from a message |
-| discord_send_message | Send a text message to a specific Discord channel |
-| discord_read_messages | Read recent messages from a Discord channel including content and reactions (Default 50, Max 100) |
-| discord_get_user_info | Get detailed information about a Discord user including username and avatar |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Discord. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

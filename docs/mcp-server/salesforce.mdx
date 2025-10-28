@@ -41,9 +41,9 @@ Connect to Salesforce to manage leads, opportunities, accounts, contacts, and au
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Salesforce
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,39 +157,9 @@ Connect to Salesforce to manage leads, opportunities, accounts, contacts, and au
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| salesforce_get_accounts             | Get accounts with flexible filtering options including name search, industry, and type. |
-| salesforce_create_account           | Create a new account in Salesforce.                                     |
-| salesforce_update_account           | Update an existing account.                                              |
-| salesforce_delete_account           | Delete an account.                                                       |
-| salesforce_get_contacts             | Get contacts with flexible filtering options including name, email, and title search. |
-| salesforce_create_contact           | Create a new contact in Salesforce.                                     |
-| salesforce_update_contact           | Update an existing contact.                                              |
-| salesforce_delete_contact           | Delete a contact.                                                        |
-| salesforce_get_opportunities        | Get opportunities, optionally filtered by account, stage, name, or account name. |
-| salesforce_create_opportunity       | Create a new opportunity in Salesforce.                                 |
-| salesforce_update_opportunity       | Update an existing opportunity.                                          |
-| salesforce_delete_opportunity       | Delete an opportunity.                                                   |
-| salesforce_get_leads                | Get leads with flexible filtering options including name, company, email, and industry search. |
-| salesforce_create_lead              | Create a new lead in Salesforce.                                        |
-| salesforce_update_lead              | Update an existing lead.                                                 |
-| salesforce_delete_lead              | Delete a lead.                                                           |
-| salesforce_convert_lead             | Convert a lead to account, contact, and optionally opportunity.         |
-| salesforce_get_cases                | Get cases with flexible filtering options including subject search, account, status, priority, and type. |
-| salesforce_create_case              | Create a new case in Salesforce.                                        |
-| salesforce_update_case              | Update an existing case.                                                 |
-| salesforce_delete_case              | Delete a case.                                                           |
-| salesforce_get_campaigns            | Get campaigns, optionally filtered by status or type.                   |
-| salesforce_create_campaign          | Create a new campaign in Salesforce.                                    |
-| salesforce_update_campaign          | Update an existing campaign.                                             |
-| salesforce_delete_campaign          | Delete a campaign.                                                       |
-| salesforce_query                    | Execute a SOQL query on Salesforce                                      |
-| salesforce_describe_object          | Get detailed schema and field information for any Salesforce object.   |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Salesforce. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

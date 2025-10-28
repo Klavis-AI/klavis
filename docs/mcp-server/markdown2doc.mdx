@@ -42,9 +42,9 @@ Connect to Markdown2doc to convert markdown text to different file formats (PDF,
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Markdown2doc
           const response = await klavis.mcpServer.createStrataServer({
@@ -135,13 +135,9 @@ Connect to Markdown2doc to convert markdown text to different file formats (PDF,
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name              | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| convert_markdown_to_file | Convert markdown text to different file formats (pdf, docx, doc, html, html5) |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Markdown2doc. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

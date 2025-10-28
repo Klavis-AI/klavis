@@ -41,9 +41,9 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Close
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,35 +157,9 @@ Connect to Close CRM to manage leads, contacts, opportunities, and automate sale
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| close_create_lead | Create a new lead in Close CRM |
-| close_get_lead | Get a lead by its ID from Close CRM |
-| close_search_leads | Search for leads in Close CRM |
-| close_update_lead | Update an existing lead in Close CRM |
-| close_delete_lead | Delete a lead from Close CRM |
-| close_list_leads | List leads from Close CRM |
-| close_create_contact | Create a new contact in Close CRM |
-| close_get_contact | Get a contact by its ID from Close CRM |
-| close_search_contacts | Search for contacts in Close CRM |
-| close_update_contact | Update an existing contact in Close CRM |
-| close_delete_contact | Delete a contact from Close CRM |
-| close_create_opportunity | Create a new opportunity in Close CRM |
-| close_get_opportunity | Get an opportunity by its ID from Close CRM |
-| close_update_opportunity | Update an existing opportunity in Close CRM |
-| close_delete_opportunity | Delete an opportunity from Close CRM |
-| close_create_task | Create a new task in Close CRM |
-| close_get_task | Get a task by its ID from Close CRM |
-| close_update_task | Update an existing task in Close CRM |
-| close_delete_task | Delete a task from Close CRM |
-| close_list_tasks | List tasks from Close CRM |
-| close_get_current_user | Get information about the current user |
-| close_list_users | List users from Close CRM |
-| close_get_user | Get a user by their ID from Close CRM |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Close. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

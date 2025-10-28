@@ -42,9 +42,9 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Motion
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,26 +172,9 @@ Connect to Motion to manage tasks, projects, workspaces, and automate scheduling
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| motion_get_workspaces | Get all workspaces in the Motion account |
-| motion_get_users | Get all users, optionally filtered by workspace |
-| motion_get_my_user | Get current user information |
-| motion_get_tasks | Get tasks, optionally filtered by workspace |
-| motion_get_task | Get a specific task by its ID |
-| motion_create_task | Create a new task in Motion |
-| motion_update_task | Update an existing task in Motion |
-| motion_delete_task | Delete a task from Motion |
-| motion_search_tasks | Search for tasks by name or description |
-| motion_get_projects | Get projects, optionally filtered by workspace |
-| motion_get_project | Get a specific project by its ID |
-| motion_create_project | Create a new project in Motion |
-| motion_get_comments | Get comments for a specific task |
-| motion_create_comment | Create a comment on a task |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Motion. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

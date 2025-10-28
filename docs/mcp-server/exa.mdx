@@ -42,9 +42,9 @@ Connect to Exa to perform AI-powered semantic search, content retrieval, and com
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Exa
           const response = await klavis.mcpServer.createStrataServer({
@@ -176,17 +176,9 @@ Connect to Exa to perform AI-powered semantic search, content retrieval, and com
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| exa_search | Perform AI-powered semantic search across the web using neural or keyword search with advanced filtering options including domains, dates, and content patterns |
-| exa_get_contents | Retrieve clean, parsed HTML content from web pages using their Exa result IDs with optional highlighting and summarization |
-| exa_find_similar | Discover web pages that are semantically similar to a given URL based on content meaning and context |
-| exa_answer | Get direct, focused answers to specific questions by searching and analyzing web sources with citations |
-| exa_research | Conduct comprehensive, multi-source research on topics with structured analysis and detailed citations |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Exa. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

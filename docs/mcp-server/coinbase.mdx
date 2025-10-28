@@ -42,9 +42,9 @@ Connect to Coinbase to access cryptocurrency prices, manage portfolios, and trac
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Coinbase
           const response = await klavis.mcpServer.createStrataServer({
@@ -175,20 +175,9 @@ Connect to Coinbase to access cryptocurrency prices, manage portfolios, and trac
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| coinbase_get_prices | Get current prices of cryptocurrency from Coinbase |
-| coinbase_get_current_exchange_rate | Get current exchange rate of cryptocurrency from Coinbase |
-| coinbase_get_historical_prices | Get historical price data of cryptocurrency from Coinbase |
-| coinbase_get_accounts | List user's Coinbase accounts |
-| coinbase_get_account_balance | Get balance for user's account |
-| coinbase_get_transactions | Get transaction history for an account |
-| coinbase_get_portfolio_value | Get portfolio value for user's accounts |
-| coinbase_get_product_details | Get product details of a cryptocurrency from Coinbase |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Coinbase. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -42,9 +42,9 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Firecrawl Web Search
           const response = await klavis.mcpServer.createStrataServer({
@@ -176,21 +176,9 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| firecrawl_scrape | Scrape a single webpage with advanced options for content extraction. Supports various formats including markdown, HTML, and screenshots. Can execute custom actions like clicking or scrolling before scraping. |
-| firecrawl_map | Discover URLs from a starting point. Can use both sitemap.xml and HTML link discovery. |
-| firecrawl_crawl | Start an asynchronous crawl of multiple pages from a starting URL. Supports depth control, path filtering, and webhook notifications. |
-| firecrawl_check_crawl_status | Check the status of a crawl job. |
-| firecrawl_batch_scrape | Scrape multiple URLs in batch mode. Returns a job ID that can be used to check status. |
-| firecrawl_check_batch_status | Check the status of a batch scraping job. |
-| firecrawl_search | Search and retrieve content from web pages with optional scraping. Returns SERP results by default (url, title, description) or full page content when scrapeOptions are provided. |
-| firecrawl_extract | Extract structured information from web pages using LLM. Supports both cloud AI and self-hosted LLM extraction. |
-| firecrawl_generate_llmstxt | Generate standardized LLMs.txt file for a given URL, which provides context about how LLMs should interact with the website. |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Firecrawl Web Search. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

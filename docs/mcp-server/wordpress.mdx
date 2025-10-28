@@ -41,9 +41,9 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with WordPress
           const response = await klavis.mcpServer.createStrataServer({
@@ -169,19 +169,9 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| wordpress_create_post | Create a new WordPress post |
-| wordpress_get_posts | Get a list of WordPress posts |
-| wordpress_update_post | Update an existing WordPress post |
-| wordpress_get_top_posts | Get top WordPress posts for a site |
-| wordpress_get_site_info | Get information about a WordPress site |
-| wordpress_get_site_stats | Get statistics for a WordPress site |
-| wordpress_get_user_sites | Get all WordPress sites the authenticated user has access to |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for WordPress. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -41,9 +41,9 @@ Connect to Dropbox to manage files, organize folders, share content, and automat
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Dropbox
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,55 +162,9 @@ Connect to Dropbox to manage files, organize folders, share content, and automat
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| dropbox_list_folder | Lists the contents of a folder |
-| dropbox_continue_folder_listing | Continues listing folder contents using a cursor |
-| dropbox_create_folder | Creates a new folder |
-| dropbox_delete_file_folder | Deletes a file or folder |
-| dropbox_move_file_folder | Moves or renames a file or folder |
-| dropbox_copy_file_folder | Creates a copy of a file or folder |
-| dropbox_batch_delete_files | Deletes multiple files and folders in a single operation |
-| dropbox_batch_move_files | Moves or renames multiple files and folders in a single operation |
-| dropbox_batch_copy_files | Creates copies of multiple files and folders in a single operation |
-| dropbox_check_batch_job_status | Checks the status of a batch operation |
-| dropbox_upload_file | Uploads a local file to Dropbox using file:// URI |
-| dropbox_download_file | Downloads a file from Dropbox |
-| dropbox_get_file_info | Gets metadata information about a file or folder |
-| dropbox_list_revisions | Lists the revisions of a file |
-| dropbox_restore_file | Restores a file to a previous revision |
-| dropbox_search_files | Searches for files and folders |
-| dropbox_continue_file_search | Continues searching files using a cursor |
-| dropbox_get_shared_links | Lists shared links for files and folders |
-| dropbox_share_file | Creates a shared link for a file or folder |
-| dropbox_add_file_member | Adds a member to a file |
-| dropbox_list_file_members | Lists the members of a file |
-| dropbox_remove_file_member | Removes a member from a file |
-| dropbox_share_folder | Shares a folder |
-| dropbox_list_folder_members | Lists the members of a shared folder |
-| dropbox_add_folder_member | Adds a member to a shared folder |
-| dropbox_unshare_file | Removes all members from a file |
-| dropbox_unshare_folder | Allows a shared folder owner to unshare the folder |
-| dropbox_remove_folder_member | Removes a member from a shared folder |
-| dropbox_create_file_request | Creates a file request |
-| dropbox_get_file_request | Gets a file request by ID |
-| dropbox_list_file_requests | Lists all file requests |
-| dropbox_delete_file_request | Deletes file requests |
-| dropbox_update_file_request | Updates a file request |
-| dropbox_get_current_account | Gets information about the current account |
-| dropbox_get_space_usage | Gets the current space usage information |
-| dropbox_get_temporary_link | Gets a temporary link to a file |
-| dropbox_get_file_thumbnail | Gets a thumbnail image for a file |
-| dropbox_save_url_to_dropbox | Downloads content from a URL and saves it as a file in Dropbox |
-| dropbox_check_url_save_status | Checks the status of a save URL operation |
-| dropbox_lock_files_batch | Temporarily locks files to prevent them from being edited by others |
-| dropbox_unlock_files_batch | Unlocks previously locked files |
-| dropbox_list_received_files | Lists files that have been shared with the current user by others |
-| dropbox_check_job_status | Checks the status of an asynchronous operation |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Dropbox. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

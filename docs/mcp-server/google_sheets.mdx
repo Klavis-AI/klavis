@@ -41,9 +41,9 @@ Connect to Google Sheets to create, read, and manage spreadsheets and automate d
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Google Sheets
           const response = await klavis.mcpServer.createStrataServer({
@@ -169,16 +169,9 @@ Connect to Google Sheets to create, read, and manage spreadsheets and automate d
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| google_sheets_create_spreadsheet | Create a new spreadsheet with a title and optional data |
-| google_sheets_get_spreadsheet | Retrieve spreadsheet properties and cell data for all sheets |
-| google_sheets_write_to_cell | Write a value to a specific cell in a spreadsheet |
-| google_sheets_list_all_sheets | List all Google Sheets spreadsheets in the user's Google Drive |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Google Sheets. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

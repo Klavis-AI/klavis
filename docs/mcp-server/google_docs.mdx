@@ -41,9 +41,9 @@ Connect to Google Docs to create, edit, and manage Google Docs documents and col
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Google Docs
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,17 +157,9 @@ Connect to Google Docs to create, edit, and manage Google Docs documents and col
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                              | Description                                                              |
-|----------------------------------------|--------------------------------------------------------------------------|
-| google_docs_get_document_by_id         | Retrieve a Google Docs document by ID                                   |
-| google_docs_get_all_documents          | Get all Google Docs documents from the user's Drive                     |
-| google_docs_insert_text_at_end         | Insert text at the end of a Google Docs document                        |
-| google_docs_create_blank_document      | Create a new blank Google Docs document with a title                    |
-| google_docs_create_document_from_text  | Create a new Google Docs document with specified text content           |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Google Docs. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

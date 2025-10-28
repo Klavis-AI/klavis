@@ -42,9 +42,9 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Mixpanel
           const response = await klavis.mcpServer.createStrataServer({
@@ -185,21 +185,9 @@ Connect to Mixpanel to track events, analyze user behavior, and generate insight
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| mixpanel_send_events | Send events to Mixpanel using the /import endpoint with Service Account authentication |
-| mixpanel_get_projects | Get all projects that are accessible to the current service account user |
-| mixpanel_get_events | Get event names for the given Mixpanel project |
-| mixpanel_get_event_properties | Get event properties for the given event and Mixpanel project |
-| mixpanel_get_event_property_values | Get event property values for the given event name, project, and property name |
-| mixpanel_run_funnels_query | Run a funnel query to measure the conversion rate of a user journey |
-| mixpanel_run_segmentation_query | Run a segmentation query to slice and dice your event stream for deeper insights |
-| mixpanel_run_retention_query | Run a retention query to track user engagement over time and perform cohort analysis |
-| mixpanel_run_frequency_query | Run a frequency query to analyze user engagement patterns and cohort behavior |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Mixpanel. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

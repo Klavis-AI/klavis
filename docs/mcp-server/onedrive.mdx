@@ -41,9 +41,9 @@ Connect to OneDrive to manage files, folders, and automate cloud storage operati
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a OneDrive MCP server instance
           const onedriveServer = await klavis.mcpServer.createServerInstance({
@@ -157,24 +157,9 @@ Connect to OneDrive to manage files, folders, and automate cloud storage operati
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| onedrive_rename_item | Rename a file or folder by its ID |
-| onedrive_move_item | Move a file or folder into another folder |
-| onedrive_delete_item | Delete a file or folder by its ID |
-| onedrive_read_file_content | Read the raw content of a text file |
-| onedrive_create_file | Create a new file in a folder or root |
-| onedrive_create_folder | Create a new folder inside a folder or root |
-| onedrive_list_root_files_folders | List all files and folders in the root of OneDrive |
-| onedrive_list_inside_folder | List contents of a specific folder |
-| onedrive_search_item_by_name | Search files and folders by name |
-| onedrive_search_folder_by_name | Search only folders by name |
-| onedrive_get_item_by_id | Get details or metadata of a file or folder by its ID |
-| onedrive_list_shared_items | List items that are shared with the user |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for OneDrive. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

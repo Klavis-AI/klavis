@@ -41,9 +41,9 @@ Connect to Asana to manage projects, track tasks, and collaborate with your team
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Asana
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,25 +161,9 @@ Connect to Asana to manage projects, track tasks, and collaborate with your team
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| asana_get_current_user | Get information about the current user |
-| asana_list_workspaces | List all workspaces |
-| asana_list_projects | List all projects in a workspace |
-| asana_get_project | Get details of a specific project |
-| asana_list_tasks | List all tasks in a project |
-| asana_get_task | Get details of a specific task |
-| asana_create_task | Create a new task |
-| asana_update_task | Update an existing task |
-| asana_delete_task | Delete a task |
-| asana_list_sections | List all sections in a project |
-| asana_create_section | Create a new section |
-| asana_list_teams | List all teams in a workspace |
-| asana_list_team_members | List members of a specific team |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Asana. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

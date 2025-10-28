@@ -42,9 +42,9 @@ Connect to Fireflies to transcribe meetings, extract insights, search conversati
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Fireflies
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,63 +172,9 @@ Connect to Fireflies to transcribe meetings, extract insights, search conversati
 
 ## Available Tools
 
-<Accordion title="Transcript Management">
-| Tool Name | Description |
-|-----------|-------------|
-| list_transcripts | List transcripts with optional filters by date range, keywords, participants, organizers, and more. Returns comprehensive transcript data including analytics, sentences, and summaries |
-| get_transcript | Get comprehensive information about a specific transcript by ID, including sentences with AI filters, detailed analytics, summary with action items, and meeting attendance |
-| delete_transcript | Delete a specific transcript by ID (requires transcript ownership or edit permissions) |
-| update_meeting_title | Update the title of a meeting transcript (requires transcript ownership or edit permissions) |
-</Accordion>
-
-<Accordion title="Meeting Operations">
-| Tool Name | Description |
-|-----------|-------------|
-| upload_audio | Upload audio/video file for transcription from a publicly accessible URL. Supports mp3, mp4, wav, m4a, ogg formats |
-| add_to_live_meeting | Add Fireflies bot to an ongoing meeting (Google Meet, Zoom, Microsoft Teams, etc.). Rate limited to 3 requests per 20 minutes |
-</Accordion>
-
-<Accordion title="User Management">
-| Tool Name | Description |
-|-----------|-------------|
-| get_user | Get user details by ID. If no ID provided, returns details for API key owner |
-| list_users | List all users in the team |
-| set_user_role | Set user role (admin or user). Requires admin privileges |
-</Accordion>
-
-<Accordion title="User Groups">
-| Tool Name | Description |
-|-----------|-------------|
-| list_user_groups | List user groups in the team with optional filtering |
-</Accordion>
-
-<Accordion title="Soundbites/Clips">
-| Tool Name | Description |
-|-----------|-------------|
-| list_bites | List bites/soundbites with filters by owner, transcript, or team |
-| get_bite | Get detailed information about a specific bite by ID |
-| create_bite | Create a new bite/soundbite from a transcript (requires appropriate permissions) |
-</Accordion>
-
-<Accordion title="Analytics">
-| Tool Name | Description |
-|-----------|-------------|
-| get_analytics | Get comprehensive team and user analytics for a date range. Includes conversation metrics, meeting metrics, and comparison data. Requires Business or Enterprise plan and admin privileges for team analytics |
-</Accordion>
-
-<Accordion title="AI Apps">
-| Tool Name | Description |
-|-----------|-------------|
-| list_apps | List AI App outputs with optional filters by app ID or transcript ID |
-</Accordion>
-
-<Accordion title="Webhooks">
-| Tool Name | Description |
-|-----------|-------------|
-| get_webhook_schema | Get the schema and example payload for Fireflies webhooks |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Fireflies. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

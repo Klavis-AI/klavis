@@ -41,9 +41,9 @@ Connect to Cal.com to manage schedules, create appointments, and automate calend
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Cal.com
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,18 +161,9 @@ Connect to Cal.com to manage schedules, create appointments, and automate calend
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| cal_get_all_schedules | Retrieve all schedules from Cal.com |
-| cal_create_a_schedule | Create a new schedule in Cal.com |
-| cal_update_a_schedule | Update an existing schedule in Cal.com |
-| cal_delete_a_schedule | Delete a schedule by ID in Cal.com |
-| cal_get_default_schedule | Get the default schedule configured in Cal.com |
-| cal_get_schedule | Fetch a specific schedule by ID from Cal.com |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Cal.com. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

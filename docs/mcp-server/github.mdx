@@ -41,9 +41,9 @@ Connect to GitHub to manage repositories, track issues, and collaborate on code 
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with GitHub
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,31 +162,9 @@ Connect to GitHub to manage repositories, track issues, and collaborate on code 
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| github_search_repositories | Search for repositories on GitHub |
-| github_get_repository | Get repository information |
-| github_list_repository_issues | List issues in a repository |
-| github_get_issue | Get specific issue details |
-| github_create_issue | Create a new issue |
-| github_update_issue | Update an existing issue |
-| github_list_pull_requests | List pull requests in a repository |
-| github_get_pull_request | Get specific pull request details |
-| github_create_pull_request | Create a new pull request |
-| github_list_commits | List commits in a repository |
-| github_get_commit | Get specific commit details |
-| github_get_file_contents | Get file contents from a repository |
-| github_create_file | Create a new file in a repository |
-| github_update_file | Update an existing file |
-| github_delete_file | Delete a file from a repository |
-| github_list_branches | List branches in a repository |
-| github_create_branch | Create a new branch |
-| github_list_releases | List releases in a repository |
-| github_create_release | Create a new release |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for GitHub. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

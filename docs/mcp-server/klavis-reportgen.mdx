@@ -42,9 +42,9 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Klavis ReportGen
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,13 +172,9 @@ Connect to Klavis ReportGen to generate visually appealing JavaScript web report
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name            | Description                                                              |
-|----------------------|--------------------------------------------------------------------------|
-| generate_web_reports | Generate visually appealing JavaScript web reports based on search queries |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Klavis ReportGen. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

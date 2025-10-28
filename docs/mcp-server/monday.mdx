@@ -41,9 +41,9 @@ Connect to Monday.com to manage projects, track tasks, and automate workflows th
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Monday.com
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,26 +161,9 @@ Connect to Monday.com to manage projects, track tasks, and automate workflows th
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| monday_list_boards | List all boards in your Monday.com workspace |
-| monday_get_board | Get details of a specific board |
-| monday_create_board | Create a new board |
-| monday_list_items | Get items from a board |
-| monday_create_item | Create a new item in a board |
-| monday_update_item | Update an existing item |
-| monday_delete_item | Delete an item from a board |
-| monday_list_columns | Get columns from a board |
-| monday_create_column | Create a new column in a board |
-| monday_update_column_value | Update a column value for an item |
-| monday_list_groups | Get groups from a board |
-| monday_create_group | Create a new group in a board |
-| monday_list_users | List all users in your workspace |
-| monday_list_workspaces | List all workspaces |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Monday.com. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

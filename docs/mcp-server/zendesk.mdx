@@ -41,9 +41,9 @@ Connect to Zendesk to manage customer support tickets, handle inquiries, and str
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Zendesk
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,27 +162,9 @@ Connect to Zendesk to manage customer support tickets, handle inquiries, and str
 
 ## Available Tools
 
-<Note>
-  **Coming Soon**: Zendesk integration is currently in development. Tool functionality will be available soon with features including:
-  - Ticket management and tracking
-  - Customer interaction history
-  - Support workflow automation
-  - Analytics and reporting
-</Note>
-
-<Accordion title="Planned Tools">
-| Tool Name (Coming Soon)        | Description                                                              |
-|--------------------------------|--------------------------------------------------------------------------|
-| zendesk_list_tickets           | List support tickets with filtering options |
-| zendesk_create_ticket          | Create new support tickets |
-| zendesk_get_ticket             | Get detailed information about a specific ticket |
-| zendesk_update_ticket          | Update ticket status, priority, or details |
-| zendesk_add_comment            | Add comments to existing tickets |
-| zendesk_list_users             | List users and customer information |
-| zendesk_search                 | Search across tickets, users, and organizations |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Zendesk. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -42,9 +42,9 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Perplexity
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,24 +172,9 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
 
 ## Available Tools
 
-<Note>
-  **Coming Soon**: Perplexity integration is currently in development. Tool functionality will be available soon with features including:
-  - AI-powered web search
-  - Research and information synthesis
-  - Real-time data access
-  - Citation and source tracking
-</Note>
-
-<Accordion title="Planned Tools">
-| Tool Name (Coming Soon)        | Description                                                              |
-|--------------------------------|--------------------------------------------------------------------------|
-| perplexity_search              | Perform AI-powered search queries with intelligent results |
-| perplexity_ask                 | Ask questions and get comprehensive, cited answers |
-| perplexity_research            | Conduct deep research on complex topics |
-| perplexity_summarize           | Summarize content with key insights |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Perplexity. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

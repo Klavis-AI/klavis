@@ -41,9 +41,9 @@ Connect to Notion to manage pages, databases, and content, enabling AI agents to
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Notion
           const response = await klavis.mcpServer.createStrataServer({
@@ -173,25 +173,9 @@ Connect to Notion to manage pages, databases, and content, enabling AI agents to
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| notion_get_user | Retrieve a Notion user |
-| notion_get_users | List all Notion users |
-| notion_get_self | Retrieve your Notion token's bot user |
-| notion_post_search | Search Notion by title |
-| notion_retrieve_a_page | Retrieve a Notion page |
-| notion_patch_page | Update Notion page properties |
-| notion_post_page | Create a Notion page |
-| notion_create_a_database | Create a Notion database |
-| notion_update_a_database | Update a Notion database |
-| notion_retrieve_a_database | Retrieve a Notion database |
-| notion_retrieve_a_page_property | Retrieve a Notion page property item |
-| notion_retrieve_a_comment | Retrieve Notion comments |
-| notion_create_a_comment | Create a Notion comment |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Notion. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

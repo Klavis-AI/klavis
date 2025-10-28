@@ -42,9 +42,9 @@ Connect to Hacker News to fetch stories, user profiles, and analyze technology n
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Hacker News
           const response = await klavis.mcpServer.createStrataServer({
@@ -134,21 +134,9 @@ Connect to Hacker News to fetch stories, user profiles, and analyze technology n
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| hackerNews_item | Fetches a single Hacker News item by its unique ID |
-| hackerNews_user | Retrieves a Hacker News user's profile by their username |
-| hackerNews_topstories | Fetches a list of the current top stories |
-| hackerNews_beststories | Fetches a list of the all-time best stories |
-| hackerNews_newstories | Fetches a list of the most recent stories |
-| hackerNews_showstories | Fetches a list of the latest "Show HN" stories |
-| hackerNews_askstories | Fetches a list of the latest "Ask HN" stories |
-| hackerNews_jobstories | Fetches a list of the latest job postings |
-| hackerNews_updates | Fetches recent updates, including new items and changed profiles |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Hacker News. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

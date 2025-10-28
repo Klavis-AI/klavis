@@ -41,9 +41,9 @@ Connect to Linear to manage issues, projects, teams, and automate project manage
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Linear
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,24 +157,9 @@ Connect to Linear to manage issues, projects, teams, and automate project manage
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| linear_get_teams | Get all teams in the Linear workspace including workflow states and team members |
-| linear_get_issues | Get issues, optionally filtered by team |
-| linear_get_issue_by_id | Get a specific issue by its ID |
-| linear_create_issue | Create a new issue in Linear |
-| linear_update_issue | Update an existing issue in Linear |
-| linear_get_projects | Get projects, optionally filtered by team |
-| linear_create_project | Create a new project in Linear |
-| linear_update_project | Update an existing project in Linear |
-| linear_get_comments | Get comments for a specific issue |
-| linear_create_comment | Create a comment on an issue |
-| linear_update_comment | Update an existing comment |
-| linear_search_issues | Search for issues by text query |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Linear. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

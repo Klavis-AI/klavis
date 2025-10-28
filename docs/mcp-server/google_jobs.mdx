@@ -42,9 +42,9 @@ Connect to Google Jobs to manage job postings and applications through AI agents
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Google Jobs
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,15 +162,9 @@ Connect to Google Jobs to manage job postings and applications through AI agents
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name   | Description                                                              |
-|-------------|--------------------------------------------------------------------------|
-<Note>
-  Coming Soon
-</Note>
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Google Jobs. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

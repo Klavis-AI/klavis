@@ -41,9 +41,9 @@ Connect to Jira to manage issues, projects, sprints, and automate development wo
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Jira
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,26 +157,9 @@ Connect to Jira to manage issues, projects, sprints, and automate development wo
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                   | Description                                                                 |
-|-----------------------------|-----------------------------------------------------------------------------|
-| jira_search                 | Search Jira issues using JQL (Jira Query Language)                          |
-| jira_get_issue              | Get details of a specific Jira issue including its Epic links and relationship information |
-| jira_search_fields          | Search Jira fields by keyword with fuzzy match                              |
-| jira_get_project_issues     | Get all issues for a specific Jira project                                  |
-| jira_get_epic_issues        | Get all issues linked to a specific epic                                    |
-| jira_get_sprints_from_board | Get jira sprints from board by state                                        |
-| jira_create_sprint          | Create Jira sprint for a board                                              |
-| jira_get_sprint_issues      | Get jira issues from sprint                                                 |
-| jira_update_sprint          | Update jira sprint                                                          |
-| jira_create_issue           | Create a new Jira issue with optional Epic link or parent for subtasks      |
-| jira_update_issue           | Update an existing Jira issue including changing status, adding Epic links, updating fields, etc. |
-| jira_delete_issue           | Delete an existing Jira issue                                               |
-| jira_add_comment            | Add a comment to a Jira issue                                               |
-| jira_get_link_types         | Get all available issue link types                                          |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Jira. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

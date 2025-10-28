@@ -41,9 +41,9 @@ Connect to QuickBooks to manage accounts, invoices, customers, payments, vendors
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with QuickBooks
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,52 +157,9 @@ Connect to QuickBooks to manage accounts, invoices, customers, payments, vendors
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| **Account Management** |  |
-| create_account | Create a new account in QuickBooks |
-| get_account | Get a specific account by ID from QuickBooks |
-| list_accounts | List all chart of accounts from QuickBooks |
-| update_account | Update an existing account in QuickBooks |
-| search_accounts | Advanced Account Search with powerful filters including name, type, classification, status, and other criteria |
-| **Invoice Management** |  |
-| create_invoice | Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line |
-| get_invoice | Retrieve a specific invoice by ID with all its details including line items, amounts, and status |
-| list_invoices | Retrieve all invoices from QuickBooks with pagination support |
-| search_invoices | Advanced Invoice Search with powerful filters including dates, amounts, addresses, customer info, and status |
-| update_invoice | Modify an existing invoice in QuickBooks with automatic sync token handling |
-| delete_invoice | Permanently delete an invoice from QuickBooks (use with caution) |
-| send_invoice | Send an invoice to customer via email with delivery tracking |
-| void_invoice | Void an existing invoice while keeping the record for audit trail |
-| **Customer Management** |  |
-| create_customer | Create a new customer in QuickBooks |
-| get_customer | Get a specific customer by ID from QuickBooks |
-| list_customers | List all customers from QuickBooks |
-| update_customer | Update an existing customer in QuickBooks |
-| search_customers | Advanced Customer Search with powerful filters including name, contact info, address, balance, and status |
-| activate_customer | Activate a customer in QuickBooks (set Active to true) |
-| deactivate_customer | Deactivate a customer from QuickBooks (set Active to false) |
-| **Payment Management** |  |
-| create_payment | Create a new payment in QuickBooks. Can be applied to specific invoices or created as unapplied credit |
-| get_payment | Retrieve a specific payment by ID with all its details and linked transactions |
-| list_payments | Retrieve all payments from QuickBooks with pagination support |
-| search_payments | Advanced Payment Search with powerful filters including dates, amounts, customer info, and status |
-| update_payment | Modify an existing payment in QuickBooks with automatic sync token handling |
-| delete_payment | Permanently delete a payment from QuickBooks (use with caution) |
-| send_payment | Send a payment receipt to customer via email |
-| void_payment | Void an existing payment while keeping the record for audit trail |
-| **Vendor Management** |  |
-| create_vendor | Create a new vendor in QuickBooks. Requires DisplayName or name components |
-| get_vendor | Get a specific vendor by ID from QuickBooks |
-| list_vendors | List all vendors from QuickBooks |
-| search_vendors | Search vendors with various filters including name, company, contact info, and status |
-| update_vendor | Update an existing vendor in QuickBooks |
-| activate_vendor | Activate a vendor in QuickBooks (set Active to true) |
-| deactivate_vendor | Deactivate a vendor from QuickBooks (set Active to false) |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for QuickBooks. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

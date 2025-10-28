@@ -42,9 +42,9 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Plai
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,22 +172,9 @@ Connect to Plai to create and manage Facebook, Instagram, and LinkedIn ad campai
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                      | Description                                                              |
-|--------------------------------|--------------------------------------------------------------------------|
-| plai_create_user_profile       | Create a new user profile on the Plai platform. This allows onboarding new users into the system. |
-| plai_get_user_profile          | Retrieve the current user profile using their email address. |
-| plai_create_link               | Generate a link that allows users to connect their Ad accounts (Facebook/Instagram or LinkedIn). |
-| plai_create_leads_dynamic      | Create a dynamic Facebook Lead Ad campaign. Lead generation ads collect contact information directly from users on Meta platforms. |
-| plai_get_campaign_insights     | Fetch campaign insights for a specific campaign with performance metrics. |
-| plai_update_campaign_status    | Update the status of a campaign (pause, activate, or delete). |
-| plai_check_leadform_tos        | Check whether the user has accepted the Terms of Service for their connected Facebook page. |
-| plai_create_leadform           | Create a lead form for Facebook Lead Ads with predefined questions (EMAIL and FULL_NAME). |
-| plai_get_leadform_list         | Get a list of all lead forms for the user. |
-| plai_search_targeting_locations| Search for advertising target locations based on search query. This helps in identifying relevant locations to improve the accuracy and effectiveness of ad targeting. |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Plai. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

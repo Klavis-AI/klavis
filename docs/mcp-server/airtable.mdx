@@ -41,9 +41,9 @@ Connect to Airtable to manage databases, automate workflows, and sync data throu
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Airtable
           const response = await klavis.mcpServer.createStrataServer({
@@ -161,23 +161,9 @@ Connect to Airtable to manage databases, automate workflows, and sync data throu
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| airtable_list_bases_info | Get information about all bases |
-| airtable_list_tables_info | Get information about all tables in a base |
-| airtable_create_table | Create a new table in a base |
-| airtable_update_table | Update an existing table in a base |
-| airtable_create_field | Create a new field in a table |
-| airtable_update_field | Update an existing field in a table |
-| airtable_list_records | Get all records from a table with optional filtering and formatting |
-| airtable_get_record | Get a single record from a table |
-| airtable_create_records | Create multiple records in a table |
-| airtable_update_records | Update multiple records in a table with optional upsert functionality |
-| airtable_delete_records | Delete multiple records from a table |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Airtable. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

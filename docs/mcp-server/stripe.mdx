@@ -41,9 +41,9 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Stripe
           const response = await klavis.mcpServer.createStrataServer({
@@ -171,17 +171,9 @@ Connect to Stripe to manage payments, customers, subscriptions, and automate pay
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| create_customer | Create a new customer in Stripe |
-| create_payment_intent | Create a new payment intent for processing payments |
-| retrieve_payment | Get information about a specific payment |
-| create_subscription | Create a new subscription for a customer |
-| list_invoices | List invoices for a customer or your account |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Stripe. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

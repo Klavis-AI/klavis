@@ -42,9 +42,9 @@ Connect to Doc2markdown to convert various document formats (PDF, PowerPoint, Wo
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Doc2markdown
           const response = await klavis.mcpServer.createStrataServer({
@@ -135,13 +135,9 @@ Connect to Doc2markdown to convert various document formats (PDF, PowerPoint, Wo
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                     | Description                                                              |
-|-------------------------------|--------------------------------------------------------------------------|
-| convert_document_to_markdown  | Convert a document from a URI to markdown. Supports PDF, PowerPoint, Word, Excel, HTML, text-based formats, ZIP files, and EPubs |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Doc2markdown. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -44,7 +44,7 @@ Connect to Microsoft Teams to manage teams, channels, messages, and automate col
           ```typescript TypeScript
           import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Microsoft Teams MCP server instance
           const teamsServer = await klavis.mcpServer.createServerInstance({
@@ -159,47 +159,9 @@ Connect to Microsoft Teams to manage teams, channels, messages, and automate col
 
 ## Available Tools
 
-<Accordion title="Team Management">
-| Tool Name         | Description                           |
-|-------------------|---------------------------------------|
-| create_team       | Create a new Microsoft Teams team    |
-| list_teams        | List all teams joined by the user    |
-| get_team_by_name  | Get team details by name              |
-</Accordion>
-
-<Accordion title="Member Management">
-| Tool Name                 | Description                           |
-|---------------------------|---------------------------------------|
-| add_member_to_team        | Add a member to a team by email       |
-| get_team_members          | Get all members of a team             |
-| remove_members_from_team  | Remove members from a team            |
-</Accordion>
-
-<Accordion title="Channel Management">
-| Tool Name                 | Description                           |
-|---------------------------|---------------------------------------|
-| get_all_channels          | Get all channels in a team            |
-| get_channel_by_name       | Get channel details by name           |
-| add_channel_to_team       | Add a new channel to a team           |
-| remove_channel_from_team  | Remove a channel from a team          |
-</Accordion>
-
-<Accordion title="Message Management">
-| Tool Name                 | Description                           |
-|---------------------------|---------------------------------------|
-| send_message_in_channel   | Send a message in a channel           |
-| get_messages_in_channel   | Get messages from a channel           |
-</Accordion>
-
-<Accordion title="Chat Management">
-| Tool Name             | Description                           |
-|-----------------------|---------------------------------------|
-| get_chat_id_with      | Get or create a chat with a user      |
-| send_chat_message     | Send a message in a chat              |
-| get_chat_messages     | Get messages from a chat              |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Microsoft Teams. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

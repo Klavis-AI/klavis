@@ -42,10 +42,10 @@ Connect to Shopify to manage e-commerce and collaboration through AI agents.
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
-
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+          
           // Create a Strata MCP server with Shopify
           const response = await klavis.mcpServer.createStrataServer({
               servers: [Klavis.McpServerName.Shopify],
@@ -69,30 +69,53 @@ Connect to Shopify to manage e-commerce and collaboration through AI agents.
         </Card>
       </Step>
       
-      <Step title="Authenticate">
+      <Step title="Authenticate with Access Token">
         <CodeGroup>
           ```python Python
-          import webbrowser
-          
-          # Open OAuth authorization page
-          webbrowser.open(response.oauth_urls[McpServerName.SHOPIFY])
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.SHOPIFY,
+              auth_data={
+                  "data": {
+                      "access_token": "YOUR_SHOPIFY_ACCESS_TOKEN",
+                      "shop_domain": "YOUR_SHOP_DOMAIN"
+                  }
+              }
+          )
           ```
           
           ```typescript TypeScript
-            import open from 'open';
-          
-          // Open OAuth authorization page
-          await open(response.oauthUrls[Klavis.McpServerName.Shopify]);
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Shopify,
+              authData: {
+                  data: {
+                      access_token: "YOUR_SHOPIFY_ACCESS_TOKEN",
+                      shop_domain: "YOUR_SHOP_DOMAIN"
+                  }
+              }
+          });
           ```
           
           ```bash cURL
-          # Copy and paste the OAuth URL into your browser
-          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/shopify/authorize?instance_id=YOUR_INSTANCE_ID"
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Shopify",
+              "authData": {
+                "data": {
+                  "access_token": "YOUR_SHOPIFY_ACCESS_TOKEN",
+                  "shop_domain": "YOUR_SHOP_DOMAIN"
+                }
+              }
+            }'
           ```
         </CodeGroup>
         
         <Note>
-          Get your Shopify API key from your [Shopify Developer Console](https://shopify.dev/docs).
+          Get your Shopify access token from your [Shopify Admin API settings](https://shopify.dev/docs/api/admin-rest). The shop domain should be in the format `your-store.myshopify.com`.
         </Note>
         
         <Check>
@@ -166,15 +189,9 @@ Connect to Shopify to manage e-commerce and collaboration through AI agents.
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name   | Description                                                              |
-|-------------|--------------------------------------------------------------------------|
-<Note>
-  Coming Soon
-</Note>
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Shopify. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

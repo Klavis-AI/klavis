@@ -42,9 +42,9 @@ Connect to Gong to access sales conversation intelligence, analyze call transcri
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Gong
           const response = await klavis.mcpServer.createStrataServer({
@@ -176,17 +176,9 @@ Connect to Gong to access sales conversation intelligence, analyze call transcri
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| gong_get_transcripts_by_user | Get call transcripts associated with a user by email address including all participants on the call and their companies |
-| gong_get_extensive_data | Lists detailed call data for specific call IDs |
-| gong_get_call_transcripts | Retrieve transcripts of specific calls |
-| gong_list_calls | List calls within a date range |
-| gong_add_new_call | Add a new call record to Gong |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Gong. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

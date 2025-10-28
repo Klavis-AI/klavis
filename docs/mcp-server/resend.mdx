@@ -42,9 +42,9 @@ Connect to Resend to send emails, manage audiences, create broadcasts, and autom
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Resend
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,27 +172,9 @@ Connect to Resend to send emails, manage audiences, create broadcasts, and autom
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| resend_send_email | Send an email using Resend service with options for HTML content, CC, BCC, scheduled delivery, etc. |
-| resend_create_audience | Create a new audience in Resend |
-| resend_get_audience | Retrieve audience details by ID in Resend |
-| resend_delete_audience | Delete an audience by ID in Resend |
-| resend_list_audiences | List all audiences in Resend |
-| resend_create_contact | Create a new contact in a Resend audience |
-| resend_get_contact | Retrieve a contact from a Resend audience by ID or email |
-| resend_update_contact | Update a contact in a Resend audience by ID or email |
-| resend_delete_contact | Delete a contact from a Resend audience by ID or email |
-| resend_list_contacts | List all contacts in a Resend audience |
-| resend_create_broadcast | Create a new broadcast in Resend |
-| resend_get_broadcast | Retrieve a broadcast by ID from Resend |
-| resend_send_broadcast | Send or schedule a broadcast in Resend |
-| resend_delete_broadcast | Delete a broadcast by ID in Resend |
-| resend_list_broadcasts | List all broadcasts in Resend |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Resend. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

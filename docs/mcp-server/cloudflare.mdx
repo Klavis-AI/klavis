@@ -42,9 +42,9 @@ Connect to Cloudflare to manage DNS records, deploy Workers, configure firewalls
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Cloudflare
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,17 +172,9 @@ Connect to Cloudflare to manage DNS records, deploy Workers, configure firewalls
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                   | Description                                                              |
-|-----------------------------|--------------------------------------------------------------------------|
-| manage_dns_records          | Create, update, or delete DNS records for your domains                   |
-| deploy_worker               | Deploy a Cloudflare Worker script to the edge network                    |
-| configure_firewall          | Configure Cloudflare firewall rules and security settings                |
-| purge_cache                 | Purge cached content from Cloudflare's CDN                               |
-| analytics_query             | Query analytics data for your Cloudflare-enabled domains                 |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Cloudflare. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -42,9 +42,9 @@ Connect to Moneybird to manage accounting data, contacts, invoices, and financia
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Moneybird
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,24 +172,9 @@ Connect to Moneybird to manage accounting data, contacts, invoices, and financia
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name   | Description                                                              |
-|-------------|--------------------------------------------------------------------------|
-| moneybird_list_administrations | List all administrations that the authenticated user has access to |
-| moneybird_list_contacts | Retrieve a list of contacts from a Moneybird administration |
-| moneybird_get_contact | Retrieve a specific contact by ID from a Moneybird administration |
-| moneybird_create_contact | Create a new company contact in Moneybird |
-| moneybird_create_contact_person | Create a new contact person within an existing contact in Moneybird |
-| moneybird_create_sales_invoice | Create a new sales invoice in Moneybird |
-| moneybird_list_sales_invoices | Retrieve a list of sales invoices from a Moneybird administration |
-| moneybird_get_sales_invoice | Retrieve a specific sales invoice by ID from a Moneybird administration |
-| moneybird_list_financial_accounts | Retrieve a list of financial accounts from a Moneybird administration |
-| moneybird_list_products | Retrieve a list of products from a Moneybird administration |
-| moneybird_list_projects | Retrieve a list of projects from a Moneybird administration |
-| moneybird_list_time_entries | Retrieve a list of time entries from a Moneybird administration |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Moneybird. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

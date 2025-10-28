@@ -41,9 +41,9 @@ Connect to Calendly to automate scheduling, manage appointments, and integrate c
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Calendly
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,25 +162,9 @@ Connect to Calendly to automate scheduling, manage appointments, and integrate c
 
 ## Available Tools
 
-<Note>
-  **Coming Soon**: Calendly integration is currently in development. Tool functionality will be available soon with features including:
-  - Event scheduling and management
-  - Availability checking
-  - Meeting creation and updates
-  - Calendar synchronization
-</Note>
-
-<Accordion title="Planned Tools">
-| Tool Name (Coming Soon)        | Description                                                              |
-|--------------------------------|--------------------------------------------------------------------------|
-| calendly_list_events           | List scheduled events and appointments |
-| calendly_create_event          | Create new calendar events and meetings |
-| calendly_get_availability      | Check availability for scheduling |
-| calendly_cancel_event          | Cancel existing appointments |
-| calendly_update_event          | Update event details and settings |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Calendly. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

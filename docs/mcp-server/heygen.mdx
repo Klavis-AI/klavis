@@ -42,9 +42,9 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with HeyGen
           const response = await klavis.mcpServer.createStrataServer({
@@ -172,22 +172,9 @@ Connect to HeyGen to generate AI-powered videos with avatars, manage video conte
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name   | Description                                                              |
-|-------------|--------------------------------------------------------------------------|
-| heygen_get_remaining_credits | Retrieve the remaining credits in your HeyGen account |
-| heygen_get_voices | Retrieve a list of available voices from the HeyGen API |
-| heygen_get_voice_locales | Retrieve a list of available voice locales (languages) from the HeyGen API |
-| heygen_get_avatar_groups | Retrieve a list of HeyGen avatar groups |
-| heygen_get_avatars_in_avatar_group | Retrieve a list of avatars in a specific HeyGen avatar group |
-| heygen_list_avatars | Retrieve a list of all available avatars from the HeyGen API |
-| heygen_generate_avatar_video | Generate a new avatar video with the specified avatar, text, and voice |
-| heygen_get_avatar_video_status | Retrieve the status of a video generated via the HeyGen API |
-| heygen_list_videos | Retrieve a list of videos from your HeyGen account |
-| heygen_delete_video | Delete a video from your HeyGen account |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for HeyGen. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

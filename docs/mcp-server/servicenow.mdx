@@ -42,9 +42,9 @@ Connect to ServiceNow for a central database and application suite to build cust
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with ServiceNow
           const response = await klavis.mcpServer.createStrataServer({
@@ -151,7 +151,9 @@ Connect to ServiceNow for a central database and application suite to build cust
 
 ## Available Tools
 
-See ServiceNow official REST API documentation for available endpoints: [ServiceNow REST API](https://www.servicenow.com/docs/bundle/zurich-api-reference/page/build/applications/concept/api-rest.html).
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for ServiceNow. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

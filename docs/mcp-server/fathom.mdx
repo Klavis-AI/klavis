@@ -42,9 +42,9 @@ Connect to Fathom for AI-Powered Notes and Summaries
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
 
           // Create a Strata MCP server with Fathom
           const response = await klavis.mcpServer.createStrataServer({
@@ -163,13 +163,9 @@ Connect to Fathom for AI-Powered Notes and Summaries
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-<Note>
-  All tools within [Fathom API](https://developers.fathom.ai/api-overview) is included in Klavis ecosystem!
-</Note>
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Fathom. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

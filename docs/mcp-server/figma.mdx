@@ -41,9 +41,9 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Figma
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,17 +162,9 @@ Connect to Figma to access design files, manage assets, retrieve comments, and c
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                   | Description                                                              |
-|-----------------------------|--------------------------------------------------------------------------|
-| get_file_content            | Retrieve content and data from a specific Figma file                     |
-| list_files                  | List accessible Figma files in a project or team                         |
-| create_component            | Create a new component in a Figma file                                   |
-| export_designs              | Export designs or assets from a Figma file                               |
-| get_comments                | Retrieve comments from a Figma file                                      |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Figma. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

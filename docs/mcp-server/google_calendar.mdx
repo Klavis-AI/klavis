@@ -41,9 +41,9 @@ Connect to Google Calendar to manage events, schedule meetings, and automate cal
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Google Calendar
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,18 +157,9 @@ Connect to Google Calendar to manage events, schedule meetings, and automate cal
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| google_calendar_list_calendars | List all calendars accessible by the user |
-| google_calendar_create_event | Create a new event/meeting/sync/meetup in the specified calendar |
-| google_calendar_list_events | List events from the specified calendar within the given datetime range |
-| google_calendar_update_event | Update an existing event in the specified calendar with the provided details |
-| google_calendar_add_attendees_to_event | Add attendees to an existing event in Google Calendar |
-| google_calendar_delete_event | Delete an event from Google Calendar |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Google Calendar. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

@@ -41,9 +41,9 @@ Connect to Slack to manage team communication, automate workflows, and collabora
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Slack
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,29 +162,9 @@ Connect to Slack to manage team communication, automate workflows, and collabora
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                    | Description                                                              |
-|------------------------------|--------------------------------------------------------------------------|
-| slack_send_message | Send a message to a Slack channel |
-| slack_list_channels | List all channels in the workspace |
-| slack_get_channel_info | Get information about a specific channel |
-| slack_list_messages | List messages from a channel |
-| slack_get_message | Get a specific message by timestamp |
-| slack_update_message | Update an existing message |
-| slack_delete_message | Delete a message |
-| slack_add_reaction | Add an emoji reaction to a message |
-| slack_remove_reaction | Remove an emoji reaction from a message |
-| slack_list_users | List all users in the workspace |
-| slack_get_user_info | Get information about a specific user |
-| slack_set_channel_topic | Set the topic for a channel |
-| slack_invite_user_to_channel | Invite a user to a channel |
-| slack_kick_user_from_channel | Remove a user from a channel |
-| slack_create_channel | Create a new channel |
-| slack_archive_channel | Archive a channel |
-| slack_upload_file | Upload a file to Slack |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Slack. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

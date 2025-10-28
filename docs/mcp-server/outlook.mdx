@@ -41,9 +41,9 @@ Connect to Outlook to read, send, organize emails, and automate email workflows 
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Outlook
           const response = await klavis.mcpServer.createStrataServer({
@@ -157,28 +157,9 @@ Connect to Outlook to read, send, organize emails, and automate email workflows 
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name                               | Description                          |
-|----------------------------------------|--------------------------------------|
-| outlookMail_create_mail_folder         | Create a new mail folder             |
-| outlookMail_list_folders               | List all mail folders                |
-| outlookMail_get_mail_folder_details    | Get details of a mail folder         |
-| outlookMail_update_folder_display_name | Rename a mail folder                 |
-| outlookMail_delete_folder              | Delete a mail folder                 |
-| outlookMail_read_message               | Read the content of an email         |
-| outlookMail_send_draft                 | Send an existing draft email         |
-| outlookMail_create_draft               | Create a new draft email             |
-| outlookMail_create_reply_draft         | Create a reply to an email           |
-| outlookMail_create_reply_all_draft     | Create a reply-all draft             |
-| outlookMail_create_forward_draft       | Create a forward draft               |
-| outlookMail_update_draft               | Update an existing draft             |
-| outlookMail_delete_draft               | Delete a draft email                 |
-| outlookMail_list_messages              | List messages from the inbox         |
-| outlookMail_list_messages_from_folder  | List messages from a specific folder |
-| outlookMail_move_message               | Move message to a different folder   |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Outlook. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

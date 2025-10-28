@@ -41,9 +41,9 @@ Connect to ClickUp to manage projects, track tasks, and automate workflow operat
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with ClickUp
           const response = await klavis.mcpServer.createStrataServer({
@@ -162,33 +162,9 @@ Connect to ClickUp to manage projects, track tasks, and automate workflow operat
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| clickup_get_teams | Get all teams/workspaces the user has access to |
-| clickup_get_workspaces | Get all workspaces (alias for get_teams) |
-| clickup_get_spaces | Get all spaces in a team |
-| clickup_create_space | Create a new space in a team |
-| clickup_update_space | Update an existing space |
-| clickup_get_folders | Get all folders in a space |
-| clickup_create_folder | Create a new folder in a space |
-| clickup_update_folder | Update an existing folder |
-| clickup_get_lists | Get all lists in a folder or space. Either folder_id or space_id must be provided |
-| clickup_create_list | Create a new list in a folder or space. Either folder_id or space_id must be provided along with name |
-| clickup_update_list | Update an existing list |
-| clickup_get_tasks | Get tasks from a list with optional filtering |
-| clickup_get_task_by_id | Get a specific task by ID |
-| clickup_create_task | Create a new task in ClickUp |
-| clickup_update_task | Update an existing task in ClickUp |
-| clickup_search_tasks | Search for tasks by text query |
-| clickup_get_comments | Get comments for a specific task |
-| clickup_create_comment | Create a comment on a task |
-| clickup_update_comment | Update an existing comment |
-| clickup_get_user | Get the current user's information |
-| clickup_get_team_members | Get all team members |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for ClickUp. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 

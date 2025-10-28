@@ -42,9 +42,9 @@ Connect to Brave Search to perform comprehensive web searches, including web res
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Brave Search
           const response = await klavis.mcpServer.createStrataServer({
@@ -171,16 +171,9 @@ Connect to Brave Search to perform comprehensive web searches, including web res
 
 ## Available Tools
 
-<Accordion title="Tools Information">
-| Tool Name | Description |
-|-----------|-------------|
-| brave_web_search | Perform a Brave web search with rich filtering and personalization options including country, language, safesearch, and pagination |
-| brave_image_search | Search for images on Brave with support for safesearch filtering, language and country localization, and pagination |
-| brave_news_search | Search for news articles with safesearch filtering, language and country localization, pagination, and freshness filter to get recent news |
-| brave_video_search | Search for videos with safesearch filtering, language and country localization, pagination, and freshness filter to get recent videos |
-</Accordion>
-
-<Note>For more details about tool input schema, use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API.</Note>
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Brave Search. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
 
 ## Next Steps
 
