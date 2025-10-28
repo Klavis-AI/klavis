@@ -51,7 +51,7 @@ All queries are automatically wrapped in `BEGIN TRANSACTION READ ONLY` to ensure
 
 | Resource | Link |
 |----------|------|
-| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
@@ -69,7 +69,7 @@ Apache 2.0 license - see [LICENSE](../../LICENSE) for details.
   <p><strong>🚀 Supercharge AI Applications </strong></p>
   <p>
     <a href="https://www.klavis.ai">Get Free API Key</a> •
-    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://www.klavis.ai/docs">Documentation</a> •
     <a href="https://discord.gg/p7TuTEcssn">Discord</a>
   </p>
 </div>

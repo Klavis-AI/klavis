@@ -59,7 +59,7 @@ python server.py
 
 | Resource | Link |
 |----------|------|
-| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 

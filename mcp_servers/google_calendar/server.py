@@ -88,6 +88,11 @@ def get_calendar_service(access_token: str):
     credentials = Credentials(token=access_token)
     return build('calendar', 'v3', credentials=credentials)
 
+def get_people_service(access_token: str):
+    """Create Google People service with access token."""
+    credentials = Credentials(token=access_token)
+    return build('people', 'v1', credentials=credentials)
+
 def get_auth_token() -> str:
     """Get the authentication token from context."""
     try:
@@ -166,6 +171,7 @@ async def create_event(
     attendees: list[str] | None = None,
     send_updates: str = "all",
     add_google_meet: bool = False,
+    recurrence: list[str] | None = None,
 ) -> Dict[str, Any]:
     """Create a new event/meeting/sync/meetup in the specified calendar."""
     logger.info(f"Executing tool: create_event with summary: {summary}")
@@ -192,6 +198,10 @@ async def create_event(
 
         if attendees:
             event["attendees"] = [{"email": email} for email in attendees]
+
+        # Add recurrence rule if provided
+        if recurrence:
+            event["recurrence"] = recurrence
 
         # Add Google Meet conference if requested
         if add_google_meet:
@@ -269,6 +279,8 @@ async def list_events(
             "id",
             "location",
             "organizer",
+            "recurrence",
+            "recurringEventId",
             "start",
             "summary",
             "visibility",
@@ -298,6 +310,7 @@ async def update_event(
     updated_visibility: str | None = None,
     attendees_to_add: list[str] | None = None,
     attendees_to_remove: list[str] | None = None,
+    updated_recurrence: list[str] | None = None,
     send_updates: str = "all",
 ) -> str:
     """Update an existing event in the specified calendar with the provided details."""
@@ -345,6 +358,11 @@ async def update_event(
         
         if updated_visibility:
             update_fields["visibility"] = updated_visibility
+        
+        if updated_recurrence is not None:
+            # If updated_recurrence is an empty list, remove recurrence (convert to single event)
+            # If it has values, update the recurrence rule
+            update_fields["recurrence"] = updated_recurrence
 
         event.update({k: v for k, v in update_fields.items() if v is not None})
 
@@ -507,6 +525,49 @@ async def delete_event(
         raise RuntimeError(f"Google Calendar API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
     except Exception as e:
         logger.exception(f"Error executing tool delete_event: {e}")
+        raise e
+
+async def get_current_time() -> Dict[str, Any]:
+    """
+    Get the current date and time using the user's Google Calendar timezone setting.
+    
+    This tool provides accurate current time information to prevent hallucinations
+    from LLM pre-training data. Always use this tool before scheduling events or
+    working with date/time operations.
+    """
+    logger.info(f"Executing tool: get_current_time")
+    try:
+        access_token = get_auth_token()
+        service = get_calendar_service(access_token)
+        
+        # Get user's timezone setting from Google Calendar settings - https://developers.google.com/workspace/calendar/api/v3/reference/settings#resource  
+        try:
+            timezone_setting = service.settings().get(setting='timezone').execute()
+            timezone = timezone_setting.get('value', 'UTC')
+            logger.info(f"Retrieved user timezone: {timezone}")
+        except Exception as e:
+            logger.error(f"Failed to retrieve user timezone: {e}")
+            raise RuntimeError(f"Failed to retrieve user timezone from Google Calendar: {e}")
+        
+        # Parse timezone
+        try:
+            tz = ZoneInfo(timezone)
+        except Exception as e:
+            logger.error(f"Invalid timezone {timezone}: {e}")
+            raise RuntimeError(f"Invalid timezone '{timezone}' received from Google Calendar: {e}")
+        
+        # Get current time in user's timezone
+        now = datetime.now(tz).replace(microsecond=0)
+        
+        return {
+            "datetime": now.strftime("%Y-%m-%dT%H:%M:%S"),
+            "timezone": timezone,
+            "date": now.strftime("%Y-%m-%d"),
+            "time": now.strftime("%H:%M:%S"),
+            "day_of_week": now.strftime("%A"),
+        }
+    except Exception as e:
+        logger.exception(f"Error executing tool get_current_time: {e}")
         raise e
 
 async def find_free_slots(
@@ -673,6 +734,291 @@ async def find_free_slots(
         logger.exception(f"Error executing tool find_free_slots: {e}")
         raise e
 
+def _warmup_contact_search(service, contact_type: str):
+    """
+    Send warmup request with empty query to update the cache.
+
+    According to Google's documentation, searchContacts and otherContacts.search
+    require a warmup request before actual searches for better performance.
+    See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
+    and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
+    """
+    try:
+        if contact_type == 'personal':
+            # Warmup for people.searchContacts
+            service.people().searchContacts(
+                query="",
+                pageSize=1,
+                readMask='names'
+            ).execute()
+            logger.info("Warmup request sent for personal contacts")
+        elif contact_type == 'other':
+            # Warmup for otherContacts.search
+            service.otherContacts().search(
+                query="",
+                pageSize=1,
+                readMask='names'
+            ).execute()
+            logger.info("Warmup request sent for other contacts")
+    except Exception as e:
+        # Don't fail if warmup fails, just log it
+        logger.warning(f"Warmup request failed for {contact_type} contacts: {e}")
+
+async def search_contacts(
+    query: str,
+    contact_type: str = "all",
+    page_size: int = 10,
+    page_token: str | None = None,
+    directory_sources: str = "UNSPECIFIED",
+) -> Dict[str, Any]:
+    """
+    Search for contacts by name or email address.
+
+    Supports searching personal contacts, other contact sources, domain directory,
+    or all sources simultaneously. When contact_type is 'all' (default), returns
+    three separate result sets (personal, other, directory) each with independent
+    pagination tokens.
+    """
+    logger.info(f"Executing tool: search_contacts with query: {query}, contact_type: {contact_type}")
+    try:
+        access_token = get_auth_token()
+        service = get_people_service(access_token)
+
+        # Define the read mask for calendar-relevant person fields
+        # Only includes fields necessary for calendar operations (creating events, adding attendees)
+        comprehensive_read_mask = 'names,emailAddresses,organizations,phoneNumbers,metadata'
+
+        # Limited read mask for other contacts
+        limited_read_mask = 'emailAddresses,metadata,names,phoneNumbers'
+
+        def format_contact(person: Dict[str, Any], contact_type_label: str) -> Dict[str, Any]:
+            """Helper function to format a person object into structured contact data."""
+            names = person.get('names', [])
+            emails = person.get('emailAddresses', [])
+            phones = person.get('phoneNumbers', [])
+            orgs = person.get('organizations', [])
+
+            return {
+                'resourceName': person.get('resourceName', ''),
+                'displayName': names[0].get('displayName', 'Unknown') if names else 'Unknown',
+                'firstName': names[0].get('givenName', '') if names else '',
+                'lastName': names[0].get('familyName', '') if names else '',
+                'contactType': contact_type_label,
+                'emailAddresses': [
+                    {
+                        'email': email.get('value', ''),
+                        'type': email.get('type', 'other').lower(),
+                    }
+                    for email in emails
+                ],
+                'phoneNumbers': [
+                    {
+                        'number': phone.get('value', ''),
+                        'type': phone.get('type', 'other').lower(),
+                    }
+                    for phone in phones
+                ],
+                'organizations': [
+                    {
+                        'name': org.get('name', ''),
+                        'title': org.get('title', ''),
+                    }
+                    for org in orgs
+                ],
+            }
+
+        if contact_type == 'all':
+            # Execute all three searches in parallel (with warmup for personal and other)
+            import asyncio
+
+            # Use ThreadPoolExecutor for blocking Google API calls
+            from concurrent.futures import ThreadPoolExecutor
+
+            def search_personal():
+                return service.people().searchContacts(
+                    query=query,
+                    pageSize=min(page_size, 30),
+                    readMask=comprehensive_read_mask,
+                ).execute()
+
+            def search_other():
+                return service.otherContacts().search(
+                    query=query,
+                    pageSize=min(page_size, 30),
+                    readMask=limited_read_mask,
+                ).execute()
+
+            def search_directory():
+                return service.people().searchDirectoryPeople(
+                    query=query,
+                    pageSize=min(page_size, 500),
+                    readMask=comprehensive_read_mask,
+                    sources=['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                ).execute()
+
+            # Run warmup requests first, then all three searches in parallel
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                # Send warmup requests for personal and other contacts
+                warmup_personal_future = loop.run_in_executor(
+                    executor, _warmup_contact_search, service, 'personal'
+                )
+                warmup_other_future = loop.run_in_executor(
+                    executor, _warmup_contact_search, service, 'other'
+                )
+
+                # Wait for warmup to complete
+                await asyncio.gather(warmup_personal_future, warmup_other_future)
+
+                # Now execute actual searches in parallel
+                personal_future = loop.run_in_executor(executor, search_personal)
+                other_future = loop.run_in_executor(executor, search_other)
+                directory_future = loop.run_in_executor(executor, search_directory)
+
+                personal_res, other_res, directory_res = await asyncio.gather(
+                    personal_future, other_future, directory_future
+                )
+
+            # Process personal results
+            personal_results = [
+                format_contact(result.get('person', {}), 'personal')
+                for result in personal_res.get('results', [])
+            ]
+
+            # Process other results
+            other_results = [
+                format_contact(result.get('person', {}), 'other')
+                for result in other_res.get('results', [])
+            ]
+
+            # Process directory results
+            directory_results = [
+                format_contact(person, 'directory')
+                for person in directory_res.get('people', [])
+            ]
+
+            # Return three independent result sets with pagination info
+            return {
+                'message': f'Found contacts matching "{query}" from all sources',
+                'query': query,
+                'contactType': 'all',
+                'personal': {
+                    'resultCount': len(personal_results),
+                    'nextPageToken': personal_res.get('nextPageToken'),
+                    'contacts': personal_results,
+                },
+                'other': {
+                    'resultCount': len(other_results),
+                    'nextPageToken': other_res.get('nextPageToken'),
+                    'contacts': other_results,
+                },
+                'directory': {
+                    'resultCount': len(directory_results),
+                    'nextPageToken': directory_res.get('nextPageToken'),
+                    'contacts': directory_results,
+                },
+            }
+
+        elif contact_type == 'personal':
+            # Send warmup request before actual search
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                await loop.run_in_executor(executor, _warmup_contact_search, service, 'personal')
+
+            response = service.people().searchContacts(
+                query=query,
+                pageSize=min(page_size, 30),
+                readMask=comprehensive_read_mask,
+            ).execute()
+
+            results = [
+                format_contact(result.get('person', {}), 'personal')
+                for result in response.get('results', [])
+            ]
+
+            return {
+                'message': f'Found {len(results)} personal contact(s) matching "{query}"',
+                'query': query,
+                'contactType': contact_type,
+                'resultCount': len(results),
+                'nextPageToken': response.get('nextPageToken'),
+                'contacts': results,
+            }
+
+        elif contact_type == 'other':
+            # Send warmup request before actual search
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                await loop.run_in_executor(executor, _warmup_contact_search, service, 'other')
+
+            response = service.otherContacts().search(
+                query=query,
+                pageSize=min(page_size, 30),
+                readMask=limited_read_mask,
+            ).execute()
+
+            results = [
+                format_contact(result.get('person', {}), 'other')
+                for result in response.get('results', [])
+            ]
+
+            return {
+                'message': f'Found {len(results)} other contact(s) matching "{query}"',
+                'query': query,
+                'contactType': contact_type,
+                'resultCount': len(results),
+                'nextPageToken': response.get('nextPageToken'),
+                'contacts': results,
+            }
+
+        elif contact_type == 'directory':
+            # Map directory sources
+            source_map = {
+                'UNSPECIFIED': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                'DOMAIN_DIRECTORY': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
+                'DOMAIN_CONTACTS': ['DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+            }
+            sources = source_map.get(directory_sources, source_map['UNSPECIFIED'])
+
+            response = service.people().searchDirectoryPeople(
+                query=query,
+                pageSize=min(page_size, 500),
+                readMask=comprehensive_read_mask,
+                sources=sources,
+                pageToken=page_token,
+            ).execute()
+
+            results = [
+                format_contact(person, 'directory')
+                for person in response.get('people', [])
+            ]
+
+            return {
+                'message': f'Found {len(results)} directory contact(s) matching "{query}"',
+                'query': query,
+                'contactType': contact_type,
+                'resultCount': len(results),
+                'nextPageToken': response.get('nextPageToken'),
+                'contacts': results,
+            }
+
+        else:
+            raise ValueError(f"Invalid contact_type: {contact_type}. Must be one of: all, personal, other, directory")
+
+    except HttpError as e:
+        logger.error(f"Google People API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google People API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool search_contacts: {e}")
+        raise e
+
 @click.command()
 @click.option("--port", default=GOOGLE_CALENDAR_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -703,6 +1049,17 @@ def main(
     @app.list_tools()
     async def list_tools() -> list[types.Tool]:
         return [
+            types.Tool(
+                name="google_calendar_get_current_time",
+                description="Get the accurate current date and time in the user's timezone. CRITICAL: Always call this tool FIRST before any calendar operations (creating, updating, listing, or scheduling events) to prevent using outdated time information. NOTE: If current time information is already provided in the system prompt or context, you do NOT need to call this tool",
+                inputSchema={
+                    "type": "object",
+                    "properties": {},
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_CONTEXT", "readOnlyHint": True}
+                ),
+            ),
             types.Tool(
                 name="google_calendar_list_calendars",
                 description="List all calendars accessible by the user.",
@@ -790,6 +1147,11 @@ def main(
                             "description": "Whether to add a Google Meet conference to the event.",
                             "default": False,
                         },
+                        "recurrence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. Examples: ['RRULE:FREQ=DAILY;COUNT=5'] for 5 days, ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for 10 occurrences on Mon/Wed/Fri, ['RRULE:FREQ=MONTHLY;BYDAY=2TH'] for 2nd Thursday each month. Common frequencies: DAILY, WEEKLY, MONTHLY, YEARLY. Use COUNT for number of occurrences or UNTIL for end date (format: YYYYMMDDTHHMMSSZ).",
+                        },
                     },
                 },
                 annotations=types.ToolAnnotations(
@@ -872,6 +1234,11 @@ def main(
                             "type": "array",
                             "items": {"type": "string"},
                             "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+                        },
+                        "updated_recurrence": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Updated recurrence rules in RRULE format (RFC5545). To convert a recurring event to a single event, pass an empty array []. To add/update recurrence, provide rules like: ['RRULE:FREQ=DAILY;COUNT=5'] for 5 days, ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for 10 occurrences on Mon/Wed/Fri, ['RRULE:FREQ=MONTHLY;BYDAY=2TH'] for 2nd Thursday each month. Common frequencies: DAILY, WEEKLY, MONTHLY, YEARLY. Use COUNT for number of occurrences or UNTIL for end date (format: YYYYMMDDTHHMMSSZ).",
                         },
                         "send_updates": {
                             "type": "string",
@@ -982,13 +1349,70 @@ def main(
                     **{"category": "GOOGLE_CALENDAR_AVAILABILITY", "readOnlyHint": True}
                 ),
             ),
+            types.Tool(
+                name="google_calendar_search_contacts",
+                description="Search for contacts by name or email address. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["query"],
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "The plain-text search query for contact names, email addresses, phone numbers, etc.",
+                        },
+                        "contactType": {
+                            "type": "string",
+                            "description": "Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory). Defaults to 'all'.",
+                            "enum": ["all", "personal", "other", "directory"],
+                            "default": "all",
+                        },
+                        "pageSize": {
+                            "type": "integer",
+                            "description": "Number of results to return. For personal/other: max 30, for directory: max 500. Defaults to 10.",
+                            "default": 10,
+                            "minimum": 1,
+                        },
+                        "pageToken": {
+                            "type": "string",
+                            "description": "Page token for pagination (used with directory searches). Optional.",
+                        },
+                        "directorySources": {
+                            "type": "string",
+                            "description": "Directory sources to search (only used for directory type): 'UNSPECIFIED' (both domain directory and contacts), 'DOMAIN_DIRECTORY' (domain directory only), or 'DOMAIN_CONTACTS' (domain contacts only). Defaults to 'UNSPECIFIED'.",
+                            "enum": ["UNSPECIFIED", "DOMAIN_DIRECTORY", "DOMAIN_CONTACTS"],
+                            "default": "UNSPECIFIED",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_CALENDAR_CONTACTS", "readOnlyHint": True}
+                ),
+            ),
         ]
 
     @app.call_tool()
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        if name == "google_calendar_list_calendars":
+        if name == "google_calendar_get_current_time":
+            try:
+                result = await get_current_time()
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "google_calendar_list_calendars":
             try:
                 max_results = arguments.get("max_results", 10)
                 show_deleted = arguments.get("show_deleted", False)
@@ -1032,11 +1456,12 @@ def main(
                 attendees = arguments.get("attendees")
                 send_updates = arguments.get("send_updates", "all")
                 add_google_meet = arguments.get("add_google_meet", False)
+                recurrence = arguments.get("recurrence")
                 
                 result = await create_event(
                     summary, start_datetime, end_datetime, calendar_id,
                     description, location, visibility, attendees, send_updates,
-                    add_google_meet
+                    add_google_meet, recurrence
                 )
                 return [
                     types.TextContent(
@@ -1105,13 +1530,14 @@ def main(
                 updated_visibility = arguments.get("updated_visibility")
                 attendees_to_add = arguments.get("attendees_to_add")
                 attendees_to_remove = arguments.get("attendees_to_remove")
+                updated_recurrence = arguments.get("updated_recurrence")
                 send_updates = arguments.get("send_updates", "all")
                 
                 result = await update_event(
                     event_id, updated_start_datetime, updated_end_datetime,
                     updated_summary, updated_description, updated_location,
                     updated_visibility, attendees_to_add, attendees_to_remove,
-                    send_updates
+                    updated_recurrence, send_updates
                 )
                 return [
                     types.TextContent(
@@ -1228,7 +1654,46 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_calendar_search_contacts":
+            try:
+                query = arguments.get("query")
+
+                if not query:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error: query parameter is required",
+                        )
+                    ]
+
+                contact_type = arguments.get("contactType", "all")
+                page_size = arguments.get("pageSize", 10)
+                page_token = arguments.get("pageToken")
+                directory_sources = arguments.get("directorySources", "UNSPECIFIED")
+
+                result = await search_contacts(
+                    query=query,
+                    contact_type=contact_type,
+                    page_size=page_size,
+                    page_token=page_token,
+                    directory_sources=directory_sources
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",

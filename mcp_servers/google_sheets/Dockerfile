@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY mcp_servers/google_sheets/server.py .
 COPY mcp_servers/google_sheets/models.py .
 COPY mcp_servers/google_sheets/utils.py .
+COPY mcp_servers/google_sheets/exceptions.py .
 
 # Expose the port the server runs on
 EXPOSE 5000

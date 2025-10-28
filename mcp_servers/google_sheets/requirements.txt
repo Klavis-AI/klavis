@@ -9,4 +9,5 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 click
-starlette 
+starlette
+packaging
