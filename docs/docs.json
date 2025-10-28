@@ -68,13 +68,6 @@
             ]
           },
           {
-            "group": "SDK",
-            "pages": [
-              "sdk/python",
-              "sdk/typescript"
-            ]
-          },
-          {
             "group": "AI Platform Integrations",
             "pages": [
               "ai-platform-integration/overview",

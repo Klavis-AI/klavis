@@ -42,9 +42,9 @@ Connect to Gong to access sales conversation intelligence, analyze call transcri
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Gong
           const response = await klavis.mcpServer.createStrataServer({

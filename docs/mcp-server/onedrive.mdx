@@ -41,9 +41,9 @@ Connect to OneDrive to manage files, folders, and automate cloud storage operati
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a OneDrive MCP server instance
           const onedriveServer = await klavis.mcpServer.createServerInstance({

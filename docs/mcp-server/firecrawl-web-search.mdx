@@ -42,9 +42,9 @@ Connect to Firecrawl Web Search to perform advanced web scraping, content extrac
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Firecrawl Web Search
           const response = await klavis.mcpServer.createStrataServer({

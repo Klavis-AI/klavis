@@ -41,9 +41,9 @@ Connect to WordPress.com to manage posts, pages, sites, and automate content pub
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with WordPress
           const response = await klavis.mcpServer.createStrataServer({

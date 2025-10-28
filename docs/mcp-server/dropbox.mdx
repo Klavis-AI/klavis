@@ -41,9 +41,9 @@ Connect to Dropbox to manage files, organize folders, share content, and automat
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Dropbox
           const response = await klavis.mcpServer.createStrataServer({

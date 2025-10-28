@@ -42,9 +42,9 @@ Connect to Perplexity to leverage AI-powered search capabilities and advanced re
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Perplexity
           const response = await klavis.mcpServer.createStrataServer({

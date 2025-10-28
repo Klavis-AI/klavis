@@ -44,7 +44,7 @@ Connect to Microsoft Teams to manage teams, channels, messages, and automate col
           ```typescript TypeScript
           import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new KlavisClient({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Microsoft Teams MCP server instance
           const teamsServer = await klavis.mcpServer.createServerInstance({

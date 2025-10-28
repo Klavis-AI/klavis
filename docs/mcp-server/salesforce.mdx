@@ -41,9 +41,9 @@ Connect to Salesforce to manage leads, opportunities, accounts, contacts, and au
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Salesforce
           const response = await klavis.mcpServer.createStrataServer({

@@ -42,9 +42,9 @@ Connect to WhatsApp to send messages and manage conversations through the WhatsA
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with WhatsApp
           const response = await klavis.mcpServer.createStrataServer({

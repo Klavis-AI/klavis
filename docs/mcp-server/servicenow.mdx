@@ -42,9 +42,9 @@ Connect to ServiceNow for a central database and application suite to build cust
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with ServiceNow
           const response = await klavis.mcpServer.createStrataServer({

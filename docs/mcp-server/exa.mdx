@@ -42,9 +42,9 @@ Connect to Exa to perform AI-powered semantic search, content retrieval, and com
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Exa
           const response = await klavis.mcpServer.createStrataServer({

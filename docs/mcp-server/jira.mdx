@@ -41,9 +41,9 @@ Connect to Jira to manage issues, projects, sprints, and automate development wo
           ```
           
           ```typescript TypeScript
-          import { Klavis } from 'klavis';
+          import { KlavisClient, Klavis } from 'klavis';
           
-          const klavis = new Klavis({ apiKey: 'YOUR_API_KEY' });
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
           
           // Create a Strata MCP server with Jira
           const response = await klavis.mcpServer.createStrataServer({
