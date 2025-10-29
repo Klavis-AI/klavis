@@ -10,11 +10,16 @@ groups:
   python-sdk:
     generators:
       - name: fernapi/fern-python-sdk
-        version: 4.22.0
+        version: 4.32.2
         output:
           location: pypi
           package-name: klavis
           token: ${PYPI_TOKEN}
+          metadata:
+            keywords: ["mcp", "model-context-protocol", "router", "ai", "llm", "tools"]
+            documentation-link: "https://www.klavis.ai/docs/introduction"
+            homepage-link: "https://www.klavis.ai/"
+
         github:
           repository: Klavis-AI/python-sdk
         config:
