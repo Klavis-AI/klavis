@@ -1145,7 +1145,7 @@ def main(
                         "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
+                            "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
                         },
                         "send_updates": {
                             "type": "string",
@@ -1239,12 +1239,12 @@ def main(
                         "attendees_to_add": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
                         },
                         "attendees_to_remove": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+                            "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
                         },
                         "updated_recurrence": {
                             "type": "array",
@@ -1305,7 +1305,7 @@ def main(
                         "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
                         },
                         "calendar_id": {
                             "type": "string",
@@ -1362,7 +1362,7 @@ def main(
             ),
             types.Tool(
                 name="google_calendar_search_contacts",
-                description="Search for contacts by name or email address. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
+                description="Search for contacts when you need to know the contact details. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
                 inputSchema={
                     "type": "object",
                     "required": ["query"],
