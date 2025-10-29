@@ -1145,7 +1145,7 @@ def main(
                         "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
+                            "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails. YOU MUST NOT assume attendees' email addresses unless it is explicitly provided.",
                         },
                         "send_updates": {
                             "type": "string",
@@ -1239,12 +1239,12 @@ def main(
                         "attendees_to_add": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
+                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails. YOU MUST NOT assume attendees' email addresses unless it is explicitly provided.",
                         },
                         "attendees_to_remove": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
+                            "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails. YOU MUST NOT assume attendees' email addresses unless it is explicitly provided.",
                         },
                         "updated_recurrence": {
                             "type": "array",
@@ -1305,7 +1305,7 @@ def main(
                         "attendees": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails.",
+                            "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. You can use google_contact_search_contact tool to find contact emails. YOU MUST NOT assume attendees' email addresses unless it is explicitly provided.",
                         },
                         "calendar_id": {
                             "type": "string",
