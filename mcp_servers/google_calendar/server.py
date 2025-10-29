@@ -1396,7 +1396,7 @@ def main(
                     },
                 },
                 annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_CALENDAR_CONTACTS", "readOnlyHint": True}
+                    **{"category": "GOOGLE_CALENDAR_EVENT", "readOnlyHint": True}
                 ),
             ),
         ]
