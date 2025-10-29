@@ -158,13 +158,13 @@ function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
 
 // Schema definitions
 const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses"),
+    to: z.array(z.string()).describe("List of recipient email addresses. You can use gmail_search_contacts tool to find contact emails."),
     subject: z.string().describe("Email subject"),
     body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
     htmlBody: z.string().optional().describe("HTML version of the email body"),
     mimeType: z.enum(['text/plain', 'text/html', 'multipart/alternative']).optional().default('text/plain').describe("Email content type"),
-    cc: z.array(z.string()).optional().describe("List of CC recipients"),
-    bcc: z.array(z.string()).optional().describe("List of BCC recipients"),
+    cc: z.array(z.string()).optional().describe("List of CC recipients. You can use gmail_search_contacts tool to find contact emails."),
+    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You can use gmail_search_contacts tool to find contact emails."),
     threadId: z.string().optional().describe("Thread ID to reply to"),
     inReplyTo: z.string().optional().describe("Message ID being replied to"),
 });
@@ -233,7 +233,7 @@ const getGmailMcpServer = () => {
         tools: [
             {
                 name: "gmail_send_email",
-                description: "Sends a new email",
+                description: "Sends a new email. You can use gmail_search_contacts tool to find contact emails.",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
                 annotations: { category: "GMAIL_EMAIL" },
             },
@@ -287,9 +287,9 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_search_contacts",
-                description: "Search for contacts by name or email address. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
+                description: "Search for contacts when you need to know the contact details. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
                 inputSchema: zodToJsonSchema(SearchContactsSchema),
-                annotations: { category: "GMAIL_EMAIL_ADDRESS", readOnlyHint: true },
+                annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
             },
         ],
     }));
