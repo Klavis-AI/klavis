@@ -734,7 +734,7 @@ async def find_free_slots(
         logger.exception(f"Error executing tool find_free_slots: {e}")
         raise e
 
-def _warmup_contact_search(service, contact_type: str):
+def _warmup_contact_search(access_token: str, contact_type: str):
     """
     Send warmup request with empty query to update the cache.
 
@@ -742,8 +742,13 @@ def _warmup_contact_search(service, contact_type: str):
     require a warmup request before actual searches for better performance.
     See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
     and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
+
+    Note: Creates its own service instance to avoid thread safety issues with httplib2.
     """
     try:
+        # Create a separate service instance for this thread
+        service = get_people_service(access_token)
+
         if contact_type == 'personal':
             # Warmup for people.searchContacts
             service.people().searchContacts(
@@ -835,21 +840,27 @@ async def search_contacts(
             from concurrent.futures import ThreadPoolExecutor
 
             def search_personal():
-                return service.people().searchContacts(
+                # Create separate service instance for thread safety
+                personal_service = get_people_service(access_token)
+                return personal_service.people().searchContacts(
                     query=query,
                     pageSize=min(page_size, 30),
                     readMask=comprehensive_read_mask,
                 ).execute()
 
             def search_other():
-                return service.otherContacts().search(
+                # Create separate service instance for thread safety
+                other_service = get_people_service(access_token)
+                return other_service.otherContacts().search(
                     query=query,
                     pageSize=min(page_size, 30),
                     readMask=limited_read_mask,
                 ).execute()
 
             def search_directory():
-                return service.people().searchDirectoryPeople(
+                # Create separate service instance for thread safety
+                directory_service = get_people_service(access_token)
+                return directory_service.people().searchDirectoryPeople(
                     query=query,
                     pageSize=min(page_size, 500),
                     readMask=comprehensive_read_mask,
@@ -861,10 +872,10 @@ async def search_contacts(
             with ThreadPoolExecutor(max_workers=5) as executor:
                 # Send warmup requests for personal and other contacts
                 warmup_personal_future = loop.run_in_executor(
-                    executor, _warmup_contact_search, service, 'personal'
+                    executor, _warmup_contact_search, access_token, 'personal'
                 )
                 warmup_other_future = loop.run_in_executor(
-                    executor, _warmup_contact_search, service, 'other'
+                    executor, _warmup_contact_search, access_token, 'other'
                 )
 
                 # Wait for warmup to complete
@@ -926,7 +937,7 @@ async def search_contacts(
 
             loop = asyncio.get_event_loop()
             with ThreadPoolExecutor(max_workers=1) as executor:
-                await loop.run_in_executor(executor, _warmup_contact_search, service, 'personal')
+                await loop.run_in_executor(executor, _warmup_contact_search, access_token, 'personal')
 
             response = service.people().searchContacts(
                 query=query,
@@ -955,7 +966,7 @@ async def search_contacts(
 
             loop = asyncio.get_event_loop()
             with ThreadPoolExecutor(max_workers=1) as executor:
-                await loop.run_in_executor(executor, _warmup_contact_search, service, 'other')
+                await loop.run_in_executor(executor, _warmup_contact_search, access_token, 'other')
 
             response = service.otherContacts().search(
                 query=query,
