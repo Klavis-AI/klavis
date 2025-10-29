@@ -289,7 +289,7 @@ const getGmailMcpServer = () => {
                 name: "gmail_search_contacts",
                 description: "Search for contacts by name or email address. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
                 inputSchema: zodToJsonSchema(SearchContactsSchema),
-                annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
+                annotations: { category: "GMAIL_EMAIL_ADDRESS", readOnlyHint: true },
             },
         ],
     }));
