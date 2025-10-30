@@ -52,6 +52,13 @@ from .tasks import (
     hubspot_delete_task_by_id,
 )
 
+from .associations import (
+    hubspot_create_association,
+    hubspot_delete_association,
+    hubspot_get_associations,
+    hubspot_batch_create_associations,
+)
+
 __all__ = [
     # Base
     "auth_token_context",
@@ -98,4 +105,10 @@ __all__ = [
     "hubspot_create_task",
     "hubspot_update_task_by_id",
     "hubspot_delete_task_by_id",
+
+    # Associations
+    "hubspot_create_association",
+    "hubspot_delete_association",
+    "hubspot_get_associations",
+    "hubspot_batch_create_associations",
 ]

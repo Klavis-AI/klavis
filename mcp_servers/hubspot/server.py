@@ -55,6 +55,11 @@ from tools import (
     hubspot_create_task,
     hubspot_update_task_by_id,
     hubspot_delete_task_by_id,
+    # Associations
+    hubspot_create_association,
+    hubspot_delete_association,
+    hubspot_get_associations,
+    hubspot_batch_create_associations,
 )
 
 # Configure logging
@@ -762,6 +767,139 @@ def main(
                 },
                 annotations=types.ToolAnnotations(
                     **{"category": "HUBSPOT_NOTE"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_create_association",
+                description="Create an association (link) between two HubSpot objects. For example, link a deal to a contact, or a deal to a company.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "from_object_type": {
+                            "type": "string",
+                            "description": "The object type to associate from (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "from_object_id": {
+                            "type": "string",
+                            "description": "The ID of the source object."
+                        },
+                        "to_object_type": {
+                            "type": "string",
+                            "description": "The object type to associate to (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "to_object_id": {
+                            "type": "string",
+                            "description": "The ID of the target object."
+                        },
+                        "association_type_id": {
+                            "type": "integer",
+                            "description": "Optional custom association type ID. If not provided, uses the default association type for the object pair."
+                        }
+                    },
+                    "required": ["from_object_type", "from_object_id", "to_object_type", "to_object_id"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_ASSOCIATION"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_delete_association",
+                description="Remove an association (unlink) between two HubSpot objects.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "from_object_type": {
+                            "type": "string",
+                            "description": "The object type to disassociate from (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "from_object_id": {
+                            "type": "string",
+                            "description": "The ID of the source object."
+                        },
+                        "to_object_type": {
+                            "type": "string",
+                            "description": "The object type to disassociate from (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "to_object_id": {
+                            "type": "string",
+                            "description": "The ID of the target object."
+                        },
+                        "association_type_id": {
+                            "type": "integer",
+                            "description": "Optional custom association type ID. If not provided, uses the default association type for the object pair."
+                        }
+                    },
+                    "required": ["from_object_type", "from_object_id", "to_object_type", "to_object_id"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_ASSOCIATION"}
+                )
+            ),
+            types.Tool(
+                name="hubspot_get_associations",
+                description="Get all associations of a specific type for an object. For example, get all contacts associated with a deal.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "from_object_type": {
+                            "type": "string",
+                            "description": "The source object type (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "from_object_id": {
+                            "type": "string",
+                            "description": "The ID of the source object."
+                        },
+                        "to_object_type": {
+                            "type": "string",
+                            "description": "The type of objects to get associations for (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        }
+                    },
+                    "required": ["from_object_type", "from_object_id", "to_object_type"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_ASSOCIATION", "readOnlyHint": True}
+                )
+            ),
+            types.Tool(
+                name="hubspot_batch_create_associations",
+                description="Create multiple associations at once (batch operation). For example, link a deal to multiple contacts at once.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "from_object_type": {
+                            "type": "string",
+                            "description": "The object type to associate from (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "from_object_id": {
+                            "type": "string",
+                            "description": "The ID of the source object."
+                        },
+                        "to_object_type": {
+                            "type": "string",
+                            "description": "The object type to associate to (contacts, companies, deals, tickets).",
+                            "enum": ["contacts", "companies", "deals", "tickets"]
+                        },
+                        "to_object_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of target object IDs to associate with."
+                        },
+                        "association_type_id": {
+                            "type": "integer",
+                            "description": "Optional custom association type ID. If not provided, uses the default association type for the object pair."
+                        }
+                    },
+                    "required": ["from_object_type", "from_object_id", "to_object_type", "to_object_ids"]
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "HUBSPOT_ASSOCIATION"}
                 )
             ),
         ]
@@ -1472,6 +1610,151 @@ def main(
                     types.TextContent(
                         type="text",
                         text="Deleted",
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        # Associations
+        elif name == "hubspot_create_association":
+            from_object_type = arguments.get("from_object_type")
+            from_object_id = arguments.get("from_object_id")
+            to_object_type = arguments.get("to_object_type")
+            to_object_id = arguments.get("to_object_id")
+            association_type_id = arguments.get("association_type_id")
+            
+            if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_id are required",
+                    )
+                ]
+            try:
+                result = await hubspot_create_association(
+                    from_object_type=from_object_type,
+                    from_object_id=from_object_id,
+                    to_object_type=to_object_type,
+                    to_object_id=to_object_id,
+                    association_type_id=association_type_id
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_delete_association":
+            from_object_type = arguments.get("from_object_type")
+            from_object_id = arguments.get("from_object_id")
+            to_object_type = arguments.get("to_object_type")
+            to_object_id = arguments.get("to_object_id")
+            association_type_id = arguments.get("association_type_id")
+            
+            if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_id are required",
+                    )
+                ]
+            try:
+                result = await hubspot_delete_association(
+                    from_object_type=from_object_type,
+                    from_object_id=from_object_id,
+                    to_object_type=to_object_type,
+                    to_object_id=to_object_id,
+                    association_type_id=association_type_id
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_get_associations":
+            from_object_type = arguments.get("from_object_type")
+            from_object_id = arguments.get("from_object_id")
+            to_object_type = arguments.get("to_object_type")
+            
+            if not all([from_object_type, from_object_id, to_object_type]):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_object_type, from_object_id, and to_object_type are required",
+                    )
+                ]
+            try:
+                result = await hubspot_get_associations(
+                    from_object_type=from_object_type,
+                    from_object_id=from_object_id,
+                    to_object_type=to_object_type
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "hubspot_batch_create_associations":
+            from_object_type = arguments.get("from_object_type")
+            from_object_id = arguments.get("from_object_id")
+            to_object_type = arguments.get("to_object_type")
+            to_object_ids = arguments.get("to_object_ids")
+            association_type_id = arguments.get("association_type_id")
+            
+            if not all([from_object_type, from_object_id, to_object_type, to_object_ids]):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_ids are required",
+                    )
+                ]
+            try:
+                result = await hubspot_batch_create_associations(
+                    from_object_type=from_object_type,
+                    from_object_id=from_object_id,
+                    to_object_type=to_object_type,
+                    to_object_ids=to_object_ids,
+                    association_type_id=association_type_id
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
