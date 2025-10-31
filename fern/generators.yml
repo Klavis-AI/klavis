@@ -38,10 +38,6 @@ groups:
           location: npm
           package-name: klavis
           token: ${NPM_TOKEN} 
-          metadata:
-            keywords: ["mcp", "model-context-protocol", "router", "ai", "llm", "tools"]
-            documentation-link: "https://www.klavis.ai/docs/introduction"
-            homepage-link: "https://www.klavis.ai/"
         github:
           repository: Klavis-AI/typescript-sdk
         config:
