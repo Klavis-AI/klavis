@@ -149,8 +149,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCont
             if isinstance(result, list):
                 if not result:
                     return [types.TextContent(type="text", text="No results found.")]
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
-        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+                return [types.TextContent(type="text", text=str(result))]
+        return [types.TextContent(type="text", text=str(result))]
     except Exception as e:
         import traceback
         logger.error(

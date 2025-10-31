@@ -398,7 +398,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=str(result),
                     )
                 ]
             except Exception as e:
@@ -425,7 +425,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=str(result),
                     )
                 ]
             except Exception as e:
@@ -457,7 +457,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=str(result),
                     )
                 ]
             except Exception as e:
@@ -475,7 +475,7 @@ def main(
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=str(result),
                     )
                 ]
             except Exception as e:
