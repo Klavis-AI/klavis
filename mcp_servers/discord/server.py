@@ -552,7 +552,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -563,7 +563,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -576,7 +576,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -588,7 +588,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -600,7 +600,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -612,7 +612,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -623,7 +623,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -634,7 +634,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
@@ -644,7 +644,7 @@ def main(
             return [
                 types.TextContent(
                     type="text",
-                    text=json.dumps(result, indent=2),
+                    text=str(result),
                 )
             ]
         
