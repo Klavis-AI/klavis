@@ -78,7 +78,7 @@ def get_sheets_service(access_token: str):
     credentials = Credentials(token=access_token)
     return build('sheets', 'v4', credentials=credentials)
 
-# This is used for the list_all_sheets tool
+# This is used for the list_spreadsheets tool
 def get_drive_service(access_token: str):
     """Create Google Drive service with access token."""
     credentials = Credentials(token=access_token)
@@ -220,9 +220,9 @@ async def write_to_cell_tool(
         logger.exception(f"Error executing tool write_to_cell: {e}")
         raise e
 
-async def list_all_sheets_tool() -> Dict[str, Any]:
+async def list_spreadsheets_tool() -> Dict[str, Any]:
     """List all Google Sheets spreadsheets in the user's Google Drive."""
-    logger.info("Executing tool: list_all_sheets")
+    logger.info("Executing tool: list_spreadsheets")
     try:
         access_token = get_auth_token()
         service = get_drive_service(access_token)
@@ -261,7 +261,7 @@ async def list_all_sheets_tool() -> Dict[str, Any]:
         error_detail = json.loads(e.content.decode('utf-8'))
         raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
     except Exception as e:
-        logger.exception(f"Error executing tool list_all_sheets: {e}")
+        logger.exception(f"Error executing tool list_spreadsheets: {e}")
         raise e
 
 async def list_sheets_tool(spreadsheet_id: str) -> Dict[str, Any]:
@@ -442,7 +442,7 @@ def main(
                 ),
             ),
             types.Tool(
-                name="google_sheets_list_all_sheets",
+                name="google_sheets_list_spreadsheets",
                 description="List all Google Sheets spreadsheets in the user's Google Drive.",
                 inputSchema={
                     "type": "object",
@@ -583,9 +583,9 @@ def main(
                     )
                 ]
         
-        elif name == "google_sheets_list_all_sheets":
+        elif name == "google_sheets_list_spreadsheets":
             try:
-                result = await list_all_sheets_tool()
+                result = await list_spreadsheets_tool()
                 return [
                     types.TextContent(
                         type="text",
