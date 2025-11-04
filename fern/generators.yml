@@ -28,7 +28,7 @@ groups:
             enum_type: python_enums
         metadata:
           package-description: "Open Source MCP Integration for AI applications"
-          license: MIT
+          license: Apache-2.0
         smart-casing: true
   ts-sdk:
     generators:
@@ -48,4 +48,9 @@ groups:
           noSerdeLayer: true
           extraDevDependencies:
             msw: '2.11.2'
+        metadata:
+          package-description: "Official TypeScript SDK for Klavis AI"
+          email: "contact@klavis.ai"
+          reference-url: "https://docs.klavis.ai"
+          license: "Apache-2.0"
         smart-casing: true
