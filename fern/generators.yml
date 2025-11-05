@@ -51,6 +51,6 @@ groups:
         metadata:
           package-description: "Official TypeScript SDK for Klavis AI"
           email: "contact@klavis.ai"
-          reference-url: "https://docs.klavis.ai"
+          reference-url: "https://www.klavis.ai/docs"
           license: "Apache-2.0"
         smart-casing: true
