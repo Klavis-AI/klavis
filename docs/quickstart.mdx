@@ -57,6 +57,9 @@ One MCP server that lets AI agents handle any tools progressively.
         </CodeGroup>
       </Step>
       <Step title="Create Strata MCP Server">
+        <Tip>
+        `userId` specifies whose connected accounts and data you are accessing in Klavis. It should be a unique id for yourself, your team, or your organization.
+        </Tip>
         <CodeGroup>
           ```bash Curl
           curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
