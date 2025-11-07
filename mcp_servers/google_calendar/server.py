@@ -564,7 +564,6 @@ async def get_current_time() -> Dict[str, Any]:
             "timezone": timezone,
             "date": now.strftime("%Y-%m-%d"),
             "time": now.strftime("%H:%M:%S"),
-            "day_of_week": now.strftime("%A"),
         }
     except Exception as e:
         logger.exception(f"Error executing tool get_current_time: {e}")
