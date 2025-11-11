@@ -151,23 +151,47 @@ async def create_spreadsheet_tool(
         logger.exception(f"Error executing tool create_spreadsheet: {e}")
         raise e
 
-async def get_spreadsheet_tool(spreadsheet_id: str) -> Dict[str, Any]:
-    """Get the user entered values and formatted values for all cells in all sheets in the spreadsheet."""
-    logger.info(f"Executing tool: get_spreadsheet with spreadsheet_id: {spreadsheet_id}")
+async def get_spreadsheet_tool(
+    spreadsheet_id: str,
+    range_a1: str | None = None,
+    cell_value_format: str = "formatted"
+) -> Dict[str, Any]:
+    """Get the cell data for all cells in all sheets, or a specific range."""
+    logger.info(f"Executing tool: get_spreadsheet with spreadsheet_id: {spreadsheet_id}, range: {range_a1}, cell_value_format: {cell_value_format}")
     try:
         access_token = get_auth_token()
         service = get_sheets_service(access_token)
-        
+
+        fields_list = [
+            "spreadsheetId",
+            "spreadsheetUrl",
+            "properties/title",
+            "sheets/properties",
+            "sheets/data/startRow",
+            "sheets/data/startColumn"
+        ]
+
+        if cell_value_format in ["formatted", "all"]:
+            fields_list.append("sheets/data/rowData/values/formattedValue")
+
+        if cell_value_format in ["userEntered", "all"]:
+            fields_list.append("sheets/data/rowData/values/userEnteredValue")
+
+        request_params = {
+            "spreadsheetId": spreadsheet_id,
+            "includeGridData": True,
+            "fields": ",".join(fields_list),
+        }
+
+        if range_a1:
+            request_params["ranges"] = [range_a1]
+
         response = (
             service.spreadsheets()
-            .get(
-                spreadsheetId=spreadsheet_id,
-                includeGridData=True,
-                fields="spreadsheetId,spreadsheetUrl,properties/title,sheets/properties,sheets/data/rowData/values/userEnteredValue,sheets/data/rowData/values/formattedValue,sheets/data/rowData/values/effectiveValue",
-            )
+            .get(**request_params)
             .execute()
         )
-        return parse_get_spreadsheet_response(response)
+        return parse_get_spreadsheet_response(response, cell_value_format)
     except HttpError as e:
         logger.error(f"Google Sheets API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -306,40 +330,6 @@ async def list_sheets_tool(spreadsheet_id: str) -> Dict[str, Any]:
         logger.exception(f"Error executing tool list_sheets: {e}")
         raise e
 
-async def get_range_tool(spreadsheet_id: str, range_a1: str) -> Dict[str, Any]:
-    """Get cell data for a specific range in A1 notation (e.g., 'Sheet1!A1:D10')."""
-    logger.info(f"Executing tool: get_range with spreadsheet_id: {spreadsheet_id}, range: {range_a1}")
-    try:
-        access_token = get_auth_token()
-        service = get_sheets_service(access_token)
-
-        response = (
-            service.spreadsheets()
-            .values()
-            .get(
-                spreadsheetId=spreadsheet_id,
-                range=range_a1,
-                valueRenderOption='FORMATTED_VALUE',
-            )
-            .execute()
-        )
-
-        values = response.get('values', [])
-
-        return {
-            "spreadsheetId": spreadsheet_id,
-            "range": response.get('range', range_a1),
-            "majorDimension": response.get('majorDimension', 'ROWS'),
-            "values": values,
-        }
-    except HttpError as e:
-        logger.error(f"Google Sheets API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Sheets API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
-    except Exception as e:
-        logger.exception(f"Error executing tool get_range: {e}")
-        raise e
-
 @click.command()
 @click.option("--port", default=GOOGLE_SHEETS_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -393,7 +383,7 @@ def main(
             ),
             types.Tool(
                 name="google_sheets_get_spreadsheet",
-                description="Retrieve spreadsheet properties and cell data for all sheets.",
+                description="Retrieve spreadsheet properties and cell data. Supports range filtering and cell value format selection.",
                 inputSchema={
                     "type": "object",
                     "required": ["spreadsheet_id"],
@@ -401,6 +391,15 @@ def main(
                         "spreadsheet_id": {
                             "type": "string",
                             "description": "The ID of the spreadsheet to retrieve.",
+                        },
+                        "range": {
+                            "type": "string",
+                            "description": "Optional. The range to retrieve in A1 notation (e.g., 'Sheet1!A1:D10' for a specific range, or 'Sheet1' for the entire sheet). If not provided, retrieves all sheets with full data.",
+                        },
+                        "cell_value_format": {
+                            "type": "string",
+                            "enum": ["formatted", "userEntered", "all"],
+                            "description": "Output format of cell values. 'formatted' (default): display values as strings {\"A\": \"100\"}, use for reading/displaying data. 'userEntered': raw input/formulas as strings {\"A\": \"=SUM(A1:A5)\"}, use to understand calculation logic. 'all': both formats {\"A\": {userEnteredValue, formattedValue}}, use when you need to see both.",
                         },
                     },
                 },
@@ -469,27 +468,6 @@ def main(
                     **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
                 ),
             ),
-            types.Tool(
-                name="google_sheets_get_range",
-                description="Get cell values for a specific range or entire sheet using A1 notation (e.g., 'Sheet1!A1:D10' or 'Sheet1' for all data). Returns values only without formatting or formulas. Most efficient for data extraction.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["spreadsheet_id", "range"],
-                    "properties": {
-                        "spreadsheet_id": {
-                            "type": "string",
-                            "description": "The ID of the spreadsheet.",
-                        },
-                        "range": {
-                            "type": "string",
-                            "description": "The range to retrieve in A1 notation (e.g., 'Sheet1!A1:D10' for a specific range, or 'Sheet1' for the entire sheet).",
-                        },
-                    },
-                },
-                annotations=types.ToolAnnotations(
-                    **{"category": "GOOGLE_SHEETS_RANGE", "readOnlyHint": True}
-                ),
-            ),
         ]
 
     @app.call_tool()
@@ -526,6 +504,8 @@ def main(
         
         elif name == "google_sheets_get_spreadsheet":
             spreadsheet_id = arguments.get("spreadsheet_id")
+            range_a1 = arguments.get("range")
+            cell_value_format = arguments.get("cell_value_format", "formatted")
             if not spreadsheet_id:
                 return [
                     types.TextContent(
@@ -533,9 +513,9 @@ def main(
                         text="Error: spreadsheet_id parameter is required",
                     )
                 ]
-            
+
             try:
-                result = await get_spreadsheet_tool(spreadsheet_id)
+                result = await get_spreadsheet_tool(spreadsheet_id, range_a1, cell_value_format)
                 return [
                     types.TextContent(
                         type="text",
@@ -613,35 +593,6 @@ def main(
 
             try:
                 result = await list_sheets_tool(spreadsheet_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-
-        elif name == "google_sheets_get_range":
-            spreadsheet_id = arguments.get("spreadsheet_id")
-            range_a1 = arguments.get("range")
-
-            if not all([spreadsheet_id, range_a1]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: spreadsheet_id and range parameters are required",
-                    )
-                ]
-
-            try:
-                result = await get_range_tool(spreadsheet_id, range_a1)
                 return [
                     types.TextContent(
                         type="text",
