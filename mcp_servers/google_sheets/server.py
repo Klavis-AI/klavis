@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from contextvars import ContextVar
 
 import click
@@ -181,13 +181,28 @@ async def write_to_cell_tool(
     column: str,
     row: int,
     value: str,
-    sheet_name: str = "Sheet1",
+    sheet_name: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Write a value to a single cell in a spreadsheet."""
     logger.info(f"Executing tool: write_to_cell with spreadsheet_id: {spreadsheet_id}, cell: {column}{row}")
     try:
         access_token = get_auth_token()
         service = get_sheets_service(access_token)
+        
+        # If no sheet name provided, use the first sheet in the spreadsheet
+        if sheet_name is None:
+            sheet_properties = (
+                service.spreadsheets()
+                .get(
+                    spreadsheetId=spreadsheet_id,
+                    fields="sheets/properties/title",
+                )
+                .execute()
+            )
+            if not sheet_properties.get("sheets"):
+                raise RuntimeError(f"No sheets found in spreadsheet with id {spreadsheet_id}")
+            sheet_name = sheet_properties["sheets"][0]["properties"]["title"]
+            logger.info(f"No sheet name provided, using first sheet: {sheet_name}")
         
         validate_write_to_cell_params(service, spreadsheet_id, sheet_name, column, row)
 
@@ -410,7 +425,7 @@ def main(
             ),
             types.Tool(
                 name="google_sheets_write_to_cell",
-                description="Write a value to a specific cell in a spreadsheet.",
+                description="Write a value to a specific cell in a spreadsheet. IMPORTANT: If the sheet name is not known, call google_sheets_list_sheets first to see available sheets, then either choose the appropriate sheet based on context or ask the user for clarification.",
                 inputSchema={
                     "type": "object",
                     "required": ["spreadsheet_id", "column", "row", "value"],
@@ -433,7 +448,7 @@ def main(
                         },
                         "sheet_name": {
                             "type": "string",
-                            "description": "The name of the sheet to write to. Defaults to 'Sheet1'.",
+                            "description": "The name of the sheet to write to. If the user specifies the sheet name, use it. If not provided, you should call google_sheets_list_sheets first to see available sheets and then choose based on context or ask the user for clarification. As a fallback, defaults to the first sheet in the spreadsheet.",
                         },
                     },
                 },
