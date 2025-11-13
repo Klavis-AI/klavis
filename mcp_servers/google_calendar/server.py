@@ -113,6 +113,31 @@ def parse_datetime(datetime_string: str, time_zone: str) -> datetime:
     except ValueError:
         raise ValueError(f"Invalid datetime format: {datetime_string}")
 
+def get_day_of_week(datetime_str: str | None) -> str | None:
+    """
+    Extract day of week from a datetime string.
+    
+    Args:
+        datetime_str: An ISO format datetime string. Examples:
+                     - "2025-11-17T21:45:00-08:00"
+                     - "2025-11-17T21:45:00Z"
+                     - "2025-11-17" (date only)
+    
+    Returns:
+        The day of week as a string (e.g., "Monday") or None if parsing fails.
+    
+    """
+    if not datetime_str:
+        return None
+    
+    try:
+        # Parse the datetime and get day of week
+        dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+        return dt.strftime("%A")
+    except Exception as e:
+        logger.warning(f"Could not parse day of week from '{datetime_str}': {e}")
+        return None
+
 # Context class to mock the context.get_auth_token_or_empty() calls
 class Context:
     def get_auth_token_or_empty(self) -> str:
@@ -223,6 +248,14 @@ async def create_event(
             sendUpdates=send_updates,
             conferenceDataVersion=conference_data_version
         ).execute()
+        
+        # Add day of the week to the created event
+        start_time = created_event.get("start", {})
+        datetime_str = start_time.get("dateTime") or start_time.get("date")
+        day_of_week = get_day_of_week(datetime_str)
+        if day_of_week:
+            created_event["dayOfWeek"] = day_of_week
+        
         return {"event": created_event}
     except HttpError as e:
         logger.error(f"Google Calendar API error: {e}")
@@ -290,6 +323,14 @@ async def list_events(
             {key: event[key] for key in items_keys if key in event}
             for event in events_result.get("items", [])
         ]
+        
+        # Add day of the week to each event
+        for event in events:
+            start_time = event.get("start", {})
+            datetime_str = start_time.get("dateTime") or start_time.get("date")
+            day_of_week = get_day_of_week(datetime_str)
+            if day_of_week:
+                event["dayOfWeek"] = day_of_week
 
         return {"events_count": len(events), "events": events}
     except HttpError as e:
@@ -564,6 +605,7 @@ async def get_current_time() -> Dict[str, Any]:
             "timezone": timezone,
             "date": now.strftime("%Y-%m-%d"),
             "time": now.strftime("%H:%M:%S"),
+            "dayOfWeek": now.strftime("%A"),
         }
     except Exception as e:
         logger.exception(f"Error executing tool get_current_time: {e}")
