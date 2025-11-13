@@ -5,4 +5,4 @@ uvicorn[standard]
 aiohttp
 python-dotenv
 typing-extensions
-youtube-transcript-api>=1.0.3
+youtube-transcript-api>=1.2.3
