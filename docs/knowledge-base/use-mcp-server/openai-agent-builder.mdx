@@ -1,0 +1,231 @@
+---
+title: "OpenAI's Agent Builder"
+description: "Connect Strata with OpenAI's Agent Builder in minutes and unlock powerful workflow automation"
+---
+<img
+  className="block dark:hidden"
+  src="/images/knowledge-base/openai-agent-builder/openai-agent-builder.png"
+  alt="OpenAI's Agent Builder"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/knowledge-base/openai-agent-builder/openai-agent-builder.png"
+  alt="OpenAI's Agent Builder"
+/>
+
+## Quick Setup Guide
+
+<Steps>
+  <Step title="Authorize MCP Servers to Use with Strata">
+    Navigate to the [Klavis home page](https://www.klavis.ai/home) and click **"MCP Server"** in the left sidebar. You will see a list of MCP servers available in Klavis.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step1.png"
+      alt="Klavis home page"
+    />    
+
+    Click the **"Authorize"** button next to your chosen server. Once server is authorized, you will see **Green Checkmark** status.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step2.png"
+      alt="Authorize MCP Servers"
+    />
+
+    <Tip>
+      You can authorize one or more servers to use with Strata
+    </Tip>
+
+  </Step>
+
+  <Step title="Get Strata Server URL">
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step3.png"
+      alt="Klavis Dashboard consisting MCP Servers"
+    />
+
+    From Klavis Dashboard, click **"Add to Other Clients"** button to get your Strata Server URL.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step4.png"
+      alt="Copy Strata Server URL"
+    />
+
+    <Accordion title="🔐 OAuth Services (Most Common)">
+      - Automatically redirected to OAuth authorization
+      - Sign in to your account (GitHub, Google, Slack, etc.)
+      - Grant necessary permissions
+      - Redirected back to Klavis automatically
+    </Accordion>
+    
+    <Accordion title="🔑 API Key Services">
+      - Prompted to enter an API key
+      - Follow service-specific instructions to generate key
+      - Paste key in the provided field
+      - Click **"Save"** to continue
+    </Accordion>
+  </Step>
+</Steps>
+
+## Build AI Workflow using Strata
+
+<Steps>
+  <Step title="Launch Your First Workflow in Agent Builder">
+    Navigate to the [OpenAI Platform](https://platform.openai.com/) and select **"Agent Builder"** from the menu. Click **"+ Create"** to start building your custom chat agent with advanced logic and integrated tools.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step5.png"
+      alt="Create new workflow in Agent Builder"
+    />
+    
+  </Step>
+
+  <Step title="Set Up Your Trigger Node">
+    When you create a new workflow, the **'Start'** node will already be present on your canvas. This foundational node defines your workflow inputs through the `input_as_texts` variable.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step6.png"
+      alt="Start node configuration"
+    />
+
+  </Step>
+
+  <Step title="Integrate Strata with Your AI Agents">
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step7.png"
+      alt="Add New Agent"
+    />
+
+    Drag the **"Agents"** node from the core nodes section onto your canvas. Configure it with the following settings:
+    
+    **Basic Configuration:**
+    - **Name:** Strata (recommended)
+    - **Instructions:** You are a helpful assistant.
+    - **Tools:** Select **"MCP Server"**
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step8.png"
+      alt="Choose Strata as MCP Server"
+    />
+    **MCP Server Details:**
+    1. **URL:** Paste your Strata URL from Step 2
+    2. **Label:** `strata`
+    3. **Description:** Strata by Klavis AI _(optional)_
+    4. **Authentication:** Select **"None"**
+    5. **Approval:** Select **"Never"**
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step9.png"
+      alt="Adding Strata as Agent"
+    />
+
+
+  </Step>
+
+  <Step title="Add User Approval Node">
+    Drag and drop the **"User Approval"** node onto your workflow canvas. This node adds a human-in-the-loop checkpoint, pausing execution until a user approves or rejects the proposed action.
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step10.png"
+      alt="User Approval node"
+    />
+
+  </Step>
+
+  <Step title="Final Step">
+    To finalize your workflow:
+    1. Duplicate the **"Strata"** agent node
+    2. Connect the duplicated node to the **"Approve"** output of the User Approval node
+    3. Connect the **"End"** node to the **"Reject"** output
+    
+
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step11.png"
+      alt="Final workflow configuration"
+    />
+
+    Above is the fnal workflow configuration consisting Strata as a agent.
+
+  </Step>
+
+  <Step title="Start Using Strata in Agent Builder">
+    To run your Strata Agent, click **"Run"** from the top menu.
+
+    **Example 1:**
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step12.png"
+      alt="Run workflow"
+    />
+  
+  **Example 2:**
+    <img
+      src="/images/knowledge-base/openai-agent-builder/step13.png"
+      alt="Workflow execution"
+    />
+
+    <CodeGroup>
+    ```text GitHub
+    "Create a new issue titled 'Add dark mode' with priority label"
+    ```
+    
+    ```text Slack
+    "Send a message to #general: 'Standup meeting in 5 minutes!'"
+    ```
+    
+    ```text Gmail
+    "Send email to john@company.com about project update"
+    ```
+    
+    ```text Notion
+    "Create a new page called 'Meeting Notes' with today's date"
+    ```
+    </CodeGroup>
+
+  </Step>
+
+  <Step title="Happy Building! 🎉">
+    You're all set! Your **Strata** MCP server is now integrated with OpenAI's Agent Builder.
+  </Step>
+
+</Steps>
+
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="🔧 Tools Not Appearing">
+    - Double-check your Server URL for typos
+    - Ensure stable internet connection
+    - Verify authentication in Klavis dashboard
+    - Check Agent Builder logs for error messages
+    - Try completely restarting Agent Builder
+  </Accordion>
+  
+  <Accordion title="🔐 Authentication Issues">
+    - Re-authenticate in the Klavis dashboard
+    - Check if your OAuth tokens have expired
+    - Verify API key permissions (for API key services)
+    - Ensure you've granted all necessary permissions
+  </Accordion>
+  
+  <Accordion title="⚡ Performance Issues">
+    - Limit the number of active MCP servers (or Use Strata)
+    - Check your internet connection speed
+    - Restart Agent Builder periodically
+    - Contact support if issues persist
+  </Accordion>
+</AccordionGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Community" icon="discord">
+    Join our Discord for community support and discussions
+  </Card>
+  <Card title="Support" icon="headphones">
+    Contact our technical support team for assistance
+  </Card>
+</CardGroup>
+
+---
