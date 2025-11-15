@@ -10,8 +10,8 @@
     "start": "mastra start"
   },
   "dependencies": {
-    "@mastra/core": "^0.21.1",
-    "@mastra/mcp": "^0.13.5",
+    "@mastra/core": "^1.0.0-beta.2",
+    "@mastra/mcp": "^1.0.0-beta.1",
     "@ai-sdk/openai": "^1.3.23",
     "klavis": "^2.10.2",
     "dotenv": "^17.2.0",
@@ -21,7 +21,7 @@
     "@types/node": "^24.0.13",
     "typescript": "^5.8.3",
     "tsx": "^4.19.0",
-    "mastra": "^0.17.0"
+    "mastra": "^1.0.0-beta.1"
   },
   "overrides": {
     "jsondiffpatch": "^0.7.2"
