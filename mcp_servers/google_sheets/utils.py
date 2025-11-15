@@ -339,12 +339,16 @@ def create_sheet_data(
     return sheet_data
 
 
-def parse_get_spreadsheet_response(api_response: dict) -> dict:
+def parse_get_spreadsheet_response(api_response: dict, cell_value_format: str) -> dict:
     """
     Parse the get spreadsheet Google Sheets API response into a structured dictionary.
+
+    Args:
+        api_response (dict): The API response from Google Sheets.
+        cell_value_format (str): Format of cell values - "formatted", "userEntered", or "all".
     """
     properties = api_response.get("properties", {})
-    sheets = [parse_sheet(sheet) for sheet in api_response.get("sheets", [])]
+    sheets = [parse_sheet(sheet, cell_value_format) for sheet in api_response.get("sheets", [])]
 
     return {
         "title": properties.get("title", ""),
@@ -354,14 +358,18 @@ def parse_get_spreadsheet_response(api_response: dict) -> dict:
     }
 
 
-def parse_sheet(api_sheet: dict) -> dict:
+def parse_sheet(api_sheet: dict, cell_value_format: str) -> dict:
     """
     Parse an individual sheet's data from the Google Sheets 'get spreadsheet'
     API response into a structured dictionary.
+
+    Args:
+        api_sheet (dict): The API response for a single sheet.
+        cell_value_format (str): Format of cell values - "formatted", "userEntered", or "all".
     """
     props = api_sheet.get("properties", {})
     grid_props = props.get("gridProperties", {})
-    cell_data = convert_api_grid_data_to_dict(api_sheet.get("data", []))
+    cell_data = convert_api_grid_data_to_dict(api_sheet.get("data", []), cell_value_format)
 
     return {
         "sheetId": props.get("sheetId"),
@@ -390,7 +398,7 @@ def extract_user_entered_cell_value(cell: dict) -> Any:
     return ""
 
 
-def process_row(row: dict, start_column_index: int) -> dict:
+def process_row(row: dict, start_column_index: int, cell_value_format: str) -> dict:
     """
     Process a single row from grid data, converting non-empty cells into a dictionary
     that maps column letters to cell values.
@@ -398,6 +406,7 @@ def process_row(row: dict, start_column_index: int) -> dict:
     Args:
         row (dict): A row from the grid data.
         start_column_index (int): The starting column index for this row.
+        cell_value_format (str): Format of cell values - "formatted", "userEntered", or "all".
 
     Returns:
         dict: A mapping of column letters to cell values for non-empty cells.
@@ -410,15 +419,20 @@ def process_row(row: dict, start_column_index: int) -> dict:
         formatted_cell_value = cell.get("formattedValue", "")
 
         if user_entered_cell_value != "" or formatted_cell_value != "":
-            row_result[column_string] = {
-                "userEnteredValue": user_entered_cell_value,
-                "formattedValue": formatted_cell_value,
-            }
+            if cell_value_format == "all":
+                row_result[column_string] = {
+                    "userEnteredValue": user_entered_cell_value,
+                    "formattedValue": formatted_cell_value,
+                }
+            elif cell_value_format == "userEntered":
+                row_result[column_string] = user_entered_cell_value
+            else:  # "formatted"
+                row_result[column_string] = formatted_cell_value
 
     return row_result
 
 
-def convert_api_grid_data_to_dict(grids: list[dict]) -> dict:
+def convert_api_grid_data_to_dict(grids: list[dict], cell_value_format: str) -> dict:
     """
     Convert a list of grid data dictionaries from the 'get spreadsheet' API
     response into a structured cell dictionary.
@@ -428,6 +442,7 @@ def convert_api_grid_data_to_dict(grids: list[dict]) -> dict:
 
     Args:
         grids (list[dict]): The list of grid data dictionaries from the API.
+        cell_value_format (str): Format of cell values - "formatted", "userEntered", or "all".
 
     Returns:
         dict: A dictionary mapping row numbers to dictionaries of column letter/value pairs.
@@ -440,7 +455,7 @@ def convert_api_grid_data_to_dict(grids: list[dict]) -> dict:
 
         for i, row in enumerate(grid.get("rowData", []), start=1):
             current_row = start_row + i
-            row_data = process_row(row, start_column)
+            row_data = process_row(row, start_column, cell_value_format)
 
             if row_data:
                 result[current_row] = row_data
