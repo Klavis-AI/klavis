@@ -14,7 +14,6 @@ from .worksheets import (
 
 logger = logging.getLogger(__name__)
 
-
 class WorksheetResolutionError(RuntimeError):
     """Raised when a worksheet cannot be resolved for a workbook."""
 
@@ -401,6 +400,7 @@ async def excel_write_to_cell(
     """
     Write a value to a single cell within the specified worksheet.
     Supports both OneDrive and SharePoint workbooks.
+    Uses session-based editing to support concurrent editing when file is open.
 
     Args:
         workbook_url: The shared URL of the Excel workbook
@@ -443,17 +443,56 @@ async def excel_write_to_cell(
                 worksheet_name=worksheet_name,
             )
 
-            escaped_range = _escape_range_address(range_address)
-            url = (
+            # Step 1: Create a workbook session for concurrent editing
+            session_url = (
                 f"{client['base_url']}{drive_path}/items/{workbook_item_id}"
-                f"{worksheet_segment}/range(address='{escaped_range}')"
+                f"/workbook/createSession"
             )
-
-            payload = {"values": [[value]]}
+            session_payload = {"persistChanges": True}
             headers = {**client["headers"], "Content-Type": "application/json"}
 
-            response = await httpx_client.patch(url, headers=headers, json=payload)
-            response.raise_for_status()
+            session_response = await httpx_client.post(
+                session_url, headers=headers, json=session_payload
+            )
+            session_response.raise_for_status()
+            session_data = session_response.json()
+            session_id = session_data.get("id")
+
+            if not session_id:
+                raise RuntimeError("Failed to create workbook session")
+
+            logger.info("Created workbook session: %s", session_id)
+
+            try:
+                # Step 2: Write to cell using the session
+                escaped_range = _escape_range_address(range_address)
+                url = (
+                    f"{client['base_url']}{drive_path}/items/{workbook_item_id}"
+                    f"{worksheet_segment}/range(address='{escaped_range}')"
+                )
+
+                payload = {"values": [[value]]}
+                # Add session ID to headers
+                session_headers = {**headers, "workbook-session-id": session_id}
+
+                response = await httpx_client.patch(url, headers=session_headers, json=payload)
+                response.raise_for_status()
+
+                result_payload = response.json()
+
+            finally:
+                # Step 3: Close the session
+                close_session_url = (
+                    f"{client['base_url']}{drive_path}/items/{workbook_item_id}"
+                    f"/workbook/closeSession"
+                )
+                close_headers = {**headers, "workbook-session-id": session_id}
+                try:
+                    await httpx_client.post(close_session_url, headers=close_headers)
+                    logger.info("Closed workbook session: %s", session_id)
+                except Exception as close_exc:
+                    logger.warning("Failed to close session %s: %s", session_id, close_exc)
+
     except WorksheetResolutionError as exc:
         raise RuntimeError(str(exc)) from exc
     except httpx.HTTPStatusError as exc:
@@ -466,8 +505,6 @@ async def excel_write_to_cell(
         logger.exception("Unexpected error writing to Excel cell")
         raise RuntimeError(f"Failed to write to cell: {exc}") from exc
 
-    payload = response.json()
-
     return {
         "workbook_id": workbook_item_id,
         "drive_type": drive_type,
@@ -476,9 +513,9 @@ async def excel_write_to_cell(
             "name": worksheet_metadata.get("name"),
             "position": worksheet_metadata.get("position"),
         },
-        "range": payload.get("address"),
-        "values": payload.get("values"),
-        "text": payload.get("text"),
+        "range": result_payload.get("address"),
+        "values": result_payload.get("values"),
+        "text": result_payload.get("text"),
     }
 
 
