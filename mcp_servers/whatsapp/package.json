@@ -56,5 +56,8 @@
         "business-api",
         "api-integration"
     ],
-    "author": "Klavis AI"
-} 
+    "author": "Klavis AI",
+    "overrides": {
+        "js-yaml": "^4.1.1"
+    }
+}
