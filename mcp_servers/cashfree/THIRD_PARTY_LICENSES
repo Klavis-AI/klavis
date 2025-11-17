@@ -1,0 +1,7 @@
+The following third-party packages are used in this project and are licensed under the Elastic License 2.0:
+
+- @mintlify/models
+- @mintlify/validation
+
+These are not covered by this project's MIT License. Use of these packages must comply with:
+https://www.elastic.co/licensing/elastic-license
