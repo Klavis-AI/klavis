@@ -17,7 +17,7 @@ pip install langchain-mcp-adapters langgraph langchain-openai klavis
 ```
 
 ```bash TypeScript
-npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai klavis
+npm install @langchain/mcp-adapters langchain @langchain/openai klavis open dotenv
 ```
 
 </CodeGroup>
@@ -34,9 +34,14 @@ os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
 ```
 
 ```typescript TypeScript
-// Set environment variables
-process.env.OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";  // Replace with your actual OpenAI API key
-process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";   // Replace with your actual Klavis API key
+import { config } from 'dotenv';
+
+// Load environment variables from .env file
+config();
+
+// Make sure you have a .env file with:
+// OPENAI_API_KEY=your_openai_api_key
+// KLAVIS_API_KEY=your_klavis_api_key
 ```
 
 </CodeGroup>
@@ -66,6 +71,10 @@ if response.oauth_urls:
 ```
 
 ```typescript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+import open from 'open';
+import { createInterface } from 'readline/promises';
+
 const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 
 const response = await klavisClient.mcpServer.createStrataServer({
@@ -73,16 +82,19 @@ const response = await klavisClient.mcpServer.createStrataServer({
     userId: "1234"
 });
 
-// Handle OAuth authorization for each services
+// Handle OAuth authorization for each service
 if (response.oauthUrls) {
+    const rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
     for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
-        window.open(oauthUrl);
-        // Wait for user to complete OAuth
-        await new Promise(resolve => {
-            const input = prompt(`Press OK after completing ${serverName} OAuth authorization...`);
-            resolve(input);
-        });
+        await open(oauthUrl);
+        await rl.question(`Press Enter after completing ${serverName} OAuth authorization...`);
     }
+    
+    rl.close();
 }
 ```
 
@@ -127,6 +139,10 @@ print("🤖 LangChain agent created successfully!")
 ```
 
 ```typescript TypeScript
+import { MultiServerMCPClient } from "@langchain/mcp-adapters";
+import { createAgent } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
+
 // Initialize LLM
 const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
@@ -140,7 +156,7 @@ const mcpClient = new MultiServerMCPClient({
     mcpServers: {
         strata: {
             url: response.strataServerUrl,
-            transport: "streamable_http"
+            transport: "http"
         }
     }
 });
@@ -149,10 +165,10 @@ const mcpClient = new MultiServerMCPClient({
 const tools = await mcpClient.getTools();
 
 // Create agent with MCP-based tools
-const agent = createReactAgent({
-    llm: llm,
+const agent = createAgent({
+    model: llm,
     tools: tools,
-    systemMessage: "You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
+    systemPrompt: "You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
 });
 
 console.log("🤖 LangChain agent created successfully!");
@@ -173,19 +189,23 @@ print(f"\n🤖 Final Response: {response_message['messages'][-1].content}")
 ```
 
 ```typescript TypeScript
-try {
-    const response = await agent.invoke({
-        messages: [{ role: "user", content: "Check my latest emails and summarize them in a Slack message to #updates" }]
-    });
-    console.log(`\n🤖 Final Response:`, response);
-} catch (error) {
-    console.error("Error during agent execution:", error);
-} finally {
-    await mcpClient.close();
-}
+const result = await agent.invoke({
+    messages: [{
+        role: 'user' as const,
+        content: 'Check my latest 5 emails and summarize them in a Slack message to #general'
+    }]
+});
+
+// Print only the final AI response content
+const lastMessage = result.messages[result.messages.length - 1];
+console.log('\n🤖 Final Response:', lastMessage.content);
 ```
 
 </CodeGroup>
+
+<Tip>
+Check out the [full TypeScript code example](https://github.com/Klavis-AI/klavis/blob/main/examples/strata-cookbooks/typescript/build_with_langchain.ts) on GitHub for a complete working implementation.
+</Tip>
 
 <Check>
 Perfect! You've integrated LangChain with Klavis MCP servers.
