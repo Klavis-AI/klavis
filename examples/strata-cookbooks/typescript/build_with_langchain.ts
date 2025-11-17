@@ -1,7 +1,8 @@
 import { config } from 'dotenv';
-import { Klavis } from 'klavis';
-import { ChatOpenAI } from '@langchain/openai';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
+import { Klavis, KlavisClient } from 'klavis';
+import { MultiServerMCPClient } from "@langchain/mcp-adapters";  
+import { createAgent } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
 import open from 'open';
 import { createInterface } from 'readline/promises';
 
@@ -9,7 +10,7 @@ import { createInterface } from 'readline/promises';
 config();
 
 async function main() {
-    const klavisClient = new Klavis({ apiKey: process.env.KLAVIS_API_KEY! });
+    const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
 
     // Step 1: Create a Strata MCP server with Gmail and YouTube integrations
     const response = await klavisClient.mcpServer.createStrataServer({
@@ -32,23 +33,31 @@ async function main() {
         rl.close();
     }
 
-    // Step 3: Get tools from the Strata server
-    const mcpTools = await klavisClient.mcpServer.listTools({
-        serverUrl: response.strataServerUrl,
-        format: Klavis.ToolFormat.LangChain
-    });
-
-    // Setup LLM
+    // Step 3: Setup LLM
     const llm = new ChatOpenAI({
-        model: 'gpt-4o-mini',
+        modelName: 'gpt-4o-mini',
         apiKey: process.env.OPENAI_API_KEY!,
     });
 
+    // Create MCP client with Strata server
+    const mcpClient = new MultiServerMCPClient({
+        throwOnLoadError: true,
+        useStandardContentBlocks: true,
+        mcpServers: {
+            strata: {
+                url: response.strataServerUrl,
+                transport: "http"
+            }
+        }
+    });
+
+    const tools = await mcpClient.getTools();  
+
     // Step 4: Create LangChain agent with MCP tools
-    const agent = createReactAgent({
-        llm,
-        tools: mcpTools.tools,
-        systemMessage: 'You are a helpful assistant that can use MCP tools.',
+    const agent = createAgent({
+        model: llm,
+        tools: tools,
+        systemPrompt: 'You are a helpful assistant that can use MCP tools.',
     });
 
     const myEmail = 'golden-kpop@example.com'; // TODO: Replace with your email
@@ -66,6 +75,5 @@ async function main() {
     console.log(lastMessage.content);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-    main().catch(console.error);
-}
+
+main()

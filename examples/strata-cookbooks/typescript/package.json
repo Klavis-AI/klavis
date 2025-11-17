@@ -9,9 +9,10 @@
     "dev": "tsx build_with_langchain.ts"
   },
   "dependencies": {
-    "@langchain/openai": "^0.3.33",
-    "@langchain/langgraph": "^0.6.7",
-    "klavis": "^2.0.2",
+    "@langchain/openai": "^1.1.1",
+    "langchain": "^1.0.4",
+    "@langchain/mcp-adapters": "^1.0.0",
+    "klavis": "^2.12.2",
     "dotenv": "^16.4.7",
     "open": "^10.1.0"
   },
