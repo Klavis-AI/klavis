@@ -147,6 +147,7 @@
               "mcp-server/pipedrive",
               "mcp-server/plai",
               "mcp-server/postgres",
+              "mcp-server/postman",
               "mcp-server/posthog",
               "mcp-server/quickbooks",
               "mcp-server/resend",
