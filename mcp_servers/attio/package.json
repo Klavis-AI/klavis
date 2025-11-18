@@ -49,6 +49,9 @@
     "engines": {
         "node": ">=18.0.0"
     },
+    "overrides": {
+        "js-yaml": "^4.1.1"
+    },
     "keywords": [
         "mcp",
         "attio",
