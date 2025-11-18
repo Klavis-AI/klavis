@@ -3,8 +3,6 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict
-from contextvars import ContextVar
 import base64
 
 import click
@@ -32,6 +30,8 @@ from tools import (
     get_cases, create_case, update_case, delete_case,
     # Campaigns
     get_campaigns, create_campaign, update_campaign, delete_campaign,
+    # Attachments
+    get_attachments_for_record, get_attachment_temporary_download_url, search_attachments,
     # Metadata & Queries
     describe_object, execute_soql_query
 )
@@ -438,6 +438,47 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN"})
             ),
             
+            # Attachment Tools
+            types.Tool(
+                name="salesforce_get_attachments",
+                description="Get all attachments for a specific Salesforce record (Account, Opportunity, Case, Contact, Lead, etc.).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["record_id"],
+                    "properties": {
+                        "record_id": {"type": "string", "description": "The ID of the parent record"},
+                        "limit": {"type": "integer", "description": "Maximum number of attachments to return (default: 50)", "default": 50}
+                    }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ATTACHMENT", "readOnlyHint": True})
+            ),
+            types.Tool(
+                name="salesforce_get_attachment_temporary_download_url",
+                description="Get temporary download URL for a specific ContentDocument by ID. Creates a public download link that expires in 1 hour.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["attachment_id"],
+                    "properties": {
+                        "attachment_id": {"type": "string", "description": "The ID of the ContentDocument"}
+                    }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ATTACHMENT", "readOnlyHint": False})
+            ),
+            types.Tool(
+                name="salesforce_search_attachments",
+                description="Search for attachments across Salesforce by file name or title.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["query"],
+                    "properties": {
+                        "query": {"type": "string", "description": "Search term to find in file names/titles"},
+                        "limit": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "default": 20},
+                        "search_type": {"type": "string", "description": "Type to search - only 'files' is supported", "default": "files", "enum": ["files"]}
+                    }
+                },
+                annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ATTACHMENT", "readOnlyHint": True})
+            ),
+            
             # Query and Metadata Tools
             types.Tool(
                 name="salesforce_query",
@@ -575,8 +616,23 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 result = await update_campaign(arguments["campaign_id"], arguments["campaign_data"])
             elif name == "salesforce_delete_campaign":
                 result = await delete_campaign(arguments["campaign_id"])
-
-
+            
+            # Attachment tools
+            elif name == "salesforce_get_attachments":
+                result = await get_attachments_for_record(
+                    record_id=arguments["record_id"],
+                    limit=arguments.get("limit", 50)
+                )
+            elif name == "salesforce_get_attachment_temporary_download_url":
+                result = await get_attachment_temporary_download_url(
+                    attachment_id=arguments["attachment_id"]
+                )
+            elif name == "salesforce_search_attachments":
+                result = await search_attachments(
+                    query=arguments["query"],
+                    limit=arguments.get("limit", 20),
+                    search_type=arguments.get("search_type", "files")
+                )
             
             # Query and metadata tools  
             elif name == "salesforce_query":
