@@ -20,6 +20,12 @@ from .campaigns import (
     get_campaigns, create_campaign, update_campaign, delete_campaign
 )
 
+from .attachments import (
+    get_attachments_for_record,
+    get_attachment_temporary_download_url,
+    search_attachments
+)
+
 from .metadata import (
     describe_object, execute_soql_query
 )
@@ -63,6 +69,10 @@ __all__ = [
     "update_campaign",
     "delete_campaign",
 
+    # Attachments
+    "get_attachments_for_record",
+    "get_attachment_temporary_download_url",
+    "search_attachments",
     
     # Metadata & Queries
     "describe_object",
