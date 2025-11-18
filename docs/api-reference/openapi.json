@@ -5901,6 +5901,156 @@
           }
         }
       }
+    },
+    "/oauth/zoom/authorize": {
+      "get": {
+        "tags": [
+          "zoom-oauth"
+        ],
+        "summary": "Authorize Zoom",
+        "operationId": "authorizeZoom",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/zoom/refresh_token": {
+      "post": {
+        "tags": [
+          "zoom-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_zoom_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoomOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoomOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6846,6 +6996,7 @@
           "Plai",
           "Postgres",
           "PostHog",
+          "Postman",
           "QuickBooks",
           "Resend",
           "Salesforce",
@@ -7502,6 +7653,65 @@
           "success"
         ],
         "title": "WhiteLabelingResponse"
+      },
+      "ZoomOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Additional error message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ZoomOAuthErrorResponse"
+      },
+      "ZoomOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ZoomOAuthSuccessResponse"
       }
     },
     "securitySchemes": {
