@@ -47,6 +47,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_salesforce_access_to
 - **Contact Operations**: Manage contacts and customer relationships
 - **Opportunity Tracking**: Handle sales opportunities and pipeline
 - **Account Management**: Manage customer accounts and hierarchies
+- **Attachment Management**: download, and manage attachments for any Salesforce record
 - **Custom Objects**: Work with custom Salesforce objects and fields
 - **Reports & Analytics**: Access Salesforce reports and dashboards
 
