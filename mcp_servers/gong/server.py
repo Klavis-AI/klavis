@@ -18,8 +18,9 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from tools import (
-    auth_token_context,
-    extract_access_token,
+    access_key_context,
+    access_key_secret_context,
+    extract_credentials,
     get_transcripts_by_user,
     get_call_transcripts,
     get_extensive_data,
@@ -239,13 +240,20 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        auth_token = extract_access_token(request)
-        token = auth_token_context.set(auth_token)
+        
+        # Extract credentials from headers
+        credentials = extract_credentials(request)
+        
+        # Set the credentials in context for this request
+        access_key_token = access_key_context.set(credentials['access_key'])
+        access_key_secret_token = access_key_secret_context.set(credentials['access_key_secret'])
         try:
             async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
                 await app.run(streams[0], streams[1], app.create_initialization_options())
         finally:
-            auth_token_context.reset(token)
+            access_key_context.reset(access_key_token)
+            access_key_secret_context.reset(access_key_secret_token)
+        
         return Response()
 
     session_manager = StreamableHTTPSessionManager(
@@ -257,12 +265,18 @@ def main(port: int, log_level: str, json_response: bool) -> int:
 
     async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info("Handling StreamableHTTP request")
-        auth_token = extract_access_token(scope)
-        token = auth_token_context.set(auth_token)
+        
+        # Extract credentials from headers
+        credentials = extract_credentials(scope)
+        
+        # Set the credentials in context for this request
+        access_key_token = access_key_context.set(credentials['access_key'])
+        access_key_secret_token = access_key_secret_context.set(credentials['access_key_secret'])
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            auth_token_context.reset(token)
+            access_key_context.reset(access_key_token)
+            access_key_secret_context.reset(access_key_secret_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
