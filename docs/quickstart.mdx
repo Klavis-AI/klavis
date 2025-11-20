@@ -35,11 +35,49 @@ One MCP server that lets AI agents handle any tools progressively.
           alt="Strata UI Dashboard"
         />
       </Step>
-      <Step title="(Optional) Authenticate">
-        Complete authentication by clicking the "Authorize" button. You can also skip this step since we have an authentication handler tool that will prompt to authenticate when needed.
+      <Step title="Authenticate">
+        Complete authentication by clicking the **"Authorize"** button. Most of the applications has OAuth support. Just follow the OAuth flow to authorize them.
+        
+        Some applications might need you to provide API keys or other kinds of secrets to authorize.
+
+        Some applications don't have **"Authorize"** buttons. It means they don't require authentication and you can access them directly.
+
+        <Tip>
+        We also provide an authentication handler tool in MCP that will prompt to authenticate when if you didn't authorize them.
+        </Tip>
+
+        <img
+          className="block dark:hidden"
+          src="/images/get-started/quickstart/oauth.png"
+          alt="Strata OAuth Example"
+        />
+        <img
+          className="hidden dark:block"
+          src="/images/get-started/quickstart/oauth.png"
+          alt="Strata OAuth Example"
+        />
       </Step>
       <Step title="Use in your app">
         Add to your favorite MCP-supported clients, such as Cursor, Claude Code, VS Code, ChatGPT, etc.
+
+        To get the MCP server URL and access token, click the **"Add to Other Clients"** button on the top right corner of the dashboard.
+
+        <Tip>
+        Both the URL with access token and the direct URL provide you with the **same** MCP. But it's recommended to use the URL with access token as it's a more secure way to connect.
+
+        DO NOT share your access token or direct URL publicly as they provide access to your connected accounts and data.
+        </Tip>
+
+        <img
+          className="block dark:hidden"
+          src="/images/get-started/quickstart/url.png"
+          alt="Strata URL"
+        />
+        <img
+          className="hidden dark:block"
+          src="/images/get-started/quickstart/url.png"
+          alt="Strata URL"
+        />
       </Step>
     </Steps>
   </Tab>
