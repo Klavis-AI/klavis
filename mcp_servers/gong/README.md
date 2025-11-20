@@ -35,12 +35,18 @@ docker run -p 5000:5000 -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
   ghcr.io/klavis-ai/gong-mcp-server:latest
 
 
-# Run Gong MCP Server (no OAuth support)
-docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gong_access_token_here"}' \
+# Run Gong MCP Server with Basic Authentication (using Access Key and Secret)
+docker run -p 5000:5000 \
+  -e GONG_ACCESS_KEY="your_access_key" \
+  -e GONG_ACCESS_KEY_SECRET="your_access_key_secret" \
   ghcr.io/klavis-ai/gong-mcp-server:latest
 ```
 
-**OAuth Setup:** Gong requires OAuth authentication. Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle the OAuth flow automatically.
+**Authentication Setup:** 
+- **Option 1 (Recommended)**: Use `KLAVIS_API_KEY` from your [free API key](https://www.klavis.ai/home/api-keys) to handle OAuth automatically
+- **Option 2**: Use Gong's Basic Authentication by providing `GONG_ACCESS_KEY` and `GONG_ACCESS_KEY_SECRET`
+  - Get your Access Key from Gong API Page (requires technical administrator privileges)
+  - The server will automatically combine and Base64-encode them as per Gong API requirements: `Base64(accessKey:accessKeySecret)`
 
 ## 🛠️ Available Tools
 
@@ -54,7 +60,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gong_access_token_he
 
 | Resource | Link |
 |----------|------|
-| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
@@ -72,7 +78,7 @@ Apache 2.0 license - see [LICENSE](../../LICENSE) for details.
   <p><strong>🚀 Supercharge AI Applications </strong></p>
   <p>
     <a href="https://www.klavis.ai">Get Free API Key</a> •
-    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://www.klavis.ai/docs">Documentation</a> •
     <a href="https://discord.gg/p7TuTEcssn">Discord</a>
   </p>
 </div>

@@ -1,0 +1,219 @@
+---
+title: 'Coinbase'
+description: 'Connect AI agents to Coinbase for cryptocurrency data and portfolio management'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Coinbase to access cryptocurrency prices, manage portfolios, and track transactions through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Coinbase">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Strata MCP server with Coinbase
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.COINBASE],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+          
+          // Create a Strata MCP server with Coinbase
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Coinbase],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Coinbase"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Tip>
+        `userId` specifies whose connected accounts and data you are accessing in Klavis. It should be a unique id for yourself, your team, or your organization.
+        </Tip>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate with API Key">
+        <CodeGroup>
+          ```python Python
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.COINBASE,
+              auth_data={
+                  "api_key": "YOUR_COINBASE_API_KEY",
+                  "secret_key": "YOUR_COINBASE_API_SECRET"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Coinbase,
+              authData: {
+                  api_key: "YOUR_COINBASE_API_KEY",
+                  secret_key: "YOUR_COINBASE_API_SECRET"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Coinbase",
+              "authData": {
+                "api_key": "YOUR_COINBASE_API_KEY",
+                "secret_key": "YOUR_COINBASE_API_SECRET"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Coinbase MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Coinbase">
+        Select Coinbase from the list of available integrations.
+      </Step>
+      
+      <Step title="Configure credentials">
+        Enter your Coinbase API key and secret to enable cryptocurrency data access.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/coinbase
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/coinbase-mcp-server:latest
+        
+        # Run with Coinbase API credentials
+        docker run -p 5000:5000 \
+          -e AUTH_DATA='{"api_key":"your_coinbase_api_key","secret_key":"your_coinbase_secret"}' \
+          ghcr.io/klavis-ai/coinbase-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "coinbase": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Coinbase. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+</CardGroup>

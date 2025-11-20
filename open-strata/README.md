@@ -2,6 +2,9 @@
   <img width="1157" height="365" alt="image" src="https://github.com/user-attachments/assets/d1db7ed7-1bc5-4d49-a858-c10be6003347" />
 </div>
 
+[![Documentation](https://img.shields.io/badge/Documentation-📖-green)](https://www.klavis.ai/docs)
+[![Website](https://img.shields.io/badge/Website-🌐-purple)](https://www.klavis.ai)
+[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/p7TuTEcssn)
 
 # Overview
 

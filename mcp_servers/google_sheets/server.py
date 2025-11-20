@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from contextvars import ContextVar
 
 import click
@@ -21,6 +21,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from exceptions import RetryableToolError
 from models import (
     SheetDataInput,
     Spreadsheet,
@@ -72,20 +73,12 @@ def extract_access_token(request_or_scope) -> str:
         logger.warning(f"Failed to parse auth data JSON: {e}")
         return ""
 
-# Error class for retryable errors
-class RetryableToolError(Exception):
-    def __init__(self, message: str, additional_prompt_content: str = "", retry_after_ms: int = 1000, developer_message: str = ""):
-        super().__init__(message)
-        self.additional_prompt_content = additional_prompt_content
-        self.retry_after_ms = retry_after_ms
-        self.developer_message = developer_message
-
 def get_sheets_service(access_token: str):
     """Create Google Sheets service with access token."""
     credentials = Credentials(token=access_token)
     return build('sheets', 'v4', credentials=credentials)
 
-# This is used for the list_all_sheets tool
+# This is used for the list_spreadsheets tool
 def get_drive_service(access_token: str):
     """Create Google Drive service with access token."""
     credentials = Credentials(token=access_token)
@@ -158,23 +151,47 @@ async def create_spreadsheet_tool(
         logger.exception(f"Error executing tool create_spreadsheet: {e}")
         raise e
 
-async def get_spreadsheet_tool(spreadsheet_id: str) -> Dict[str, Any]:
-    """Get the user entered values and formatted values for all cells in all sheets in the spreadsheet."""
-    logger.info(f"Executing tool: get_spreadsheet with spreadsheet_id: {spreadsheet_id}")
+async def get_spreadsheet_tool(
+    spreadsheet_id: str,
+    range_a1: str | None = None,
+    cell_value_format: str = "formatted"
+) -> Dict[str, Any]:
+    """Get the cell data for all cells in all sheets, or a specific range."""
+    logger.info(f"Executing tool: get_spreadsheet with spreadsheet_id: {spreadsheet_id}, range: {range_a1}, cell_value_format: {cell_value_format}")
     try:
         access_token = get_auth_token()
         service = get_sheets_service(access_token)
-        
+
+        fields_list = [
+            "spreadsheetId",
+            "spreadsheetUrl",
+            "properties/title",
+            "sheets/properties",
+            "sheets/data/startRow",
+            "sheets/data/startColumn"
+        ]
+
+        if cell_value_format in ["formatted", "all"]:
+            fields_list.append("sheets/data/rowData/values/formattedValue")
+
+        if cell_value_format in ["userEntered", "all"]:
+            fields_list.append("sheets/data/rowData/values/userEnteredValue")
+
+        request_params = {
+            "spreadsheetId": spreadsheet_id,
+            "includeGridData": True,
+            "fields": ",".join(fields_list),
+        }
+
+        if range_a1:
+            request_params["ranges"] = [range_a1]
+
         response = (
             service.spreadsheets()
-            .get(
-                spreadsheetId=spreadsheet_id,
-                includeGridData=True,
-                fields="spreadsheetId,spreadsheetUrl,properties/title,sheets/properties,sheets/data/rowData/values/userEnteredValue,sheets/data/rowData/values/formattedValue,sheets/data/rowData/values/effectiveValue",
-            )
+            .get(**request_params)
             .execute()
         )
-        return parse_get_spreadsheet_response(response)
+        return parse_get_spreadsheet_response(response, cell_value_format)
     except HttpError as e:
         logger.error(f"Google Sheets API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -188,13 +205,28 @@ async def write_to_cell_tool(
     column: str,
     row: int,
     value: str,
-    sheet_name: str = "Sheet1",
+    sheet_name: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Write a value to a single cell in a spreadsheet."""
     logger.info(f"Executing tool: write_to_cell with spreadsheet_id: {spreadsheet_id}, cell: {column}{row}")
     try:
         access_token = get_auth_token()
         service = get_sheets_service(access_token)
+        
+        # If no sheet name provided, use the first sheet in the spreadsheet
+        if sheet_name is None:
+            sheet_properties = (
+                service.spreadsheets()
+                .get(
+                    spreadsheetId=spreadsheet_id,
+                    fields="sheets/properties/title",
+                )
+                .execute()
+            )
+            if not sheet_properties.get("sheets"):
+                raise RuntimeError(f"No sheets found in spreadsheet with id {spreadsheet_id}")
+            sheet_name = sheet_properties["sheets"][0]["properties"]["title"]
+            logger.info(f"No sheet name provided, using first sheet: {sheet_name}")
         
         validate_write_to_cell_params(service, spreadsheet_id, sheet_name, column, row)
 
@@ -227,9 +259,9 @@ async def write_to_cell_tool(
         logger.exception(f"Error executing tool write_to_cell: {e}")
         raise e
 
-async def list_all_sheets_tool() -> Dict[str, Any]:
+async def list_spreadsheets_tool() -> Dict[str, Any]:
     """List all Google Sheets spreadsheets in the user's Google Drive."""
-    logger.info("Executing tool: list_all_sheets")
+    logger.info("Executing tool: list_spreadsheets")
     try:
         access_token = get_auth_token()
         service = get_drive_service(access_token)
@@ -268,7 +300,49 @@ async def list_all_sheets_tool() -> Dict[str, Any]:
         error_detail = json.loads(e.content.decode('utf-8'))
         raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
     except Exception as e:
-        logger.exception(f"Error executing tool list_all_sheets: {e}")
+        logger.exception(f"Error executing tool list_spreadsheets: {e}")
+        raise e
+
+async def list_sheets_tool(spreadsheet_id: str) -> Dict[str, Any]:
+    """List all sheets in a spreadsheet (metadata only, no cell data)."""
+    logger.info(f"Executing tool: list_sheets with spreadsheet_id: {spreadsheet_id}")
+    try:
+        access_token = get_auth_token()
+        service = get_sheets_service(access_token)
+
+        response = (
+            service.spreadsheets()
+            .get(
+                spreadsheetId=spreadsheet_id,
+                fields="spreadsheetId,spreadsheetUrl,properties/title,sheets/properties",
+            )
+            .execute()
+        )
+
+        sheets = []
+        for sheet in response.get('sheets', []):
+            props = sheet.get('properties', {})
+            grid_props = props.get('gridProperties', {})
+            sheets.append({
+                "sheetId": props.get('sheetId'),
+                "title": props.get('title', ''),
+                "index": props.get('index', 0),
+                "rowCount": grid_props.get('rowCount', 0),
+                "columnCount": grid_props.get('columnCount', 0),
+            })
+
+        return {
+            "spreadsheetId": response.get('spreadsheetId', ''),
+            "spreadsheetUrl": response.get('spreadsheetUrl', ''),
+            "title": response.get('properties', {}).get('title', ''),
+            "sheets": sheets,
+        }
+    except HttpError as e:
+        logger.error(f"Google Sheets API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Sheets API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool list_sheets: {e}")
         raise e
 
 @click.command()
@@ -324,7 +398,7 @@ def main(
             ),
             types.Tool(
                 name="google_sheets_get_spreadsheet",
-                description="Retrieve spreadsheet properties and cell data for all sheets.",
+                description="Retrieve spreadsheet properties and cell data. Supports range filtering and cell value format selection.",
                 inputSchema={
                     "type": "object",
                     "required": ["spreadsheet_id"],
@@ -332,6 +406,15 @@ def main(
                         "spreadsheet_id": {
                             "type": "string",
                             "description": "The ID of the spreadsheet to retrieve.",
+                        },
+                        "range": {
+                            "type": "string",
+                            "description": "Optional. The range to retrieve in A1 notation (e.g., 'Sheet1!A1:D10' for a specific range, or 'Sheet1' for the entire sheet). If not provided, retrieves all sheets with full data.",
+                        },
+                        "cell_value_format": {
+                            "type": "string",
+                            "enum": ["formatted", "userEntered", "all"],
+                            "description": "Output format of cell values. 'formatted' (default): display values as strings {\"A\": \"100\"}, use for reading/displaying data. 'userEntered': raw input/formulas as strings {\"A\": \"=SUM(A1:A5)\"}, use to understand calculation logic. 'all': both formats {\"A\": {userEnteredValue, formattedValue}}, use when you need to see both.",
                         },
                     },
                 },
@@ -341,7 +424,7 @@ def main(
             ),
             types.Tool(
                 name="google_sheets_write_to_cell",
-                description="Write a value to a specific cell in a spreadsheet.",
+                description="Write a value to a specific cell in a spreadsheet. IMPORTANT: If the sheet name is not known, call google_sheets_list_sheets first to see available sheets, then either choose the appropriate sheet based on context or ask the user for clarification.",
                 inputSchema={
                     "type": "object",
                     "required": ["spreadsheet_id", "column", "row", "value"],
@@ -364,7 +447,7 @@ def main(
                         },
                         "sheet_name": {
                             "type": "string",
-                            "description": "The name of the sheet to write to. Defaults to 'Sheet1'.",
+                            "description": "The name of the sheet to write to. If the user specifies the sheet name, use it. If not provided, you should call google_sheets_list_sheets first to see available sheets and then choose based on context or ask the user for clarification. As a fallback, defaults to the first sheet in the spreadsheet.",
                         },
                     },
                 },
@@ -373,11 +456,28 @@ def main(
                 ),
             ),
             types.Tool(
-                name="google_sheets_list_all_sheets",
+                name="google_sheets_list_spreadsheets",
                 description="List all Google Sheets spreadsheets in the user's Google Drive.",
                 inputSchema={
                     "type": "object",
                     "properties": {},
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="google_sheets_list_sheets",
+                description="List all sheets in a spreadsheet with metadata (sheetId, title, index, rowCount, columnCount). Does not include cell data. Use this to discover available sheets before fetching data.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["spreadsheet_id"],
+                    "properties": {
+                        "spreadsheet_id": {
+                            "type": "string",
+                            "description": "The ID of the spreadsheet.",
+                        },
+                    },
                 },
                 annotations=types.ToolAnnotations(
                     **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
@@ -388,7 +488,7 @@ def main(
     @app.call_tool()
     async def call_tool(
         name: str, arguments: dict
-    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:     
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         if name == "google_sheets_create_spreadsheet":
             title = arguments.get("title")
             data = arguments.get("data")
@@ -419,6 +519,8 @@ def main(
         
         elif name == "google_sheets_get_spreadsheet":
             spreadsheet_id = arguments.get("spreadsheet_id")
+            range_a1 = arguments.get("range")
+            cell_value_format = arguments.get("cell_value_format", "formatted")
             if not spreadsheet_id:
                 return [
                     types.TextContent(
@@ -426,9 +528,9 @@ def main(
                         text="Error: spreadsheet_id parameter is required",
                     )
                 ]
-            
+
             try:
-                result = await get_spreadsheet_tool(spreadsheet_id)
+                result = await get_spreadsheet_tool(spreadsheet_id, range_a1, cell_value_format)
                 return [
                     types.TextContent(
                         type="text",
@@ -450,7 +552,7 @@ def main(
             row = arguments.get("row")
             value = arguments.get("value")
             sheet_name = arguments.get("sheet_name", "Sheet1")
-            
+
             if not all([spreadsheet_id, column, row is not None, value is not None]):
                 return [
                     types.TextContent(
@@ -458,7 +560,7 @@ def main(
                         text="Error: spreadsheet_id, column, row, and value parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await write_to_cell_tool(spreadsheet_id, column, row, value, sheet_name)
                 return [
@@ -476,9 +578,9 @@ def main(
                     )
                 ]
         
-        elif name == "google_sheets_list_all_sheets":
+        elif name == "google_sheets_list_spreadsheets":
             try:
-                result = await list_all_sheets_tool()
+                result = await list_spreadsheets_tool()
                 return [
                     types.TextContent(
                         type="text",
@@ -493,7 +595,34 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_sheets_list_sheets":
+            spreadsheet_id = arguments.get("spreadsheet_id")
+            if not spreadsheet_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: spreadsheet_id parameter is required",
+                    )
+                ]
+
+            try:
+                result = await list_sheets_tool(spreadsheet_id)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",
@@ -582,4 +711,4 @@ def main(
     return 0
 
 if __name__ == "__main__":
-    main() 
+    main()

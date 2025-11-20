@@ -47,6 +47,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_salesforce_access_to
 - **Contact Operations**: Manage contacts and customer relationships
 - **Opportunity Tracking**: Handle sales opportunities and pipeline
 - **Account Management**: Manage customer accounts and hierarchies
+- **Attachment Management**: download, and manage attachments for any Salesforce record
 - **Custom Objects**: Work with custom Salesforce objects and fields
 - **Reports & Analytics**: Access Salesforce reports and dashboards
 
@@ -54,7 +55,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_salesforce_access_to
 
 | Resource | Link |
 |----------|------|
-| **📖 Documentation** | [docs.klavis.ai](https://docs.klavis.ai) |
+| **📖 Documentation** | [www.klavis.ai/docs](https://www.klavis.ai/docs) |
 | **💬 Discord** | [Join Community](https://discord.gg/p7TuTEcssn) |
 | **🐛 Issues** | [GitHub Issues](https://github.com/klavis-ai/klavis/issues) |
 
@@ -72,7 +73,7 @@ Apache 2.0 license - see [LICENSE](../../LICENSE) for details.
   <p><strong>🚀 Supercharge AI Applications </strong></p>
   <p>
     <a href="https://www.klavis.ai">Get Free API Key</a> •
-    <a href="https://docs.klavis.ai">Documentation</a> •
+    <a href="https://www.klavis.ai/docs">Documentation</a> •
     <a href="https://discord.gg/p7TuTEcssn">Discord</a>
   </p>
 </div>

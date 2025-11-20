@@ -17,6 +17,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
     gmailClient: any;
+    peopleClient: any;
 }>();
 
 // Type definitions for Gmail API responses
@@ -61,6 +62,44 @@ function base64UrlToBase64(input: string): string {
 // Helper function to get Gmail client from context
 function getGmailClient() {
     return asyncLocalStorage.getStore()!.gmailClient;
+}
+
+// Helper function to get People client from context
+function getPeopleClient() {
+    return asyncLocalStorage.getStore()!.peopleClient;
+}
+
+/**
+ * Send warmup request with empty query to update the cache.
+ *
+ * According to Google's documentation, searchContacts and otherContacts.search
+ * require a warmup request before actual searches for better performance.
+ * See: https://developers.google.com/people/v1/contacts#search_the_users_contacts
+ * and https://developers.google.com/people/v1/other-contacts#search_the_users_other_contacts
+ */
+async function warmupContactSearch(peopleClient: any, contactType: 'personal' | 'other'): Promise<void> {
+    try {
+        if (contactType === 'personal') {
+            // Warmup for people.searchContacts
+            await peopleClient.people.searchContacts({
+                query: '',
+                pageSize: 1,
+                readMask: 'names',
+            });
+            console.log('Warmup request sent for personal contacts');
+        } else if (contactType === 'other') {
+            // Warmup for otherContacts.search
+            await peopleClient.otherContacts.search({
+                query: '',
+                pageSize: 1,
+                readMask: 'names',
+            });
+            console.log('Warmup request sent for other contacts');
+        }
+    } catch (error) {
+        // Don't fail if warmup fails, just log it
+        console.warn(`Warmup request failed for ${contactType} contacts:`, error);
+    }
 }
 
 function extractAccessToken(req: Request): string {
@@ -119,13 +158,13 @@ function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
 
 // Schema definitions
 const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses"),
+    to: z.array(z.string()).describe("List of recipient email addresses. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
     subject: z.string().describe("Email subject"),
     body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
     htmlBody: z.string().optional().describe("HTML version of the email body"),
     mimeType: z.enum(['text/plain', 'text/html', 'multipart/alternative']).optional().default('text/plain').describe("Email content type"),
-    cc: z.array(z.string()).optional().describe("List of CC recipients"),
-    bcc: z.array(z.string()).optional().describe("List of BCC recipients"),
+    cc: z.array(z.string()).optional().describe("List of CC recipients. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
+    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
     threadId: z.string().optional().describe("Thread ID to reply to"),
     inReplyTo: z.string().optional().describe("Message ID being replied to"),
 });
@@ -148,6 +187,15 @@ const ModifyEmailSchema = z.object({
 
 const DeleteEmailSchema = z.object({
     messageId: z.string().describe("ID of the email message to delete"),
+});
+
+// Schema for searching contacts
+const SearchContactsSchema = z.object({
+    query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
+    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
+    pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
+    pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
+    directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
 });
 
 // Schema for getting attachments of an email
@@ -185,7 +233,7 @@ const getGmailMcpServer = () => {
         tools: [
             {
                 name: "gmail_send_email",
-                description: "Sends a new email",
+                description: "Sends a new email. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided.",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
                 annotations: { category: "GMAIL_EMAIL" },
             },
@@ -197,7 +245,7 @@ const getGmailMcpServer = () => {
             },
             {
                 name: "gmail_read_email",
-                description: "Retrieves the content of a specific email",
+                description: "Retrieves the content of a specific email and all messages in its thread. Returns a structured list of emails with individual metadata (messageId, subject, from, to, date, body, attachments) for each message in the conversation.",
                 inputSchema: zodToJsonSchema(ReadEmailSchema),
                 annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
             },
@@ -236,6 +284,12 @@ const getGmailMcpServer = () => {
                 description: "Returns attachments for an email by message ID. Extracts and returns text for PDFs, Word (.docx), and Excel (.xlsx); returns inline text for text/JSON/XML; returns base64 for images/audio; otherwise returns a data URI reference.",
                 inputSchema: zodToJsonSchema(GetEmailAttachmentsSchema),
                 annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
+            },
+            {
+                name: "gmail_search_contacts",
+                description: "Search for contacts when you need to know the contact details. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
+                inputSchema: zodToJsonSchema(SearchContactsSchema),
+                annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
             },
         ],
     }));
@@ -355,54 +409,76 @@ const getGmailMcpServer = () => {
                         format: 'full',
                     });
 
-                    const headers = response.data.payload?.headers || [];
-                    const subject = headers.find((h: any) => h.name?.toLowerCase() === 'subject')?.value || '';
-                    const from = headers.find((h: any) => h.name?.toLowerCase() === 'from')?.value || '';
-                    const to = headers.find((h: any) => h.name?.toLowerCase() === 'to')?.value || '';
-                    const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
                     const threadId = response.data.threadId || '';
 
-                    // Extract email content using the recursive function
-                    const { text, html } = extractEmailContent(response.data.payload as GmailMessagePart || {});
+                    // Get all messages in the thread
+                    const threadResponse = await gmail.users.threads.get({
+                        userId: 'me',
+                        id: threadId,
+                        format: 'full',
+                    });
 
-                    // Get attachment information
-                    const attachments: EmailAttachment[] = [];
-                    const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
-                        if (part.body && part.body.attachmentId) {
-                            const filename = part.filename || `attachment-${part.body.attachmentId}`;
-                            attachments.push({
-                                id: part.body.attachmentId,
-                                filename: filename,
-                                mimeType: part.mimeType || 'application/octet-stream',
-                                size: part.body.size || 0
-                            });
+                    const threadMessages = threadResponse.data.messages || [];
+
+                    // Process each message in the thread
+                    const emails = threadMessages.map((msg: any) => {
+                        const headers = msg.payload?.headers || [];
+                        const subject = headers.find((h: any) => h.name?.toLowerCase() === 'subject')?.value || '';
+                        const from = headers.find((h: any) => h.name?.toLowerCase() === 'from')?.value || '';
+                        const to = headers.find((h: any) => h.name?.toLowerCase() === 'to')?.value || '';
+                        const cc = headers.find((h: any) => h.name?.toLowerCase() === 'cc')?.value || '';
+                        const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
+                        const messageId = msg.id || '';
+
+                        // Extract email content using the recursive function
+                        const { text, html } = extractEmailContent(msg.payload as GmailMessagePart || {});
+
+                        // Get attachment information
+                        const attachments: EmailAttachment[] = [];
+                        const processAttachmentParts = (part: GmailMessagePart, path: string = '') => {
+                            if (part.body && part.body.attachmentId) {
+                                const filename = part.filename || `attachment-${part.body.attachmentId}`;
+                                attachments.push({
+                                    id: part.body.attachmentId,
+                                    filename: filename,
+                                    mimeType: part.mimeType || 'application/octet-stream',
+                                    size: part.body.size || 0
+                                });
+                            }
+
+                            if (part.parts) {
+                                part.parts.forEach((subpart: GmailMessagePart) =>
+                                    processAttachmentParts(subpart, `${path}/parts`)
+                                );
+                            }
+                        };
+
+                        if (msg.payload) {
+                            processAttachmentParts(msg.payload as GmailMessagePart);
                         }
 
-                        if (part.parts) {
-                            part.parts.forEach((subpart: GmailMessagePart) =>
-                                processAttachmentParts(subpart, `${path}/parts`)
-                            );
-                        }
-                    };
+                        const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
+                        
+                        return {
+                            messageId,
+                            subject,
+                            from,
+                            to,
+                            cc: cc || undefined,
+                            date,
+                            body: {
+                                text: text || '',
+                                html: html || '',
+                                preferredFormat,
+                            },
+                            attachments: attachments.length > 0 ? attachments : undefined,
+                        };
+                    });
 
-                    if (response.data.payload) {
-                        processAttachmentParts(response.data.payload as GmailMessagePart);
-                    }
-
-                    const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
                     const resultPayload = {
                         threadId,
-                        subject,
-                        from,
-                        to,
-                        date,
-                        body: {
-                            text: text || '',
-                            html: html || '',
-                            preferredFormat,
-                            note: !text && html ? 'Email body available only in HTML format; plain text representation not available.' : undefined,
-                        },
-                        attachments,
+                        messageCount: emails.length,
+                        emails,
                     };
 
                     return {
@@ -802,6 +878,292 @@ const getGmailMcpServer = () => {
                     };
                 }
 
+                case "gmail_search_contacts": {
+                    const validatedArgs = SearchContactsSchema.parse(args);
+                    const peopleClient = getPeopleClient();
+                    const contactType = validatedArgs.contactType || 'personal';
+
+                    try {
+                        let response: any;
+                        let results: any[] = [];
+                        let typeLabel = '';
+
+                        if (contactType === 'all') {
+                            typeLabel = 'contact(s) from all sources';
+                            // Send warmup requests for personal and other contacts
+                            await Promise.all([
+                                warmupContactSearch(peopleClient, 'personal'),
+                                warmupContactSearch(peopleClient, 'other'),
+                            ]);
+                            // Execute all three searches in parallel
+                            const [personalRes, otherRes, directoryRes] = await Promise.all([
+                                // Personal contacts
+                                peopleClient.people.searchContacts({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                    readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
+                                }),
+                                // Other contacts
+                                peopleClient.otherContacts.search({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                    readMask: 'emailAddresses,metadata,names,phoneNumbers',
+                                }),
+                                // Directory contacts
+                                peopleClient.people.searchDirectoryPeople({
+                                    query: validatedArgs.query,
+                                    pageSize: Math.min(validatedArgs.pageSize || 10, 500),
+                                    readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
+                                    sources: ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                                }),
+                            ]);
+
+                            // Process personal results
+                            const personalResults = (personalRes.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'personal',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                };
+                            });
+
+                            // Process other results
+                            const otherResults = (otherRes.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'other',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: [],
+                                };
+                            });
+
+                            // Process directory results
+                            const directoryResults = (directoryRes.data.people || []).map((person: any) => {
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    contactType: 'directory',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'work',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'work',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                };
+                            });
+
+                            // Return three independent result sets with pagination info
+                            const resultPayload = {
+                                message: `Found contacts matching "${validatedArgs.query}" from all sources`,
+                                query: validatedArgs.query,
+                                contactType: 'all',
+                                personal: {
+                                    resultCount: personalResults.length,
+                                    nextPageToken: (personalRes.data as any).nextPageToken || undefined,
+                                    contacts: personalResults,
+                                },
+                                other: {
+                                    resultCount: otherResults.length,
+                                    nextPageToken: (otherRes.data as any).nextPageToken || undefined,
+                                    contacts: otherResults,
+                                },
+                                directory: {
+                                    resultCount: directoryResults.length,
+                                    nextPageToken: (directoryRes.data as any).nextPageToken || undefined,
+                                    contacts: directoryResults,
+                                },
+                            };
+
+                            return {
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: JSON.stringify(resultPayload, null, 2),
+                                    },
+                                ],
+                            };
+
+                        } else if (contactType === 'personal') {
+                            typeLabel = 'personal contact(s)';
+                            // Send warmup request before search
+                            await warmupContactSearch(peopleClient, 'personal');
+                            response = await peopleClient.people.searchContacts({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
+                            });
+
+                            results = (response.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                };
+                            });
+                        } else if (contactType === 'other') {
+                            typeLabel = 'other contact(s)';
+                            // Send warmup request before search
+                            await warmupContactSearch(peopleClient, 'other');
+                            response = await peopleClient.otherContacts.search({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 30),
+                                readMask: 'emailAddresses,metadata,names,phoneNumbers',
+                            });
+
+                            results = (response.data.results || []).map((result: any) => {
+                                const person = result.person || {};
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'other',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'other',
+                                    })),
+                                    organizations: [],
+                                };
+                            });
+                        } else if (contactType === 'directory') {
+                            typeLabel = 'directory contact(s)';
+                            const sourceMap: { [key: string]: string[] } = {
+                                'UNSPECIFIED': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                                'DOMAIN_DIRECTORY': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
+                                'DOMAIN_CONTACTS': ['DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
+                            };
+                            const directorySources = sourceMap[validatedArgs.directorySources || 'UNSPECIFIED'];
+
+                            response = await peopleClient.people.searchDirectoryPeople({
+                                query: validatedArgs.query,
+                                pageSize: Math.min(validatedArgs.pageSize || 10, 500),
+                                readMask: 'names,emailAddresses,organizations,phoneNumbers,metadata',
+                                sources: directorySources,
+                                pageToken: validatedArgs.pageToken,
+                            });
+
+                            results = (response.data.people || []).map((person: any) => {
+                                const names = person.names || [];
+                                const emails = person.emailAddresses || [];
+                                const phones = person.phoneNumbers || [];
+                                const orgs = person.organizations || [];
+
+                                return {
+                                    resourceName: person.resourceName,
+                                    displayName: names.length > 0 ? names[0].displayName : 'Unknown',
+                                    firstName: names.length > 0 ? names[0].givenName : '',
+                                    lastName: names.length > 0 ? names[0].familyName : '',
+                                    emailAddresses: emails.map((e: any) => ({
+                                        email: e.value,
+                                        type: e.type || 'work',
+                                    })),
+                                    phoneNumbers: phones.map((p: any) => ({
+                                        number: p.value,
+                                        type: p.type || 'work',
+                                    })),
+                                    organizations: orgs.map((o: any) => ({
+                                        name: o.name,
+                                        title: o.title,
+                                    })),
+                                };
+                            });
+                        }
+
+                        const resultPayload = {
+                            message: `Found ${results.length} ${typeLabel} matching "${validatedArgs.query}"`,
+                            query: validatedArgs.query,
+                            contactType: contactType,
+                            resultCount: results.length,
+                            contacts: results,
+                        };
+
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: JSON.stringify(resultPayload, null, 2),
+                                },
+                            ],
+                        };
+                    } catch (error: any) {
+                        throw new Error(`Failed to search ${contactType} contacts: ${error.message}`);
+                    }
+                }
+
                 default:
                     throw new Error(`Unknown tool: ${name}`);
             }
@@ -831,10 +1193,11 @@ const app = express();
 app.post('/mcp', async (req: Request, res: Response) => {
     const accessToken = extractAccessToken(req);
 
-    // Initialize Gmail client with the access token
+    // Initialize Gmail and People clients with the access token
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
     const gmailClient = google.gmail({ version: 'v1', auth });
+    const peopleClient = google.people({ version: 'v1', auth });
 
     const server = getGmailMcpServer();
     try {
@@ -842,7 +1205,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
             sessionIdGenerator: undefined,
         });
         await server.connect(transport);
-        asyncLocalStorage.run({ gmailClient }, async () => {
+        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport.handleRequest(req, res, req.body);
         });
         res.on('close', () => {
@@ -925,12 +1288,13 @@ app.post("/messages", async (req: Request, res: Response) => {
     let transport: SSEServerTransport | undefined;
     transport = sessionId ? transports.get(sessionId) : undefined;
     if (transport) {
-        // Initialize Gmail client with the access token
+        // Initialize Gmail and People clients with the access token
         const auth = new google.auth.OAuth2();
         auth.setCredentials({ access_token: accessToken });
         const gmailClient = google.gmail({ version: 'v1', auth });
+        const peopleClient = google.people({ version: 'v1', auth });
 
-        asyncLocalStorage.run({ gmailClient }, async () => {
+        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport!.handlePostMessage(req, res);
         });
     } else {

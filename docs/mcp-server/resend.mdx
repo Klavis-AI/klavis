@@ -1,0 +1,216 @@
+---
+title: 'Resend'
+description: 'Connect AI agents to Resend for automated email campaigns and transactional messaging'
+---
+
+<Info>
+  **Prerequisites**
+  Before you begin, [create an account](https://www.klavis.ai/home/api-keys) and get your API Key.
+</Info>
+
+## Getting started
+
+Connect to Resend to send emails, manage audiences, create broadcasts, and automate email marketing through AI agents.
+
+<Tabs>
+  <Tab title="API">
+    <Steps>
+      <Step title="Install the SDKs (optional)">
+        <CodeGroup>
+          ```bash pip
+          pip install klavis
+          ```
+          ```bash npm
+          npm install klavis
+          ```
+        </CodeGroup>
+      </Step>
+      
+      <Step title="Create a Strata MCP Server with Resend">
+        <CodeGroup>
+          ```python Python
+          from klavis import Klavis
+          from klavis.types import McpServerName
+          
+          klavis_client = Klavis(api_key="YOUR_API_KEY")
+          
+          # Create a Strata MCP server with Resend
+          response = klavis_client.mcp_server.create_strata_server(
+              servers=[McpServerName.RESEND],
+              user_id="user123"
+          )
+          ```
+          
+          ```typescript TypeScript
+          import { KlavisClient, Klavis } from 'klavis';
+          
+          const klavis = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY! });
+          
+          // Create a Strata MCP server with Resend
+          const response = await klavis.mcpServer.createStrataServer({
+              servers: [Klavis.McpServerName.Resend],
+              userId: "user123"
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/create" \
+            -H "Authorization: Bearer YOUR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "servers": ["Resend"],
+              "userId": "user123"
+            }'
+          ```
+        </CodeGroup>
+
+        <Tip>
+        `userId` specifies whose connected accounts and data you are accessing in Klavis. It should be a unique id for yourself, your team, or your organization.
+        </Tip>
+
+        <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
+          Full Strata API endpoints
+        </Card>
+      </Step>
+      
+      <Step title="Authenticate with API Key">
+        <CodeGroup>
+          ```python Python
+          klavis_client.mcp_server.set_strata_auth(
+              strata_id=response.strata_id,
+              server_name=McpServerName.RESEND,
+              auth_data={
+                  "api_key": "YOUR_RESEND_API_KEY"
+              }
+          )
+          ```
+          
+          ```typescript TypeScript
+          await klavis.mcpServer.setStrataAuth({
+              strataId: response.strataId,
+              serverName: Klavis.McpServerName.Resend,
+              authData: {
+                  api_key: "YOUR_RESEND_API_KEY"
+              }
+          });
+          ```
+          
+          ```bash cURL
+          curl -X POST "https://api.klavis.ai/mcp-server/strata/set-auth" \
+            -H "Authorization: Bearer YOUR_KLAVIS_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "strataId": "YOUR_STRATA_ID",
+              "serverName": "Resend",
+              "authData": {
+                "api_key": "YOUR_RESEND_API_KEY"
+              }
+            }'
+          ```
+        </CodeGroup>
+        
+        <Check>
+          🎉 **Your Resend MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
+        </Check>
+      </Step>
+      
+
+    </Steps>
+  </Tab>
+  
+  <Tab title="UI">
+    <Steps>
+      <Step title="Open Dashboard">
+        Go to your [Dashboard](https://www.klavis.ai/home/mcp-servers).
+      </Step>
+      
+      <Step title="Choose Resend">
+        Select Resend from the list of available integrations.
+      </Step>
+      
+      <Step title="Authenticate">
+        Enter your Resend API key to connect.
+      </Step>
+      
+      <Step title="Use in your app">
+        Copy the MCP endpoint URL and add it to your MCP-supported client (Claude Desktop, Cursor, VS Code, etc.).
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Open Source">
+    <Steps>
+      <Step title="Clone repository (for developers to build from source)">
+        ```bash
+        git clone https://github.com/klavis-ai/klavis
+        cd klavis/mcp_servers/resend
+        ```
+      </Step>
+      
+      <Step title="Run with Docker">
+        ```bash
+        # Pull the Docker image
+        docker pull ghcr.io/klavis-ai/resend-mcp-server:latest
+        
+        # Run with API key support (requires Klavis API key)
+        docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
+          ghcr.io/klavis-ai/resend-mcp-server:latest
+        ```
+      </Step>
+      
+      <Step title="Configure MCP client">
+        ```json
+        {
+          "mcpServers": {
+            "resend": {
+              "url": "http://localhost:5000/mcp/"
+            }
+          }
+        }
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Available Tools
+
+<Tip>
+With our progressive discovery approach, Klavis System is capable of enabling all tools for Resend. Please use the [get_tools](https://www.klavis.ai/docs/api-reference/mcp-server/get-tools) API for more details. If you find any tool that is missing, please reach out to contact@klavis.ai.
+</Tip>
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="AI Platform Integrations"
+    icon="robot"
+    href="/ai-platform-integration/overview"
+  >
+    Integrate Klavis MCP Servers with leading AI platforms
+  </Card>
+  
+  <Card
+    title="Integrations"
+    icon="puzzle-piece"
+    href="/mcp-server/overview"
+  >
+    Explore available MCP servers
+  </Card>
+  
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/introduction"
+  >
+    REST endpoints and schemas
+  </Card>
+    <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+</CardGroup>

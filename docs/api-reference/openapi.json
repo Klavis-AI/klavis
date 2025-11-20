@@ -8,11 +8,11 @@
   "servers": [
     {
       "url": "https://api.klavis.ai",
-      "description": "Global (US) - Production server"
+      "description": "US Production server"
     },
     {
-      "url": "https://api.eu.klavis.ai/",
-      "description": "Europe - Production server"
+      "url": "https://api.eu.klavis.ai",
+      "description": "EU Production server"
     }
   ],
   "paths": {
@@ -5108,114 +5108,6 @@
         }
       }
     },
-    "/oauth/shopify/authorize": {
-      "get": {
-        "tags": [
-          "shopify-oauth"
-        ],
-        "summary": "Authorize Shopify",
-        "description": "Start Shopify OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- shop: Shopify shop domain (e.g., mystore.myshopify.com)\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
-        "operationId": "authorizeShopify",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the client instance requesting authorization",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the client instance requesting authorization"
-          },
-          {
-            "name": "shop",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Shopify shop domain (e.g., mystore.myshopify.com)",
-              "title": "Shop"
-            },
-            "description": "Shopify shop domain (e.g., mystore.myshopify.com)"
-          },
-          {
-            "name": "client_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Client ID for white labeling, if not provided will use default credentials",
-              "title": "Client Id"
-            },
-            "description": "Client ID for white labeling, if not provided will use default credentials"
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Optional OAuth scopes to request (comma-separated string)",
-              "title": "Scope"
-            },
-            "description": "Optional OAuth scopes to request (comma-separated string)"
-          },
-          {
-            "name": "redirect_url",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Optional URL to redirect to after authorization completes",
-              "title": "Redirect Url"
-            },
-            "description": "Optional URL to redirect to after authorization completes"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/onedrive/authorize": {
       "get": {
         "tags": [
@@ -5469,6 +5361,156 @@
         ],
         "summary": "Refresh Token",
         "operationId": "refresh_token_oauth_outlook_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AzureADOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/mscalendar/authorize": {
+      "get": {
+        "tags": [
+          "mscalendar-oauth"
+        ],
+        "summary": "Authorize MsCalendar",
+        "operationId": "authorizeMsCalendar",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/mscalendar/refresh_token": {
+      "post": {
+        "tags": [
+          "mscalendar-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_mscalendar_refresh_token_post",
         "parameters": [
           {
             "name": "instance_id",
@@ -5846,6 +5888,156 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/zoom/authorize": {
+      "get": {
+        "tags": [
+          "zoom-oauth"
+        ],
+        "summary": "Authorize Zoom",
+        "operationId": "authorizeZoom",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/zoom/refresh_token": {
+      "post": {
+        "tags": [
+          "zoom-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_zoom_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoomOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoomOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -6751,6 +6943,7 @@
           "Box",
           "Brave Search",
           "Cal.com",
+          "Canva",
           "ClickUp",
           "Close",
           "Cloudflare",
@@ -6796,12 +6989,14 @@
           "Notion",
           "OneDrive",
           "Openrouter",
-          "Outlook",
+          "Outlook Mail",
+          "Outlook Calendar",
           "PagerDuty",
           "Pipedrive",
           "Plai",
           "Postgres",
           "PostHog",
+          "Postman",
           "QuickBooks",
           "Resend",
           "Salesforce",
@@ -6855,11 +7050,11 @@
           "Notion",
           "Onedrive",
           "Outlook",
+          "MsCalendar",
           "PagerDuty",
           "Pipedrive",
           "QuickBooks",
           "Salesforce",
-          "Shopify",
           "Slack",
           "Stripe",
           "Supabase",
@@ -7458,6 +7653,65 @@
           "success"
         ],
         "title": "WhiteLabelingResponse"
+      },
+      "ZoomOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Additional error message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ZoomOAuthErrorResponse"
+      },
+      "ZoomOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ZoomOAuthSuccessResponse"
       }
     },
     "securitySchemes": {

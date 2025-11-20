@@ -1,0 +1,233 @@
+---
+title: "LangChain"
+description: "This tutorial demonstrates how to integrate LangChain's agent framework with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
+---
+## Prerequisites
+
+Before we begin, you'll need [OpenAI API key]((https://platform.openai.com/api-keys)) and [Klavis API key](https://www.klavis.ai/home/api-keys).
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install langchain-mcp-adapters langgraph langchain-openai klavis
+```
+
+```bash TypeScript
+npm install @langchain/mcp-adapters langchain @langchain/openai klavis open dotenv
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace
+```
+
+```typescript TypeScript
+import { config } from 'dotenv';
+
+// Load environment variables from .env file
+config();
+
+// Make sure you have a .env file with:
+// OPENAI_API_KEY=your_openai_api_key
+// KLAVIS_API_KEY=your_klavis_api_key
+```
+
+</CodeGroup>
+
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
+
+<CodeGroup>
+
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
+import webbrowser
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+    user_id="1234"
+)
+
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+```
+
+```typescript TypeScript
+import { KlavisClient, Klavis } from 'klavis';
+import open from 'open';
+import { createInterface } from 'readline/promises';
+
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const response = await klavisClient.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId: "1234"
+});
+
+// Handle OAuth authorization for each service
+if (response.oauthUrls) {
+    const rl = createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+        await open(oauthUrl);
+        await rl.question(`Press Enter after completing ${serverName} OAuth authorization...`);
+    }
+    
+    rl.close();
+}
+```
+
+</CodeGroup>
+
+<Note>
+*OAuth Authorization Required*: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create LangChain Agent with Strata MCP Server
+
+<CodeGroup>
+
+```python Python
+import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.prebuilt import create_react_agent
+from langchain_openai import ChatOpenAI
+
+# Initialize LLM
+llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+
+# Create MCP client with Strata server
+mcp_client = MultiServerMCPClient({
+    "strata": {
+        "transport": "streamable_http",
+        "url": response.strata_server_url
+    }
+})
+
+# Get tools from Strata MCP server
+tools = asyncio.run(mcp_client.get_tools())
+
+# Create agent with MCP-based tools
+agent = create_react_agent(
+    model=llm,
+    tools=tools,
+    prompt="You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
+)
+
+print("🤖 LangChain agent created successfully!")
+```
+
+```typescript TypeScript
+import { MultiServerMCPClient } from "@langchain/mcp-adapters";
+import { createAgent } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
+
+// Initialize LLM
+const llm = new ChatOpenAI({
+    modelName: "gpt-4o-mini",
+    apiKey: process.env.OPENAI_API_KEY
+});
+
+// Create MCP client with Strata server
+const mcpClient = new MultiServerMCPClient({
+    throwOnLoadError: true,
+    useStandardContentBlocks: true,
+    mcpServers: {
+        strata: {
+            url: response.strataServerUrl,
+            transport: "http"
+        }
+    }
+});
+
+// Get tools from Strata MCP server
+const tools = await mcpClient.getTools();
+
+// Create agent with MCP-based tools
+const agent = createAgent({
+    model: llm,
+    tools: tools,
+    systemPrompt: "You are a helpful assistant that uses MCP tools to interact with Gmail and Slack."
+});
+
+console.log("🤖 LangChain agent created successfully!");
+```
+
+</CodeGroup>
+
+### Step 3 - Run!
+
+<CodeGroup>
+
+```python Python
+response_message = asyncio.run(agent.ainvoke({
+    "messages": [{"role": "user", "content": "Check my latest 5 emails and summarize them in a Slack message to #general"}]
+}))
+
+print(f"\n🤖 Final Response: {response_message['messages'][-1].content}")
+```
+
+```typescript TypeScript
+const result = await agent.invoke({
+    messages: [{
+        role: 'user' as const,
+        content: 'Check my latest 5 emails and summarize them in a Slack message to #general'
+    }]
+});
+
+// Print only the final AI response content
+const lastMessage = result.messages[result.messages.length - 1];
+console.log('\n🤖 Final Response:', lastMessage.content);
+```
+
+</CodeGroup>
+
+<Tip>
+Check out the [full TypeScript code example](https://github.com/Klavis-AI/klavis/blob/main/examples/strata-cookbooks/typescript/build_with_langchain.ts) on GitHub for a complete working implementation.
+</Tip>
+
+<Check>
+Perfect! You've integrated LangChain with Klavis MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+
+## Useful Resources
+
+- [LangChain Documentation](https://python.langchain.com/docs/)
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
+- [LangChain MCP Adapters](https://pypi.org/project/langchain-mcp-adapters/)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+*Happy building* 🚀
