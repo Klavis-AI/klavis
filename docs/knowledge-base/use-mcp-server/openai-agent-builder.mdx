@@ -1,5 +1,5 @@
 ---
-title: "OpenAI's Agent Builder"
+title: "Agent Builder"
 description: "Connect Strata with OpenAI's Agent Builder in minutes and unlock powerful workflow automation"
 ---
 <img
@@ -123,26 +123,12 @@ description: "Connect Strata with OpenAI's Agent Builder in minutes and unlock p
 
   </Step>
 
-  <Step title="Add User Approval Node">
-    Drag and drop the **"User Approval"** node onto your workflow canvas. This node adds a human-in-the-loop checkpoint, pausing execution until a user approves or rejects the proposed action.
+  <Step title="Add the End Node">
+    Drag and drop the **"End"** node to stop the execution of your workflow diagram.
 
     <img
       src="/images/knowledge-base/openai-agent-builder/step10.png"
       alt="User Approval node"
-    />
-
-  </Step>
-
-  <Step title="Final Step">
-    To finalize your workflow:
-    1. Duplicate the **"Strata"** agent node
-    2. Connect the duplicated node to the **"Approve"** output of the User Approval node
-    3. Connect the **"End"** node to the **"Reject"** output
-    
-
-    <img
-      src="/images/knowledge-base/openai-agent-builder/step11.png"
-      alt="Final workflow configuration"
     />
 
     Above is the fnal workflow configuration consisting Strata as a agent.
@@ -154,13 +140,13 @@ description: "Connect Strata with OpenAI's Agent Builder in minutes and unlock p
 
     **Example 1:**
     <img
-      src="/images/knowledge-base/openai-agent-builder/step12.png"
+      src="/images/knowledge-base/openai-agent-builder/step11.png"
       alt="Run workflow"
     />
   
   **Example 2:**
     <img
-      src="/images/knowledge-base/openai-agent-builder/step13.png"
+      src="/images/knowledge-base/openai-agent-builder/step12.png"
       alt="Workflow execution"
     />
 
