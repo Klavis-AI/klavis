@@ -27,6 +27,10 @@ from tools import (
     list_calls,
     add_new_call,
     get_call_by_id,
+    list_all_users,
+    get_user_by_id,
+    get_user_settings_history,
+    list_users_by_filter,
 )
 
 logger = logging.getLogger(__name__)
@@ -352,6 +356,74 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                 },
                 annotations=types.ToolAnnotations(**{"category": "GONG_CALL"}),
             ),
+            types.Tool(
+                name="gong_list_all_users",
+                description="List all of the company's users. When accessed through a Bearer token authorization method, this endpoint requires the scope 'api:users:read'.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "cursor": {
+                            "type": "string",
+                            "description": "When paging is needed, provide the value supplied by the previous API call to bring the following page of records.",
+                        },
+                        "include_avatars": {
+                            "type": "boolean",
+                            "description": "Avatars are synthetic users representing Gong employees (CSMs and support providers) when they access your instance. If not provided, avatars will not be included in the results.",
+                            "default": False,
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "GONG_USERS", "readOnlyHint": True}),
+            ),
+            types.Tool(
+                name="gong_get_user_by_id",
+                description="Retrieve a specific user. When accessed through a Bearer token authorization method, this endpoint requires the scope 'api:users:read'.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id"],
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Gong's unique numeric identifier for the user (up to 20 digits).",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "GONG_USERS", "readOnlyHint": True}),
+            ),
+            types.Tool(
+                name="gong_get_user_settings_history",
+                description="Retrieve a specific user's settings history. When accessed through a Bearer token authorization method, this endpoint requires the scope 'api:users:read'.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id"],
+                    "properties": {
+                        "user_id": {
+                            "type": "string",
+                            "description": "Gong's unique numeric identifier for the user (up to 20 digits).",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "GONG_USERS", "readOnlyHint": True}),
+            ),
+            types.Tool(
+                name="gong_list_users_by_filter",
+                description="List multiple Users by filter criteria. When accessed through a Bearer token authorization method, this endpoint requires the scope 'api:users:read'.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["filter_data"],
+                    "properties": {
+                        "filter_data": {
+                            "type": "object",
+                            "description": "Filter parameters to apply when listing users.",
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "When paging is needed, provide the value supplied by the previous API call to bring the following page of records.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "GONG_USERS", "readOnlyHint": True}),
+            ),
         ]
 
     @app.call_tool()
@@ -486,6 +558,72 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             try:
                 # Pass the entire arguments dict as the call_data
                 result = await add_new_call(arguments)
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception("Error executing Gong tool %s: %s", name, e)
+                return [types.TextContent(type="text", text=f"Error: {e}")]
+
+        elif name == "gong_list_all_users":
+            cursor = arguments.get("cursor")
+            include_avatars = arguments.get("include_avatars", False)
+            
+            try:
+                result = await list_all_users(cursor, include_avatars)
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception("Error executing Gong tool %s: %s", name, e)
+                return [types.TextContent(type="text", text=f"Error: {e}")]
+
+        elif name == "gong_get_user_by_id":
+            user_id = arguments.get("user_id")
+            
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: 'user_id' is a required parameter.",
+                    )
+                ]
+            
+            try:
+                result = await get_user_by_id(user_id)
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception("Error executing Gong tool %s: %s", name, e)
+                return [types.TextContent(type="text", text=f"Error: {e}")]
+
+        elif name == "gong_get_user_settings_history":
+            user_id = arguments.get("user_id")
+            
+            if not user_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: 'user_id' is a required parameter.",
+                    )
+                ]
+            
+            try:
+                result = await get_user_settings_history(user_id)
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception("Error executing Gong tool %s: %s", name, e)
+                return [types.TextContent(type="text", text=f"Error: {e}")]
+
+        elif name == "gong_list_users_by_filter":
+            filter_data = arguments.get("filter_data")
+            cursor = arguments.get("cursor")
+            
+            if not filter_data:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: 'filter_data' is a required parameter.",
+                    )
+                ]
+            
+            try:
+                result = await list_users_by_filter(filter_data, cursor)
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.exception("Error executing Gong tool %s: %s", name, e)
