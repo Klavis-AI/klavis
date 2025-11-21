@@ -344,6 +344,7 @@
             "group": "Use MCP Server",
             "pages": [
               "knowledge-base/use-mcp-server/overview",
+              "knowledge-base/use-mcp-server/antigravity",
               "knowledge-base/use-mcp-server/chatgpt",
               "knowledge-base/use-mcp-server/claude_code",
               "knowledge-base/use-mcp-server/claude_web_desktop",
