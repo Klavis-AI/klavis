@@ -48,6 +48,7 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_google_access_token_
 - **Folder Operations**: Create and organize folders and directory structure
 - **Sharing**: Manage file permissions and sharing settings
 - **Search**: Search files and folders by name, content, and metadata
+- **Direct Document Retrieval**: Retrieve specific documents by their document ID
 - **Collaboration**: Handle real-time collaboration and comments
 
 ## 📚 Documentation & Support

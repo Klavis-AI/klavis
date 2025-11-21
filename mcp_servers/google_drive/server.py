@@ -758,6 +758,29 @@ def main(
                     **{"category": "GOOGLE_DRIVE_FILE"}
                 ),
             ),
+            types.Tool(
+                name="google_drive_get_document_by_id",
+                description="Retrieve a specific Google Docs document by its document ID. Use this when you know the exact document ID and want to retrieve its full content directly without searching.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The unique ID of the Google Docs document to retrieve.",
+                        },
+                        "return_format": {
+                            "type": "string",
+                            "enum": ["markdown", "html"],
+                            "description": "The format of the document to return.",
+                            "default": "markdown",
+                        },
+                    },
+                    "required": ["document_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DRIVE_DOCUMENT", "readOnlyHint": True}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -879,6 +902,48 @@ def main(
                     types.TextContent(
                         type="text",
                         text=json.dumps(result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_drive_get_document_by_id":
+            try:
+                document_id = arguments.get("document_id")
+                if not document_id:
+                    raise ValueError("The 'document_id' argument is required.")
+                
+                return_format = arguments.get("return_format", "markdown")
+                
+                # Get the document content
+                document = await get_document_content_by_id(document_id)
+                
+                # Convert document content to requested format
+                if return_format == DocumentFormat.MARKDOWN.value:
+                    document_body = convert_document_to_markdown(document)
+                elif return_format == DocumentFormat.HTML.value:
+                    document_body = convert_document_to_html(document)
+                else:
+                    # Default to markdown if format is not recognized
+                    document_body = convert_document_to_markdown(document)
+                
+                # Extract only the useful fields
+                filtered_document = {
+                    "title": document.get("title", ""),
+                    "body": document_body,
+                    "documentId": document.get("documentId", document_id)
+                }
+                
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(filtered_document, indent=2),
                     )
                 ]
             except Exception as e:
