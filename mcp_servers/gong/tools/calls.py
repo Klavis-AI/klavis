@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, Optional, List
+import httpx
 
 from .base import get, post
 
@@ -46,7 +47,25 @@ async def list_calls(
         
     logger.info("Listing calls from %s to %s (limit=%s, workspace_id=%s)", 
                 from_date, to_date, limit, workspace_id)
-    return await get("/v2/calls", params=params)
+    
+    try:
+        return await get("/v2/calls", params=params)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            # 404 means no calls found for the specified period, not an error
+            logger.info("No calls found for the specified period from %s to %s", from_date, to_date)
+            return {
+                "calls": [],
+                "records": {"totalRecords": 0, "currentPageSize": 0, "currentPageNumber": 1},
+                "message": "No calls found for the specified period"
+            }
+        elif e.response.status_code == 429:
+            # 429 means API request limit exceeded
+            logger.warning("Gong API request limit exceeded")
+            raise RuntimeError("Gong API request limit exceeded. Please try again later.") from e
+        else:
+            # Re-raise other HTTP errors
+            raise
 
 async def add_new_call(call_data: Dict[str, Any]) -> Dict[str, Any]:
     """Add a new call record to Gong.
