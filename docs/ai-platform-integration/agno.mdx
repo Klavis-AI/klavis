@@ -1,0 +1,223 @@
+---
+title: "Agno"
+description: "Learn how to build AI agents that integrate Agno with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
+---
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI API Key" icon="key" href="https://platform.openai.com/api-keys">
+    Get your API key from OpenAI Console
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install openai klavis agno
+```
+
+```bash TypeScript
+npm install @agno/sdk klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+os.environ["OPENAI_API_KEY"] = "YOUR_OPENAI_API_KEY"  # Replace with your actual OpenAI API key
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+```
+
+```typescript TypeScript
+import Anthropic from '@anthropic-ai/sdk';
+import { KlavisClient, Klavis } from 'klavis';
+
+// Set environment variables
+process.env.OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";  // Replace with your actual OpenAI API key
+process.env.KLAVIS_API_KEY = "YOUR_KLAVIS_API_KEY";  // Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
+
+<CodeGroup>
+
+```python Python
+import webbrowser
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
+
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+    user_id="1234"
+)
+
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+```
+
+```typescript TypeScript
+const klavisClient = new KlavisClient({ apiKey: process.env.KLAVIS_API_KEY });
+
+const response = await klavisClient.mcpServer.createStrataServer({
+    servers: [Klavis.McpServerName.Gmail, Klavis.McpServerName.Slack],
+    userId: "1234"
+});
+
+// Handle OAuth authorization for each services
+if (response.oauthUrls) {
+    for (const [serverName, oauthUrl] of Object.entries(response.oauthUrls)) {
+        window.open(oauthUrl);
+        // Wait for user to complete OAuth
+        await new Promise(resolve => {
+            const input = prompt(`Press OK after completing ${serverName} OAuth authorization...`);
+            resolve(input);
+        });
+    }
+}
+
+```
+
+</CodeGroup>
+
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create method to use MCP Server with Claude
+
+This method handles multiple rounds of tool calls until a final response is ready.
+
+<CodeGroup>
+
+```python Python
+import json
+import asyncio
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.mcp import MCPTools
+
+
+async def agno_with_mcp_server(mcp_server_url: str, user_query: str):
+    """Run an Agno agent with Klavis MCP server tools."""
+
+    async with MCPTools(transport="streamable-http", url=mcp_server_url) as mcp_tools:
+        agent = Agent(
+            model=OpenAIChat(
+                id="gpt-4o",
+                api_key=os.getenv("OPENAI_API_KEY")
+            ),
+            instructions="You are a helpful AI assistant.",
+            tools=[mcp_tools],
+            markdown=True,
+        )
+
+        response = await agent.arun(user_query)
+        return response.content
+```
+
+```typescript TypeScript
+import { Agent } from '@agno/sdk';
+import { OpenAI } from '@agno/sdk/models/openai';
+import { MCPTools } from '@agno/sdk/tools/mcp';
+
+
+async function agnoWithMcpServer(mcpServerUrl: string, userQuery: string): Promise<string> {
+    const mcpTools = new MCPTools({
+        transport: "streamable-http",
+        url: mcpServerUrl
+    });
+
+    const agent = new Agent({
+        model: new OpenAI({
+            id: "gpt-4o",
+            apiKey: process.env.OPENAI_API_KEY
+        }),
+        instructions: "You are a helpful AI assistant.",
+        tools: [mcpTools],
+        markdown: true
+    });
+
+    const response = await agent.run(userQuery);
+    return response.content;
+}
+```
+
+</CodeGroup>
+
+### Step 3 - Run!
+
+<CodeGroup>
+
+```python Python
+async def main():
+    result = await agno_with_mcp_server(
+        mcp_server_url=response.strata_server_url,
+        user_query="Check my latest 5 emails and summarize them in a Slack message to #general"
+    )
+    print(f"\nFinal Response: {result}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+```typescript TypeScript
+async function main() {
+    const result = await agnoWithMcpServer(
+        response.strataServerUrl,
+        "Check my latest 5 emails and summarize them in a Slack message to #general"
+    );
+    console.log(`\nFinal Response: ${result}`);
+}
+
+main().catch(console.error);
+```
+
+</CodeGroup>
+
+<Check>
+Perfect! You've integrated Agno with Klavis MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+
+## Useful Resources
+
+- [Anthropic API Documentation](https://docs.anthropic.com/)
+- [Agno Agent Reference](https://docs.agno.com/introduction)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+**Happy building!** 🚀
