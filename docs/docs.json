@@ -71,6 +71,7 @@
             "group": "AI Platform Integrations",
             "pages": [
               "ai-platform-integration/overview",
+              "ai-platform-integration/agno",
               "ai-platform-integration/claude",
               "ai-platform-integration/crewai",
               "ai-platform-integration/fireworks-ai",
