@@ -9,5 +9,6 @@
   "google_sheets": "google-sheets",
   "google_slides": "google-slides",
   "hacker_news": "hacker-news",
-  "report_generation": "report-generation"
+  "report_generation": "report-generation",
+  "yahoo_finance": "yahoo-finance"
 }
