@@ -1,0 +1,175 @@
+---
+title: "Mistral"
+description: "Learn how to build AI agents that integrate Mistral AI with Strata MCP servers to build AI agents that can interact with Gmail and Slack."
+---
+
+## Prerequisites
+
+Before we begin, you'll need:
+
+<CardGroup cols={2}>
+  <Card title="Mistral API Key" icon="key" href="https://console.mistral.ai/">
+    Get your API key from Mistral AI Console
+  </Card>
+  <Card title="Klavis AI API Key" icon="key" href="https://klavis.ai/">
+    Get your API key from Klavis AI
+  </Card>
+</CardGroup>
+
+## Installation
+
+First, install the required packages:
+
+<CodeGroup>
+
+```bash Python
+pip install mistralai klavis
+```
+
+</CodeGroup>
+
+## Setup Environment Variables
+
+<CodeGroup>
+
+```python Python
+import os
+
+os.environ["MISTRAL_API_KEY"] = "YOUR_MISTRAL_API_KEY"  # Replace with your actual Mistral API key
+os.environ["KLAVIS_API_KEY"] = "YOUR_KLAVIS_API_KEY"  # Replace with your actual Klavis API key
+```
+
+</CodeGroup>
+
+### Step 1 - Create Strata MCP Server with Gmail and Slack
+
+<CodeGroup>
+
+```python Python
+from klavis import Klavis
+from klavis.types import McpServerName, ToolFormat
+import webbrowser
+
+klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
+
+response = klavis_client.mcp_server.create_strata_server(
+    servers=[McpServerName.GMAIL, McpServerName.SLACK], 
+    user_id="1234"
+)
+
+# Handle OAuth authorization for each services
+if response.oauth_urls:
+    for server_name, oauth_url in response.oauth_urls.items():
+        webbrowser.open(oauth_url)
+        print(f"Or please open this URL to complete {server_name} OAuth authorization: {oauth_url}")
+```
+
+</CodeGroup>
+
+<Note>
+**OAuth Authorization Required**: The code above will open browser windows for each service. Click through the OAuth flow to authorize access to your accounts.
+</Note>
+
+### Step 2 - Create method to use MCP Server with Mistral AI
+
+This method handles multiple rounds of tool calls until a final response is ready, allowing the AI to chain tool executions for complex tasks.
+
+<CodeGroup>
+
+```python Python
+import json
+from mistralai import Mistral
+
+def mistral_with_mcp_server(mcp_server_url: str, user_query: str):
+    mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant. Use the available tools to answer the user's question."},
+        {"role": "user", "content": user_query}
+    ]
+
+    mcp_server_tools = klavis_client.mcp_server.list_tools(
+        server_url=mcp_server_url,
+        format=ToolFormat.OPENAI
+    )
+
+    max_iterations = 20
+    iteration = 0
+
+    while iteration < max_iterations:
+        iteration += 1
+
+        response = mistral_client.chat.complete(
+            model="mistral-small-latest",
+            messages=messages,
+            tools=mcp_server_tools.tools,
+            tool_choice="auto"
+        )
+
+        assistant_message = response.choices[0].message
+        messages.append(assistant_message)
+
+        if assistant_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = json.loads(tool_call.function.arguments)
+
+                print(f"🔧 Calling: {tool_name}, with args: {tool_args}")
+
+                result = klavis_client.mcp_server.call_tools(
+                    server_url=mcp_server_url,
+                    tool_name=tool_name,
+                    tool_args=tool_args
+                )
+
+                messages.append({
+                    "role": "tool",
+                    "name": tool_name,
+                    "content": str(result),
+                    "tool_call_id": tool_call.id
+                })
+        else:
+            return assistant_message.content
+
+    return "Max iterations reached without final response"
+```
+
+</CodeGroup>
+
+### Step 3 - Run!
+
+<CodeGroup>
+
+```python Python
+result = mistral_with_mcp_server(
+    mcp_server_url=response.strata_server_url,
+    user_query="Check my latest 3 emails and summarize them in a Slack message to #general"
+)
+
+print(f"\n🤖 Final Response: {result}")
+```
+
+</CodeGroup>
+
+<Check>
+Perfect! You've integrated Mistral AI with Klavis MCP servers.
+</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Integrations" icon="server" href="/mcp-server/github">
+    Explore available MCP servers
+  </Card>
+  <Card title="API Reference" icon="magnifying-glass" href="/api-reference/introduction">
+    REST endpoints and schemas
+  </Card>
+</CardGroup>
+
+
+## Useful Resources
+
+- [Mistral API Documentation](https://docs.mistral.ai/getting-started/quickstart)
+- [MCP Protocol Specification](https://modelcontextprotocol.io/)
+
+**Happy building with Mistral AI and Klavis** 🚀
