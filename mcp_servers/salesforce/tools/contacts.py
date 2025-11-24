@@ -5,9 +5,12 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, name_contains: Optional[str] = None, email_contains: Optional[str] = None, title_contains: Optional[str] = None) -> Dict[str, Any]:
-    """Get contacts with flexible filtering options."""
-    logger.info(f"Executing tool: get_contacts with account_id: {account_id}, limit: {limit}, name_contains: {name_contains}, email_contains: {email_contains}, title_contains: {title_contains}")
+async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, name_contains: Optional[str] = None, email_contains: Optional[str] = None, title_contains: Optional[str] = None, created_date_from: Optional[str] = None, created_date_to: Optional[str] = None) -> Dict[str, Any]:
+    """Get contacts with flexible filtering options including date ranges.
+    
+    Date parameters should be in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ).
+    """
+    logger.info(f"Executing tool: get_contacts with account_id: {account_id}, limit: {limit}, name_contains: {name_contains}, email_contains: {email_contains}, title_contains: {title_contains}, created_date_from: {created_date_from}, created_date_to: {created_date_to}")
     try:
         sf = get_salesforce_conn()
         
@@ -56,6 +59,16 @@ async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields
             ]
             title_like_conditions = " OR ".join([f"Title LIKE '%{variation}%'" for variation in set(title_variations)])
             where_clauses.append(f"({title_like_conditions})")
+        
+        # Date filters
+        if created_date_from:
+            # Append time if not present
+            date_from = created_date_from if 'T' in created_date_from else f"{created_date_from}T00:00:00Z"
+            where_clauses.append(f"CreatedDate >= {date_from}")
+        if created_date_to:
+            # Append time if not present
+            date_to = created_date_to if 'T' in created_date_to else f"{created_date_to}T23:59:59Z"
+            where_clauses.append(f"CreatedDate <= {date_to}")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Contact{where_clause} ORDER BY LastName, FirstName LIMIT {limit}"
