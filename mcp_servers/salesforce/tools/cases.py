@@ -5,9 +5,12 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_cases(account_id: Optional[str] = None, status: Optional[str] = None, priority: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, subject_contains: Optional[str] = None, case_type: Optional[str] = None) -> Dict[str, Any]:
-    """Get cases with flexible filtering options."""
-    logger.info(f"Executing tool: get_cases with account_id: {account_id}, status: {status}, priority: {priority}, limit: {limit}, subject_contains: {subject_contains}, case_type: {case_type}")
+async def get_cases(account_id: Optional[str] = None, status: Optional[str] = None, priority: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, subject_contains: Optional[str] = None, case_type: Optional[str] = None, created_date_from: Optional[str] = None, created_date_to: Optional[str] = None, closed_date_from: Optional[str] = None, closed_date_to: Optional[str] = None) -> Dict[str, Any]:
+    """Get cases with flexible filtering options including date ranges.
+    
+    Date parameters should be in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ).
+    """
+    logger.info(f"Executing tool: get_cases with account_id: {account_id}, status: {status}, priority: {priority}, limit: {limit}, subject_contains: {subject_contains}, case_type: {case_type}, created_date_from: {created_date_from}, created_date_to: {created_date_to}, closed_date_from: {closed_date_from}, closed_date_to: {closed_date_to}")
     try:
         sf = get_salesforce_conn()
         
@@ -39,6 +42,24 @@ async def get_cases(account_id: Optional[str] = None, status: Optional[str] = No
             where_clauses.append(f"({subject_like_conditions})")
         if case_type:
             where_clauses.append(f"Type = '{case_type}'")
+        
+        # Date filters
+        if created_date_from:
+            # Append time if not present
+            date_from = created_date_from if 'T' in created_date_from else f"{created_date_from}T00:00:00Z"
+            where_clauses.append(f"CreatedDate >= {date_from}")
+        if created_date_to:
+            # Append time if not present
+            date_to = created_date_to if 'T' in created_date_to else f"{created_date_to}T23:59:59Z"
+            where_clauses.append(f"CreatedDate <= {date_to}")
+        if closed_date_from:
+            # Append time if not present
+            date_from = closed_date_from if 'T' in closed_date_from else f"{closed_date_from}T00:00:00Z"
+            where_clauses.append(f"ClosedDate >= {date_from}")
+        if closed_date_to:
+            # Append time if not present
+            date_to = closed_date_to if 'T' in closed_date_to else f"{closed_date_to}T23:59:59Z"
+            where_clauses.append(f"ClosedDate <= {date_to}")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Case{where_clause} ORDER BY CreatedDate DESC LIMIT {limit}"

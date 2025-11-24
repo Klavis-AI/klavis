@@ -5,9 +5,12 @@ from .base import get_salesforce_conn, handle_salesforce_error, format_success_r
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def get_campaigns(status: Optional[str] = None, type_filter: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None) -> Dict[str, Any]:
-    """Get campaigns, optionally filtered by status or type."""
-    logger.info(f"Executing tool: get_campaigns with status: {status}, type: {type_filter}, limit: {limit}")
+async def get_campaigns(status: Optional[str] = None, type_filter: Optional[str] = None, limit: int = 50, fields: Optional[List[str]] = None, created_date_from: Optional[str] = None, created_date_to: Optional[str] = None, start_date_from: Optional[str] = None, start_date_to: Optional[str] = None, end_date_from: Optional[str] = None, end_date_to: Optional[str] = None) -> Dict[str, Any]:
+    """Get campaigns, optionally filtered by status, type, or date ranges.
+    
+    Date parameters should be in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ).
+    """
+    logger.info(f"Executing tool: get_campaigns with status: {status}, type: {type_filter}, limit: {limit}, created_date_from: {created_date_from}, created_date_to: {created_date_to}, start_date_from: {start_date_from}, start_date_to: {start_date_to}, end_date_from: {end_date_from}, end_date_to: {end_date_to}")
     try:
         sf = get_salesforce_conn()
         
@@ -27,6 +30,28 @@ async def get_campaigns(status: Optional[str] = None, type_filter: Optional[str]
             where_clauses.append(f"Status = '{status}'")
         if type_filter:
             where_clauses.append(f"Type = '{type_filter}'")
+        
+        # Date filters
+        if created_date_from:
+            # Append time if not present
+            date_from = created_date_from if 'T' in created_date_from else f"{created_date_from}T00:00:00Z"
+            where_clauses.append(f"CreatedDate >= {date_from}")
+        if created_date_to:
+            # Append time if not present
+            date_to = created_date_to if 'T' in created_date_to else f"{created_date_to}T23:59:59Z"
+            where_clauses.append(f"CreatedDate <= {date_to}")
+        if start_date_from:
+            # StartDate is a date field, not datetime - use just the date
+            where_clauses.append(f"StartDate >= {start_date_from}")
+        if start_date_to:
+            # StartDate is a date field, not datetime - use just the date
+            where_clauses.append(f"StartDate <= {start_date_to}")
+        if end_date_from:
+            # EndDate is a date field, not datetime - use just the date
+            where_clauses.append(f"EndDate >= {end_date_from}")
+        if end_date_to:
+            # EndDate is a date field, not datetime - use just the date
+            where_clauses.append(f"EndDate <= {end_date_to}")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Campaign{where_clause} ORDER BY StartDate DESC LIMIT {limit}"
