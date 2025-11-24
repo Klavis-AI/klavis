@@ -208,6 +208,10 @@ def main(
                             "type": "string",
                             "description": "The ID of the project to assign the issue to.",
                         },
+                        "due_date": {
+                            "type": "string",
+                            "description": "The due date for the issue (ISO 8601 date string, e.g., '2025-12-31').",
+                        },
                     },
                 },
                 annotations=types.ToolAnnotations(
@@ -248,6 +252,10 @@ def main(
                         "project_id": {
                             "type": "string",
                             "description": "The ID of the project to assign the issue to.",
+                        },
+                        "due_date": {
+                            "type": "string",
+                            "description": "The due date for the issue (ISO 8601 date string, e.g., '2025-12-31').",
                         },
                     },
                 },
@@ -548,9 +556,10 @@ def main(
             priority = arguments.get("priority")
             state_id = arguments.get("state_id")
             project_id = arguments.get("project_id")
+            due_date = arguments.get("due_date")
             
             try:
-                result = await create_issue(team_id, title, description, assignee_id, priority, state_id, project_id)
+                result = await create_issue(team_id, title, description, assignee_id, priority, state_id, project_id, due_date)
                 return [
                     types.TextContent(
                         type="text",
@@ -582,9 +591,10 @@ def main(
             priority = arguments.get("priority")
             state_id = arguments.get("state_id")
             project_id = arguments.get("project_id")
+            due_date = arguments.get("due_date")
             
             try:
-                result = await update_issue(issue_id, title, description, assignee_id, priority, state_id, project_id)
+                result = await update_issue(issue_id, title, description, assignee_id, priority, state_id, project_id, due_date)
                 return [
                     types.TextContent(
                         type="text",

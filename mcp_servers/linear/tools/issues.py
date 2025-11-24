@@ -36,6 +36,7 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
                   title
                   description
                   priority
+                  dueDate
                   state {
                     id
                     name
@@ -79,6 +80,7 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
                   title
                   description
                   priority
+                  dueDate
                   state {
                     id
                     name
@@ -130,6 +132,7 @@ async def get_issue_by_id(issue_id: str) -> Dict[str, Any]:
             description
             priority
             priorityLabel
+            dueDate
             state {
               id
               name
@@ -178,7 +181,7 @@ async def get_issue_by_id(issue_id: str) -> Dict[str, Any]:
         logger.exception(f"Error executing tool get_issue_by_id: {e}")
         raise e
 
-async def create_issue(team_id: str, title: str, description: str = None, assignee_id: str = None, priority: int = None, state_id: str = None, project_id: str = None) -> Dict[str, Any]:
+async def create_issue(team_id: str, title: str, description: str = None, assignee_id: str = None, priority: int = None, state_id: str = None, project_id: str = None, due_date: str = None) -> Dict[str, Any]:
     """Create a new issue."""
     logger.info(f"Executing tool: create_issue with title: {title}")
     try:
@@ -193,6 +196,7 @@ async def create_issue(team_id: str, title: str, description: str = None, assign
               description
               priority
               priorityLabel
+              dueDate
               state {
                 id
                 name
@@ -234,6 +238,8 @@ async def create_issue(team_id: str, title: str, description: str = None, assign
             input_data["stateId"] = state_id
         if project_id:
             input_data["projectId"] = project_id
+        if due_date:
+            input_data["dueDate"] = due_date
         
         variables = {"input": input_data}
         return await make_graphql_request(query, variables)
@@ -241,7 +247,7 @@ async def create_issue(team_id: str, title: str, description: str = None, assign
         logger.exception(f"Error executing tool create_issue: {e}")
         raise e
 
-async def update_issue(issue_id: str, title: str = None, description: str = None, assignee_id: str = None, priority: int = None, state_id: str = None, project_id: str = None) -> Dict[str, Any]:
+async def update_issue(issue_id: str, title: str = None, description: str = None, assignee_id: str = None, priority: int = None, state_id: str = None, project_id: str = None, due_date: str = None) -> Dict[str, Any]:
     """Update an existing issue."""
     logger.info(f"Executing tool: update_issue with issue_id: {issue_id}")
     try:
@@ -256,6 +262,7 @@ async def update_issue(issue_id: str, title: str = None, description: str = None
               description
               priority
               priorityLabel
+              dueDate
               state {
                 id
                 name
@@ -295,6 +302,8 @@ async def update_issue(issue_id: str, title: str = None, description: str = None
             input_data["stateId"] = state_id
         if project_id:
             input_data["projectId"] = project_id
+        if due_date:
+            input_data["dueDate"] = due_date
         
         variables = {"id": issue_id, "input": input_data}
         return await make_graphql_request(query, variables)
@@ -316,6 +325,7 @@ async def search_issues(query_text: str, team_id: str = None, limit: int = 20) -
                   title
                   description
                   priority
+                  dueDate
                   state {
                     id
                     name
@@ -359,6 +369,7 @@ async def search_issues(query_text: str, team_id: str = None, limit: int = 20) -
                   title
                   description
                   priority
+                  dueDate
                   state {
                     id
                     name
