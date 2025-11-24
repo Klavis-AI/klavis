@@ -10,11 +10,18 @@ async def get_opportunities(
     stage: Optional[str] = None, 
     name_contains: Optional[str] = None,
     account_name_contains: Optional[str] = None,
+    created_date_from: Optional[str] = None,
+    created_date_to: Optional[str] = None,
+    close_date_from: Optional[str] = None,
+    close_date_to: Optional[str] = None,
     limit: int = 50, 
     fields: Optional[List[str]] = None
 ) -> Dict[str, Any]:
-    """Get opportunities, optionally filtered by account, stage, name, or account name."""
-    logger.info(f"Executing tool: get_opportunities with account_id: {account_id}, stage: {stage}, name_contains: {name_contains}, account_name_contains: {account_name_contains}, limit: {limit}")
+    """Get opportunities, optionally filtered by account, stage, name, account name, or date ranges.
+    
+    Date parameters should be in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ).
+    """
+    logger.info(f"Executing tool: get_opportunities with account_id: {account_id}, stage: {stage}, name_contains: {name_contains}, account_name_contains: {account_name_contains}, created_date_from: {created_date_from}, created_date_to: {created_date_to}, close_date_from: {close_date_from}, close_date_to: {close_date_to}, limit: {limit}")
     try:
         sf = get_salesforce_conn()
         
@@ -55,6 +62,22 @@ async def get_opportunities(
             # Create OR conditions for different case variations
             account_like_conditions = " OR ".join([f"Account.Name LIKE '%{variation}%'" for variation in set(account_variations)])
             where_clauses.append(f"({account_like_conditions})")
+        
+        # Date filters
+        if created_date_from:
+            # Append time if not present
+            date_from = created_date_from if 'T' in created_date_from else f"{created_date_from}T00:00:00Z"
+            where_clauses.append(f"CreatedDate >= {date_from}")
+        if created_date_to:
+            # Append time if not present
+            date_to = created_date_to if 'T' in created_date_to else f"{created_date_to}T23:59:59Z"
+            where_clauses.append(f"CreatedDate <= {date_to}")
+        if close_date_from:
+            # CloseDate is a date field, not datetime - use just the date
+            where_clauses.append(f"CloseDate >= {close_date_from}")
+        if close_date_to:
+            # CloseDate is a date field, not datetime - use just the date
+            where_clauses.append(f"CloseDate <= {close_date_to}")
         
         where_clause = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         query = f"SELECT {field_list} FROM Opportunity{where_clause} ORDER BY CloseDate ASC LIMIT {limit}"

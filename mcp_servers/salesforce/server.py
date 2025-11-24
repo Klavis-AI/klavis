@@ -93,7 +93,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Account Tools
             types.Tool(
                 name="salesforce_get_accounts",
-                description="Get accounts with flexible filtering options including name search, industry, and type.",
+                description="Get accounts with flexible filtering options including name search, industry, type, and date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -101,7 +101,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
                         "name_contains": {"type": "string", "description": "Filter accounts by name containing this text (case-insensitive)"},
                         "industry": {"type": "string", "description": "Filter accounts by industry"},
-                        "account_type": {"type": "string", "description": "Filter accounts by type"}
+                        "account_type": {"type": "string", "description": "Filter accounts by type"},
+                        "created_date_from": {"type": "string", "description": "Filter accounts created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter accounts created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT", "readOnlyHint": True})
@@ -147,7 +149,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Contact Tools
             types.Tool(
                 name="salesforce_get_contacts",
-                description="Get contacts with flexible filtering options including name, email, and title search.",
+                description="Get contacts with flexible filtering options including name, email, title search, and date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -156,7 +158,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
                         "name_contains": {"type": "string", "description": "Filter contacts by first or last name containing this text (case-insensitive)"},
                         "email_contains": {"type": "string", "description": "Filter contacts by email containing this text (case-insensitive)"},
-                        "title_contains": {"type": "string", "description": "Filter contacts by title containing this text (case-insensitive)"}
+                        "title_contains": {"type": "string", "description": "Filter contacts by title containing this text (case-insensitive)"},
+                        "created_date_from": {"type": "string", "description": "Filter contacts created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter contacts created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CONTACT", "readOnlyHint": True})
@@ -202,7 +206,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Opportunity Tools  
             types.Tool(
                 name="salesforce_get_opportunities",
-                description="Get opportunities, optionally filtered by account, stage, name, or account name.",
+                description="Get opportunities, optionally filtered by account, stage, name, account name, or date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -210,6 +214,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "stage": {"type": "string", "description": "Filter opportunities by stage"},
                         "name_contains": {"type": "string", "description": "Filter opportunities by name containing this text"},
                         "account_name_contains": {"type": "string", "description": "Filter opportunities by account name containing this text"},
+                        "created_date_from": {"type": "string", "description": "Filter opportunities created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter opportunities created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "close_date_from": {"type": "string", "description": "Filter opportunities with close date on or after this date (ISO format: YYYY-MM-DD)"},
+                        "close_date_to": {"type": "string", "description": "Filter opportunities with close date on or before this date (ISO format: YYYY-MM-DD)"},
                         "limit": {"type": "integer", "description": "Maximum number of opportunities to return (default: 50)", "default": 50},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
                     }
@@ -263,7 +271,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Lead Tools
             types.Tool(
                 name="salesforce_get_leads",
-                description="Get leads with flexible filtering options including name, company, email, and industry search.",
+                description="Get leads with flexible filtering options including name, company, email, industry search, and date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -273,7 +281,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "name_contains": {"type": "string", "description": "Filter leads by first or last name containing this text (case-insensitive)"},
                         "company_contains": {"type": "string", "description": "Filter leads by company name containing this text (case-insensitive)"},
                         "email_contains": {"type": "string", "description": "Filter leads by email containing this text (case-insensitive)"},
-                        "industry": {"type": "string", "description": "Filter leads by industry"}
+                        "industry": {"type": "string", "description": "Filter leads by industry"},
+                        "created_date_from": {"type": "string", "description": "Filter leads created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter leads created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_LEAD", "readOnlyHint": True})
@@ -332,7 +342,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Case Tools
             types.Tool(
                 name="salesforce_get_cases",
-                description="Get cases with flexible filtering options including subject search, account, status, priority, and type.",
+                description="Get cases with flexible filtering options including subject search, account, status, priority, type, and date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -342,7 +352,11 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                         "limit": {"type": "integer", "description": "Maximum number of cases to return (default: 50)", "default": 50},
                         "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
                         "subject_contains": {"type": "string", "description": "Filter cases by subject containing this text (case-insensitive)"},
-                        "case_type": {"type": "string", "description": "Filter cases by type"}
+                        "case_type": {"type": "string", "description": "Filter cases by type"},
+                        "created_date_from": {"type": "string", "description": "Filter cases created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter cases created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "closed_date_from": {"type": "string", "description": "Filter cases closed on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "closed_date_to": {"type": "string", "description": "Filter cases closed on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CASE", "readOnlyHint": True})
@@ -388,14 +402,20 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             # Campaign Tools
             types.Tool(
                 name="salesforce_get_campaigns",
-                description="Get campaigns, optionally filtered by status or type.",
+                description="Get campaigns, optionally filtered by status, type, or date ranges.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "status": {"type": "string", "description": "Filter campaigns by status"},
                         "type_filter": {"type": "string", "description": "Filter campaigns by type"},
                         "limit": {"type": "integer", "description": "Maximum number of campaigns to return (default: 50)", "default": 50},
-                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"}
+                        "fields": {"type": "array", "items": {"type": "string"}, "description": "Specific fields to retrieve"},
+                        "created_date_from": {"type": "string", "description": "Filter campaigns created on or after this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "created_date_to": {"type": "string", "description": "Filter campaigns created on or before this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)"},
+                        "start_date_from": {"type": "string", "description": "Filter campaigns starting on or after this date (ISO format: YYYY-MM-DD)"},
+                        "start_date_to": {"type": "string", "description": "Filter campaigns starting on or before this date (ISO format: YYYY-MM-DD)"},
+                        "end_date_from": {"type": "string", "description": "Filter campaigns ending on or after this date (ISO format: YYYY-MM-DD)"},
+                        "end_date_to": {"type": "string", "description": "Filter campaigns ending on or before this date (ISO format: YYYY-MM-DD)"}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_CAMPAIGN", "readOnlyHint": True})
@@ -517,7 +537,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     fields=arguments.get("fields"),
                     name_contains=arguments.get("name_contains"),
                     industry=arguments.get("industry"),
-                    account_type=arguments.get("account_type")
+                    account_type=arguments.get("account_type"),
+                    created_date_from=arguments.get("created_date_from"),
+                    created_date_to=arguments.get("created_date_to")
                 )
             elif name == "salesforce_create_account":
                 result = await create_account(arguments["account_data"])
@@ -534,7 +556,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     fields=arguments.get("fields"),
                     name_contains=arguments.get("name_contains"),
                     email_contains=arguments.get("email_contains"),
-                    title_contains=arguments.get("title_contains")
+                    title_contains=arguments.get("title_contains"),
+                    created_date_from=arguments.get("created_date_from"),
+                    created_date_to=arguments.get("created_date_to")
                 )
             elif name == "salesforce_create_contact":
                 result = await create_contact(arguments["contact_data"])
@@ -550,6 +574,10 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     arguments.get("stage"), 
                     arguments.get("name_contains"),
                     arguments.get("account_name_contains"),
+                    arguments.get("created_date_from"),
+                    arguments.get("created_date_to"),
+                    arguments.get("close_date_from"),
+                    arguments.get("close_date_to"),
                     arguments.get("limit", 50), 
                     arguments.get("fields")
                 )
@@ -578,7 +606,9 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     name_contains=arguments.get("name_contains"),
                     company_contains=arguments.get("company_contains"),
                     email_contains=arguments.get("email_contains"),
-                    industry=arguments.get("industry")
+                    industry=arguments.get("industry"),
+                    created_date_from=arguments.get("created_date_from"),
+                    created_date_to=arguments.get("created_date_to")
                 )
             elif name == "salesforce_create_lead":
                 result = await create_lead(arguments["lead_data"])
@@ -598,7 +628,11 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     limit=arguments.get("limit", 50), 
                     fields=arguments.get("fields"),
                     subject_contains=arguments.get("subject_contains"),
-                    case_type=arguments.get("case_type")
+                    case_type=arguments.get("case_type"),
+                    created_date_from=arguments.get("created_date_from"),
+                    created_date_to=arguments.get("created_date_to"),
+                    closed_date_from=arguments.get("closed_date_from"),
+                    closed_date_to=arguments.get("closed_date_to")
                 )
             elif name == "salesforce_create_case":
                 result = await create_case(arguments["case_data"])
@@ -609,7 +643,18 @@ def main(port: int, log_level: str, json_response: bool) -> int:
             
             # Campaign tools
             elif name == "salesforce_get_campaigns":
-                result = await get_campaigns(arguments.get("status"), arguments.get("type_filter"), arguments.get("limit", 50), arguments.get("fields"))
+                result = await get_campaigns(
+                    arguments.get("status"), 
+                    arguments.get("type_filter"), 
+                    arguments.get("limit", 50), 
+                    arguments.get("fields"),
+                    arguments.get("created_date_from"),
+                    arguments.get("created_date_to"),
+                    arguments.get("start_date_from"),
+                    arguments.get("start_date_to"),
+                    arguments.get("end_date_from"),
+                    arguments.get("end_date_to")
+                )
             elif name == "salesforce_create_campaign":
                 result = await create_campaign(arguments["campaign_data"])
             elif name == "salesforce_update_campaign":
