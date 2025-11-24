@@ -73,6 +73,7 @@
               "ai-platform-integration/overview",
               "ai-platform-integration/agno",
               "ai-platform-integration/claude",
+              "ai-platform-integration/cohere",
               "ai-platform-integration/crewai",
               "ai-platform-integration/fireworks-ai",
               "ai-platform-integration/gemini",
@@ -80,6 +81,7 @@
               "ai-platform-integration/langchain",
               "ai-platform-integration/llamaindex",
               "ai-platform-integration/mastra",
+              "ai-platform-integration/mistral",
               "ai-platform-integration/openai",
               "ai-platform-integration/together-ai"
             ]
