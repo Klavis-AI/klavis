@@ -1,0 +1,7 @@
+mcp==1.12.3
+httpx
+openpyxl
+click
+starlette
+uvicorn[standard]
+python-dotenv
