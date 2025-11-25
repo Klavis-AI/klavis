@@ -30,6 +30,8 @@ from tools import activities_emails as email_tools
 from tools import activities_calls as call_tools
 from tools import activities_sms as sms_tools
 from tools import activities_notes as note_tools
+from tools import activities_meeting as meeting_tools
+from tools import activities_whatsapp as whatsapp_tools
 from tools.base import auth_token_context
 
 # Configure logging
@@ -785,7 +787,7 @@ def main(
             # Activity Management Tools
             types.Tool(
                 name="close_list_activities",
-                description="List all activities (emails, calls, SMS, notes, meetings) from Close CRM",
+                description="List all activities (emails, calls, SMS, notes, meetings, WhatsApp messages) from Close CRM",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -1412,6 +1414,473 @@ def main(
                 ),
             ),
             
+            # Meeting Activity Management Tools
+            types.Tool(
+                name="close_list_meeting_activities",
+                description="List meeting activities from Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return (1-200, default 100)",
+                            "minimum": 1,
+                            "maximum": 200,
+                        },
+                        "skip": {
+                            "type": "integer",
+                            "description": "Number of results to skip for pagination",
+                            "minimum": 0,
+                        },
+                        "lead_id": {
+                            "type": "string",
+                            "description": "Filter by lead ID",
+                        },
+                        "contact_id": {
+                            "type": "string",
+                            "description": "Filter by contact ID",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Filter by user ID",
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Filter by status",
+                            "enum": ["upcoming", "in-progress", "completed", "canceled", "declined-by-lead", "declined-by-org"],
+                        },
+                        "date_created__gte": {
+                            "type": "string",
+                            "description": "Filter by creation date (greater than or equal, ISO 8601 format)",
+                        },
+                        "date_created__lte": {
+                            "type": "string",
+                            "description": "Filter by creation date (less than or equal, ISO 8601 format)",
+                        },
+                        "starts_at__gte": {
+                            "type": "string",
+                            "description": "Filter by start date (greater than or equal, ISO 8601 format)",
+                        },
+                        "starts_at__lte": {
+                            "type": "string",
+                            "description": "Filter by start date (less than or equal, ISO 8601 format)",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="close_get_meeting_activity",
+                description="Get a specific meeting activity by ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "meeting_id": {
+                            "type": "string",
+                            "description": "The ID of the meeting to retrieve",
+                        },
+                    },
+                    "required": ["meeting_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="close_create_meeting_activity",
+                description="Create a new meeting activity in Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "lead_id": {
+                            "type": "string",
+                            "description": "The ID of the lead this meeting belongs to",
+                        },
+                        "starts_at": {
+                            "type": "string",
+                            "description": "Start time of the meeting (ISO 8601 format)",
+                        },
+                        "ends_at": {
+                            "type": "string",
+                            "description": "End time of the meeting (ISO 8601 format)",
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Meeting status",
+                            "enum": ["upcoming", "in-progress", "completed", "canceled", "declined-by-lead", "declined-by-org"],
+                        },
+                        "attendees": {
+                            "type": "array",
+                            "description": "List of attendee objects with contact_id and status (noreply, yes, no, maybe)",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "contact_id": {
+                                        "type": "string",
+                                        "description": "The ID of the contact",
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "Attendee's response status",
+                                        "enum": ["noreply", "yes", "no", "maybe"],
+                                    },
+                                },
+                                "required": ["contact_id"],
+                            },
+                        },
+                        "user_note_html": {
+                            "type": "string",
+                            "description": "Notes related to the meeting in HTML format",
+                        },
+                        "outcome_id": {
+                            "type": "string",
+                            "description": "The ID of a user-defined outcome for the meeting",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "The ID of the user who created the meeting",
+                        },
+                        "date_created": {
+                            "type": "string",
+                            "description": "Date the meeting was created (ISO 8601 format)",
+                        },
+                    },
+                    "required": ["lead_id", "starts_at", "ends_at"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING"}
+                ),
+            ),
+            types.Tool(
+                name="close_update_meeting_activity",
+                description="Update an existing meeting activity",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "meeting_id": {
+                            "type": "string",
+                            "description": "The ID of the meeting to update",
+                        },
+                        "starts_at": {
+                            "type": "string",
+                            "description": "Start time of the meeting (ISO 8601 format)",
+                        },
+                        "ends_at": {
+                            "type": "string",
+                            "description": "End time of the meeting (ISO 8601 format)",
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "Meeting status",
+                            "enum": ["upcoming", "in-progress", "completed", "canceled", "declined-by-lead", "declined-by-org"],
+                        },
+                        "attendees": {
+                            "type": "array",
+                            "description": "List of attendee objects with contact_id and status",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "contact_id": {
+                                        "type": "string",
+                                        "description": "The ID of the contact",
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "Attendee's response status",
+                                        "enum": ["noreply", "yes", "no", "maybe"],
+                                    },
+                                },
+                                "required": ["contact_id"],
+                            },
+                        },
+                        "user_note_html": {
+                            "type": "string",
+                            "description": "Notes related to the meeting in HTML format",
+                        },
+                        "outcome_id": {
+                            "type": "string",
+                            "description": "The ID of a user-defined outcome for the meeting",
+                        },
+                    },
+                    "required": ["meeting_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING"}
+                ),
+            ),
+            types.Tool(
+                name="close_delete_meeting_activity",
+                description="Delete a meeting activity",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "meeting_id": {
+                            "type": "string",
+                            "description": "The ID of the meeting to delete",
+                        },
+                    },
+                    "required": ["meeting_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING"}
+                ),
+            ),
+            types.Tool(
+                name="close_search_meeting_activities",
+                description="Search for meeting activities in Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Search query string",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return (1-200, default 25)",
+                            "minimum": 1,
+                            "maximum": 200,
+                        },
+                    },
+                    "required": ["query"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_MEETING", "readOnlyHint": True}
+                ),
+            ),
+            
+            # WhatsApp Message Activity Management Tools
+            types.Tool(
+                name="close_list_whatsapp_activities",
+                description="List WhatsApp message activities from Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return (1-200, default 100)",
+                            "minimum": 1,
+                            "maximum": 200,
+                        },
+                        "skip": {
+                            "type": "integer",
+                            "description": "Number of results to skip for pagination",
+                            "minimum": 0,
+                        },
+                        "lead_id": {
+                            "type": "string",
+                            "description": "Filter by lead ID",
+                        },
+                        "contact_id": {
+                            "type": "string",
+                            "description": "Filter by contact ID",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Filter by user ID",
+                        },
+                        "direction": {
+                            "type": "string",
+                            "description": "Filter by direction",
+                            "enum": ["incoming", "outgoing"],
+                        },
+                        "date_created__gte": {
+                            "type": "string",
+                            "description": "Filter by creation date (greater than or equal, ISO 8601 format)",
+                        },
+                        "date_created__lte": {
+                            "type": "string",
+                            "description": "Filter by creation date (less than or equal, ISO 8601 format)",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="close_get_whatsapp_activity",
+                description="Get a specific WhatsApp message activity by ID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "whatsapp_id": {
+                            "type": "string",
+                            "description": "The ID of the WhatsApp message to retrieve",
+                        },
+                    },
+                    "required": ["whatsapp_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="close_create_whatsapp_activity",
+                description="Create a new WhatsApp message activity in Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "lead_id": {
+                            "type": "string",
+                            "description": "The ID of the lead this WhatsApp message belongs to",
+                        },
+                        "external_whatsapp_message_id": {
+                            "type": "string",
+                            "description": "The ID of the message within WhatsApp",
+                        },
+                        "message_markdown": {
+                            "type": "string",
+                            "description": "The body of the message in WhatsApp Markdown format",
+                        },
+                        "direction": {
+                            "type": "string",
+                            "description": "Message direction",
+                            "enum": ["incoming", "outgoing"],
+                        },
+                        "attachments": {
+                            "type": "array",
+                            "description": "List of attachment objects (url must begin with https://app.close.com/go/file/)",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "description": "URL of the attachment (must begin with https://app.close.com/go/file/)",
+                                    },
+                                    "filename": {
+                                        "type": "string",
+                                        "description": "Name of the file",
+                                    },
+                                    "content_type": {
+                                        "type": "string",
+                                        "description": "MIME type of the file",
+                                    },
+                                },
+                                "required": ["url"],
+                            },
+                        },
+                        "integration_link": {
+                            "type": "string",
+                            "description": "A URL linking back to the message in the external system",
+                        },
+                        "response_to_id": {
+                            "type": "string",
+                            "description": "The Close activity ID of another WhatsApp message this message is replying to",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "The ID of the user who sent/received the message",
+                        },
+                        "contact_id": {
+                            "type": "string",
+                            "description": "The ID of the contact",
+                        },
+                        "date_created": {
+                            "type": "string",
+                            "description": "Date the message was created (ISO 8601 format)",
+                        },
+                        "send_to_inbox": {
+                            "type": "boolean",
+                            "description": "Create a corresponding Inbox Notification for incoming messages",
+                        },
+                    },
+                    "required": ["lead_id", "external_whatsapp_message_id", "message_markdown"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP"}
+                ),
+            ),
+            types.Tool(
+                name="close_update_whatsapp_activity",
+                description="Update an existing WhatsApp message activity",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "whatsapp_id": {
+                            "type": "string",
+                            "description": "The ID of the WhatsApp message to update",
+                        },
+                        "message_markdown": {
+                            "type": "string",
+                            "description": "The body of the message in WhatsApp Markdown format",
+                        },
+                        "attachments": {
+                            "type": "array",
+                            "description": "List of attachment objects",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "description": "URL of the attachment (must begin with https://app.close.com/go/file/)",
+                                    },
+                                    "filename": {
+                                        "type": "string",
+                                        "description": "Name of the file",
+                                    },
+                                    "content_type": {
+                                        "type": "string",
+                                        "description": "MIME type of the file",
+                                    },
+                                },
+                                "required": ["url"],
+                            },
+                        },
+                        "integration_link": {
+                            "type": "string",
+                            "description": "A URL linking back to the message in the external system",
+                        },
+                    },
+                    "required": ["whatsapp_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP"}
+                ),
+            ),
+            types.Tool(
+                name="close_delete_whatsapp_activity",
+                description="Delete a WhatsApp message activity",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "whatsapp_id": {
+                            "type": "string",
+                            "description": "The ID of the WhatsApp message to delete",
+                        },
+                    },
+                    "required": ["whatsapp_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP"}
+                ),
+            ),
+            types.Tool(
+                name="close_search_whatsapp_activities",
+                description="Search for WhatsApp message activities in Close CRM",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Search query string",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of results to return (1-200, default 25)",
+                            "minimum": 1,
+                            "maximum": 200,
+                        },
+                    },
+                    "required": ["query"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "CLOSE_ACTIVITY_WHATSAPP", "readOnlyHint": True}
+                ),
+            ),
+            
             # Note Activity Management Tools
             types.Tool(
                 name="close_list_note_activities",
@@ -1654,6 +2123,32 @@ def main(
                 result = await sms_tools.send_sms(**arguments)
             elif name == "close_search_sms_activities":
                 result = await sms_tools.search_sms(**arguments)
+            
+            elif name == "close_list_meeting_activities":
+                result = await meeting_tools.list_meetings(**arguments)
+            elif name == "close_get_meeting_activity":
+                result = await meeting_tools.get_meeting(**arguments)
+            elif name == "close_create_meeting_activity":
+                result = await meeting_tools.create_meeting(**arguments)
+            elif name == "close_update_meeting_activity":
+                result = await meeting_tools.update_meeting(**arguments)
+            elif name == "close_delete_meeting_activity":
+                result = await meeting_tools.delete_meeting(**arguments)
+            elif name == "close_search_meeting_activities":
+                result = await meeting_tools.search_meetings(**arguments)
+            
+            elif name == "close_list_whatsapp_activities":
+                result = await whatsapp_tools.list_whatsapp(**arguments)
+            elif name == "close_get_whatsapp_activity":
+                result = await whatsapp_tools.get_whatsapp(**arguments)
+            elif name == "close_create_whatsapp_activity":
+                result = await whatsapp_tools.create_whatsapp(**arguments)
+            elif name == "close_update_whatsapp_activity":
+                result = await whatsapp_tools.update_whatsapp(**arguments)
+            elif name == "close_delete_whatsapp_activity":
+                result = await whatsapp_tools.delete_whatsapp(**arguments)
+            elif name == "close_search_whatsapp_activities":
+                result = await whatsapp_tools.search_whatsapp(**arguments)
             
             elif name == "close_list_note_activities":
                 result = await note_tools.list_notes(**arguments)
