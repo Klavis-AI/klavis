@@ -44,11 +44,28 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_close_api_key_here"}
 
 ## 🛠️ Available Tools
 
-- **Lead Management**: Create, update, and manage sales leads
-- **Opportunity Tracking**: Handle sales opportunities and pipeline
-- **Activity Management**: Track calls, emails, and sales activities
+### Core CRM Features
+- **Lead Management**: Create, read, update, delete, search, and list leads
 - **Contact Operations**: Manage contact information and relationships
-- **Sales Analytics**: Access sales metrics and performance data
+- **Opportunity Tracking**: Handle sales opportunities and pipeline management
+- **Task Management**: Create and track tasks with assignments and due dates
+- **User Management**: Access user information and team details
+
+### Activity & Communication Features
+- **Activities**: List and search all activity types (emails, calls, SMS, notes)
+- **Email Management**: Send, receive, search, and track email communications
+- **Call Tracking**: Log and manage inbound/outbound calls with recordings
+- **SMS Messaging**: Send and receive SMS messages with contacts
+- **Notes**: Create, update, and manage notes on leads and activities
+
+### Available Operations
+Each resource supports comprehensive CRUD operations:
+- **Create**: Add new records (leads, contacts, emails, calls, SMS, notes, etc.)
+- **Read**: Retrieve individual records by ID
+- **Update**: Modify existing records
+- **Delete**: Remove records
+- **List**: Fetch multiple records with pagination
+- **Search**: Find records using query strings
 
 ## 📚 Documentation & Support
 
