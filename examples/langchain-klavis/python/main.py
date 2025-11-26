@@ -49,14 +49,29 @@ async def main():
         ),
     )
 
-    my_email = "golden-kpop@example.com" # TODO: Replace with your email
-    # Step 5: Invoke the agent
-    result = await agent.ainvoke({
-        "messages": [{"role": "user", "content": f"summarize this video - https://youtu.be/yebNIHKAC4A?si=1Rz_ZsiVRz0YfOR7 and send the summary to my email {my_email}"}],
-    })
+    my_email = "test@example.com" # TODO: Replace with your email
+    user_message = f"summarize this video - https://www.youtube.com/watch?v=OX89LkTvNKQ and send the summary to my email {my_email}"
     
-    # Print only the final AI response content
-    print(result["messages"][-1].content)
+    # Step 5: Invoke the agent with streaming for detailed logging
+    print(f"\n{'='*80}\n👤 USER: {user_message}\n{'='*80}\n")
+    
+    async for event in agent.astream_events({"messages": [{"role": "user", "content": user_message}]}, version="v2"):
+        kind = event.get("event")
+        data = event.get("data", {})
+        
+        if kind == "on_chat_model_stream":
+            if hasattr(chunk := data.get("chunk", {}), "content") and chunk.content:
+                print(chunk.content, end="", flush=True)
+        
+        elif kind == "on_chat_model_end":
+            if hasattr(msg := data.get("output", {}), "tool_calls") and msg.tool_calls:
+                print(f"\n\n🔧 TOOL CALLS: {[f'{tc["name"]}({tc["args"]})' for tc in msg.tool_calls]}\n")
+        
+        elif kind == "on_tool_end":
+            output = str(data.get("output", ""))
+            print(f"✅ {event.get('name')}: {output[:200]}{'...' if len(output) > 200 else ''}\n")
+    
+    print(f"{'='*80}\n✓ COMPLETE\n{'='*80}")
 
 
 if __name__ == "__main__":
