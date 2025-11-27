@@ -51,63 +51,45 @@ class AttioClient {
         return response.json();
     }
 
-    async searchPeople(filters: any = {}, limit: number = 25): Promise<any> {
-        if (Object.keys(filters).length === 0) {
-            return this.makeRequest('/objects/people/records/query', {
-                method: 'POST',
-                body: JSON.stringify({
-                    limit
-                }),
-            });
+    async searchPeople(filters: any = {}, limit: number = 25, offset: number = 0): Promise<any> {
+        const body: any = { limit, offset };
+        if (Object.keys(filters).length > 0) {
+            body.filter = filters;
         }
         return this.makeRequest('/objects/people/records/query', {
             method: 'POST',
-            body: JSON.stringify({
-                filter: filters,
-                limit
-            }),
+            body: JSON.stringify(body),
         });
     }
 
-    async searchCompanies(filters: any = {}, limit: number = 25): Promise<any> {
-        if (Object.keys(filters).length === 0) {
-            return this.makeRequest('/objects/companies/records/query', {
-                method: 'POST',
-                body: JSON.stringify({
-                    limit
-                }),
-            });
+    async searchCompanies(filters: any = {}, limit: number = 25, offset: number = 0): Promise<any> {
+        const body: any = { limit, offset };
+        if (Object.keys(filters).length > 0) {
+            body.filter = filters;
         }
         return this.makeRequest('/objects/companies/records/query', {
             method: 'POST',
-            body: JSON.stringify({
-                filter: filters,
-                limit
-            }),
+            body: JSON.stringify(body),
         });
     }
 
-    async searchDeals(filters: any = {}, limit: number = 25): Promise<any> {
-        if (Object.keys(filters).length === 0) {
-            return this.makeRequest('/objects/deals/records/query', {
-                method: 'POST',
-                body: JSON.stringify({
-                    limit
-                }),
-            });
+    async searchDeals(filters: any = {}, limit: number = 25, offset: number = 0): Promise<any> {
+        const body: any = { limit, offset };
+        if (Object.keys(filters).length > 0) {
+            body.filter = filters;
         }
         return this.makeRequest('/objects/deals/records/query', {
             method: 'POST',
-            body: JSON.stringify({
-                filter: filters,
-                limit
-            }),
+            body: JSON.stringify(body),
         });
     }
 
-    async searchNotes(query: string, limit: number = 50): Promise<any> {
-        // First, get all notes (up to the limit)
-        const allNotes = await this.makeRequest(`/notes?limit=${limit}`, {
+    async searchNotes(query: string, limit: number = 50, offset: number = 0): Promise<any> {
+        // Build query parameters with limit/offset pagination
+        const url = `/notes?limit=${limit}&offset=${offset}`;
+
+        // Get notes with limit/offset pagination
+        const allNotes = await this.makeRequest(url, {
             method: 'GET',
         });
 
@@ -328,6 +310,11 @@ const SEARCH_PEOPLE_TOOL: Tool = {
                 description: 'Maximum number of results to return (default: 25, max: 50)',
                 default: 25,
             },
+            offset: {
+                type: 'number',
+                description: 'Number of results to skip for pagination (default: 0)',
+                default: 0,
+            },
         },
     },
     annotations: {
@@ -358,6 +345,11 @@ const SEARCH_COMPANIES_TOOL: Tool = {
                 type: 'number',
                 description: 'Maximum number of results to return (default: 25, max: 50)',
                 default: 25,
+            },
+            offset: {
+                type: 'number',
+                description: 'Number of results to skip for pagination (default: 0)',
+                default: 0,
             },
         },
     },
@@ -398,6 +390,11 @@ const SEARCH_DEALS_TOOL: Tool = {
                 description: 'Maximum number of results to return (default: 25, max: 50)',
                 default: 25,
             },
+            offset: {
+                type: 'number',
+                description: 'Number of results to skip for pagination (default: 0)',
+                default: 0,
+            },
         },
     },
     annotations: {
@@ -420,6 +417,11 @@ const SEARCH_NOTES_TOOL: Tool = {
                 type: 'number',
                 description: 'Maximum number of notes to fetch and search through (default: 50, max: 50)',
                 default: 50,
+            },
+            offset: {
+                type: 'number',
+                description: 'Number of results to skip for pagination (default: 0)',
+                default: 0,
             },
         },
     },
@@ -730,7 +732,11 @@ const getAttioMcpServer = () => {
                         }
                     }
 
-                    const result = await client.searchPeople(filters, (args?.limit as number) || 25);
+                    const result = await client.searchPeople(
+                        filters,
+                        (args?.limit as number) || 25,
+                        (args?.offset as number) || 0
+                    );
 
                     return {
                         content: [
@@ -780,7 +786,11 @@ const getAttioMcpServer = () => {
                         }
                     }
 
-                    const result = await client.searchCompanies(filters, (args?.limit as number) || 25);
+                    const result = await client.searchCompanies(
+                        filters,
+                        (args?.limit as number) || 25,
+                        (args?.offset as number) || 0
+                    );
 
                     return {
                         content: [
@@ -816,7 +826,11 @@ const getAttioMcpServer = () => {
                         }
                     }
 
-                    const result = await client.searchDeals(filters, (args?.limit as number) || 25);
+                    const result = await client.searchDeals(
+                        filters,
+                        (args?.limit as number) || 25,
+                        (args?.offset as number) || 0
+                    );
 
                     return {
                         content: [
@@ -830,7 +844,11 @@ const getAttioMcpServer = () => {
 
                 case 'attio_search_notes': {
                     const client = getAttioClient();
-                    const result = await client.searchNotes((args as any)?.query || '', (args?.limit as number) || 50);
+                    const result = await client.searchNotes(
+                        (args as any)?.query || '',
+                        (args?.limit as number) || 50,
+                        (args?.offset as number) || 0
+                    );
 
                     return {
                         content: [
