@@ -84,9 +84,17 @@ class AttioClient {
         });
     }
 
-    async searchNotes(query: string, limit: number = 50, offset: number = 0): Promise<any> {
+    async searchNotes(query: string, limit: number = 50, offset: number = 0, parent_object?: string, parent_record_id?: string): Promise<any> {
         // Build query parameters with limit/offset pagination
-        const url = `/notes?limit=${limit}&offset=${offset}`;
+        let url = `/notes?limit=${limit}&offset=${offset}`;
+        
+        // Add optional parent_object and parent_record_id filters
+        if (parent_object) {
+            url += `&parent_object=${encodeURIComponent(parent_object)}`;
+        }
+        if (parent_record_id) {
+            url += `&parent_record_id=${encodeURIComponent(parent_record_id)}`;
+        }
 
         // Get notes with limit/offset pagination
         const allNotes = await this.makeRequest(url, {
@@ -405,7 +413,7 @@ const SEARCH_DEALS_TOOL: Tool = {
 
 const SEARCH_NOTES_TOOL: Tool = {
     name: 'attio_search_notes',
-    description: 'Search for notes across all objects in your Attio workspace by fetching all notes and filtering by content.',
+    description: 'Search for notes across all objects in your Attio workspace by fetching all notes and filtering by content. Can optionally filter by parent object and parent record.',
     inputSchema: {
         type: 'object',
         properties: {
@@ -422,6 +430,14 @@ const SEARCH_NOTES_TOOL: Tool = {
                 type: 'number',
                 description: 'Number of results to skip for pagination (default: 0)',
                 default: 0,
+            },
+            parent_object: {
+                type: 'string',
+                description: 'The slug or ID of the parent object the notes belong to (e.g., "people", "companies", "deals")',
+            },
+            parent_record_id: {
+                type: 'string',
+                description: 'The ID of the parent record the notes belong to (UUID format)',
             },
         },
     },
@@ -847,7 +863,9 @@ const getAttioMcpServer = () => {
                     const result = await client.searchNotes(
                         (args as any)?.query || '',
                         (args?.limit as number) || 50,
-                        (args?.offset as number) || 0
+                        (args?.offset as number) || 0,
+                        (args as any)?.parent_object,
+                        (args as any)?.parent_record_id
                     );
 
                     return {
