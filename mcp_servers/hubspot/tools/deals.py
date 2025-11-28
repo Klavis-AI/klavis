@@ -106,6 +106,33 @@ async def hubspot_create_deal(properties: str):
     try:
         logger.info("Creating a new deal...")
         props = json.loads(properties)
+        
+        # Common property name mistakes mapping
+        property_corrections = {
+            'deal_name': 'dealname',
+            'name': 'dealname',
+            'deal_amount': 'amount',
+            'value': 'amount',
+            'deal_stage': 'dealstage',
+            'stage': 'dealstage',
+            'close_date': 'closedate',
+            'deal_type': 'dealtype',
+        }
+        
+        # Check for common mistakes and provide helpful suggestions
+        suggestions = []
+        for prop_key in props.keys():
+            if prop_key in property_corrections:
+                suggestions.append(
+                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
+                )
+        
+        if suggestions:
+            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
+            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='deals' to see all valid property names."
+            logger.warning(error_msg)
+            return f"Error: {error_msg}"
+        
         data = SimplePublicObjectInputForCreate(properties=props)
         result = client.crm.deals.basic_api.create(simple_public_object_input_for_create=data)
         logger.info("Deal created successfully.")
