@@ -90,9 +90,37 @@ async def hubspot_create_contact(properties: str) -> str:
         raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
-        properties = json.loads(properties)
-        logger.info(f"Creating contact with properties: {properties}")
-        data = SimplePublicObjectInputForCreate(properties=properties)
+        properties_dict = json.loads(properties)
+        
+        # Common property name mistakes mapping
+        property_corrections = {
+            'first_name': 'firstname',
+            'last_name': 'lastname',
+            'full_name': 'firstname',  # Needs to be split
+            'mobile': 'mobilephone',
+            'mobile_phone': 'mobilephone',
+            'job_title': 'jobtitle',
+            'postal_code': 'zip',
+            'postalcode': 'zip',
+            'zipcode': 'zip',
+        }
+        
+        # Check for common mistakes and provide helpful suggestions
+        suggestions = []
+        for prop_key in properties_dict.keys():
+            if prop_key in property_corrections:
+                suggestions.append(
+                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
+                )
+        
+        if suggestions:
+            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
+            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='contacts' to see all valid property names."
+            logger.warning(error_msg)
+            return f"Error: {error_msg}"
+        
+        logger.info(f"Creating contact with properties: {properties_dict}")
+        data = SimplePublicObjectInputForCreate(properties=properties_dict)
         client.crm.contacts.basic_api.create(simple_public_object_input_for_create=data)
         logger.info("Successfully created contact")
         return "Created"

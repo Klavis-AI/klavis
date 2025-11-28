@@ -22,8 +22,38 @@ async def hubspot_create_companies(properties: str) -> str:
     
     try:
         logger.info("Creating company...")
-        properties = json.loads(properties)
-        data = SimplePublicObjectInputForCreate(properties=properties)
+        properties_dict = json.loads(properties)
+        
+        # Common property name mistakes mapping
+        property_corrections = {
+            'postal_code': 'zip',
+            'postalcode': 'zip',
+            'zipcode': 'zip',
+            'num_of_employees': 'numberofemployees',
+            'num_employees': 'numberofemployees',
+            'employee_count': 'numberofemployees',
+            'employees': 'numberofemployees',
+            'company_name': 'name',
+            'annual_revenue': 'annualrevenue',
+            'web_site': 'website',
+            'url': 'website',
+        }
+        
+        # Check for common mistakes and provide helpful suggestions
+        suggestions = []
+        for prop_key in properties_dict.keys():
+            if prop_key in property_corrections:
+                suggestions.append(
+                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
+                )
+        
+        if suggestions:
+            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
+            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='companies' to see all valid property names."
+            logger.warning(error_msg)
+            return f"Error: {error_msg}"
+        
+        data = SimplePublicObjectInputForCreate(properties=properties_dict)
         client.crm.companies.basic_api.create(simple_public_object_input_for_create=data)
         logger.info("Company created successfully.")
         return "Created"
