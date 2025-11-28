@@ -418,13 +418,49 @@ def main(
             ),
             types.Tool(
                 name="hubspot_create_contact",
-                description="Create a new contact using a JSON string of properties.",
+                description="""Create a new contact in HubSpot using a JSON string of properties.
+
+IMPORTANT: Use HubSpot's exact property names (case-sensitive).
+
+Common Standard Contact Properties:
+- email (string): Email address [REQUIRED for most use cases]
+- firstname (string): First name
+- lastname (string): Last name
+- phone (string): Phone number
+- mobilephone (string): Mobile phone
+- company (string): Company name
+- jobtitle (string): Job title
+- website (string): Website URL
+- address (string): Street address
+- city (string): City
+- state (string): State/Region
+- zip (string): Postal/ZIP code (NOT "postal_code")
+- country (string): Country
+- lifecyclestage (string): Lifecycle stage (e.g., "lead", "customer", "opportunity")
+- hs_lead_status (string): Lead status
+- hubspot_owner_id (string): Owner ID
+
+Example:
+{
+  "email": "john.doe@example.com",
+  "firstname": "John",
+  "lastname": "Doe",
+  "phone": "+1-555-123-4567",
+  "company": "Acme Corp",
+  "jobtitle": "VP of Sales",
+  "city": "San Francisco",
+  "state": "CA",
+  "zip": "94105",
+  "lifecyclestage": "lead"
+}
+
+For custom properties or the complete list, call 'hubspot_list_properties' with object_type='contacts' first.""",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "properties": {
                             "type": "string",
-                            "description": "JSON string containing contact fields and values."
+                            "description": "JSON string containing contact property names and values. Use exact HubSpot property names."
                         }
                     },
                     "required": ["properties"]
@@ -456,13 +492,53 @@ def main(
             ),
             types.Tool(
                 name="hubspot_create_companies",
-                description="Create a new company using a JSON string of fields.",
+                description="""Create a new company in HubSpot using a JSON string of properties.
+
+IMPORTANT: Use HubSpot's exact property names (case-sensitive). 
+
+Common Standard Company Properties:
+- name (string): Company name [REQUIRED for most use cases]
+- domain (string): Company domain (e.g., "example.com")
+- website (string): Website URL
+- phone (string): Phone number
+- address (string): Street address
+- address2 (string): Additional address line
+- city (string): City
+- state (string): State/Region
+- zip (string): Postal/ZIP code (NOT "postal_code")
+- country (string): Country
+- numberofemployees (string): Number of employees (NOT "num_of_employees")
+- industry (string): Industry
+- type (string): Company type (e.g., "PROSPECT", "PARTNER", "RESELLER")
+- description (string): Company description
+- annualrevenue (string): Annual revenue
+- timezone (string): Timezone
+- hs_lead_status (string): Lead status
+- lifecyclestage (string): Lifecycle stage
+
+Example:
+{
+  "name": "Acme Corporation",
+  "domain": "acme.com",
+  "website": "https://www.acme.com",
+  "phone": "+1-555-123-4567",
+  "address": "123 Main St",
+  "city": "San Francisco",
+  "state": "CA",
+  "zip": "94105",
+  "country": "United States",
+  "numberofemployees": "250",
+  "industry": "Technology",
+  "annualrevenue": "5000000"
+}
+
+For custom properties or the complete list of available properties, call 'hubspot_list_properties' with object_type='companies' first.""",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "properties": {
                             "type": "string",
-                            "description": "JSON string containing company fields and values."
+                            "description": "JSON string containing company property names and values. Use exact HubSpot property names (e.g., 'zip' not 'postal_code', 'numberofemployees' not 'num_of_employees')."
                         }
                     },
                     "required": ["properties"]
@@ -581,13 +657,38 @@ def main(
             ),
             types.Tool(
                 name="hubspot_create_deal",
-                description="Create a new deal using a JSON string of properties.",
+                description="""Create a new deal in HubSpot using a JSON string of properties.
+
+IMPORTANT: Use HubSpot's exact property names (case-sensitive).
+
+Common Standard Deal Properties:
+- dealname (string): Deal name [REQUIRED for most use cases]
+- amount (string): Deal amount/value (numeric as string)
+- dealstage (string): Deal stage ID (get valid IDs using hubspot_list_properties)
+- pipeline (string): Pipeline ID
+- closedate (string): Expected close date (Unix timestamp in milliseconds as string, or ISO 8601)
+- hubspot_owner_id (string): Owner ID
+- dealtype (string): Deal type (e.g., "newbusiness", "existingbusiness")
+- description (string): Deal description
+
+Example:
+{
+  "dealname": "Acme Corp - Annual Contract",
+  "amount": "50000",
+  "pipeline": "default",
+  "dealstage": "appointmentscheduled",
+  "closedate": "1735689600000",
+  "hubspot_owner_id": "12345",
+  "dealtype": "newbusiness"
+}
+
+For custom properties or the complete list, call 'hubspot_list_properties' with object_type='deals' first.""",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "properties": {
                             "type": "string",
-                            "description": "JSON string with fields to create the deal."
+                            "description": "JSON string containing deal property names and values. Use exact HubSpot property names."
                         }
                     },
                     "required": ["properties"]
