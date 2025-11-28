@@ -115,7 +115,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "type": "object",
                     "required": ["account_data"],
                     "properties": {
-                        "account_data": {"type": "object", "description": "Account data including Name (required) and other fields"}
+                        "account_data": {"type": "object", "description": "Account data dictionary. Common fields include: Name (required, string), AccountNumber (string), Type (string: Customer/Partner/Competitor/Other), Industry (string), AnnualRevenue (number), Phone (string), Fax (string), Website (string), BillingStreet (string), BillingCity (string), BillingState (string - use full name like 'California' not 'CA' if State/Country Picklists are enabled), BillingPostalCode (string), BillingCountry (string - use full name like 'United States' not 'USA' if State/Country Picklists are enabled), ShippingStreet (string), ShippingCity (string), ShippingState (string - use full name if picklists enabled), ShippingPostalCode (string), ShippingCountry (string - use full name if picklists enabled), Description (string), NumberOfEmployees (integer), Ownership (string: Public/Private), ParentId (string, ID of parent account), Sic (string, Standard Industrial Classification code). NOTE: If State/Country Picklists are enabled in your Salesforce org, use full names (e.g., 'California' instead of 'CA', 'United States' instead of 'USA')."}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
@@ -128,7 +128,7 @@ def main(port: int, log_level: str, json_response: bool) -> int:
                     "required": ["account_id", "account_data"],
                     "properties": {
                         "account_id": {"type": "string", "description": "The ID of the account to update"},
-                        "account_data": {"type": "object", "description": "Updated account data"}
+                        "account_data": {"type": "object", "description": "Updated account data dictionary. Common fields include: Name (string), AccountNumber (string), Type (string: Customer/Partner/Competitor/Other), Industry (string), AnnualRevenue (number), Phone (string), Fax (string), Website (string), BillingStreet (string), BillingCity (string), BillingState (string - use full name like 'California' not 'CA' if State/Country Picklists are enabled), BillingPostalCode (string), BillingCountry (string - use full name like 'United States' not 'USA' if State/Country Picklists are enabled), ShippingStreet (string), ShippingCity (string), ShippingState (string - use full name if picklists enabled), ShippingPostalCode (string), ShippingCountry (string - use full name if picklists enabled), Description (string), NumberOfEmployees (integer), Ownership (string: Public/Private), ParentId (string, ID of parent account), Sic (string, Standard Industrial Classification code). NOTE: If State/Country Picklists are enabled in your Salesforce org, use full names (e.g., 'California' instead of 'CA', 'United States' instead of 'USA')."}
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "SALESFORCE_ACCOUNT"})
