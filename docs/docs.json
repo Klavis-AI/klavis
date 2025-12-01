@@ -269,6 +269,91 @@
             ]
           },
           {
+            "group": "Sandbox",
+            "pages": [
+              "api-reference/sandbox/create",
+              "api-reference/sandbox/list",
+              "api-reference/sandbox/get",
+              "api-reference/sandbox/delete",
+              "api-reference/sandbox/reset",
+              {
+                "group": "Individual MCP Servers",
+                "pages": [
+                  {
+                    "group": "Google Calendar",
+                    "pages": [
+                      "api-reference/sandbox/google_calendar/initialize-google-calendar",
+                      "api-reference/sandbox/google_calendar/dump-google-calendar"
+                    ]
+                  },
+                  {
+                    "group": "Gmail",
+                    "pages": [
+                      "api-reference/sandbox/gmail/initialize-gmail",
+                      "api-reference/sandbox/gmail/dump-gmail"
+                    ]
+                  },
+                  {
+                    "group": "Salesforce",
+                    "pages": [
+                      "api-reference/sandbox/salesforce/initialize-salesforce",
+                      "api-reference/sandbox/salesforce/dump-salesforce"
+                    ]
+                  },
+                  {
+                    "group": "OneDrive",
+                    "pages": [
+                      "api-reference/sandbox/onedrive/initialize-onedrive",
+                      "api-reference/sandbox/onedrive/dump-onedrive"
+                    ]
+                  },
+                  {
+                    "group": "Teams",
+                    "pages": [
+                      "api-reference/sandbox/teams/initialize-teams",
+                      "api-reference/sandbox/teams/dump-teams"
+                    ]
+                  },
+                  {
+                    "group": "Outlook Mail",
+                    "pages": [
+                      "api-reference/sandbox/outlook_mail/initialize-outlook-mail",
+                      "api-reference/sandbox/outlook_mail/dump-outlook-mail"
+                    ]
+                  },
+                  {
+                    "group": "Outlook Calendar",
+                    "pages": [
+                      "api-reference/sandbox/outlook_calendar/initialize-outlook-calendar",
+                      "api-reference/sandbox/outlook_calendar/dump-outlook-calendar"
+                    ]
+                  },
+                  {
+                    "group": "Close",
+                    "pages": [
+                      "api-reference/sandbox/close/initialize-close",
+                      "api-reference/sandbox/close/dump-close"
+                    ]
+                  },
+                  {
+                    "group": "Resend",
+                    "pages": [
+                      "api-reference/sandbox/resend/initialize-resend",
+                      "api-reference/sandbox/resend/dump-resend"
+                    ]
+                  },
+                  {
+                    "group": "Asana",
+                    "pages": [
+                      "api-reference/sandbox/asana/initialize-asana",
+                      "api-reference/sandbox/asana/dump-asana"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
             "group": "Self Hosted MCP Server",
             "pages": [
               "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
