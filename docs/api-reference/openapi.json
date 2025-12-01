@@ -6459,7 +6459,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/GoogleCalendarData-Input"
               }
             }
           }
@@ -6569,7 +6569,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/GmailData"
               }
             }
           }
@@ -6679,7 +6679,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/SalesforceData"
               }
             }
           }
@@ -6789,7 +6789,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/OneDriveData-Input"
               }
             }
           }
@@ -6899,7 +6899,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/MsTeamsData-Input"
               }
             }
           }
@@ -7009,7 +7009,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/OutlookMailData"
               }
             }
           }
@@ -7119,7 +7119,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/OutlookCalendarData"
               }
             }
           }
@@ -7229,7 +7229,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/CloseData"
               }
             }
           }
@@ -7339,7 +7339,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/ResendData"
               }
             }
           }
@@ -7449,7 +7449,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InitializeRequest"
+                "$ref": "#/components/schemas/AsanaData"
               }
             }
           }
@@ -8848,7 +8848,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/GoogleCalendarData",
+            "$ref": "#/components/schemas/GoogleCalendarData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -8879,7 +8879,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/MsTeamsData",
+            "$ref": "#/components/schemas/MsTeamsData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -8910,7 +8910,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/OneDriveData",
+            "$ref": "#/components/schemas/OneDriveData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -9620,7 +9620,29 @@
         "title": "GoogleCalendarAttendee",
         "description": "Google Calendar event attendee"
       },
-      "GoogleCalendarData": {
+      "GoogleCalendarData-Input": {
+        "properties": {
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events",
+            "description": "List of Google Calendar events"
+          }
+        },
+        "type": "object",
+        "title": "GoogleCalendarData",
+        "description": "Complete Google Calendar sandbox data structure"
+      },
+      "GoogleCalendarData-Output": {
         "properties": {
           "events": {
             "anyOf": [
@@ -9798,21 +9820,6 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
-      },
-      "InitializeRequest": {
-        "properties": {
-          "data": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Data"
-          }
-        },
-        "type": "object",
-        "required": [
-          "data"
-        ],
-        "title": "InitializeRequest",
-        "description": "Wrapper for initialization data"
       },
       "InitializeSandboxResponse": {
         "properties": {
@@ -10093,7 +10100,44 @@
         ],
         "title": "McpServerName"
       },
-      "MsTeamsData": {
+      "MsTeamsData-Input": {
+        "properties": {
+          "channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TeamsChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "List of team channels"
+          },
+          "chats": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TeamsChat"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chats",
+            "description": "List of one-on-one chats"
+          }
+        },
+        "type": "object",
+        "title": "MsTeamsData",
+        "description": "Complete Microsoft Teams sandbox data structure"
+      },
+      "MsTeamsData-Output": {
         "properties": {
           "channels": {
             "anyOf": [
@@ -10180,10 +10224,24 @@
         ],
         "title": "OAuthServerName"
       },
-      "OneDriveData": {
+      "OneDriveData-Input": {
         "properties": {
           "root": {
-            "$ref": "#/components/schemas/OneDriveFolder",
+            "$ref": "#/components/schemas/OneDriveFolder-Input",
+            "description": "Root folder containing all subfolders and files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "root"
+        ],
+        "title": "OneDriveData",
+        "description": "Complete OneDrive sandbox data structure"
+      },
+      "OneDriveData-Output": {
+        "properties": {
+          "root": {
+            "$ref": "#/components/schemas/OneDriveFolder-Output",
             "description": "Root folder containing all subfolders and files"
           }
         },
@@ -10233,7 +10291,7 @@
         "title": "OneDriveFile",
         "description": "OneDrive File object"
       },
-      "OneDriveFolder": {
+      "OneDriveFolder-Input": {
         "properties": {
           "id": {
             "anyOf": [
@@ -10256,7 +10314,64 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/OneDriveFolder"
+                  "$ref": "#/components/schemas/OneDriveFolder-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "List of subfolders"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OneDriveFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "List of files in the folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "OneDriveFolder",
+        "description": "OneDrive Folder object"
+      },
+      "OneDriveFolder-Output": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Folder ID (read-only, set by OneDrive)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OneDriveFolder-Output"
                 },
                 "type": "array"
               },
