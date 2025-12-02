@@ -28,7 +28,7 @@
         "@modelcontextprotocol/sdk": "^1.12.1",
         "dotenv": "^16.4.7",
         "p-queue": "^8.0.1",
-        "express": "^5.1.0"
+        "express": "^5.2.0"
     },
     "devDependencies": {
         "@jest/globals": "^29.7.0",
