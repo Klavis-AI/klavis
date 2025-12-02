@@ -36,8 +36,8 @@ from enums import (
     convert_sort_by_to_enum, convert_sort_order_to_enum, convert_update_mode_to_enum
 )
 
-# Import context for auth token
-from client import auth_token_context
+# Import context for auth token and data
+from client import auth_token_context, auth_data_context
 
 
 # Configure logging
@@ -47,34 +47,41 @@ load_dotenv()
 
 CONFLUENCE_MCP_SERVER_PORT = int(os.getenv("CONFLUENCE_MCP_SERVER_PORT", "5000"))
 
-def extract_access_token(request_or_scope) -> str:
-    """Extract access token from x-auth-data header."""
-    auth_data = os.getenv("AUTH_DATA")
+def extract_auth_data(request_or_scope) -> Dict[str, Any]:
+    """Extract auth data from x-auth-data header.
     
-    if not auth_data:
+    Returns:
+        Dict containing 'access_token' and optionally 'auth_data' (full auth object)
+    """
+    auth_data_str = os.getenv("AUTH_DATA")
+    
+    if not auth_data_str:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
         if hasattr(request_or_scope, 'headers'):
             # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+            auth_data_str = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data_str:
+                auth_data_str = base64.b64decode(auth_data_str).decode('utf-8')
         elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
             # StreamableHTTP scope object
             headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+            auth_data_str = headers.get(b'x-auth-data')
+            if auth_data_str:
+                auth_data_str = base64.b64decode(auth_data_str).decode('utf-8')
     
-    if not auth_data:
-        return ""
+    if not auth_data_str:
+        return {"access_token": ""}
     
     try:
-        # Parse the JSON auth data to extract access_token
-        auth_json = json.loads(auth_data)
-        return auth_json.get('access_token', '')
+        # Parse the JSON auth data
+        auth_data = json.loads(auth_data_str)
+        return {
+            "access_token": auth_data.get('access_token', ''),
+            "auth_data": auth_data
+        }
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
-        return ""
+        return {"access_token": ""}
 
 @click.command()
 @click.option("--port", default=CONFLUENCE_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -569,11 +576,14 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract auth token from headers
-        auth_token = extract_access_token(request)
+        # Extract auth data from headers
+        auth_info = extract_auth_data(request)
+        auth_token = auth_info.get("access_token", "")
+        auth_data = auth_info.get("auth_data", {})
         
-        # Set the auth token in context for this request
+        # Set the auth token and data in context for this request
         token = auth_token_context.set(auth_token)
+        data_token = auth_data_context.set(auth_data)
         
         try:
             async with sse.connect_sse(
@@ -584,6 +594,7 @@ def main(
                 )
         finally:
             auth_token_context.reset(token)
+            auth_data_context.reset(data_token)
         
         return Response()
 
@@ -600,16 +611,20 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract auth token from headers
-        auth_token = extract_access_token(scope)
+        # Extract auth data from headers
+        auth_info = extract_auth_data(scope)
+        auth_token = auth_info.get("access_token", "")
+        auth_data = auth_info.get("auth_data", {})
         
-        # Set the auth token in context for this request
+        # Set the auth token and data in context for this request
         token = auth_token_context.set(auth_token)
+        data_token = auth_data_context.set(auth_data)
         
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
             auth_token_context.reset(token)
+            auth_data_context.reset(data_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:

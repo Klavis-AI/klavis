@@ -175,26 +175,35 @@ interface JiraAddCommentArgs {
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
   authToken: string;
+  authData?: any;
 }>();
 
-function extractAccessToken(req: Request): string {
-  let authData = process.env.AUTH_DATA;
+function extractAuthData(req: Request): { authToken: string; authData?: any } {
+  let authDataStr = process.env.AUTH_DATA;
   
-  if (!authData && req.headers['x-auth-data']) {
+  if (!authDataStr && req.headers['x-auth-data']) {
     try {
-      authData = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
+      authDataStr = Buffer.from(req.headers['x-auth-data'] as string, 'base64').toString('utf8');
     } catch (error) {
       console.error('Error parsing x-auth-data JSON:', error);
     }
   }
 
-  if (!authData) {
+  if (!authDataStr) {
     console.error('Error: Jira access token is missing. Provide it via AUTH_DATA env var or x-auth-data header with access_token field.');
-    return '';
+    return { authToken: '' };
   }
 
-  const authDataJson = JSON.parse(authData);
-  return authDataJson.access_token ?? '';
+  try {
+    const authData = JSON.parse(authDataStr);
+    return {
+      authToken: authData.access_token ?? '',
+      authData: authData
+    };
+  } catch (error) {
+    console.error('Error parsing auth data JSON:', error);
+    return { authToken: '' };
+  }
 }
 
 // Helper function to get Jira client from async local storage
@@ -203,47 +212,94 @@ async function getJiraClient(): Promise<JiraClient> {
   if (!store) {
     throw new Error('Auth token not found in AsyncLocalStorage');
   }
-  return await createJiraClient(store.authToken);
+  return await createJiraClient(store.authToken, store.authData);
+}
+
+// Helper function to fetch cloud ID from auth data or API
+async function fetchCloudId(authToken: string, authData?: any): Promise<{ cloudId: string, siteUrl: string }> {
+  // Check if selected_cloud_id is provided in auth_data
+  if (authData?.selected_cloud_id) {
+    console.log(`Using selected_cloud_id from auth_data: ${authData.selected_cloud_id}`);
+    
+    // If accessible_resources is also provided, find the matching resource
+    if (authData.accessible_resources && Array.isArray(authData.accessible_resources)) {
+      const selectedResource = authData.accessible_resources.find(
+        (resource: any) => resource.id === authData.selected_cloud_id
+      );
+      
+      if (selectedResource) {
+        return {
+          cloudId: selectedResource.id,
+          siteUrl: selectedResource.url
+        };
+      }
+    }
+    
+    // If we have selected_cloud_id but no matching resource in accessible_resources,
+    // we still use the selected_cloud_id but need to fetch the URL
+    // For now, construct a placeholder URL (will be overridden by API calls)
+    return {
+      cloudId: authData.selected_cloud_id,
+      siteUrl: `https://api.atlassian.com/ex/jira/${authData.selected_cloud_id}`
+    };
+  }
+  
+  // Fall back to fetching from API
+  const accessibleResourcesUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
+  
+  const response = await fetch(accessibleResourcesUrl, {
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch accessible resources (${response.status}): ${errorText}`);
+  }
+
+  // Define the type for the resources
+  interface JiraResource {
+    id: string;
+    name: string;
+    url: string;
+    scopes: string[];
+    avatarUrl: string;
+  }
+
+  const resources = await response.json() as JiraResource[];
+
+  // If no resources are found, throw an error
+  if (!resources || resources.length === 0) {
+    throw new Error('No accessible Jira resources found for this user');
+  }
+
+  // Find the first Jira site (identified by jira-related scopes)
+  for (const resource of resources) {
+    const scopes = resource.scopes || [];
+    // Check if this is a Jira site
+    if (scopes.some(scope => scope.toLowerCase().includes('jira'))) {
+      console.log(`Found Jira cloud_id: ${resource.id} for site: ${resource.name}`);
+      return {
+        cloudId: resource.id,
+        siteUrl: resource.url
+      };
+    }
+  }
+  
+  // If no Jira-specific site found, use the first one
+  console.warn(`No Jira-specific site found, using first resource: ${resources[0].id}`);
+  return {
+    cloudId: resources[0].id,
+    siteUrl: resources[0].url
+  };
 }
 
 // Create a Jira API client
-async function createJiraClient(authToken: string): Promise<JiraClient> {
-  // First, fetch the accessible resources to get the correct baseUrl
-  const accessibleResourcesUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
-
+async function createJiraClient(authToken: string, authData?: any): Promise<JiraClient> {
   try {
-    const response = await fetch(accessibleResourcesUrl, {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to fetch accessible resources (${response.status}): ${errorText}`);
-    }
-
-    // Define the type for the resources
-    interface JiraResource {
-      id: string;
-      name: string;
-      url: string;
-      scopes: string[];
-      avatarUrl: string;
-    }
-
-    const resources = await response.json() as JiraResource[];
-
-    // If no resources are found, throw an error
-    if (!resources || resources.length === 0) {
-      throw new Error('No accessible Jira resources found for this user');
-    }
-
-    // Use the first resource's cloud ID
-    const cloudId = resources[0].id;
-    // Store the site URL as well for reference
-    const siteUrl = resources[0].url;
+    const { cloudId, siteUrl } = await fetchCloudId(authToken, authData);
 
     return {
       baseUrl: siteUrl,
@@ -1464,7 +1520,7 @@ const app = express();
 //=============================================================================
 
 app.post('/mcp', async (req: Request, res: Response) => {
-  const authToken = extractAccessToken(req);
+  const { authToken, authData } = extractAuthData(req);
 
   const server = getJiraMcpServer();
   try {
@@ -1472,7 +1528,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
       sessionIdGenerator: undefined,
     });
     await server.connect(transport);
-    asyncLocalStorage.run({ authToken }, async () => {
+    asyncLocalStorage.run({ authToken, authData }, async () => {
       await transport.handleRequest(req, res, req.body);
     });
     res.on('close', () => {
@@ -1547,9 +1603,9 @@ app.post("/messages", async (req, res) => {
   let transport: SSEServerTransport | undefined;
   transport = sessionId ? transports.get(sessionId) : undefined;
   if (transport) {
-    const authToken = extractAccessToken(req);
+    const { authToken, authData } = extractAuthData(req);
 
-    asyncLocalStorage.run({ authToken }, async () => {
+    asyncLocalStorage.run({ authToken, authData }, async () => {
       await transport!.handlePostMessage(req, res);
     });
   } else {

@@ -7,8 +7,9 @@ import logging
 import httpx
 from errors import ToolExecutionError, AuthenticationError, TokenExpiredError, InvalidTokenError
 
-# Single auth token context for the entire application
+# Context variables for authentication
 auth_token_context: ContextVar[str] = ContextVar('auth_token')
+auth_data_context: ContextVar[dict] = ContextVar('auth_data', default={})
 
 from enums import BodyFormat, PageUpdateMode
 from utils import (
@@ -48,6 +49,17 @@ class ConfluenceClient:
                 developer_message="Please ensure you have a valid OAuth 2.0 access token. You may need to complete the OAuth authorization flow."
             )
 
+        # Check if selected_cloud_id is provided in auth_data
+        try:
+            auth_data = auth_data_context.get()
+            if auth_data and "selected_cloud_id" in auth_data:
+                selected_cloud_id = auth_data["selected_cloud_id"]
+                logger.info(f"Using selected_cloud_id from auth_data: {selected_cloud_id}")
+                return selected_cloud_id
+        except LookupError:
+            # Context not set, continue with API fetch
+            pass
+
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Accept": "application/json"
@@ -67,8 +79,19 @@ class ConfluenceClient:
                         developer_message="The OAuth token is valid but no Confluence workspaces are accessible. Ensure the user has access to at least one Confluence site."
                     )
 
+                # Find the first Confluence site (identified by confluence-related scopes)
+                for resource in resp_json:
+                    scopes = resource.get("scopes", [])
+                    # Check if this is a Confluence site
+                    if any("confluence" in scope.lower() for scope in scopes):
+                        cloud_id = resource.get("id")
+                        if cloud_id:
+                            logger.info(f"Found Confluence cloud_id: {cloud_id} for site: {resource.get('name')}")
+                            return cloud_id
+                
+                # If no Confluence-specific site found, use the first one
                 cloud_id = resp_json[0].get("id")
-                logger.info(f"Successfully retrieved cloud ID: {cloud_id}")
+                logger.warning(f"No Confluence-specific site found, using first resource: {cloud_id}")
                 return cloud_id
 
         except httpx.HTTPStatusError as e:
