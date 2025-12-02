@@ -35,15 +35,15 @@ docker run -p 5000:5000 -e API_KEY=$API_KEY \
   ghcr.io/klavis-ai/google-jobs-mcp-server:latest
 ```
 
-**API Key Setup:** Get your Google API key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and enable the Google Jobs API.
+**API Key Setup:** Get your SerpAPI key from [SerpAPI](https://serpapi.com/) and set it as the `API_KEY` environment variable. This server uses SerpAPI to scrape Google Jobs results.
 
 ## 🛠️ Available Tools
 
 - **Job Search**: Search for job listings by keywords, location, and filters
 - **Job Details**: Get detailed information about specific job postings
-- **Company Information**: Access employer details and company profiles
-- **Location-based Search**: Find jobs in specific geographic areas
-- **Filter Options**: Apply various filters for salary, experience, job type
+- **Company Job Search**: Search for all job openings at a specific company
+- **Remote Job Search**: Search specifically for remote job opportunities
+- **Search Suggestions**: Get search suggestions and related job titles based on a query
 
 ## 📚 Documentation & Support
 
