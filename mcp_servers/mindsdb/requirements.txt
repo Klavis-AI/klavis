@@ -1,0 +1,4 @@
+httpx>=0.25.0
+fastmcp>=2.11.0
+lightwood>=25.0.0
+python-dotenv>=1.0.0
