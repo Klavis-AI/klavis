@@ -1,0 +1,53 @@
+{
+  "name": "@cashfreepayments/cashfree-mcp",
+  "mcpName": "io.github.cashfree/cashfree-mcp",
+  "version": "1.0.1",
+  "type": "module",
+  "description": "Cashfree MCP server for cashfree docs and APIs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "cashfree-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_LICENSES"
+  ],
+  "scripts": {
+    "start": "npm run build && node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "build": "tsc && node scripts/copy-openapi-json.cjs",
+    "lint": "echo 'No linting configured'",
+    "check": "tsc --noEmit"
+  },
+  "author": "Cashfree",
+  "reference": "Mintlify mcp",
+  "dependencies": {
+    "@mintlify/openapi-parser": "^0.0.7",
+    "@mintlify/openapi-types": "^0.0.0",
+    "@mintlify/validation": "^0.1.320",
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "axios": ">=1.12.0",
+    "dashify": "^2.0.0",
+    "js-yaml": "^4.1.0",
+    "semantic-ui-react": "^2.1.5",
+    "trieve-ts-sdk": "^0.0.62",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/dashify": "^1.0.3",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.18.9",
+    "@types/react": "^19.1.4",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
