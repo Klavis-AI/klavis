@@ -6102,6 +6102,156 @@
         }
       }
     },
+    "/oauth/sharesight/authorize": {
+      "get": {
+        "tags": [
+          "sharesight-oauth"
+        ],
+        "summary": "Authorize Sharesight",
+        "operationId": "authorizeSharesight",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (space-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (space-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/sharesight/refresh_token": {
+      "post": {
+        "tags": [
+          "sharesight-oauth"
+        ],
+        "summary": "Refresh Token",
+        "operationId": "refresh_token_oauth_sharesight_refresh_token_post",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Instance ID for which to refresh the token",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for which to refresh the token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharesightOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharesightOAuthErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/{server_name}": {
       "post": {
         "tags": [
@@ -6631,6 +6781,336 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DumpSandboxResponse_GmailData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_docs/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_docs sandbox with data",
+        "description": "Initialize the sandbox with google_docs-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_docs__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleDocsData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_docs/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_docs sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_docs__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleDocsData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_drive/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_drive sandbox with data",
+        "description": "Initialize the sandbox with google_drive-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_drive__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleDriveData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_drive/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_drive sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_drive__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleDriveData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_sheets/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_sheets sandbox with data",
+        "description": "Initialize the sandbox with google_sheets-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_sheets__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleSheetsData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_sheets/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_sheets sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_sheets__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleSheetsData_"
                 }
               }
             }
@@ -7644,68 +8124,6 @@
             ],
             "title": "Notes",
             "description": "Project notes/description"
-          },
-          "color": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Color",
-            "description": "Project color"
-          },
-          "archived": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Archived",
-            "description": "Whether project is archived",
-            "default": false
-          },
-          "public": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Public",
-            "description": "Whether project is public to workspace",
-            "default": false
-          },
-          "workspace": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace",
-            "description": "Workspace GID"
-          },
-          "team": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Team",
-            "description": "Team GID"
           }
         },
         "type": "object",
@@ -7733,30 +8151,6 @@
             "type": "string",
             "title": "Text",
             "description": "Story text/comment content"
-          },
-          "task": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Task",
-            "description": "Task GID this story belongs to"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At",
-            "description": "Creation timestamp (ISO 8601)"
           }
         },
         "type": "object",
@@ -7857,45 +8251,6 @@
             ],
             "title": "Start On",
             "description": "Start date (YYYY-MM-DD)"
-          },
-          "projects": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Projects",
-            "description": "Project GIDs (create-only)"
-          },
-          "parent": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parent",
-            "description": "Parent task GID"
-          },
-          "workspace": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace",
-            "description": "Workspace GID"
           }
         },
         "type": "object",
@@ -8861,6 +9216,99 @@
         ],
         "title": "DumpSandboxResponse[GoogleCalendarData]"
       },
+      "DumpSandboxResponse_GoogleDocsData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleDocsData",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleDocsData]"
+      },
+      "DumpSandboxResponse_GoogleDriveData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleDriveData",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleDriveData]"
+      },
+      "DumpSandboxResponse_GoogleSheetsData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleSheetsData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleSheetsData]"
+      },
       "DumpSandboxResponse_MsTeamsData_": {
         "properties": {
           "sandbox_id": {
@@ -9807,6 +10255,493 @@
         "type": "object",
         "title": "GoogleCalendarEventDateTime",
         "description": "Event date/time with timezone support"
+      },
+      "GoogleDocsData": {
+        "properties": {
+          "documents": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleDocsDocument"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documents",
+            "description": "List of Google Docs documents"
+          }
+        },
+        "type": "object",
+        "title": "GoogleDocsData",
+        "description": "Complete Google Docs sandbox data structure"
+      },
+      "GoogleDocsDocument": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Document title (required)"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "Plain text content of the document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleDocsDocument",
+        "description": "Google Docs document object"
+      },
+      "GoogleDriveData": {
+        "properties": {
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleDriveFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "List of Google Drive files and folders"
+          }
+        },
+        "type": "object",
+        "title": "GoogleDriveData",
+        "description": "Complete Google Drive sandbox data structure"
+      },
+      "GoogleDriveFile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Name of the file or folder (required)"
+          },
+          "mimeType": {
+            "type": "string",
+            "title": "Mimetype",
+            "description": "MIME type of the file (required). Use 'application/vnd.google-apps.folder' for folders"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Description of the file"
+          },
+          "parents": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parents",
+            "description": "List of parent folder IDs"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "Text content for Google Docs documents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "mimeType"
+        ],
+        "title": "GoogleDriveFile",
+        "description": "Google Drive file or folder object"
+      },
+      "GoogleSheetsCellValue": {
+        "properties": {
+          "userEnteredValue": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Userenteredvalue",
+            "description": "The value entered by the user"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsCellValue",
+        "description": "Cell value containing only user-entered data"
+      },
+      "GoogleSheetsData-Input": {
+        "properties": {
+          "spreadsheets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsSpreadsheet-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spreadsheets",
+            "description": "List of Google Sheets spreadsheets"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsData",
+        "description": "Complete Google Sheets sandbox data structure"
+      },
+      "GoogleSheetsData-Output": {
+        "properties": {
+          "spreadsheets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsSpreadsheet-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spreadsheets",
+            "description": "List of Google Sheets spreadsheets"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsData",
+        "description": "Complete Google Sheets sandbox data structure"
+      },
+      "GoogleSheetsGridData-Input": {
+        "properties": {
+          "startRow": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startrow",
+            "description": "Starting row index",
+            "default": 0
+          },
+          "startColumn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startcolumn",
+            "description": "Starting column index",
+            "default": 0
+          },
+          "rowData": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsRowData"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rowdata",
+            "description": "Row data with values array"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsGridData",
+        "description": "Grid data for a sheet"
+      },
+      "GoogleSheetsGridData-Output": {
+        "properties": {
+          "startRow": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startrow",
+            "description": "Starting row index",
+            "default": 0
+          },
+          "startColumn": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startcolumn",
+            "description": "Starting column index",
+            "default": 0
+          },
+          "rowData": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsRowData"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rowdata",
+            "description": "Row data with values array"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsGridData",
+        "description": "Grid data for a sheet"
+      },
+      "GoogleSheetsRowData": {
+        "properties": {
+          "values": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsCellValue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Values",
+            "description": "Cell values in the row"
+          }
+        },
+        "type": "object",
+        "title": "GoogleSheetsRowData",
+        "description": "Row data containing cell values"
+      },
+      "GoogleSheetsSheet-Input": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/GoogleSheetsSheetProperties",
+            "description": "Sheet properties (required)"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsGridData-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Grid data for the sheet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "properties"
+        ],
+        "title": "GoogleSheetsSheet",
+        "description": "A sheet within a Google Sheets spreadsheet"
+      },
+      "GoogleSheetsSheet-Output": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/GoogleSheetsSheetProperties",
+            "description": "Sheet properties (required)"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsGridData-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Grid data for the sheet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "properties"
+        ],
+        "title": "GoogleSheetsSheet",
+        "description": "A sheet within a Google Sheets spreadsheet"
+      },
+      "GoogleSheetsSheetProperties": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Sheet title (required)"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index",
+            "description": "Sheet index position"
+          },
+          "gridProperties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gridproperties",
+            "description": "Grid properties (rowCount, columnCount)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleSheetsSheetProperties",
+        "description": "Properties for a sheet within a spreadsheet"
+      },
+      "GoogleSheetsSpreadsheet-Input": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/GoogleSheetsSpreadsheetProperties",
+            "description": "Spreadsheet properties including title (required)"
+          },
+          "sheets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsSheet-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheets",
+            "description": "List of sheets in the spreadsheet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "properties"
+        ],
+        "title": "GoogleSheetsSpreadsheet",
+        "description": "Google Sheets spreadsheet object"
+      },
+      "GoogleSheetsSpreadsheet-Output": {
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/GoogleSheetsSpreadsheetProperties",
+            "description": "Spreadsheet properties including title (required)"
+          },
+          "sheets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsSheet-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheets",
+            "description": "List of sheets in the spreadsheet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "properties"
+        ],
+        "title": "GoogleSheetsSpreadsheet",
+        "description": "Google Sheets spreadsheet object"
+      },
+      "GoogleSheetsSpreadsheetProperties": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Spreadsheet title (required)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleSheetsSpreadsheetProperties",
+        "description": "Properties for a spreadsheet - only includes title"
       },
       "HTTPValidationError": {
         "properties": {
@@ -12467,6 +13402,65 @@
           "authData"
         ],
         "title": "SetUserAuthRequest"
+      },
+      "SharesightOAuthErrorResponse": {
+        "properties": {
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "description": "Error message from the OAuth process"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Additional error message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "SharesightOAuthErrorResponse"
+      },
+      "SharesightOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the OAuth process",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Additional data related to the response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SharesightOAuthSuccessResponse"
       },
       "StatusResponse": {
         "properties": {
