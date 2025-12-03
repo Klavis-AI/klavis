@@ -7678,6 +7678,116 @@
         }
       }
     },
+    "/sandbox/clickup/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize clickup sandbox with data",
+        "description": "Initialize the sandbox with clickup-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_clickup__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClickUpData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/clickup/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export clickup sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_clickup__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_ClickUpData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/close/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -7898,6 +8008,116 @@
         }
       }
     },
+    "/sandbox/wordpress/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize wordpress sandbox with data",
+        "description": "Initialize the sandbox with wordpress-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_wordpress__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WordPressData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/wordpress/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export wordpress sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_wordpress__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_WordPressData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/asana/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -7991,6 +8211,116 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DumpSandboxResponse_AsanaData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/mem0/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize mem0 sandbox with data",
+        "description": "Initialize the sandbox with mem0-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_mem0__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mem0Data-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/mem0/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export mem0 sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_mem0__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_Mem0Data_"
                 }
               }
             }
@@ -8423,6 +8753,218 @@
         ],
         "title": "CallToolResult",
         "description": "The server's response to a tool call."
+      },
+      "ClickUpComment": {
+        "properties": {
+          "comment_text": {
+            "type": "string",
+            "title": "Comment Text",
+            "description": "Comment text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "comment_text"
+        ],
+        "title": "ClickUpComment",
+        "description": "ClickUp Comment object"
+      },
+      "ClickUpData-Input": {
+        "properties": {
+          "spaces": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpSpace"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spaces",
+            "description": "List of spaces with nested objects"
+          }
+        },
+        "type": "object",
+        "title": "ClickUpData",
+        "description": "Complete ClickUp sandbox data structure.\n\nNested hierarchy for initialization:\n- Spaces contain Folders and Lists (folderless)\n- Folders contain Lists\n- Lists contain Tasks\n- Tasks contain Comments"
+      },
+      "ClickUpData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ClickUpFolder": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "lists": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpList"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lists",
+            "description": "Lists in this folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClickUpFolder",
+        "description": "ClickUp Folder object"
+      },
+      "ClickUpList": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "List name"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "List description/content"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks in this list"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClickUpList",
+        "description": "ClickUp List object"
+      },
+      "ClickUpSpace": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Space name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpFolder"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "Folders in this space"
+          },
+          "lists": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpList"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lists",
+            "description": "Folderless lists in this space"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClickUpSpace",
+        "description": "ClickUp Space object"
+      },
+      "ClickUpTask": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Task name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Task description"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Task priority (1-4)"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ClickUpComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this task"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClickUpTask",
+        "description": "ClickUp Task object"
       },
       "CloseContact": {
         "properties": {
@@ -9123,6 +9665,37 @@
         ],
         "title": "DumpSandboxResponse[AsanaData]"
       },
+      "DumpSandboxResponse_ClickUpData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ClickUpData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[ClickUpData]"
+      },
       "DumpSandboxResponse_CloseData_": {
         "properties": {
           "sandbox_id": {
@@ -9309,6 +9882,37 @@
         ],
         "title": "DumpSandboxResponse[GoogleSheetsData]"
       },
+      "DumpSandboxResponse_Mem0Data_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Mem0Data-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[Mem0Data]"
+      },
       "DumpSandboxResponse_MsTeamsData_": {
         "properties": {
           "sandbox_id": {
@@ -9494,6 +10098,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[SalesforceData]"
+      },
+      "DumpSandboxResponse_WordPressData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WordPressData",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[WordPressData]"
       },
       "ExternalServerInfo": {
         "properties": {
@@ -11034,6 +11669,333 @@
           "ServiceNow"
         ],
         "title": "McpServerName"
+      },
+      "Mem0Data-Input": {
+        "properties": {
+          "memories": {
+            "items": {
+              "$ref": "#/components/schemas/Mem0Memory"
+            },
+            "type": "array",
+            "title": "Memories",
+            "description": "List of memories"
+          }
+        },
+        "type": "object",
+        "title": "Mem0Data",
+        "description": "Complete Mem0 sandbox data structure"
+      },
+      "Mem0Data-Output": {
+        "properties": {
+          "memories": {
+            "items": {
+              "$ref": "#/components/schemas/Mem0Memory"
+            },
+            "type": "array",
+            "title": "Memories",
+            "description": "List of memories"
+          }
+        },
+        "type": "object",
+        "title": "Mem0Data",
+        "description": "Complete Mem0 sandbox data structure"
+      },
+      "Mem0Memory": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Memory ID (read-only, set by Mem0)"
+          },
+          "memory": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Memory",
+            "description": "Memory content (returned from API)"
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "description": "Array of message objects representing the content"
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Id",
+            "description": "Agent ID"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "User ID"
+          },
+          "app_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Id",
+            "description": "App ID"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id",
+            "description": "Run ID"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional metadata"
+          },
+          "includes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Includes",
+            "description": "String to include specific preferences in the memory"
+          },
+          "excludes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excludes",
+            "description": "String to exclude specific preferences in the memory"
+          },
+          "infer": {
+            "type": "boolean",
+            "title": "Infer",
+            "description": "Whether to infer memories or directly store messages",
+            "default": true
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Format",
+            "description": "Response format structure (v1.0 or v1.1)",
+            "default": "v1.1"
+          },
+          "custom_categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Categories",
+            "description": "List of custom categories with name and description"
+          },
+          "custom_instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Instructions",
+            "description": "Project-specific guidelines for handling memories"
+          },
+          "immutable": {
+            "type": "boolean",
+            "title": "Immutable",
+            "description": "Whether the memory is immutable",
+            "default": false
+          },
+          "async_mode": {
+            "type": "boolean",
+            "title": "Async Mode",
+            "description": "Whether to add memory asynchronously",
+            "default": true
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp",
+            "description": "Unix timestamp of the memory"
+          },
+          "expiration_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiration Date",
+            "description": "Expiration date (YYYY-MM-DD)"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "Memory version (v1 deprecated, use v2)"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Creation timestamp"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At",
+            "description": "Last update timestamp"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner",
+            "description": "Memory owner"
+          },
+          "organization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization",
+            "description": "Organization"
+          }
+        },
+        "type": "object",
+        "title": "Mem0Memory",
+        "description": "Mem0 Memory object"
+      },
+      "Message": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "Role of the message sender (user or assistant)"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Content of the message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "Message",
+        "description": "Message object for memory"
       },
       "MsTeamsData-Input": {
         "properties": {
@@ -13308,7 +14270,9 @@
           "dropbox",
           "shopify",
           "outlook_calendar",
-          "resend"
+          "resend",
+          "wordpress",
+          "mem0"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -14145,6 +15109,135 @@
           "success"
         ],
         "title": "WhiteLabelingResponse"
+      },
+      "WordPressData": {
+        "properties": {
+          "posts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WordPressPost"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posts",
+            "description": "List of WordPress posts to create"
+          }
+        },
+        "type": "object",
+        "title": "WordPressData",
+        "description": "Complete WordPress sandbox data structure\n\nNote: Posts are created in a single batch without dependencies.\nFuture expansion could include pages, media, categories, etc."
+      },
+      "WordPressPost": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Post title"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Post content (HTML or plain text)"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Post status: draft, publish, private, pending, trash",
+            "default": "draft"
+          },
+          "excerpt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt",
+            "description": "Post excerpt/summary"
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories",
+            "description": "List of category names"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "List of tag names"
+          },
+          "featured_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured Image",
+            "description": "URL to featured image"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date",
+            "description": "Post publish date in ISO format (e.g., 2025-01-15T10:00:00)"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format",
+            "description": "Post format: standard, aside, gallery, link, image, quote, status, video, audio, chat",
+            "default": "standard"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "title": "WordPressPost",
+        "description": "WordPress post data for creation/update\n\nAttributes:\n    title: Post title\n    content: Post content (HTML or plain text)\n    status: Post status (draft, publish, private, pending)\n    excerpt: Post excerpt/summary (optional)\n    categories: List of category names (optional, created if not exist)\n    tags: List of tag names (optional, created if not exist)\n    featured_image: URL to featured image (optional)\n    date: Post publish date in ISO format (optional)\n    format: Post format (standard, aside, gallery, etc.) (optional)"
       },
       "ZoomOAuthErrorResponse": {
         "properties": {
