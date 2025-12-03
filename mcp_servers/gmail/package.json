@@ -37,5 +37,8 @@
     "@types/express": "^5.0.0",
     "@types/pdf-parse": "^1.1.5",
     "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "body-parser": "2.2.1"
   }
 }
