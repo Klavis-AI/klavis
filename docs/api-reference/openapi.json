@@ -6257,8 +6257,8 @@
         "tags": [
           "sandbox"
         ],
-        "summary": "Create a new sandbox",
-        "description": "Create a new sandbox instance for a specific MCP server type. The sandbox will be in 'initializing' status and can be initialized with data separately.",
+        "summary": "Acquire a sandbox",
+        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'.",
         "operationId": "create_sandbox_sandbox__server_name__post",
         "security": [
           {
@@ -6272,21 +6272,11 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SandboxMCPServer",
-              "description": "The MCP server type"
+              "description": "The MCP server name"
             },
-            "description": "The MCP server type"
+            "description": "The MCP server name"
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSandboxRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": "Successful Response",
@@ -6311,102 +6301,13 @@
         }
       }
     },
-    "/sandbox": {
-      "get": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "List all sandboxes",
-        "description": "Retrieve a list of all sandbox instances, optionally filtered by server type, user, or status.",
-        "operationId": "list_sandboxes_sandbox_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "server_name",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/SandboxMCPServer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by MCP server type",
-              "title": "Server Name"
-            },
-            "description": "Filter by MCP server type"
-          },
-          {
-            "name": "sandbox_status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/SandboxStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by sandbox status",
-              "title": "Sandbox Status"
-            },
-            "description": "Filter by sandbox status"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 500,
-              "minimum": 1,
-              "description": "Maximum number of results to return",
-              "default": 50,
-              "title": "Limit"
-            },
-            "description": "Maximum number of results to return"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListSandboxesResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/{server_name}/{sandbox_id}": {
       "get": {
         "tags": [
           "sandbox"
         ],
         "summary": "Get sandbox details",
-        "description": "Retrieve detailed information about a specific sandbox instance including its status, metadata, and configuration.",
+        "description": "Retrieve detailed information about a specific sandbox instance.",
         "operationId": "get_sandbox_sandbox__server_name___sandbox_id__get",
         "security": [
           {
@@ -6420,9 +6321,9 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SandboxMCPServer",
-              "description": "The MCP server type"
+              "description": "The MCP server name"
             },
-            "description": "The MCP server type"
+            "description": "The MCP server name"
           },
           {
             "name": "sandbox_id",
@@ -6463,8 +6364,8 @@
         "tags": [
           "sandbox"
         ],
-        "summary": "Delete sandbox",
-        "description": "Permanently delete a sandbox instance and all its data. This action cannot be undone.",
+        "summary": "Release sandbox",
+        "description": "Release an occupied sandbox back to idle state and marks the sandbox as available for reuse.",
         "operationId": "delete_sandbox_sandbox__server_name___sandbox_id__delete",
         "security": [
           {
@@ -6478,9 +6379,9 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SandboxMCPServer",
-              "description": "The MCP server type"
+              "description": "The MCP server name"
             },
-            "description": "The MCP server type"
+            "description": "The MCP server name"
           },
           {
             "name": "sandbox_id",
@@ -6500,7 +6401,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DeleteSandboxResponse"
+                  "$ref": "#/components/schemas/ReleaseSandboxResponse"
                 }
               }
             }
@@ -6538,9 +6439,9 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/SandboxMCPServer",
-              "description": "The MCP server type"
+              "description": "The MCP server name"
             },
-            "description": "The MCP server type"
+            "description": "The MCP server name"
           },
           {
             "name": "sandbox_id",
@@ -7568,6 +7469,556 @@
         }
       }
     },
+    "/sandbox/calcom/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize calcom sandbox with data",
+        "description": "Initialize the sandbox with calcom-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_calcom__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalcomData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/calcom/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export calcom sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_calcom__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_CalcomData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/quickbooks/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize quickbooks sandbox with data",
+        "description": "Initialize the sandbox with quickbooks-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_quickbooks__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuickBooksData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/quickbooks/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export quickbooks sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_quickbooks__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_QuickBooksData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/moneybird/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize moneybird sandbox with data",
+        "description": "Initialize the sandbox with moneybird-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_moneybird__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoneybirdData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/moneybird/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export moneybird sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_moneybird__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_MoneybirdData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/dropbox/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize dropbox sandbox with data",
+        "description": "Initialize the sandbox with dropbox-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_dropbox__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropboxData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/dropbox/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export dropbox sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_dropbox__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_DropboxData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/shopify/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize shopify sandbox with data",
+        "description": "Initialize the sandbox with shopify-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_shopify__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShopifyData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/shopify/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export shopify sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_shopify__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_ShopifyData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/outlook_calendar/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -7819,7 +8270,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CloseData"
+                "$ref": "#/components/schemas/CloseData-Input"
               }
             }
           }
@@ -8149,7 +8600,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AsanaData"
+                "$ref": "#/components/schemas/AsanaData-Input"
               }
             }
           }
@@ -8372,7 +8823,7 @@
         "type": "object",
         "title": "Option 1: API Key"
       },
-      "AsanaData": {
+      "AsanaData-Input": {
         "properties": {
           "projects": {
             "anyOf": [
@@ -8387,42 +8838,16 @@
               }
             ],
             "title": "Projects",
-            "description": "List of projects"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/AsanaTask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks",
-            "description": "List of tasks"
-          },
-          "stories": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/AsanaStory"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Stories",
-            "description": "List of stories (comments)"
+            "description": "List of projects with nested tasks and stories"
           }
         },
         "type": "object",
         "title": "AsanaData",
-        "description": "Complete Asana sandbox data structure"
+        "description": "Complete Asana sandbox data structure.\n\nNested hierarchy for initialization:\n- Projects contain Tasks\n- Tasks contain Stories (comments)"
+      },
+      "AsanaData-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "AsanaProject": {
         "properties": {
@@ -8454,6 +8879,21 @@
             ],
             "title": "Notes",
             "description": "Project notes/description"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AsanaTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks in this project"
           }
         },
         "type": "object",
@@ -8581,6 +9021,21 @@
             ],
             "title": "Start On",
             "description": "Start date (YYYY-MM-DD)"
+          },
+          "stories": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AsanaStory"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stories",
+            "description": "Stories (comments) on this task"
           }
         },
         "type": "object",
@@ -8648,6 +9103,94 @@
           "message"
         ],
         "title": "AzureADOAuthSuccessResponse"
+      },
+      "CalcomData-Input": {
+        "properties": {
+          "schedules": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CalcomSchedule"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schedules",
+            "description": "List of schedules to create"
+          }
+        },
+        "type": "object",
+        "title": "CalcomData",
+        "description": "Complete Cal.com sandbox data structure"
+      },
+      "CalcomData-Output": {
+        "properties": {
+          "schedules": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CalcomSchedule"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schedules",
+            "description": "List of schedules to create"
+          }
+        },
+        "type": "object",
+        "title": "CalcomData",
+        "description": "Complete Cal.com sandbox data structure"
+      },
+      "CalcomSchedule": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Human-readable schedule name"
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., 'America/New_York')"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "title": "Isdefault",
+            "description": "Whether this is the default schedule",
+            "default": false
+          },
+          "availability": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSlot"
+            },
+            "type": "array",
+            "title": "Availability",
+            "description": "List of recurring time slots"
+          },
+          "overrides": {
+            "items": {
+              "$ref": "#/components/schemas/Override"
+            },
+            "type": "array",
+            "title": "Overrides",
+            "description": "List of date-specific availability overrides"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "timeZone"
+        ],
+        "title": "CalcomSchedule",
+        "description": "Schedule data for creating a new schedule via Cal.com API.\n\nAttributes:\n    name: Human-readable schedule name\n    timeZone: IANA timezone (e.g., \"America/New_York\")\n    isDefault: Whether this is the default schedule for the user\n    availability: List of recurring time slots (optional, defaults to Mon-Fri 9-17)\n    overrides: List of date-specific availability overrides (optional)"
       },
       "CallToolRequest": {
         "properties": {
@@ -8968,18 +9511,6 @@
       },
       "CloseContact": {
         "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id",
-            "description": "Contact ID (read-only, set by Close)"
-          },
           "name": {
             "anyOf": [
               {
@@ -9023,25 +9554,13 @@
             ],
             "title": "Phones",
             "description": "List of phone objects"
-          },
-          "lead_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead Id",
-            "description": "Associated lead ID"
           }
         },
         "type": "object",
         "title": "CloseContact",
-        "description": "Close Contact object"
+        "description": "Close Contact object - child of Lead"
       },
-      "CloseData": {
+      "CloseData-Input": {
         "properties": {
           "leads": {
             "anyOf": [
@@ -9056,72 +9575,19 @@
               }
             ],
             "title": "Leads",
-            "description": "List of leads"
-          },
-          "contacts": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/CloseContact"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contacts",
-            "description": "List of contacts"
-          },
-          "opportunities": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/CloseOpportunity"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Opportunities",
-            "description": "List of opportunities"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/CloseTask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks",
-            "description": "List of tasks"
+            "description": "List of leads with nested objects"
           }
         },
         "type": "object",
         "title": "CloseData",
-        "description": "Complete Close sandbox data structure"
+        "description": "Complete Close sandbox data structure.\n\nNested hierarchy for initialization:\n- Leads contain Contacts, Opportunities, and Tasks"
+      },
+      "CloseData-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "CloseLead": {
         "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id",
-            "description": "Lead ID (read-only, set by Close)"
-          },
           "name": {
             "type": "string",
             "title": "Name",
@@ -9139,29 +9605,50 @@
             "title": "Status Label",
             "description": "Lead status"
           },
-          "created_by": {
+          "contacts": {
             "anyOf": [
               {
-                "type": "string"
+                "items": {
+                  "$ref": "#/components/schemas/CloseContact"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Created By",
-            "description": "User ID who created the lead"
+            "title": "Contacts",
+            "description": "Contacts associated with this lead"
           },
-          "date_created": {
+          "opportunities": {
             "anyOf": [
               {
-                "type": "string"
+                "items": {
+                  "$ref": "#/components/schemas/CloseOpportunity"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Date Created",
-            "description": "Creation timestamp"
+            "title": "Opportunities",
+            "description": "Opportunities associated with this lead"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CloseTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks associated with this lead"
           }
         },
         "type": "object",
@@ -9169,22 +9656,10 @@
           "name"
         ],
         "title": "CloseLead",
-        "description": "Close Lead object"
+        "description": "Close Lead object - parent object containing contacts, opportunities, and tasks"
       },
       "CloseOpportunity": {
         "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id",
-            "description": "Opportunity ID (read-only, set by Close)"
-          },
           "note": {
             "type": "string",
             "title": "Note",
@@ -9202,18 +9677,6 @@
             "title": "Value",
             "description": "Opportunity value in cents"
           },
-          "value_formatted": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Value Formatted",
-            "description": "Formatted value string"
-          },
           "confidence": {
             "anyOf": [
               {
@@ -9226,7 +9689,7 @@
             "title": "Confidence",
             "description": "Confidence percentage (0-100)"
           },
-          "status_label": {
+          "value_period": {
             "anyOf": [
               {
                 "type": "string"
@@ -9235,32 +9698,8 @@
                 "type": "null"
               }
             ],
-            "title": "Status Label",
-            "description": "Opportunity status"
-          },
-          "date_created": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date Created",
-            "description": "Creation timestamp"
-          },
-          "lead_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead Id",
-            "description": "Associated lead ID"
+            "title": "Value Period",
+            "description": "Value period (e.g., 'one_time', 'monthly', 'annual')"
           }
         },
         "type": "object",
@@ -9268,22 +9707,10 @@
           "note"
         ],
         "title": "CloseOpportunity",
-        "description": "Close Opportunity object"
+        "description": "Close Opportunity object - child of Lead"
       },
       "CloseTask": {
         "properties": {
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id",
-            "description": "Task ID (read-only, set by Close)"
-          },
           "text": {
             "type": "string",
             "title": "Text",
@@ -9299,7 +9726,7 @@
               }
             ],
             "title": "Date",
-            "description": "Due date (YYYY-MM-DD)"
+            "description": "The date of a task represents the point in time of when the task is actionable and appears in the inbox"
           },
           "is_complete": {
             "anyOf": [
@@ -9324,18 +9751,6 @@
             ],
             "title": "Assigned To",
             "description": "User ID assigned to"
-          },
-          "lead_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead Id",
-            "description": "Associated lead ID"
           }
         },
         "type": "object",
@@ -9343,7 +9758,7 @@
           "text"
         ],
         "title": "CloseTask",
-        "description": "Close Task object"
+        "description": "Close Task object - child of Lead"
       },
       "ConnectionType": {
         "type": "string",
@@ -9353,59 +9768,25 @@
         ],
         "title": "ConnectionType"
       },
-      "CreateSandboxRequest": {
-        "properties": {
-          "description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Optional sandbox description"
-          },
-          "config": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Config",
-            "description": "Optional configuration parameters"
-          }
-        },
-        "type": "object",
-        "title": "CreateSandboxRequest",
-        "description": "Request model for creating a new sandbox"
-      },
       "CreateSandboxResponse": {
         "properties": {
           "sandbox_id": {
             "type": "string",
             "title": "Sandbox Id",
-            "description": "Unique identifier for the sandbox"
+            "description": "Unique identifier for the acquired sandbox"
+          },
+          "server_url": {
+            "type": "string",
+            "title": "Server Url",
+            "description": "URL to connect to the MCP server"
           },
           "server_name": {
             "$ref": "#/components/schemas/SandboxMCPServer",
-            "description": "The MCP server type"
+            "description": "The MCP server name"
           },
           "status": {
             "$ref": "#/components/schemas/SandboxStatus",
             "description": "Current status of the sandbox"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At",
-            "description": "Timestamp when the sandbox was created"
           },
           "message": {
             "type": "string",
@@ -9416,13 +9797,13 @@
         "type": "object",
         "required": [
           "sandbox_id",
+          "server_url",
           "server_name",
           "status",
-          "created_at",
           "message"
         ],
         "title": "CreateSandboxResponse",
-        "description": "Response model for sandbox creation"
+        "description": "Response model for sandbox acquisition"
       },
       "CreateSelfHostedServerRequest": {
         "properties": {
@@ -9595,27 +9976,6 @@
         ],
         "title": "CreateWhiteLabelingRequest"
       },
-      "DeleteSandboxResponse": {
-        "properties": {
-          "sandbox_id": {
-            "type": "string",
-            "title": "Sandbox Id",
-            "description": "Deleted sandbox identifier"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Deletion confirmation message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sandbox_id",
-          "message"
-        ],
-        "title": "DeleteSandboxResponse",
-        "description": "Response model for sandbox deletion"
-      },
       "DeleteUserResponse": {
         "properties": {
           "success": {
@@ -9633,6 +9993,65 @@
           "message"
         ],
         "title": "DeleteUserResponse"
+      },
+      "DropboxData": {
+        "properties": {
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "List of folder paths to create (e.g., ['/SandboxTest', '/SandboxTest/Documents'])"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DropboxFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "List of files to create with their content"
+          }
+        },
+        "type": "object",
+        "title": "DropboxData",
+        "description": "Complete Dropbox sandbox data structure\n\nDescribes the folder and file structure to be created in the sandbox.\nFolders are created in the order specified, and files are uploaded after\nall folders have been created.\n\nNote: The root folder /SandboxTest is always created first automatically.\nAdditional folders should be nested within /SandboxTest."
+      },
+      "DropboxFile": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Path",
+            "description": "Full path to the file (must start with /SandboxTest/)"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Text content of the file"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "content"
+        ],
+        "title": "DropboxFile",
+        "description": "Dropbox file data\n\nAttributes:\n    path: Full path to the file (e.g., \"/SandboxTest/document.txt\")\n    content: Text content of the file"
       },
       "DumpSandboxResponse_AsanaData_": {
         "properties": {
@@ -9652,7 +10071,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/AsanaData",
+            "$ref": "#/components/schemas/AsanaData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -9664,6 +10083,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[AsanaData]"
+      },
+      "DumpSandboxResponse_CalcomData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CalcomData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[CalcomData]"
       },
       "DumpSandboxResponse_ClickUpData_": {
         "properties": {
@@ -9714,7 +10164,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/CloseData",
+            "$ref": "#/components/schemas/CloseData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -9726,6 +10176,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[CloseData]"
+      },
+      "DumpSandboxResponse_DropboxData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DropboxData",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[DropboxData]"
       },
       "DumpSandboxResponse_GmailData_": {
         "properties": {
@@ -9913,6 +10394,37 @@
         ],
         "title": "DumpSandboxResponse[Mem0Data]"
       },
+      "DumpSandboxResponse_MoneybirdData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MoneybirdData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[MoneybirdData]"
+      },
       "DumpSandboxResponse_MsTeamsData_": {
         "properties": {
           "sandbox_id": {
@@ -10037,6 +10549,37 @@
         ],
         "title": "DumpSandboxResponse[OutlookMailData]"
       },
+      "DumpSandboxResponse_QuickBooksData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/QuickBooksData",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[QuickBooksData]"
+      },
       "DumpSandboxResponse_ResendData_": {
         "properties": {
           "sandbox_id": {
@@ -10098,6 +10641,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[SalesforceData]"
+      },
+      "DumpSandboxResponse_ShopifyData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ShopifyData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[ShopifyData]"
       },
       "DumpSandboxResponse_WordPressData_": {
         "properties": {
@@ -11432,30 +12006,6 @@
         "title": "InitializeSandboxResponse",
         "description": "Response model for sandbox initialization"
       },
-      "ListSandboxesResponse": {
-        "properties": {
-          "sandboxes": {
-            "items": {
-              "$ref": "#/components/schemas/SandboxInfo"
-            },
-            "type": "array",
-            "title": "Sandboxes",
-            "description": "List of sandbox instances"
-          },
-          "total_count": {
-            "type": "integer",
-            "title": "Total Count",
-            "description": "Total number of sandboxes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sandboxes",
-          "total_count"
-        ],
-        "title": "ListSandboxesResponse",
-        "description": "Response model for listing sandboxes"
-      },
       "ListToolsRequest": {
         "properties": {
           "serverUrl": {
@@ -11997,6 +12547,554 @@
         "title": "Message",
         "description": "Message object for memory"
       },
+      "MoneybirdContact": {
+        "properties": {
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name",
+            "description": "Company name"
+          },
+          "firstname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firstname",
+            "description": "First name"
+          },
+          "lastname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastname",
+            "description": "Last name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone",
+            "description": "Phone number"
+          },
+          "address1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address1",
+            "description": "Street address"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "City"
+          },
+          "zipcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zipcode",
+            "description": "Postal code"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Country code"
+          },
+          "sepa_iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sepa Iban",
+            "description": "SEPA IBAN"
+          }
+        },
+        "type": "object",
+        "title": "MoneybirdContact",
+        "description": "Moneybird contact (customer/supplier) - API format\n\nAttributes:\n    company_name: Company name (optional, for business contacts)\n    firstname: First name (optional, for individual contacts)\n    lastname: Last name (optional, for individual contacts)\n    phone: Phone number\n    address1: Street address\n    city: City\n    zipcode: Postal code\n    country: Country code (e.g., 'NL', 'DE', 'FR')\n    sepa_iban: SEPA IBAN for direct debit (optional)"
+      },
+      "MoneybirdData-Input": {
+        "properties": {
+          "ledger_accounts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdLedgerAccount"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ledger Accounts",
+            "description": "List of ledger accounts to create"
+          },
+          "contacts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdContact"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts",
+            "description": "List of contacts to create"
+          },
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdProject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projects",
+            "description": "List of projects to create"
+          },
+          "time_entries": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdTimeEntry"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Entries",
+            "description": "List of time entries to create"
+          },
+          "sales_invoices": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdSalesInvoice"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Invoices",
+            "description": "List of sales invoices to create"
+          }
+        },
+        "type": "object",
+        "title": "MoneybirdData",
+        "description": "Complete Moneybird sandbox data structure - API format\n\nNote: Objects are created in dependency order:\n1. Ledger accounts (no dependencies)\n2. Contacts (no dependencies)\n3. Products (no dependencies, but needs tax rates from system)\n4. Projects (no dependencies)\n5. Time entries (linked to projects and contacts)\n6. Sales invoices (linked to contacts)"
+      },
+      "MoneybirdData-Output": {
+        "properties": {
+          "ledger_accounts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdLedgerAccount"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ledger Accounts",
+            "description": "List of ledger accounts to create"
+          },
+          "contacts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdContact"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts",
+            "description": "List of contacts to create"
+          },
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdProject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projects",
+            "description": "List of projects to create"
+          },
+          "time_entries": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdTimeEntry"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Entries",
+            "description": "List of time entries to create"
+          },
+          "sales_invoices": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MoneybirdSalesInvoice"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Invoices",
+            "description": "List of sales invoices to create"
+          }
+        },
+        "type": "object",
+        "title": "MoneybirdData",
+        "description": "Complete Moneybird sandbox data structure - API format\n\nNote: Objects are created in dependency order:\n1. Ledger accounts (no dependencies)\n2. Contacts (no dependencies)\n3. Products (no dependencies, but needs tax rates from system)\n4. Projects (no dependencies)\n5. Time entries (linked to projects and contacts)\n6. Sales invoices (linked to contacts)"
+      },
+      "MoneybirdInvoiceDetail": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Line item description"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "Unit price as string"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount",
+            "description": "Quantity as string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "price",
+          "amount"
+        ],
+        "title": "MoneybirdInvoiceDetail",
+        "description": "Invoice line item details"
+      },
+      "MoneybirdLedgerAccount": {
+        "properties": {
+          "rgs_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rgs Code",
+            "description": "RGS code - required for creation, not returned by GET API"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Account name"
+          },
+          "account_type": {
+            "type": "string",
+            "title": "Account Type",
+            "description": "Account type (revenue, expense, etc.)"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id",
+            "description": "Account identifier (optional for system accounts)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "account_type"
+        ],
+        "title": "MoneybirdLedgerAccount",
+        "description": "Moneybird ledger account (chart of accounts) - API format\n\nAttributes:\n    rgs_code: Reference Grootboekschema (RGS) code - required for creation\n    name: Account name\n    account_type: Account type (revenue, expense, etc.)\n    account_id: Account identifier (optional, system accounts may not have this)"
+      },
+      "MoneybirdProduct": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Product description"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Product title/name"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "Product price as string"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "Currency code (e.g., 'EUR')"
+          },
+          "identifier": {
+            "type": "string",
+            "title": "Identifier",
+            "description": "Product SKU/identifier"
+          },
+          "frequency": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency",
+            "description": "Billing frequency"
+          },
+          "frequency_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency Type",
+            "description": "Frequency type (month, year)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "title",
+          "price",
+          "currency",
+          "identifier"
+        ],
+        "title": "MoneybirdProduct",
+        "description": "Moneybird product/service - API format\n\nAttributes:\n    description: Product description\n    title: Product title/name\n    price: Product price\n    currency: Currency code (e.g., 'EUR')\n    identifier: Product SKU/identifier\n    frequency: Billing frequency (optional, for recurring products)\n    frequency_type: Frequency type (e.g., 'month', 'year')"
+      },
+      "MoneybirdProject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Project state (active, archived)",
+            "default": "active"
+          },
+          "budget": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget",
+            "description": "Project budget"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MoneybirdProject",
+        "description": "Moneybird project for time tracking and invoicing - API format\n\nAttributes:\n    name: Project name\n    state: Project state (active, archived)\n    budget: Project budget"
+      },
+      "MoneybirdSalesInvoice": {
+        "properties": {
+          "reference": {
+            "type": "string",
+            "title": "Reference",
+            "description": "Invoice reference number"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "Currency code",
+            "default": "EUR"
+          },
+          "prices_are_incl_tax": {
+            "type": "boolean",
+            "title": "Prices Are Incl Tax",
+            "description": "Whether prices include tax",
+            "default": false
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Invoice state (draft, open, paid)",
+            "default": "draft"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/MoneybirdInvoiceDetail"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Details",
+            "description": "Invoice line items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference",
+          "details"
+        ],
+        "title": "MoneybirdSalesInvoice",
+        "description": "Moneybird sales invoice - API format\n\nNote: During initialization, contact_id will be automatically assigned based on\nthe contacts created. Invoice dates will be calculated dynamically.\n\nAttributes:\n    reference: Invoice reference number\n    currency: Currency code (e.g., 'EUR')\n    prices_are_incl_tax: Whether prices include tax\n    state: Invoice state (draft, open, paid)\n    details: List of invoice line items"
+      },
+      "MoneybirdTimeEntry": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Description of work performed"
+          },
+          "hours": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "title": "Hours",
+            "description": "Number of hours worked"
+          },
+          "billable": {
+            "type": "boolean",
+            "title": "Billable",
+            "description": "Whether this time is billable",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "hours"
+        ],
+        "title": "MoneybirdTimeEntry",
+        "description": "Moneybird time entry - API format\n\nNote: During initialization, this will be linked to a project and contact automatically.\nThe started_at and ended_at timestamps will be generated based on the hours field.\n\nAttributes:\n    description: Description of work performed\n    hours: Number of hours worked\n    billable: Whether this time is billable"
+      },
       "MsTeamsData-Input": {
         "properties": {
           "channels": {
@@ -12535,6 +13633,121 @@
         "title": "OutlookMailMessage",
         "description": "Outlook Mail Message object"
       },
+      "Override": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Date"
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "title": "Starttime"
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "title": "Endtime"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "startTime",
+          "endTime"
+        ],
+        "title": "Override",
+        "description": "Represents a date-specific override to the regular schedule.\n\nAttributes:\n    date: Date in YYYY-MM-DD format\n    startTime: Start time in HH:MM format (24-hour)\n    endTime: End time in HH:MM format (24-hour)"
+      },
+      "QuickBooksData": {
+        "properties": {
+          "accounts": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accounts",
+            "description": "List of accounts (input: minimal, output: full API objects)"
+          },
+          "customers": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customers",
+            "description": "List of customers (input: minimal, output: full API objects)"
+          },
+          "vendors": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendors",
+            "description": "List of vendors (input: minimal, output: full API objects)"
+          },
+          "invoices": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoices",
+            "description": "List of invoices (input: minimal, output: full API objects)"
+          },
+          "payments": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payments",
+            "description": "List of payments (input: minimal, output: full API objects)"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "title": "QuickBooksData",
+        "description": "Complete QuickBooks sandbox data structure\n\nNote: For dump operations, accounts/customers/etc. will contain full API response objects\nwith additional fields beyond the minimal input schema. This is expected behavior."
+      },
       "RawActionsResponse": {
         "properties": {
           "instanceId": {
@@ -12560,6 +13773,32 @@
           "serverName"
         ],
         "title": "RawActionsResponse"
+      },
+      "ReleaseSandboxResponse": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Released sandbox identifier"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SandboxStatus",
+            "description": "Current status after release (should be idle)"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Release confirmation message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "status",
+          "message"
+        ],
+        "title": "ReleaseSandboxResponse",
+        "description": "Response model for sandbox release (delete)"
       },
       "ResendBroadcast": {
         "properties": {
@@ -14212,15 +15451,7 @@
             "title": "Sandbox Id",
             "description": "Unique identifier for the sandbox"
           },
-          "server_name": {
-            "$ref": "#/components/schemas/SandboxMCPServer",
-            "description": "The MCP server type"
-          },
-          "status": {
-            "$ref": "#/components/schemas/SandboxStatus",
-            "description": "Current status of the sandbox"
-          },
-          "description": {
+          "server_url": {
             "anyOf": [
               {
                 "type": "string"
@@ -14229,8 +15460,29 @@
                 "type": "null"
               }
             ],
-            "title": "Description",
-            "description": "Sandbox description"
+            "title": "Server Url",
+            "description": "URL to connect to the MCP server"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "The MCP server type"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SandboxStatus",
+            "description": "Current status of the sandbox"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At",
+            "description": "Last update timestamp"
           }
         },
         "type": "object",
@@ -14280,14 +15532,11 @@
       "SandboxStatus": {
         "type": "string",
         "enum": [
-          "initializing",
-          "running",
-          "resetting",
-          "error",
-          "deleted"
+          "idle",
+          "occupied"
         ],
         "title": "SandboxStatus",
-        "description": "Status of a sandbox instance"
+        "description": "Status of a sandbox instance - matches database enum"
       },
       "ServerTool": {
         "properties": {
@@ -14425,6 +15674,290 @@
           "message"
         ],
         "title": "SharesightOAuthSuccessResponse"
+      },
+      "ShopifyAddress": {
+        "properties": {
+          "address1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address1",
+            "description": "Street address line 1"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "City name"
+          },
+          "province": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Province",
+            "description": "State/province code"
+          },
+          "zip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zip",
+            "description": "Postal/ZIP code"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Country code (e.g., 'US')"
+          }
+        },
+        "type": "object",
+        "title": "ShopifyAddress",
+        "description": "Customer address information\n\nAttributes:\n    address1: Street address line 1 (optional - may not be present in API response)\n    city: City name (optional - may not be present in API response)\n    province: State/province code (optional - may not be present in API response)\n    zip: Postal/ZIP code (optional - may not be present in API response)\n    country: Country code (e.g., 'US') (optional - may not be present in API response)"
+      },
+      "ShopifyCustomer": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Customer email address"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name",
+            "description": "Customer first name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "Customer last name"
+          },
+          "addresses": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyAddress"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Addresses",
+            "description": "List of customer addresses"
+          }
+        },
+        "type": "object",
+        "title": "ShopifyCustomer",
+        "description": "Shopify customer data\n\nAttributes:\n    email: Customer email address (optional - may not be present in API response)\n    first_name: Customer first name (optional - may not be present in API response)\n    last_name: Customer last name (optional - may not be present in API response)\n    addresses: List of customer addresses"
+      },
+      "ShopifyData-Input": {
+        "properties": {
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "customers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyCustomer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customers",
+            "description": "List of customers to create"
+          }
+        },
+        "type": "object",
+        "title": "ShopifyData",
+        "description": "Complete Shopify sandbox data structure\n\nNote: Orders are created automatically by the sandbox based on products and customers.\nThe initialize method will generate orders that link customers to products."
+      },
+      "ShopifyData-Output": {
+        "properties": {
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "customers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyCustomer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customers",
+            "description": "List of customers to create"
+          }
+        },
+        "type": "object",
+        "title": "ShopifyData",
+        "description": "Complete Shopify sandbox data structure\n\nNote: Orders are created automatically by the sandbox based on products and customers.\nThe initialize method will generate orders that link customers to products."
+      },
+      "ShopifyProduct": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Product title/name"
+          },
+          "body_html": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Html",
+            "description": "HTML description of the product"
+          },
+          "vendor": {
+            "type": "string",
+            "title": "Vendor",
+            "description": "Product vendor/brand name"
+          },
+          "product_type": {
+            "type": "string",
+            "title": "Product Type",
+            "description": "Category/type of product"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Product status (active, draft, archived)",
+            "default": "active"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/ShopifyProductVariant"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Variants",
+            "description": "List of product variants"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "vendor",
+          "product_type",
+          "variants"
+        ],
+        "title": "ShopifyProduct",
+        "description": "Shopify product data\n\nAttributes:\n    title: Product title/name\n    body_html: HTML description of the product\n    vendor: Product vendor/brand name\n    product_type: Category/type of product\n    status: Product status (active, draft, archived)\n    variants: List of product variants (at least one required)"
+      },
+      "ShopifyProductVariant": {
+        "properties": {
+          "price": {
+            "type": "string",
+            "title": "Price",
+            "description": "Product variant price (e.g., '29.99')"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku",
+            "description": "Stock Keeping Unit identifier"
+          },
+          "inventory_quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Inventory Quantity",
+            "description": "Available inventory count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "price",
+          "sku",
+          "inventory_quantity"
+        ],
+        "title": "ShopifyProductVariant",
+        "description": "Product variant within a Shopify product\n\nAttributes:\n    price: Product variant price\n    sku: Stock Keeping Unit identifier\n    inventory_quantity: Available inventory count"
       },
       "StatusResponse": {
         "properties": {
@@ -15007,6 +16540,35 @@
         ],
         "title": "TeamsMessage",
         "description": "Teams Message object"
+      },
+      "TimeSlot": {
+        "properties": {
+          "days": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "title": "Starttime"
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$",
+            "title": "Endtime"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days",
+          "startTime",
+          "endTime"
+        ],
+        "title": "TimeSlot",
+        "description": "Represents a recurring time slot in a schedule.\n\nAttributes:\n    days: List of weekday names (Monday, Tuesday, etc.)\n    startTime: Start time in HH:MM format (24-hour)\n    endTime: End time in HH:MM format (24-hour)"
       },
       "ToolFormat": {
         "type": "string",
