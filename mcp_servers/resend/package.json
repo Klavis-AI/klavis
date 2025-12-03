@@ -13,7 +13,7 @@
     "dotenv": "^16.3.1",
     "resend": "^4.1.2",
     "zod": "^3.24.2",
-    "express": "^5.1.0"
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
