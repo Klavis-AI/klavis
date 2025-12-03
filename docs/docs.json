@@ -272,7 +272,6 @@
             "group": "Sandbox",
             "pages": [
               "api-reference/sandbox/create",
-              "api-reference/sandbox/list",
               "api-reference/sandbox/get",
               "api-reference/sandbox/delete",
               "api-reference/sandbox/reset",
@@ -280,52 +279,24 @@
                 "group": "Individual MCP Servers",
                 "pages": [
                   {
-                    "group": "Google Calendar",
+                    "group": "Asana",
                     "pages": [
-                      "api-reference/sandbox/google_calendar/initialize-google-calendar",
-                      "api-reference/sandbox/google_calendar/dump-google-calendar"
+                      "api-reference/sandbox/asana/initialize-asana",
+                      "api-reference/sandbox/asana/dump-asana"
                     ]
                   },
                   {
-                    "group": "Gmail",
+                    "group": "Cal.com",
                     "pages": [
-                      "api-reference/sandbox/gmail/initialize-gmail",
-                      "api-reference/sandbox/gmail/dump-gmail"
+                      "api-reference/sandbox/calcom/initialize-calcom",
+                      "api-reference/sandbox/calcom/dump-calcom"
                     ]
                   },
                   {
-                    "group": "Salesforce",
+                    "group": "ClickUp",
                     "pages": [
-                      "api-reference/sandbox/salesforce/initialize-salesforce",
-                      "api-reference/sandbox/salesforce/dump-salesforce"
-                    ]
-                  },
-                  {
-                    "group": "OneDrive",
-                    "pages": [
-                      "api-reference/sandbox/onedrive/initialize-onedrive",
-                      "api-reference/sandbox/onedrive/dump-onedrive"
-                    ]
-                  },
-                  {
-                    "group": "Teams",
-                    "pages": [
-                      "api-reference/sandbox/teams/initialize-teams",
-                      "api-reference/sandbox/teams/dump-teams"
-                    ]
-                  },
-                  {
-                    "group": "Outlook Mail",
-                    "pages": [
-                      "api-reference/sandbox/outlook_mail/initialize-outlook-mail",
-                      "api-reference/sandbox/outlook_mail/dump-outlook-mail"
-                    ]
-                  },
-                  {
-                    "group": "Outlook Calendar",
-                    "pages": [
-                      "api-reference/sandbox/outlook_calendar/initialize-outlook-calendar",
-                      "api-reference/sandbox/outlook_calendar/dump-outlook-calendar"
+                      "api-reference/sandbox/clickup/initialize-clickup",
+                      "api-reference/sandbox/clickup/dump-clickup"
                     ]
                   },
                   {
@@ -336,6 +307,90 @@
                     ]
                   },
                   {
+                    "group": "Dropbox",
+                    "pages": [
+                      "api-reference/sandbox/dropbox/initialize-dropbox",
+                      "api-reference/sandbox/dropbox/dump-dropbox"
+                    ]
+                  },
+                  {
+                    "group": "Gmail",
+                    "pages": [
+                      "api-reference/sandbox/gmail/initialize-gmail",
+                      "api-reference/sandbox/gmail/dump-gmail"
+                    ]
+                  },
+                  {
+                    "group": "Google Calendar",
+                    "pages": [
+                      "api-reference/sandbox/google_calendar/initialize-google-calendar",
+                      "api-reference/sandbox/google_calendar/dump-google-calendar"
+                    ]
+                  },
+                  {
+                    "group": "Google Docs",
+                    "pages": [
+                      "api-reference/sandbox/google_docs/initialize-google-docs",
+                      "api-reference/sandbox/google_docs/dump-google-docs"
+                    ]
+                  },
+                  {
+                    "group": "Google Drive",
+                    "pages": [
+                      "api-reference/sandbox/google_drive/initialize-google-drive",
+                      "api-reference/sandbox/google_drive/dump-google-drive"
+                    ]
+                  },
+                  {
+                    "group": "Google Sheets",
+                    "pages": [
+                      "api-reference/sandbox/google_sheets/initialize-google-sheets",
+                      "api-reference/sandbox/google_sheets/dump-google-sheets"
+                    ]
+                  },
+                  {
+                    "group": "Mem0",
+                    "pages": [
+                      "api-reference/sandbox/mem0/initialize-mem0",
+                      "api-reference/sandbox/mem0/dump-mem0"
+                    ]
+                  },
+                  {
+                    "group": "Moneybird",
+                    "pages": [
+                      "api-reference/sandbox/moneybird/initialize-moneybird",
+                      "api-reference/sandbox/moneybird/dump-moneybird"
+                    ]
+                  },
+                  {
+                    "group": "OneDrive",
+                    "pages": [
+                      "api-reference/sandbox/onedrive/initialize-onedrive",
+                      "api-reference/sandbox/onedrive/dump-onedrive"
+                    ]
+                  },
+                  {
+                    "group": "Outlook Calendar",
+                    "pages": [
+                      "api-reference/sandbox/outlook_calendar/initialize-outlook-calendar",
+                      "api-reference/sandbox/outlook_calendar/dump-outlook-calendar"
+                    ]
+                  },
+                  {
+                    "group": "Outlook Mail",
+                    "pages": [
+                      "api-reference/sandbox/outlook_mail/initialize-outlook-mail",
+                      "api-reference/sandbox/outlook_mail/dump-outlook-mail"
+                    ]
+                  },
+                  {
+                    "group": "QuickBooks",
+                    "pages": [
+                      "api-reference/sandbox/quickbooks/initialize-quickbooks",
+                      "api-reference/sandbox/quickbooks/dump-quickbooks"
+                    ]
+                  },
+                  {
                     "group": "Resend",
                     "pages": [
                       "api-reference/sandbox/resend/initialize-resend",
@@ -343,10 +398,31 @@
                     ]
                   },
                   {
-                    "group": "Asana",
+                    "group": "Salesforce",
                     "pages": [
-                      "api-reference/sandbox/asana/initialize-asana",
-                      "api-reference/sandbox/asana/dump-asana"
+                      "api-reference/sandbox/salesforce/initialize-salesforce",
+                      "api-reference/sandbox/salesforce/dump-salesforce"
+                    ]
+                  },
+                  {
+                    "group": "Shopify",
+                    "pages": [
+                      "api-reference/sandbox/shopify/initialize-shopify",
+                      "api-reference/sandbox/shopify/dump-shopify"
+                    ]
+                  },
+                  {
+                    "group": "Teams",
+                    "pages": [
+                      "api-reference/sandbox/teams/initialize-teams",
+                      "api-reference/sandbox/teams/dump-teams"
+                    ]
+                  },
+                  {
+                    "group": "WordPress",
+                    "pages": [
+                      "api-reference/sandbox/wordpress/initialize-wordpress",
+                      "api-reference/sandbox/wordpress/dump-wordpress"
                     ]
                   }
                 ]
