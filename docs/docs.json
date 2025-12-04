@@ -349,6 +349,20 @@
                     ]
                   },
                   {
+                    "group": "HubSpot",
+                    "pages": [
+                      "api-reference/sandbox/hubspot/initialize-hubspot",
+                      "api-reference/sandbox/hubspot/dump-hubspot"
+                    ]
+                  },
+                  {
+                    "group": "Jira",
+                    "pages": [
+                      "api-reference/sandbox/jira/initialize-jira",
+                      "api-reference/sandbox/jira/dump-jira"
+                    ]
+                  },
+                  {
                     "group": "Mem0",
                     "pages": [
                       "api-reference/sandbox/mem0/initialize-mem0",
