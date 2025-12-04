@@ -6479,6 +6479,116 @@
         }
       }
     },
+    "/sandbox/jira/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize jira sandbox with data",
+        "description": "Initialize the sandbox with jira-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_jira__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JiraData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/jira/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export jira sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_jira__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_JiraData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/google_calendar/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -7579,6 +7689,116 @@
         }
       }
     },
+    "/sandbox/hubspot/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize hubspot sandbox with data",
+        "description": "Initialize the sandbox with hubspot-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_hubspot__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubSpotData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/hubspot/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export hubspot sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_hubspot__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_HubSpotData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/quickbooks/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -8380,7 +8600,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResendData"
+                "$ref": "#/components/schemas/ResendData-Input"
               }
             }
           }
@@ -10363,6 +10583,68 @@
         ],
         "title": "DumpSandboxResponse[GoogleSheetsData]"
       },
+      "DumpSandboxResponse_HubSpotData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/HubSpotData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[HubSpotData]"
+      },
+      "DumpSandboxResponse_JiraData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/JiraData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[JiraData]"
+      },
       "DumpSandboxResponse_Mem0Data_": {
         "properties": {
           "sandbox_id": {
@@ -10598,7 +10880,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/ResendData",
+            "$ref": "#/components/schemas/ResendData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -11965,6 +12247,548 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HubSpotCompany": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Company name"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain",
+            "description": "Company domain/website"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry",
+            "description": "Company industry"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City",
+            "description": "Company city"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Company state/region"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "Company country"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone",
+            "description": "Company phone number"
+          },
+          "number_of_employees": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number Of Employees",
+            "description": "Number of employees"
+          },
+          "annual_revenue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Revenue",
+            "description": "Annual revenue"
+          },
+          "contacts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotContact"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts",
+            "description": "Contacts associated with this company"
+          },
+          "deals": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotDeal"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deals",
+            "description": "Deals associated with this company"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "HubSpotCompany",
+        "description": "HubSpot Company object"
+      },
+      "HubSpotContact": {
+        "properties": {
+          "firstname": {
+            "type": "string",
+            "title": "Firstname",
+            "description": "Contact first name"
+          },
+          "lastname": {
+            "type": "string",
+            "title": "Lastname",
+            "description": "Contact last name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Contact email address"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone",
+            "description": "Contact phone number"
+          },
+          "job_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Title",
+            "description": "Contact job title"
+          },
+          "deals": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotDeal"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deals",
+            "description": "Deals associated with this contact"
+          },
+          "tickets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTicket"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tickets",
+            "description": "Tickets associated with this contact"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks associated with this contact"
+          }
+        },
+        "type": "object",
+        "required": [
+          "firstname",
+          "lastname",
+          "email"
+        ],
+        "title": "HubSpotContact",
+        "description": "HubSpot Contact object"
+      },
+      "HubSpotData-Input": {
+        "properties": {
+          "companies": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotCompany"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Companies",
+            "description": "List of companies with nested objects"
+          },
+          "contacts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotContact"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contacts",
+            "description": "Standalone contacts not associated with any company"
+          },
+          "deals": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotDeal"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deals",
+            "description": "Standalone deals not associated with any company or contact"
+          },
+          "tickets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTicket"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tickets",
+            "description": "Standalone tickets not associated with any contact"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Standalone tasks not associated with any object"
+          }
+        },
+        "type": "object",
+        "title": "HubSpotData",
+        "description": "Complete HubSpot sandbox data structure.\n\nNested hierarchy for initialization:\n- Companies contain Contacts and Deals\n- Contacts contain Deals, Tickets, and Tasks\n- Deals contain Tasks\n- Tickets contain Tasks\n\nStandalone objects (not nested under any parent):\n- Contacts (can exist without a company)\n- Deals (can exist without a company or contact)\n- Tickets (can exist without a contact)\n- Tasks (can exist without being associated to any object)"
+      },
+      "HubSpotData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "HubSpotDeal": {
+        "properties": {
+          "deal_name": {
+            "type": "string",
+            "title": "Deal Name",
+            "description": "Deal name"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount",
+            "description": "Deal amount"
+          },
+          "deal_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deal Stage",
+            "description": "Deal stage"
+          },
+          "pipeline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pipeline",
+            "description": "Deal pipeline"
+          },
+          "close_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close Date",
+            "description": "Expected close date"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks associated with this deal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deal_name"
+        ],
+        "title": "HubSpotDeal",
+        "description": "HubSpot Deal object"
+      },
+      "HubSpotTask": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "description": "Task subject/title"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Task body/description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Task status (NOT_STARTED, IN_PROGRESS, COMPLETED, WAITING, DEFERRED)"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Task priority (HIGH, MEDIUM, LOW)"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date",
+            "description": "Task due date (ISO 8601 format)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject"
+        ],
+        "title": "HubSpotTask",
+        "description": "HubSpot Task object"
+      },
+      "HubSpotTicket": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "description": "Ticket subject"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "Ticket content/description"
+          },
+          "pipeline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pipeline",
+            "description": "Ticket pipeline"
+          },
+          "pipeline_stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pipeline Stage",
+            "description": "Ticket pipeline stage"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Ticket priority (HIGH, MEDIUM, LOW)"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/HubSpotTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks associated with this ticket"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject"
+        ],
+        "title": "HubSpotTicket",
+        "description": "HubSpot Ticket object"
+      },
       "InitializeSandboxResponse": {
         "properties": {
           "sandbox_id": {
@@ -12005,6 +12829,266 @@
         ],
         "title": "InitializeSandboxResponse",
         "description": "Response model for sandbox initialization"
+      },
+      "JiraBoard": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Board name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Board type (scrum or kanban)",
+            "default": "scrum"
+          },
+          "sprints": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraSprint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprints",
+            "description": "Sprints in this board"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "JiraBoard",
+        "description": "Jira Board object"
+      },
+      "JiraComment": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Comment text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "JiraComment",
+        "description": "Jira Comment object"
+      },
+      "JiraData-Input": {
+        "properties": {
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraProject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projects",
+            "description": "List of projects with nested objects"
+          }
+        },
+        "type": "object",
+        "title": "JiraData",
+        "description": "Complete Jira sandbox data structure.\n\nNested hierarchy for initialization:\n- Projects contain Boards and Issues\n- Boards contain Sprints\n- Sprints contain Issues\n- Issues contain Comments"
+      },
+      "JiraData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "JiraIssue": {
+        "properties": {
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "Issue summary/title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Issue description"
+          },
+          "issue_type": {
+            "type": "string",
+            "title": "Issue Type",
+            "description": "Issue type (Task, Bug, Story, etc.)",
+            "default": "Task"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Issue priority (Highest, High, Medium, Low, Lowest)"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this issue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary"
+        ],
+        "title": "JiraIssue",
+        "description": "Jira Issue object"
+      },
+      "JiraProject": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "Project key (e.g., PROJ)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "project_type": {
+            "type": "string",
+            "title": "Project Type",
+            "description": "Project type (software, business, etc.)",
+            "default": "software"
+          },
+          "boards": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraBoard"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boards",
+            "description": "Boards in this project"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues not assigned to any sprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name"
+        ],
+        "title": "JiraProject",
+        "description": "Jira Project object"
+      },
+      "JiraSprint": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Sprint name"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date",
+            "description": "Sprint start date (ISO 8601 format)"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "description": "Sprint end date (ISO 8601 format)"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/JiraIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues in this sprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "JiraSprint",
+        "description": "Jira Sprint object"
       },
       "ListToolsRequest": {
         "properties": {
@@ -13814,11 +14898,6 @@
             "title": "Id",
             "description": "Broadcast ID (read-only, set by Resend)"
           },
-          "segment_id": {
-            "type": "string",
-            "title": "Segment Id",
-            "description": "Segment ID to send to"
-          },
           "from": {
             "type": "string",
             "title": "From",
@@ -13940,12 +15019,11 @@
         },
         "type": "object",
         "required": [
-          "segment_id",
           "from",
           "subject"
         ],
         "title": "ResendBroadcast",
-        "description": "Resend Broadcast object"
+        "description": "Resend Broadcast object - child of Segment, requires parent segment"
       },
       "ResendContact": {
         "properties": {
@@ -14000,7 +15078,7 @@
               }
             ],
             "title": "Unsubscribed",
-            "description": "Whether contact is unsubscribed",
+            "description": "Whether contact is unsubscribed from all Broadcasts",
             "default": false
           },
           "created_at": {
@@ -14021,9 +15099,9 @@
           "email"
         ],
         "title": "ResendContact",
-        "description": "Resend Contact object"
+        "description": "Resend Contact object - standalone, independent of segments"
       },
-      "ResendData": {
+      "ResendData-Input": {
         "properties": {
           "emails": {
             "anyOf": [
@@ -14038,22 +15116,7 @@
               }
             ],
             "title": "Emails",
-            "description": "List of emails"
-          },
-          "segments": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ResendSegment"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Segments",
-            "description": "List of segments"
+            "description": "List of standalone transactional emails"
           },
           "contacts": {
             "anyOf": [
@@ -14068,13 +15131,13 @@
               }
             ],
             "title": "Contacts",
-            "description": "List of contacts"
+            "description": "List of standalone contacts"
           },
-          "broadcasts": {
+          "segments": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ResendBroadcast"
+                  "$ref": "#/components/schemas/ResendSegment"
                 },
                 "type": "array"
               },
@@ -14082,13 +15145,17 @@
                 "type": "null"
               }
             ],
-            "title": "Broadcasts",
-            "description": "List of broadcasts"
+            "title": "Segments",
+            "description": "List of segments with nested broadcasts"
           }
         },
         "type": "object",
         "title": "ResendData",
-        "description": "Complete Resend sandbox data structure"
+        "description": "Complete Resend sandbox data structure.\n\nMixed structure:\n- Segments contain nested Broadcasts (broadcasts MUST have a segment)\n- Emails are standalone (transactional)\n- Contacts are standalone (can be optionally linked to segments)"
+      },
+      "ResendData-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "ResendEmail": {
         "properties": {
@@ -14226,7 +15293,7 @@
           "subject"
         ],
         "title": "ResendEmail",
-        "description": "Resend Email object"
+        "description": "Resend Email object - standalone transactional email"
       },
       "ResendSegment": {
         "properties": {
@@ -14258,6 +15325,21 @@
             ],
             "title": "Created At",
             "description": "Creation timestamp"
+          },
+          "broadcasts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ResendBroadcast"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Broadcasts",
+            "description": "Broadcasts sent to this segment"
           }
         },
         "type": "object",
@@ -14265,7 +15347,7 @@
           "name"
         ],
         "title": "ResendSegment",
-        "description": "Resend Segment object (replaces deprecated Audience)"
+        "description": "Resend Segment object - parent containing broadcasts that target this segment"
       },
       "ResetSandboxResponse": {
         "properties": {
