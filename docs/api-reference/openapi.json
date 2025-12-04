@@ -9008,6 +9008,116 @@
           }
         }
       }
+    },
+    "/sandbox/supabase/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize supabase sandbox with data",
+        "description": "Initialize the sandbox with supabase-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_supabase__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupabaseData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/supabase/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export supabase sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_supabase__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_SupabaseData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10954,6 +11064,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[ShopifyData]"
+      },
+      "DumpSandboxResponse_SupabaseData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SupabaseData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[SupabaseData]"
       },
       "DumpSandboxResponse_WordPressData_": {
         "properties": {
@@ -13364,7 +13505,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/Message"
+                  "$ref": "#/components/schemas/Mem0Message"
                 },
                 "type": "array"
               },
@@ -13610,7 +13751,7 @@
         "title": "Mem0Memory",
         "description": "Mem0 Memory object"
       },
-      "Message": {
+      "Mem0Message": {
         "properties": {
           "role": {
             "type": "string",
@@ -13628,7 +13769,7 @@
           "role",
           "content"
         ],
-        "title": "Message",
+        "title": "Mem0Message",
         "description": "Message object for memory"
       },
       "MoneybirdContact": {
@@ -16591,7 +16732,8 @@
           "outlook_calendar",
           "resend",
           "wordpress",
-          "mem0"
+          "mem0",
+          "supabase"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -17434,6 +17576,118 @@
           "authData"
         ],
         "title": "StrataSetAuthRequest"
+      },
+      "SupabaseData-Input": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/SupabaseProject"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of Supabase projects"
+          }
+        },
+        "type": "object",
+        "title": "SupabaseData",
+        "description": "Complete Supabase sandbox data structure"
+      },
+      "SupabaseData-Output": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/SupabaseProject"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of Supabase projects"
+          }
+        },
+        "type": "object",
+        "title": "SupabaseData",
+        "description": "Complete Supabase sandbox data structure"
+      },
+      "SupabaseProject": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Project ID (read-only, set by Supabase)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SupabaseTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "List of tables in the project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SupabaseProject",
+        "description": "Supabase Project object"
+      },
+      "SupabaseTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Columns",
+            "description": "Table schema mapping column names to types"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows",
+            "description": "Table data rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "columns"
+        ],
+        "title": "SupabaseTable",
+        "description": "Supabase Table object"
       },
       "TeamsChannel": {
         "properties": {
