@@ -12984,20 +12984,29 @@
             "description": "Board type (scrum or kanban)",
             "default": "scrum"
           },
-          "sprints": {
+          "project_key": {
             "anyOf": [
               {
-                "items": {
-                  "$ref": "#/components/schemas/JiraSprint"
-                },
-                "type": "array"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Sprints",
-            "description": "Sprints in this board"
+            "title": "Project Key",
+            "description": "Key of the project this board belongs to (for initialization)"
+          },
+          "filter_jql": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter Jql",
+            "description": "JQL for the board filter"
           }
         },
         "type": "object",
@@ -13025,24 +13034,33 @@
       "JiraData-Input": {
         "properties": {
           "projects": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/JiraProject"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "items": {
+              "$ref": "#/components/schemas/JiraProject"
+            },
+            "type": "array",
             "title": "Projects",
-            "description": "List of projects with nested objects"
+            "description": "List of projects with their issues"
+          },
+          "boards": {
+            "items": {
+              "$ref": "#/components/schemas/JiraBoard"
+            },
+            "type": "array",
+            "title": "Boards",
+            "description": "List of boards"
+          },
+          "sprints": {
+            "items": {
+              "$ref": "#/components/schemas/JiraSprint"
+            },
+            "type": "array",
+            "title": "Sprints",
+            "description": "List of sprints"
           }
         },
         "type": "object",
         "title": "JiraData",
-        "description": "Complete Jira sandbox data structure.\n\nNested hierarchy for initialization:\n- Projects contain Boards and Issues\n- Boards contain Sprints\n- Sprints contain Issues\n- Issues contain Comments"
+        "description": "Complete Jira sandbox data structure.\n\nRelational structure for initialization:\n- Projects contain Issues\n- Boards refer to Projects (via key)\n- Sprints refer to Boards (via name)\n- Issues can refer to Sprints (via name)"
       },
       "JiraData-Output": {
         "additionalProperties": true,
@@ -13084,6 +13102,18 @@
             ],
             "title": "Priority",
             "description": "Issue priority (Highest, High, Medium, Low, Lowest)"
+          },
+          "sprint_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sprint Name",
+            "description": "Name of the sprint this issue belongs to (for initialization)"
           },
           "comments": {
             "anyOf": [
@@ -13138,21 +13168,6 @@
             "description": "Project type (software, business, etc.)",
             "default": "software"
           },
-          "boards": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/JiraBoard"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Boards",
-            "description": "Boards in this project"
-          },
           "issues": {
             "anyOf": [
               {
@@ -13166,7 +13181,7 @@
               }
             ],
             "title": "Issues",
-            "description": "Issues not assigned to any sprint"
+            "description": "Issues in this project"
           }
         },
         "type": "object",
@@ -13208,20 +13223,41 @@
             "title": "End Date",
             "description": "Sprint end date (ISO 8601 format)"
           },
-          "issues": {
+          "origin_board_name": {
             "anyOf": [
               {
-                "items": {
-                  "$ref": "#/components/schemas/JiraIssue"
-                },
-                "type": "array"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Issues",
-            "description": "Issues in this sprint"
+            "title": "Origin Board Name",
+            "description": "Name of the board this sprint belongs to (for initialization)"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal",
+            "description": "Sprint goal"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Sprint state (future, active, closed)"
           }
         },
         "type": "object",
