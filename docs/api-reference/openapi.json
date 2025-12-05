@@ -12490,36 +12490,6 @@
             ],
             "title": "Annual Revenue",
             "description": "Annual revenue"
-          },
-          "contacts": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotContact"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contacts",
-            "description": "Contacts associated with this company"
-          },
-          "deals": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotDeal"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deals",
-            "description": "Deals associated with this company"
           }
         },
         "type": "object",
@@ -12527,7 +12497,7 @@
           "name"
         ],
         "title": "HubSpotCompany",
-        "description": "HubSpot Company object"
+        "description": "HubSpot Company object.\nBase object, typically doesn't associate upwards in this schema, but contacts/deals associate to it."
       },
       "HubSpotContact": {
         "properties": {
@@ -12569,51 +12539,6 @@
             ],
             "title": "Job Title",
             "description": "Contact job title"
-          },
-          "deals": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotDeal"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deals",
-            "description": "Deals associated with this contact"
-          },
-          "tickets": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotTicket"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tickets",
-            "description": "Tickets associated with this contact"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotTask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks",
-            "description": "Tasks associated with this contact"
           }
         },
         "type": "object",
@@ -12623,7 +12548,7 @@
           "email"
         ],
         "title": "HubSpotContact",
-        "description": "HubSpot Contact object"
+        "description": "HubSpot Contact object.\nCan be associated with: Companies."
       },
       "HubSpotData-Input": {
         "properties": {
@@ -12640,7 +12565,7 @@
               }
             ],
             "title": "Companies",
-            "description": "List of companies with nested objects"
+            "description": "List of companies"
           },
           "contacts": {
             "anyOf": [
@@ -12655,7 +12580,7 @@
               }
             ],
             "title": "Contacts",
-            "description": "Standalone contacts not associated with any company"
+            "description": "List of contacts"
           },
           "deals": {
             "anyOf": [
@@ -12670,7 +12595,7 @@
               }
             ],
             "title": "Deals",
-            "description": "Standalone deals not associated with any company or contact"
+            "description": "List of deals"
           },
           "tickets": {
             "anyOf": [
@@ -12685,7 +12610,7 @@
               }
             ],
             "title": "Tickets",
-            "description": "Standalone tickets not associated with any contact"
+            "description": "List of tickets"
           },
           "tasks": {
             "anyOf": [
@@ -12700,12 +12625,12 @@
               }
             ],
             "title": "Tasks",
-            "description": "Standalone tasks not associated with any object"
+            "description": "List of tasks"
           }
         },
         "type": "object",
         "title": "HubSpotData",
-        "description": "Complete HubSpot sandbox data structure.\n\nNested hierarchy for initialization:\n- Companies contain Contacts and Deals\n- Contacts contain Deals, Tickets, and Tasks\n- Deals contain Tasks\n- Tickets contain Tasks\n\nStandalone objects (not nested under any parent):\n- Contacts (can exist without a company)\n- Deals (can exist without a company or contact)\n- Tickets (can exist without a contact)\n- Tasks (can exist without being associated to any object)"
+        "description": "Complete HubSpot sandbox data structure (Flat Schema).\n\nAll object types are top-level lists. Relationships are defined via association fields\nin the respective objects (e.g. associated_company_names in HubSpotContact)."
       },
       "HubSpotData-Output": {
         "additionalProperties": true,
@@ -12765,21 +12690,6 @@
             ],
             "title": "Close Date",
             "description": "Expected close date"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotTask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks",
-            "description": "Tasks associated with this deal"
           }
         },
         "type": "object",
@@ -12787,7 +12697,7 @@
           "deal_name"
         ],
         "title": "HubSpotDeal",
-        "description": "HubSpot Deal object"
+        "description": "HubSpot Deal object.\nCan be associated with: Contacts, Companies."
       },
       "HubSpotTask": {
         "properties": {
@@ -12850,7 +12760,7 @@
           "subject"
         ],
         "title": "HubSpotTask",
-        "description": "HubSpot Task object"
+        "description": "HubSpot Task object.\nCan be associated with: Contacts, Companies, Deals, Tickets."
       },
       "HubSpotTicket": {
         "properties": {
@@ -12906,21 +12816,6 @@
             ],
             "title": "Priority",
             "description": "Ticket priority (HIGH, MEDIUM, LOW)"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/HubSpotTask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks",
-            "description": "Tasks associated with this ticket"
           }
         },
         "type": "object",
@@ -12928,7 +12823,7 @@
           "subject"
         ],
         "title": "HubSpotTicket",
-        "description": "HubSpot Ticket object"
+        "description": "HubSpot Ticket object.\nCan be associated with: Contacts, Companies."
       },
       "InitializeSandboxResponse": {
         "properties": {
