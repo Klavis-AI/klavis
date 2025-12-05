@@ -48,7 +48,7 @@ async def list_channels(
         params["types"] = "public_channel"
     
     try:
-        return await make_slack_user_request("GET", "conversations.list", params=params)
+        return await make_slack_user_request("GET", "users.conversations", params=params)
     except Exception as e:
         logger.exception(f"Error executing tool slack_user_list_channels: {e}")
         raise e
