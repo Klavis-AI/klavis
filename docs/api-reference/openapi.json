@@ -7359,14 +7359,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/initialize": {
+    "/sandbox/microsoft_teams/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize teams sandbox with data",
-        "description": "Initialize the sandbox with teams-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_teams__sandbox_id__initialize_post",
+        "summary": "Initialize microsoft_teams sandbox with data",
+        "description": "Initialize the sandbox with microsoft_teams-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_microsoft_teams__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7419,14 +7419,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/dump": {
+    "/sandbox/microsoft_teams/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export teams sandbox data",
+        "summary": "Export microsoft_teams sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_teams__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_microsoft_teams__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -7579,14 +7579,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/initialize": {
+    "/sandbox/Cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize calcom sandbox with data",
-        "description": "Initialize the sandbox with calcom-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_calcom__sandbox_id__initialize_post",
+        "summary": "Initialize Cal.com sandbox with data",
+        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7639,14 +7639,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/dump": {
+    "/sandbox/Cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export calcom sandbox data",
+        "summary": "Export Cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_calcom__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -16653,9 +16653,9 @@
           "close",
           "monday",
           "onedrive",
-          "teams",
+          "microsoft_teams",
           "outlook_mail",
-          "calcom",
+          "Cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
