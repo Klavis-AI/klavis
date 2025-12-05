@@ -7359,14 +7359,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/initialize": {
+    "/sandbox/microsoft_teams/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize teams sandbox with data",
-        "description": "Initialize the sandbox with teams-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_teams__sandbox_id__initialize_post",
+        "summary": "Initialize microsoft_teams sandbox with data",
+        "description": "Initialize the sandbox with microsoft_teams-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_microsoft_teams__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7419,14 +7419,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/dump": {
+    "/sandbox/microsoft_teams/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export teams sandbox data",
+        "summary": "Export microsoft_teams sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_teams__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_microsoft_teams__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -7579,14 +7579,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/initialize": {
+    "/sandbox/Cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize calcom sandbox with data",
-        "description": "Initialize the sandbox with calcom-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_calcom__sandbox_id__initialize_post",
+        "summary": "Initialize Cal.com sandbox with data",
+        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7639,14 +7639,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/dump": {
+    "/sandbox/Cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export calcom sandbox data",
+        "summary": "Export Cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_calcom__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -9118,6 +9118,116 @@
           }
         }
       }
+    },
+    "/sandbox/github/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize github sandbox with data",
+        "description": "Initialize the sandbox with github-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_github__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitHubData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/github/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export github sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_github__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GitHubData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10538,6 +10648,37 @@
         ],
         "title": "DumpSandboxResponse[DropboxData]"
       },
+      "DumpSandboxResponse_GitHubData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GitHubData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GitHubData]"
+      },
       "DumpSandboxResponse_GmailData_": {
         "properties": {
           "sandbox_id": {
@@ -11467,6 +11608,527 @@
           "createdAt"
         ],
         "title": "GetUserResponse"
+      },
+      "GitHubBranch-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Branch name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubFolder-Input"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Root folder structure for this branch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubBranch",
+        "description": "GitHub Branch object"
+      },
+      "GitHubBranch-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Branch name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubFolder-Output"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Root folder structure for this branch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubBranch",
+        "description": "GitHub Branch object"
+      },
+      "GitHubData-Input": {
+        "properties": {
+          "repos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubRepo-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repos",
+            "description": "List of repositories"
+          }
+        },
+        "type": "object",
+        "title": "GitHubData",
+        "description": "Complete GitHub sandbox data structure"
+      },
+      "GitHubData-Output": {
+        "properties": {
+          "repos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubRepo-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repos",
+            "description": "List of repositories"
+          }
+        },
+        "type": "object",
+        "title": "GitHubData",
+        "description": "Complete GitHub sandbox data structure"
+      },
+      "GitHubFile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "File name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "File path within the repository"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "File content (base64 encoded for binary files)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFile",
+        "description": "GitHub File object"
+      },
+      "GitHubFolder-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Folder path within the repository"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "Files within this folder"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFolder-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "Subfolders within this folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFolder",
+        "description": "GitHub Folder object"
+      },
+      "GitHubFolder-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Folder path within the repository"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "Files within this folder"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFolder-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "Subfolders within this folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFolder",
+        "description": "GitHub Folder object"
+      },
+      "GitHubIssue": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Issue ID (read-only, set by GitHub)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Issue title"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Issue description/body"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Issue state: open or closed",
+            "default": "open"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "List of label names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GitHubIssue",
+        "description": "GitHub Issue object"
+      },
+      "GitHubPullRequest": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "PR ID (read-only, set by GitHub)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Pull request title"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Pull request description/body"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "PR state: open, closed, or merged",
+            "default": "open"
+          },
+          "head": {
+            "type": "string",
+            "title": "Head",
+            "description": "Head branch name"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base",
+            "description": "Base branch name",
+            "default": "main"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "List of label names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "head"
+        ],
+        "title": "GitHubPullRequest",
+        "description": "GitHub Pull Request object"
+      },
+      "GitHubRepo-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Repository name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Repository description"
+          },
+          "branches": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubBranch-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branches",
+            "description": "List of branches with their folder structures"
+          },
+          "prs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubPullRequest"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prs",
+            "description": "List of pull requests"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "List of issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubRepo",
+        "description": "GitHub Repository object"
+      },
+      "GitHubRepo-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Repository name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Repository description"
+          },
+          "branches": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubBranch-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branches",
+            "description": "List of branches with their folder structures"
+          },
+          "prs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubPullRequest"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prs",
+            "description": "List of pull requests"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "List of issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubRepo",
+        "description": "GitHub Repository object"
       },
       "GmailData": {
         "properties": {
@@ -16653,9 +17315,9 @@
           "close",
           "monday",
           "onedrive",
-          "teams",
+          "microsoft_teams",
           "outlook_mail",
-          "calcom",
+          "Cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
