@@ -38,7 +38,7 @@ def extract_api_key(request_or_scope) -> str:
     """Extract API key from headers or environment."""
     api_key = os.getenv("API_KEY")
     auth_data = None
-    
+
     if not api_key:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
         if hasattr(request_or_scope, 'headers'):
@@ -52,7 +52,7 @@ def extract_api_key(request_or_scope) -> str:
             auth_data = headers.get(b'x-auth-data')
             if auth_data:
                 auth_data = base64.b64decode(auth_data).decode('utf-8')
-        
+
         if auth_data:
             try:
                 # Parse the JSON auth data to extract token
@@ -61,7 +61,7 @@ def extract_api_key(request_or_scope) -> str:
             except (json.JSONDecodeError, TypeError) as e:
                 logger.warning(f"Failed to parse auth data JSON: {e}")
                 api_key = ""
-    
+
     return api_key or ""
 
 @click.command()
@@ -82,7 +82,7 @@ def main(
     log_level: str,
     json_response: bool,
 ) -> int:
-    
+
     logging.basicConfig(
         level=getattr(logging, log_level.upper()),
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -134,6 +134,14 @@ def main(
                             "type": "integer",
                             "description": "Starting position for pagination (default: 0)",
                             "default": 0
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Country code for search results (e.g., 'us', 'jp', 'uk'). Defaults to 'us'."
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Language code for search results (e.g., 'en', 'ja', 'fr'). Defaults to 'en'."
                         }
                     }
                 },
@@ -178,6 +186,14 @@ def main(
                             "type": "integer",
                             "description": "Starting position for pagination (default: 0)",
                             "default": 0
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Country code for search results (e.g., 'us', 'jp', 'uk'). Defaults to 'us'."
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Language code for search results (e.g., 'en', 'ja', 'fr'). Defaults to 'en'."
                         }
                     }
                 },
@@ -212,6 +228,14 @@ def main(
                             "type": "integer",
                             "description": "Starting position for pagination (default: 0)",
                             "default": 0
+                        },
+                        "country": {
+                            "type": "string",
+                            "description": "Country code for search results (e.g., 'us', 'jp', 'uk'). Defaults to 'us'."
+                        },
+                        "language": {
+                            "type": "string",
+                            "description": "Language code for search results (e.g., 'en', 'ja', 'fr'). Defaults to 'en'."
                         }
                     }
                 },
@@ -238,7 +262,7 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        
+
         if name == "google_jobs_search":
             query = arguments.get("query")
             location = arguments.get("location")
@@ -248,7 +272,9 @@ def main(
             company = arguments.get("company")
             radius = arguments.get("radius")
             start = arguments.get("start", 0)
-            
+            country = arguments.get("country", "us")
+            language = arguments.get("language", "en")
+
             if not query:
                 return [
                     types.TextContent(
@@ -265,7 +291,9 @@ def main(
                     salary_min=salary_min,
                     company=company,
                     radius=radius,
-                    start=start
+                    start=start,
+                    country=country,
+                    language=language
                 )
                 return [
                     types.TextContent(
@@ -281,10 +309,10 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_jobs_get_details":
             job_id = arguments.get("job_id")
-            
+
             if not job_id:
                 return [
                     types.TextContent(
@@ -308,13 +336,15 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_jobs_search_by_company":
             company_name = arguments.get("company_name")
             location = arguments.get("location")
             employment_type = arguments.get("employment_type")
             start = arguments.get("start", 0)
-            
+            country = arguments.get("country", "us")
+            language = arguments.get("language", "en")
+
             if not company_name:
                 return [
                     types.TextContent(
@@ -327,7 +357,9 @@ def main(
                     company_name=company_name,
                     location=location,
                     employment_type=employment_type,
-                    start=start
+                    start=start,
+                    country=country,
+                    language=language
                 )
                 return [
                     types.TextContent(
@@ -343,14 +375,16 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_jobs_search_remote":
             query = arguments.get("query")
             employment_type = arguments.get("employment_type")
             date_posted = arguments.get("date_posted")
             salary_min = arguments.get("salary_min")
             start = arguments.get("start", 0)
-            
+            country = arguments.get("country", "us")
+            language = arguments.get("language", "en")
+
             if not query:
                 return [
                     types.TextContent(
@@ -364,7 +398,9 @@ def main(
                     employment_type=employment_type,
                     date_posted=date_posted,
                     salary_min=salary_min,
-                    start=start
+                    start=start,
+                    country=country,
+                    language=language
                 )
                 return [
                     types.TextContent(
@@ -380,10 +416,10 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "google_jobs_get_suggestions":
             query = arguments.get("query")
-            
+
             if not query:
                 return [
                     types.TextContent(
@@ -407,7 +443,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         else:
             return [
                 types.TextContent(
@@ -421,9 +457,9 @@ def main(
     async def handle_sse(request: Request):
         """Handle SSE connections."""
         logger.info("Handling SSE connection")
-        
+
         auth_token = extract_api_key(request)
-        
+
         token = serpapi_token_context.set(auth_token or "")
         try:
             async with sse.connect_sse(
@@ -437,7 +473,7 @@ def main(
             return Response(f"Internal server error: {str(e)}", status_code=500)
         finally:
             serpapi_token_context.reset(token)
-        
+
         return Response()
 
     session_manager = StreamableHTTPSessionManager(
@@ -452,7 +488,7 @@ def main(
     ) -> None:
         """Handle StreamableHTTP requests."""
         logger.info(f"Handling StreamableHTTP request: {scope['method']} {scope['path']}")
-        
+
         if scope["method"] != "POST":
             await send({
                 "type": "http.response.start",
@@ -469,9 +505,9 @@ def main(
                 }).encode(),
             })
             return
-        
+
         auth_token = extract_api_key(scope)
-        
+
         token = serpapi_token_context.set(auth_token or "")
         try:
             await session_manager.handle_request(scope, receive, send)
@@ -514,7 +550,7 @@ def main(
             },
             "tools": [
                 "google_jobs_search",
-                "google_jobs_get_details", 
+                "google_jobs_get_details",
                 "google_jobs_search_by_company",
                 "google_jobs_search_remote",
                 "google_jobs_get_suggestions"
@@ -541,11 +577,11 @@ def main(
         routes=[
             # Root endpoint
             Route("/", endpoint=handle_root, methods=["GET"]),
-            
+
             # SSE routes
             Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Mount("/messages", app=sse.handle_post_message),
-            
+
             # StreamableHTTP routes
             Route("/mcp", endpoint=handle_mcp_info, methods=["GET"]),
             Mount("/mcp", app=handle_streamable_http),
@@ -567,4 +603,3 @@ def main(
 
 if __name__ == "__main__":
     main()
-    
