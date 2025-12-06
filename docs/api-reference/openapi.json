@@ -9338,6 +9338,226 @@
           }
         }
       }
+    },
+    "/sandbox/notion/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize notion sandbox with data",
+        "description": "Initialize the sandbox with notion-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_notion__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotionData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/notion/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export notion sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_notion__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_NotionData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/slack/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize slack sandbox with data",
+        "description": "Initialize the sandbox with slack-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_slack__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlackData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/slack/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export slack sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_slack__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_SlackData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11130,6 +11350,37 @@
         ],
         "title": "DumpSandboxResponse[MsTeamsData]"
       },
+      "DumpSandboxResponse_NotionData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/NotionData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[NotionData]"
+      },
       "DumpSandboxResponse_OneDriveData_": {
         "properties": {
           "sandbox_id": {
@@ -11346,6 +11597,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[ShopifyData]"
+      },
+      "DumpSandboxResponse_SlackData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SlackData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[SlackData]"
       },
       "DumpSandboxResponse_SupabaseData_": {
         "properties": {
@@ -15347,6 +15629,262 @@
         "title": "MsTeamsData",
         "description": "Complete Microsoft Teams sandbox data structure"
       },
+      "NotionBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Block type (paragraph, heading_1, heading_2, etc.)"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Block text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "content"
+        ],
+        "title": "NotionBlock",
+        "description": "Notion Block object - fundamental content unit.\n\nBlocks can be: paragraph, heading_1, heading_2, heading_3, bulleted_list_item,\nnumbered_list_item, to_do, toggle, code, quote, callout, etc."
+      },
+      "NotionComment": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Comment text content (rich text)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "NotionComment",
+        "description": "Notion Comment object - can be attached to pages or blocks"
+      },
+      "NotionData-Input": {
+        "properties": {
+          "databases": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionDatabase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Databases",
+            "description": "List of databases with their data sources and pages"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionPage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "List of standalone pages (not in databases)"
+          }
+        },
+        "type": "object",
+        "title": "NotionData",
+        "description": "Complete Notion sandbox data structure.\n\nHierarchical structure for initialization:\n- Databases contain Data Sources\n- Data Sources contain Pages (with properties matching the schema)\n- Standalone Pages exist at top level (not in databases)\n- Pages contain Blocks (content) and Comments\n\nRelational structure:\n- Pages refer to Data Sources (via data_source_name)\n- Data Sources are nested in Databases"
+      },
+      "NotionData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "NotionDataSource": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Data source name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Data source description"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema",
+            "description": "Schema definition (property types and configurations)"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionPage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "Pages (items/rows) in this data source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "NotionDataSource",
+        "description": "Notion Data Source object - represents a table within a database.\n\nNew in API version 2025-09-03:\n- A database can contain multiple data sources\n- Each data source has its own schema (properties)\n- Pages within a data source follow that schema"
+      },
+      "NotionDatabase": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Database title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Database description"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon",
+            "description": "Database icon (emoji or external URL)"
+          },
+          "data_sources": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionDataSource"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Sources",
+            "description": "Data sources within this database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "NotionDatabase",
+        "description": "Notion Database object - container for data sources.\n\nDatabases organize structured data and can contain multiple data sources.\nEach data source represents a table with its own schema."
+      },
+      "NotionPage": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Page title"
+          },
+          "properties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Properties",
+            "description": "Page properties (for database pages)"
+          },
+          "blocks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionBlock"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocks",
+            "description": "Content blocks in this page"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this page"
+          },
+          "data_source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Name",
+            "description": "Name of the data source this page belongs to (for initialization)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "NotionPage",
+        "description": "Notion Page object.\n\nPages can be:\n1. Standalone pages (top-level in workspace)\n2. Items/rows within a database data source\n\nFor pages in databases, properties should match the data source schema."
+      },
       "OAuthServerName": {
         "type": "string",
         "enum": [
@@ -17686,7 +18224,8 @@
           "resend",
           "wordpress",
           "mem0",
-          "supabase"
+          "supabase",
+          "slack"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -18120,6 +18659,144 @@
         ],
         "title": "ShopifyProductVariant",
         "description": "Product variant within a Shopify product\n\nAttributes:\n    price: Product variant price\n    sku: Stock Keeping Unit identifier\n    inventory_quantity: Available inventory count"
+      },
+      "SlackChannel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Channel name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Channel description/purpose"
+          },
+          "is_private": {
+            "type": "boolean",
+            "title": "Is Private",
+            "description": "Whether the channel is private",
+            "default": false
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackMessage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "description": "Messages in this channel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SlackChannel",
+        "description": "Slack Channel (Conversation) object"
+      },
+      "SlackData-Input": {
+        "properties": {
+          "channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "List of channels"
+          }
+        },
+        "type": "object",
+        "title": "SlackData",
+        "description": "Complete Slack sandbox data structure.\n\nHierarchy:\n- Channels contain Messages\n- Messages can have Reactions and Replies (threads)"
+      },
+      "SlackData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SlackMessage-Input": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Message text content"
+          },
+          "reactions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackReaction"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reactions",
+            "description": "Reactions to this message"
+          },
+          "replies": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackMessage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replies",
+            "description": "Thread replies to this message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "SlackMessage",
+        "description": "Slack Message object"
+      },
+      "SlackMessage-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SlackReaction": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Emoji name (without colons, e.g., 'thumbsup')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SlackReaction",
+        "description": "Slack Reaction object"
       },
       "StatusResponse": {
         "properties": {
