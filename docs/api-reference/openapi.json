@@ -9228,6 +9228,116 @@
           }
         }
       }
+    },
+    "/sandbox/linear/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize linear sandbox with data",
+        "description": "Initialize the sandbox with linear-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_linear__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/linear/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export linear sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_linear__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_LinearData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10895,6 +11005,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[JiraData]"
+      },
+      "DumpSandboxResponse_LinearData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LinearData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[LinearData]"
       },
       "DumpSandboxResponse_Mem0Data_": {
         "properties": {
@@ -13823,6 +13964,225 @@
         ],
         "title": "JiraSprint",
         "description": "Jira Sprint object"
+      },
+      "LinearComment": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Comment text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "LinearComment",
+        "description": "Linear Comment object"
+      },
+      "LinearData-Input": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/LinearProject-Input"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of projects with their issues. At most 50 projects can be included."
+          }
+        },
+        "type": "object",
+        "title": "LinearData",
+        "description": "Complete Linear sandbox data structure.\n\nRelational structure for initialization:\n- Projects contain Issues\n- Issues contain Comments"
+      },
+      "LinearData-Output": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/LinearProject-Output"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of projects with their issues. At most 50 projects can be included."
+          }
+        },
+        "type": "object",
+        "title": "LinearData",
+        "description": "Complete Linear sandbox data structure.\n\nRelational structure for initialization:\n- Projects contain Issues\n- Issues contain Comments"
+      },
+      "LinearIssue": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Issue title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Issue description"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Issue priority (0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low)"
+          },
+          "state_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Name",
+            "description": "Name of the workflow state (e.g., 'Todo', 'In Progress', 'Done')"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this issue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "LinearIssue",
+        "description": "Linear Issue object"
+      },
+      "LinearProject-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Project state (planned, started, paused, completed, canceled)"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues in this project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LinearProject",
+        "description": "Linear Project object"
+      },
+      "LinearProject-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Project state (planned, started, paused, completed, canceled)"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues in this project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LinearProject",
+        "description": "Linear Project object"
       },
       "ListToolsRequest": {
         "properties": {
