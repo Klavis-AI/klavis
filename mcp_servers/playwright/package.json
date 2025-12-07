@@ -1,0 +1,35 @@
+{
+  "name": "@klavis-ai/playwright-mcp-server",
+  "version": "1.0.0",
+  "description": "Playwright MCP server wrapper for browser automation",
+  "type": "module",
+  "main": "build/src/index.js",
+  "bin": {
+    "playwright-mcp": "./build/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/src/index.js",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "author": "Klavis AI",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@playwright/mcp": "^0.0.50",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.3.3"
+  }
+}
