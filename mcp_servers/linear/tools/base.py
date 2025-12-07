@@ -18,6 +18,25 @@ def get_auth_token() -> str:
     except LookupError:
         raise RuntimeError("Authentication token not found in request context")
 
+def clean_filter_object(obj: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove empty string values and empty nested objects from a filter object.
+    
+    This is necessary because the Linear API returns 400 Bad Request when
+    filter objects contain empty strings (e.g., {'lte': '', 'gte': ''}).
+    """
+    if not isinstance(obj, dict):
+        return obj
+    
+    cleaned = {}
+    for key, value in obj.items():
+        if isinstance(value, dict):
+            nested_cleaned = clean_filter_object(value)
+            if nested_cleaned:  # Only add if not empty after cleaning
+                cleaned[key] = nested_cleaned
+        elif value != "" and value is not None:  # Exclude empty strings and None
+            cleaned[key] = value
+    return cleaned
+
 async def make_graphql_request(query: str, variables: Dict[str, Any] = None) -> Dict[str, Any]:
     """Make a GraphQL request to Linear API."""
     access_token = get_auth_token()
