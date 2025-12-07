@@ -9668,6 +9668,116 @@
           }
         }
       }
+    },
+    "/sandbox/discord/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize discord sandbox with data",
+        "description": "Initialize the sandbox with discord-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_discord__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscordData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/discord/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export discord sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_discord__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_DiscordData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11011,6 +11121,111 @@
         ],
         "title": "DeleteUserResponse"
       },
+      "DiscordChannel": {
+        "properties": {
+          "channel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel Id",
+            "description": "Discord channel ID (auto-discovered if not provided)"
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordMessage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "description": "Messages in this channel"
+          }
+        },
+        "type": "object",
+        "title": "DiscordChannel",
+        "description": "Discord Channel - uses existing channel by ID"
+      },
+      "DiscordData-Input": {
+        "properties": {
+          "channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "List of channels"
+          }
+        },
+        "type": "object",
+        "title": "DiscordData",
+        "description": "Complete Discord sandbox data structure.\n\nHierarchy:\n- Channels contain Messages\n- Messages can have Reactions"
+      },
+      "DiscordData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "DiscordMessage": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Message text content"
+          },
+          "reactions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordReaction"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reactions",
+            "description": "Reactions to this message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "DiscordMessage",
+        "description": "Discord Message object"
+      },
+      "DiscordReaction": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Emoji (Unicode like '👍' or custom 'name:id')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DiscordReaction",
+        "description": "Discord Reaction object"
+      },
       "DropboxData": {
         "properties": {
           "folders": {
@@ -11224,6 +11439,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[ConfluenceData]"
+      },
+      "DumpSandboxResponse_DiscordData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DiscordData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[DiscordData]"
       },
       "DumpSandboxResponse_DropboxData_": {
         "properties": {
@@ -18504,7 +18750,8 @@
           "mem0",
           "supabase",
           "slack",
-          "confluence"
+          "confluence",
+          "discord"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
