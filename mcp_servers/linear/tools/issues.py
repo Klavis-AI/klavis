@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict
-from .base import make_graphql_request
+from .base import make_graphql_request, clean_filter_object
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -16,14 +16,15 @@ async def get_issues(team_id: str = None, limit: int = 50, filter: Dict[str, Any
         if team_id:
             issue_filter["team"] = {"id": {"eq": team_id}}
         
-        # Add timestamp filters if provided
+        # Add timestamp filters if provided (clean empty values first)
         if filter:
-            if "updatedAt" in filter:
-                issue_filter["updatedAt"] = filter["updatedAt"]
-            if "createdAt" in filter:
-                issue_filter["createdAt"] = filter["createdAt"]
-            if "priority" in filter:
-                issue_filter["priority"] = {"eq": filter["priority"]}
+            cleaned_filter = clean_filter_object(filter)
+            if "updatedAt" in cleaned_filter:
+                issue_filter["updatedAt"] = cleaned_filter["updatedAt"]
+            if "createdAt" in cleaned_filter:
+                issue_filter["createdAt"] = cleaned_filter["createdAt"]
+            if "priority" in cleaned_filter:
+                issue_filter["priority"] = {"eq": cleaned_filter["priority"]}
         
         # Use filtered query if we have any filters
         if issue_filter:
