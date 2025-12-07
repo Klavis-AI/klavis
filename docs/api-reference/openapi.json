@@ -9558,6 +9558,116 @@
           }
         }
       }
+    },
+    "/sandbox/confluence/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize confluence sandbox with data",
+        "description": "Initialize the sandbox with confluence-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_confluence__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfluenceData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/confluence/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export confluence sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_confluence__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_ConfluenceData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10530,6 +10640,143 @@
         "title": "CloseTask",
         "description": "Close Task object - child of Lead"
       },
+      "ConfluenceComment": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Comment text content (storage format)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "ConfluenceComment",
+        "description": "Confluence Comment object"
+      },
+      "ConfluenceData-Input": {
+        "properties": {
+          "spaces": {
+            "items": {
+              "$ref": "#/components/schemas/ConfluenceSpace"
+            },
+            "type": "array",
+            "title": "Spaces",
+            "description": "List of spaces"
+          }
+        },
+        "type": "object",
+        "title": "ConfluenceData",
+        "description": "Complete Confluence sandbox data structure.\n\nHierarchy:\n- Spaces contain Pages\n- Pages can have children (nested pages) and Comments"
+      },
+      "ConfluenceData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ConfluencePage-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Page title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Page content (storage format)"
+          },
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluencePage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children",
+            "description": "Child pages"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluenceComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this page"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "body"
+        ],
+        "title": "ConfluencePage",
+        "description": "Confluence Page object"
+      },
+      "ConfluencePage-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ConfluenceSpace": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "Space key (e.g., DS)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Space name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Space description"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluencePage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "Root pages in this space"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name"
+        ],
+        "title": "ConfluenceSpace",
+        "description": "Confluence Space object"
+      },
       "ConnectionType": {
         "type": "string",
         "enum": [
@@ -10946,6 +11193,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[CloseData]"
+      },
+      "DumpSandboxResponse_ConfluenceData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ConfluenceData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[ConfluenceData]"
       },
       "DumpSandboxResponse_DropboxData_": {
         "properties": {
@@ -18225,7 +18503,8 @@
           "wordpress",
           "mem0",
           "supabase",
-          "slack"
+          "slack",
+          "confluence"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
