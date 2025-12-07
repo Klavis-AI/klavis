@@ -9778,10 +9778,253 @@
           }
         }
       }
+    },
+    "/sandbox/airtable/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize airtable sandbox with data",
+        "description": "Initialize the sandbox with airtable-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_airtable__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AirtableData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/airtable/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export airtable sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_airtable__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_AirtableData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AirtableData-Input": {
+        "properties": {
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "List of tables (simplified, assumes single base)"
+          }
+        },
+        "type": "object",
+        "title": "AirtableData",
+        "description": "Complete Airtable sandbox data structure.\n\nHierarchy:\n- Bases contain Tables\n- Tables contain Fields (schema) and Records (data)\n- Records contain field values\n\nNote: For sandbox purposes, we typically work with a single base\nand multiple tables within it."
+      },
+      "AirtableData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AirtableField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Field name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Field type (singleLineText, multilineText, number, singleSelect, multipleSelects, date, checkbox, url, email, phoneNumber, attachment, etc.)"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options",
+            "description": "Field options (e.g., choices for select fields)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "AirtableField",
+        "description": "Airtable Field definition (column schema)"
+      },
+      "AirtableRecord": {
+        "properties": {
+          "fields": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Fields",
+            "description": "Dictionary of field names to values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "title": "AirtableRecord",
+        "description": "Airtable Record object (a row in a table)"
+      },
+      "AirtableTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Table description"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableField"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields",
+            "description": "Field definitions for this table"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableRecord"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records",
+            "description": "Records in this table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AirtableTable",
+        "description": "Airtable Table object"
+      },
       "ApiKeyAuth": {
         "properties": {
           "token": {
@@ -11284,6 +11527,37 @@
         ],
         "title": "DropboxFile",
         "description": "Dropbox file data\n\nAttributes:\n    path: Full path to the file (e.g., \"/SandboxTest/document.txt\")\n    content: Text content of the file"
+      },
+      "DumpSandboxResponse_AirtableData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AirtableData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[AirtableData]"
       },
       "DumpSandboxResponse_AsanaData_": {
         "properties": {
