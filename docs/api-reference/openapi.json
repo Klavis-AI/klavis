@@ -2803,6 +2803,200 @@
         }
       }
     },
+    "/oauth/google-cloud/authorize": {
+      "get": {
+        "tags": [
+          "google-cloud-oauth"
+        ],
+        "summary": "Authorize Google Cloud",
+        "description": "Start Google Cloud OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeGoogleCloud",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/google-forms/authorize": {
+      "get": {
+        "tags": [
+          "google-forms-oauth"
+        ],
+        "summary": "Authorize Google Forms",
+        "description": "Start Google Forms OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeGoogleForms",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/oauth/attio/authorize": {
       "get": {
         "tags": [
@@ -7029,6 +7223,116 @@
         }
       }
     },
+    "/sandbox/google_forms/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_forms sandbox with data",
+        "description": "Initialize the sandbox with google_forms-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_forms__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleFormsData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_forms/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_forms sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_forms__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleFormsData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/google_sheets/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -7359,14 +7663,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/initialize": {
+    "/sandbox/microsoft_teams/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize teams sandbox with data",
-        "description": "Initialize the sandbox with teams-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_teams__sandbox_id__initialize_post",
+        "summary": "Initialize microsoft_teams sandbox with data",
+        "description": "Initialize the sandbox with microsoft_teams-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_microsoft_teams__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7419,14 +7723,14 @@
         }
       }
     },
-    "/sandbox/teams/{sandbox_id}/dump": {
+    "/sandbox/microsoft_teams/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export teams sandbox data",
+        "summary": "Export microsoft_teams sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_teams__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_microsoft_teams__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -7579,14 +7883,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/initialize": {
+    "/sandbox/Cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize calcom sandbox with data",
-        "description": "Initialize the sandbox with calcom-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_calcom__sandbox_id__initialize_post",
+        "summary": "Initialize Cal.com sandbox with data",
+        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -7639,14 +7943,14 @@
         }
       }
     },
-    "/sandbox/calcom/{sandbox_id}/dump": {
+    "/sandbox/Cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export calcom sandbox data",
+        "summary": "Export Cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_calcom__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -9118,10 +9422,1023 @@
           }
         }
       }
+    },
+    "/sandbox/github/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize github sandbox with data",
+        "description": "Initialize the sandbox with github-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_github__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitHubData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/github/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export github sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_github__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GitHubData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/linear/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize linear sandbox with data",
+        "description": "Initialize the sandbox with linear-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_linear__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/linear/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export linear sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_linear__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_LinearData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/notion/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize notion sandbox with data",
+        "description": "Initialize the sandbox with notion-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_notion__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotionData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/notion/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export notion sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_notion__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_NotionData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/slack/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize slack sandbox with data",
+        "description": "Initialize the sandbox with slack-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_slack__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlackData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/slack/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export slack sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_slack__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_SlackData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/confluence/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize confluence sandbox with data",
+        "description": "Initialize the sandbox with confluence-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_confluence__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfluenceData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/confluence/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export confluence sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_confluence__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_ConfluenceData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/discord/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize discord sandbox with data",
+        "description": "Initialize the sandbox with discord-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_discord__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscordData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/discord/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export discord sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_discord__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_DiscordData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/airtable/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize airtable sandbox with data",
+        "description": "Initialize the sandbox with airtable-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_airtable__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AirtableData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/airtable/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export airtable sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_airtable__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_AirtableData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/snowflake/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize snowflake sandbox with data",
+        "description": "Initialize the sandbox with snowflake-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_snowflake__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnowflakeData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/snowflake/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export snowflake sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_snowflake__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_SnowflakeData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AirtableData-Input": {
+        "properties": {
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "List of tables (simplified, assumes single base)"
+          }
+        },
+        "type": "object",
+        "title": "AirtableData",
+        "description": "Complete Airtable sandbox data structure.\n\nHierarchy:\n- Bases contain Tables\n- Tables contain Fields (schema) and Records (data)\n- Records contain field values\n\nNote: For sandbox purposes, we typically work with a single base\nand multiple tables within it."
+      },
+      "AirtableData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AirtableField": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Field name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Field type (singleLineText, multilineText, number, singleSelect, multipleSelects, date, checkbox, url, email, phoneNumber, attachment, etc.)"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options",
+            "description": "Field options (e.g., choices for select fields)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "AirtableField",
+        "description": "Airtable Field definition (column schema)"
+      },
+      "AirtableRecord": {
+        "properties": {
+          "fields": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Fields",
+            "description": "Dictionary of field names to values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "title": "AirtableRecord",
+        "description": "Airtable Record object (a row in a table)"
+      },
+      "AirtableTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Table description"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableField"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields",
+            "description": "Field definitions for this table"
+          },
+          "records": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AirtableRecord"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records",
+            "description": "Records in this table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AirtableTable",
+        "description": "Airtable Table object"
+      },
       "ApiKeyAuth": {
         "properties": {
           "token": {
@@ -10090,6 +11407,143 @@
         "title": "CloseTask",
         "description": "Close Task object - child of Lead"
       },
+      "ConfluenceComment": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Comment text content (storage format)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "ConfluenceComment",
+        "description": "Confluence Comment object"
+      },
+      "ConfluenceData-Input": {
+        "properties": {
+          "spaces": {
+            "items": {
+              "$ref": "#/components/schemas/ConfluenceSpace"
+            },
+            "type": "array",
+            "title": "Spaces",
+            "description": "List of spaces"
+          }
+        },
+        "type": "object",
+        "title": "ConfluenceData",
+        "description": "Complete Confluence sandbox data structure.\n\nHierarchy:\n- Spaces contain Pages\n- Pages can have children (nested pages) and Comments"
+      },
+      "ConfluenceData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ConfluencePage-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Page title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Page content (storage format)"
+          },
+          "children": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluencePage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Children",
+            "description": "Child pages"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluenceComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this page"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "body"
+        ],
+        "title": "ConfluencePage",
+        "description": "Confluence Page object"
+      },
+      "ConfluencePage-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ConfluenceSpace": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "Space key (e.g., DS)"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Space name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Space description"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ConfluencePage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "Root pages in this space"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name"
+        ],
+        "title": "ConfluenceSpace",
+        "description": "Confluence Space object"
+      },
       "ConnectionType": {
         "type": "string",
         "enum": [
@@ -10324,6 +11778,111 @@
         ],
         "title": "DeleteUserResponse"
       },
+      "DiscordChannel": {
+        "properties": {
+          "channel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel Id",
+            "description": "Discord channel ID (auto-discovered if not provided)"
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordMessage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "description": "Messages in this channel"
+          }
+        },
+        "type": "object",
+        "title": "DiscordChannel",
+        "description": "Discord Channel - uses existing channel by ID"
+      },
+      "DiscordData-Input": {
+        "properties": {
+          "channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "List of channels"
+          }
+        },
+        "type": "object",
+        "title": "DiscordData",
+        "description": "Complete Discord sandbox data structure.\n\nHierarchy:\n- Channels contain Messages\n- Messages can have Reactions"
+      },
+      "DiscordData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "DiscordMessage": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Message text content"
+          },
+          "reactions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DiscordReaction"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reactions",
+            "description": "Reactions to this message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "DiscordMessage",
+        "description": "Discord Message object"
+      },
+      "DiscordReaction": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Emoji (Unicode like '👍' or custom 'name:id')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DiscordReaction",
+        "description": "Discord Reaction object"
+      },
       "DropboxData": {
         "properties": {
           "folders": {
@@ -10382,6 +11941,37 @@
         ],
         "title": "DropboxFile",
         "description": "Dropbox file data\n\nAttributes:\n    path: Full path to the file (e.g., \"/SandboxTest/document.txt\")\n    content: Text content of the file"
+      },
+      "DumpSandboxResponse_AirtableData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AirtableData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[AirtableData]"
       },
       "DumpSandboxResponse_AsanaData_": {
         "properties": {
@@ -10507,6 +12097,68 @@
         ],
         "title": "DumpSandboxResponse[CloseData]"
       },
+      "DumpSandboxResponse_ConfluenceData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ConfluenceData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[ConfluenceData]"
+      },
+      "DumpSandboxResponse_DiscordData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DiscordData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[DiscordData]"
+      },
       "DumpSandboxResponse_DropboxData_": {
         "properties": {
           "sandbox_id": {
@@ -10537,6 +12189,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[DropboxData]"
+      },
+      "DumpSandboxResponse_GitHubData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GitHubData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GitHubData]"
       },
       "DumpSandboxResponse_GmailData_": {
         "properties": {
@@ -10662,6 +12345,37 @@
         ],
         "title": "DumpSandboxResponse[GoogleDriveData]"
       },
+      "DumpSandboxResponse_GoogleFormsData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleFormsData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleFormsData]"
+      },
       "DumpSandboxResponse_GoogleSheetsData_": {
         "properties": {
           "sandbox_id": {
@@ -10755,6 +12469,37 @@
         ],
         "title": "DumpSandboxResponse[JiraData]"
       },
+      "DumpSandboxResponse_LinearData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LinearData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[LinearData]"
+      },
       "DumpSandboxResponse_Mem0Data_": {
         "properties": {
           "sandbox_id": {
@@ -10847,6 +12592,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[MsTeamsData]"
+      },
+      "DumpSandboxResponse_NotionData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/NotionData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[NotionData]"
       },
       "DumpSandboxResponse_OneDriveData_": {
         "properties": {
@@ -11064,6 +12840,68 @@
           "data"
         ],
         "title": "DumpSandboxResponse[ShopifyData]"
+      },
+      "DumpSandboxResponse_SlackData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SlackData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[SlackData]"
+      },
+      "DumpSandboxResponse_SnowflakeData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SnowflakeData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[SnowflakeData]"
       },
       "DumpSandboxResponse_SupabaseData_": {
         "properties": {
@@ -11467,6 +13305,527 @@
           "createdAt"
         ],
         "title": "GetUserResponse"
+      },
+      "GitHubBranch-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Branch name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubFolder-Input"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Root folder structure for this branch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubBranch",
+        "description": "GitHub Branch object"
+      },
+      "GitHubBranch-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Branch name"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubFolder-Output"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Root folder structure for this branch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubBranch",
+        "description": "GitHub Branch object"
+      },
+      "GitHubData-Input": {
+        "properties": {
+          "repos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubRepo-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repos",
+            "description": "List of repositories"
+          }
+        },
+        "type": "object",
+        "title": "GitHubData",
+        "description": "Complete GitHub sandbox data structure"
+      },
+      "GitHubData-Output": {
+        "properties": {
+          "repos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubRepo-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repos",
+            "description": "List of repositories"
+          }
+        },
+        "type": "object",
+        "title": "GitHubData",
+        "description": "Complete GitHub sandbox data structure"
+      },
+      "GitHubFile": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "File name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "File path within the repository"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "File content (base64 encoded for binary files)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFile",
+        "description": "GitHub File object"
+      },
+      "GitHubFolder-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Folder path within the repository"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "Files within this folder"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFolder-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "Subfolders within this folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFolder",
+        "description": "GitHub Folder object"
+      },
+      "GitHubFolder-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Folder name"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Folder path within the repository"
+          },
+          "files": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFile"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Files",
+            "description": "Files within this folder"
+          },
+          "folders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubFolder-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folders",
+            "description": "Subfolders within this folder"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "GitHubFolder",
+        "description": "GitHub Folder object"
+      },
+      "GitHubIssue": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Issue ID (read-only, set by GitHub)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Issue title"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Issue description/body"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Issue state: open or closed",
+            "default": "open"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "List of label names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GitHubIssue",
+        "description": "GitHub Issue object"
+      },
+      "GitHubPullRequest": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "PR ID (read-only, set by GitHub)"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Pull request title"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body",
+            "description": "Pull request description/body"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "PR state: open, closed, or merged",
+            "default": "open"
+          },
+          "head": {
+            "type": "string",
+            "title": "Head",
+            "description": "Head branch name"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base",
+            "description": "Base branch name",
+            "default": "main"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "List of label names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "head"
+        ],
+        "title": "GitHubPullRequest",
+        "description": "GitHub Pull Request object"
+      },
+      "GitHubRepo-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Repository name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Repository description"
+          },
+          "branches": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubBranch-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branches",
+            "description": "List of branches with their folder structures"
+          },
+          "prs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubPullRequest"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prs",
+            "description": "List of pull requests"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "List of issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubRepo",
+        "description": "GitHub Repository object"
+      },
+      "GitHubRepo-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Repository name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Repository description"
+          },
+          "branches": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubBranch-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branches",
+            "description": "List of branches with their folder structures"
+          },
+          "prs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubPullRequest"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prs",
+            "description": "List of pull requests"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GitHubIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "List of issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GitHubRepo",
+        "description": "GitHub Repository object"
       },
       "GmailData": {
         "properties": {
@@ -12020,6 +14379,327 @@
         ],
         "title": "GoogleDriveFile",
         "description": "Google Drive file or folder object"
+      },
+      "GoogleFormsData-Input": {
+        "properties": {
+          "forms": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsForm-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forms",
+            "description": "List of Google Forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsData",
+        "description": "Complete Google Forms sandbox data structure"
+      },
+      "GoogleFormsData-Output": {
+        "properties": {
+          "forms": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsForm-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forms",
+            "description": "List of Google Forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsData",
+        "description": "Complete Google Forms sandbox data structure"
+      },
+      "GoogleFormsForm-Input": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/GoogleFormsInfo",
+            "description": "Required. The title and description of the form"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsFormSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The form's settings"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "A list of the form's items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "title": "GoogleFormsForm",
+        "description": "Google Forms form object - matches API Form resource"
+      },
+      "GoogleFormsForm-Output": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/GoogleFormsInfo",
+            "description": "Required. The title and description of the form"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsFormSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The form's settings"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "A list of the form's items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "title": "GoogleFormsForm",
+        "description": "Google Forms form object - matches API Form resource"
+      },
+      "GoogleFormsFormSettings": {
+        "properties": {
+          "quizSettings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsQuizSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Settings related to quiz forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsFormSettings",
+        "description": "Form settings - matches API FormSettings object"
+      },
+      "GoogleFormsInfo": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "The title of the form visible to responders"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "The description of the form"
+          },
+          "documentTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documenttitle",
+            "description": "The title of the document visible in Drive (output only, can be set on create)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleFormsInfo",
+        "description": "Form info - matches API Info object"
+      },
+      "GoogleFormsItem": {
+        "properties": {
+          "itemId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Itemid",
+            "description": "The item ID"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "The title of the item"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "The description of the item"
+          },
+          "questionItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questionitem",
+            "description": "Poses a question to the user"
+          },
+          "questionGroupItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questiongroupitem",
+            "description": "Poses one or more questions with a single major prompt"
+          },
+          "pageBreakItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagebreakitem",
+            "description": "Starts a new page with a title"
+          },
+          "textItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Textitem",
+            "description": "Displays a title and description on the page"
+          },
+          "imageItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imageitem",
+            "description": "Displays an image on the page"
+          },
+          "videoItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Videoitem",
+            "description": "Displays a video on the page"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsItem",
+        "description": "Form item - matches API Item object. Uses Dict for flexibility to match API structure."
+      },
+      "GoogleFormsQuizSettings": {
+        "properties": {
+          "isQuiz": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isquiz",
+            "description": "Whether this form is a quiz"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsQuizSettings",
+        "description": "Quiz settings - matches API QuizSettings object"
       },
       "GoogleSheetsCellValue": {
         "properties": {
@@ -13162,6 +15842,225 @@
         "title": "JiraSprint",
         "description": "Jira Sprint object"
       },
+      "LinearComment": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Comment text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "LinearComment",
+        "description": "Linear Comment object"
+      },
+      "LinearData-Input": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/LinearProject-Input"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of projects with their issues. At most 50 projects can be included."
+          }
+        },
+        "type": "object",
+        "title": "LinearData",
+        "description": "Complete Linear sandbox data structure.\n\nRelational structure for initialization:\n- Projects contain Issues\n- Issues contain Comments"
+      },
+      "LinearData-Output": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/LinearProject-Output"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "List of projects with their issues. At most 50 projects can be included."
+          }
+        },
+        "type": "object",
+        "title": "LinearData",
+        "description": "Complete Linear sandbox data structure.\n\nRelational structure for initialization:\n- Projects contain Issues\n- Issues contain Comments"
+      },
+      "LinearIssue": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Issue title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Issue description"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Issue priority (0=No priority, 1=Urgent, 2=High, 3=Medium, 4=Low)"
+          },
+          "state_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Name",
+            "description": "Name of the workflow state (e.g., 'Todo', 'In Progress', 'Done')"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this issue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "LinearIssue",
+        "description": "Linear Issue object"
+      },
+      "LinearProject-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Project state (planned, started, paused, completed, canceled)"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues in this project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LinearProject",
+        "description": "Linear Project object"
+      },
+      "LinearProject-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State",
+            "description": "Project state (planned, started, paused, completed, canceled)"
+          },
+          "issues": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LinearIssue"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issues",
+            "description": "Issues in this project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LinearProject",
+        "description": "Linear Project object"
+      },
       "ListToolsRequest": {
         "properties": {
           "serverUrl": {
@@ -13332,6 +16231,7 @@
           "Google Drive",
           "Google Jobs",
           "Google Sheets",
+          "Google Forms",
           "Hacker News",
           "Heygen",
           "HubSpot",
@@ -14325,6 +17225,262 @@
         "title": "MsTeamsData",
         "description": "Complete Microsoft Teams sandbox data structure"
       },
+      "NotionBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Block type (paragraph, heading_1, heading_2, etc.)"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Block text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "content"
+        ],
+        "title": "NotionBlock",
+        "description": "Notion Block object - fundamental content unit.\n\nBlocks can be: paragraph, heading_1, heading_2, heading_3, bulleted_list_item,\nnumbered_list_item, to_do, toggle, code, quote, callout, etc."
+      },
+      "NotionComment": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Comment text content (rich text)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "NotionComment",
+        "description": "Notion Comment object - can be attached to pages or blocks"
+      },
+      "NotionData-Input": {
+        "properties": {
+          "databases": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionDatabase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Databases",
+            "description": "List of databases with their data sources and pages"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionPage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "List of standalone pages (not in databases)"
+          }
+        },
+        "type": "object",
+        "title": "NotionData",
+        "description": "Complete Notion sandbox data structure.\n\nHierarchical structure for initialization:\n- Databases contain Data Sources\n- Data Sources contain Pages (with properties matching the schema)\n- Standalone Pages exist at top level (not in databases)\n- Pages contain Blocks (content) and Comments\n\nRelational structure:\n- Pages refer to Data Sources (via data_source_name)\n- Data Sources are nested in Databases"
+      },
+      "NotionData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "NotionDataSource": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Data source name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Data source description"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema",
+            "description": "Schema definition (property types and configurations)"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionPage"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages",
+            "description": "Pages (items/rows) in this data source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "NotionDataSource",
+        "description": "Notion Data Source object - represents a table within a database.\n\nNew in API version 2025-09-03:\n- A database can contain multiple data sources\n- Each data source has its own schema (properties)\n- Pages within a data source follow that schema"
+      },
+      "NotionDatabase": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Database title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Database description"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon",
+            "description": "Database icon (emoji or external URL)"
+          },
+          "data_sources": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionDataSource"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Sources",
+            "description": "Data sources within this database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "NotionDatabase",
+        "description": "Notion Database object - container for data sources.\n\nDatabases organize structured data and can contain multiple data sources.\nEach data source represents a table with its own schema."
+      },
+      "NotionPage": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Page title"
+          },
+          "properties": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Properties",
+            "description": "Page properties (for database pages)"
+          },
+          "blocks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionBlock"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocks",
+            "description": "Content blocks in this page"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/NotionComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this page"
+          },
+          "data_source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Name",
+            "description": "Name of the data source this page belongs to (for initialization)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "NotionPage",
+        "description": "Notion Page object.\n\nPages can be:\n1. Standalone pages (top-level in workspace)\n2. Items/rows within a database data source\n\nFor pages in databases, properties should match the data source schema."
+      },
       "OAuthServerName": {
         "type": "string",
         "enum": [
@@ -14349,6 +17505,7 @@
           "Google Docs",
           "Google Drive",
           "Google Sheets",
+          "Google Forms",
           "HubSpot",
           "Jira",
           "Klaviyo",
@@ -14366,6 +17523,7 @@
           "QuickBooks",
           "Salesforce",
           "Slack",
+          "Snowflake",
           "Stripe",
           "Supabase",
           "Vercel",
@@ -16649,13 +19807,14 @@
           "google_docs",
           "gmail",
           "google_calendar",
+          "google_forms",
           "clickup",
           "close",
           "monday",
           "onedrive",
-          "teams",
+          "microsoft_teams",
           "outlook_mail",
-          "calcom",
+          "Cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
@@ -16664,7 +19823,11 @@
           "resend",
           "wordpress",
           "mem0",
-          "supabase"
+          "supabase",
+          "slack",
+          "confluence",
+          "discord",
+          "snowflake"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -17098,6 +20261,329 @@
         ],
         "title": "ShopifyProductVariant",
         "description": "Product variant within a Shopify product\n\nAttributes:\n    price: Product variant price\n    sku: Stock Keeping Unit identifier\n    inventory_quantity: Available inventory count"
+      },
+      "SlackChannel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Channel name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Channel description/purpose"
+          },
+          "is_private": {
+            "type": "boolean",
+            "title": "Is Private",
+            "description": "Whether the channel is private",
+            "default": false
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackMessage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages",
+            "description": "Messages in this channel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SlackChannel",
+        "description": "Slack Channel (Conversation) object"
+      },
+      "SlackData-Input": {
+        "properties": {
+          "channels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackChannel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channels",
+            "description": "List of channels"
+          }
+        },
+        "type": "object",
+        "title": "SlackData",
+        "description": "Complete Slack sandbox data structure.\n\nHierarchy:\n- Channels contain Messages\n- Messages can have Reactions and Replies (threads)"
+      },
+      "SlackData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SlackMessage-Input": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Message text content"
+          },
+          "reactions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackReaction"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reactions",
+            "description": "Reactions to this message"
+          },
+          "replies": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SlackMessage-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replies",
+            "description": "Thread replies to this message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "SlackMessage",
+        "description": "Slack Message object"
+      },
+      "SlackMessage-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SlackReaction": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Emoji name (without colons, e.g., 'thumbsup')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SlackReaction",
+        "description": "Slack Reaction object"
+      },
+      "SnowflakeColumn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Column name"
+          },
+          "data_type": {
+            "type": "string",
+            "title": "Data Type",
+            "description": "Column data type (e.g., VARCHAR, NUMBER, TIMESTAMP)"
+          },
+          "nullable": {
+            "type": "boolean",
+            "title": "Nullable",
+            "description": "Whether the column can be NULL",
+            "default": true
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default",
+            "description": "Default value for the column"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "data_type"
+        ],
+        "title": "SnowflakeColumn",
+        "description": "Snowflake Table Column definition"
+      },
+      "SnowflakeData-Input": {
+        "properties": {
+          "databases": {
+            "items": {
+              "$ref": "#/components/schemas/SnowflakeDatabase"
+            },
+            "type": "array",
+            "title": "Databases",
+            "description": "List of databases with their schemas"
+          }
+        },
+        "type": "object",
+        "title": "SnowflakeData",
+        "description": "Complete Snowflake sandbox data structure.\n\nHierarchical structure for initialization:\n- Databases contain Schemas\n- Schemas contain Tables\n- Tables contain Columns and Rows"
+      },
+      "SnowflakeData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeDatabase": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Database name, cannot be 'SNOWFLAKE' or 'USER$...' since they are default databases"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment",
+            "description": "Database comment/description"
+          },
+          "schemas": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schemas",
+            "description": "Schemas in this database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SnowflakeDatabase",
+        "description": "Snowflake Database object"
+      },
+      "SnowflakeRow": {
+        "properties": {
+          "values": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Values",
+            "description": "Column name to value mapping for the row"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "SnowflakeRow",
+        "description": "Snowflake Table Row data"
+      },
+      "SnowflakeSchema": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Schema name, cannot be 'PUBLIC' since it's a default schema"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "Tables in this schema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SnowflakeSchema",
+        "description": "Snowflake Schema object (namespace within a database)"
+      },
+      "SnowflakeTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/SnowflakeColumn"
+            },
+            "type": "array",
+            "title": "Columns",
+            "description": "List of columns in the table"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeRow"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows",
+            "description": "Initial data rows for the table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "columns"
+        ],
+        "title": "SnowflakeTable",
+        "description": "Snowflake Table object"
       },
       "StatusResponse": {
         "properties": {

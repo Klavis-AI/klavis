@@ -279,6 +279,13 @@
                 "group": "Individual MCP Servers",
                 "pages": [
                   {
+                    "group": "Airtable",
+                    "pages": [
+                      "api-reference/sandbox/airtable/initialize-airtable",
+                      "api-reference/sandbox/airtable/dump-airtable"
+                    ]
+                  },
+                  {
                     "group": "Asana",
                     "pages": [
                       "api-reference/sandbox/asana/initialize-asana",
@@ -307,6 +314,20 @@
                     ]
                   },
                   {
+                    "group": "Confluence",
+                    "pages": [
+                      "api-reference/sandbox/confluence/initialize-confluence",
+                      "api-reference/sandbox/confluence/dump-confluence"
+                    ]
+                  },
+                  {
+                    "group": "Discord",
+                    "pages": [
+                      "api-reference/sandbox/discord/initialize-discord",
+                      "api-reference/sandbox/discord/dump-discord"
+                    ]
+                  },
+                  {
                     "group": "Dropbox",
                     "pages": [
                       "api-reference/sandbox/dropbox/initialize-dropbox",
@@ -318,6 +339,13 @@
                     "pages": [
                       "api-reference/sandbox/gmail/initialize-gmail",
                       "api-reference/sandbox/gmail/dump-gmail"
+                    ]
+                  },
+                  {
+                    "group": "GitHub",
+                    "pages": [
+                      "api-reference/sandbox/github/initialize-github",
+                      "api-reference/sandbox/github/dump-github"
                     ]
                   },
                   {
@@ -363,6 +391,13 @@
                     ]
                   },
                   {
+                    "group": "Linear",
+                    "pages": [
+                      "api-reference/sandbox/linear/initialize-linear",
+                      "api-reference/sandbox/linear/dump-linear"
+                    ]
+                  },
+                  {
                     "group": "Mem0",
                     "pages": [
                       "api-reference/sandbox/mem0/initialize-mem0",
@@ -374,6 +409,13 @@
                     "pages": [
                       "api-reference/sandbox/moneybird/initialize-moneybird",
                       "api-reference/sandbox/moneybird/dump-moneybird"
+                    ]
+                  },
+                  {
+                    "group": "Notion",
+                    "pages": [
+                      "api-reference/sandbox/notion/initialize-notion",
+                      "api-reference/sandbox/notion/dump-notion"
                     ]
                   },
                   {
@@ -426,10 +468,31 @@
                     ]
                   },
                   {
-                    "group": "Teams",
+                    "group": "Slack",
                     "pages": [
-                      "api-reference/sandbox/teams/initialize-teams",
-                      "api-reference/sandbox/teams/dump-teams"
+                      "api-reference/sandbox/slack/initialize-slack",
+                      "api-reference/sandbox/slack/dump-slack"
+                    ]
+                  },
+                  {
+                    "group": "Snowflake",
+                    "pages": [
+                      "api-reference/sandbox/snowflake/initialize-snowflake",
+                      "api-reference/sandbox/snowflake/dump-snowflake"
+                    ]
+                  },
+                  {
+                    "group": "Supabase",
+                    "pages": [
+                      "api-reference/sandbox/supabase/initialize-supabase",
+                      "api-reference/sandbox/supabase/dump-supabase"
+                    ]
+                  },
+                  {
+                    "group": "Microsoft Teams",
+                    "pages": [
+                      "api-reference/sandbox/microsoft_teams/initialize-microsoft-teams",
+                      "api-reference/sandbox/microsoft_teams/dump-microsoft-teams"
                     ]
                   },
                   {

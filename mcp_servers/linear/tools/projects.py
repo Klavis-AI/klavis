@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict
-from .base import make_graphql_request
+from .base import make_graphql_request, clean_filter_object
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -17,12 +17,13 @@ async def get_projects(team_id: str = None, limit: int = 50, filter: Dict[str, A
             # For projects, we need to filter by teams relation
             project_filter["teams"] = {"some": {"id": {"eq": team_id}}}
         
-        # Add timestamp filters if provided
+        # Add timestamp filters if provided (clean empty values first)
         if filter:
-            if "updatedAt" in filter:
-                project_filter["updatedAt"] = filter["updatedAt"]
-            if "createdAt" in filter:
-                project_filter["createdAt"] = filter["createdAt"]
+            cleaned_filter = clean_filter_object(filter)
+            if "updatedAt" in cleaned_filter:
+                project_filter["updatedAt"] = cleaned_filter["updatedAt"]
+            if "createdAt" in cleaned_filter:
+                project_filter["createdAt"] = cleaned_filter["createdAt"]
         
         # Use filtered query if we have any filters
         if project_filter:
