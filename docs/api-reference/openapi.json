@@ -2803,6 +2803,103 @@
         }
       }
     },
+    "/oauth/google-forms/authorize": {
+      "get": {
+        "tags": [
+          "google-forms-oauth"
+        ],
+        "summary": "Authorize Google Forms",
+        "description": "Start Google Forms OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeGoogleForms",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/oauth/attio/authorize": {
       "get": {
         "tags": [
@@ -7012,6 +7109,116 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DumpSandboxResponse_GoogleDriveData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_forms/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_forms sandbox with data",
+        "description": "Initialize the sandbox with google_forms-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_forms__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleFormsData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_forms/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_forms sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_forms__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleFormsData_"
                 }
               }
             }
@@ -11931,6 +12138,37 @@
         ],
         "title": "DumpSandboxResponse[GoogleDriveData]"
       },
+      "DumpSandboxResponse_GoogleFormsData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleFormsData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleFormsData]"
+      },
       "DumpSandboxResponse_GoogleSheetsData_": {
         "properties": {
           "sandbox_id": {
@@ -13904,6 +14142,327 @@
         "title": "GoogleDriveFile",
         "description": "Google Drive file or folder object"
       },
+      "GoogleFormsData-Input": {
+        "properties": {
+          "forms": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsForm-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forms",
+            "description": "List of Google Forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsData",
+        "description": "Complete Google Forms sandbox data structure"
+      },
+      "GoogleFormsData-Output": {
+        "properties": {
+          "forms": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsForm-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forms",
+            "description": "List of Google Forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsData",
+        "description": "Complete Google Forms sandbox data structure"
+      },
+      "GoogleFormsForm-Input": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/GoogleFormsInfo",
+            "description": "Required. The title and description of the form"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsFormSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The form's settings"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "A list of the form's items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "title": "GoogleFormsForm",
+        "description": "Google Forms form object - matches API Form resource"
+      },
+      "GoogleFormsForm-Output": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/GoogleFormsInfo",
+            "description": "Required. The title and description of the form"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsFormSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The form's settings"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "A list of the form's items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "info"
+        ],
+        "title": "GoogleFormsForm",
+        "description": "Google Forms form object - matches API Form resource"
+      },
+      "GoogleFormsFormSettings": {
+        "properties": {
+          "quizSettings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsQuizSettings"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Settings related to quiz forms"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsFormSettings",
+        "description": "Form settings - matches API FormSettings object"
+      },
+      "GoogleFormsInfo": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "The title of the form visible to responders"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "The description of the form"
+          },
+          "documentTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documenttitle",
+            "description": "The title of the document visible in Drive (output only, can be set on create)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleFormsInfo",
+        "description": "Form info - matches API Info object"
+      },
+      "GoogleFormsItem": {
+        "properties": {
+          "itemId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Itemid",
+            "description": "The item ID"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "The title of the item"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "The description of the item"
+          },
+          "questionItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questionitem",
+            "description": "Poses a question to the user"
+          },
+          "questionGroupItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questiongroupitem",
+            "description": "Poses one or more questions with a single major prompt"
+          },
+          "pageBreakItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagebreakitem",
+            "description": "Starts a new page with a title"
+          },
+          "textItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Textitem",
+            "description": "Displays a title and description on the page"
+          },
+          "imageItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imageitem",
+            "description": "Displays an image on the page"
+          },
+          "videoItem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Videoitem",
+            "description": "Displays a video on the page"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsItem",
+        "description": "Form item - matches API Item object. Uses Dict for flexibility to match API structure."
+      },
+      "GoogleFormsQuizSettings": {
+        "properties": {
+          "isQuiz": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isquiz",
+            "description": "Whether this form is a quiz"
+          }
+        },
+        "type": "object",
+        "title": "GoogleFormsQuizSettings",
+        "description": "Quiz settings - matches API QuizSettings object"
+      },
       "GoogleSheetsCellValue": {
         "properties": {
           "userEnteredValue": {
@@ -15434,6 +15993,7 @@
           "Google Drive",
           "Google Jobs",
           "Google Sheets",
+          "Google Forms",
           "Hacker News",
           "Heygen",
           "HubSpot",
@@ -16707,6 +17267,7 @@
           "Google Docs",
           "Google Drive",
           "Google Sheets",
+          "Google Forms",
           "HubSpot",
           "Jira",
           "Klaviyo",
@@ -19007,6 +19568,7 @@
           "google_docs",
           "gmail",
           "google_calendar",
+          "google_forms",
           "clickup",
           "close",
           "monday",
