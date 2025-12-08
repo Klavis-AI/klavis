@@ -475,6 +475,13 @@
                     ]
                   },
                   {
+                    "group": "Snowflake",
+                    "pages": [
+                      "api-reference/sandbox/snowflake/initialize-snowflake",
+                      "api-reference/sandbox/snowflake/dump-snowflake"
+                    ]
+                  },
+                  {
                     "group": "Supabase",
                     "pages": [
                       "api-reference/sandbox/supabase/initialize-supabase",
