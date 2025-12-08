@@ -21,7 +21,7 @@ process.on("unhandledRejection", (reason, promise) => {
 const server = new McpServer(
   {
     name: "fetch-url-mcp",
-    version: "1`.0.0",
+    version: "1.0.0",
   }
 );
 
