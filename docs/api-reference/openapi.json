@@ -2803,6 +2803,103 @@
         }
       }
     },
+    "/oauth/google-cloud/authorize": {
+      "get": {
+        "tags": [
+          "google-cloud-oauth"
+        ],
+        "summary": "Authorize Google Cloud",
+        "description": "Start Google Cloud OAuth flow\n\nParameters:\n- instance_id: Identifier for the instance requesting authorization\n- client_id: Optional client ID for white labeling\n- scope: Optional scopes to request (comma-separated)\n- redirect_url: Optional URL to redirect to after authorization completes",
+        "operationId": "authorizeGoogleCloud",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the client instance requesting authorization",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/oauth/google-forms/authorize": {
       "get": {
         "tags": [
@@ -10095,6 +10192,116 @@
           }
         }
       }
+    },
+    "/sandbox/snowflake/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize snowflake sandbox with data",
+        "description": "Initialize the sandbox with snowflake-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_snowflake__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnowflakeData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/snowflake/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export snowflake sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_snowflake__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_SnowflakeData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -12664,6 +12871,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[SlackData]"
+      },
+      "DumpSandboxResponse_SnowflakeData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SnowflakeData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[SnowflakeData]"
       },
       "DumpSandboxResponse_SupabaseData_": {
         "properties": {
@@ -19587,7 +19825,8 @@
           "supabase",
           "slack",
           "confluence",
-          "discord"
+          "discord",
+          "snowflake"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -20159,6 +20398,191 @@
         ],
         "title": "SlackReaction",
         "description": "Slack Reaction object"
+      },
+      "SnowflakeColumn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Column name"
+          },
+          "data_type": {
+            "type": "string",
+            "title": "Data Type",
+            "description": "Column data type (e.g., VARCHAR, NUMBER, TIMESTAMP)"
+          },
+          "nullable": {
+            "type": "boolean",
+            "title": "Nullable",
+            "description": "Whether the column can be NULL",
+            "default": true
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default",
+            "description": "Default value for the column"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "data_type"
+        ],
+        "title": "SnowflakeColumn",
+        "description": "Snowflake Table Column definition"
+      },
+      "SnowflakeData-Input": {
+        "properties": {
+          "databases": {
+            "items": {
+              "$ref": "#/components/schemas/SnowflakeDatabase"
+            },
+            "type": "array",
+            "title": "Databases",
+            "description": "List of databases with their schemas"
+          }
+        },
+        "type": "object",
+        "title": "SnowflakeData",
+        "description": "Complete Snowflake sandbox data structure.\n\nHierarchical structure for initialization:\n- Databases contain Schemas\n- Schemas contain Tables\n- Tables contain Columns and Rows"
+      },
+      "SnowflakeData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeDatabase": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Database name, cannot be 'SNOWFLAKE' or 'USER$...' since they are default databases"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment",
+            "description": "Database comment/description"
+          },
+          "schemas": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schemas",
+            "description": "Schemas in this database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SnowflakeDatabase",
+        "description": "Snowflake Database object"
+      },
+      "SnowflakeRow": {
+        "properties": {
+          "values": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Values",
+            "description": "Column name to value mapping for the row"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "SnowflakeRow",
+        "description": "Snowflake Table Row data"
+      },
+      "SnowflakeSchema": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Schema name, cannot be 'PUBLIC' since it's a default schema"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "Tables in this schema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "SnowflakeSchema",
+        "description": "Snowflake Schema object (namespace within a database)"
+      },
+      "SnowflakeTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/SnowflakeColumn"
+            },
+            "type": "array",
+            "title": "Columns",
+            "description": "List of columns in the table"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SnowflakeRow"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows",
+            "description": "Initial data rows for the table"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "columns"
+        ],
+        "title": "SnowflakeTable",
+        "description": "Snowflake Table object"
       },
       "StatusResponse": {
         "properties": {
