@@ -17437,7 +17437,8 @@
           "WordPress",
           "YouTube",
           "Zendesk",
-          "ServiceNow"
+          "ServiceNow",
+          "Zoho Mail"
         ],
         "title": "McpServerName"
       },
@@ -18694,7 +18695,8 @@
           "Vercel",
           "WordPress",
           "Xero",
-          "Zendesk"
+          "Zendesk",
+          "Zoho Mail"
         ],
         "title": "OAuthServerName"
       },
