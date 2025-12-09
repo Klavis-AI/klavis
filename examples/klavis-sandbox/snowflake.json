@@ -50,31 +50,99 @@
                 {
                   "values": {
                     "ID": 1,
-                    "NAME": "John Basic",
-                    "EMAIL": "john.basic@example.com",
+                    "NAME": "John Smith",
+                    "EMAIL": "john.smith@example.com",
                     "SERVICE_LEVEL": "Basic",
                     "CUSTOMER_MANAGER": "Sarah Manager",
-                    "CREATED_AT": "2025-12-08 00:00:00"
+                    "CREATED_AT": "2025-12-01 00:00:00"
                   }
                 },
                 {
                   "values": {
                     "ID": 2,
-                    "NAME": "Alice Pro",
-                    "EMAIL": "alice.pro@example.com",
+                    "NAME": "Alice Johnson",
+                    "EMAIL": "alice.johnson@example.com",
                     "SERVICE_LEVEL": "Pro",
                     "CUSTOMER_MANAGER": "Mike Supervisor",
-                    "CREATED_AT": "2025-10-08 00:00:00"
+                    "CREATED_AT": "2025-12-01 00:00:00"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "TICKETS",
+              "columns": [
+                {
+                  "name": "ID",
+                  "data_type": "NUMBER(38,0)",
+                  "nullable": false
+                },
+                {
+                  "name": "USER_ID",
+                  "data_type": "NUMBER(38,0)",
+                  "nullable": false
+                },
+                {
+                  "name": "TITLE",
+                  "data_type": "VARCHAR(500)",
+                  "nullable": false
+                },
+                {
+                  "name": "DESCRIPTION",
+                  "data_type": "TEXT",
+                  "nullable": true
+                },
+                {
+                  "name": "STATUS",
+                  "data_type": "VARCHAR(50)",
+                  "nullable": false
+                },
+                {
+                  "name": "PRIORITY",
+                  "data_type": "VARCHAR(50)",
+                  "nullable": false
+                },
+                {
+                  "name": "CREATED_AT",
+                  "data_type": "TIMESTAMP_NTZ(9)",
+                  "nullable": false
+                },
+                {
+                  "name": "FIRST_RESPONSE_AT",
+                  "data_type": "TIMESTAMP_NTZ(9)",
+                  "nullable": true
+                },
+                {
+                  "name": "RESOLVED_AT",
+                  "data_type": "TIMESTAMP_NTZ(9)",
+                  "nullable": true
+                }
+              ],
+              "rows": [
+                {
+                  "values": {
+                    "ID": 101,
+                    "USER_ID": 1,
+                    "TITLE": "Cannot access dashboard",
+                    "DESCRIPTION": "Getting 404 error when trying to access main dashboard",
+                    "STATUS": "Open",
+                    "PRIORITY": "High",
+                    "CREATED_AT": "2025-12-05 10:00:00",
+                    "FIRST_RESPONSE_AT": null,
+                    "RESOLVED_AT": null
                   }
                 },
                 {
                   "values": {
-                    "ID": 3,
-                    "NAME": "Bob Max",
-                    "EMAIL": "bob.max@example.com",
-                    "SERVICE_LEVEL": "Max",
-                    "CUSTOMER_MANAGER": "Sarah Manager",
-                    "CREATED_AT": "2025-10-08 00:00:00"
+                    "ID": 102,
+                    "USER_ID": 2,
+                    "TITLE": "Payment processing failed",
+                    "DESCRIPTION": "Transaction timeout during checkout process",
+                    "STATUS": "Open",
+                    "PRIORITY": "Critical",
+                    "CREATED_AT": "2025-12-07 08:00:00",
+                    "FIRST_RESPONSE_AT": null,
+                    "RESOLVED_AT": null
                   }
                 }
               ]

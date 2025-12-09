@@ -1,5 +1,9 @@
 components:
   schemas:
+    GoogleCloudData-Input:
+      x-fern-type-name: GoogleCloudDataInput
+    GoogleCloudData-Output:
+      x-fern-type-name: GoogleCloudDataOutput
     McpServerName:
       x-fern-enum:
         "GitHub":
@@ -223,3 +227,85 @@ paths:
     get:
       x-fern-sdk-group-name: oauth
       x-fern-sdk-method-name: authorize_monday
+  "/oauth/google-cloud/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_google_cloud
+  "/oauth/google-forms/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_google_forms
+  "/oauth/mscalendar/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_mscalendar
+  "/oauth/sharesight/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_sharesight
+  "/oauth/zoom/authorize":
+    get:
+      x-fern-sdk-group-name: oauth
+      x-fern-sdk-method-name: authorize_zoom
+  "/sandbox/{server_name}":
+    post:
+      operationId: create_sandbox
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: create_sandbox
+  "/sandbox/{server_name}/{sandbox_id}":
+    get:
+      operationId: get_sandbox
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: get_sandbox
+    delete:
+      operationId: delete_sandbox
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: delete_sandbox
+  "/sandbox/{server_name}/{sandbox_id}/reset":
+    post:
+      operationId: reset_sandbox
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: reset_sandbox
+  "/user/{userId}/integrations":
+    get:
+      operationId: get_user_integrations
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: get_user_integrations
+  "/user/{userId}":
+    get:
+      operationId: get_user_by_user_id
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: get_user_by_user_id
+    delete:
+      operationId: delete_user_by_user_id
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: delete_user_by_user_id
+  "/user/":
+    get:
+      operationId: get_all_users
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: get_all_users
+  "/user/set-auth":
+    post:
+      operationId: set_user_auth
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: set_user_auth
+  "/user/{userId}/auth/{serverName}":
+    get:
+      operationId: get_user_auth
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: get_user_auth
+    delete:
+      operationId: delete_user_auth
+      x-fern-sdk-group-name: user
+      x-fern-sdk-method-name: delete_user_auth
+  "/white-labeling/create":
+    post:
+      operationId: create_white_labeling
+      x-fern-sdk-group-name: white_labeling
+      x-fern-sdk-method-name: create_white_labeling
+  "/white-labeling/get/{client_id}":
+    get:
+      operationId: get_white_labeling_by_client_id
+      x-fern-sdk-group-name: white_labeling
+      x-fern-sdk-method-name: get_white_labeling_by_client_id
