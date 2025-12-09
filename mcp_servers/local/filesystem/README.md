@@ -241,7 +241,7 @@ Note: all directories must be mounted to `/projects` by default.
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-filesystem",
+        "/absolute/path/to/mcp_servers/local/filesystem",
         "/Users/username/Desktop",
         "/path/to/other/allowed/dir"
       ]
@@ -300,7 +300,7 @@ Note: all directories must be mounted to `/projects` by default.
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-filesystem",
+        "/absolute/path/to/mcp_servers/local/filesystem",
         "${workspaceFolder}"
       ]
     }
