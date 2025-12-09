@@ -252,17 +252,18 @@ def main(
             # User Info
             types.Tool(
                 name="slack_list_users",
-                description="Lists all users in a Slack team using user token",
+                description="Lists all users in a Slack team. Supports filtering by user ID or name, and flexible response formats.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "cursor": {
                             "type": "string",
-                            "description": "Pagination cursor for getting more results",
+                            "description": "Pagination cursor for next page of results. Use the value from response_metadata.next_cursor in the previous response.",
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of users to return (default 100, max 200)",
+                            "description": "Maximum number of users to return from API (default 100, max 200)",
+                            "default": 100,
                         },
                         "team_id": {
                             "type": "string",
@@ -271,6 +272,20 @@ def main(
                         "include_locale": {
                             "type": "boolean",
                             "description": "Whether to include locale information for each user",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Filter by user ID (exact match). When both user_id and name are provided, results matching either condition are returned (OR search).",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Filter by name (case-insensitive partial match against name or real_name fields). When both user_id and name are provided, results matching either condition are returned (OR search).",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects.",
+                            "default": "concise",
                         },
                     },
                     "required": [],
@@ -665,9 +680,20 @@ def main(
             limit = arguments.get("limit")
             team_id = arguments.get("team_id")
             include_locale = arguments.get("include_locale")
+            user_id = arguments.get("user_id")
+            name = arguments.get("name")
+            response_format = arguments.get("response_format")
 
             try:
-                result = await list_users(cursor, limit, team_id, include_locale)
+                result = await list_users(
+                    cursor=cursor,
+                    limit=limit,
+                    team_id=team_id,
+                    include_locale=include_locale,
+                    user_id=user_id,
+                    name=name,
+                    response_format=response_format,
+                )
                 return [
                     types.TextContent(
                         type="text",
