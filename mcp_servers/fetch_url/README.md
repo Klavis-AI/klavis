@@ -1,6 +1,6 @@
 # MCP NPX Fetch
 
-A HTTP transportation version of https://github.com/tokenizin-agency/mcp-npx-fetch. It's a MCP server that will fetch url and covert to the following format: HTLM, Text, Markdown, JSON
+A HTTP transportation version of https://github.com/tokenizin-agency/mcp-npx-fetch. It's a MCP server that will fetch url and covert to the following format: HTML, Text, Markdown, JSON
 
 ## 💻 Local Development
 
@@ -13,7 +13,7 @@ npm install
 2. Start local deployment
 
 ```bash
-npm rum build
+npm run build
 npm start
 ```
 
