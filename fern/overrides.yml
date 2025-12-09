@@ -1,13 +1,110 @@
 components:
   schemas:
+    # Fix duplicate type names from FastAPI -Input/-Output schema variants
+    AirtableData-Input:
+      x-fern-type-name: AirtableDataInput
+    AirtableData-Output:
+      x-fern-type-name: AirtableDataOutput
+    AsanaData-Input:
+      x-fern-type-name: AsanaDataInput
+    AsanaData-Output:
+      x-fern-type-name: AsanaDataOutput
+    CalcomData-Input:
+      x-fern-type-name: CalcomDataInput
+    CalcomData-Output:
+      x-fern-type-name: CalcomDataOutput
+    ClickUpData-Input:
+      x-fern-type-name: ClickUpDataInput
+    ClickUpData-Output:
+      x-fern-type-name: ClickUpDataOutput
+    CloseData-Input:
+      x-fern-type-name: CloseDataInput
+    CloseData-Output:
+      x-fern-type-name: CloseDataOutput
+    ConfluenceData-Input:
+      x-fern-type-name: ConfluenceDataInput
+    ConfluenceData-Output:
+      x-fern-type-name: ConfluenceDataOutput
+    DiscordData-Input:
+      x-fern-type-name: DiscordDataInput
+    DiscordData-Output:
+      x-fern-type-name: DiscordDataOutput
+    GitHubData-Input:
+      x-fern-type-name: GitHubDataInput
+    GitHubData-Output:
+      x-fern-type-name: GitHubDataOutput
+    GoogleCalendarData-Input:
+      x-fern-type-name: GoogleCalendarDataInput
+    GoogleCalendarData-Output:
+      x-fern-type-name: GoogleCalendarDataOutput
     GoogleCloudData-Input:
       x-fern-type-name: GoogleCloudDataInput
     GoogleCloudData-Output:
       x-fern-type-name: GoogleCloudDataOutput
+    GoogleFormsData-Input:
+      x-fern-type-name: GoogleFormsDataInput
+    GoogleFormsData-Output:
+      x-fern-type-name: GoogleFormsDataOutput
+    GoogleSheetsData-Input:
+      x-fern-type-name: GoogleSheetsDataInput
+    GoogleSheetsData-Output:
+      x-fern-type-name: GoogleSheetsDataOutput
+    GoogleSheetsGridData-Input:
+      x-fern-type-name: GoogleSheetsGridDataInput
+    GoogleSheetsGridData-Output:
+      x-fern-type-name: GoogleSheetsGridDataOutput
+    HubSpotData-Input:
+      x-fern-type-name: HubSpotDataInput
+    HubSpotData-Output:
+      x-fern-type-name: HubSpotDataOutput
+    JiraData-Input:
+      x-fern-type-name: JiraDataInput
+    JiraData-Output:
+      x-fern-type-name: JiraDataOutput
+    LinearData-Input:
+      x-fern-type-name: LinearDataInput
+    LinearData-Output:
+      x-fern-type-name: LinearDataOutput
+    MoneybirdData-Input:
+      x-fern-type-name: MoneybirdDataInput
+    MoneybirdData-Output:
+      x-fern-type-name: MoneybirdDataOutput
+    MsTeamsData-Input:
+      x-fern-type-name: MsTeamsDataInput
+    MsTeamsData-Output:
+      x-fern-type-name: MsTeamsDataOutput
+    NotionData-Input:
+      x-fern-type-name: NotionDataInput
+    NotionData-Output:
+      x-fern-type-name: NotionDataOutput
+    OneDriveData-Input:
+      x-fern-type-name: OneDriveDataInput
+    OneDriveData-Output:
+      x-fern-type-name: OneDriveDataOutput
+    ResendData-Input:
+      x-fern-type-name: ResendDataInput
+    ResendData-Output:
+      x-fern-type-name: ResendDataOutput
+    ShopifyData-Input:
+      x-fern-type-name: ShopifyDataInput
+    ShopifyData-Output:
+      x-fern-type-name: ShopifyDataOutput
+    SlackData-Input:
+      x-fern-type-name: SlackDataInput
+    SlackData-Output:
+      x-fern-type-name: SlackDataOutput
+    SnowflakeData-Input:
+      x-fern-type-name: SnowflakeDataInput
+    SnowflakeData-Output:
+      x-fern-type-name: SnowflakeDataOutput
+    SupabaseData-Input:
+      x-fern-type-name: SupabaseDataInput
+    SupabaseData-Output:
+      x-fern-type-name: SupabaseDataOutput
     McpServerName:
       x-fern-enum:
         "GitHub":
-          name: GITHUB 
+          name: GITHUB
         "YouTube":
           name: YOUTUBE
         "ClickUp":
@@ -227,23 +324,277 @@ paths:
     get:
       x-fern-sdk-group-name: oauth
       x-fern-sdk-method-name: authorize_monday
-  "/oauth/google-cloud/authorize":
+  # Fix sandbox dump endpoints - all 35 sandbox types need unique method names
+  "/sandbox/airtable/{sandbox_id}/dump":
     get:
-      x-fern-sdk-group-name: oauth
-      x-fern-sdk-method-name: authorize_google_cloud
-  "/oauth/google-forms/authorize":
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_airtable_sandbox
+  "/sandbox/asana/{sandbox_id}/dump":
     get:
-      x-fern-sdk-group-name: oauth
-      x-fern-sdk-method-name: authorize_google_forms
-  "/oauth/mscalendar/authorize":
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_asana_sandbox
+  "/sandbox/Cal.com/{sandbox_id}/dump":
     get:
-      x-fern-sdk-group-name: oauth
-      x-fern-sdk-method-name: authorize_mscalendar
-  "/oauth/sharesight/authorize":
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_calcom_sandbox
+  "/sandbox/clickup/{sandbox_id}/dump":
     get:
-      x-fern-sdk-group-name: oauth
-      x-fern-sdk-method-name: authorize_sharesight
-  "/oauth/zoom/authorize":
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_clickup_sandbox
+  "/sandbox/close/{sandbox_id}/dump":
     get:
-      x-fern-sdk-group-name: oauth
-      x-fern-sdk-method-name: authorize_zoom
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_close_sandbox
+  "/sandbox/confluence/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_confluence_sandbox
+  "/sandbox/discord/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_discord_sandbox
+  "/sandbox/dropbox/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_dropbox_sandbox
+  "/sandbox/github/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_github_sandbox
+  "/sandbox/gmail/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_gmail_sandbox
+  "/sandbox/google_calendar/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_calendar_sandbox
+  "/sandbox/google_cloud/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_cloud_sandbox
+  "/sandbox/google_docs/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_docs_sandbox
+  "/sandbox/google_drive/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_drive_sandbox
+  "/sandbox/google_forms/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_forms_sandbox
+  "/sandbox/google_sheets/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_google_sheets_sandbox
+  "/sandbox/hubspot/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_hubspot_sandbox
+  "/sandbox/jira/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_jira_sandbox
+  "/sandbox/linear/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_linear_sandbox
+  "/sandbox/mem0/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_mem0_sandbox
+  "/sandbox/microsoft_teams/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_microsoft_teams_sandbox
+  "/sandbox/moneybird/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_moneybird_sandbox
+  "/sandbox/notion/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_notion_sandbox
+  "/sandbox/onedrive/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_onedrive_sandbox
+  "/sandbox/outlook_calendar/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_outlook_calendar_sandbox
+  "/sandbox/outlook_mail/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_outlook_mail_sandbox
+  "/sandbox/quickbooks/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_quickbooks_sandbox
+  "/sandbox/resend/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_resend_sandbox
+  "/sandbox/salesforce/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_salesforce_sandbox
+  "/sandbox/shopify/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_shopify_sandbox
+  "/sandbox/slack/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_slack_sandbox
+  "/sandbox/snowflake/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_snowflake_sandbox
+  "/sandbox/supabase/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_supabase_sandbox
+  "/sandbox/wordpress/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_wordpress_sandbox
+  # Fix sandbox initialize endpoints - all 35 sandbox types need unique method names
+  "/sandbox/airtable/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_airtable_sandbox
+  "/sandbox/asana/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_asana_sandbox
+  "/sandbox/Cal.com/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_calcom_sandbox
+  "/sandbox/clickup/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_clickup_sandbox
+  "/sandbox/close/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_close_sandbox
+  "/sandbox/confluence/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_confluence_sandbox
+  "/sandbox/discord/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_discord_sandbox
+  "/sandbox/dropbox/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_dropbox_sandbox
+  "/sandbox/github/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_github_sandbox
+  "/sandbox/gmail/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_gmail_sandbox
+  "/sandbox/google_calendar/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_calendar_sandbox
+  "/sandbox/google_cloud/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_cloud_sandbox
+  "/sandbox/google_docs/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_docs_sandbox
+  "/sandbox/google_drive/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_drive_sandbox
+  "/sandbox/google_forms/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_forms_sandbox
+  "/sandbox/google_sheets/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_google_sheets_sandbox
+  "/sandbox/hubspot/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_hubspot_sandbox
+  "/sandbox/jira/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_jira_sandbox
+  "/sandbox/linear/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_linear_sandbox
+  "/sandbox/mem0/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_mem0_sandbox
+  "/sandbox/microsoft_teams/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_microsoft_teams_sandbox
+  "/sandbox/moneybird/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_moneybird_sandbox
+  "/sandbox/notion/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_notion_sandbox
+  "/sandbox/onedrive/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_onedrive_sandbox
+  "/sandbox/outlook_calendar/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_outlook_calendar_sandbox
+  "/sandbox/outlook_mail/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_outlook_mail_sandbox
+  "/sandbox/quickbooks/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_quickbooks_sandbox
+  "/sandbox/resend/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_resend_sandbox
+  "/sandbox/salesforce/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_salesforce_sandbox
+  "/sandbox/shopify/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_shopify_sandbox
+  "/sandbox/slack/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_slack_sandbox
+  "/sandbox/snowflake/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_snowflake_sandbox
+  "/sandbox/supabase/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_supabase_sandbox
+  "/sandbox/wordpress/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_wordpress_sandbox
