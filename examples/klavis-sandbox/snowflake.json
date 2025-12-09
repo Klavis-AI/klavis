@@ -53,7 +53,7 @@
                     "NAME": "John Smith",
                     "EMAIL": "john.smith@example.com",
                     "SERVICE_LEVEL": "Basic",
-                    "CUSTOMER_MANAGER": "Sarah Manager",
+                    "CUSTOMER_MANAGER": "sarah.manager@example.com",
                     "CREATED_AT": "2025-12-01 00:00:00"
                   }
                 },
@@ -63,7 +63,7 @@
                     "NAME": "Alice Johnson",
                     "EMAIL": "alice.johnson@example.com",
                     "SERVICE_LEVEL": "Pro",
-                    "CUSTOMER_MANAGER": "Mike Supervisor",
+                    "CUSTOMER_MANAGER": "mike.supervisor@example.com",
                     "CREATED_AT": "2025-12-01 00:00:00"
                   }
                 }
@@ -140,8 +140,8 @@
                     "DESCRIPTION": "Transaction timeout during checkout process",
                     "STATUS": "Open",
                     "PRIORITY": "Critical",
-                    "CREATED_AT": "2025-12-07 08:00:00",
-                    "FIRST_RESPONSE_AT": null,
+                    "CREATED_AT": "2025-12-09 00:00:00",
+                    "FIRST_RESPONSE_AT": "2025-12-09 08:00:00",
                     "RESOLVED_AT": null
                   }
                 }
