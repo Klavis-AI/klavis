@@ -1,6 +1,0 @@
-klavis>=2.15.0
-python-dotenv
-langchain
-langchain-mcp-adapters
-langgraph
-langchain-openai
