@@ -1,0 +1,8 @@
+<svg width="400" height="100" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="800" height="200" fill="#0F172A" rx="20"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="bold" text-anchor="start" dominant-baseline="text-before-edge">
+    <text x="130" y="125" font-size="60" fill="#38BDF8">Excel</text>
+    <text x="310" y="125" font-size="60" fill="#FACC15">MCP</text>
+    <text x="470" y="125" font-size="60" fill="#4ADE80">Server</text>
+  </g>
+</svg> 

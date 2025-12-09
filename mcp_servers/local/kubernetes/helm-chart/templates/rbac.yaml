@@ -1,0 +1,53 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.rbac.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.rbac.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+rules:
+{{- if .Values.rbac.useLegacyRules }}
+{{- with .Values.rbac.legacyRules }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- else }}
+{{- with .Values.rbac.rules }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.rbac.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.rbac.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "mcp-server-kubernetes.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

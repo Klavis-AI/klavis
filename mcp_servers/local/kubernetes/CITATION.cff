@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use kubernetes mcp server, please cite it as below."
+abstract: "MCP Server for interacting with Kubernetes clusters via kubectl, enabling management and troubleshooting of Kubernetes resources."
+authors:
+  - family-names: "Patel"
+    given-names: "Paras"
+    orcid: "https://orcid.org/0009-0000-4058-8214"
+  - family-names: "Sonwalkar"
+    given-names: "Suyog"
+    orcid: "https://orcid.org/0009-0002-7352-5978"
+title: "MCP Server Kubernetes"
+version: 3.0.1
+date-released: 2024-07-30
+url: "https://github.com/Flux159/mcp-server-kubernetes"

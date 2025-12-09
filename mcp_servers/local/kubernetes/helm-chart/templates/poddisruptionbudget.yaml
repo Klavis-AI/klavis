@@ -1,0 +1,28 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.podDisruptionBudget.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.podDisruptionBudget.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  {{- if .Values.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mcp-server-kubernetes.selectorLabels" . | nindent 6 }}
+{{- end }}

@@ -1,0 +1,3690 @@
+{
+  "metadata": {
+    "version": "4.1",
+    "description": "Unified comprehensive slide layout templates with enhanced dynamic features and modern 2024 design trends",
+    "created_date": "2025-01-20",
+    "updated_date": "2025-06-20",
+    "total_templates": 31,
+    "supported_features": [
+      "Dynamic text sizing and wrapping",
+      "Multiple font combinations per template",
+      "Advanced visual effects for all elements",
+      "Gradient backgrounds and overlays",
+      "Shadow and glow effects",
+      "Automatic content adaptation",
+      "Stylistic text variations",
+      "Professional animation readiness",
+      "Interactive hover effects",
+      "Animated counters and metrics",
+      "Smart content overflow handling",
+      "Multi-layer gradient backgrounds",
+      "Text placeholders",
+      "Image placeholders", 
+      "Chart placeholders",
+      "Table placeholders",
+      "Shape elements",
+      "Professional color schemes",
+      "Typography styles",
+      "Layout positioning",
+      "Custom image masks (circle, hexagon)",
+      "Interactive poll elements",
+      "Organic shape design",
+      "Neon cyberpunk styling",
+      "Nature-inspired themes",
+      "Minimalist clean aesthetics",
+      "Pastel color schemes",
+      "Brutalist bold typography",
+      "Split-screen comparisons",
+      "Product showcase layouts",
+      "Real-time visualization",
+      "Modern gradient effects"
+    ]
+  },
+  "color_schemes": {
+    "modern_blue": {
+      "primary": [0, 120, 215],
+      "secondary": [40, 40, 40],
+      "accent1": [0, 176, 240],
+      "accent2": [255, 192, 0],
+      "light": [247, 247, 247],
+      "text": [68, 68, 68],
+      "gradient_start": [0, 176, 240],
+      "gradient_end": [0, 120, 215]
+    },
+    "corporate_gray": {
+      "primary": [68, 68, 68],
+      "secondary": [0, 120, 215],
+      "accent1": [89, 89, 89],
+      "accent2": [217, 217, 217],
+      "light": [242, 242, 242],
+      "text": [51, 51, 51],
+      "gradient_start": [217, 217, 217],
+      "gradient_end": [89, 89, 89]
+    },
+    "elegant_green": {
+      "primary": [70, 136, 71],
+      "secondary": [255, 255, 255],
+      "accent1": [146, 208, 80],
+      "accent2": [112, 173, 71],
+      "light": [238, 236, 225],
+      "text": [89, 89, 89],
+      "gradient_start": [146, 208, 80],
+      "gradient_end": [70, 136, 71]
+    },
+    "warm_red": {
+      "primary": [192, 80, 77],
+      "secondary": [68, 68, 68],
+      "accent1": [230, 126, 34],
+      "accent2": [241, 196, 15],
+      "light": [253, 253, 253],
+      "text": [44, 62, 80],
+      "gradient_start": [241, 196, 15],
+      "gradient_end": [192, 80, 77]
+    },
+    "pastel_dream": {
+      "primary": [156, 136, 255],
+      "secondary": [255, 154, 162],
+      "accent1": [255, 206, 147],
+      "accent2": [163, 228, 215],
+      "light": [248, 248, 255],
+      "text": [88, 88, 88],
+      "gradient_start": [255, 206, 147],
+      "gradient_end": [156, 136, 255]
+    },
+    "nature_earth": {
+      "primary": [101, 123, 131],
+      "secondary": [162, 132, 94],
+      "accent1": [218, 215, 205],
+      "accent2": [143, 151, 121],
+      "light": [245, 243, 238],
+      "text": [68, 68, 68],
+      "gradient_start": [218, 215, 205],
+      "gradient_end": [101, 123, 131]
+    },
+    "neon_vibrant": {
+      "primary": [255, 20, 147],
+      "secondary": [0, 191, 255],
+      "accent1": [57, 255, 20],
+      "accent2": [255, 140, 0],
+      "light": [248, 248, 248],
+      "text": [34, 34, 34],
+      "gradient_start": [255, 20, 147],
+      "gradient_end": [0, 191, 255]
+    },
+    "minimalist_mono": {
+      "primary": [34, 34, 34],
+      "secondary": [128, 128, 128],
+      "accent1": [68, 68, 68],
+      "accent2": [187, 187, 187],
+      "light": [250, 250, 250],
+      "text": [51, 51, 51],
+      "gradient_start": [187, 187, 187],
+      "gradient_end": [68, 68, 68]
+    }
+  },
+  "typography_styles": {
+    "modern_sans": {
+      "title": {"name": "Segoe UI", "weight": "bold", "style": "normal"},
+      "subtitle": {"name": "Segoe UI Light", "weight": "normal", "style": "normal"},
+      "body": {"name": "Segoe UI", "weight": "normal", "style": "normal"},
+      "accent": {"name": "Segoe UI Semibold", "weight": "semibold", "style": "normal"}
+    },
+    "elegant_serif": {
+      "title": {"name": "Times New Roman", "weight": "bold", "style": "normal"},
+      "subtitle": {"name": "Georgia", "weight": "normal", "style": "italic"},
+      "body": {"name": "Times New Roman", "weight": "normal", "style": "normal"},
+      "accent": {"name": "Georgia", "weight": "bold", "style": "normal"}
+    },
+    "tech_modern": {
+      "title": {"name": "Arial", "weight": "bold", "style": "normal"},
+      "subtitle": {"name": "Helvetica", "weight": "light", "style": "normal"},
+      "body": {"name": "Arial", "weight": "normal", "style": "normal"},
+      "accent": {"name": "Helvetica", "weight": "bold", "style": "normal"}
+    },
+    "organic_flow": {
+      "title": {"name": "Montserrat", "weight": "bold", "style": "normal"},
+      "subtitle": {"name": "Open Sans", "weight": "light", "style": "normal"},
+      "body": {"name": "Source Sans Pro", "weight": "normal", "style": "normal"},
+      "accent": {"name": "Montserrat", "weight": "semibold", "style": "normal"}
+    },
+    "brutalist_bold": {
+      "title": {"name": "Impact", "weight": "bold", "style": "normal"},
+      "subtitle": {"name": "Arial Black", "weight": "normal", "style": "normal"},
+      "body": {"name": "Helvetica", "weight": "normal", "style": "normal"},
+      "accent": {"name": "Impact", "weight": "normal", "style": "normal"}
+    }
+  },
+  "typography": {
+    "title": {
+      "font_name": "Segoe UI",
+      "font_size_large": 36,
+      "font_size_medium": 28,
+      "font_size_small": 24,
+      "bold": true
+    },
+    "subtitle": {
+      "font_name": "Segoe UI Light",
+      "font_size_large": 20,
+      "font_size_medium": 18,
+      "font_size_small": 16,
+      "bold": false
+    },
+    "body": {
+      "font_name": "Segoe UI",
+      "font_size_large": 16,
+      "font_size_medium": 14,
+      "font_size_small": 12,
+      "bold": false
+    },
+    "caption": {
+      "font_name": "Segoe UI",
+      "font_size_large": 12,
+      "font_size_medium": 10,
+      "font_size_small": 9,
+      "bold": false
+    }
+  },
+  "text_effects": {
+    "shadow_soft": {
+      "type": "shadow",
+      "blur_radius": 3.0,
+      "distance": 2.0,
+      "direction": 315.0,
+      "color": [0, 0, 0],
+      "transparency": 0.4
+    },
+    "shadow_strong": {
+      "type": "shadow",
+      "blur_radius": 6.0,
+      "distance": 4.0,
+      "direction": 315.0,
+      "color": [0, 0, 0],
+      "transparency": 0.6
+    },
+    "glow_subtle": {
+      "type": "glow",
+      "size": 3.0,
+      "color_role": "accent1",
+      "transparency": 0.3
+    },
+    "glow_vibrant": {
+      "type": "glow",
+      "size": 8.0,
+      "color_role": "accent2",
+      "transparency": 0.5
+    },
+    "outline_thin": {
+      "type": "outline",
+      "width": 1.0,
+      "color_role": "primary"
+    },
+    "outline_thick": {
+      "type": "outline",
+      "width": 2.5,
+      "color_role": "secondary"
+    }
+  },
+  "image_effects": {
+    "professional_shadow": {
+      "shadow": {
+        "blur_radius": 8.0,
+        "distance": 5.0,
+        "direction": 315.0,
+        "color": [0, 0, 0],
+        "transparency": 0.3
+      },
+      "border": {
+        "width": 2.0,
+        "color": [255, 255, 255]
+      }
+    },
+    "modern_glow": {
+      "glow": {
+        "size": 6.0,
+        "color_role": "accent1",
+        "transparency": 0.4
+      },
+      "soft_edges": {
+        "radius": 4.0
+      }
+    },
+    "elegant_frame": {
+      "border": {
+        "width": 3.0,
+        "color_role": "primary"
+      },
+      "reflection": {
+        "size": 0.3,
+        "transparency": 0.4
+      }
+    },
+    "custom_mask_circle": {
+      "mask_type": "circle",
+      "border_radius": "50%",
+      "shadow": {
+        "blur_radius": 12.0,
+        "distance": 6.0,
+        "color": [0, 0, 0],
+        "transparency": 0.25
+      }
+    },
+    "custom_mask_hexagon": {
+      "mask_type": "polygon",
+      "polygon_points": 6,
+      "glow": {
+        "size": 8.0,
+        "color_role": "accent1",
+        "transparency": 0.3
+      }
+    },
+    "neon_outline": {
+      "border": {
+        "width": 4.0,
+        "color_role": "accent1"
+      },
+      "glow": {
+        "size": 10.0,
+        "color_role": "accent1",
+        "transparency": 0.6
+      },
+      "double_exposure": true
+    },
+    "organic_blend": {
+      "blend_mode": "multiply",
+      "organic_mask": true,
+      "soft_edges": {
+        "radius": 8.0
+      },
+      "color_overlay": {
+        "color_role": "accent2",
+        "opacity": 0.2
+      }
+    }
+  },
+  "dynamic_sizing": {
+    "text_length_thresholds": {
+      "short": 50,
+      "medium": 150,
+      "long": 300,
+      "very_long": 500
+    },
+    "font_size_adjustments": {
+      "short": {"multiplier": 1.2, "min_size": 14, "max_size": 36},
+      "medium": {"multiplier": 1.0, "min_size": 12, "max_size": 28},
+      "long": {"multiplier": 0.9, "min_size": 10, "max_size": 24},
+      "very_long": {"multiplier": 0.8, "min_size": 9, "max_size": 18}
+    },
+    "line_spacing_adjustments": {
+      "short": 1.0,
+      "medium": 1.2,
+      "long": 1.3,
+      "very_long": 1.4
+    }
+  },
+  "auto_sizing_rules": {
+    "text_measurement": {
+      "characters_per_line": {
+        "title": 40,
+        "subtitle": 50,
+        "body": 60,
+        "caption": 70
+      },
+      "base_font_sizes": {
+        "title": {"min": 18, "max": 44, "default": 28},
+        "subtitle": {"min": 14, "max": 24, "default": 18},
+        "body": {"min": 10, "max": 18, "default": 14},
+        "caption": {"min": 8, "max": 14, "default": 11}
+      }
+    },
+    "dynamic_adjustments": {
+      "content_overflow": {
+        "action": "reduce_font_size",
+        "min_reduction": 1,
+        "max_reduction": 4
+      },
+      "content_underflow": {
+        "action": "increase_font_size", 
+        "max_increase": 2
+      },
+      "line_wrapping": {
+        "enabled": true,
+        "break_long_words": false,
+        "preserve_formatting": true
+      }
+    }
+  },
+  "effect_presets": {
+    "professional": {
+      "text_effects": ["shadow_soft"],
+      "image_effects": ["professional_shadow"],
+      "shape_effects": ["shadow_soft", "glow_subtle"]
+    },
+    "modern": {
+      "text_effects": ["glow_subtle", "shadow_soft"],
+      "image_effects": ["modern_glow"],
+      "shape_effects": ["glow_vibrant", "shadow_strong"]
+    },
+    "elegant": {
+      "text_effects": ["outline_thin", "shadow_soft"],
+      "image_effects": ["elegant_frame"],
+      "shape_effects": ["shadow_soft"]
+    },
+    "neon_cyberpunk": {
+      "text_effects": ["glow_vibrant", "outline_thick"],
+      "image_effects": ["neon_outline"],
+      "shape_effects": ["glow_vibrant", "shadow_strong"]
+    },
+    "organic_nature": {
+      "text_effects": ["shadow_soft"],
+      "image_effects": ["organic_blend"],
+      "shape_effects": ["shadow_soft", "glow_subtle"]
+    },
+    "minimalist_clean": {
+      "text_effects": ["outline_thin"],
+      "image_effects": ["custom_mask_circle"],
+      "shape_effects": ["shadow_soft"]
+    },
+    "brutalist_bold": {
+      "text_effects": ["shadow_strong", "outline_thick"],
+      "image_effects": ["custom_mask_hexagon"],
+      "shape_effects": ["shadow_strong", "glow_vibrant"]
+    }
+  },
+  "templates": {
+    "title_slide": {
+      "name": "Dynamic Title Slide",
+      "description": "Main title slide with gradient background and text effects",
+      "layout_type": "title",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 1.0,
+            "top": 2.0,
+            "width": 8.0,
+            "height": 2.0
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_strong", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "gradient_text": true,
+            "gradient_colors": ["primary", "accent1"]
+          },
+          "placeholder_text": "Transform Your Business",
+          "dynamic_content": {
+            "short_version": "Success",
+            "medium_version": "Business Success",
+            "long_version": "Transform Your Business for Success"
+          }
+        },
+        {
+          "type": "text",
+          "role": "subtitle",
+          "position": {
+            "left": 1.0,
+            "top": 4.2,
+            "width": 8.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "italic": true
+          },
+          "placeholder_text": "Strategic Innovation for 2024",
+          "dynamic_content": {
+            "enhancement": "animated_fade_in"
+          }
+        },
+        {
+          "type": "text",
+          "role": "author",
+          "position": {
+            "left": 1.0,
+            "top": 5.8,
+            "width": 8.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "medium",
+            "alignment": "center",
+            "color_role": "accent1",
+            "text_effects": ["outline_thin"],
+            "auto_wrap": true,
+            "bold": true
+          },
+          "placeholder_text": "Leadership Team"
+        },
+        {
+          "type": "shape",
+          "role": "decorative_accent",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 3.5,
+            "top": 6.8,
+            "width": 3.0,
+            "height": 0.1
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "accent2",
+              "direction": "horizontal"
+            },
+            "shadow": "shadow_soft",
+            "no_border": true
+          }
+        }
+      ],
+      "background": {
+        "type": "advanced_gradient",
+        "style": "radial",
+        "start_color_role": "light",
+        "end_color_role": "gradient_end",
+        "opacity": 0.8,
+        "overlay_pattern": "subtle_dots"
+      }
+    },
+    "text_with_image": {
+      "name": "Dynamic Text + Image",
+      "description": "Text content with stylized image and interactive elements",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.4,
+            "width": 9.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "underline": true,
+            "underline_color_role": "accent1"
+          },
+          "placeholder_text": "Revolutionary Solutions"
+        },
+        {
+          "type": "shape",
+          "role": "title_underline",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 0.5,
+            "top": 1.3,
+            "width": 3.0,
+            "height": 0.08
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "horizontal"
+            },
+            "no_border": true,
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "text",
+          "role": "content",
+          "position": {
+            "left": 0.5,
+            "top": 1.8,
+            "width": 4.3,
+            "height": 4.8
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic",
+            "bullet_style": "custom",
+            "bullet_color_role": "accent1",
+            "bullet_shape": "diamond"
+          },
+          "placeholder_text": "◆ Breakthrough innovation in technology\n◆ 250% increase in efficiency metrics\n◆ Sustainable solutions for the future\n◆ Industry-leading performance standards\n◆ Customer satisfaction at 98%",
+          "dynamic_formatting": {
+            "bullet_animation": "slide_in_left",
+            "text_highlight": "accent2",
+            "emphasis_words": ["breakthrough", "250%", "sustainable", "98%"]
+          }
+        },
+        {
+          "type": "image",
+          "role": "supporting",
+          "position": {
+            "left": 5.2,
+            "top": 1.6,
+            "width": 4.3,
+            "height": 4.0
+          },
+          "styling": {
+            "effects": "professional_shadow",
+            "border_radius": 12,
+            "hover_effect": "scale_105",
+            "overlay_gradient": {
+              "color_role": "primary",
+              "opacity": 0.1,
+              "direction": "diagonal"
+            }
+          },
+          "placeholder_text": "High-Impact Visual"
+        },
+        {
+          "type": "shape",
+          "role": "image_frame",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 5.0,
+            "top": 1.4,
+            "width": 4.7,
+            "height": 4.4
+          },
+          "styling": {
+            "fill_color": "transparent",
+            "line_color_role": "accent1",
+            "line_width": 3.0,
+            "border_radius": 15,
+            "glow": "glow_vibrant"
+          }
+        },
+        {
+          "type": "text",
+          "role": "call_to_action",
+          "position": {
+            "left": 2.0,
+            "top": 6.0,
+            "width": 6.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "large",
+            "alignment": "center",
+            "color_role": "accent2",
+            "text_effects": ["shadow_strong", "glow_vibrant"],
+            "auto_wrap": true,
+            "bold": true,
+            "italic": true
+          },
+          "placeholder_text": "Ready to Transform? Let's Begin!"
+        }
+      ],
+      "background": {
+        "type": "layered_gradient",
+        "base_color_role": "light",
+        "accent_gradient": {
+          "start_color_role": "accent1",
+          "end_color_role": "transparent",
+          "opacity": 0.05,
+          "direction": "diagonal"
+        }
+      }
+    },
+    "two_column_text": {
+      "name": "Two Columns of Text",
+      "description": "Two equal columns of text content with dynamic sizing",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Slide Title"
+        },
+        {
+          "type": "text",
+          "role": "content_left",
+          "position": {
+            "left": 0.5,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 5.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Column 1:\n• Point A\n• Point B\n• Point C\n• Supporting details"
+        },
+        {
+          "type": "text",
+          "role": "content_right",
+          "position": {
+            "left": 5.25,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 5.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Column 2:\n• Point D\n• Point E\n• Point F\n• Additional details"
+        }
+      ]
+    },
+    "two_column_text_images": {
+      "name": "Two Columns Text + Images",
+      "description": "Two columns with text and corresponding images with effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Comparison Title"
+        },
+        {
+          "type": "text",
+          "role": "content_left",
+          "position": {
+            "left": 0.5,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Left Section:\n• Key point 1\n• Key point 2"
+        },
+        {
+          "type": "image",
+          "role": "supporting_left",
+          "position": {
+            "left": 0.5,
+            "top": 4.2,
+            "width": 4.25,
+            "height": 2.3
+          },
+          "styling": {
+            "effects": "professional_shadow",
+            "border_radius": 8
+          },
+          "placeholder_text": "Left Image"
+        },
+        {
+          "type": "text",
+          "role": "content_right",
+          "position": {
+            "left": 5.25,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Right Section:\n• Key point 3\n• Key point 4"
+        },
+        {
+          "type": "image",
+          "role": "supporting_right",
+          "position": {
+            "left": 5.25,
+            "top": 4.2,
+            "width": 4.25,
+            "height": 2.3
+          },
+          "styling": {
+            "effects": "professional_shadow",
+            "border_radius": 8
+          },
+          "placeholder_text": "Right Image"
+        }
+      ]
+    },
+    "three_column_layout": {
+      "name": "Three Columns Text + Images",
+      "description": "Three equal columns with text and images with effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Three-Part Analysis"
+        },
+        {
+          "type": "text",
+          "role": "content_1",
+          "position": {
+            "left": 0.5,
+            "top": 1.5,
+            "width": 2.8,
+            "height": 2.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Section 1:\n• Point A\n• Point B"
+        },
+        {
+          "type": "image",
+          "role": "supporting_1",
+          "position": {
+            "left": 0.5,
+            "top": 3.7,
+            "width": 2.8,
+            "height": 2.8
+          },
+          "styling": {
+            "effects": "modern_glow",
+            "border_radius": 10
+          },
+          "placeholder_text": "Image 1"
+        },
+        {
+          "type": "text",
+          "role": "content_2",
+          "position": {
+            "left": 3.6,
+            "top": 1.5,
+            "width": 2.8,
+            "height": 2.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Section 2:\n• Point C\n• Point D"
+        },
+        {
+          "type": "image",
+          "role": "supporting_2",
+          "position": {
+            "left": 3.6,
+            "top": 3.7,
+            "width": 2.8,
+            "height": 2.8
+          },
+          "styling": {
+            "effects": "modern_glow",
+            "border_radius": 10
+          },
+          "placeholder_text": "Image 2"
+        },
+        {
+          "type": "text",
+          "role": "content_3",
+          "position": {
+            "left": 6.7,
+            "top": 1.5,
+            "width": 2.8,
+            "height": 2.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Section 3:\n• Point E\n• Point F"
+        },
+        {
+          "type": "image",
+          "role": "supporting_3",
+          "position": {
+            "left": 6.7,
+            "top": 3.7,
+            "width": 2.8,
+            "height": 2.8
+          },
+          "styling": {
+            "effects": "modern_glow",
+            "border_radius": 10
+          },
+          "placeholder_text": "Image 3"
+        }
+      ]
+    },
+    "agenda_slide": {
+      "name": "Agenda/Directory Page",
+      "description": "Table of contents or agenda overview with styling",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Agenda"
+        },
+        {
+          "type": "shape",
+          "role": "decorative",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 1.8,
+            "width": 8.0,
+            "height": 0.1
+          },
+          "styling": {
+            "fill_color_role": "accent1",
+            "no_border": true,
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "text",
+          "role": "agenda_items",
+          "position": {
+            "left": 2.0,
+            "top": 2.5,
+            "width": 6.0,
+            "height": 4.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "1. Introduction\n\n2. Problem Statement\n\n3. Proposed Solution\n\n4. Implementation Plan\n\n5. Timeline & Budget\n\n6. Q&A Session"
+        }
+      ],
+      "background": {
+        "type": "solid",
+        "color_role": "light"
+      }
+    },
+    "chapter_intro": {
+      "name": "Chapter Introduction Page",
+      "description": "Section divider with chapter number and title with effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "shape",
+          "role": "background_accent",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 4.0,
+            "height": 7.5
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "primary",
+              "end_color_role": "accent1",
+              "direction": "diagonal"
+            },
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "chapter_number",
+          "position": {
+            "left": 0.5,
+            "top": 2.0,
+            "width": 3.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "03"
+        },
+        {
+          "type": "text",
+          "role": "chapter_title",
+          "position": {
+            "left": 4.5,
+            "top": 2.5,
+            "width": 5.0,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Chapter Title"
+        },
+        {
+          "type": "text",
+          "role": "chapter_description",
+          "position": {
+            "left": 4.5,
+            "top": 5.0,
+            "width": 5.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Brief description of what this chapter covers"
+        }
+      ]
+    },
+    "thank_you_slide": {
+      "name": "Thank You/End Page",
+      "description": "Closing slide with contact information and effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "thank_you",
+          "position": {
+            "left": 1.0,
+            "top": 2.0,
+            "width": 8.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_strong", "glow_vibrant"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Thank You"
+        },
+        {
+          "type": "text",
+          "role": "questions",
+          "position": {
+            "left": 1.0,
+            "top": 3.8,
+            "width": 8.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "italic": true
+          },
+          "placeholder_text": "Questions & Discussion"
+        },
+        {
+          "type": "text",
+          "role": "contact",
+          "position": {
+            "left": 2.0,
+            "top": 5.5,
+            "width": 6.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Contact Information:\nemail@company.com\nphone: (555) 123-4567"
+        }
+      ],
+      "background": {
+        "type": "professional_gradient",
+        "style": "subtle",
+        "direction": "horizontal"
+      }
+    },
+    "timeline_slide": {
+      "name": "Timeline Page",
+      "description": "Horizontal timeline with milestones and effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Project Timeline"
+        },
+        {
+          "type": "shape",
+          "role": "timeline_line",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 3.5,
+            "width": 8.0,
+            "height": 0.1
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "accent2",
+              "direction": "horizontal"
+            },
+            "no_border": true,
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "shape",
+          "role": "milestone_1",
+          "shape_type": "oval",
+          "position": {
+            "left": 1.5,
+            "top": 3.25,
+            "width": 0.5,
+            "height": 0.5
+          },
+          "styling": {
+            "fill_color_role": "primary",
+            "line_color_role": "primary",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "text",
+          "role": "milestone_1_text",
+          "position": {
+            "left": 1.0,
+            "top": 4.0,
+            "width": 1.5,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Phase 1\nQ1 2024"
+        },
+        {
+          "type": "shape",
+          "role": "milestone_2",
+          "shape_type": "oval",
+          "position": {
+            "left": 3.5,
+            "top": 3.25,
+            "width": 0.5,
+            "height": 0.5
+          },
+          "styling": {
+            "fill_color_role": "primary",
+            "line_color_role": "primary",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "text",
+          "role": "milestone_2_text",
+          "position": {
+            "left": 3.0,
+            "top": 4.0,
+            "width": 1.5,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Phase 2\nQ2 2024"
+        },
+        {
+          "type": "shape",
+          "role": "milestone_3",
+          "shape_type": "oval",
+          "position": {
+            "left": 5.5,
+            "top": 3.25,
+            "width": 0.5,
+            "height": 0.5
+          },
+          "styling": {
+            "fill_color_role": "primary",
+            "line_color_role": "primary",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "text",
+          "role": "milestone_3_text",
+          "position": {
+            "left": 5.0,
+            "top": 4.0,
+            "width": 1.5,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Phase 3\nQ3 2024"
+        },
+        {
+          "type": "shape",
+          "role": "milestone_4",
+          "shape_type": "oval",
+          "position": {
+            "left": 7.5,
+            "top": 3.25,
+            "width": 0.5,
+            "height": 0.5
+          },
+          "styling": {
+            "fill_color_role": "accent2",
+            "line_color_role": "accent2",
+            "shadow": "shadow_soft",
+            "glow": "glow_vibrant"
+          }
+        },
+        {
+          "type": "text",
+          "role": "milestone_4_text",
+          "position": {
+            "left": 7.0,
+            "top": 4.0,
+            "width": 1.5,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Launch\nQ4 2024"
+        }
+      ]
+    },
+    "data_table_slide": {
+      "name": "Data Table Page",
+      "description": "Slide focused on tabular data presentation with styling",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Data Analysis Results"
+        },
+        {
+          "type": "table",
+          "role": "main_data",
+          "position": {
+            "left": 1.0,
+            "top": 1.8,
+            "width": 8.0,
+            "height": 4.2
+          },
+          "table_config": {
+            "rows": 5,
+            "cols": 4,
+            "header_row": true,
+            "data": [
+              ["Metric", "Q1", "Q2", "Q3"],
+              ["Revenue", "$1.2M", "$1.5M", "$1.8M"],
+              ["Growth", "15%", "25%", "20%"],
+              ["Customers", "1,200", "1,500", "1,800"],
+              ["Satisfaction", "4.2/5", "4.4/5", "4.6/5"]
+            ]
+          },
+          "styling": {
+            "header_bg_color_role": "primary",
+            "header_text_color": [255, 255, 255],
+            "body_bg_color_role": "light",
+            "border_color_role": "secondary",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "text",
+          "role": "insights",
+          "position": {
+            "left": 1.0,
+            "top": 6.2,
+            "width": 8.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "italic": true
+          },
+          "placeholder_text": "Key insight: Consistent growth across all metrics with strong customer satisfaction"
+        }
+      ]
+    },
+    "chart_comparison": {
+      "name": "Chart Comparison Page",
+      "description": "Two charts side by side for comparison with effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Performance Comparison"
+        },
+        {
+          "type": "chart",
+          "role": "chart_left",
+          "position": {
+            "left": 0.5,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 4.5
+          },
+          "chart_config": {
+            "type": "column",
+            "title": "Before Implementation",
+            "categories": ["Jan", "Feb", "Mar", "Apr"],
+            "series": [
+              {
+                "name": "Sales",
+                "values": [100, 120, 110, 130]
+              }
+            ]
+          },
+          "styling": {
+            "color_scheme": "corporate_gray",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "chart",
+          "role": "chart_right",
+          "position": {
+            "left": 5.25,
+            "top": 1.5,
+            "width": 4.25,
+            "height": 4.5
+          },
+          "chart_config": {
+            "type": "column",
+            "title": "After Implementation",
+            "categories": ["Jan", "Feb", "Mar", "Apr"],
+            "series": [
+              {
+                "name": "Sales",
+                "values": [140, 170, 160, 190]
+              }
+            ]
+          },
+          "styling": {
+            "color_scheme": "modern_blue",
+            "shadow": "shadow_soft"
+          }
+        },
+        {
+          "type": "text",
+          "role": "comparison_note",
+          "position": {
+            "left": 2.0,
+            "top": 6.2,
+            "width": 6.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "accent1",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "35% average improvement across all metrics"
+        }
+      ]
+    },
+    "full_image_slide": {
+      "name": "Full Image with Overlay Text",
+      "description": "Large background image with text overlay and effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "image",
+          "role": "background",
+          "position": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 10.0,
+            "height": 7.5
+          },
+          "styling": {
+            "transparency": 0.3,
+            "overlay_gradient": {
+              "color_role": "primary",
+              "opacity": 0.2,
+              "direction": "vertical"
+            }
+          },
+          "placeholder_text": "Full Background Image"
+        },
+        {
+          "type": "shape",
+          "role": "text_overlay_bg",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 2.0,
+            "width": 8.0,
+            "height": 3.5
+          },
+          "styling": {
+            "fill_color": [0, 0, 0],
+            "transparency": 0.6,
+            "no_border": true,
+            "border_radius": 15
+          }
+        },
+        {
+          "type": "text",
+          "role": "overlay_title",
+          "position": {
+            "left": 1.5,
+            "top": 2.5,
+            "width": 7.0,
+            "height": 1.2
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong", "glow_vibrant"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "Impactful Statement"
+        },
+        {
+          "type": "text",
+          "role": "overlay_subtitle",
+          "position": {
+            "left": 1.5,
+            "top": 3.8,
+            "width": 7.0,
+            "height": 1.2
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Supporting message or call to action"
+        }
+      ]
+    },
+    "process_flow": {
+      "name": "Process Flow Diagram",
+      "description": "Step-by-step process visualization with enhanced effects",
+      "layout_type": "content",
+      "typography_style": "tech_modern",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.3,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Streamlined Process Architecture"
+        },
+        {
+          "type": "shape",
+          "role": "step_1_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 0.5,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "primary",
+              "end_color_role": "accent1",
+              "direction": "diagonal"
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_subtle",
+            "border_radius": 15,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "step_1_number",
+          "position": {
+            "left": 0.6,
+            "top": 1.0,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "oval",
+              "color_role": "accent2",
+              "shadow": "shadow_strong"
+            }
+          },
+          "placeholder_text": "01"
+        },
+        {
+          "type": "text",
+          "role": "step_1_text",
+          "position": {
+            "left": 0.5,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "vertical_alignment": "middle"
+          },
+          "placeholder_text": "Data\nCollection\n& Analysis"
+        },
+        {
+          "type": "shape",
+          "role": "connector_1",
+          "shape_type": "arrow",
+          "position": {
+            "left": 2.7,
+            "top": 2.4,
+            "width": 1.0,
+            "height": 0.4
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "accent2",
+              "direction": "horizontal"
+            },
+            "glow": "glow_vibrant",
+            "shadow": "shadow_soft",
+            "no_border": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "step_2_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 4.0,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "secondary",
+              "direction": "diagonal"
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_subtle",
+            "border_radius": 15,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "step_2_number",
+          "position": {
+            "left": 4.1,
+            "top": 1.0,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "oval",
+              "color_role": "accent2",
+              "shadow": "shadow_strong"
+            }
+          },
+          "placeholder_text": "02"
+        },
+        {
+          "type": "text",
+          "role": "step_2_text",
+          "position": {
+            "left": 4.0,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "vertical_alignment": "middle"
+          },
+          "placeholder_text": "AI-Powered\nProcessing\n& Optimization"
+        },
+        {
+          "type": "shape",
+          "role": "connector_2",
+          "shape_type": "arrow",
+          "position": {
+            "left": 6.2,
+            "top": 2.4,
+            "width": 1.0,
+            "height": 0.4
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "accent2",
+              "direction": "horizontal"
+            },
+            "glow": "glow_vibrant",
+            "shadow": "shadow_soft",
+            "no_border": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "step_3_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 7.5,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "primary",
+              "direction": "diagonal"
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_vibrant",
+            "border_radius": 15,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "step_3_number",
+          "position": {
+            "left": 7.6,
+            "top": 1.0,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "oval",
+              "color_role": "primary",
+              "shadow": "shadow_strong"
+            }
+          },
+          "placeholder_text": "03"
+        },
+        {
+          "type": "text",
+          "role": "step_3_text",
+          "position": {
+            "left": 7.5,
+            "top": 1.8,
+            "width": 2.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "vertical_alignment": "middle"
+          },
+          "placeholder_text": "Intelligent\nDelivery\n& Results"
+        },
+        {
+          "type": "text",
+          "role": "process_benefits",
+          "position": {
+            "left": 1.0,
+            "top": 4.0,
+            "width": 8.0,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic",
+            "background_shape": {
+              "type": "rounded_rectangle",
+              "color_role": "light",
+              "opacity": 0.8,
+              "shadow": "shadow_soft"
+            }
+          },
+          "placeholder_text": "🎯 Complete automation reduces processing time by 85%\n⚡ Real-time optimization delivers instant insights\n🔄 Continuous learning improves accuracy over time\n📊 Comprehensive analytics provide actionable intelligence\n🚀 Scalable architecture grows with your business needs",
+          "dynamic_formatting": {
+            "icon_glow": "glow_subtle",
+            "emphasis_words": ["85%", "real-time", "continuous", "comprehensive", "scalable"]
+          }
+        }
+      ],
+      "background": {
+        "type": "tech_gradient",
+        "base_gradient": {
+          "start_color_role": "light",
+          "end_color_role": "secondary",
+          "direction": "diagonal",
+          "opacity": 0.1
+        },
+        "tech_pattern": "circuit_subtle"
+      }
+    },
+    "quote_testimonial": {
+      "name": "Quote/Testimonial Slide",
+      "description": "Featured quote or customer testimonial with effects",
+      "layout_type": "content",
+      "typography_style": "elegant_serif",
+      "elements": [
+        {
+          "type": "shape",
+          "role": "quote_mark",
+          "shape_type": "cloud",
+          "position": {
+            "left": 1.0,
+            "top": 1.5,
+            "width": 1.0,
+            "height": 1.0
+          },
+          "styling": {
+            "fill_color_role": "accent1",
+            "no_border": true,
+            "transparency": 0.3,
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "text",
+          "role": "quote_text",
+          "position": {
+            "left": 1.5,
+            "top": 2.5,
+            "width": 7.0,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "italic": true
+          },
+          "placeholder_text": "\"This solution transformed our business operations and increased efficiency by 40%. We couldn't be more satisfied with the results.\""
+        },
+        {
+          "type": "text",
+          "role": "attribution",
+          "position": {
+            "left": 2.0,
+            "top": 5.5,
+            "width": 6.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "— Jane Smith, CEO, Company Name"
+        }
+      ],
+      "background": {
+        "type": "professional_gradient",
+        "style": "subtle",
+        "direction": "vertical"
+      }
+    },
+    "key_metrics_dashboard": {
+      "name": "KPI Dashboard",
+      "description": "Interactive metrics dashboard with animated counters and effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.2,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "gradient_text": true,
+            "gradient_colors": ["primary", "accent1"]
+          },
+          "placeholder_text": "Performance Dashboard 2024"
+        },
+        {
+          "type": "shape",
+          "role": "metric_1_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 0.5,
+            "top": 1.3,
+            "width": 2.2,
+            "height": 2.2
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "diagonal",
+              "angle": 45
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_subtle",
+            "border_radius": 20,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_1_value",
+          "position": {
+            "left": 0.5,
+            "top": 1.6,
+            "width": 2.2,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "94%",
+          "dynamic_content": {
+            "animation": "count_up",
+            "duration": 2000,
+            "from_value": 0
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_1_label",
+          "position": {
+            "left": 0.5,
+            "top": 2.5,
+            "width": 2.2,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Customer\nSatisfaction"
+        },
+        {
+          "type": "shape",
+          "role": "metric_2_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 3.2,
+            "top": 1.3,
+            "width": 2.2,
+            "height": 2.2
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "primary",
+              "direction": "diagonal",
+              "angle": 135
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_subtle",
+            "border_radius": 20,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_2_value",
+          "position": {
+            "left": 3.2,
+            "top": 1.6,
+            "width": 2.2,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "$2.4M",
+          "dynamic_content": {
+            "animation": "count_up",
+            "duration": 2500,
+            "format": "currency"
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_2_label",
+          "position": {
+            "left": 3.2,
+            "top": 2.5,
+            "width": 2.2,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Annual\nRevenue"
+        },
+        {
+          "type": "shape",
+          "role": "metric_3_container",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 5.9,
+            "top": 1.3,
+            "width": 2.2,
+            "height": 2.2
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "secondary",
+              "end_color_role": "accent1",
+              "direction": "radial"
+            },
+            "shadow": "shadow_strong",
+            "glow": "glow_subtle",
+            "border_radius": 20,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_3_value",
+          "position": {
+            "left": 5.9,
+            "top": 1.6,
+            "width": 2.2,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "247",
+          "dynamic_content": {
+            "animation": "count_up",
+            "duration": 1800
+          }
+        },
+        {
+          "type": "text",
+          "role": "metric_3_label",
+          "position": {
+            "left": 5.9,
+            "top": 2.5,
+            "width": 2.2,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "New\nCustomers"
+        },
+        {
+          "type": "chart",
+          "role": "trend_visualization",
+          "position": {
+            "left": 1.0,
+            "top": 4.0,
+            "width": 8.0,
+            "height": 3.0
+          },
+          "chart_config": {
+            "type": "line_smooth",
+            "title": "Performance Trend Analysis",
+            "categories": ["Q1", "Q2", "Q3", "Q4"],
+            "series": [
+              {
+                "name": "Revenue Growth",
+                "values": [100, 125, 150, 180],
+                "color_role": "accent1",
+                "line_style": "smooth_gradient"
+              },
+              {
+                "name": "Customer Acquisition",
+                "values": [80, 95, 120, 145],
+                "color_role": "accent2",
+                "line_style": "smooth_gradient"
+              }
+            ]
+          },
+          "styling": {
+            "background_gradient": {
+              "start_color_role": "light",
+              "end_color_role": "accent1",
+              "opacity": 0.1
+            },
+            "shadow": "shadow_soft"
+          }
+        }
+      ],
+      "background": {
+        "type": "premium_gradient",
+        "base_gradient": {
+          "start_color_role": "light",
+          "end_color_role": "gradient_end",
+          "direction": "radial",
+          "opacity": 0.3
+        },
+        "overlay_pattern": "geometric_subtle"
+      }
+    },
+    "before_after_comparison": {
+      "name": "Before/After Comparison",
+      "description": "Dynamic comparison layout with visual dividers and effects",
+      "layout_type": "content",
+      "typography_style": "tech_modern",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.3,
+            "width": 9.0,
+            "height": 0.9
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "outline_thin"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "letter_spacing": 1.2
+          },
+          "placeholder_text": "Before vs After Transformation"
+        },
+        {
+          "type": "shape",
+          "role": "vs_divider",
+          "shape_type": "oval",
+          "position": {
+            "left": 4.6,
+            "top": 3.0,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "styling": {
+            "fill_color_role": "accent2",
+            "line_color_role": "primary",
+            "line_width": 3.0,
+            "glow": "glow_vibrant",
+            "shadow": "shadow_strong"
+          }
+        },
+        {
+          "type": "text",
+          "role": "vs_text",
+          "position": {
+            "left": 4.6,
+            "top": 3.0,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "vertical_alignment": "middle"
+          },
+          "placeholder_text": "VS"
+        },
+        {
+          "type": "text",
+          "role": "left_header",
+          "position": {
+            "left": 0.5,
+            "top": 1.4,
+            "width": 4.0,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "secondary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "rounded_rectangle",
+              "color_role": "light",
+              "opacity": 0.8
+            }
+          },
+          "placeholder_text": "BEFORE"
+        },
+        {
+          "type": "text",
+          "role": "content_left",
+          "position": {
+            "left": 0.5,
+            "top": 2.1,
+            "width": 4.0,
+            "height": 3.8
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic",
+            "bullet_style": "custom",
+            "bullet_color_role": "secondary",
+            "negative_emphasis": true
+          },
+          "placeholder_text": "✗ Manual processes taking 8+ hours\n✗ 40% error rate in operations\n✗ Limited scalability options\n✗ Customer complaints increasing\n✗ High operational costs\n✗ Inefficient resource allocation",
+          "dynamic_formatting": {
+            "negative_indicators": ["✗", "manual", "error", "limited", "complaints", "high", "inefficient"],
+            "text_color_negative": "secondary"
+          }
+        },
+        {
+          "type": "text",
+          "role": "right_header",
+          "position": {
+            "left": 5.5,
+            "top": 1.4,
+            "width": 4.0,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "rounded_rectangle",
+              "color_role": "accent1",
+              "opacity": 0.2
+            }
+          },
+          "placeholder_text": "AFTER"
+        },
+        {
+          "type": "text",
+          "role": "content_right",
+          "position": {
+            "left": 5.5,
+            "top": 2.1,
+            "width": 4.0,
+            "height": 3.8
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic",
+            "bullet_style": "custom",
+            "bullet_color_role": "primary",
+            "positive_emphasis": true
+          },
+          "placeholder_text": "✓ Automated workflows in 2 hours\n✓ 2% error rate with AI validation\n✓ Infinite scalability in cloud\n✓ 98% customer satisfaction score\n✓ 60% reduction in operational costs\n✓ Optimized resource management",
+          "dynamic_formatting": {
+            "positive_indicators": ["✓", "automated", "AI", "infinite", "98%", "60% reduction", "optimized"],
+            "text_color_positive": "primary",
+            "emphasis_glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "shape",
+          "role": "improvement_arrow",
+          "shape_type": "arrow",
+          "position": {
+            "left": 3.8,
+            "top": 6.2,
+            "width": 2.4,
+            "height": 0.6
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "horizontal"
+            },
+            "glow": "glow_vibrant",
+            "shadow": "shadow_strong",
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "improvement_text",
+          "position": {
+            "left": 3.0,
+            "top": 6.9,
+            "width": 4.0,
+            "height": 0.5
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "accent2",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "italic": true
+          },
+          "placeholder_text": "75% Overall Improvement"
+        }
+      ],
+      "background": {
+        "type": "split_gradient",
+        "left_gradient": {
+          "start_color_role": "secondary",
+          "end_color_role": "light",
+          "opacity": 0.1
+        },
+        "right_gradient": {
+          "start_color_role": "primary",
+          "end_color_role": "light",
+          "opacity": 0.1
+        }
+      }
+    },
+    "team_introduction": {
+      "name": "Team Introduction",
+      "description": "Team member showcase with photos, roles and effects",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "title",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Meet the Team"
+        },
+        {
+          "type": "image",
+          "role": "team_member_1",
+          "position": {
+            "left": 1.0,
+            "top": 2.0,
+            "width": 2.0,
+            "height": 2.0
+          },
+          "styling": {
+            "effects": "elegant_frame",
+            "border_radius": "50%",
+            "hover_effect": "scale_105"
+          },
+          "placeholder_text": "Team Member 1"
+        },
+        {
+          "type": "text",
+          "role": "member_1_name",
+          "position": {
+            "left": 1.0,
+            "top": 4.2,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "Alice Johnson"
+        },
+        {
+          "type": "text",
+          "role": "member_1_role",
+          "position": {
+            "left": 1.0,
+            "top": 4.7,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Project Manager"
+        },
+        {
+          "type": "image",
+          "role": "team_member_2",
+          "position": {
+            "left": 4.0,
+            "top": 2.0,
+            "width": 2.0,
+            "height": 2.0
+          },
+          "styling": {
+            "effects": "elegant_frame",
+            "border_radius": "50%",
+            "hover_effect": "scale_105"
+          },
+          "placeholder_text": "Team Member 2"
+        },
+        {
+          "type": "text",
+          "role": "member_2_name",
+          "position": {
+            "left": 4.0,
+            "top": 4.2,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "Bob Smith"
+        },
+        {
+          "type": "text",
+          "role": "member_2_role",
+          "position": {
+            "left": 4.0,
+            "top": 4.7,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Lead Developer"
+        },
+        {
+          "type": "image",
+          "role": "team_member_3",
+          "position": {
+            "left": 7.0,
+            "top": 2.0,
+            "width": 2.0,
+            "height": 2.0
+          },
+          "styling": {
+            "effects": "elegant_frame",
+            "border_radius": "50%",
+            "hover_effect": "scale_105"
+          },
+          "placeholder_text": "Team Member 3"
+        },
+        {
+          "type": "text",
+          "role": "member_3_name",
+          "position": {
+            "left": 7.0,
+            "top": 4.2,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "Carol Davis"
+        },
+        {
+          "type": "text",
+          "role": "member_3_role",
+          "position": {
+            "left": 7.0,
+            "top": 4.7,
+            "width": 2.0,
+            "height": 0.4
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "UX Designer"
+        },
+        {
+          "type": "text",
+          "role": "team_description",
+          "position": {
+            "left": 1.5,
+            "top": 5.5,
+            "width": 7.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "Our experienced team combines technical expertise with creative vision to deliver exceptional results for every project."
+        }
+      ]
+    },
+    "minimalist_hero": {
+      "name": "Minimalist Hero Slide",
+      "description": "Clean, spacious design with bold typography and minimal elements",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "hero_title",
+          "position": {
+            "left": 1.0,
+            "top": 2.5,
+            "width": 8.0,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["outline_thin"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "letter_spacing": 1.5,
+            "line_height": 1.2
+          },
+          "placeholder_text": "Less is More",
+          "dynamic_content": {
+            "responsive_sizing": true,
+            "min_font_size": 32,
+            "max_font_size": 72
+          }
+        },
+        {
+          "type": "shape",
+          "role": "accent_line",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 4.0,
+            "top": 5.2,
+            "width": 2.0,
+            "height": 0.05
+          },
+          "styling": {
+            "fill_color_role": "accent1",
+            "no_border": true
+          }
+        }
+      ],
+      "background": {
+        "type": "solid",
+        "color_role": "light",
+        "texture": "paper_subtle"
+      }
+    },
+    "neon_cyberpunk": {
+      "name": "Neon Cyberpunk Slide",
+      "description": "Futuristic design with neon colors and cyber elements",
+      "layout_type": "content",
+      "typography_style": "tech_modern",
+      "elements": [
+        {
+          "type": "text",
+          "role": "cyber_title",
+          "position": {
+            "left": 0.5,
+            "top": 1.0,
+            "width": 9.0,
+            "height": 1.5
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "accent1",
+            "text_effects": ["glow_vibrant", "outline_thick"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "text_transform": "uppercase",
+            "letter_spacing": 2.0
+          },
+          "placeholder_text": "FUTURE TECH",
+          "dynamic_content": {
+            "neon_flicker": true,
+            "animation": "glow_pulse"
+          }
+        },
+        {
+          "type": "shape",
+          "role": "cyber_grid",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 10.0,
+            "height": 7.5
+          },
+          "styling": {
+            "fill_color": "transparent",
+            "line_color_role": "accent1",
+            "line_width": 1.0,
+            "opacity": 0.3,
+            "pattern": "grid_cyber"
+          }
+        },
+        {
+          "type": "text",
+          "role": "cyber_content",
+          "position": {
+            "left": 1.0,
+            "top": 3.0,
+            "width": 8.0,
+            "height": 3.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "light",
+            "text_effects": ["glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "◇ Neural network integration\n◇ Quantum processing capabilities\n◇ Holographic interface design\n◇ AI-driven optimization",
+          "dynamic_formatting": {
+            "bullet_glow": true,
+            "typewriter_effect": true
+          }
+        }
+      ],
+      "background": {
+        "type": "cyber_gradient",
+        "base_color": [10, 10, 15],
+        "accent_gradient": {
+          "start_color_role": "accent1",
+          "end_color_role": "accent2",
+          "opacity": 0.2,
+          "direction": "diagonal"
+        },
+        "tech_pattern": "circuit_matrix"
+      }
+    },
+    "nature_organic": {
+      "name": "Organic Nature Slide",
+      "description": "Earth-toned design with organic shapes and natural textures",
+      "layout_type": "content",
+      "typography_style": "organic_flow",
+      "elements": [
+        {
+          "type": "text",
+          "role": "nature_title",
+          "position": {
+            "left": 1.0,
+            "top": 1.0,
+            "width": 8.0,
+            "height": 1.2
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "organic_curve": true
+          },
+          "placeholder_text": "Sustainable Growth"
+        },
+        {
+          "type": "shape",
+          "role": "organic_blob_1",
+          "shape_type": "organic_blob",
+          "position": {
+            "left": 7.0,
+            "top": 0.5,
+            "width": 2.5,
+            "height": 2.0
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "accent2",
+              "direction": "radial"
+            },
+            "opacity": 0.7,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "nature_content",
+          "position": {
+            "left": 1.0,
+            "top": 2.5,
+            "width": 5.5,
+            "height": 4.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "🌱 Renewable energy solutions\n🌍 Carbon-neutral operations\n🌿 Biodegradable materials\n🌊 Water conservation systems"
+        },
+        {
+          "type": "shape",
+          "role": "organic_blob_2",
+          "shape_type": "organic_blob",
+          "position": {
+            "left": 0.2,
+            "top": 5.0,
+            "width": 3.0,
+            "height": 2.0
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "primary",
+              "direction": "radial"
+            },
+            "opacity": 0.5,
+            "no_border": true
+          }
+        }
+      ],
+      "background": {
+        "type": "organic_gradient",
+        "base_color_role": "light",
+        "texture": "organic_paper",
+        "overlay_pattern": "leaves_subtle"
+      }
+    },
+    "interactive_poll": {
+      "name": "Interactive Poll Slide",
+      "description": "Engaging poll slide with interactive elements and real-time visualization",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "poll_question",
+          "position": {
+            "left": 0.5,
+            "top": 0.5,
+            "width": 9.0,
+            "height": 1.2
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "What's your biggest challenge?",
+          "dynamic_content": {
+            "interactive": true,
+            "poll_integration": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "poll_option_1",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 2.0,
+            "width": 8.0,
+            "height": 0.8
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "horizontal"
+            },
+            "border_radius": 25,
+            "shadow": "shadow_soft",
+            "interactive": true,
+            "hover_effect": "scale_102"
+          }
+        },
+        {
+          "type": "text",
+          "role": "poll_option_1_text",
+          "position": {
+            "left": 1.2,
+            "top": 2.1,
+            "width": 6.0,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "A) Time Management"
+        },
+        {
+          "type": "text",
+          "role": "poll_option_1_percentage",
+          "position": {
+            "left": 7.5,
+            "top": 2.1,
+            "width": 1.3,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "right",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "45%",
+          "dynamic_content": {
+            "animation": "count_up",
+            "live_update": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "poll_option_2",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 3.0,
+            "width": 6.0,
+            "height": 0.8
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "secondary",
+              "direction": "horizontal"
+            },
+            "border_radius": 25,
+            "shadow": "shadow_soft",
+            "interactive": true,
+            "hover_effect": "scale_102"
+          }
+        },
+        {
+          "type": "text",
+          "role": "poll_option_2_text",
+          "position": {
+            "left": 1.2,
+            "top": 3.1,
+            "width": 4.5,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "B) Budget Constraints"
+        },
+        {
+          "type": "text",
+          "role": "poll_option_2_percentage",
+          "position": {
+            "left": 6.0,
+            "top": 3.1,
+            "width": 1.0,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "right",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "30%",
+          "dynamic_content": {
+            "animation": "count_up",
+            "live_update": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "poll_option_3",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 1.0,
+            "top": 4.0,
+            "width": 5.0,
+            "height": 0.8
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "primary",
+              "end_color_role": "accent1",
+              "direction": "horizontal"
+            },
+            "border_radius": 25,
+            "shadow": "shadow_soft",
+            "interactive": true,
+            "hover_effect": "scale_102"
+          }
+        },
+        {
+          "type": "text",
+          "role": "poll_option_3_text",
+          "position": {
+            "left": 1.2,
+            "top": 4.1,
+            "width": 3.5,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "C) Team Communication"
+        },
+        {
+          "type": "text",
+          "role": "poll_option_3_percentage",
+          "position": {
+            "left": 5.0,
+            "top": 4.1,
+            "width": 1.0,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "right",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "25%",
+          "dynamic_content": {
+            "animation": "count_up",
+            "live_update": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "poll_instruction",
+          "position": {
+            "left": 1.0,
+            "top": 5.5,
+            "width": 8.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "italic": true
+          },
+          "placeholder_text": "🗳️ Vote now using your mobile device or click on an option"
+        }
+      ],
+      "background": {
+        "type": "interactive_gradient",
+        "base_color_role": "light",
+        "pulse_effect": true
+      }
+    },
+    "split_screen_comparison": {
+      "name": "Split Screen Comparison",
+      "description": "Modern split-screen layout for comparing two concepts or solutions",
+      "layout_type": "content",
+      "typography_style": "tech_modern",
+      "elements": [
+        {
+          "type": "text",
+          "role": "main_title",
+          "position": {
+            "left": 0.5,
+            "top": 0.3,
+            "width": 9.0,
+            "height": 0.9
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "outline_thin"],
+            "auto_wrap": true,
+            "auto_fit": true
+          },
+          "placeholder_text": "Choose Your Path"
+        },
+        {
+          "type": "shape",
+          "role": "left_section_bg",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 0.0,
+            "top": 1.5,
+            "width": 4.9,
+            "height": 6.0
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "diagonal"
+            },
+            "opacity": 0.9,
+            "no_border": true
+          }
+        },
+        {
+          "type": "shape",
+          "role": "right_section_bg",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 5.1,
+            "top": 1.5,
+            "width": 4.9,
+            "height": 6.0
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "secondary",
+              "direction": "diagonal"
+            },
+            "opacity": 0.9,
+            "no_border": true
+          }
+        },
+        {
+          "type": "text",
+          "role": "left_title",
+          "position": {
+            "left": 0.2,
+            "top": 2.0,
+            "width": 4.5,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "TRADITIONAL"
+        },
+        {
+          "type": "text",
+          "role": "right_title",
+          "position": {
+            "left": 5.3,
+            "top": 2.0,
+            "width": 4.5,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "subtitle",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "INNOVATIVE"
+        },
+        {
+          "type": "text",
+          "role": "left_content",
+          "position": {
+            "left": 0.3,
+            "top": 3.0,
+            "width": 4.3,
+            "height": 3.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "• Manual processes\n• Limited scalability\n• Higher costs\n• Slower execution\n• Traditional methods"
+        },
+        {
+          "type": "text",
+          "role": "right_content",
+          "position": {
+            "left": 5.4,
+            "top": 3.0,
+            "width": 4.3,
+            "height": 3.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "• Automated workflows\n• Infinite scalability\n• Cost optimization\n• Rapid deployment\n• AI-powered solutions"
+        },
+        {
+          "type": "shape",
+          "role": "divider_line",
+          "shape_type": "rectangle",
+          "position": {
+            "left": 4.95,
+            "top": 1.5,
+            "width": 0.1,
+            "height": 6.0
+          },
+          "styling": {
+            "fill_color": [255, 255, 255],
+            "opacity": 0.8,
+            "no_border": true
+          }
+        }
+      ],
+      "background": {
+        "type": "split_gradient",
+        "left_gradient": {
+          "start_color_role": "accent1",
+          "end_color_role": "light",
+          "opacity": 0.1
+        },
+        "right_gradient": {
+          "start_color_role": "accent2",
+          "end_color_role": "light",
+          "opacity": 0.1
+        }
+      }
+    },
+    "product_showcase": {
+      "name": "Product Showcase",
+      "description": "Modern product presentation with custom image masks and interactive elements",
+      "layout_type": "content",
+      "typography_style": "modern_sans",
+      "elements": [
+        {
+          "type": "text",
+          "role": "product_title",
+          "position": {
+            "left": 0.5,
+            "top": 0.3,
+            "width": 9.0,
+            "height": 1.0
+          },
+          "styling": {
+            "font_type": "title",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color_role": "primary",
+            "text_effects": ["shadow_soft", "glow_subtle"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "gradient_text": true,
+            "gradient_colors": ["primary", "accent1"]
+          },
+          "placeholder_text": "Revolutionary Product"
+        },
+        {
+          "type": "image",
+          "role": "hero_product",
+          "position": {
+            "left": 1.0,
+            "top": 1.8,
+            "width": 4.0,
+            "height": 4.0
+          },
+          "styling": {
+            "effects": "custom_mask_hexagon",
+            "hover_effect": "rotate_360",
+            "interactive": true,
+            "zoom_on_click": true
+          },
+          "placeholder_text": "Product Hero Image"
+        },
+        {
+          "type": "text",
+          "role": "product_features",
+          "position": {
+            "left": 5.5,
+            "top": 1.8,
+            "width": 4.0,
+            "height": 2.5
+          },
+          "styling": {
+            "font_type": "body",
+            "font_size": "dynamic",
+            "alignment": "left",
+            "color_role": "text",
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "line_spacing": "dynamic"
+          },
+          "placeholder_text": "✨ Cutting-edge technology\n🚀 10x performance boost\n🔒 Enterprise-grade security\n🌐 Global compatibility\n📱 Mobile-first design"
+        },
+        {
+          "type": "shape",
+          "role": "feature_highlight_1",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 5.5,
+            "top": 4.5,
+            "width": 1.8,
+            "height": 1.2
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent1",
+              "end_color_role": "primary",
+              "direction": "diagonal"
+            },
+            "border_radius": 15,
+            "shadow": "shadow_soft",
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "text",
+          "role": "highlight_1_text",
+          "position": {
+            "left": 5.6,
+            "top": 4.8,
+            "width": 1.6,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "99.9%\nUptime"
+        },
+        {
+          "type": "shape",
+          "role": "feature_highlight_2",
+          "shape_type": "rounded_rectangle",
+          "position": {
+            "left": 7.5,
+            "top": 4.5,
+            "width": 1.8,
+            "height": 1.2
+          },
+          "styling": {
+            "fill_gradient": {
+              "start_color_role": "accent2",
+              "end_color_role": "secondary",
+              "direction": "diagonal"
+            },
+            "border_radius": 15,
+            "shadow": "shadow_soft",
+            "glow": "glow_subtle"
+          }
+        },
+        {
+          "type": "text",
+          "role": "highlight_2_text",
+          "position": {
+            "left": 7.6,
+            "top": 4.8,
+            "width": 1.6,
+            "height": 0.6
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_soft"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true
+          },
+          "placeholder_text": "< 1ms\nLatency"
+        },
+        {
+          "type": "text",
+          "role": "cta_button",
+          "position": {
+            "left": 3.0,
+            "top": 6.2,
+            "width": 4.0,
+            "height": 0.8
+          },
+          "styling": {
+            "font_type": "accent",
+            "font_size": "dynamic",
+            "alignment": "center",
+            "color": [255, 255, 255],
+            "text_effects": ["shadow_strong", "glow_vibrant"],
+            "auto_wrap": true,
+            "auto_fit": true,
+            "bold": true,
+            "background_shape": {
+              "type": "rounded_rectangle",
+              "color_role": "accent2",
+              "border_radius": 25,
+              "glow": "glow_vibrant"
+            },
+            "interactive": true,
+            "hover_effect": "scale_105"
+          },
+          "placeholder_text": "Experience the Future →"
+        }
+      ],
+      "background": {
+        "type": "product_gradient",
+        "base_gradient": {
+          "start_color_role": "light",
+          "end_color_role": "accent1",
+          "direction": "radial",
+          "opacity": 0.1
+        },
+        "floating_particles": true
+      }
+    }
+  },
+  "usage_guide": {
+    "basic_usage": "Templates can be applied by specifying the template name and color scheme",
+    "customization": "All elements can be customized including positions, colors, fonts, and content",
+    "positioning": "All positions are in inches from top-left corner of slide (10\" x 7.5\" standard)",
+    "color_roles": "Use color_role to automatically apply colors from selected scheme",
+    "dynamic_features": {
+      "auto_text_sizing": "Text automatically adjusts based on content length and container size",
+      "responsive_layouts": "Elements reposition based on content overflow",
+      "effect_combinations": "Multiple effects can be applied simultaneously",
+      "gradient_backgrounds": "Advanced gradient backgrounds with patterns and animations"
+    },
+    "element_types": [
+      "text - Text content with various formatting options and dynamic sizing",
+      "image - Pictures with positioning, styling and visual effects",
+      "shape - Geometric shapes with gradient fills and advanced effects", 
+      "table - Data tables with header and cell formatting",
+      "chart - Various chart types with data series and styling"
+    ],
+    "styling_tips": [
+      "Use 'dynamic' font size for automatic text fitting",
+      "Combine text effects for maximum visual impact",
+      "Leverage gradient fills for modern appearance",
+      "Apply hover effects for interactive elements",
+      "Use animation properties for engaging presentations"
+    ],
+    "best_practices": [
+      "Use consistent color schemes throughout presentation",
+      "Maintain proper text hierarchy with title/subtitle/body fonts",
+      "Leave adequate white space for readability",
+      "Ensure images are high resolution for professional appearance",
+      "Test layouts with actual content before finalizing",
+      "Enable auto-wrapping for content that may vary in length",
+      "Use dynamic sizing for presentations with variable content"
+    ]
+  },
+  "implementation_notes": {
+    "mcp_integration": "Templates designed to work with existing MCP server tools",
+    "backward_compatibility": "All templates use existing presentation capabilities",
+    "extensibility": "New templates can be added by following the same JSON structure",
+    "automation": "Templates can be automatically applied based on content type detection",
+    "dynamic_features": "Enhanced templates include automatic sizing, wrapping, and effects",
+    "performance": "Optimized algorithms for real-time text sizing and layout adaptation"
+  }
+}

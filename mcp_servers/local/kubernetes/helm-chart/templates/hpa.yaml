@@ -1,0 +1,53 @@
+{{- if .Values.autoscaling.enabled }}
+{{- if semverCompare ">=1.23-0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: autoscaling/v2
+{{- else }}
+apiVersion: autoscaling/v2beta2
+{{- end }}
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.autoscaling.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.autoscaling.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "mcp-server-kubernetes.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- with .Values.autoscaling.customMetrics }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.autoscaling.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}

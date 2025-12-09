@@ -1,0 +1,620 @@
+# Default values for mcp-server-kubernetes
+# This is a YAML-formatted file.
+
+# Image configuration
+image:
+  repository: flux159/mcp-server-kubernetes
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is "latest". Pin to specific version for production.
+  tag: "latest"
+  
+  # Multi-architecture support
+  # Set architecture-specific image tags if needed
+  # architectures:
+  #   amd64: "latest-amd64"
+  #   arm64: "latest-arm64"
+  
+  # Architecture preference (auto-detected if not specified)
+  # Set to specific architecture if needed: amd64, arm64, etc.
+  architecture: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Common labels added to all resources
+commonLabels: {}
+# Example:
+# commonLabels:
+#   environment: production
+#   team: platform
+#   cost-center: engineering
+
+# Common annotations added to all resources  
+commonAnnotations: {}
+# Example:
+# commonAnnotations:
+#   monitoring.coreos.com/enabled: "true"
+#   backup.velero.io/backup-volumes: "data"
+#   policy.kubernetes.io/security-level: "restricted"
+
+# Transport configuration
+transport:
+  # Transport mode: stdio, sse, http
+  mode: "http"
+  
+  # Service configuration (for sse/http modes)
+  service:
+    type: ClusterIP
+    port: 3001
+    targetPort: 3001
+    annotations: {}
+  
+  # Ingress configuration (for sse/http modes)
+  # ⚠️  WARNING: Model Context Protocol (MCP) uses streaming connections
+  # Some ingress controllers and load balancers may not support MCP properly:
+  #
+  # KNOWN ISSUES:
+  # - AWS Classic Load Balancer (ELB): Does not support streaming, use NLB instead
+  # - NGINX Ingress with ELB: May timeout streaming connections, configure timeouts
+  # - CloudFlare: May buffer streaming responses, disable buffering
+  # - Some API Gateways: May not support Server-Sent Events (SSE) properly
+  #
+  # RECOMMENDED CONFIGURATIONS:
+  # - AWS: Use NLB (type: LoadBalancer with aws-load-balancer-type: nlb)
+  # - NGINX: Add streaming timeout annotations (nginx.ingress.kubernetes.io/proxy-read-timeout)
+  # - For production: Test MCP streaming behavior thoroughly with your ingress setup
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    # Example streaming-friendly annotations:
+    # annotations:
+    #   nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    #   nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"  
+    #   nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    #   nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    hosts:
+      - host: mcp-server.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+# Kubeconfig configuration
+kubeconfig:
+  # Provider type: aws, gcp, url, serviceaccount, custom, content
+  provider: "serviceaccount"
+
+  # AWS EKS configuration
+  aws:
+    clusters: []
+    # Example:
+    # clusters:
+    #   - name: "prod-us-east"
+    #     clusterName: "prod-cluster"
+    #     region: "us-east-1"
+    #     roleArn: "arn:aws:iam::123456789:role/EKSAdminRole"
+    #     extraArgs:
+    #       - "--profile=production"
+    #       - "--alias=prod-east"
+    #   - name: "staging-us-west"
+    #     clusterName: "staging-cluster"
+    #     region: "us-west-2"
+    #     roleArn: "arn:aws:iam::987654321:role/EKSReadOnlyRole"
+    #     extraArgs:
+    #       - "--profile=staging"
+    defaultContext: ""
+
+  # GCP GKE configuration
+  gcp:
+    clusters: []
+    # Example:
+    # clusters:
+    #   - name: "prod-cluster"
+    #     clusterName: "prod-gke"
+    #     zone: "us-central1-a"
+    #     project: "company-prod"
+    #     extraArgs:
+    #       - "--internal-ip"
+    #   - name: "staging-cluster"
+    #     clusterName: "staging-gke"
+    #     zone: "us-central1-b"
+    #     project: "company-staging"
+    defaultContext: ""
+    
+  # URL-based configuration
+  url:
+    configs: []
+    # Example:
+    # configs:
+    #   - name: "prod-config"
+    #     url: "https://storage.company.com/prod-kubeconfig.yaml"
+    #     extraArgs:
+    #       - "--header=Authorization: Bearer ${PROD_TOKEN}"
+    #   - name: "staging-config"
+    #     url: "https://storage.company.com/staging-kubeconfig.yaml"
+    #     extraArgs:
+    #       - "--header=Authorization: Bearer ${STAGING_TOKEN}"
+        
+  # Custom command configuration
+  custom:
+    command: ""
+    args: []
+    # Example:
+    # command: "/usr/local/bin/custom-kubeconfig-fetcher"
+    # args:
+    #   - "--cluster-id=special-cluster"
+    #   - "--output-path=/shared/kubeconfig"
+    #   - "--format=kubeconfig"
+    
+  # Direct kubeconfig content
+  content: ""
+  # Example:
+  # content: |
+  #   apiVersion: v1
+  #   kind: Config
+  #   clusters: ...
+  
+  # Environment variables for kubeconfig fetching
+  env: {}
+  # Example:
+  # env:
+  #   AWS_PROFILE: "production"
+  #   GOOGLE_APPLICATION_CREDENTIALS: "/var/secrets/gcp-key.json"
+  #   PROD_TOKEN: "my-auth-token"
+  
+  # Init container retry configuration for kubeconfig fetch
+  initContainer:
+    maxRetries: 3
+    retryDelay: 10
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+# Security configuration
+security:
+  # Tool filtering
+  allowOnlyNonDestructive: false
+  # When enabled, these destructive tools are DISABLED:
+  # kubectl_delete, uninstall_helm_chart, cleanup, kubectl_generic
+  allowOnlyReadonly: false
+  # When enabled, only these read-only tools are available:
+  # kubectl_get, kubectl_describe, kubectl_logs, kubectl_context,
+  # explain_resource, list_api_resources, ping
+  allowedTools: ""  # Comma-separated list of allowed tools
+  # Examples: "kubectl_get,kubectl_describe,kubectl_logs,kubectl_context"
+  # Available tools: kubectl_get, kubectl_describe, kubectl_apply, kubectl_delete,
+  # kubectl_create, kubectl_logs, kubectl_patch, kubectl_scale, kubectl_rollout,
+  # kubectl_generic, kubectl_context, install_helm_chart, upgrade_helm_chart,
+  # uninstall_helm_chart, start_port_forward, stop_port_forward, exec_in_pod,
+  # explain_resource, list_api_resources, ping, cleanup
+  
+  # Pod security context
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# Service Account
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # Examples for cloud provider IAM integration:
+  # 
+  # AWS IRSA (IAM Roles for Service Accounts):
+  # annotations:
+  #   eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/mcp-server-role"
+  #   eks.amazonaws.com/sts-regional-endpoints: "true"
+  #
+  # GCP Workload Identity:
+  # annotations:
+  #   iam.gke.io/gcp-service-account: "mcp-server@my-project.iam.gserviceaccount.com"
+  #
+  #
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# RBAC configuration
+rbac:
+  # Specifies whether RBAC resources should be created
+  create: true
+  # Annotations to add to RBAC resources
+  annotations: {}
+  # Rules for ClusterRole - least-privilege defaults
+  # For production, customize these rules based on your specific needs
+  rules:
+    # Core resources read access
+    - apiGroups: [""]
+      resources: ["pods", "services", "endpoints", "persistentvolumeclaims", "configmaps", "secrets", "namespaces", "nodes"]
+      verbs: ["get", "list", "watch"]
+    
+    # Core resources write access (needed for MCP operations)
+    - apiGroups: [""]
+      resources: ["pods", "services", "endpoints", "persistentvolumeclaims", "configmaps"]
+      verbs: ["create", "update", "patch", "delete"]
+    
+    # Pod exec and logs access (needed for exec_in_pod and logs)
+    - apiGroups: [""]
+      resources: ["pods/exec", "pods/log", "pods/portforward"]
+      verbs: ["create", "get"]
+    
+    # Apps resources
+    - apiGroups: ["apps"]
+      resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    
+    # Batch resources
+    - apiGroups: ["batch"]
+      resources: ["jobs", "cronjobs"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    
+    # Networking
+    - apiGroups: ["networking.k8s.io"]
+      resources: ["networkpolicies", "ingresses"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    
+    # RBAC (read-only for security)
+    - apiGroups: ["rbac.authorization.k8s.io"]
+      resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+      verbs: ["get", "list", "watch"]
+    
+    # Metrics and monitoring
+    - apiGroups: ["metrics.k8s.io"]
+      resources: ["pods", "nodes"]
+      verbs: ["get", "list"]
+    
+    # Custom Resource Definitions (read-only by default)
+    - apiGroups: ["apiextensions.k8s.io"]
+      resources: ["customresourcedefinitions"]
+      verbs: ["get", "list", "watch"]
+    
+    # Events (read-only)
+    - apiGroups: [""]
+      resources: ["events"]
+      verbs: ["get", "list", "watch"]
+  
+  # Advanced RBAC configuration
+  # Set to true to use the more permissive legacy rules (not recommended for production)
+  useLegacyRules: false
+  
+  # Legacy rules (only used if useLegacyRules: true)
+  legacyRules:
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+
+# Pod configuration
+podAnnotations: {}
+podLabels: {}
+
+# Deployment configuration
+replicaCount: 1
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  
+  # Custom metrics for scaling
+  customMetrics: []
+  # Example:
+  # customMetrics:
+  #   - type: Pods
+  #     pods:
+  #       metric:
+  #         name: custom_metric
+  #       target:
+  #         type: AverageValue
+  #         averageValue: "100m"
+  
+  # Scaling behavior configuration
+  behavior: {}
+  # Example:
+  # behavior:
+  #   scaleUp:
+  #     stabilizationWindowSeconds: 60
+  #     policies:
+  #     - type: Percent
+  #       value: 100
+  #       periodSeconds: 15
+  #   scaleDown:
+  #     stabilizationWindowSeconds: 300
+  #     policies:
+  #     - type: Percent
+  #       value: 10
+  #       periodSeconds: 60
+  
+  # Annotations for HPA resource
+  annotations: {}
+
+# Pod Disruption Budget for high availability
+podDisruptionBudget:
+  enabled: false
+  # Define either minAvailable OR maxUnavailable, not both
+  minAvailable: 1
+  # maxUnavailable: 1
+  # maxUnavailable: 50%
+  annotations: {}
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Health check configuration
+# For HTTP/SSE transport modes: uses TCP port checks (default)
+# For stdio mode: uses process checks
+# Override with custom exec, httpGet, or tcpSocket as needed
+
+# Liveness probe - determines if the container should be restarted
+livenessProbe:
+  enabled: false
+  # TCP port check is used by default for HTTP/SSE modes
+  # Process check is used by default for stdio mode
+  # Override with custom configuration:
+  # tcpSocket:
+  #   port: 3001
+  # httpGet:
+  #   path: /health
+  #   port: http
+  # exec:
+  #   command:
+  #   - /bin/sh
+  #   - -c
+  #   - "pgrep -f 'node.*dist/index.js' > /dev/null"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Readiness probe - determines if the container can serve traffic
+readinessProbe:
+  enabled: false
+  # TCP port check is used by default for HTTP/SSE modes
+  # Process check is used by default for stdio mode
+  # Override with custom configuration:
+  # tcpSocket:
+  #   port: 3001
+  # httpGet:
+  #   path: /ready
+  #   port: http
+  # exec:
+  #   command:
+  #   - /bin/sh
+  #   - -c
+  #   - "pgrep -f 'node.*dist/index.js' > /dev/null"
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Startup probe - determines if the container has started successfully
+startupProbe:
+  enabled: false
+  # TCP port check is used by default for HTTP/SSE modes
+  # Process check is used by default for stdio mode
+  # Override with custom configuration:
+  # httpGet:
+  #   path: /ping
+  #   port: http
+  # tcpSocket:
+  #   port: 3001
+  # exec:
+  #   command:
+  #   - /bin/sh
+  #   - -c
+  #   - "pgrep -f 'node.*dist/index.js' > /dev/null"
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30  # Allow up to 5 minutes for startup
+  successThreshold: 1
+
+# Node selection
+nodeSelector: {}
+# Example for architecture-specific node selection:
+# nodeSelector:
+#   kubernetes.io/arch: amd64
+
+tolerations: []
+
+# Affinity configuration
+affinity: {}
+# Example for multi-architecture affinity:
+# affinity:
+#   nodeAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#     - weight: 100
+#       preference:
+#         matchExpressions:
+#         - key: kubernetes.io/arch
+#           operator: In
+#           values: ["amd64", "arm64"]
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/arch
+#           operator: In
+#           values: ["amd64", "arm64"]
+
+# Additional environment variables
+env: {}
+# Example:
+# env:
+#   CUSTOM_VAR: "value"
+
+# Additional volume mounts
+volumeMounts: []
+# Example:
+# volumeMounts:
+#   - name: custom-volume
+#     mountPath: /custom/path
+
+# Additional volumes
+volumes: []
+# Example:
+# volumes:
+#   - name: custom-volume
+#     configMap:
+#       name: custom-configmap
+
+# Network Policy configuration
+networkPolicy:
+  # Enable NetworkPolicy creation
+  enabled: false
+  
+  # Annotations for NetworkPolicy
+  annotations: {}
+  
+  # Default deny all ingress and egress traffic (security best practice)
+  # Users must explicitly define allowed connections below
+  
+  # Flexible DNS configuration for egress rules
+  dns:
+    # Enable automatic DNS egress rules
+    enabled: true
+    # DNS namespace selector (adjust for your cluster)
+    namespaceSelector:
+      matchLabels:
+        name: kube-system
+    # DNS pod selector (adjust for your DNS provider)
+    podSelector:
+      matchLabels:
+        k8s-app: kube-dns
+    # Alternative DNS configurations for different providers
+    # Uncomment and adjust as needed:
+    # CoreDNS:
+    # podSelector:
+    #   matchLabels:
+    #     k8s-app: kube-dns
+    # Amazon EKS DNS:
+    # podSelector:
+    #   matchLabels:
+    #     k8s-app: kube-dns
+    # Custom DNS:
+    # podSelector:
+    #   matchLabels:
+    #     app: custom-dns
+    
+  # Kubernetes API access configuration
+  kubernetesApi:
+    # Enable automatic Kubernetes API egress rules
+    enabled: true
+    # Service CIDR (adjust for your cluster)
+    serviceCidr: "10.96.0.0/12"
+    # Alternative CIDRs for different environments:
+    # GKE default: "10.96.0.0/12"
+    # EKS default: "10.100.0.0/16" or "172.20.0.0/16"
+    # Custom: specify your cluster's service CIDR
+  
+  # Cloud provider API access (for kubeconfig providers)
+  cloudProviderApi:
+    # Enable automatic cloud provider API egress rules
+    enabled: true
+    # Allow all HTTPS traffic (less secure but more compatible)
+    allowAllHttps: true
+    # Specific cloud provider CIDR ranges (more secure)
+    # Set allowAllHttps: false and configure specific ranges:
+    # awsCidrs:
+    #   - "52.94.0.0/16"   # AWS API endpoints
+    #   - "54.239.0.0/16"  # AWS services
+    # gcpCidrs:
+    #   - "35.199.0.0/16"  # Google APIs
+    #   - "199.36.153.8/30" # metadata.google.internal
+  
+  # Metadata services access
+  metadata:
+    # Enable access to cloud metadata services
+    enabled: true
+    # Cloud provider metadata service (AWS/GCP use same IP: 169.254.169.254)
+    cloudMetadata: "169.254.169.254/32"
+  
+  # Ingress rules - traffic coming TO the pod
+  # By default, all ingress is DENIED. Add rules to allow specific traffic.
+  ingress: []
+  # Examples:
+  # ingress:
+  #   # Allow traffic from specific pods with labels
+  #   - from:
+  #       - podSelector:
+  #           matchLabels:
+  #             app: allowed-app
+  #       - namespaceSelector:
+  #           matchLabels:
+  #             name: allowed-namespace
+  #     ports:
+  #       - protocol: TCP
+  #         port: 3001
+  #   
+  #   # Allow traffic from specific CIDR blocks
+  #   - from:
+  #       - ipBlock:
+  #           cidr: 10.0.0.0/8
+  #           except:
+  #             - 10.0.1.0/24
+  #     ports:
+  #       - protocol: TCP
+  #         port: 3001
+  #
+  #   # Allow traffic from ingress controller
+  #   - from:
+  #       - namespaceSelector:
+  #           matchLabels:
+  #             name: ingress-nginx
+  #         podSelector:
+  #           matchLabels:
+  #             app.kubernetes.io/name: ingress-nginx
+  #     ports:
+  #       - protocol: TCP
+  #         port: 3001
+  
+  # Egress rules - traffic going FROM the pod
+  # By default, all egress is DENIED. Add rules to allow specific traffic.
+  # Note: DNS, Kubernetes API, and cloud provider rules are automatically added if enabled above
+  egress: []
+  # Examples:
+  # egress:
+  #   # Allow egress to specific services
+  #   - to:
+  #       - podSelector:
+  #           matchLabels:
+  #             app: allowed-service
+  #     ports:
+  #       - protocol: TCP
+  #         port: 8080
+  #   
+  #   # Allow egress to external services
+  #   - to:
+  #       - ipBlock:
+  #           cidr: 203.0.113.0/24
+  #     ports:
+  #       - protocol: TCP
+  #         port: 443

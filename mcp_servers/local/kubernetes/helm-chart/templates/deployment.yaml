@@ -1,0 +1,203 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    krupesh: {{ include "mcp-server-kubernetes.needsInitContainer" . | quote }}
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if $commonAnnotations }}
+  annotations:
+    {{- $commonAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mcp-server-kubernetes.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+        {{- if $commonAnnotations }}
+        {{- $commonAnnotations | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "mcp-server-kubernetes.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mcp-server-kubernetes.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.security.podSecurityContext | nindent 8 }}
+      {{- if eq (include "mcp-server-kubernetes.needsInitContainer" .) "true" }}
+      initContainers:
+        - name: kubeconfig-fetcher
+          image: {{ include "mcp-server-kubernetes.initImage" . }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            {{- toYaml .Values.security.securityContext | nindent 12 }}
+          {{- if eq .Values.kubeconfig.provider "aws" }}
+          command: ["/bin/sh"]
+          args: ["/scripts/fetch-aws-kubeconfig.sh"]
+          {{- else if eq .Values.kubeconfig.provider "gcp" }}
+          command: ["/bin/sh"]
+          args: ["/scripts/fetch-gcp-kubeconfig.sh"]
+          {{- else if eq .Values.kubeconfig.provider "url" }}
+          command: ["/bin/sh"]
+          args: ["/scripts/fetch-url-kubeconfig.sh"]
+          {{- else if eq .Values.kubeconfig.provider "custom" }}
+          command: ["/bin/sh"]
+          args: ["/scripts/fetch-custom-kubeconfig.sh"]
+          {{- end }}
+          env:
+            # Retry configuration for init container
+            - name: MAX_RETRIES
+              value: {{ .Values.kubeconfig.initContainer.maxRetries | quote }}
+            - name: RETRY_DELAY  
+              value: {{ .Values.kubeconfig.initContainer.retryDelay | quote }}
+            {{- range $key, $value := .Values.kubeconfig.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: kubeconfig-volume
+              mountPath: /kubeconfig
+            - name: kubeconfig-scripts
+              mountPath: /scripts
+          resources:
+            {{- toYaml .Values.kubeconfig.initContainer.resources | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: mcp-server
+          securityContext:
+            {{- toYaml .Values.security.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ include "mcp-server-kubernetes.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if or (eq .Values.transport.mode "sse") (eq .Values.transport.mode "http") }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.transport.service.targetPort }}
+              protocol: TCP
+          {{- end }}
+          env:
+            # Transport configuration
+            {{- if eq .Values.transport.mode "sse" }}
+            - name: ENABLE_UNSAFE_SSE_TRANSPORT
+              value: "true"
+            {{- else if eq .Values.transport.mode "http" }}
+            - name: ENABLE_UNSAFE_STREAMABLE_HTTP_TRANSPORT
+              value: "true"
+            {{- end }}
+            {{- if or (eq .Values.transport.mode "sse") (eq .Values.transport.mode "http") }}
+            - name: PORT
+              value: {{ .Values.transport.service.targetPort | quote }}
+            - name: HOST
+              value: "0.0.0.0"
+            {{- end }}
+            
+            # Security configuration
+            {{- if .Values.security.allowOnlyNonDestructive }}
+            - name: ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS
+              value: "true"
+            {{- end }}
+            {{- if .Values.security.allowOnlyReadonly }}
+            - name: ALLOW_ONLY_READONLY_TOOLS
+              value: "true"
+            {{- end }}
+            {{- if .Values.security.allowedTools }}
+            - name: ALLOWED_TOOLS
+              value: {{ .Values.security.allowedTools | quote }}
+            {{- end }}
+            
+            # Kubeconfig configuration
+            {{- if ne .Values.kubeconfig.provider "serviceaccount" }}
+            {{- $kubeconfigPath := include "mcp-server-kubernetes.kubeconfigEnv" . }}
+            {{- if $kubeconfigPath }}
+            - name: KUBECONFIG
+              value: {{ $kubeconfigPath | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.kubeconfig.provider "content" }}
+            - name: KUBECONFIG_YAML
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mcp-server-kubernetes.fullname" . }}-kubeconfig
+                  key: kubeconfig.yaml
+            {{- end }}
+            
+            # Additional environment variables
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- if ne .Values.kubeconfig.provider "serviceaccount" }}
+          volumeMounts:
+            - name: kubeconfig-volume
+              mountPath: /kubeconfig
+            {{- range .Values.volumeMounts }}
+            - {{- toYaml . | nindent 14 }}
+            {{- end }}
+          {{- else }}
+          volumeMounts:
+            {{- range .Values.volumeMounts }}
+            - {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- $startupProbe := include "mcp-server-kubernetes.startupProbe" . }}
+          {{- if $startupProbe }}
+          startupProbe:
+            {{- $startupProbe | nindent 12 }}
+          {{- end }}
+          {{- $livenessProbe := include "mcp-server-kubernetes.livenessProbe" . }}
+          {{- if $livenessProbe }}
+          livenessProbe:
+            {{- $livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- $readinessProbe := include "mcp-server-kubernetes.readinessProbe" . }}
+          {{- if $readinessProbe }}
+          readinessProbe:
+            {{- $readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- if eq (include "mcp-server-kubernetes.needsInitContainer" .) "true" }}
+        - name: kubeconfig-volume
+          emptyDir: {}
+        - name: kubeconfig-scripts
+          configMap:
+            name: {{ include "mcp-server-kubernetes.fullname" . }}-scripts
+            defaultMode: 0755
+        {{- else if eq .Values.kubeconfig.provider "content" }}
+        - name: kubeconfig-volume
+          secret:
+            secretName: {{ include "mcp-server-kubernetes.fullname" . }}-kubeconfig
+            defaultMode: 0600
+        {{- end }}
+        {{- range .Values.volumes }}
+        - {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- $nodeSelector := include "mcp-server-kubernetes.nodeSelector" . }}
+      {{- if $nodeSelector }}
+      nodeSelector:
+        {{- $nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- $affinity := include "mcp-server-kubernetes.affinity" . }}
+      {{- if $affinity }}
+      affinity:
+        {{- $affinity | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

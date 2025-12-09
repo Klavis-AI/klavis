@@ -1,0 +1,53 @@
+{{- if or (eq .Values.transport.mode "sse") (eq .Values.transport.mode "http") }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "mcp-server-kubernetes.fullname" . }}-test-connectivity"
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: connectivity-test
+    image: curlimages/curl:latest
+    command:
+    - /bin/sh
+    - -c
+    - |
+      set -e
+      echo "Testing MCP server connectivity..."
+      
+      SERVICE_URL="http://{{ include "mcp-server-kubernetes.fullname" . }}:{{ .Values.transport.service.port }}"
+      
+      # Test basic connectivity
+      echo "Testing connection to: $SERVICE_URL"
+      curl -f --connect-timeout 10 --max-time 30 -s "$SERVICE_URL" || curl -f --connect-timeout 10 --max-time 30 -s "$SERVICE_URL/health" || {
+        echo "ERROR: Cannot connect to MCP server at $SERVICE_URL"
+        echo "Checking service status..."
+        nslookup {{ include "mcp-server-kubernetes.fullname" . }} || true
+        exit 1
+      }
+      
+      echo "✓ MCP server is accessible"
+      
+      {{- if eq .Values.transport.mode "http" }}
+      # Test MCP HTTP endpoint
+      echo "Testing MCP HTTP endpoint..."
+      curl -f --connect-timeout 10 --max-time 30 -s -X POST \
+        -H "Content-Type: application/json" \
+        -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
+        "$SERVICE_URL/mcp" && echo "✓ MCP HTTP endpoint is working" || {
+        echo "WARNING: MCP HTTP endpoint test failed (server might need more time to start)"
+      }
+      {{- end }}
+      
+      echo "Connectivity test completed successfully"
+{{- end }}

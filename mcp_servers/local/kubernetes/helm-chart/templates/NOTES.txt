@@ -1,0 +1,124 @@
+1. MCP Server Kubernetes has been deployed!
+
+{{- if eq .Values.transport.mode "stdio" }}
+
+   Transport Mode: STDIO (default)
+   
+   The MCP server is running in stdio mode and is ready to accept MCP client connections.
+   
+   To connect via kubectl port-forward:
+   kubectl port-forward deployment/{{ include "mcp-server-kubernetes.fullname" . }} 8080:8080
+
+{{- else if eq .Values.transport.mode "sse" }}
+
+   Transport Mode: Server-Sent Events (SSE)
+   
+   {{- if .Values.transport.ingress.enabled }}
+   {{- range $host := .Values.transport.ingress.hosts }}
+   The MCP server is accessible at:
+     {{- range .paths }}
+     http{{ if $.Values.transport.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+     {{- end }}
+   {{- end }}
+   {{- else }}
+   Get the application URL by running these commands:
+     {{- if contains "NodePort" .Values.transport.service.type }}
+     export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "mcp-server-kubernetes.fullname" . }})
+     export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+     echo http://$NODE_IP:$NODE_PORT
+     {{- else if contains "LoadBalancer" .Values.transport.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "mcp-server-kubernetes.fullname" . }}'
+     export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "mcp-server-kubernetes.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+     echo http://$SERVICE_IP:{{ .Values.transport.service.port }}
+     {{- else if contains "ClusterIP" .Values.transport.service.type }}
+     export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "mcp-server-kubernetes.selectorLabels" . }}" -o jsonpath="{.items[0].metadata.name}")
+     export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+     echo "Visit http://127.0.0.1:8080 to use your application"
+     kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+     {{- end }}
+   {{- end }}
+
+{{- else if eq .Values.transport.mode "http" }}
+
+   Transport Mode: HTTP Streaming
+   
+   {{- if .Values.transport.ingress.enabled }}
+   {{- range $host := .Values.transport.ingress.hosts }}
+   The MCP server is accessible at:
+     {{- range .paths }}
+     http{{ if $.Values.transport.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}mcp
+     {{- end }}
+   {{- end }}
+   {{- else }}
+   Get the application URL by running these commands:
+     {{- if contains "NodePort" .Values.transport.service.type }}
+     export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "mcp-server-kubernetes.fullname" . }})
+     export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+     echo http://$NODE_IP:$NODE_PORT/mcp
+     {{- else if contains "LoadBalancer" .Values.transport.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "mcp-server-kubernetes.fullname" . }}'
+     export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "mcp-server-kubernetes.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+     echo http://$SERVICE_IP:{{ .Values.transport.service.port }}/mcp
+     {{- else if contains "ClusterIP" .Values.transport.service.type }}
+     export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "mcp-server-kubernetes.selectorLabels" . }}" -o jsonpath="{.items[0].metadata.name}")
+     export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+     echo "Visit http://127.0.0.1:8080/mcp to use your application"
+     kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+     {{- end }}
+   {{- end }}
+
+{{- end }}
+
+2. Configuration Summary:
+
+   Kubeconfig Provider: {{ .Values.kubeconfig.provider }}
+   {{- if eq .Values.kubeconfig.provider "aws" }}
+   AWS Clusters: {{ len .Values.kubeconfig.aws.clusters }}
+   {{- range .Values.kubeconfig.aws.clusters }}
+   - {{ .name }}: {{ .clusterName }} ({{ .region }})
+   {{- end }}
+   {{- else if eq .Values.kubeconfig.provider "gcp" }}
+   GCP Clusters: {{ len .Values.kubeconfig.gcp.clusters }}
+   {{- range .Values.kubeconfig.gcp.clusters }}
+   - {{ .name }}: {{ .clusterName }} ({{ .zone | default .region }})
+   {{- end }}
+   {{- else if eq .Values.kubeconfig.provider "url" }}
+   URL Configs: {{ len .Values.kubeconfig.url.configs }}
+   {{- range .Values.kubeconfig.url.configs }}
+   - {{ .name }}: {{ .url }}
+   {{- end }}
+   {{- else if eq .Values.kubeconfig.provider "serviceaccount" }}
+   Using ServiceAccount: {{ include "mcp-server-kubernetes.serviceAccountName" . }}
+   {{- else if eq .Values.kubeconfig.provider "content" }}
+   Using provided kubeconfig content
+   {{- else if eq .Values.kubeconfig.provider "custom" }}
+   Using custom command: {{ .Values.kubeconfig.custom.command }}
+   {{- end }}
+
+   Security Settings:
+   {{- if .Values.security.allowOnlyNonDestructive }}
+   - Non-destructive tools only: ENABLED
+   {{- end }}
+   {{- if .Values.security.allowOnlyReadonly }}
+   - Read-only tools only: ENABLED
+   {{- end }}
+   {{- if .Values.security.allowedTools }}
+   - Allowed tools: {{ .Values.security.allowedTools }}
+   {{- end }}
+   {{- if not (or .Values.security.allowOnlyNonDestructive .Values.security.allowOnlyReadonly .Values.security.allowedTools) }}
+   - All tools enabled (full access)
+   {{- end }}
+
+3. Verify deployment:
+   kubectl get pods -l "{{ include "mcp-server-kubernetes.selectorLabels" . }}" -n {{ .Release.Namespace }}
+
+4. View logs:
+   kubectl logs -l "{{ include "mcp-server-kubernetes.selectorLabels" . }}" -n {{ .Release.Namespace }}
+
+{{- if eq .Values.kubeconfig.provider "serviceaccount" }}
+5. RBAC Note:
+   The server is using the ServiceAccount: {{ include "mcp-server-kubernetes.serviceAccountName" . }}
+   Make sure it has the required permissions for your intended operations.
+{{- end }}

@@ -1,0 +1,137 @@
+{{- if and (eq (include "mcp-server-kubernetes.needsInitContainer" .) "true") (ne .Values.kubeconfig.provider "serviceaccount") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}-test-scripts
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+data:
+  {{- if eq .Values.kubeconfig.provider "aws" }}
+  test-aws-kubeconfig.sh: |
+    #!/bin/sh
+    set -e
+    echo "Testing AWS EKS kubeconfig fetch..."
+    
+    export KUBECONFIG=/kubeconfig/kubeconfig
+    touch $KUBECONFIG
+    
+    {{- range .Values.kubeconfig.aws.clusters }}
+    echo "Testing cluster: {{ .name }}"
+    aws eks describe-cluster --name {{ .clusterName | quote }} --region {{ .region | quote }} >/dev/null || {
+      echo "ERROR: Cannot access EKS cluster {{ .name }}"
+      exit 1
+    }
+    echo "✓ EKS cluster {{ .name }} is accessible"
+    
+    aws eks update-kubeconfig \
+      --name {{ .clusterName | quote }} \
+      --region {{ .region | quote }} \
+      {{- if .roleArn }}
+      --role-arn {{ .roleArn | quote }} \
+      {{- end }} \
+      --kubeconfig $KUBECONFIG \
+      {{- range .extraArgs }}
+      {{ . | quote }} \
+      {{- end }}
+    {{- end }}
+    
+    echo "AWS kubeconfig test completed successfully"
+  {{- end }}
+  
+  {{- if eq .Values.kubeconfig.provider "gcp" }}
+  test-gcp-kubeconfig.sh: |
+    #!/bin/sh
+    set -e
+    echo "Testing GCP GKE kubeconfig fetch..."
+    
+    export KUBECONFIG=/kubeconfig/kubeconfig
+    touch $KUBECONFIG
+    
+    {{- range .Values.kubeconfig.gcp.clusters }}
+    echo "Testing cluster: {{ .name }}"
+    gcloud container clusters describe {{ .clusterName | quote }} \
+      {{- if .zone }}
+      --zone={{ .zone | quote }} \
+      {{- else if .region }}
+      --region={{ .region | quote }} \
+      {{- end }}
+      {{- if .project }}
+      --project={{ .project | quote }} \
+      {{- end }}
+      >/dev/null || {
+      echo "ERROR: Cannot access GKE cluster {{ .name }}"
+      exit 1
+    }
+    echo "✓ GKE cluster {{ .name }} is accessible"
+    
+    gcloud container clusters get-credentials {{ .clusterName | quote }} \
+      {{- if .zone }}
+      --zone={{ .zone | quote }} \
+      {{- else if .region }}
+      --region={{ .region | quote }} \
+      {{- end }}
+      {{- if .project }}
+      --project={{ .project | quote }} \
+      {{- end }}
+      --kubeconfig $KUBECONFIG \
+      {{- range .extraArgs }}
+      {{ . | quote }} \
+      {{- end }}
+    {{- end }}
+    
+    echo "GCP kubeconfig test completed successfully"
+  {{- end }}
+
+  {{- if eq .Values.kubeconfig.provider "url" }}
+  test-url-kubeconfig.sh: |
+    #!/bin/sh
+    set -e
+    echo "Testing URL kubeconfig downloads..."
+    
+    {{- range .Values.kubeconfig.url.configs }}
+    echo "Testing download: {{ .name }}"
+    curl -sS --connect-timeout 10 --max-time 30 \
+      {{- range .extraArgs }}
+      {{ . | quote }} \
+      {{- end }}
+      -o /kubeconfig/{{ .name }}.yaml \
+      {{ .url | quote }} || {
+      echo "ERROR: Cannot download kubeconfig from {{ .url }}"
+      exit 1
+    }
+    echo "✓ Successfully downloaded {{ .name }}.yaml"
+    {{- end }}
+    
+    echo "URL kubeconfig test completed successfully"
+  {{- end }}
+  
+  {{- if eq .Values.kubeconfig.provider "custom" }}
+  test-custom-kubeconfig.sh: |
+    #!/bin/sh
+    set -e
+    echo "Testing custom kubeconfig command..."
+    
+    {{- if .Values.kubeconfig.custom.command }}
+    {{ .Values.kubeconfig.custom.command }} \
+      {{- range .Values.kubeconfig.custom.args }}
+      {{ . | quote }} \
+      {{- end }} || {
+      echo "ERROR: Custom kubeconfig command failed"
+      exit 1
+    }
+    {{- else }}
+    echo "ERROR: No custom command specified"
+    exit 1
+    {{- end }}
+    
+    echo "Custom kubeconfig test completed successfully"
+  {{- end }}
+{{- end }}

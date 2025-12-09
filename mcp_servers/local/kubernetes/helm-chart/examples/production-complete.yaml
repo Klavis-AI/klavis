@@ -1,0 +1,293 @@
+# Complete Production Configuration Example
+# This example demonstrates all major features of the MCP server Helm chart
+# including multi-cluster AWS access, security, networking, and auto-scaling.
+
+# Deploy with: helm install mcp-server ./helm-chart -f examples/production-complete.yaml
+
+image:
+  repository: flux159/mcp-server-kubernetes
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Common labels and annotations for all resources
+commonLabels:
+  environment: production
+  team: platform
+  cost-center: engineering
+  app.kubernetes.io/part-of: mcp-platform
+
+commonAnnotations:
+  monitoring.coreos.com/enabled: "true"
+  backup.velero.io/backup-volumes: "kubeconfig-volume"
+  policy.kubernetes.io/security-level: "restricted"
+
+# HTTP transport for web accessibility
+transport:
+  mode: "http"
+  service:
+    type: ClusterIP
+    port: 3001
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "alb"
+      service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/healthcheck-path: /health
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+    hosts:
+      - host: mcp-server.company.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: mcp-server-tls
+        hosts:
+          - mcp-server.company.com
+
+# AWS EKS multi-cluster configuration
+kubeconfig:
+  provider: "aws"
+  aws:
+    clusters:
+      # Production US-East cluster
+      - name: "prod-us-east"
+        clusterName: "company-prod-us-east"
+        region: "us-east-1"
+        roleArn: "arn:aws:iam::123456789012:role/EKSClusterAdminRole"
+        extraArgs:
+          - "--profile=production"
+          - "--alias=prod-east"
+          - "--external-id=mcp-server-prod"
+          
+      # Production US-West cluster  
+      - name: "prod-us-west"
+        clusterName: "company-prod-us-west"
+        region: "us-west-2"
+        roleArn: "arn:aws:iam::123456789012:role/EKSClusterAdminRole"
+        extraArgs:
+          - "--profile=production"
+          - "--alias=prod-west"
+          
+      # Staging cluster (different account)
+      - name: "staging-us-east"
+        clusterName: "company-staging"
+        region: "us-east-1"  
+        roleArn: "arn:aws:iam::987654321098:role/EKSReadOnlyRole"
+        extraArgs:
+          - "--profile=staging"
+          - "--duration-seconds=3600"
+          
+    defaultContext: "prod-us-east"
+    
+  env:
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_SDK_LOAD_CONFIG: "1"
+
+# Security configuration
+security:
+  # Enable non-destructive mode (disables: kubectl_delete, uninstall_helm_chart, cleanup, kubectl_generic)
+  allowOnlyNonDestructive: true
+  
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+      
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# Network Policy for secure communication
+networkPolicy:
+  enabled: true
+  annotations:
+    policy.kubernetes.io/description: "MCP Server production network policy"
+  
+  ingress:
+    # Allow ingress controller access
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3001
+    
+    # Allow monitoring access
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 3001
+  
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Allow Kubernetes API access
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.0/12  # Service CIDR
+      ports:
+        - protocol: TCP
+          port: 443
+    
+    # Allow AWS API access
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 30
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 180
+
+# RBAC for production
+rbac:
+  create: true
+  annotations:
+    rbac.authorization.kubernetes.io/description: "MCP Server cross-cluster access"
+  rules:
+    - apiGroups: ["*"]
+      resources: ["*"] 
+      verbs: ["get", "list", "describe", "watch"]
+    # Limited write access for specific resources
+    - apiGroups: [""]
+      resources: ["configmaps", "secrets"]
+      verbs: ["create", "patch", "update"]
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/EKSPodRole"
+
+# Resource limits for production workload
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+
+startupProbe:
+  enabled: false
+
+# Health checks
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 3001
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 3001
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Pod configuration
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3001"
+  prometheus.io/path: "/metrics"
+
+# Deployment settings
+replicaCount: 3
+
+nodeSelector:
+  kubernetes.io/os: linux
+  node-type: compute-optimized
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "mcp-server"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - mcp-server-kubernetes
+      topologyKey: kubernetes.io/hostname
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      preference:
+        matchExpressions:
+        - key: instance-type
+          operator: In
+          values:
+          - c5.large
+          - c5.xlarge

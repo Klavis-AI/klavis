@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "mcp-server-kubernetes.fullname" . }}-test-mcp-tools"
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+spec:
+  restartPolicy: Never
+  serviceAccountName: {{ include "mcp-server-kubernetes.serviceAccountName" . }}
+  securityContext:
+    {{- toYaml .Values.security.podSecurityContext | nindent 4 }}
+  containers:
+  - name: mcp-tools-test
+    image: curlimages/curl:latest
+    securityContext:
+      {{- toYaml .Values.security.securityContext | nindent 6 }}
+    command:
+    - /bin/sh
+    - -c
+    - |
+      set -e
+      echo "Testing MCP server tools and functionality..."
+      
+      {{- if or (eq .Values.transport.mode "sse") (eq .Values.transport.mode "http") }}
+      SERVICE_URL="http://{{ include "mcp-server-kubernetes.fullname" . }}:{{ .Values.transport.service.port }}"
+      
+      # Test MCP tools/list endpoint
+      echo "Testing MCP tools/list..."
+      RESPONSE=$(curl -s --connect-timeout 10 --max-time 30 -X POST \
+        -H "Content-Type: application/json" \
+        -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
+        "{{ if eq .Values.transport.mode "http" }}$SERVICE_URL/mcp{{ else }}$SERVICE_URL/sse{{ end }}")
+      
+      echo "MCP Response: $RESPONSE"
+      
+      # Check if response contains expected tools
+      if echo "$RESPONSE" | grep -q "kubectl_get"; then
+        echo "✓ kubectl_get tool found"
+      else
+        echo "WARNING: kubectl_get tool not found in response"
+      fi
+      
+      if echo "$RESPONSE" | grep -q "ping"; then
+        echo "✓ ping tool found"
+      else
+        echo "WARNING: ping tool not found in response"
+      fi
+      
+      # Check security filtering
+      {{- if .Values.security.allowOnlyReadonly }}
+      if echo "$RESPONSE" | grep -q "kubectl_delete"; then
+        echo "ERROR: kubectl_delete should not be available in readonly mode"
+        exit 1
+      else
+        echo "✓ Readonly mode working - destructive tools filtered"
+      fi
+      {{- end }}
+      
+      {{- if .Values.security.allowOnlyNonDestructive }}
+      if echo "$RESPONSE" | grep -q "kubectl_delete"; then
+        echo "ERROR: kubectl_delete should not be available in non-destructive mode"
+        exit 1
+      else
+        echo "✓ Non-destructive mode working - destructive tools filtered"
+      fi
+      {{- end }}
+      
+      {{- else }}
+      echo "Skipping HTTP/SSE tests - server is in stdio mode"
+      echo "✓ MCP server is deployed in stdio transport mode"
+      {{- end }}
+      
+      echo "MCP tools test completed successfully"
