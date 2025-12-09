@@ -10302,6 +10302,116 @@
           }
         }
       }
+    },
+    "/sandbox/google_cloud/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize google_cloud sandbox with data",
+        "description": "Initialize the sandbox with google_cloud-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_google_cloud__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/google_cloud/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export google_cloud sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_google_cloud__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleCloudData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10750,6 +10860,372 @@
           "message"
         ],
         "title": "AzureADOAuthSuccessResponse"
+      },
+      "BigQueryDataset": {
+        "properties": {
+          "datasetReference": {
+            "$ref": "#/components/schemas/BigQueryDatasetReference",
+            "description": "Dataset reference"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Dataset description"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Dataset location",
+            "default": "US"
+          },
+          "creationTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creationtime",
+            "description": "Creation timestamp"
+          },
+          "lastModifiedTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastmodifiedtime",
+            "description": "Last modified timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datasetReference"
+        ],
+        "title": "BigQueryDataset",
+        "description": "BigQuery dataset object - matches API format"
+      },
+      "BigQueryDatasetReference": {
+        "properties": {
+          "datasetId": {
+            "type": "string",
+            "title": "Datasetid",
+            "description": "Dataset ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datasetId"
+        ],
+        "title": "BigQueryDatasetReference",
+        "description": "Reference to a BigQuery dataset"
+      },
+      "BigQueryTable-Input": {
+        "properties": {
+          "tableReference": {
+            "$ref": "#/components/schemas/BigQueryTableReference",
+            "description": "Table reference"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BigQueryTableSchema-Input"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Table schema"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Table description"
+          },
+          "numRows": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numrows",
+            "description": "Number of rows"
+          },
+          "creationTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creationtime",
+            "description": "Creation timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableReference"
+        ],
+        "title": "BigQueryTable",
+        "description": "BigQuery table object - matches API format"
+      },
+      "BigQueryTable-Output": {
+        "properties": {
+          "tableReference": {
+            "$ref": "#/components/schemas/BigQueryTableReference",
+            "description": "Table reference"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BigQueryTableSchema-Output"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Table schema"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Table description"
+          },
+          "numRows": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numrows",
+            "description": "Number of rows"
+          },
+          "creationTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creationtime",
+            "description": "Creation timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableReference"
+        ],
+        "title": "BigQueryTable",
+        "description": "BigQuery table object - matches API format"
+      },
+      "BigQueryTableFieldSchema-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Field name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Field type (STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP, RECORD, etc.)"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode",
+            "description": "Field mode (NULLABLE, REQUIRED, REPEATED)",
+            "default": "NULLABLE"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Field description"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryTableFieldSchema-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields",
+            "description": "Nested fields for RECORD type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "BigQueryTableFieldSchema",
+        "description": "Schema for a BigQuery table field"
+      },
+      "BigQueryTableFieldSchema-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Field name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Field type (STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP, RECORD, etc.)"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode",
+            "description": "Field mode (NULLABLE, REQUIRED, REPEATED)",
+            "default": "NULLABLE"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Field description"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryTableFieldSchema-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fields",
+            "description": "Nested fields for RECORD type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "BigQueryTableFieldSchema",
+        "description": "Schema for a BigQuery table field"
+      },
+      "BigQueryTableReference": {
+        "properties": {
+          "datasetId": {
+            "type": "string",
+            "title": "Datasetid",
+            "description": "Dataset ID"
+          },
+          "tableId": {
+            "type": "string",
+            "title": "Tableid",
+            "description": "Table ID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datasetId",
+          "tableId"
+        ],
+        "title": "BigQueryTableReference",
+        "description": "Reference to a BigQuery table"
+      },
+      "BigQueryTableSchema-Input": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/BigQueryTableFieldSchema-Input"
+            },
+            "type": "array",
+            "title": "Fields",
+            "description": "List of table fields"
+          }
+        },
+        "type": "object",
+        "title": "BigQueryTableSchema",
+        "description": "Schema for a BigQuery table"
+      },
+      "BigQueryTableSchema-Output": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/BigQueryTableFieldSchema-Output"
+            },
+            "type": "array",
+            "title": "Fields",
+            "description": "List of table fields"
+          }
+        },
+        "type": "object",
+        "title": "BigQueryTableSchema",
+        "description": "Schema for a BigQuery table"
       },
       "CalcomData-Input": {
         "properties": {
@@ -11406,6 +11882,102 @@
         ],
         "title": "CloseTask",
         "description": "Close Task object - child of Lead"
+      },
+      "ComputeInstance": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Instance name"
+          },
+          "zone": {
+            "type": "string",
+            "title": "Zone",
+            "description": "Instance zone"
+          },
+          "machineType": {
+            "type": "string",
+            "title": "Machinetype",
+            "description": "Machine type",
+            "default": "e2-micro"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Instance status",
+            "default": "RUNNING"
+          },
+          "creationTimestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creationtimestamp",
+            "description": "Creation timestamp"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "Instance ID"
+          },
+          "selfLink": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selflink",
+            "description": "Self link URL"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Instance description"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "Instance labels"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "zone"
+        ],
+        "title": "ComputeInstance",
+        "description": "Compute Engine instance - matches API format"
       },
       "ConfluenceComment": {
         "properties": {
@@ -12282,6 +12854,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[GoogleCalendarData]"
+      },
+      "DumpSandboxResponse_GoogleCloudData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleCloudData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleCloudData]"
       },
       "DumpSandboxResponse_GoogleDocsData_": {
         "properties": {
@@ -14247,6 +14850,260 @@
         "title": "GoogleCalendarEventDateTime",
         "description": "Event date/time with timezone support"
       },
+      "GoogleCloudData-Input": {
+        "properties": {
+          "datasets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryDataset"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datasets",
+            "description": "BigQuery datasets"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryTable-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "BigQuery tables"
+          },
+          "buckets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageBucket-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buckets",
+            "description": "Cloud Storage buckets"
+          },
+          "objects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageObject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objects",
+            "description": "Cloud Storage objects"
+          },
+          "logEntries": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogEntry"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logentries",
+            "description": "Log entries"
+          },
+          "logSinks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogSink"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logsinks",
+            "description": "Log sinks"
+          },
+          "logBuckets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogBucket"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logbuckets",
+            "description": "Log buckets"
+          },
+          "instances": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ComputeInstance"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instances",
+            "description": "Compute Engine instances"
+          }
+        },
+        "type": "object",
+        "title": "GoogleCloudData",
+        "description": "Complete Google Cloud sandbox data structure"
+      },
+      "GoogleCloudData-Output": {
+        "properties": {
+          "datasets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryDataset"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datasets",
+            "description": "BigQuery datasets"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BigQueryTable-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "BigQuery tables"
+          },
+          "buckets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageBucket-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buckets",
+            "description": "Cloud Storage buckets"
+          },
+          "objects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageObject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objects",
+            "description": "Cloud Storage objects"
+          },
+          "logEntries": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogEntry"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logentries",
+            "description": "Log entries"
+          },
+          "logSinks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogSink"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logsinks",
+            "description": "Log sinks"
+          },
+          "logBuckets": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LogBucket"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logbuckets",
+            "description": "Log buckets"
+          },
+          "instances": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ComputeInstance"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instances",
+            "description": "Compute Engine instances"
+          }
+        },
+        "type": "object",
+        "title": "GoogleCloudData",
+        "description": "Complete Google Cloud sandbox data structure"
+      },
       "GoogleDocsData": {
         "properties": {
           "documents": {
@@ -16144,6 +17001,215 @@
         ],
         "title": "ListToolsResponse"
       },
+      "LogBucket": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Bucket name/ID"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Bucket location",
+            "default": "global"
+          },
+          "retentionDays": {
+            "type": "integer",
+            "title": "Retentiondays",
+            "description": "Retention period in days",
+            "default": 30
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Bucket description"
+          },
+          "createTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createtime",
+            "description": "Creation timestamp"
+          },
+          "updateTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updatetime",
+            "description": "Update timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LogBucket",
+        "description": "Cloud Logging bucket - matches API format"
+      },
+      "LogEntry": {
+        "properties": {
+          "logName": {
+            "type": "string",
+            "title": "Logname",
+            "description": "Log name"
+          },
+          "textPayload": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Textpayload",
+            "description": "Text payload"
+          },
+          "jsonPayload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jsonpayload",
+            "description": "JSON payload"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity",
+            "description": "Log severity (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+            "default": "INFO"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp",
+            "description": "Entry timestamp"
+          },
+          "insertId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insertid",
+            "description": "Unique insert ID"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource",
+            "description": "Monitored resource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "logName"
+        ],
+        "title": "LogEntry",
+        "description": "Cloud Logging log entry - matches API format"
+      },
+      "LogSink": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Sink name"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter",
+            "description": "Log filter"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Sink description"
+          },
+          "createTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createtime",
+            "description": "Creation timestamp"
+          },
+          "updateTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updatetime",
+            "description": "Update timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "LogSink",
+        "description": "Cloud Logging sink - matches API format"
+      },
       "McpServer": {
         "properties": {
           "id": {
@@ -16232,6 +17298,7 @@
           "Google Jobs",
           "Google Sheets",
           "Google Forms",
+          "Google Cloud",
           "Hacker News",
           "Heygen",
           "HubSpot",
@@ -17506,6 +18573,7 @@
           "Google Drive",
           "Google Sheets",
           "Google Forms",
+          "Google Cloud",
           "HubSpot",
           "Jira",
           "Klaviyo",
@@ -19827,7 +20895,8 @@
           "slack",
           "confluence",
           "discord",
-          "snowflake"
+          "snowflake",
+          "google_cloud"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
@@ -20608,6 +21677,427 @@
           "success"
         ],
         "title": "StatusResponse"
+      },
+      "StorageBucket-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Bucket name"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Bucket location",
+            "default": "US"
+          },
+          "storageClass": {
+            "type": "string",
+            "title": "Storageclass",
+            "description": "Storage class",
+            "default": "STANDARD"
+          },
+          "versioning": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageBucketVersioning"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Versioning configuration"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageBucketLifecycle-Input"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lifecycle configuration"
+          },
+          "timeCreated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timecreated",
+            "description": "Creation timestamp"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated",
+            "description": "Last update timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "StorageBucket",
+        "description": "Cloud Storage bucket object - matches API format"
+      },
+      "StorageBucket-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Bucket name"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "Bucket location",
+            "default": "US"
+          },
+          "storageClass": {
+            "type": "string",
+            "title": "Storageclass",
+            "description": "Storage class",
+            "default": "STANDARD"
+          },
+          "versioning": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageBucketVersioning"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Versioning configuration"
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorageBucketLifecycle-Output"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Lifecycle configuration"
+          },
+          "timeCreated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timecreated",
+            "description": "Creation timestamp"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated",
+            "description": "Last update timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "StorageBucket",
+        "description": "Cloud Storage bucket object - matches API format"
+      },
+      "StorageBucketLifecycle-Input": {
+        "properties": {
+          "rule": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageBucketLifecycleRule"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule",
+            "description": "Lifecycle rules"
+          }
+        },
+        "type": "object",
+        "title": "StorageBucketLifecycle",
+        "description": "Lifecycle configuration for a bucket"
+      },
+      "StorageBucketLifecycle-Output": {
+        "properties": {
+          "rule": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StorageBucketLifecycleRule"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule",
+            "description": "Lifecycle rules"
+          }
+        },
+        "type": "object",
+        "title": "StorageBucketLifecycle",
+        "description": "Lifecycle configuration for a bucket"
+      },
+      "StorageBucketLifecycleRule": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/StorageBucketLifecycleRuleAction",
+            "description": "Rule action"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/StorageBucketLifecycleRuleCondition",
+            "description": "Rule condition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "condition"
+        ],
+        "title": "StorageBucketLifecycleRule",
+        "description": "A lifecycle rule for a bucket"
+      },
+      "StorageBucketLifecycleRuleAction": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Action type (Delete, SetStorageClass)"
+          },
+          "storageClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storageclass",
+            "description": "Storage class for SetStorageClass action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "StorageBucketLifecycleRuleAction",
+        "description": "Action for a lifecycle rule"
+      },
+      "StorageBucketLifecycleRuleCondition": {
+        "properties": {
+          "age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age",
+            "description": "Age in days"
+          },
+          "createdBefore": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdbefore",
+            "description": "Created before date"
+          },
+          "isLive": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Islive",
+            "description": "Is live version"
+          },
+          "numNewerVersions": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numnewerversions",
+            "description": "Number of newer versions"
+          }
+        },
+        "type": "object",
+        "title": "StorageBucketLifecycleRuleCondition",
+        "description": "Condition for a lifecycle rule"
+      },
+      "StorageBucketVersioning": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Whether versioning is enabled",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "StorageBucketVersioning",
+        "description": "Versioning configuration for a bucket"
+      },
+      "StorageObject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Object name"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket",
+            "description": "Bucket name"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size",
+            "description": "Object size in bytes"
+          },
+          "contentType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contenttype",
+            "description": "Content type"
+          },
+          "timeCreated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timecreated",
+            "description": "Creation timestamp"
+          },
+          "updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated",
+            "description": "Last update timestamp"
+          },
+          "generation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation",
+            "description": "Object generation"
+          },
+          "metageneration": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metageneration",
+            "description": "Metadata generation"
+          },
+          "md5Hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Md5Hash",
+            "description": "MD5 hash"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content",
+            "description": "Object content (text or base64 encoded)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "bucket"
+        ],
+        "title": "StorageObject",
+        "description": "Cloud Storage object (blob) - matches API format"
       },
       "StrataAddServersRequest": {
         "properties": {
