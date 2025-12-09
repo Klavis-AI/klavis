@@ -1,0 +1,4 @@
+mcp[cli]
+python-pptx
+Pillow
+fonttools

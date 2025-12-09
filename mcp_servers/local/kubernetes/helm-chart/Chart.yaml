@@ -1,0 +1,20 @@
+apiVersion: v2
+name: mcp-server-kubernetes
+description: MCP server for interacting with Kubernetes clusters
+type: application
+version: 2.8.0
+appVersion: "2.8.0"
+home: https://github.com/Flux159/mcp-server-kubernetes
+sources:
+  - https://github.com/Flux159/mcp-server-kubernetes
+maintainers:
+  - name: Flux159, Paras Patel
+keywords:
+  - mcp
+  - kubernetes
+  - kubectl
+  - k8s
+  - eks
+  - gke
+annotations:
+  category: Infrastructure

@@ -1,0 +1,202 @@
+# Example: Secure NetworkPolicy with Default Deny
+# This example demonstrates security best practices with NetworkPolicy
+# using default deny and explicit allow rules.
+
+# Deploy with: helm install mcp-server ./helm-chart -f examples/secure-networkpolicy.yaml
+
+image:
+  repository: flux159/mcp-server-kubernetes
+  tag: "latest"
+
+# HTTP transport for web access
+transport:
+  mode: "http"
+  service:
+    type: ClusterIP
+    port: 3001
+  
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+      - host: mcp-server.company.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Use ServiceAccount authentication
+kubeconfig:
+  provider: "serviceaccount"
+
+# Security configuration
+security:
+  allowOnlyNonDestructive: true
+  
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+      
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# NetworkPolicy with default deny and explicit allow rules
+networkPolicy:
+  enabled: true
+  annotations:
+    policy.kubernetes.io/description: "Default deny with explicit allow rules for MCP server"
+  
+  # Ingress rules - explicitly allow inbound connections
+  ingress:
+    # Allow ingress controller access for web traffic
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3001
+    
+    # Allow monitoring/metrics collection
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 3001
+    
+    # Allow access from specific internal subnets only
+    - from:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+            except:
+              - 10.0.1.0/24  # DMZ subnet
+              - 10.0.2.0/24  # Guest network
+      ports:
+        - protocol: TCP
+          port: 3001
+  
+  # Egress rules - explicitly allow outbound connections (CRITICAL!)
+  egress:
+    # REQUIRED: DNS resolution (adjust labels for your cluster)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Alternative DNS resolution (for clusters using CoreDNS)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: coredns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # REQUIRED: Kubernetes API server access
+    # Option 1: Via service CIDR (adjust for your cluster)
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.0/12  # Default service CIDR
+      ports:
+        - protocol: TCP
+          port: 443
+    
+    # Option 2: Direct API server access (if using external API server)
+    - to:
+        - ipBlock:
+            cidr: 172.20.0.0/16  # API server subnet
+      ports:
+        - protocol: TCP
+          port: 6443
+    
+    # REQUIRED for AWS: AWS API and metadata service access
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32  # AWS metadata service
+      ports:
+        - protocol: TCP
+          port: 80
+    
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8      # Internal networks
+              - 172.16.0.0/12   # Internal networks  
+              - 192.168.0.0/16  # Internal networks
+      ports:
+        - protocol: TCP
+          port: 443  # AWS APIs (EKS, STS, etc.)
+    
+    # REQUIRED for GCP: GCP metadata and API access
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32  # GCP metadata service
+      ports:
+        - protocol: TCP
+          port: 80
+    
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443  # GCP APIs
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# IMPORTANT NOTES FOR NETWORKPOLICY:
+# 
+# 1. DEFAULT DENY: This NetworkPolicy implements default deny for both ingress and egress
+# 2. EGRESS REQUIREMENTS: You MUST allow egress traffic for:
+#    - DNS resolution (kube-dns/coredns)
+#    - Kubernetes API server access  
+#    - Cloud provider APIs (AWS/GCP)
+#    - Metadata services (169.254.169.254)
+# 3. CLUSTER-SPECIFIC: Adjust CIDR blocks and selectors for your cluster:
+#    - Service CIDR (usually 10.96.0.0/12 or 172.20.0.0/16)
+#    - API server endpoints
+#    - DNS service labels
+# 4. TESTING: Test connectivity after applying:
+#    kubectl exec -it deployment/mcp-server -- nslookup kubernetes.default
+#    kubectl exec -it deployment/mcp-server -- curl -k https://kubernetes.default/api
+# 5. MONITORING: Monitor NetworkPolicy denials:
+#    kubectl logs -n kube-system -l app=calico-node | grep denied

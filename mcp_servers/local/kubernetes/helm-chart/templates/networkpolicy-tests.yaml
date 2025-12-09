@@ -1,0 +1,252 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}-tests
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+    {{- if or .Values.networkPolicy.annotations $commonAnnotations }}
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.networkPolicy.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- end }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - {{ include "mcp-server-kubernetes.name" . }}
+      - key: app.kubernetes.io/instance
+        operator: In
+        values:
+          - {{ .Release.Name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  # Allow test pods to communicate with MCP server
+  ingress:
+    # Allow test pods to access MCP server
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - {{ include "mcp-server-kubernetes.name" . }}
+              - key: app.kubernetes.io/instance
+                operator: In
+                values:
+                  - {{ .Release.Name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.transport.service.targetPort }}
+    
+    # Include user-defined ingress rules
+    {{- range .Values.networkPolicy.ingress }}
+    - {{- if .from }}
+      from:
+        {{- range .from }}
+        {{- if .podSelector }}
+        - podSelector:
+            {{- if .podSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .podSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .podSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .podSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- if .namespaceSelector }}
+          namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- end }}
+        {{- else if .namespaceSelector }}
+        - namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+        {{- else if .ipBlock }}
+        - ipBlock:
+            cidr: {{ .ipBlock.cidr }}
+            {{- if .ipBlock.except }}
+            except:
+              {{- toYaml .ipBlock.except | nindent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          {{- if .port }}
+          port: {{ .port }}
+          {{- end }}
+          {{- if .endPort }}
+          endPort: {{ .endPort }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  
+  # Allow test pods egress for their functionality
+  egress:
+    # Allow test pods to reach MCP server
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "mcp-server-kubernetes.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.transport.service.targetPort }}
+    
+    # Allow DNS resolution for tests
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Alternative DNS for CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: coredns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    
+    # Allow Kubernetes API access for kubectl tests
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.0/12  # Default service CIDR - adjust for your cluster
+      ports:
+        - protocol: TCP
+          port: 443
+    
+    # Allow cloud provider API access for kubeconfig tests
+    {{- if or (eq .Values.kubeconfig.provider "aws") (eq .Values.kubeconfig.provider "gcp") }}
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80  # For metadata services
+    {{- end }}
+    
+    # Allow URL downloads for URL provider tests
+    {{- if eq .Values.kubeconfig.provider "url" }}
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    {{- end }}
+    
+    # Include user-defined egress rules
+    {{- range .Values.networkPolicy.egress }}
+    - {{- if .to }}
+      to:
+        {{- range .to }}
+        {{- if .podSelector }}
+        - podSelector:
+            {{- if .podSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .podSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .podSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .podSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- if .namespaceSelector }}
+          namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- end }}
+        {{- else if .namespaceSelector }}
+        - namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+        {{- else if .ipBlock }}
+        - ipBlock:
+            cidr: {{ .ipBlock.cidr }}
+            {{- if .ipBlock.except }}
+            except:
+              {{- toYaml .ipBlock.except | nindent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          {{- if .port }}
+          port: {{ .port }}
+          {{- end }}
+          {{- if .endPort }}
+          endPort: {{ .endPort }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+{{- end }}

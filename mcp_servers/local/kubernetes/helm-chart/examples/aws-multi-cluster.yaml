@@ -1,0 +1,142 @@
+# Example: AWS EKS Multi-Cluster Configuration
+# This example shows how to configure the MCP server to manage multiple EKS clusters
+# across different AWS accounts and regions with role assumption.
+
+# Deploy with: helm install mcp-server ./helm-chart -f examples/aws-multi-cluster.yaml
+
+image:
+  repository: flux159/mcp-server-kubernetes
+  tag: "latest"
+
+# HTTP transport for web accessibility
+transport:
+  mode: "http"
+  service:
+    type: LoadBalancer
+    port: 3001
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/healthcheck-path: /health
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+    hosts:
+      - host: mcp-server.company.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: mcp-server-tls
+        hosts:
+          - mcp-server.company.com
+
+# AWS EKS multi-cluster configuration
+kubeconfig:
+  initContainer:
+    maxRetries: 3
+    retryDelay: 10
+    resources:
+      limits:
+        cpu: 250m
+        memory: 200Mi
+      requests:
+        cpu: 250m
+        memory: 200Mi
+  provider: "aws"
+  aws:
+    clusters:
+      # Production US-East cluster
+      - name: "prod-us-east"
+        clusterName: "company-prod-us-east"
+        region: "us-east-1"
+        roleArn: "arn:aws:iam::123456789012:role/EKSClusterAdminRole"
+        extraArgs:
+          - "--profile=production"
+          - "--alias=prod-east"
+
+      # Production US-West cluster  
+      - name: "prod-us-west"
+        clusterName: "company-prod-us-west"
+        region: "us-west-2"
+        assumeRoleArn: "arn:aws:iam::123456789012:role/ProductionAccountAccessRole"
+        roleArn: "arn:aws:iam::123456789012:role/EKSClusterAdminRole"
+        extraArgs:
+          - "--profile=production"
+          - "--alias=prod-west"
+
+      # Staging cluster (different account)
+      - name: "staging-us-east"
+        clusterName: "company-staging"
+        region: "us-east-1"
+        assumeRoleArn: "arn:aws:iam::987654321098:role/OrganizationAccountAccessRole"
+        roleArn: "arn:aws:iam::987654321098:role/EKSReadOnlyRole"
+        extraArgs:
+          - "--profile=staging"
+          - "--alias=staging"
+
+      # Development cluster (limited permissions)
+      - name: "dev-us-central"
+        clusterName: "company-dev"
+        region: "us-central-1"
+        roleArn: "arn:aws:iam::192837465019:role/EKSDeveloperRole"
+        extraArgs:
+          - "--profile=development" 
+          - "--alias=dev"
+
+    defaultContext: "prod-us-east"
+    
+  # Environment variables for AWS authentication
+  env:
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_SDK_LOAD_CONFIG: "1"
+
+# Security configuration for production
+security:
+  # Allow non-destructive operations only for safety
+  allowOnlyNonDestructive: true
+
+# RBAC for cross-cluster operations
+rbac:
+  create: true
+  annotations:
+    description: "MCP Server cross-cluster access"
+  rules:
+    - apiGroups: ["*"]
+      resources: ["*"] 
+      verbs: ["get", "list", "describe", "watch"]
+
+# Resource limits for production workload
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+# Production deployment settings
+replicaCount: 2
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "mcp-server"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - mcp-server-kubernetes
+        topologyKey: kubernetes.io/hostname

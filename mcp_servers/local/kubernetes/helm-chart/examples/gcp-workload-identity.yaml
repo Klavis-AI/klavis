@@ -1,0 +1,104 @@
+# Example: GCP Workload Identity Configuration
+# This example shows how to use GCP Workload Identity for secure access to GCP resources
+# without storing service account keys in the cluster.
+
+# Deploy with: helm install mcp-server ./helm-chart -f examples/gcp-workload-identity.yaml
+
+image:
+  repository: flux159/mcp-server-kubernetes
+  tag: "latest"
+
+# HTTP transport
+transport:
+  mode: "http"
+  service:
+    type: ClusterIP
+    port: 3001
+
+# Use ServiceAccount mode with Workload Identity for secure GCP access
+kubeconfig:
+  provider: "serviceaccount"
+  # No GCP service account keys needed - Workload Identity handles authentication
+
+# Service Account with Workload Identity configuration
+serviceAccount:
+  create: true
+  annotations:
+    # GCP Workload Identity annotation - links K8s ServiceAccount to GCP Service Account
+    iam.gke.io/gcp-service-account: "mcp-server@my-gcp-project.iam.gserviceaccount.com"
+
+# Security configuration
+security:
+  allowOnlyNonDestructive: true
+  
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+      
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# RBAC for the ServiceAccount
+rbac:
+  create: true
+  annotations:
+    description: "MCP Server with Workload Identity cross-cluster access"
+  rules:
+    # Full access to current cluster via ServiceAccount token
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+
+# Resource configuration
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Environment variables for GCP SDK
+env:
+  # GCP SDK will automatically use Workload Identity credentials
+  GOOGLE_CLOUD_PROJECT: "my-gcp-project"
+  CLOUDSDK_CORE_PROJECT: "my-gcp-project"
+
+# Required setup steps for GCP Workload Identity:
+#
+# 1. Enable Workload Identity on the GKE cluster:
+#    gcloud container clusters update CLUSTER_NAME \
+#      --workload-pool=PROJECT_ID.svc.id.goog
+#
+# 2. Create a GCP Service Account:
+#    gcloud iam service-accounts create mcp-server \
+#      --display-name="MCP Server Service Account"
+#
+# 3. Grant necessary permissions to the GCP Service Account:
+#    gcloud projects add-iam-policy-binding PROJECT_ID \
+#      --member="serviceAccount:mcp-server@PROJECT_ID.iam.gserviceaccount.com" \
+#      --role="roles/container.clusterAdmin"
+#
+# 4. Allow the Kubernetes ServiceAccount to impersonate the GCP Service Account:
+#    gcloud iam service-accounts add-iam-policy-binding \
+#      --role roles/iam.workloadIdentityUser \
+#      --member "serviceAccount:PROJECT_ID.svc.id.goog[NAMESPACE/RELEASE_NAME-mcp-server-kubernetes]" \
+#      mcp-server@PROJECT_ID.iam.gserviceaccount.com
+#
+# 5. Annotate the Kubernetes ServiceAccount (done automatically by this chart):
+#    kubectl annotate serviceaccount RELEASE_NAME-mcp-server-kubernetes \
+#      --namespace NAMESPACE \
+#      iam.gke.io/gcp-service-account=mcp-server@PROJECT_ID.iam.gserviceaccount.com
+
+# Example GCP Service Account permissions for cross-cluster GKE access:
+# - roles/container.clusterAdmin (for full cluster access)
+# - roles/container.clusterViewer (for read-only access)  
+# - roles/iam.serviceAccountTokenCreator (for impersonation)
+# - Custom roles for specific resource access

@@ -1,0 +1,120 @@
+# Example: AWS IRSA (IAM Roles for Service Accounts) Configuration
+# This example shows how to use AWS IRSA for secure access to AWS resources
+# without storing long-lived credentials in the cluster.
+
+# Deploy with: helm install mcp-server ./helm-chart -f examples/aws-irsa-example.yaml
+
+image:
+  repository: flux159/mcp-server-kubernetes
+  tag: "latest"
+
+# HTTP transport for web accessibility
+transport:
+  mode: "http"
+  service:
+    type: ClusterIP
+    port: 3001
+
+# Use ServiceAccount mode with IRSA for secure AWS access
+kubeconfig:
+  provider: "serviceaccount"
+  # No AWS credentials needed - IRSA handles authentication
+  
+# Service Account with IRSA configuration
+serviceAccount:
+  create: true
+  annotations:
+    # AWS IRSA annotation - links ServiceAccount to IAM role
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/mcp-server-cross-cluster-role"
+    # Use regional STS endpoints for better performance and reliability
+    eks.amazonaws.com/sts-regional-endpoints: "true"
+
+# Security configuration
+security:
+  allowOnlyNonDestructive: true
+  
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+      
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+# RBAC for the ServiceAccount
+rbac:
+  create: true
+  annotations:
+    description: "MCP Server with IRSA cross-cluster access"
+  rules:
+    # Full access to current cluster via ServiceAccount token
+    - apiGroups: ["*"]
+      resources: ["*"]
+      verbs: ["*"]
+
+# Resource configuration
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Additional environment variables for AWS SDK
+env:
+  # AWS SDK will automatically use IRSA credentials
+  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_SDK_LOAD_CONFIG: "1"
+  # Enable IRSA token refresh
+  AWS_ROLE_SESSION_NAME: "mcp-server-session"
+
+# Example IAM role trust policy for the IRSA role:
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Federated": "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE"
+#       },
+#       "Action": "sts:AssumeRoleWithWebIdentity",
+#       "Condition": {
+#         "StringEquals": {
+#           "oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE:sub": "system:serviceaccount:default:mcp-server-kubernetes",
+#           "oidc.eks.us-east-1.amazonaws.com/id/EXAMPLE:aud": "sts.amazonaws.com"
+#         }
+#       }
+#     }
+#   ]
+# }
+
+# Example IAM role permissions for cross-cluster EKS access:
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Effect": "Allow",
+#       "Action": [
+#         "eks:DescribeCluster",
+#         "eks:ListClusters",
+#         "sts:AssumeRole"
+#       ],
+#       "Resource": "*"
+#     },
+#     {
+#       "Effect": "Allow", 
+#       "Action": "sts:AssumeRole",
+#       "Resource": [
+#         "arn:aws:iam::*:role/EKSClusterAdminRole",
+#         "arn:aws:iam::*:role/EKSReadOnlyRole"
+#       ]
+#     }
+#   ]
+# }

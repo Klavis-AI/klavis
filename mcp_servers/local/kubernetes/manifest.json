@@ -1,0 +1,128 @@
+{
+  "manifest_version": "0.1",
+  "name": "mcp-server-kubernetes",
+  "display_name": "Kubernetes MCP Server",
+  "version": "3.0.1",
+  "description": "MCP server for interacting with Kubernetes clusters via kubectl",
+  "long_description": "MCP Server that can connect to a Kubernetes cluster and manage it.\n\nBy default, the server loads kubeconfig from `~/.kube/config`.\n\nThe server will automatically connect to your current kubectl context. Make sure you have:\n\n1. kubectl installed and in your PATH\n2. A valid kubeconfig file with contexts configured\n3. Access to a Kubernetes cluster configured for kubectl (e.g. minikube, Rancher Desktop, GKE, etc.)\n4. Optional: Helm v3 installed and in your PATH.\n\nYou can verify your connection by asking Claude to list your pods or create a test deployment.\n\nIf you have errors open up a standard terminal and run `kubectl get pods` to see if you can connect to your cluster without credentials issues.\n\n## Features\n\n- [x] Connect to a Kubernetes cluster\n- [x] Unified kubectl API for managing resources\n- Get or list resources with `kubectl_get`\n- Describe resources with `kubectl_describe`\n- List resources with `kubectl_get`\n- Create resources with `kubectl_create`\n- Apply YAML manifests with `kubectl_apply`\n- Delete resources with `kubectl_delete`\n- Get logs with `kubectl_logs`\n- and more.",
+  "homepage": "https://github.com/Flux159/mcp-server-kubernetes",
+  "icon": "icon.png",
+  "author": {
+    "name": "Flux159",
+    "url": "https://github.com/Flux159/"
+  },
+  "privacy_policies": [
+    "https://www.linuxfoundation.org/legal/privacy-policy"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "ping",
+      "description": "Verify that the counterpart is still responsive and the connection is alive."
+    },
+    {
+      "name": "cleanup",
+      "description": "Cleanup all managed resources"
+    },
+    {
+      "name": "kubectl_get",
+      "description": "Get or list Kubernetes resources by resource type, name, and optionally namespace"
+    },
+    {
+      "name": "kubectl_describe",
+      "description": "Describe Kubernetes resources by resource type, name, and optionally namespace"
+    },
+    {
+      "name": "kubectl_apply",
+      "description": "Apply a Kubernetes YAML manifest from a string or file"
+    },
+    {
+      "name": "kubectl_delete",
+      "description": "Delete Kubernetes resources by resource type, name, labels, or from a manifest file"
+    },
+    {
+      "name": "kubectl_create",
+      "description": "Create Kubernetes resources using various methods (from file or using subcommands)"
+    },
+    {
+      "name": "kubectl_logs",
+      "description": "Get logs from Kubernetes resources like pods, deployments, or jobs"
+    },
+    {
+      "name": "kubectl_patch",
+      "description": "Update field(s) of a resource using strategic merge patch, JSON merge patch, or JSON patch"
+    },
+    {
+      "name": "kubectl_rollout",
+      "description": "Manage the rollout of a resource (e.g., deployment, daemonset, statefulset)"
+    },
+    {
+      "name": "kubectl_scale",
+      "description": "Scale a Kubernetes deployment"
+    },
+    {
+      "name": "kubectl_context",
+      "description": "Manage Kubernetes contexts - list, get, or set the current context"
+    },
+    {
+      "name": "kubectl_generic",
+      "description": "Execute any kubectl command with the provided arguments and flags"
+    },
+    {
+      "name": "install_helm_chart",
+      "description": "Install a Helm chart"
+    },
+    {
+      "name": "upgrade_helm_chart",
+      "description": "Upgrade a Helm release"
+    },
+    {
+      "name": "uninstall_helm_chart",
+      "description": "Uninstall a Helm release"
+    },
+    {
+      "name": "explain_resource",
+      "description": "Get documentation for a Kubernetes resource or field"
+    },
+    {
+      "name": "list_api_resources",
+      "description": "List the API resources available in the cluster"
+    },
+    {
+      "name": "node_management",
+      "description": "Manage Kubernetes nodes with cordon, drain, and uncordon operations"
+    },
+    {
+      "name": "exec_in_pod",
+      "description": "Execute a command in a Kubernetes pod or container and return the output"
+    },
+    {
+      "name": "port_forward",
+      "description": "Forward a local port to a port on a Kubernetes resource"
+    },
+    {
+      "name": "stop_port_forward",
+      "description": "Stop a port-forward process"
+    }
+  ],
+  "keywords": [
+    "kubernetes",
+    "docker",
+    "containers",
+    "containerization"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Flux159/mcp-server-kubernetes"
+  }
+}

@@ -1,0 +1,214 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.networkPolicy.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.networkPolicy.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "mcp-server-kubernetes.selectorLabels" . | nindent 6 }}
+  # Default deny all ingress and egress traffic (security best practice)
+  policyTypes:
+    - Ingress
+    - Egress
+  {{- if .Values.networkPolicy.ingress }}
+  ingress:
+    {{- range .Values.networkPolicy.ingress }}
+    - {{- if .from }}
+      from:
+        {{- range .from }}
+        {{- if .podSelector }}
+        - podSelector:
+            {{- if .podSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .podSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .podSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .podSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- if .namespaceSelector }}
+          namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- end }}
+        {{- else if .namespaceSelector }}
+        - namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+        {{- else if .ipBlock }}
+        - ipBlock:
+            cidr: {{ .ipBlock.cidr }}
+            {{- if .ipBlock.except }}
+            except:
+              {{- toYaml .ipBlock.except | nindent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          {{- if .port }}
+          port: {{ .port }}
+          {{- end }}
+          {{- if .endPort }}
+          endPort: {{ .endPort }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  egress:
+    {{- if .Values.networkPolicy.dns.enabled }}
+    # Auto-generated DNS egress rule
+    - to:
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.dns.namespaceSelector | nindent 12 }}
+          podSelector:
+            {{- toYaml .Values.networkPolicy.dns.podSelector | nindent 12 }}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- end }}
+    {{- if .Values.networkPolicy.kubernetesApi.enabled }}
+    # Auto-generated Kubernetes API egress rule
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.kubernetesApi.serviceCidr }}
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- end }}
+    {{- if .Values.networkPolicy.cloudProviderApi.enabled }}
+    {{- if .Values.networkPolicy.cloudProviderApi.allowAllHttps }}
+    # Auto-generated cloud provider API egress rule (all HTTPS)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- else }}
+    {{- if .Values.networkPolicy.cloudProviderApi.awsCidrs }}
+    # AWS API access
+    {{- range .Values.networkPolicy.cloudProviderApi.awsCidrs }}
+    - to:
+        - ipBlock:
+            cidr: {{ . }}
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- end }}
+    {{- end }}
+    {{- if .Values.networkPolicy.cloudProviderApi.gcpCidrs }}
+    # GCP API access  
+    {{- range .Values.networkPolicy.cloudProviderApi.gcpCidrs }}
+    - to:
+        - ipBlock:
+            cidr: {{ . }}
+      ports:
+        - protocol: TCP
+          port: 443
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.networkPolicy.metadata.enabled }}
+    # Auto-generated metadata service egress rules
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.metadata.cloudMetadata }}
+      ports:
+        - protocol: TCP
+          port: 80
+    {{- end }}
+    {{- if .Values.networkPolicy.egress }}
+    # User-defined egress rules
+    {{- range .Values.networkPolicy.egress }}
+    - {{- if .to }}
+      to:
+        {{- range .to }}
+        {{- if .podSelector }}
+        - podSelector:
+            {{- if .podSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .podSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .podSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .podSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- if .namespaceSelector }}
+          namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+          {{- end }}
+        {{- else if .namespaceSelector }}
+        - namespaceSelector:
+            {{- if .namespaceSelector.matchLabels }}
+            matchLabels:
+              {{- toYaml .namespaceSelector.matchLabels | nindent 14 }}
+            {{- end }}
+            {{- if .namespaceSelector.matchExpressions }}
+            matchExpressions:
+              {{- toYaml .namespaceSelector.matchExpressions | nindent 14 }}
+            {{- end }}
+        {{- else if .ipBlock }}
+        - ipBlock:
+            cidr: {{ .ipBlock.cidr }}
+            {{- if .ipBlock.except }}
+            except:
+              {{- toYaml .ipBlock.except | nindent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          {{- if .port }}
+          port: {{ .port }}
+          {{- end }}
+          {{- if .endPort }}
+          endPort: {{ .endPort }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}
