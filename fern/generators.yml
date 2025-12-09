@@ -1,11 +1,19 @@
 # yaml-language-server: $schema=https://schema.buildwithfern.dev/generators-yml.json
-
 api:
   specs:
     - openapi: ../docs/api-reference/openapi.json
       overrides: overrides.yml
-      origin: https://api.klavis.ai/openapi.json # URL to fetch latest spec from
-
+      origin: https://api.klavis.ai/openapi.json
+      settings:
+        title-as-schema-name: true
+        type-dates-as-strings: true
+        object-query-parameters: false
+        idiomatic-request-names: false
+        respect-nullable-schemas: false
+        wrap-references-to-nullable-in-optional: true
+        coerce-optional-schemas-to-nullable: true
+        inline-path-parameters: false
+        coerce-enums-to-literals: true
 groups:
   python-sdk:
     generators:
@@ -16,10 +24,15 @@ groups:
           package-name: klavis
           token: ${PYPI_TOKEN}
           metadata:
-            keywords: ["mcp", "model-context-protocol", "router", "ai", "llm", "tools"]
-            documentation-link: "https://www.klavis.ai/docs/introduction"
-            homepage-link: "https://www.klavis.ai/"
-
+            keywords:
+              - mcp
+              - model-context-protocol
+              - router
+              - ai
+              - llm
+              - tools
+            documentation-link: https://www.klavis.ai/docs/introduction
+            homepage-link: https://www.klavis.ai/
         github:
           repository: Klavis-AI/python-sdk
         config:
@@ -27,7 +40,7 @@ groups:
           pydantic_config:
             enum_type: python_enums
         metadata:
-          package-description: "Open Source MCP Integration for AI applications"
+          package-description: Open Source MCP Integration for AI applications
           license: Apache-2.0
         smart-casing: true
   ts-sdk:
@@ -37,7 +50,7 @@ groups:
         output:
           location: npm
           package-name: klavis
-          token: ${NPM_TOKEN} 
+          token: ${NPM_TOKEN}
         github:
           repository: Klavis-AI/typescript-sdk
         config:
@@ -47,10 +60,10 @@ groups:
           includeApiReference: true
           noSerdeLayer: true
           extraDevDependencies:
-            msw: '2.11.2'
+            msw: 2.11.2
         metadata:
-          package-description: "Official TypeScript SDK for Klavis AI"
-          email: "contact@klavis.ai"
-          reference-url: "https://www.klavis.ai/docs"
-          license: "Apache-2.0"
+          package-description: Official TypeScript SDK for Klavis AI
+          email: contact@klavis.ai
+          reference-url: https://www.klavis.ai/docs
+          license: Apache-2.0
         smart-casing: true
