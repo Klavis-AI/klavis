@@ -276,7 +276,7 @@
               "api-reference/sandbox/delete",
               "api-reference/sandbox/reset",
               {
-                "group": "Individual MCP Servers",
+                "group": "Remote MCP Servers",
                 "pages": [
                   {
                     "group": "Airtable",
@@ -502,6 +502,22 @@
                       "api-reference/sandbox/wordpress/dump-wordpress"
                     ]
                   }
+                ]
+              },
+              {
+                "group": "Local MCP Servers",
+                "pages": [
+                  "mcp-server/local/excel",
+                  "mcp-server/local/filesystem",
+                  "mcp-server/local/git",
+                  "mcp-server/local/kubernetes",
+                  "mcp-server/local/memory",
+                  "mcp-server/local/pdf-tools",
+                  "mcp-server/local/posteio",
+                  "mcp-server/local/powerpoint",
+                  "mcp-server/local/terminal",
+                  "mcp-server/local/woocommerce",
+                  "mcp-server/local/word"
                 ]
               }
             ]
