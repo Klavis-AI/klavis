@@ -1,0 +1,25 @@
+[project]
+name = "emails-mcp"
+version = "0.1.11"
+description = "A FastMCP-based email management server for IMAP/SMTP operations"
+readme = "README.md"
+authors = [
+    { name = "lockon-n", email = "lockonlvange@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.10.5",
+    "mcp[cli]>=1.11.0",
+    "email-validator>=2.1.1",
+    "typing-extensions>=4.9.0",
+    "requests>=2.32.4",
+    "beautifulsoup4>=4.13.4",
+    "imapclient>=3.0.1",
+]
+
+[project.scripts]
+emails-mcp = "emails_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

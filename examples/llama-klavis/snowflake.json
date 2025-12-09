@@ -1,0 +1,87 @@
+{
+  "databases": [
+    {
+      "name": "SLA_MONITOR_SANDBOX",
+      "comment": "SLA Monitor Database for testing",
+      "schemas": [
+        {
+          "name": "CORE",
+          "tables": [
+            {
+              "name": "USERS",
+              "columns": [
+                {
+                  "name": "ID",
+                  "data_type": "NUMBER(38,0)",
+                  "nullable": false
+                },
+                {
+                  "name": "NAME",
+                  "data_type": "VARCHAR(255)",
+                  "nullable": false
+                },
+                {
+                  "name": "EMAIL",
+                  "data_type": "VARCHAR(255)",
+                  "nullable": false
+                },
+                {
+                  "name": "SERVICE_LEVEL",
+                  "data_type": "VARCHAR(50)",
+                  "nullable": false
+                },
+                {
+                  "name": "CUSTOMER_MANAGER",
+                  "data_type": "VARCHAR(255)",
+                  "nullable": false
+                },
+                {
+                  "name": "CREATED_AT",
+                  "data_type": "TIMESTAMP_NTZ(9)",
+                  "default": "CURRENT_TIMESTAMP()"
+                },
+                {
+                  "name": "UPDATED_AT",
+                  "data_type": "TIMESTAMP_NTZ(9)",
+                  "default": "CURRENT_TIMESTAMP()"
+                }
+              ],
+              "rows": [
+                {
+                  "values": {
+                    "ID": 1,
+                    "NAME": "John Basic",
+                    "EMAIL": "john.basic@example.com",
+                    "SERVICE_LEVEL": "Basic",
+                    "CUSTOMER_MANAGER": "Sarah Manager",
+                    "CREATED_AT": "2023-10-01 10:00:00"
+                  }
+                },
+                {
+                  "values": {
+                    "ID": 2,
+                    "NAME": "Alice Pro",
+                    "EMAIL": "alice.pro@example.com",
+                    "SERVICE_LEVEL": "Pro",
+                    "CUSTOMER_MANAGER": "Mike Supervisor",
+                    "CREATED_AT": "2023-10-02 11:30:00"
+                  }
+                },
+                {
+                  "values": {
+                    "ID": 3,
+                    "NAME": "Bob Max",
+                    "EMAIL": "bob.max@example.com",
+                    "SERVICE_LEVEL": "Max",
+                    "CUSTOMER_MANAGER": "Sarah Manager",
+                    "CREATED_AT": "2023-10-03 09:15:00"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

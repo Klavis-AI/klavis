@@ -1,0 +1,27 @@
+{{- if or (eq .Values.transport.mode "sse") (eq .Values.transport.mode "http") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mcp-server-kubernetes.fullname" . }}
+  labels:
+    {{- include "mcp-server-kubernetes.labels" . | nindent 4 }}
+  {{- $commonAnnotations := include "mcp-server-kubernetes.annotations" . }}
+  {{- if or .Values.transport.service.annotations $commonAnnotations }}
+  annotations:
+    {{- if $commonAnnotations }}
+    {{- $commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- with .Values.transport.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.transport.service.type }}
+  ports:
+    - port: {{ .Values.transport.service.port }}
+      targetPort: {{ .Values.transport.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "mcp-server-kubernetes.selectorLabels" . | nindent 4 }}
+{{- end }}

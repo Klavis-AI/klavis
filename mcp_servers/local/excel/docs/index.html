@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel MCP Server</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #333;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        .github-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            font-size: 1.2rem;
+        }
+        .github-link svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            fill: currentColor;
+        }
+        .stars {
+            background-color: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .hero img {
+            width: 200px;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .section {
+            padding: 2rem 0;
+            border-bottom: 1px solid #333;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        ul li {
+            background-color: #1e1e1e;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .github-link {
+                margin-top: 1rem;
+            }
+            header h1 {
+                font-size: 1.5rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>excel-mcp-server</h1>
+            <a href="https://github.com/haris-musa/excel-mcp-server" target="_blank" class="github-link">
+                <svg viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                <span>View on GitHub</span>
+                <span class="stars">Loading...</span>
+            </a>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Excel MCP Server</h1>
+                <p>A Model Context Protocol (MCP) server that lets you manipulate Excel files without needing Microsoft Excel installed. Create, read, and modify Excel workbooks with your AI agent.</p>
+            </section>
+
+            <section class="section">
+                <h2>Features</h2>
+                <ul>
+                    <li>📊 Create and modify Excel workbooks</li>
+                    <li>📝 Read and write data</li>
+                    <li>🎨 Apply formatting and styles</li>
+                    <li>📈 Create charts and visualizations</li>
+                    <li>📊 Generate pivot tables</li>
+                    <li>🔄 Manage worksheets and ranges</li>
+                    <li>🔌 Triple transport support: stdio, streamable HTTP, and SSE</li>
+                </ul>
+            </section>
+
+            <section class="section">
+                <h2>Available Tools</h2>
+                <p>A comprehensive set of tools to interact with your Excel files.</p>
+                <ul>
+                    <li><strong>Workbook Operations:</strong> Create workbooks and worksheets, and get metadata.</li>
+                    <li><strong>Data Operations:</strong> Read and write data to worksheets.</li>
+                    <li><strong>Formatting Operations:</strong> Apply rich formatting to cell ranges.</li>
+                    <li><strong>Formula Operations:</strong> Apply and validate Excel formulas.</li>
+                    <li><strong>Chart Operations:</strong> Create various types of charts.</li>
+                    <li><strong>Pivot Table Operations:</strong> Generate pivot tables from your data.</li>
+                    <li><strong>Table Operations:</strong> Create native Excel tables.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 excelmcpserver.com - An open source project by haris-musa.</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://api.github.com/repos/haris-musa/excel-mcp-server')
+                .then(response => response.json())
+                .then(data => {
+                    const starsSpan = document.querySelector('.stars');
+                    if (starsSpan && data.stargazers_count !== undefined) {
+                        starsSpan.textContent = '★ ' + data.stargazers_count;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching star count:', error);
+                    const starsSpan = document.querySelector('.stars');
+                    if (starsSpan) {
+                        starsSpan.textContent = '★ N/A'; // Fallback if API fails
+                    }
+                });
+        });
+    </script>
+</body>
+</html> 

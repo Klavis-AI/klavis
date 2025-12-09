@@ -154,117 +154,6 @@ async def extract_pages(
         return {"error": f"Failed to extract pages: {str(e)}"}
 
 
-async def merge_pdfs(
-    workspace_path: str,
-    tempfile_dir: str,
-    input_files: List[str],
-    output_file: str
-) -> Dict[str, Any]:
-    """
-    Merge multiple PDF files into a single PDF.
-    
-    Args:
-        workspace_path: The workspace directory path
-        tempfile_dir: Directory for temporary files
-        input_files: List of input PDF file paths
-        output_file: Path to output merged PDF
-        
-    Returns:
-        Dictionary with operation result
-    """
-    logger.info(f"Merging {len(input_files)} PDFs into {output_file}")
-    
-    try:
-        output_path = ensure_workspace_path(workspace_path, output_file)
-        writer = PdfWriter()
-        
-        total_pages = 0
-        for input_file in input_files:
-            input_path = ensure_workspace_path(workspace_path, input_file)
-            
-            if not input_path.exists():
-                return {"error": f"Input file not found: {input_file}"}
-            
-            reader = PdfReader(str(input_path))
-            for page in reader.pages:
-                writer.add_page(page)
-            total_pages += len(reader.pages)
-        
-        # Create output directory if it doesn't exist
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(output_path, "wb") as output:
-            writer.write(output)
-        
-        return {
-            "success": True,
-            "output_file": output_file,
-            "input_files_count": len(input_files),
-            "total_pages": total_pages,
-            "message": f"Successfully merged {len(input_files)} PDFs ({total_pages} pages) into {output_file}"
-        }
-        
-    except Exception as e:
-        logger.exception(f"Error merging PDFs: {e}")
-        return {"error": f"Failed to merge PDFs: {str(e)}"}
-
-
-async def split_pdf(
-    workspace_path: str,
-    tempfile_dir: str,
-    input_file: str,
-    output_prefix: str
-) -> Dict[str, Any]:
-    """
-    Split a PDF into individual pages.
-    
-    Args:
-        workspace_path: The workspace directory path
-        tempfile_dir: Directory for temporary files
-        input_file: Path to input PDF
-        output_prefix: Prefix for output files (e.g., "page" -> "page_1.pdf", "page_2.pdf")
-        
-    Returns:
-        Dictionary with operation result
-    """
-    logger.info(f"Splitting {input_file} with prefix {output_prefix}")
-    
-    try:
-        input_path = ensure_workspace_path(workspace_path, input_file)
-        
-        if not input_path.exists():
-            return {"error": f"Input file not found: {input_file}"}
-        
-        reader = PdfReader(str(input_path))
-        output_files = []
-        
-        for i, page in enumerate(reader.pages):
-            writer = PdfWriter()
-            writer.add_page(page)
-            
-            output_file = f"{output_prefix}_{i + 1}.pdf"
-            output_path = ensure_workspace_path(workspace_path, output_file)
-            
-            # Create output directory if it doesn't exist
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(output_path, "wb") as output:
-                writer.write(output)
-            
-            output_files.append(output_file)
-        
-        return {
-            "success": True,
-            "output_files": output_files,
-            "pages_created": len(output_files),
-            "message": f"Successfully split PDF into {len(output_files)} pages"
-        }
-        
-    except Exception as e:
-        logger.exception(f"Error splitting PDF: {e}")
-        return {"error": f"Failed to split PDF: {str(e)}"}
-
-
 async def get_pdf_info(workspace_path: str, file_path: str) -> Dict[str, Any]:
     """
     Get information about a PDF file without extracting full text.
@@ -422,45 +311,6 @@ def main(
                 },
                 annotations=types.ToolAnnotations(**{"category": "PDF_MANIPULATE"}),
             ),
-            types.Tool(
-                name="merge_pdfs",
-                description="Merge multiple PDF files into a single PDF file.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["input_files", "output_file"],
-                    "properties": {
-                        "input_files": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                            "description": "Array of relative paths to input PDF files"
-                        },
-                        "output_file": {
-                            "type": "string",
-                            "description": "Relative path for the output merged PDF file"
-                        }
-                    },
-                },
-                annotations=types.ToolAnnotations(**{"category": "PDF_MANIPULATE"}),
-            ),
-            types.Tool(
-                name="split_pdf",
-                description="Split a PDF file into individual pages, creating one PDF per page.",
-                inputSchema={
-                    "type": "object",
-                    "required": ["input_file", "output_prefix"],
-                    "properties": {
-                        "input_file": {
-                            "type": "string",
-                            "description": "Relative path to the input PDF file"
-                        },
-                        "output_prefix": {
-                            "type": "string",
-                            "description": "Prefix for output files (e.g., 'page' creates 'page_1.pdf', 'page_2.pdf')"
-                        }
-                    },
-                },
-                annotations=types.ToolAnnotations(**{"category": "PDF_MANIPULATE"}),
-            ),
         ]
     
     @app.call_tool()
@@ -493,24 +343,6 @@ def main(
                     return [types.TextContent(type="text", text="Error: input_file, output_file, and page_numbers are required")]
                 
                 result = await extract_pages(workspace_path, tempfile_dir, input_file, output_file, page_numbers)
-                
-            elif name == "merge_pdfs":
-                input_files = arguments.get("input_files")
-                output_file = arguments.get("output_file")
-                
-                if not all([input_files, output_file]):
-                    return [types.TextContent(type="text", text="Error: input_files and output_file are required")]
-                
-                result = await merge_pdfs(workspace_path, tempfile_dir, input_files, output_file)
-                
-            elif name == "split_pdf":
-                input_file = arguments.get("input_file")
-                output_prefix = arguments.get("output_prefix")
-                
-                if not all([input_file, output_prefix]):
-                    return [types.TextContent(type="text", text="Error: input_file and output_prefix are required")]
-                
-                result = await split_pdf(workspace_path, tempfile_dir, input_file, output_prefix)
                 
             else:
                 return [types.TextContent(type="text", text=f"Unknown tool: {name}")]

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "office-word-mcp-server"
+version = "1.1.10"
+description = "MCP server for manipulating Microsoft Word documents"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "GongRzhe", email = "gongrzhe@gmail.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "python-docx>=1.1.2",
+    "fastmcp>=2.8.1",
+    "msoffcrypto-tool>=5.4.2",
+    "docx2pdf>=0.1.8",
+    "pytest>=8.4.2",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/GongRzhe/Office-Word-MCP-Server.git"
+"Bug Tracker" = "https://github.com/GongRzhe/Office-Word-MCP-Server.git/issues"
+
+[tool.hatch.build.targets.wheel]
+only-include = [
+    "word_document_server",
+    "office_word_mcp_server",
+]
+sources = ["."]
+
+[project.scripts]
+word_mcp_server = "word_document_server.main:run_server"

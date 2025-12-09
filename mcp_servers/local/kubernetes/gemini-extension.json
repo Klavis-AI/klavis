@@ -1,0 +1,10 @@
+{
+  "name":"mcp-server-kubernetes",
+  "version":"1.0.0",
+  "mcpServers": {
+    "kubernetes": {
+      "command": "npx",
+      "args": ["mcp-server-kubernetes"]
+    }
+  }
+}

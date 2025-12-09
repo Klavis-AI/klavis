@@ -1,0 +1,23 @@
+[project]
+name = "cli-mcp-server"
+version = "0.2.5"
+description = "Command line interface for MCP clients with secure execution and customizable security policies"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["mcp>=1.10.1"]
+authors = [
+    { name = "Mladen", email = "fangs-lever6n@icloud.com" },
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+cli-mcp-server = "cli_mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/MladenSU/cli-mcp-server"
+Documentation = "https://github.com/MladenSU/cli-mcp-server#readme"
+Repository = "https://github.com/MladenSU/cli-mcp-server.git"
+"Bug Tracker" = "https://github.com/MladenSU/cli-mcp-server/issues"

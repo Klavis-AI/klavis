@@ -1,0 +1,78 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.Flux159/mcp-server-kubernetes",
+  "description": "MCP server for interacting with Kubernetes clusters via kubectl",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/Flux159/mcp-server-kubernetes",
+    "source": "github"
+  },
+  "version": "2.9.4",
+  "packages": [
+    {
+      "registry_type": "npm",
+      "registry_base_url": "https://registry.npmjs.org",
+      "identifier": "mcp-server-kubernetes",
+      "version": "2.9.4",
+      "transport": {
+        "type": "stdio"
+      },
+      "environment_variables": [
+        {
+          "description": "Non destructive mode.",
+          "is_required": false,
+          "format": "string",
+          "name": "ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS"
+        },
+        {
+          "description": "Read only mode.",
+          "is_required": false,
+          "format": "string",
+          "name": "ALLOW_ONLY_READONLY_TOOLS"
+        },
+        {
+          "description": "Comma delimited list of allowed tools.",
+          "is_required": false,
+          "format": "string",
+          "name": "ALLOWED_TOOLS"
+        },
+        {
+          "description": "Set to false to disable automatic secrets masking in responses.",
+          "is_required": false,
+          "format": "string",
+          "name": "MASK_SECRETS"
+        },
+        {
+          "description": "Enable Streamable HTTP Transport.",
+          "is_required": false,
+          "format": "string",
+          "name": "ENABLE_UNSAFE_STREAMABLE_HTTP_TRANSPORT"
+        },
+        {
+          "description": "Enable SSE Transport.",
+          "is_required": false,
+          "format": "string",
+          "name": "ENABLE_UNSAFE_SSE_TRANSPORT"
+        },
+        {
+          "description": "Specify kubeconfig as a yaml string.",
+          "is_required": false,
+          "format": "string",
+          "name": "KUBECONFIG_YAML"
+        },
+        {
+          "description": "Specify kubeconfig as a json string.",
+          "is_required": false,
+          "format": "string",
+          "name": "KUBECONFIG_JSON"
+        },
+        {
+          "description": "Specify kubeconfig file path. Defaults to ~/.kube/config",
+          "is_required": false,
+          "format": "string",
+          "name": "KUBECONFIG_PATH"
+        }
+      ]
+    }
+  ]
+}
