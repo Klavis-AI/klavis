@@ -192,10 +192,10 @@ const readTextFileHandler = async (args: z.infer<typeof ReadTextFileArgsSchema>)
 };
 
 server.registerTool(
-  "read_file",
+  "filesystem_read_file",
   {
     title: "Read File (Deprecated)",
-    description: "Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.",
+    description: "Read the complete contents of a file as text. DEPRECATED: Use filesystem_read_text_file instead.",
     inputSchema: ReadTextFileArgsSchema.shape,
     outputSchema: { content: z.string() },
     annotations: { readOnlyHint: true }
@@ -204,7 +204,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "read_text_file",
+  "filesystem_read_text_file",
   {
     title: "Read Text File",
     description:
@@ -227,7 +227,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "read_media_file",
+  "filesystem_read_media_file",
   {
     title: "Read Media File",
     description:
@@ -279,7 +279,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "read_multiple_files",
+  "filesystem_read_multiple_files",
   {
     title: "Read Multiple Files",
     description:
@@ -318,7 +318,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "write_file",
+  "filesystem_write_file",
   {
     title: "Write File",
     description:
@@ -344,7 +344,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "edit_file",
+  "filesystem_edit_file",
   {
     title: "Edit File",
     description:
@@ -373,7 +373,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "create_directory",
+  "filesystem_create_directory",
   {
     title: "Create Directory",
     description:
@@ -399,7 +399,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "list_directory",
+  "filesystem_list_directory",
   {
     title: "List Directory",
     description:
@@ -427,7 +427,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "list_directory_with_sizes",
+  "filesystem_list_directory_with_sizes",
   {
     title: "List Directory with Sizes",
     description:
@@ -506,7 +506,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "directory_tree",
+  "filesystem_directory_tree",
   {
     title: "Directory Tree",
     description:
@@ -576,7 +576,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "move_file",
+  "filesystem_move_file",
   {
     title: "Move File",
     description:
@@ -605,7 +605,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "search_files",
+  "filesystem_search_files",
   {
     title: "Search Files",
     description:
@@ -634,7 +634,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "get_file_info",
+  "filesystem_get_file_info",
   {
     title: "Get File Info",
     description:
@@ -662,7 +662,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  "list_allowed_directories",
+  "filesystem_list_allowed_directories",
   {
     title: "List Allowed Directories",
     description:
