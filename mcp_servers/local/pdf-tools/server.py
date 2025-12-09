@@ -258,7 +258,7 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             types.Tool(
-                name="read_pdf",
+                name="pdf_tools_read_pdf",
                 description="Read and extract text content from a PDF file. Returns metadata and text from all pages.",
                 inputSchema={
                     "type": "object",
@@ -273,7 +273,7 @@ def main(
                 annotations=types.ToolAnnotations(**{"category": "PDF_READ", "readOnlyHint": True}),
             ),
             types.Tool(
-                name="get_pdf_info",
+                name="pdf_tools_get_pdf_info",
                 description="Get metadata and information about a PDF file without extracting full text content.",
                 inputSchema={
                     "type": "object",
@@ -288,7 +288,7 @@ def main(
                 annotations=types.ToolAnnotations(**{"category": "PDF_INFO", "readOnlyHint": True}),
             ),
             types.Tool(
-                name="extract_pages",
+                name="pdf_tools_extract_pages",
                 description="Extract specific pages from a PDF and create a new PDF file.",
                 inputSchema={
                     "type": "object",
@@ -322,19 +322,19 @@ def main(
         try:
             result = None
             
-            if name == "read_pdf":
+            if name == "pdf_tools_read_pdf":
                 file_path = arguments.get("file_path")
                 if not file_path:
                     return [types.TextContent(type="text", text="Error: file_path parameter is required")]
                 result = await read_pdf(workspace_path, file_path)
                 
-            elif name == "get_pdf_info":
+            elif name == "pdf_tools_get_pdf_info":
                 file_path = arguments.get("file_path")
                 if not file_path:
                     return [types.TextContent(type="text", text="Error: file_path parameter is required")]
                 result = await get_pdf_info(workspace_path, file_path)
                 
-            elif name == "extract_pages":
+            elif name == "pdf_tools_extract_pages":
                 input_file = arguments.get("input_file")
                 output_file = arguments.get("output_file")
                 page_numbers = arguments.get("page_numbers")

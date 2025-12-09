@@ -1,8 +1,8 @@
 {
   "databases": [
     {
-      "name": "SLA_MONITOR_SANDBOX",
-      "comment": "SLA Monitor Database for testing",
+      "name": "SLA_MONITOR",
+      "comment": "SLA monitoring and customer support ticket tracking system",
       "schemas": [
         {
           "name": "CORE",
@@ -54,7 +54,7 @@
                     "EMAIL": "john.basic@example.com",
                     "SERVICE_LEVEL": "Basic",
                     "CUSTOMER_MANAGER": "Sarah Manager",
-                    "CREATED_AT": "2023-10-01 10:00:00"
+                    "CREATED_AT": "2025-12-08 00:00:00"
                   }
                 },
                 {
@@ -64,7 +64,7 @@
                     "EMAIL": "alice.pro@example.com",
                     "SERVICE_LEVEL": "Pro",
                     "CUSTOMER_MANAGER": "Mike Supervisor",
-                    "CREATED_AT": "2023-10-02 11:30:00"
+                    "CREATED_AT": "2025-10-08 00:00:00"
                   }
                 },
                 {
@@ -74,7 +74,7 @@
                     "EMAIL": "bob.max@example.com",
                     "SERVICE_LEVEL": "Max",
                     "CUSTOMER_MANAGER": "Sarah Manager",
-                    "CREATED_AT": "2023-10-03 09:15:00"
+                    "CREATED_AT": "2025-10-08 00:00:00"
                   }
                 }
               ]
