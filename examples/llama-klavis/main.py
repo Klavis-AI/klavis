@@ -1,12 +1,13 @@
+import json
 import os
 import asyncio
 import webbrowser
 from dotenv import load_dotenv
-from klavis import Klavis, McpServerName
 from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage
+from klavis import Klavis, SandboxMcpServer
 
 load_dotenv()
 
@@ -18,65 +19,45 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
 MCP_SERVERS_LOCAL_PATH = os.path.join(REPO_ROOT, "mcp_servers", "local")
 
+
 async def main():
+    # Initialize Klavis client
     klavis_client = Klavis(api_key=os.getenv("KLAVIS_API_KEY"))
-
-    # Step 1: Create a Strata MCP server with Gmail and Google Calendar integrations
-    response = klavis_client.mcp_server.create_strata_server(
-        user_id="demo_user",
-        servers=[McpServerName.GOOGLE_CALENDAR],
+    
+    # Step 1: Create sandbox
+    gmail_sandbox = klavis_client.sandbox.create_sandbox(
+        server_name=SandboxMcpServer.GMAIL,
     )
     
-    gmail_mcp_server = klavis_client.mcp_server.create_server_instance(
-        server_name="Gmail",
-        user_id="demo_user",
+    snowflake_sandbox = klavis_client.sandbox.create_sandbox(
+        server_name=SandboxMcpServer.SNOWFLAKE,
     )
     
-    snowflake_mcp_server = klavis_client.mcp_server.create_server_instance(
-        server_name="Snowflake",
-        user_id="demo_user",
+    
+    print(f"Gmail Sandbox: {gmail_sandbox}")
+    print(f"Snowflake Sandbox: {snowflake_sandbox}")
+    
+    # Step 2: initialize snowflake sandbox data from snowflake.json
+    snowflake_json_path = os.path.join(CURRENT_DIR, "snowflake.json")
+    with open(snowflake_json_path, "r") as f:
+        snowflake_data = json.load(f)
+    
+    initialize_response = klavis_client.sandbox.initialize_sandbox(
+        sandbox_id=snowflake_sandbox.sandbox_id,
+        databases=snowflake_data["databases"],
     )
-
-    # Step 2: Handle OAuth authorization if needed
-    if response.oauth_urls:
-        for server_name, oauth_url in response.oauth_urls.items():
-            webbrowser.open(oauth_url)
-            input(f"Press Enter after completing {server_name} OAuth authorization...")
-            
-    # snowflake_mcp_server = klavis_client.mcp_server.create_server_instance(
-    #     server_name=McpServerName.SNOWFLAKE,
-    #     user_id="demo_user",
-    # )
-
+    
     # Step 3: Create LangChain Agent with MCP Tools
+    # Use the server URL from one of the created MCP servers
+    
     mcp_client = MultiServerMCPClient({
-        # "filesystem": {
-        #     "transport": "stdio",
-        #     "command": "npx",
-        #     "args": [
-        #         "-y",
-        #         os.path.join(MCP_SERVERS_LOCAL_PATH, "filesystem"),
-        #         MCP_SERVERS_LOCAL_PATH
-        #     ],
-        #     "env": dict(os.environ)
-        # },
-        # "pdf-tools": {
-        #     "transport": "stdio",
-        #     "command": "uvx",
-        #     "args": [
-        #         "--from",
-        #         os.path.join(MCP_SERVERS_LOCAL_PATH, "pdf-tools"),
-        #         "pdf-tools-mcp",
-        #         "--workspace_path",
-        #         MCP_SERVERS_LOCAL_PATH,
-        #         "--tempfile_dir",
-        #         MCP_SERVERS_LOCAL_PATH
-        #     ],
-        #     "env": dict(os.environ)
-        # },
-        "strata": {
+        "gmail": {
             "transport": "streamable_http",
-            "url": response.strata_server_url,
+            "url": gmail_sandbox.server_url,
+        },
+        "snowflake": {
+            "transport": "streamable_http",
+            "url": snowflake_sandbox.server_url,
         }
     })
 
@@ -103,6 +84,20 @@ async def main():
         {"messages": [{"role": "user", "content": user_message}]}
     )
     print(response)
+    
+    delete_response = klavis_client.sandbox.delete_sandbox(
+        server_name=SandboxMcpServer.SNOWFLAKE,
+        sandbox_id=snowflake_sandbox.sandbox_id,
+    )
+    print(f"Delete Response: {delete_response}")
+    print(f"Initialize Response: {initialize_response}")
+    
+    delete_response = klavis_client.sandbox.delete_sandbox(
+        server_name=SandboxMcpServer.GMAIL,
+        sandbox_id=gmail_sandbox.sandbox_id,
+    )
+    print(f"Delete Response: {delete_response}")
+    
 
 
 if __name__ == "__main__":

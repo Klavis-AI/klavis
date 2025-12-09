@@ -1,4 +1,4 @@
-klavis>=2.14.1
+klavis>=2.15.0
 python-dotenv
 langchain
 langchain-mcp-adapters
