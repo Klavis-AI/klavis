@@ -122,46 +122,6 @@ Connect to Sentry to monitor application errors, track performance issues, and m
       </Step>
     </Steps>
   </Tab>
-
-  <Tab title="Open Source">
-    <Steps>
-      <Step title="Clone repository (for developers to build from source)">
-        ```bash
-        git clone https://github.com/klavis-ai/klavis
-        cd klavis/mcp_servers/sentry
-        ```
-      </Step>
-
-      <Step title="Run with Docker">
-        ```bash
-        # Pull the Docker image
-        docker pull ghcr.io/klavis-ai/sentry-mcp-server:latest
-
-        # Run with OAuth support (requires Klavis API key)
-        docker run -p 5000:5000 \
-          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
-          ghcr.io/klavis-ai/sentry-mcp-server:latest
-
-        # Or run with manual API key
-        docker run -p 5000:5000 \
-          -e AUTH_DATA='{"access_token":"your_sentry_access_token"}' \
-          ghcr.io/klavis-ai/sentry-mcp-server:latest
-        ```
-      </Step>
-
-      <Step title="Configure MCP client">
-        ```json
-        {
-          "mcpServers": {
-            "sentry": {
-              "url": "http://localhost:5000/mcp/"
-            }
-          }
-        }
-        ```
-      </Step>
-    </Steps>
-  </Tab>
 </Tabs>
 
 ## Available Tools

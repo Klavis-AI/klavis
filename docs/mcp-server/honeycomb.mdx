@@ -122,46 +122,6 @@ Connect to Honeycomb to query observability data, analyze traces, and manage ale
       </Step>
     </Steps>
   </Tab>
-
-  <Tab title="Open Source">
-    <Steps>
-      <Step title="Clone repository (for developers to build from source)">
-        ```bash
-        git clone https://github.com/klavis-ai/klavis
-        cd klavis/mcp_servers/honeycomb
-        ```
-      </Step>
-
-      <Step title="Run with Docker">
-        ```bash
-        # Pull the Docker image
-        docker pull ghcr.io/klavis-ai/honeycomb-mcp-server:latest
-
-        # Run with OAuth support (requires Klavis API key)
-        docker run -p 5000:5000 \
-          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
-          ghcr.io/klavis-ai/honeycomb-mcp-server:latest
-
-        # Or run with manual API key
-        docker run -p 5000:5000 \
-          -e AUTH_DATA='{"api_key":"your_honeycomb_api_key"}' \
-          ghcr.io/klavis-ai/honeycomb-mcp-server:latest
-        ```
-      </Step>
-
-      <Step title="Configure MCP client">
-        ```json
-        {
-          "mcpServers": {
-            "honeycomb": {
-              "url": "http://localhost:5000/mcp/"
-            }
-          }
-        }
-        ```
-      </Step>
-    </Steps>
-  </Tab>
 </Tabs>
 
 ## Available Tools
