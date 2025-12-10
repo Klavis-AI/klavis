@@ -10509,6 +10509,226 @@
           }
         }
       }
+    },
+    "/sandbox/monday/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize monday sandbox with data",
+        "description": "Initialize the sandbox with monday-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_monday__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MondayData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/monday/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export monday sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_monday__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_MondayData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/motion/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize motion sandbox with data",
+        "description": "Initialize the sandbox with motion-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_motion__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionData-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/motion/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export motion sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_motion__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_MotionData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13231,6 +13451,37 @@
         ],
         "title": "DumpSandboxResponse[Mem0Data]"
       },
+      "DumpSandboxResponse_MondayData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MondayData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[MondayData]"
+      },
       "DumpSandboxResponse_MoneybirdData_": {
         "properties": {
           "sandbox_id": {
@@ -13261,6 +13512,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[MoneybirdData]"
+      },
+      "DumpSandboxResponse_MotionData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MotionData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[MotionData]"
       },
       "DumpSandboxResponse_MsTeamsData_": {
         "properties": {
@@ -17770,6 +18052,276 @@
         "title": "Mem0Message",
         "description": "Message object for memory"
       },
+      "MondayBoard": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Board name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Board description"
+          },
+          "board_kind": {
+            "type": "string",
+            "title": "Board Kind",
+            "description": "Board kind (public, private, share)",
+            "default": "public"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id",
+            "description": "Workspace ID this board belongs to (for initialization)"
+          },
+          "groups": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MondayGroup"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groups",
+            "description": "Groups in this board"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MondayBoard",
+        "description": "Monday.com Board object - DELETE SUPPORTED"
+      },
+      "MondayData-Input": {
+        "properties": {
+          "workspaces": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MondayWorkspace"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspaces",
+            "description": "List of workspaces"
+          },
+          "boards": {
+            "items": {
+              "$ref": "#/components/schemas/MondayBoard"
+            },
+            "type": "array",
+            "title": "Boards",
+            "description": "List of boards with their groups and items"
+          }
+        },
+        "type": "object",
+        "title": "MondayData",
+        "description": "Complete Monday.com sandbox data structure.\n\nRelational structure for initialization:\n- Workspaces (optional, can be created separately)\n- Boards contain Groups\n- Groups contain Items\n- Items contain Updates and Subitems\n\nAll objects support DELETE operations."
+      },
+      "MondayData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MondayGroup": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Group title"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color",
+            "description": "Group color (e.g., '#FF0000', 'red')"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MondayItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "Items in this group"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "MondayGroup",
+        "description": "Monday.com Group (Section) object - DELETE SUPPORTED"
+      },
+      "MondayItem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Item name"
+          },
+          "column_values": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column Values",
+            "description": "Column values as JSON object"
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MondayUpdate"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates",
+            "description": "Updates/comments on this item"
+          },
+          "subitems": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MondaySubitem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subitems",
+            "description": "Subitems (nested items)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MondayItem",
+        "description": "Monday.com Item (Task/Row) object - DELETE SUPPORTED"
+      },
+      "MondaySubitem": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Subitem name"
+          },
+          "column_values": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column Values",
+            "description": "Column values as JSON object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MondaySubitem",
+        "description": "Monday.com Subitem object (nested item) - DELETE SUPPORTED"
+      },
+      "MondayUpdate": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body",
+            "description": "Update text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "MondayUpdate",
+        "description": "Monday.com Update (Comment) object - DELETE SUPPORTED"
+      },
+      "MondayWorkspace": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Workspace name"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "description": "Workspace kind (open, closed)",
+            "default": "open"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Workspace description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MondayWorkspace",
+        "description": "Monday.com Workspace object - DELETE SUPPORTED"
+      },
       "MoneybirdContact": {
         "properties": {
           "company_name": {
@@ -18317,6 +18869,256 @@
         ],
         "title": "MoneybirdTimeEntry",
         "description": "Moneybird time entry - API format\n\nNote: During initialization, this will be linked to a project and contact automatically.\nThe started_at and ended_at timestamps will be generated based on the hours field.\n\nAttributes:\n    description: Description of work performed\n    hours: Number of hours worked\n    billable: Whether this time is billable"
+      },
+      "MotionComment": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Comment text content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "MotionComment",
+        "description": "Motion Comment object - supports DELETE operation"
+      },
+      "MotionData-Input": {
+        "properties": {
+          "workspaces": {
+            "items": {
+              "$ref": "#/components/schemas/MotionWorkspace"
+            },
+            "type": "array",
+            "title": "Workspaces",
+            "description": "List of workspaces with their projects and tasks"
+          }
+        },
+        "type": "object",
+        "title": "MotionData",
+        "description": "Complete Motion sandbox data structure.\n\nHierarchical structure for initialization:\n- Workspaces contain Projects\n- Projects contain Tasks\n- Tasks contain Comments\n\nDelete operation support:\n- Tasks: YES\n- Comments: YES\n- Projects: YES\n- Workspaces: NO (organization level, typically not deleted)"
+      },
+      "MotionData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MotionProject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Project name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Project description"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date",
+            "description": "Project due date in ISO 8601 format"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Project priority: ASAP, HIGH, MEDIUM, or LOW"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "Project labels"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MotionTask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks",
+            "description": "Tasks in this project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MotionProject",
+        "description": "Motion Project object - supports DELETE operation"
+      },
+      "MotionTask": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Task name/title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Task description (supports Markdown)"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Task status (e.g., 'TODO', 'IN_PROGRESS', 'COMPLETED')"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "Task priority: ASAP, HIGH, MEDIUM, or LOW"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date",
+            "description": "Due date in ISO 8601 format"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "Estimated duration in minutes"
+          },
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Labels",
+            "description": "Task labels for categorization"
+          },
+          "comments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MotionComment"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comments",
+            "description": "Comments on this task"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MotionTask",
+        "description": "Motion Task object - supports DELETE operation"
+      },
+      "MotionWorkspace": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Workspace name"
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MotionProject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projects",
+            "description": "Projects in this workspace"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MotionWorkspace",
+        "description": "Motion Workspace object - typically NOT deleted (organization level)"
       },
       "MsTeamsData-Input": {
         "properties": {
@@ -20979,6 +21781,7 @@
           "clickup",
           "close",
           "monday",
+          "motion",
           "onedrive",
           "microsoft_teams",
           "outlook_mail",
