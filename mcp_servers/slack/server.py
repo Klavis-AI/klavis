@@ -58,17 +58,17 @@ def extract_access_tokens(request_or_scope) -> tuple[str, str]:
 
     ## ---- for Klavis Cloud ---- ##
     # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-    if hasattr(request_or_scope, 'headers'):
-        # SSE request object
-        auth_data = request_or_scope.headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = base64.b64decode(auth_data).decode('utf-8')
-    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-        # StreamableHTTP scope object
-        headers = dict(request_or_scope.get("headers", []))
-        auth_data = headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = base64.b64decode(auth_data).decode('utf-8')
+    # if hasattr(request_or_scope, 'headers'):
+    #     # SSE request object
+    #     auth_data = request_or_scope.headers.get(b'x-auth-data')
+    #     if auth_data:
+    #         auth_data = base64.b64decode(auth_data).decode('utf-8')
+    # elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+    #     # StreamableHTTP scope object
+    #     headers = dict(request_or_scope.get("headers", []))
+    #     auth_data = headers.get(b'x-auth-data')
+    #     if auth_data:
+    #         auth_data = base64.b64decode(auth_data).decode('utf-8')
 
     ## ---- for local development ---- ##
     if not auth_data:
@@ -681,7 +681,7 @@ def main(
             team_id = arguments.get("team_id")
             include_locale = arguments.get("include_locale")
             user_id = arguments.get("user_id")
-            name = arguments.get("name")
+            user_name = arguments.get("name")
             response_format = arguments.get("response_format")
 
             try:
@@ -691,7 +691,7 @@ def main(
                     team_id=team_id,
                     include_locale=include_locale,
                     user_id=user_id,
-                    name=name,
+                    name=user_name,
                     response_format=response_format,
                 )
                 return [

@@ -1,16 +1,17 @@
 import logging
-from typing import Any
+from typing import Any, Dict, Optional
 
 from .base import make_slack_user_request
 
+# Configure logging
 logger = logging.getLogger(__name__)
 
 
 def filter_channels(
     channels: list[dict[str, Any]],
-    channel_name: str | None = None,
-    user_id: str | None = None,
-) -> list[dict[str, Any]]:
+    channel_name: Optional[str] = None,
+    user_id: Optional[str] = None,
+) -> list[Dict[str, Any]]:
     """Client-side filtering of channels.
 
     Args:
@@ -49,9 +50,9 @@ def filter_channels(
 
 
 def format_channel_response(
-    channel: dict[str, Any],
+    channel: Dict[str, Any],
     response_format: str = "concise",
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """Format a single channel object based on response_format.
 
     Args:
@@ -90,15 +91,16 @@ def generate_summary(total_returned: int, has_next_cursor: bool) -> str:
         return f"Found {total_returned} channels. More results available - please specify the cursor parameter to continue."
     return f"Found {total_returned} channels."
 
-
+# list_channels returns all channels that the user has access to
+# User tokens: channels:read, groups:read, im:read, mpim:read
 async def list_channels(
-    limit: int | None = None,
-    cursor: str | None = None,
-    types: str | None = None,
-    channel_name: str | None = None,
-    user_id: str | None = None,
-    response_format: str | None = None,
-) -> dict[str, Any]:
+    limit: Optional[int] = None,
+    cursor: Optional[str] = None,
+    types: Optional[str] = None,
+    channel_name: Optional[str] = None,
+    user_id: Optional[str] = None,
+    response_format: Optional[str] = None,
+) -> Dict[str, Any]:
     """List all channels the authenticated user has access to with optional filtering.
 
     This uses the user token to list channels, which means it can access:

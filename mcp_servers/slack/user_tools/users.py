@@ -1,16 +1,17 @@
 import logging
-from typing import Any
+from typing import Any, Dict, Optional
 
 from .base import make_slack_user_request
 
+# Configure logging
 logger = logging.getLogger(__name__)
 
 
 def filter_users(
     users: list[dict[str, Any]],
-    user_id: str | None = None,
-    name: str | None = None,
-) -> list[dict[str, Any]]:
+    user_id: Optional[str] = None,
+    name: Optional[str] = None,
+) -> list[Dict[str, Any]]:
     """Client-side filtering of users.
 
     Args:
@@ -54,9 +55,9 @@ def filter_users(
 
 
 def format_user_response(
-    user: dict[str, Any],
+    user: Dict[str, Any],
     response_format: str = "concise",
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """Format a single user object based on response_format.
 
     Args:
@@ -90,16 +91,17 @@ def generate_summary(total_returned: int, has_next_cursor: bool) -> str:
         return f"Found {total_returned} users. More results available - please specify the cursor parameter to continue."
     return f"Found {total_returned} users."
 
-
+# Lists all users in a Slack team.
+# User tokens: users:read
 async def list_users(
-    cursor: str | None = None,
-    limit: int | None = None,
-    team_id: str | None = None,
-    include_locale: bool | None = None,
-    user_id: str | None = None,
-    name: str | None = None,
-    response_format: str | None = None,
-) -> dict[str, Any]:
+    cursor: Optional[str] = None,
+    limit: Optional[int] = None,
+    team_id: Optional[str] = None,
+    include_locale: Optional[bool] = None,
+    user_id: Optional[str] = None,
+    name: Optional[str] = None,
+    response_format: Optional[str] = None,
+) -> Dict[str, Any]:
     """Lists all users in a Slack team with optional filtering.
 
     This uses the user token to list users, which means it can access:
