@@ -19,7 +19,7 @@ npm start
 
 3. Get MCP http URL
 
-The MCP should be hosted at `http://localhost:8000/mcp`.
+The MCP should be hosted at `http://localhost:5000/mcp`.
 
 ## 🐳 Docker Deployment
 
@@ -32,10 +32,10 @@ docker build -f mcp_servers/fetch_url/Dockerfile -t fetch-url-mcp .
 2. Run the container:
 
 ```bash
-docker run -p 8000:8000 fetch-url-mcp
+docker run -p 5000:5000 fetch-url-mcp
 ```
 
-3. Access the MCP server at `http://localhost:8000/mcp`
+3. Access the MCP server at `http://localhost:5000/mcp`
 
 
 ## 📚 Documentation
