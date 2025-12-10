@@ -17380,6 +17380,7 @@
           "ElevenLabs",
           "Exa",
           "Fathom",
+          "Fetch URL",
           "Figma",
           "Fireflies",
           "Firecrawl Deep Research",
@@ -17437,7 +17438,8 @@
           "WordPress",
           "YouTube",
           "Zendesk",
-          "ServiceNow"
+          "ServiceNow",
+          "Zoho Mail"
         ],
         "title": "McpServerName"
       },
@@ -18694,7 +18696,8 @@
           "Vercel",
           "WordPress",
           "Xero",
-          "Zendesk"
+          "Zendesk",
+          "Zoho Mail"
         ],
         "title": "OAuthServerName"
       },
