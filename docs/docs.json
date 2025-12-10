@@ -497,6 +497,20 @@
                     ]
                   },
                   {
+                    "group": "Monday",
+                    "pages": [
+                      "api-reference/sandbox/monday/initialize-monday",
+                      "api-reference/sandbox/monday/dump-monday"
+                    ]
+                  },
+                  {
+                    "group": "Motion",
+                    "pages": [
+                      "api-reference/sandbox/motion/initialize-motion",
+                      "api-reference/sandbox/motion/dump-motion"
+                    ]
+                  },
+                  {
                     "group": "WordPress",
                     "pages": [
                       "api-reference/sandbox/wordpress/initialize-wordpress",

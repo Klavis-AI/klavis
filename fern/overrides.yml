@@ -65,10 +65,18 @@ components:
       x-fern-type-name: LinearDataInput
     LinearData-Output:
       x-fern-type-name: LinearDataOutput
+    MondayData-Input:
+      x-fern-type-name: MondayDataInput
+    MondayData-Output:
+      x-fern-type-name: MondayDataOutput
     MoneybirdData-Input:
       x-fern-type-name: MoneybirdDataInput
     MoneybirdData-Output:
       x-fern-type-name: MoneybirdDataOutput
+    MotionData-Input:
+      x-fern-type-name: MotionDataInput
+    MotionData-Output:
+      x-fern-type-name: MotionDataOutput
     MsTeamsData-Input:
       x-fern-type-name: MsTeamsDataInput
     MsTeamsData-Output:
@@ -409,10 +417,18 @@ paths:
     get:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: dump_microsoft_teams_sandbox
+  "/sandbox/monday/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_monday_sandbox
   "/sandbox/moneybird/{sandbox_id}/dump":
     get:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: dump_moneybird_sandbox
+  "/sandbox/motion/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_motion_sandbox
   "/sandbox/notion/{sandbox_id}/dump":
     get:
       x-fern-sdk-group-name: sandbox
@@ -546,10 +562,18 @@ paths:
     post:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: initialize_microsoft_teams_sandbox
+  "/sandbox/monday/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_monday_sandbox
   "/sandbox/moneybird/{sandbox_id}/initialize":
     post:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: initialize_moneybird_sandbox
+  "/sandbox/motion/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_motion_sandbox
   "/sandbox/notion/{sandbox_id}/initialize":
     post:
       x-fern-sdk-group-name: sandbox
