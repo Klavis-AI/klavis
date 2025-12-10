@@ -1,0 +1,51 @@
+---
+title: "Overview"
+description: "Overview of Klavis API base URLs and response codes."
+---
+
+The Klavis API is built on REST principles. We enforce HTTPS in every request to improve data security, integrity, and privacy. The API does not support HTTP.
+
+## API Structure
+
+**Standard Server:** `https://api.klavis.ai`
+
+**EU Residency Server:** `https://api.eu.klavis.ai`
+
+<CardGroup cols={2}>
+  <Card title="Strata API" icon="layer-group" href="/api-reference/strata/create">
+    Use the Strata API to manage the unified MCP server that guides AI agents to use tools progressively. Solves tool overload, context limits, and coverage gaps for reliable agentic workflows.
+  </Card>
+  <Card title="Single Integration API" icon="server" href="/api-reference/mcp-server/create-a-server-instance">
+    Use the Single Integration API to manage individual MCP server instances. This allows you to provision and control specific tool integrations one by one.
+  </Card>
+  <Card title="User API" icon="users" href="/api-reference/user/get-user">
+    Use the User API to manage users within your organization. This includes retrieving user details, managing user-specific integrations, and handling user deletion.
+  </Card>
+  <Card title="OAuth API" icon="key" href="/api-reference/oauth/airtable-oauth/authorize-airtable">
+    Use the OAuth API to handle authentication flows for your integrations. This covers the authorization processes required to connect third-party services securely.
+  </Card>
+  <Card title="White Label API" icon="tag" href="/api-reference/white-labeling/create">
+    Use the White Label API to manage white-label configurations, allowing you to present integrations under your own branding.
+  </Card>
+  <Card title="Sandbox API" icon="box" href="/api-reference/sandbox/create">
+    Use the Sandbox API to manage isolated MCP sandbox environments for LLM training and evaluation. Handles account pooling, state initialization, export, and teardown for reproducible AI workflows.
+  </Card>
+</CardGroup>
+
+## Response codes
+
+Klavis uses standard HTTP codes to indicate the success or failure of your requests.
+
+In general, 2xx HTTP codes correspond to success, 4xx codes are for user-related failures, and 5xx codes are for infrastructure issues.
+
+| Status | Description                             |
+| ------ | --------------------------------------- |
+| 200    | Successful request.                     |
+| 400    | Check that the parameters were correct. |
+| 401    | The API key used was missing.           |
+| 403    | The API key used was invalid.           |
+| 404    | The resource was not found.             |
+| 429    | The rate limit was exceeded.            |
+| 5xx    | Indicates an error with Klavis servers. |
+
+Check Error Codes for a comprehensive breakdown of all possible API errors.
