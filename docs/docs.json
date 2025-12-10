@@ -200,8 +200,9 @@
           {
             "group": "API References",
             "pages": [
-              "api-reference/introduction",
-              "api-reference/api_key"
+              "api-reference/overview",
+              "api-reference/authentication",
+              "api-reference/rate-limit"
             ]
           },
           {
