@@ -7,14 +7,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the entire scholarly directory
-COPY mcp_servers/scholarly/ .
+# Copy requirements and source code
+COPY mcp_servers/scholarly/requirements.txt .
+COPY mcp_servers/scholarly/src ./src
 
-# Install dependencies using pip
-RUN pip install --no-cache-dir .
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set PYTHONPATH to include src directory
+ENV PYTHONPATH=/app/src
 
 # Expose the default port
 EXPOSE 5000
 
-# Run the MCP server using the installed package
+# Run the MCP server
 CMD ["python", "-m", "mcp_scholarly", "--port", "5000"]

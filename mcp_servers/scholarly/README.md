@@ -13,7 +13,7 @@ A Model Context Protocol (MCP) server to search for accurate academic articles f
 ## Requirements
 
 - Python >= 3.11
-- Dependencies listed in `pyproject.toml`
+- Dependencies listed in `requirements.txt`
 
 ## Installation
 
@@ -23,18 +23,18 @@ git clone https://github.com/Klavis-AI/klavis.git
 cd mcp_servers/scholarly
 ```
 
-2. Install `uv` if you haven't already:
+2. Install dependencies:
 ```bash
-pip install uv
+pip install -r requirements.txt
 ```
 
 ## Running the MCP Server
 
-### Using uv (Recommended)
+### Using Python Module
 
 Run the server with default settings (port 5000):
 ```bash
-uv run mcp-scholarly
+python -m mcp_scholarly
 ```
 
 ### Custom Port and Options
@@ -43,20 +43,13 @@ You can customize the server with various options:
 
 ```bash
 # Run on a custom port
-uv run mcp-scholarly --port 8080
+python -m mcp_scholarly --port 8080
 
 # Set logging level
-uv run mcp-scholarly --log-level DEBUG
+python -m mcp_scholarly --log-level DEBUG
 
 # Enable JSON responses instead of SSE streams
-uv run mcp-scholarly --json-response
-```
-
-### Using Python Module
-
-Alternatively, run as a Python module:
-```bash
-uv run python -m mcp_scholarly
+python -m mcp_scholarly --json-response
 ```
 
 ### Environment Variables
