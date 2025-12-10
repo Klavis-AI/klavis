@@ -112,6 +112,7 @@
               "mcp-server/elevenlabs",
               "mcp-server/exa",
               "mcp-server/fathom",
+              "mcp-server/fetch_url",
               "mcp-server/figma",
               "mcp-server/firecrawl-deep-research",
               "mcp-server/firecrawl-web-search",
