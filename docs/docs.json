@@ -123,8 +123,10 @@
               "mcp-server/gmail",
               "mcp-server/gong",
               "mcp-server/google_calendar",
+              "mcp-server/google_cloud",
               "mcp-server/google_docs",
               "mcp-server/google_drive",
+              "mcp-server/google_forms",
               "mcp-server/google_jobs",
               "mcp-server/google_sheets",
               "mcp-server/gorgias",
@@ -174,7 +176,8 @@
               "mcp-server/wordpress",
               "mcp-server/youtube",
               "mcp-server/zendesk",
-              "mcp-server/zoho_desk"
+              "mcp-server/zoho_desk",
+              "mcp-server/zoho_mail"
             ]
           },
           {
