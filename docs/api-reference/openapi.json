@@ -6543,6 +6543,1068 @@
         }
       }
     },
+    "/oauth/intercom/authorize": {
+      "get": {
+        "tags": [
+          "intercom-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizeintercom_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/intercom/refresh_token": {
+      "post": {
+        "tags": [
+          "intercom-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_intercom_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/paypal/authorize": {
+      "get": {
+        "tags": [
+          "paypal-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizepaypal_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/paypal/refresh_token": {
+      "post": {
+        "tags": [
+          "paypal-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_paypal_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/sentry/authorize": {
+      "get": {
+        "tags": [
+          "sentry-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizesentry_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/sentry/refresh_token": {
+      "post": {
+        "tags": [
+          "sentry-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_sentry_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/netlify/authorize": {
+      "get": {
+        "tags": [
+          "netlify-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizenetlify_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/netlify/refresh_token": {
+      "post": {
+        "tags": [
+          "netlify-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_netlify_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/huggingface/authorize": {
+      "get": {
+        "tags": [
+          "huggingface-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizehuggingface_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/huggingface/refresh_token": {
+      "post": {
+        "tags": [
+          "huggingface-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_huggingface_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/square/authorize": {
+      "get": {
+        "tags": [
+          "square-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizesquare_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/square/refresh_token": {
+      "post": {
+        "tags": [
+          "square-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_square_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/clockwise/authorize": {
+      "get": {
+        "tags": [
+          "clockwise-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizeclockwise_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/clockwise/refresh_token": {
+      "post": {
+        "tags": [
+          "clockwise-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_clockwise_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/jotform/authorize": {
+      "get": {
+        "tags": [
+          "jotform-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizejotform_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/jotform/refresh_token": {
+      "post": {
+        "tags": [
+          "jotform-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_jotform_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/honeycomb/authorize": {
+      "get": {
+        "tags": [
+          "honeycomb-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizehoneycomb_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/honeycomb/refresh_token": {
+      "post": {
+        "tags": [
+          "honeycomb-oauth"
+        ],
+        "summary": "Refresh Token",
+        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
+        "operationId": "refresh_honeycomb_oauth_token",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/{server_name}": {
       "post": {
         "tags": [
@@ -17589,6 +18651,26 @@
         "title": "LogSink",
         "description": "Cloud Logging sink - matches API format"
       },
+      "MCPOAuthSuccessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the operation",
+            "default": "success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MCPOAuthSuccessResponse"
+      },
       "McpServer": {
         "properties": {
           "id": {
@@ -17682,6 +18764,7 @@
           "Hacker News",
           "Heygen",
           "HubSpot",
+          "Intercom",
           "Jira",
           "Klaviyo",
           "Klavis ReportGen",
@@ -17721,6 +18804,14 @@
           "YouTube",
           "Zendesk",
           "ServiceNow",
+          "PayPal",
+          "Sentry",
+          "Netlify",
+          "Hugging Face",
+          "Square",
+          "Clockwise",
+          "Jotform",
+          "Honeycomb",
           "Zoho Mail"
         ],
         "title": "McpServerName"
@@ -19499,6 +20590,14 @@
           "WordPress",
           "Xero",
           "Zendesk",
+          "PayPal",
+          "Sentry",
+          "Netlify",
+          "Hugging Face",
+          "Square",
+          "Clockwise",
+          "Jotform",
+          "Honeycomb",
           "Zoho Mail"
         ],
         "title": "OAuthServerName"
