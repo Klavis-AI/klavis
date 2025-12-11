@@ -1,0 +1,160 @@
+---
+title: "Setting Up Microsoft Azure OAuth App"
+description: "Complete guide to creating and configuring a Microsoft Azure (Entra ID) OAuth application"
+---
+
+## Prerequisites
+
+- Microsoft account (personal or organizational)
+- Access to [Azure Portal](https://portal.azure.com/)
+
+## Step 1: Sign in to Azure Portal
+
+1. Visit [https://portal.azure.com/](https://portal.azure.com/) and sign in with your Microsoft account
+2. In the left sidebar or search bar, navigate to **Microsoft Entra ID**
+3. Click **App registrations** under the Manage section
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step1_portal.png" alt="Azure Portal Home" />
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step2_app_registrations.png" alt="App Registrations Page" />
+
+## Step 2: Register an Application
+
+1. Click **New registration** at the top of the App registrations page
+2. Fill out the registration form:
+
+   * **Name**: Choose a descriptive app name (e.g., your brand name)
+   * **Supported account types**: Select **Accounts in any organizational directory (Any Microsoft Entra ID tenant - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)**
+   * **Redirect URI**: Select **Web** and enter `https://api.klavis.ai/oauth/azure-ad/callback`
+
+3. Click **Register**
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step2_register_form.png" alt="Register Application Form" />
+
+## Step 3: Get Client ID and Create Client Secret
+
+After registration, you'll be redirected to the application overview page.
+
+1. From the **Overview** page, copy the **Application (client) ID** - you'll need this later
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step3_overview.png" alt="Application Overview" />
+
+2. In the left sidebar, go to **Certificates & secrets**
+3. Click the **Client secrets** tab
+4. Click **New client secret**
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step3_certificates.png" alt="Certificates and Secrets" />
+
+5. In the dialog:
+   * **Description**: Enter a description (e.g., `klavis-api`)
+   * **Expires**: Select an expiration period (Recommended: 730 days / 24 months)
+
+6. Click **Add**
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step3_add_secret.png" alt="Add Client Secret" />
+
+7. **Important**: Copy the **Value** immediately - it will only be shown once!
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step3_secret_created.png" alt="Client Secret Created" />
+
+<Check>
+You have successfully created a Microsoft Azure OAuth application! You now have your Application (client) ID and Client Secret ready for integration with Klavis AI.
+</Check>
+
+<Note>
+OAuth scopes are configured automatically by Klavis when initiating the OAuth flow. You don't need to manually set API permissions in Azure Portal, as web-configured scopes are handled dynamically based on which Microsoft service you're connecting to (e.g., Microsoft Teams, Outlook, OneDrive).
+</Note>
+
+## (Optional) Step 4: Configure Branding
+
+You can customize the branding that users see during the OAuth consent screen:
+
+1. In your app's left sidebar, go to **Branding & properties**
+2. Configure the following optional fields:
+   * **Logo**: Upload your company logo (displayed on the consent screen)
+   * **Home page URL**: Your application's homepage
+   * **Terms of service URL**: Link to your terms of service
+   * **Privacy statement URL**: Link to your privacy policy
+
+3. Click **Save**
+
+<img src="/images/knowledge-base/azure_ad_oauth_app/azure_step4_branding.png" alt="Branding & Properties" />
+
+<Tip>
+Adding branding helps build trust with users during the OAuth flow by showing your company's logo and links to your policies.
+</Tip>
+
+## (Optional) Step 5: White Labeling
+
+<Note>
+White labeling allows you to customize the OAuth experience with your own branding instead of Klavis AI's.
+</Note>
+
+If you want to use your own Microsoft Azure OAuth application with custom branding:
+
+1. **Configure White Labeling**: Go to [https://www.klavis.ai/home/white-label](https://www.klavis.ai/home/white-label)
+2. **Add Your Credentials**: Enter your Azure **Application (client) ID** and **Client Secret** from Step 3
+3. **Set Redirect URI**: Use `https://api.klavis.ai/oauth/azure-ad/callback` or your custom callback URL
+4. **Initiate OAuth**: Use your Client ID when starting the OAuth flow:
+
+   <CodeGroup>
+
+   ```javascript without SDK
+   // Example: Initiating Azure AD OAuth with white-label
+   const authUrl = `https://api.klavis.ai/oauth/azure-ad/authorize?instance_id=${instanceId}&client_id=${yourClientId}`;
+   window.location.href = authUrl;
+   ```
+
+   ```typescript TypeScript SDK
+   import { Klavis } from "@klavis/sdk";
+
+   const klavis = new Klavis({
+     apiKey: "YOUR_API_KEY"
+   });
+
+   // Example: Initiating Azure AD OAuth with white-label
+   // Use the appropriate server name for your Microsoft service
+   const oauthUrl = await klavis.mcpServer.getOAuthUrl({
+     serverName: Klavis.McpServerName.MicrosoftTeams, // or Outlook, OutlookCalendar, etc.
+     instanceId: instanceId,
+     clientId: yourClientId,
+     // redirectUri: YOUR_REDIRECT_URI,
+     // scope: "YOUR_SCOPES",
+   });
+
+   window.location.href = oauthUrl;
+   ```
+
+   ```python Python SDK
+   import webbrowser
+   from klavis import Klavis
+   from klavis.types import McpServerName
+
+   klavis = Klavis(api_key="YOUR_API_KEY")
+
+   # Example: Initiating Azure AD OAuth with white-label
+   # Use the appropriate server name for your Microsoft service
+   oauth_url = klavis.mcp_server.get_oauth_url(
+       server_name=McpServerName.MICROSOFT_TEAMS,  # or OUTLOOK, OUTLOOK_CALENDAR, etc.
+       instance_id=instance_id,
+       client_id=your_client_id,
+       # redirect_uri="YOUR_REDIRECT_URI",
+       # scope="YOUR_SCOPES"
+   )
+
+   # Open OAuth URL in user's default browser
+   webbrowser.open(oauth_url)
+   ```
+
+   </CodeGroup>
+
+<Tip>
+For detailed white labeling implementation and code examples, see our [OAuth & White Labeling guide](/auth/white-label).
+</Tip>
+
+## Resources
+
+* [Microsoft Identity Platform Documentation](https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-overview)
+* [Microsoft Entra ID App Registration Guide](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+* [Klavis OAuth & White Labeling Guide](/auth/white-label)
+* [Klavis White Label Dashboard](https://www.klavis.ai/home/white-label)
