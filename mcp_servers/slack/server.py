@@ -18,13 +18,11 @@ from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
 # Import bot tools
-from bot_tools import (
-    bot_token_context
-)
+from bot_tools import bot_token_context
 from bot_tools.bot_messages import (
-    bot_post_message, 
-    bot_reply_to_thread, 
-    bot_add_reaction
+    bot_post_message,
+    bot_reply_to_thread,
+    bot_add_reaction,
 )
 
 # Import user tools
@@ -33,12 +31,12 @@ from user_tools import (
     list_channels as user_list_channels,
     get_channel_history as user_get_channel_history,
     invite_users_to_channel,
-    get_thread_replies
+    get_thread_replies,
 )
 from user_tools.user_messages import (
     user_post_message,
     user_reply_to_thread,
-    user_add_reaction
+    user_add_reaction,
 )
 from user_tools.search import user_search_messages
 from user_tools.users import list_users, user_get_info
@@ -50,42 +48,55 @@ load_dotenv()
 
 SLACK_MCP_SERVER_PORT = int(os.getenv("SLACK_MCP_SERVER_PORT", "5000"))
 
+
 def extract_access_tokens(request_or_scope) -> tuple[str, str]:
     """Extract both bot and user access tokens from x-auth-data header.
     Returns (bot_token, user_token)
     """
-    auth_data = None
-    
+    auth_data = os.getenv("AUTH_DATA")
+
     ## ---- for Klavis Cloud ---- ##
-    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-    if hasattr(request_or_scope, 'headers'):
-        # SSE request object
-        auth_data = request_or_scope.headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = base64.b64decode(auth_data).decode('utf-8')
-    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-        # StreamableHTTP scope object
-        headers = dict(request_or_scope.get("headers", []))
-        auth_data = headers.get(b'x-auth-data')
-        if auth_data:
-            auth_data = base64.b64decode(auth_data).decode('utf-8')
-    
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+
     ## ---- for local development ---- ##
     if not auth_data:
         # Fall back to environment variables
         bot_token = os.getenv("SLACK_BOT_TOKEN", "")
         user_token = os.getenv("SLACK_USER_TOKEN", "")
         return bot_token, user_token
-    
+
     try:
         # Parse the JSON auth data to extract both tokens
         auth_json = json.loads(auth_data)
         bot_token = auth_json.get('access_token', '')  # Bot token at root level
         user_token = auth_json.get('authed_user', {}).get('access_token', '')  # User token in authed_user
+
+        # If tokens are empty in auth_data, fall back to environment variables
+        if not bot_token:
+            bot_token = os.getenv("SLACK_BOT_TOKEN", "")
+        if not user_token:
+            user_token = os.getenv("SLACK_USER_TOKEN", "")
+
         return bot_token, user_token
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
-        return "", ""
+        # Fall back to environment variables on parse error
+        bot_token = os.getenv("SLACK_BOT_TOKEN", "")
+        user_token = os.getenv("SLACK_USER_TOKEN", "")
+        return bot_token, user_token
+
 
 @click.command()
 @click.option("--port", default=SLACK_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -118,7 +129,6 @@ def main(
     async def list_tools() -> list[types.Tool]:
         return [
             # ============= USER TOOLS (using user token) =============
-
             # User Channels
             types.Tool(
                 name="slack_user_list_channels",
@@ -234,7 +244,7 @@ def main(
                     **{"category": "SLACK_CHANNEL"}
                 ),
             ),
-            
+
             # User Info
             types.Tool(
                 name="slack_list_users",
@@ -286,7 +296,7 @@ def main(
                     **{"category": "SLACK_USER", "readOnlyHint": True}
                 ),
             ),
-            
+
             # User Search
             types.Tool(
                 name="slack_user_search_messages",
@@ -338,7 +348,7 @@ def main(
                     **{"category": "SLACK_MESSAGE", "readOnlyHint": True}
                 ),
             ),
-            
+
             # User Messages
             types.Tool(
                 name="slack_user_post_message",
@@ -411,9 +421,9 @@ def main(
                     **{"category": "SLACK_REACTION"}
                 ),
             ),
-            
+
             # ============= BOT TOOLS (using bot token) =============
-            
+
             # Bot Messages
             types.Tool(
                 name="slack_bot_post_message",
@@ -432,9 +442,7 @@ def main(
                     },
                     "required": ["channel_id", "text"],
                 },
-                annotations=types.ToolAnnotations(
-                    **{"category": "SLACK_MESSAGE"}
-                ),
+                annotations=types.ToolAnnotations(**{"category": "SLACK_MESSAGE"}),
             ),
             types.Tool(
                 name="slack_bot_reply_to_thread",
@@ -492,15 +500,15 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        
+
         # ============= USER TOOLS (using user token) =============
-        
+
         # User Channels
         if name == "slack_user_list_channels":
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
             types_param = arguments.get("types")
-            
+
             try:
                 result = await user_list_channels(limit, cursor, types_param)
                 return [
@@ -517,7 +525,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_get_channel_history":
             channel_id = arguments.get("channel_id")
             if not channel_id:
@@ -527,9 +535,9 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             limit = arguments.get("limit")
-            
+
             try:
                 result = await user_get_channel_history(channel_id, limit)
                 return [
@@ -546,11 +554,11 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_get_thread_replies":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
-            
+
             if not channel_id:
                 return [
                     types.TextContent(
@@ -558,7 +566,7 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             if not thread_ts:
                 return [
                     types.TextContent(
@@ -566,18 +574,18 @@ def main(
                         text="Error: thread_ts parameter is required",
                     )
                 ]
-            
+
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
             oldest = arguments.get("oldest")
             latest = arguments.get("latest")
             inclusive = arguments.get("inclusive")
-            
+
             try:
                 result = await get_thread_replies(
-                    channel_id, 
-                    thread_ts, 
-                    limit, 
+                    channel_id,
+                    thread_ts,
+                    limit,
                     cursor,
                     oldest,
                     latest,
@@ -597,11 +605,11 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_invite_users_to_channel":
             channel_id = arguments.get("channel_id")
             user_ids = arguments.get("user_ids")
-            
+
             if not channel_id:
                 return [
                     types.TextContent(
@@ -609,7 +617,7 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             if not user_ids or not isinstance(user_ids, list) or len(user_ids) == 0:
                 return [
                     types.TextContent(
@@ -617,7 +625,7 @@ def main(
                         text="Error: user_ids parameter is required and must be a non-empty list",
                     )
                 ]
-            
+
             try:
                 result = await invite_users_to_channel(channel_id, user_ids)
                 return [
@@ -634,14 +642,14 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Info
         elif name == "slack_list_users":
             cursor = arguments.get("cursor")
             limit = arguments.get("limit")
             team_id = arguments.get("team_id")
             include_locale = arguments.get("include_locale")
-            
+
             try:
                 result = await list_users(cursor, limit, team_id, include_locale)
                 return [
@@ -658,7 +666,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_get_info":
             user_id = arguments.get("user_id")
             if not user_id:
@@ -668,9 +676,9 @@ def main(
                         text="Error: user_id parameter is required",
                     )
                 ]
-            
+
             include_locale = arguments.get("include_locale")
-            
+
             try:
                 result = await user_get_info(user_id, include_locale)
                 return [
@@ -687,7 +695,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Search
         elif name == "slack_user_search_messages":
             query = arguments.get("query")
@@ -698,14 +706,14 @@ def main(
                         text="Error: query parameter is required",
                     )
                 ]
-            
+
             channel_ids = arguments.get("channel_ids")
             sort = arguments.get("sort")
             sort_dir = arguments.get("sort_dir")
             count = arguments.get("count")
             cursor = arguments.get("cursor")
             highlight = arguments.get("highlight")
-            
+
             try:
                 result = await user_search_messages(query, channel_ids, sort, sort_dir, count, cursor, highlight)
                 return [
@@ -722,7 +730,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Messages
         elif name == "slack_user_post_message":
             channel_id = arguments.get("channel_id")
@@ -734,7 +742,7 @@ def main(
                         text="Error: channel_id and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_post_message(channel_id, text)
                 return [
@@ -751,7 +759,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
@@ -763,7 +771,7 @@ def main(
                         text="Error: channel_id, thread_ts, and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_reply_to_thread(channel_id, thread_ts, text)
                 return [
@@ -780,7 +788,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
@@ -792,7 +800,7 @@ def main(
                         text="Error: channel_id, timestamp, and reaction parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_add_reaction(channel_id, timestamp, reaction)
                 return [
@@ -809,9 +817,9 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # ============= BOT TOOLS (using bot token) =============
-        
+
         # Bot Messages
         elif name == "slack_bot_post_message":
             channel_id = arguments.get("channel_id")
@@ -823,7 +831,7 @@ def main(
                         text="Error: channel_id and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_post_message(channel_id, text)
                 return [
@@ -840,7 +848,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_bot_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
@@ -852,7 +860,7 @@ def main(
                         text="Error: channel_id, thread_ts, and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_reply_to_thread(channel_id, thread_ts, text)
                 return [
@@ -869,7 +877,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_bot_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
@@ -881,7 +889,7 @@ def main(
                         text="Error: channel_id, timestamp, and reaction parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_add_reaction(channel_id, timestamp, reaction)
                 return [
@@ -898,7 +906,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         else:
             return [
                 types.TextContent(
@@ -912,10 +920,10 @@ def main(
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        
+
         # Extract both bot and user tokens from headers
         bot_token, user_token = extract_access_tokens(request)
-        
+
         # Set both tokens in context for this request
         bot_token_ctx = bot_token_context.set(bot_token)
         user_token_ctx = user_token_context.set(user_token)
@@ -929,7 +937,7 @@ def main(
         finally:
             bot_token_context.reset(bot_token_ctx)
             user_token_context.reset(user_token_ctx)
-        
+
         return Response()
 
     # Set up StreamableHTTP transport
@@ -944,10 +952,10 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        
+
         # Extract both bot and user tokens from headers
         bot_token, user_token = extract_access_tokens(scope)
-        
+
         # Set both tokens in context for this request
         bot_token_ctx = bot_token_context.set(bot_token)
         user_token_ctx = user_token_context.set(user_token)
@@ -974,7 +982,6 @@ def main(
             # SSE routes
             Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Mount("/messages/", app=sse.handle_post_message),
-            
             # StreamableHTTP route
             Mount("/mcp", app=handle_streamable_http),
         ],
@@ -990,6 +997,7 @@ def main(
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
 
     return 0
+
 
 if __name__ == "__main__":
     main()
