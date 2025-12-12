@@ -1164,7 +1164,7 @@
           "user"
         ],
         "summary": "Get User Integrations",
-        "description": "Get all available integrations (MCP server names) by user ID.\nReturns a list of integration names as McpServerName types.",
+        "description": "Get all available integrations (MCP server names) by user ID.\nReturns a list of integration names and their authentication status.",
         "operationId": "getUserIntegrations",
         "security": [
           {
@@ -15309,7 +15309,7 @@
         "properties": {
           "integrations": {
             "items": {
-              "$ref": "#/components/schemas/McpServerName"
+              "$ref": "#/components/schemas/IntegrationItem"
             },
             "type": "array",
             "title": "Integrations"
@@ -17843,6 +17843,24 @@
         ],
         "title": "InitializeSandboxResponse",
         "description": "Response model for sandbox initialization"
+      },
+      "IntegrationItem": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/McpServerName"
+          },
+          "is_authenticated": {
+            "type": "boolean",
+            "title": "Is Authenticated",
+            "description": "Whether the integration is authenticated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "is_authenticated"
+        ],
+        "title": "IntegrationItem"
       },
       "JiraBoard": {
         "properties": {
