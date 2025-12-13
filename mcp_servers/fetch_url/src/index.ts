@@ -37,6 +37,7 @@ server.registerTool(
   {
     description: "Fetch a website and return the content as HTML",
     inputSchema: fetchInputSchema,
+    annotations: { category: "FETCH_URL" },
   },
   async (args) => {
     return await Fetcher.html(args as RequestPayload);
@@ -49,6 +50,7 @@ server.registerTool(
   {
     description: "Fetch a website and return the content as Markdown",
     inputSchema: fetchInputSchema,
+    annotations: { category: "FETCH_URL" },
   },
   async (args) => {
     return await Fetcher.markdown(args as RequestPayload);
@@ -61,6 +63,7 @@ server.registerTool(
   {
     description: "Fetch a website, return the content as plain text (no HTML)",
     inputSchema: fetchInputSchema,
+    annotations: { category: "FETCH_URL" },
   },
   async (args) => {
     return await Fetcher.txt(args as RequestPayload);
@@ -73,6 +76,7 @@ server.registerTool(
   {
     description: "Fetch a JSON file from a URL",
     inputSchema: fetchInputSchema,
+    annotations: { category: "FETCH_URL" },
   },
   async (args) => {
     return await Fetcher.json(args as RequestPayload);
