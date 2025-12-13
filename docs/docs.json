@@ -171,6 +171,7 @@
               "mcp-server/sendgrid",
               "mcp-server/sentry",
               "mcp-server/servicenow",
+              "mcp-server/sharesight",
               "mcp-server/shopify",
               "mcp-server/slack",
               "mcp-server/stripe",
