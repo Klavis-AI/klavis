@@ -4,6 +4,7 @@ import logging
 import contextlib
 import json
 from collections.abc import AsyncIterator
+from typing import Any, Dict, Optional
 
 import click
 from dotenv import load_dotenv
@@ -18,11 +19,18 @@ from starlette.types import Receive, Scope, Send
 
 from tools import (
     mem0_api_key_context,
+    mem0_user_id_context,
+    DEFAULT_MCP_USER_ID,
+    get_mem0_user_id,
     add_memory,
-    get_all_memories,
+    get_memories,
     search_memories,
+    get_memory,
     update_memory,
     delete_memory,
+    delete_all_memories,
+    list_entities,
+    delete_entities,
 )
 
 load_dotenv()
@@ -33,36 +41,62 @@ logger = logging.getLogger("mem0-mcp-server")
 
 MEM0_MCP_SERVER_PORT = int(os.getenv("MEM0_MCP_SERVER_PORT", "5000"))
 
-def extract_api_key(request_or_scope) -> str:
-    """Extract API key from headers or environment."""
-    api_key = os.getenv("API_KEY")
+def extract_auth_info(request_or_scope) -> tuple[str, str | None]:
+    """Extract API key and User ID from headers or environment."""
+    api_key = os.getenv("MEM0_API_KEY") or os.getenv("API_KEY")
+    user_id = os.getenv("MEM0_DEFAULT_USER_ID", DEFAULT_MCP_USER_ID)
     
-    if not api_key:
-        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-        if hasattr(request_or_scope, 'headers'):
-            # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data and isinstance(auth_data, bytes):
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-            # StreamableHTTP scope object
-            headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-        else:
-            auth_data = None
-        
+    auth_data = None
+    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object
+        auth_data = request_or_scope.headers.get(b'x-auth-data')
+        if auth_data and isinstance(auth_data, bytes):
+            auth_data = base64.b64decode(auth_data).decode('utf-8')
+    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        auth_data = headers.get(b'x-auth-data')
         if auth_data:
-            try:
-                # Parse the JSON auth data to extract token
-                auth_json = json.loads(auth_data)
-                api_key = auth_json.get('token') or auth_json.get('api_key') or ''
-            except (json.JSONDecodeError, TypeError) as e:
-                logger.warning(f"Failed to parse auth data JSON: {e}")
-                api_key = ""
+            auth_data = base64.b64decode(auth_data).decode('utf-8')
     
-    return api_key or ""
+    if auth_data:
+        try:
+            # Parse the JSON auth data to extract token and user_id
+            auth_json = json.loads(auth_data)
+            
+            # Extract API key if not already set or if we want to allow override (logic below prefers existing api_key if set, 
+            # but usually we might want request to override. The original code preferred env var if set. 
+            # Let's stick to original behavior for API key but check for user_id)
+            extracted_key = auth_json.get('token') or auth_json.get('api_key')
+            if extracted_key and not api_key:
+                api_key = extracted_key
+                
+            # Extract user_id
+            extracted_user = auth_json.get('user_id')
+            if extracted_user:
+                user_id = extracted_user
+                
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to parse auth data JSON: {e}")
+    
+    return api_key or "", user_id
+
+def _with_default_filters(
+    default_user_id: str, filters: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Ensure filters exist and include the default user_id at the top level."""
+    if not filters:
+        return {"AND": [{"user_id": default_user_id}]}
+    if not any(key in filters for key in ("AND", "OR", "NOT")):
+        filters = {"AND": [filters]}
+    has_user = json.dumps(filters, sort_keys=True).find('"user_id"') != -1
+    if not has_user:
+        and_list = filters.setdefault("AND", [])
+        if not isinstance(and_list, list):
+            raise ValueError("filters['AND'] must be a list when present.")
+        and_list.insert(0, {"user_id": default_user_id})
+    return filters
 
 @click.command()
 @click.option("--port", default=MEM0_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -96,116 +130,214 @@ def main(
         return [
             types.Tool(
                 name="mem0_add_memory",
-                description="Add a new memory to mem0 for long-term storage. This tool stores code snippets, implementation details, and programming knowledge for future reference. When storing information, you should include: complete code with all necessary imports and dependencies, language/framework version information, full implementation context and any required setup/configuration, detailed comments explaining the logic, example usage or test cases, any known limitations or performance considerations, related patterns or alternative approaches, links to relevant documentation or resources, environment setup requirements, and error handling tips. The memory will be indexed for semantic search and can be retrieved later using natural language queries.",
+                description="Store a new preference, fact, or conversation snippet. Requires at least one: user_id, agent_id, or run_id.",
                 inputSchema={
                     "type": "object",
-                    "required": ["content"],
                     "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "Plain sentence summarizing what to store. Required even if `messages` is provided.",
+                        },
                         "content": {
                             "type": "string",
-                            "description": "The content to store in memory, including code, documentation, and context."
+                            "description": "Legacy alias of `text`.",
+                        },
+                        "messages": {
+                            "type": "array",
+                            "description": "Structured conversation history with `role`/`content`. Use when you have multiple turns.",
+                            "items": {
+                                "type": "object",
+                                "required": ["role", "content"],
+                                "properties": {
+                                    "role": {"type": "string"},
+                                    "content": {"type": "string"},
+                                },
+                            },
                         },
                         "user_id": {
                             "type": "string",
-                            "description": "Optional user ID. If not provided, uses the default user ID."
-                        }
-                    }
+                            "description": "Unique identifier for the user. If not specified, the system uses the default user. Do NOT fill with a random value."
+                        },
+                        "agent_id": {"type": "string", "description": "Optional agent identifier."},
+                        "app_id": {"type": "string", "description": "Optional app identifier."},
+                        "run_id": {"type": "string", "description": "Optional run identifier."},
+                        "metadata": {
+                            "type": "object",
+                            "description": "Attach arbitrary metadata JSON to the memory.",
+                            "additionalProperties": True,
+                        },
+                        "enable_graph": {
+                            "type": "boolean",
+                            "description": "Set true only if the caller explicitly wants Mem0 graph memory.",
+                        },
+                    },
+                    "anyOf": [{"required": ["text"]}, {"required": ["content"]}, {"required": ["messages"]}],
                 },
                 annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
-                name="mem0_get_all_memories",
-                description="Retrieve all stored memories for the user. Call this tool when you need complete context of all previously stored information. This is useful when you need to analyze all available code patterns and knowledge, check all stored implementation examples, review the full history of stored solutions, or ensure no relevant information is missed. Returns a comprehensive list of code snippets and implementation patterns, programming knowledge and best practices, technical documentation and examples, and setup and configuration guides. Results are returned in JSON format with metadata.",
+                name="mem0_get_memories",
+                description="""Page through memories using filters instead of search.
+
+        Use filters to list specific memories. Common filter patterns:
+        - Single user: {"AND": [{"user_id": "john"}]}
+        - Agent memories: {"AND": [{"agent_id": "agent_name"}]}
+        - Recent memories: {"AND": [{"user_id": "john"}, {"created_at": {"gte": "2024-01-01"}}]}
+        - Multiple users: {"AND": [{"user_id": {"in": ["john", "jane"]}}]}
+
+        Pagination: Use page (1-indexed) and page_size for browsing results.
+        user_id is automatically added to filters if not provided.""",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "Optional user ID. If not provided, uses the default user ID."
+                        "filters": {
+                            "type": "object",
+                            "description": "Structured filters; user_id injected automatically.",
+                            "additionalProperties": True,
                         },
                         "page": {
                             "type": "integer",
-                            "description": "Page number for pagination (default: 1).",
-                            "default": 1
+                            "description": "1-indexed page number when paginating.",
                         },
                         "page_size": {
                             "type": "integer",
-                            "description": "Number of memories per page (default: 50).",
-                            "default": 50
-                        }
-                    }
+                            "description": "Number of memories per page (default 10).",
+                        },
+                        "enable_graph": {
+                            "type": "boolean",
+                            "description": "Set true only if the caller explicitly wants graph-derived memories.",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Unique identifier for the user. If not specified, the system uses the default user. Do NOT fill with a random value.",
+                        },
+                    },
                 },
-                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True})
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True}),
             ),
             types.Tool(
                 name="mem0_search_memories",
-                description="Search through stored memories using semantic search. This tool should be called for user queries to find relevant code and implementation details. It helps find specific code implementations or patterns, solutions to programming problems, best practices and coding standards, setup and configuration guides, and technical documentation and examples. The search uses natural language understanding to find relevant matches, so you can describe what you're looking for in plain English. Search the memories to leverage existing knowledge before providing answers.",
+                description="""Run a semantic search over existing memories.
+
+        Use filters to narrow results. Common filter patterns:
+        - Single user: {"AND": [{"user_id": "john"}]}
+        - Agent memories: {"AND": [{"agent_id": "agent_name"}]}
+        - Recent memories: {"AND": [{"user_id": "john"}, {"created_at": {"gte": "2024-01-01"}}]}
+        - Multiple users: {"AND": [{"user_id": {"in": ["john", "jane"]}}]}
+        - Cross-entity: {"OR": [{"user_id": "john"}, {"agent_id": "agent_name"}]}
+
+        user_id is automatically added to filters if not provided.""",
                 inputSchema={
                     "type": "object",
                     "required": ["query"],
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Search query string describing what you're looking for. Can be natural language or specific technical terms."
+                            "description": "Natural language description of what to find."
                         },
                         "user_id": {
                             "type": "string",
-                            "description": "Optional user ID. If not provided, uses the default user ID."
+                            "description": "Unique identifier for the user. If not specified, the system uses the default user. Do NOT fill with a random value."
+                        },
+                        "filters": {
+                            "type": "object",
+                            "description": "Additional filter clauses (user_id injected automatically).",
+                            "additionalProperties": True,
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of results to return (default: 20).",
+                            "description": "Maximum number of results to return.",
                             "default": 20
-                        }
+                        },
+                        "enable_graph": {
+                            "type": "boolean",
+                            "description": "Set true only when the user explicitly wants graph-derived memories.",
+                        },
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True})
             ),
             types.Tool(
-                name="mem0_update_memory",
-                description="Update an existing memory with new data. This tool allows you to modify the content of a previously stored memory while maintaining its unique identifier. Use this when you need to correct, enhance, or completely replace the content of an existing memory entry.",
+                name="mem0_get_memory",
+                description="Fetch a single memory once you know its memory_id.",
                 inputSchema={
                     "type": "object",
-                    "required": ["memory_id", "data"],
+                    "required": ["memory_id"],
+                    "properties": {"memory_id": {"type": "string", "description": "Exact memory_id to fetch."}},
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True}),
+            ),
+            types.Tool(
+                name="mem0_list_entities",
+                description="List which users/agents/apps/runs currently hold memories.",
+                inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY", "readOnlyHint": True}),
+            ),
+            types.Tool(
+                name="mem0_update_memory",
+                description="Overwrite an existing memory's text.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["memory_id"],
                     "properties": {
                         "memory_id": {
                             "type": "string",
-                            "description": "The unique identifier of the memory to update."
+                            "description": "Exact memory_id to overwrite."
+                        },
+                        "text": {
+                            "type": "string",
+                            "description": "Replacement text for the memory."
                         },
                         "data": {
                             "type": "string",
-                            "description": "The new content to replace the existing memory data."
+                            "description": "Legacy alias of `text`.",
                         },
-                        "user_id": {
-                            "type": "string",
-                            "description": "Optional user ID. If not provided, uses the default user ID."
-                        }
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
             ),
             types.Tool(
                 name="mem0_delete_memory",
-                description="Delete a specific memory by ID or delete all memories for a user. This tool provides options to remove individual memories or clear all stored memories for a user. Use with caution as deleted memories cannot be recovered.",
+                description="Delete one memory after the user confirms its memory_id.",
                 inputSchema={
                     "type": "object",
+                    "required": ["memory_id"],
                     "properties": {
                         "memory_id": {
                             "type": "string",
-                            "description": "The unique identifier of the memory to delete. Required if delete_all is false."
-                        },
-                        "user_id": {
-                            "type": "string",
-                            "description": "Optional user ID. If not provided, uses the default user ID."
-                        },
-                        "delete_all": {
-                            "type": "boolean",
-                            "description": "If true, deletes all memories for the user. If false, deletes specific memory by ID.",
-                            "default": False
+                            "description": "Exact memory_id to delete."
                         }
                     }
                 },
                 annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"})
+            ),
+            types.Tool(
+                name="mem0_delete_all_memories",
+                description="Delete every memory in the given user/agent/app/run but keep the entity.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "description": "Unique identifier for the user. If not specified, the system uses the default user. Do NOT fill with a random value."},
+                        "agent_id": {"type": "string", "description": "Optional agent scope to delete."},
+                        "app_id": {"type": "string", "description": "Optional app scope to delete."},
+                        "run_id": {"type": "string", "description": "Optional run scope to delete."},
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"}),
+            ),
+            types.Tool(
+                name="mem0_delete_entities",
+                description="Remove a user/agent/app/run record entirely (and cascade-delete its memories).",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "description": "Unique identifier for the user to delete. If not specified, the system uses the default user. Do NOT fill with a random value."},
+                        "agent_id": {"type": "string", "description": "Delete this agent and its memories."},
+                        "app_id": {"type": "string", "description": "Delete this app and its memories."},
+                        "run_id": {"type": "string", "description": "Delete this run and its memories."},
+                    },
+                },
+                annotations=types.ToolAnnotations(**{"category": "MEM0_MEMORY"}),
             ),
         ]
 
@@ -215,17 +347,39 @@ def main(
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
         
         if name == "mem0_add_memory":
-            content = arguments.get("content")
+            text = arguments.get("text") or arguments.get("content")
+            messages = arguments.get("messages")
             user_id = arguments.get("user_id")
-            if not content:
+            agent_id = arguments.get("agent_id")
+            app_id = arguments.get("app_id")
+            run_id = arguments.get("run_id")
+            metadata = arguments.get("metadata")
+            enable_graph = arguments.get("enable_graph")
+            if not text and not messages:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: content parameter is required",
+                        text="Error: provide at least one of text/content or messages",
+                    )
+                ]
+            if not any([user_id, agent_id, run_id]) and not get_mem0_user_id():
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: provide at least one of user_id, agent_id, or run_id (or configure a default user_id)",
                     )
                 ]
             try:
-                result = await add_memory(content, user_id)
+                result = await add_memory(
+                    text=text or "",
+                    messages=messages,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    app_id=app_id,
+                    run_id=run_id,
+                    metadata=metadata,
+                    enable_graph=enable_graph,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -241,12 +395,27 @@ def main(
                     )
                 ]
         
-        elif name == "mem0_get_all_memories":
+        elif name == "mem0_get_memories":
+            filters = arguments.get("filters")
+            page = arguments.get("page")
+            page_size = arguments.get("page_size")
+            enable_graph = arguments.get("enable_graph")
             user_id = arguments.get("user_id")
-            page = arguments.get("page", 1)
-            page_size = arguments.get("page_size", 50)
+            
+            default_user = user_id or get_mem0_user_id()
+            
+            if not filters and not default_user:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: provide filters (or user_id) to scope the listing; no default user_id is configured",
+                    )
+                ]
             try:
-                result = await get_all_memories(user_id, page, page_size)
+                if default_user:
+                    filters = _with_default_filters(default_user, filters)
+
+                result = await get_memories(filters=filters, page=page, page_size=page_size, enable_graph=enable_graph)
                 return [
                     types.TextContent(
                         type="text",
@@ -261,11 +430,13 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "mem0_search_memories":
             query = arguments.get("query")
-            user_id = arguments.get("user_id")
             limit = arguments.get("limit", 20)
+            filters = arguments.get("filters")
+            enable_graph = arguments.get("enable_graph")
+            user_id = arguments.get("user_id")
             if not query:
                 return [
                     types.TextContent(
@@ -273,8 +444,27 @@ def main(
                         text="Error: query parameter is required",
                     )
                 ]
+            
+            default_user = user_id or get_mem0_user_id()
+            
+            if not filters and not default_user:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: provide filters or user_id to scope the search; no default user_id is configured",
+                    )
+                ]
             try:
-                result = await search_memories(query, user_id, limit)
+                if default_user:
+                    filters = _with_default_filters(default_user, filters)
+
+                result = await search_memories(
+                    query=query,
+                    user_id=None,
+                    filters=filters,
+                    limit=limit,
+                    enable_graph=enable_graph,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -290,19 +480,37 @@ def main(
                     )
                 ]
         
+        elif name == "mem0_get_memory":
+            memory_id = arguments.get("memory_id")
+            if not memory_id:
+                return [types.TextContent(type="text", text="Error: memory_id parameter is required")]
+            try:
+                result = await get_memory(memory_id)
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "mem0_list_entities":
+            try:
+                result = await list_entities()
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
         elif name == "mem0_update_memory":
             memory_id = arguments.get("memory_id")
-            data = arguments.get("data")
-            user_id = arguments.get("user_id")
-            if not memory_id or not data:
+            text = arguments.get("text") or arguments.get("data")
+            if not memory_id or not text:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: memory_id and data parameters are required",
+                        text="Error: memory_id and text/data parameters are required",
                     )
                 ]
             try:
-                result = await update_memory(memory_id, data, user_id)
+                result = await update_memory(memory_id, text)
                 return [
                     types.TextContent(
                         type="text",
@@ -320,17 +528,10 @@ def main(
         
         elif name == "mem0_delete_memory":
             memory_id = arguments.get("memory_id")
-            user_id = arguments.get("user_id")
-            delete_all = arguments.get("delete_all", False)
-            if not delete_all and not memory_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: memory_id parameter is required when delete_all is false",
-                    )
-                ]
+            if not memory_id:
+                return [types.TextContent(type="text", text="Error: memory_id parameter is required")]
             try:
-                result = await delete_memory(memory_id, user_id, delete_all)
+                result = await delete_memory(memory_id)
                 return [
                     types.TextContent(
                         type="text",
@@ -345,6 +546,32 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
+
+        elif name == "mem0_delete_all_memories":
+            try:
+                result = await delete_all_memories(
+                    user_id=arguments.get("user_id"),
+                    agent_id=arguments.get("agent_id"),
+                    app_id=arguments.get("app_id"),
+                    run_id=arguments.get("run_id"),
+                )
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+
+        elif name == "mem0_delete_entities":
+            try:
+                result = await delete_entities(
+                    user_id=arguments.get("user_id"),
+                    agent_id=arguments.get("agent_id"),
+                    app_id=arguments.get("app_id"),
+                    run_id=arguments.get("run_id"),
+                )
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [types.TextContent(type="text", text=f"Error: {str(e)}")]
         
         else:
             return [
@@ -360,11 +587,12 @@ def main(
     async def handle_sse(request):
         logger.info("Handling SSE connection")
         
-        # Extract API key from headers
-        api_key = extract_api_key(request)
+        # Extract API key and User ID
+        api_key, user_id = extract_auth_info(request)
         
-        # Set the API key in context for this request
-        token = mem0_api_key_context.set(api_key or "")
+        # Set context
+        token_key = mem0_api_key_context.set(api_key or "")
+        token_user = mem0_user_id_context.set(user_id)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -373,7 +601,8 @@ def main(
                     streams[0], streams[1], app.create_initialization_options()
                 )
         finally:
-            mem0_api_key_context.reset(token)
+            mem0_api_key_context.reset(token_key)
+            mem0_user_id_context.reset(token_user)
         
         return Response()
 
@@ -390,15 +619,17 @@ def main(
     ) -> None:
         logger.info("Handling StreamableHTTP request")
         
-        # Extract API key from headers
-        api_key = extract_api_key(scope)
+        # Extract API key and User ID
+        api_key, user_id = extract_auth_info(scope)
         
-        # Set the API key in context for this request
-        token = mem0_api_key_context.set(api_key or "")
+        # Set context
+        token_key = mem0_api_key_context.set(api_key or "")
+        token_user = mem0_user_id_context.set(user_id)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
-            mem0_api_key_context.reset(token)
+            mem0_api_key_context.reset(token_key)
+            mem0_user_id_context.reset(token_user)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
