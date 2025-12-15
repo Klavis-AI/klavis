@@ -22,8 +22,8 @@ from bot_tools import (
     bot_token_context
 )
 from bot_tools.bot_messages import (
-    bot_post_message, 
-    bot_reply_to_thread, 
+    bot_post_message,
+    bot_reply_to_thread,
     bot_add_reaction
 )
 
@@ -55,7 +55,7 @@ def extract_access_tokens(request_or_scope) -> tuple[str, str]:
     Returns (bot_token, user_token)
     """
     auth_data = None
-    
+
     ## ---- for Klavis Cloud ---- ##
     # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
     if hasattr(request_or_scope, 'headers'):
@@ -69,14 +69,14 @@ def extract_access_tokens(request_or_scope) -> tuple[str, str]:
         auth_data = headers.get(b'x-auth-data')
         if auth_data:
             auth_data = base64.b64decode(auth_data).decode('utf-8')
-    
+
     ## ---- for local development ---- ##
     if not auth_data:
         # Fall back to environment variables
         bot_token = os.getenv("SLACK_BOT_TOKEN", "")
         user_token = os.getenv("SLACK_USER_TOKEN", "")
         return bot_token, user_token
-    
+
     try:
         # Parse the JSON auth data to extract both tokens
         auth_json = json.loads(auth_data)
@@ -122,23 +122,37 @@ def main(
             # User Channels
             types.Tool(
                 name="slack_user_list_channels",
-                description="List all channels the authenticated user has access to. This includes public channels, private channels the user is a member of, direct messages, and multi-party direct messages.",
+                description="List all channels the authenticated user has access to. Supports filtering by channel name or DM user ID, and flexible response formats.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "limit": {
                             "type": "number",
-                            "description": "Maximum number of channels to return (default 100, max 200)",
+                            "description": "Maximum number of channels to return from API (default 100, max 200)",
                             "default": 100,
                         },
                         "cursor": {
                             "type": "string",
-                            "description": "Pagination cursor for next page of results",
+                            "description": "Pagination cursor for next page of results. Use the value from response_metadata.next_cursor in the previous response.",
                         },
                         "types": {
                             "type": "string",
                             "description": "Mix and match channel types by providing a comma-separated list of any combination of public_channel, private_channel, mpim, im",
                             "default": "public_channel",
+                        },
+                        "channel_name": {
+                            "type": "string",
+                            "description": "Filter channels by name (case-insensitive partial match). Applies to public_channel, private_channel, and mpim types. Ignored for im (DM) type.",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Filter DMs by user ID (exact match). Only applies when types includes 'im'. Ignored for other channel types.",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns only id and name/user fields. 'detailed' returns complete channel objects.",
+                            "default": "concise",
                         },
                     },
                 },
@@ -234,21 +248,22 @@ def main(
                     **{"category": "SLACK_CHANNEL"}
                 ),
             ),
-            
+
             # User Info
             types.Tool(
                 name="slack_list_users",
-                description="Lists all users in a Slack team using user token",
+                description="Lists all users in a Slack team. Supports filtering by user ID or name, and flexible response formats.",
                 inputSchema={
                     "type": "object",
                     "properties": {
                         "cursor": {
                             "type": "string",
-                            "description": "Pagination cursor for getting more results",
+                            "description": "Pagination cursor for next page of results. Use the value from response_metadata.next_cursor in the previous response.",
                         },
                         "limit": {
                             "type": "integer",
-                            "description": "Maximum number of users to return (default 100, max 200)",
+                            "description": "Maximum number of users to return from API (default 100, max 200)",
+                            "default": 100,
                         },
                         "team_id": {
                             "type": "string",
@@ -257,6 +272,20 @@ def main(
                         "include_locale": {
                             "type": "boolean",
                             "description": "Whether to include locale information for each user",
+                        },
+                        "user_id": {
+                            "type": "string",
+                            "description": "Filter by user ID (exact match). When both user_id and name are provided, results matching either condition are returned (OR search).",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Filter by name (case-insensitive partial match against name or real_name fields). When both user_id and name are provided, results matching either condition are returned (OR search).",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects.",
+                            "default": "concise",
                         },
                     },
                     "required": [],
@@ -286,7 +315,7 @@ def main(
                     **{"category": "SLACK_USER", "readOnlyHint": True}
                 ),
             ),
-            
+
             # User Search
             types.Tool(
                 name="slack_user_search_messages",
@@ -338,7 +367,7 @@ def main(
                     **{"category": "SLACK_MESSAGE", "readOnlyHint": True}
                 ),
             ),
-            
+
             # User Messages
             types.Tool(
                 name="slack_user_post_message",
@@ -411,9 +440,9 @@ def main(
                     **{"category": "SLACK_REACTION"}
                 ),
             ),
-            
+
             # ============= BOT TOOLS (using bot token) =============
-            
+
             # Bot Messages
             types.Tool(
                 name="slack_bot_post_message",
@@ -492,17 +521,27 @@ def main(
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        
+
         # ============= USER TOOLS (using user token) =============
-        
+
         # User Channels
         if name == "slack_user_list_channels":
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
             types_param = arguments.get("types")
-            
+            channel_name = arguments.get("channel_name")
+            user_id = arguments.get("user_id")
+            response_format = arguments.get("response_format")
+
             try:
-                result = await user_list_channels(limit, cursor, types_param)
+                result = await user_list_channels(
+                    limit=limit,
+                    cursor=cursor,
+                    types=types_param,
+                    channel_name=channel_name,
+                    user_id=user_id,
+                    response_format=response_format,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -517,7 +556,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_get_channel_history":
             channel_id = arguments.get("channel_id")
             if not channel_id:
@@ -527,9 +566,9 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             limit = arguments.get("limit")
-            
+
             try:
                 result = await user_get_channel_history(channel_id, limit)
                 return [
@@ -546,11 +585,11 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_get_thread_replies":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
-            
+
             if not channel_id:
                 return [
                     types.TextContent(
@@ -558,7 +597,7 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             if not thread_ts:
                 return [
                     types.TextContent(
@@ -566,18 +605,18 @@ def main(
                         text="Error: thread_ts parameter is required",
                     )
                 ]
-            
+
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
             oldest = arguments.get("oldest")
             latest = arguments.get("latest")
             inclusive = arguments.get("inclusive")
-            
+
             try:
                 result = await get_thread_replies(
-                    channel_id, 
-                    thread_ts, 
-                    limit, 
+                    channel_id,
+                    thread_ts,
+                    limit,
                     cursor,
                     oldest,
                     latest,
@@ -597,11 +636,11 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_invite_users_to_channel":
             channel_id = arguments.get("channel_id")
             user_ids = arguments.get("user_ids")
-            
+
             if not channel_id:
                 return [
                     types.TextContent(
@@ -609,7 +648,7 @@ def main(
                         text="Error: channel_id parameter is required",
                     )
                 ]
-            
+
             if not user_ids or not isinstance(user_ids, list) or len(user_ids) == 0:
                 return [
                     types.TextContent(
@@ -617,7 +656,7 @@ def main(
                         text="Error: user_ids parameter is required and must be a non-empty list",
                     )
                 ]
-            
+
             try:
                 result = await invite_users_to_channel(channel_id, user_ids)
                 return [
@@ -634,16 +673,27 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Info
         elif name == "slack_list_users":
             cursor = arguments.get("cursor")
             limit = arguments.get("limit")
             team_id = arguments.get("team_id")
             include_locale = arguments.get("include_locale")
-            
+            user_id = arguments.get("user_id")
+            user_name = arguments.get("name")
+            response_format = arguments.get("response_format")
+
             try:
-                result = await list_users(cursor, limit, team_id, include_locale)
+                result = await list_users(
+                    cursor=cursor,
+                    limit=limit,
+                    team_id=team_id,
+                    include_locale=include_locale,
+                    user_id=user_id,
+                    name=user_name,
+                    response_format=response_format,
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -658,7 +708,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_get_info":
             user_id = arguments.get("user_id")
             if not user_id:
@@ -668,9 +718,9 @@ def main(
                         text="Error: user_id parameter is required",
                     )
                 ]
-            
+
             include_locale = arguments.get("include_locale")
-            
+
             try:
                 result = await user_get_info(user_id, include_locale)
                 return [
@@ -687,7 +737,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Search
         elif name == "slack_user_search_messages":
             query = arguments.get("query")
@@ -698,14 +748,14 @@ def main(
                         text="Error: query parameter is required",
                     )
                 ]
-            
+
             channel_ids = arguments.get("channel_ids")
             sort = arguments.get("sort")
             sort_dir = arguments.get("sort_dir")
             count = arguments.get("count")
             cursor = arguments.get("cursor")
             highlight = arguments.get("highlight")
-            
+
             try:
                 result = await user_search_messages(query, channel_ids, sort, sort_dir, count, cursor, highlight)
                 return [
@@ -722,7 +772,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # User Messages
         elif name == "slack_user_post_message":
             channel_id = arguments.get("channel_id")
@@ -734,7 +784,7 @@ def main(
                         text="Error: channel_id and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_post_message(channel_id, text)
                 return [
@@ -751,7 +801,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
@@ -763,7 +813,7 @@ def main(
                         text="Error: channel_id, thread_ts, and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_reply_to_thread(channel_id, thread_ts, text)
                 return [
@@ -780,7 +830,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_user_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
@@ -792,7 +842,7 @@ def main(
                         text="Error: channel_id, timestamp, and reaction parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await user_add_reaction(channel_id, timestamp, reaction)
                 return [
@@ -809,9 +859,9 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         # ============= BOT TOOLS (using bot token) =============
-        
+
         # Bot Messages
         elif name == "slack_bot_post_message":
             channel_id = arguments.get("channel_id")
@@ -823,7 +873,7 @@ def main(
                         text="Error: channel_id and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_post_message(channel_id, text)
                 return [
@@ -840,7 +890,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_bot_reply_to_thread":
             channel_id = arguments.get("channel_id")
             thread_ts = arguments.get("thread_ts")
@@ -852,7 +902,7 @@ def main(
                         text="Error: channel_id, thread_ts, and text parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_reply_to_thread(channel_id, thread_ts, text)
                 return [
@@ -869,7 +919,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         elif name == "slack_bot_add_reaction":
             channel_id = arguments.get("channel_id")
             timestamp = arguments.get("timestamp")
@@ -881,7 +931,7 @@ def main(
                         text="Error: channel_id, timestamp, and reaction parameters are required",
                     )
                 ]
-            
+
             try:
                 result = await bot_add_reaction(channel_id, timestamp, reaction)
                 return [
@@ -898,7 +948,7 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
         else:
             return [
                 types.TextContent(
@@ -912,10 +962,10 @@ def main(
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        
+
         # Extract both bot and user tokens from headers
         bot_token, user_token = extract_access_tokens(request)
-        
+
         # Set both tokens in context for this request
         bot_token_ctx = bot_token_context.set(bot_token)
         user_token_ctx = user_token_context.set(user_token)
@@ -929,7 +979,7 @@ def main(
         finally:
             bot_token_context.reset(bot_token_ctx)
             user_token_context.reset(user_token_ctx)
-        
+
         return Response()
 
     # Set up StreamableHTTP transport
@@ -944,10 +994,10 @@ def main(
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        
+
         # Extract both bot and user tokens from headers
         bot_token, user_token = extract_access_tokens(scope)
-        
+
         # Set both tokens in context for this request
         bot_token_ctx = bot_token_context.set(bot_token)
         user_token_ctx = user_token_context.set(user_token)
@@ -974,7 +1024,7 @@ def main(
             # SSE routes
             Route("/sse", endpoint=handle_sse, methods=["GET"]),
             Mount("/messages/", app=sse.handle_post_message),
-            
+
             # StreamableHTTP route
             Mount("/mcp", app=handle_streamable_http),
         ],
