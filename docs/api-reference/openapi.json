@@ -6242,60 +6242,6 @@
         }
       }
     },
-    "/oauth/zoom/refresh_token": {
-      "post": {
-        "tags": [
-          "zoom-oauth"
-        ],
-        "summary": "Refresh Token",
-        "operationId": "refresh_token_oauth_zoom_refresh_token_post",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Instance ID for which to refresh the token",
-              "title": "Instance Id"
-            },
-            "description": "Instance ID for which to refresh the token"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZoomOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZoomOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/zoho-mail/authorize": {
       "get": {
         "tags": [
@@ -6489,13 +6435,13 @@
         }
       }
     },
-    "/oauth/sharesight/refresh_token": {
-      "post": {
+    "/oauth/instagram/authorize": {
+      "get": {
         "tags": [
-          "sharesight-oauth"
+          "instagram-oauth"
         ],
-        "summary": "Refresh Token",
-        "operationId": "refresh_token_oauth_sharesight_refresh_token_post",
+        "summary": "Authorize Instagram",
+        "operationId": "authorizeInstagram",
         "parameters": [
           {
             "name": "instance_id",
@@ -6503,10 +6449,64 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instance ID for which to refresh the token",
+              "description": "Unique identifier for the client instance requesting authorization",
               "title": "Instance Id"
             },
-            "description": "Instance ID for which to refresh the token"
+            "description": "Unique identifier for the client instance requesting authorization"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client ID for white labeling, if not provided will use default credentials",
+              "title": "Client Id"
+            },
+            "description": "Client ID for white labeling, if not provided will use default credentials"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional OAuth scopes to request (comma-separated string)",
+              "title": "Scope"
+            },
+            "description": "Optional OAuth scopes to request (comma-separated string)"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization completes",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization completes"
           }
         ],
         "responses": {
@@ -6514,21 +6514,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SharesightOAuthSuccessResponse"
-                }
+                "schema": {}
               }
             }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SharesightOAuthErrorResponse"
-                }
-              }
-            },
-            "description": "Bad Request"
           },
           "422": {
             "description": "Validation Error",
@@ -6713,51 +6701,6 @@
         }
       }
     },
-    "/oauth/intercom/refresh_token": {
-      "post": {
-        "tags": [
-          "intercom-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_intercom_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/paypal/authorize": {
       "get": {
         "tags": [
@@ -6815,51 +6758,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/paypal/refresh_token": {
-      "post": {
-        "tags": [
-          "paypal-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_paypal_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
               }
             }
           },
@@ -6949,51 +6847,6 @@
         }
       }
     },
-    "/oauth/sentry/refresh_token": {
-      "post": {
-        "tags": [
-          "sentry-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_sentry_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/netlify/authorize": {
       "get": {
         "tags": [
@@ -7051,51 +6904,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/netlify/refresh_token": {
-      "post": {
-        "tags": [
-          "netlify-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_netlify_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
               }
             }
           },
@@ -7185,51 +6993,6 @@
         }
       }
     },
-    "/oauth/huggingface/refresh_token": {
-      "post": {
-        "tags": [
-          "huggingface-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_huggingface_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/square/authorize": {
       "get": {
         "tags": [
@@ -7287,51 +7050,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/square/refresh_token": {
-      "post": {
-        "tags": [
-          "square-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_square_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
               }
             }
           },
@@ -7421,51 +7139,6 @@
         }
       }
     },
-    "/oauth/clockwise/refresh_token": {
-      "post": {
-        "tags": [
-          "clockwise-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_clockwise_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/oauth/jotform/authorize": {
       "get": {
         "tags": [
@@ -7523,51 +7196,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/oauth/jotform/refresh_token": {
-      "post": {
-        "tags": [
-          "jotform-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_jotform_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
               }
             }
           },
@@ -7657,58 +7285,13 @@
         }
       }
     },
-    "/oauth/honeycomb/refresh_token": {
-      "post": {
-        "tags": [
-          "honeycomb-oauth"
-        ],
-        "summary": "Refresh Token",
-        "description": "Refresh OAuth token for an MCP connection.\n\nThis endpoint triggers a token refresh by making a list_tools request to the MCP server.\nThe MCP SDK will automatically detect if the token is expired and refresh it if a refresh_token is available.",
-        "operationId": "refresh_honeycomb_oauth_token",
-        "parameters": [
-          {
-            "name": "instance_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Unique identifier for the MCP connection",
-              "title": "Instance Id"
-            },
-            "description": "Unique identifier for the MCP connection"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MCPOAuthSuccessResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/{server_name}": {
       "post": {
         "tags": [
           "sandbox"
         ],
         "summary": "Acquire a sandbox",
-        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'.",
+        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally specify a test_account_email to acquire a specific test account.",
         "operationId": "create_sandbox_sandbox__server_name__post",
         "security": [
           {
@@ -7727,6 +7310,15 @@
             "description": "The MCP server name"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcquireSandboxRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Successful Response",
@@ -11892,6 +11484,25 @@
   },
   "components": {
     "schemas": {
+      "AcquireSandboxRequest": {
+        "properties": {
+          "test_account_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Account Email",
+            "description": "Optional email of a specific test account to acquire. If provided, the system will attempt to acquire the sandbox associated with this test account email instead of a random idle sandbox."
+          }
+        },
+        "type": "object",
+        "title": "AcquireSandboxRequest",
+        "description": "Request model for acquiring a sandbox"
+      },
       "AirtableData-Input": {
         "properties": {
           "tables": {
@@ -18766,26 +18377,6 @@
         "title": "LogSink",
         "description": "Cloud Logging sink - matches API format"
       },
-      "MCPOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the operation",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "MCPOAuthSuccessResponse"
-      },
       "McpServer": {
         "properties": {
           "id": {
@@ -23108,65 +22699,6 @@
         ],
         "title": "SetUserAuthRequest"
       },
-      "SharesightOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message",
-            "description": "Additional error message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "error"
-        ],
-        "title": "SharesightOAuthErrorResponse"
-      },
-      "SharesightOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SharesightOAuthSuccessResponse"
-      },
       "ShopifyAddress": {
         "properties": {
           "address1": {
@@ -25148,65 +24680,6 @@
         ],
         "title": "WordPressPost",
         "description": "WordPress post data for creation/update\n\nAttributes:\n    title: Post title\n    content: Post content (HTML or plain text)\n    status: Post status (draft, publish, private, pending)\n    excerpt: Post excerpt/summary (optional)\n    categories: List of category names (optional, created if not exist)\n    tags: List of tag names (optional, created if not exist)\n    featured_image: URL to featured image (optional)\n    date: Post publish date in ISO format (optional)\n    format: Post format (standard, aside, gallery, etc.) (optional)"
-      },
-      "ZoomOAuthErrorResponse": {
-        "properties": {
-          "error": {
-            "type": "string",
-            "title": "Error",
-            "description": "Error message from the OAuth process"
-          },
-          "message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Message",
-            "description": "Additional error message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "error"
-        ],
-        "title": "ZoomOAuthErrorResponse"
-      },
-      "ZoomOAuthSuccessResponse": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Status of the OAuth process",
-            "default": "success"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Success message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data",
-            "description": "Additional data related to the response"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "ZoomOAuthSuccessResponse"
       }
     },
     "securitySchemes": {
