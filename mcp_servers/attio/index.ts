@@ -155,9 +155,7 @@ class AttioClient {
         if (data.name) { recordData.name = data.name; }
         if (data.email_addresses) { recordData.email_addresses = data.email_addresses; }
         if (data.phone_numbers) {
-            for (const phoneNumber of data.phone_numbers) {
-                recordData.phone_numbers.push({ original_phone_number: phoneNumber });
-            }
+            recordData.phone_numbers = data.phone_numbers.map(phoneNumber => ({ original_phone_number: phoneNumber }));
         }
         if (data.job_title) { recordData.job_title = data.job_title; }
         if (data.description) { recordData.description = data.description; }
@@ -206,9 +204,7 @@ class AttioClient {
         if (data.name) { recordData.name = data.name; }
         if (data.email_addresses) { recordData.email_addresses = data.email_addresses; }
         if (data.phone_numbers) {
-            for (const phoneNumber of data.phone_numbers) {
-                recordData.phone_numbers.push({ original_phone_number: phoneNumber });
-            }
+            recordData.phone_numbers = data.phone_numbers.map(phoneNumber => ({ original_phone_number: phoneNumber }));
         }
         if (data.job_title) { recordData.job_title = data.job_title; }
         if (data.description) { recordData.description = data.description; }
