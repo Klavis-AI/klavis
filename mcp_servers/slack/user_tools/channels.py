@@ -179,13 +179,80 @@ async def list_channels(
         logger.exception(f"Error executing tool slack_user_list_channels: {e}")
         raise e
 
+
+def format_history_message(
+    message: Dict[str, Any],
+    response_format: str = "concise",
+) -> Dict[str, Any]:
+    """Format a single message object based on response_format.
+
+    Args:
+        message: Raw message object from Slack API
+        response_format: "concise" or "detailed"
+
+    Returns:
+        Formatted message object
+    """
+    if response_format == "detailed":
+        return message
+
+    formatted = {
+        "user_id": message.get("user"),
+        "ts": message.get("ts"),
+        "text": message.get("text"),
+    }
+
+    # Add thread info if this is a thread parent
+    thread_ts = message.get("thread_ts")
+    if thread_ts:
+        formatted["thread_ts"] = thread_ts
+        # Check if this is a thread parent (ts == thread_ts)
+        if thread_ts == message.get("ts"):
+            formatted["reply_count"] = message.get("reply_count", 0)
+            formatted["is_thread_parent"] = True
+        else:
+            formatted["is_thread_parent"] = False
+
+    return formatted
+
+
+def generate_history_summary(returned: int, has_more: bool) -> str:
+    """Generate summary string for history response.
+
+    Args:
+        returned: Number of messages returned
+        has_more: Whether there are more messages available
+
+    Returns:
+        Summary string
+    """
+    summary = f"Found {returned} messages."
+
+    if has_more:
+        summary += " Use next_cursor for more results."
+
+    return summary
+
+
 # get_channel_history returns the most recent messages from a channel
 # User tokens: channels:history, groups:history, im:history, mpim:history
 async def get_channel_history(
     channel_id: str,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
+    cursor: Optional[str] = None,
+    response_format: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Get recent messages from a channel."""
+    """Get recent messages from a channel.
+
+    Args:
+        channel_id: The ID of the channel to get history from
+        limit: Maximum number of messages to return (default 10)
+        cursor: Pagination cursor for next page of results
+        response_format: "concise" (default) or "detailed"
+
+    Returns:
+        Dictionary containing messages and pagination info
+    """
     logger.info(f"Executing tool: slack_get_channel_history for channel {channel_id}")
 
     params = {
@@ -197,8 +264,39 @@ async def get_channel_history(
     else:
         params["limit"] = "10"
 
+    if cursor:
+        params["cursor"] = cursor
+
+    if response_format is None:
+        response_format = "concise"
+
     try:
-        return await make_slack_user_request("GET", "conversations.history", params=params)
+        response = await make_slack_user_request("GET", "conversations.history", params=params)
+
+        if not response.get("ok", False):
+            return response
+
+        messages = response.get("messages", [])
+        has_more = response.get("has_more", False)
+
+        # Format messages based on response_format
+        formatted_messages = [
+            format_history_message(msg, response_format) for msg in messages
+        ]
+
+        result = {
+            "ok": True,
+            "messages": formatted_messages,
+            "has_more": has_more,
+            "summary": generate_history_summary(len(formatted_messages), has_more),
+        }
+
+        response_metadata = response.get("response_metadata", {})
+        if response_metadata:
+            result["response_metadata"] = response_metadata
+
+        return result
+
     except Exception as e:
         logger.exception(f"Error executing tool slack_get_channel_history: {e}")
         raise e
