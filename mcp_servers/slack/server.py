@@ -151,7 +151,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only id and name/user fields. 'detailed' returns complete channel objects.",
+                            "description": "Response format. 'concise' (default) returns only id and name/user fields. 'detailed' returns complete channel objects(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -162,7 +162,7 @@ def main(
             ),
             types.Tool(
                 name="slack_get_channel_history",
-                description="Get recent messages from a channel",
+                description="Get recent messages from a channel. Can also retrieve a specific message by its timestamp using oldest/latest/inclusive parameters.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -179,10 +179,22 @@ def main(
                             "type": "string",
                             "description": "Pagination cursor for next page of results",
                         },
+                        "oldest": {
+                            "type": "string",
+                            "description": "Only messages after this Unix timestamp (e.g., '1234567890.123456')",
+                        },
+                        "latest": {
+                            "type": "string",
+                            "description": "Only messages before this Unix timestamp (e.g., '1234567890.123456')",
+                        },
+                        "inclusive": {
+                            "type": "boolean",
+                            "description": "Include messages with oldest or latest timestamps in results. Set to true when fetching a specific message.",
+                        },
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only essential fields (user_id, ts, text, thread_ts, reply_count). 'detailed' returns complete API response.",
+                            "description": "Response format. 'concise' (default) returns essential fields (user_id, ts, text, thread_ts, reply_count, reactions). In most cases, 'concise' is sufficient. 'detailed' returns complete API response(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -230,7 +242,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only essential fields (user_id, ts, text, thread_ts, is_parent, reply_count/parent_user_id). 'detailed' returns complete API response.",
+                            "description": "Response format. 'concise' (default) returns only essential fields (user_id, ts, text, thread_ts, is_parent, reply_count/parent_user_id). 'detailed' returns complete API response(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -300,7 +312,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects.",
+                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -384,7 +396,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only essential fields (channel_id, channel_name, user_id, username, ts, text, permalink, thread_ts). 'detailed' returns complete API response.",
+                            "description": "Response format. 'concise' (default) returns only essential fields (channel_id, channel_name, user_id, username, ts, text, permalink, thread_ts). 'detailed' returns complete API response(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -596,11 +608,14 @@ def main(
 
             limit = arguments.get("limit")
             cursor = arguments.get("cursor")
+            oldest = arguments.get("oldest")
+            latest = arguments.get("latest")
+            inclusive = arguments.get("inclusive")
             response_format = arguments.get("response_format")
 
             try:
                 result = await user_get_channel_history(
-                    channel_id, limit, cursor, response_format
+                    channel_id, limit, cursor, oldest, latest, inclusive, response_format
                 )
                 return [
                     types.TextContent(

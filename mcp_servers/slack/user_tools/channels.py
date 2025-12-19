@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Optional
 
-from .base import make_slack_user_request
+from .base import make_slack_user_request, format_reactions
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -213,6 +213,11 @@ def format_history_message(
         else:
             formatted["is_thread_parent"] = False
 
+    # Add reactions if present
+    reactions = message.get("reactions")
+    if reactions:
+        formatted["reactions"] = format_reactions(reactions)
+
     return formatted
 
 
@@ -240,6 +245,9 @@ async def get_channel_history(
     channel_id: str,
     limit: Optional[int] = None,
     cursor: Optional[str] = None,
+    oldest: Optional[str] = None,
+    latest: Optional[str] = None,
+    inclusive: Optional[bool] = None,
     response_format: Optional[str] = None
 ) -> Dict[str, Any]:
     """Get recent messages from a channel.
@@ -248,10 +256,23 @@ async def get_channel_history(
         channel_id: The ID of the channel to get history from
         limit: Maximum number of messages to return (default 10)
         cursor: Pagination cursor for next page of results
+        oldest: Only messages after this Unix timestamp
+        latest: Only messages before this Unix timestamp
+        inclusive: Include messages with oldest or latest timestamps in results
         response_format: "concise" (default) or "detailed"
 
     Returns:
         Dictionary containing messages and pagination info
+
+    Examples:
+        # Get a specific message by its timestamp
+        result = await get_channel_history(
+            channel_id='C123456',
+            latest='1234567890.123456',
+            oldest='1234567890.123456',
+            inclusive=True,
+            limit=1
+        )
     """
     logger.info(f"Executing tool: slack_get_channel_history for channel {channel_id}")
 
@@ -266,6 +287,15 @@ async def get_channel_history(
 
     if cursor:
         params["cursor"] = cursor
+
+    if oldest:
+        params["oldest"] = oldest
+
+    if latest:
+        params["latest"] = latest
+
+    if inclusive is not None:
+        params["inclusive"] = "true" if inclusive else "false"
 
     if response_format is None:
         response_format = "concise"

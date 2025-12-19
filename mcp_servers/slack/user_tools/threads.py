@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Optional
-from .base import make_slack_user_request
+from .base import make_slack_user_request, format_reactions
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,11 @@ def format_thread_message(
         formatted["reply_count"] = message.get("reply_count", 0)
     else:
         formatted["parent_user_id"] = message.get("parent_user_id")
+
+    # Add reactions if present
+    reactions = message.get("reactions")
+    if reactions:
+        formatted["reactions"] = format_reactions(reactions)
 
     return formatted
 
