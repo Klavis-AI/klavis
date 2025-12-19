@@ -50,9 +50,9 @@ def filter_channels(
 
 
 def format_channel_response(
-    channel: Dict[str, Any],
+    channel: dict[str, Any],
     response_format: str = "concise",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Format a single channel object based on response_format.
 
     Args:
@@ -181,9 +181,9 @@ async def list_channels(
 
 
 def format_history_message(
-    message: Dict[str, Any],
+    message: dict[str, Any],
     response_format: str = "concise",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Format a single message object based on response_format.
 
     Args:
