@@ -7285,6 +7285,79 @@
         }
       }
     },
+    "/oauth/amplitude/authorize": {
+      "get": {
+        "tags": [
+          "amplitude-oauth"
+        ],
+        "summary": "Authorize",
+        "description": "Start OAuth flow and redirect to authorization page.",
+        "operationId": "authorizeamplitude_oauth",
+        "parameters": [
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique identifier for the MCP connection",
+              "title": "Instance Id"
+            },
+            "description": "Unique identifier for the MCP connection"
+          },
+          {
+            "name": "redirect_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional URL to redirect to after authorization",
+              "title": "Redirect Url"
+            },
+            "description": "Optional URL to redirect to after authorization"
+          },
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Force re-authorization even if valid tokens exist",
+              "default": true,
+              "title": "Force Refresh"
+            },
+            "description": "Force re-authorization even if valid tokens exist"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/{server_name}": {
       "post": {
         "tags": [
