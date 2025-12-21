@@ -6,6 +6,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 const LIST_ARTICLES_TOOL: Tool = {
   name: 'intercom_list_articles',
   description: 'List all articles in your Help Center with pagination support.',
+  annotations: {
+    title: 'List Articles',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -31,6 +35,10 @@ const LIST_ARTICLES_TOOL: Tool = {
 const GET_ARTICLE_TOOL: Tool = {
   name: 'intercom_get_article',
   description: 'Retrieve a specific article by its ID.',
+  annotations: {
+    title: 'Get Article',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -50,6 +58,10 @@ const GET_ARTICLE_TOOL: Tool = {
 const CREATE_ARTICLE_TOOL: Tool = {
   name: 'intercom_create_article',
   description: 'Create a new article in your Help Center.',
+  annotations: {
+    title: 'Create Article',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -149,6 +161,10 @@ const CREATE_ARTICLE_TOOL: Tool = {
 const UPDATE_ARTICLE_TOOL: Tool = {
   name: 'intercom_update_article',
   description: 'Update an existing article in your Help Center.',
+  annotations: {
+    title: 'Update Article',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -242,6 +258,10 @@ const UPDATE_ARTICLE_TOOL: Tool = {
 const DELETE_ARTICLE_TOOL: Tool = {
   name: 'intercom_delete_article',
   description: 'Delete a single article from your Help Center.',
+  annotations: {
+    title: 'Delete Article',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -261,6 +281,10 @@ const DELETE_ARTICLE_TOOL: Tool = {
 const SEARCH_ARTICLES_TOOL: Tool = {
   name: 'intercom_search_articles',
   description: 'Search articles in your Help Center using query filters.',
+  annotations: {
+    title: 'Search Articles',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -313,6 +337,10 @@ const SEARCH_ARTICLES_TOOL: Tool = {
 const LIST_COLLECTIONS_TOOL: Tool = {
   name: 'intercom_list_collections',
   description: 'List all Help Center collections with pagination support.',
+  annotations: {
+    title: 'List Collections',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -338,6 +366,10 @@ const LIST_COLLECTIONS_TOOL: Tool = {
 const GET_COLLECTION_TOOL: Tool = {
   name: 'intercom_get_collection',
   description: 'Retrieve a specific Help Center collection by its ID.',
+  annotations: {
+    title: 'Get Collection',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -357,6 +389,10 @@ const GET_COLLECTION_TOOL: Tool = {
 const CREATE_COLLECTION_TOOL: Tool = {
   name: 'intercom_create_collection',
   description: 'Create a new Help Center collection.',
+  annotations: {
+    title: 'Create Collection',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -416,6 +452,10 @@ const CREATE_COLLECTION_TOOL: Tool = {
 const UPDATE_COLLECTION_TOOL: Tool = {
   name: 'intercom_update_collection',
   description: 'Update an existing Help Center collection.',
+  annotations: {
+    title: 'Update Collection',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -473,6 +513,10 @@ const UPDATE_COLLECTION_TOOL: Tool = {
 const DELETE_COLLECTION_TOOL: Tool = {
   name: 'intercom_delete_collection',
   description: 'Delete a single Help Center collection.',
+  annotations: {
+    title: 'Delete Collection',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {

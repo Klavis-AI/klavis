@@ -6,6 +6,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 const LIST_CONVERSATIONS_TOOL: Tool = {
   name: 'intercom_list_conversations',
   description: 'List all conversations in your Intercom workspace with pagination support.',
+  annotations: {
+    title: 'List Conversations',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -36,6 +40,10 @@ const LIST_CONVERSATIONS_TOOL: Tool = {
 const GET_CONVERSATION_TOOL: Tool = {
   name: 'intercom_get_conversation',
   description: 'Retrieve a specific conversation by its ID with all conversation parts.',
+  annotations: {
+    title: 'Get Conversation',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -61,6 +69,10 @@ const CREATE_CONVERSATION_TOOL: Tool = {
   name: 'intercom_create_conversation',
   description:
     'Create a conversation that has been initiated by a contact (user or lead). The conversation can be an in-app message only.',
+  annotations: {
+    title: 'Create Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -108,6 +120,10 @@ const CREATE_CONVERSATION_TOOL: Tool = {
 const UPDATE_CONVERSATION_TOOL: Tool = {
   name: 'intercom_update_conversation',
   description: 'Update an existing conversation including custom attributes and read status.',
+  annotations: {
+    title: 'Update Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -147,6 +163,10 @@ const UPDATE_CONVERSATION_TOOL: Tool = {
 const DELETE_CONVERSATION_TOOL: Tool = {
   name: 'intercom_delete_conversation',
   description: 'Delete a single conversation from Intercom workspace.',
+  annotations: {
+    title: 'Delete Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -166,6 +186,10 @@ const SEARCH_CONVERSATIONS_TOOL: Tool = {
   name: 'intercom_search_conversations',
   description:
     'Search conversations using query filters and operators with advanced search capabilities.',
+  annotations: {
+    title: 'Search Conversations',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -270,6 +294,10 @@ const REPLY_CONVERSATION_TOOL: Tool = {
   name: 'intercom_reply_conversation',
   description:
     'Reply to a conversation with a message from an admin or on behalf of a contact, or with a note for admins.',
+  annotations: {
+    title: 'Reply to Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -322,6 +350,10 @@ const REPLY_CONVERSATION_TOOL: Tool = {
 const MANAGE_CONVERSATION_TOOL: Tool = {
   name: 'intercom_manage_conversation',
   description: 'Perform management actions on a conversation: close, snooze, open, or assign.',
+  annotations: {
+    title: 'Manage Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -374,6 +406,10 @@ const ATTACH_CONTACT_TO_CONVERSATION_TOOL: Tool = {
   name: 'intercom_attach_contact_to_conversation',
   description:
     'Add participants who are contacts to a conversation, on behalf of either another contact or an admin.',
+  annotations: {
+    title: 'Attach Contact to Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -410,6 +446,10 @@ const ATTACH_CONTACT_TO_CONVERSATION_TOOL: Tool = {
 const DETACH_CONTACT_FROM_CONVERSATION_TOOL: Tool = {
   name: 'intercom_detach_contact_from_conversation',
   description: 'Remove a contact from a group conversation.',
+  annotations: {
+    title: 'Detach Contact from Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -451,6 +491,10 @@ const DETACH_CONTACT_FROM_CONVERSATION_TOOL: Tool = {
 const REDACT_CONVERSATION_TOOL: Tool = {
   name: 'intercom_redact_conversation',
   description: 'Redact a conversation part or the source message of a conversation.',
+  annotations: {
+    title: 'Redact Conversation',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -486,6 +530,10 @@ const REDACT_CONVERSATION_TOOL: Tool = {
 const CONVERT_CONVERSATION_TO_TICKET_TOOL: Tool = {
   name: 'intercom_convert_conversation_to_ticket',
   description: 'Convert a conversation to a ticket.',
+  annotations: {
+    title: 'Convert to Ticket',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {

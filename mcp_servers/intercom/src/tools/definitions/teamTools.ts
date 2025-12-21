@@ -6,6 +6,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 const LIST_TEAMS_TOOL: Tool = {
   name: 'intercom_list_teams',
   description: 'List all teams in your Intercom workspace.',
+  annotations: {
+    title: 'List Teams',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {},
@@ -20,6 +24,10 @@ const GET_TEAM_TOOL: Tool = {
   name: 'intercom_get_team',
   description:
     'Retrieve a specific team by its ID, containing an array of admins that belong to this team.',
+  annotations: {
+    title: 'Get Team',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -39,6 +47,10 @@ const GET_TEAM_TOOL: Tool = {
 const LIST_ADMINS_TOOL: Tool = {
   name: 'intercom_list_admins',
   description: 'List all admins (teammates) in your Intercom workspace.',
+  annotations: {
+    title: 'List Admins',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {},
@@ -52,6 +64,10 @@ const LIST_ADMINS_TOOL: Tool = {
 const GET_ADMIN_TOOL: Tool = {
   name: 'intercom_get_admin',
   description: 'Retrieve the details of a single admin (teammate).',
+  annotations: {
+    title: 'Get Admin',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -72,6 +88,10 @@ const GET_CURRENT_ADMIN_TOOL: Tool = {
   name: 'intercom_get_current_admin',
   description:
     'Identify the currently authorized admin along with the embedded app object (workspace).',
+  annotations: {
+    title: 'Get Current Admin',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {},
@@ -85,6 +105,10 @@ const GET_CURRENT_ADMIN_TOOL: Tool = {
 const SET_ADMIN_AWAY_TOOL: Tool = {
   name: 'intercom_set_admin_away',
   description: 'Set an admin as away for the Inbox, with options for reassigning conversations.',
+  annotations: {
+    title: 'Set Admin Away',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -116,6 +140,10 @@ const SET_ADMIN_AWAY_TOOL: Tool = {
 const LIST_ADMIN_ACTIVITY_LOGS_TOOL: Tool = {
   name: 'intercom_list_admin_activity_logs',
   description: 'Get a log of activities by all admins in an app within a specified timeframe.',
+  annotations: {
+    title: 'List Admin Activity Logs',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {

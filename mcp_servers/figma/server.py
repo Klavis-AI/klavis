@@ -67,12 +67,14 @@ async def run_server(log_level: str = "INFO"):
             types.Tool(
                 name="figma_test_connection",
                 description="Test Figma Connection - verify API authentication is working correctly.",
-                inputSchema={"type": "object", "properties": {}}
+                inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(title="Test Connection", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_current_user",
                 description="Get Current User - retrieve information about the authenticated user.",
-                inputSchema={"type": "object", "properties": {}}
+                inputSchema={"type": "object", "properties": {}},
+                annotations=types.ToolAnnotations(title="Get Current User", readOnlyHint=True)
             ),
             
             # File management tools
@@ -91,7 +93,8 @@ async def run_server(log_level: str = "INFO"):
                         "plugin_data": {"type": "string", "description": "Plugin data to include"},
                         "branch_data": {"type": "boolean", "description": "Whether to include branch data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get File", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_file_nodes",
@@ -107,7 +110,8 @@ async def run_server(log_level: str = "INFO"):
                         "geometry": {"type": "string", "enum": ["paths", "no_geometry"], "description": "Whether to include geometry data"},
                         "plugin_data": {"type": "string", "description": "Plugin data to include"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get File Nodes", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_file_images",
@@ -125,7 +129,8 @@ async def run_server(log_level: str = "INFO"):
                         "use_absolute_bounds": {"type": "boolean", "description": "Use absolute bounds for export"},
                         "version": {"type": "string", "description": "Specific version to export"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get File Images", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_file_versions",
@@ -136,7 +141,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get File Versions", readOnlyHint=True)
             ),
             
             # Project management tools
@@ -149,7 +155,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "team_id": {"type": "string", "description": "The team ID (from Figma team URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Team Projects", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_project_files",
@@ -161,7 +168,8 @@ async def run_server(log_level: str = "INFO"):
                         "project_id": {"type": "string", "description": "The project ID"},
                         "branch_data": {"type": "boolean", "description": "Whether to include branch data"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Project Files", readOnlyHint=True)
             ),
             
             # Comment management tools
@@ -175,7 +183,8 @@ async def run_server(log_level: str = "INFO"):
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"},
                         "as_md": {"type": "boolean", "description": "Return comments as markdown"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get File Comments", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_post_file_comment",
@@ -189,7 +198,8 @@ async def run_server(log_level: str = "INFO"):
                         "client_meta": {"type": "object", "description": "Client metadata including x, y coordinates and node_id"},
                         "comment_id": {"type": "string", "description": "Parent comment ID for replies"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Post Comment", destructiveHint=True)
             ),
             types.Tool(
                 name="figma_delete_comment",
@@ -200,7 +210,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "comment_id": {"type": "string", "description": "The comment ID to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Delete Comment", destructiveHint=True)
             ),
             
             # Variables (Design Tokens) management tools
@@ -213,7 +224,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Local Variables", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_get_published_variables",
@@ -224,7 +236,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Published Variables", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_post_variables",
@@ -237,7 +250,8 @@ async def run_server(log_level: str = "INFO"):
                         "variableCollections": {"type": "array", "description": "Array of variable collections to create/update"},
                         "variables": {"type": "array", "description": "Array of variables to create/update"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Create/Update Variables", destructiveHint=True)
             ),
             
             # Dev Resources management tools
@@ -251,7 +265,8 @@ async def run_server(log_level: str = "INFO"):
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"},
                         "node_id": {"type": "string", "description": "Filter by specific node ID"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Dev Resources", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_post_dev_resources",
@@ -263,7 +278,8 @@ async def run_server(log_level: str = "INFO"):
                         "file_key": {"type": "string", "description": "The file key (from Figma URL)"},
                         "dev_resources": {"type": "array", "description": "Array of dev resources to create"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Create Dev Resources", destructiveHint=True)
             ),
             types.Tool(
                 name="figma_put_dev_resource",
@@ -276,7 +292,8 @@ async def run_server(log_level: str = "INFO"):
                         "name": {"type": "string", "description": "New name for the dev resource"},
                         "url": {"type": "string", "description": "New URL for the dev resource"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Update Dev Resource", destructiveHint=True)
             ),
             types.Tool(
                 name="figma_delete_dev_resource",
@@ -287,7 +304,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "dev_resource_id": {"type": "string", "description": "The dev resource ID to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Delete Dev Resource", destructiveHint=True)
             ),
             
             # Webhook management tools
@@ -300,7 +318,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "team_id": {"type": "string", "description": "The team ID (from Figma team URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Team Webhooks", readOnlyHint=True)
             ),
             types.Tool(
                 name="figma_post_webhook",
@@ -315,7 +334,8 @@ async def run_server(log_level: str = "INFO"):
                         "passcode": {"type": "string", "description": "Passcode for webhook verification"},
                         "description": {"type": "string", "description": "Description of the webhook"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Create Webhook", destructiveHint=True)
             ),
             types.Tool(
                 name="figma_put_webhook",
@@ -330,7 +350,8 @@ async def run_server(log_level: str = "INFO"):
                         "passcode": {"type": "string", "description": "Passcode for webhook verification"},
                         "description": {"type": "string", "description": "Description of the webhook"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Update Webhook", destructiveHint=True)
             ),
             types.Tool(
                 name="figma_delete_webhook",
@@ -341,7 +362,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "webhook_id": {"type": "string", "description": "The webhook ID to delete"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Delete Webhook", destructiveHint=True)
             ),
             
             # Library Analytics tools
@@ -354,7 +376,8 @@ async def run_server(log_level: str = "INFO"):
                     "properties": {
                         "file_key": {"type": "string", "description": "The file key of a published library (from Figma URL)"}
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Library Analytics", readOnlyHint=True)
             ),
         ]
         

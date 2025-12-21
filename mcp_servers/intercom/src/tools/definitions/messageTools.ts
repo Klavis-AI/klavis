@@ -7,6 +7,10 @@ const CREATE_MESSAGE_TOOL: Tool = {
   name: 'intercom_create_message',
   description:
     'Create a message that has been initiated by an admin. The conversation can be an in-app message or an email.',
+  annotations: {
+    title: 'Create Message',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -108,6 +112,10 @@ const CREATE_MESSAGE_TOOL: Tool = {
 const LIST_MESSAGES_TOOL: Tool = {
   name: 'intercom_list_messages',
   description: 'List all messages sent from your workspace with pagination support.',
+  annotations: {
+    title: 'List Messages',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -133,6 +141,10 @@ const LIST_MESSAGES_TOOL: Tool = {
 const GET_MESSAGE_TOOL: Tool = {
   name: 'intercom_get_message',
   description: 'Retrieve a specific message by its ID.',
+  annotations: {
+    title: 'Get Message',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -152,6 +164,10 @@ const GET_MESSAGE_TOOL: Tool = {
 const CREATE_NOTE_TOOL: Tool = {
   name: 'intercom_create_note',
   description: 'Add a note to a specific contact.',
+  annotations: {
+    title: 'Create Note',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -182,6 +198,10 @@ const CREATE_NOTE_TOOL: Tool = {
 const LIST_NOTES_TOOL: Tool = {
   name: 'intercom_list_notes',
   description: 'List all notes attached to a specific contact.',
+  annotations: {
+    title: 'List Notes',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -212,6 +232,10 @@ const LIST_NOTES_TOOL: Tool = {
 const GET_NOTE_TOOL: Tool = {
   name: 'intercom_get_note',
   description: 'Retrieve a specific note by its ID.',
+  annotations: {
+    title: 'Get Note',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -232,6 +256,10 @@ const SEND_USER_MESSAGE_TOOL: Tool = {
   name: 'intercom_send_user_message',
   description:
     'Create a conversation that has been initiated by a contact (user or lead). The conversation can be an in-app message only.',
+  annotations: {
+    title: 'Send User Message',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
