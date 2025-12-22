@@ -50,7 +50,8 @@
             "group": "Core Concepts",
             "pages": [
               "concepts/mcp",
-              "concepts/strata"
+              "concepts/strata",
+              "concepts/sandbox"
             ]
           },
           {

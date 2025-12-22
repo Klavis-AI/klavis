@@ -1,0 +1,59 @@
+---
+title: "Sandbox"
+description: "Deterministic, isolated SaaS environments for agent training, evaluation, and debugging"
+---
+
+# Klavis Sandbox (Sandbox-as-a-Service)
+
+Klavis Sandbox gives you **ephemeral, fully controllable** application environments (e.g., Gmail, Snowflake) to safely test and evaluate agents without touching production data.
+
+## Lifecycle
+
+<Steps>
+  <Step title="Create">
+    Request a sandbox and get an MCP server URL for that isolated instance.
+  </Step>
+  <Step title="Initialize (seed)">
+    Load a deterministic “world state” (records, messages, files, etc.) via the Sandbox API.
+  </Step>
+  <Step title="Interact (MCP)">
+    Let your agent use MCP tools against the sandbox as if it were the real app.
+  </Step>
+  <Step title="Dump (verify)">
+    Snapshot the full sandbox state to programmatically validate outcomes.
+  </Step>
+  <Step title="Reset / Delete">
+    Wipe the sandbox back to a clean slate for the next test run.
+  </Step>
+</Steps>
+
+## Video
+
+<iframe
+  style={{
+    width: '100%',
+    aspectRatio: '16/9',
+    border: 'none'
+  }}
+  src="https://www.youtube.com/embed/10C18rpCYcA"
+  title="Klavis Sandbox"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowfullscreen
+></iframe>
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card
+    title="Example Notebook"
+    icon="book-open"
+    href="https://github.com/Klavis-AI/klavis/blob/main/examples/klavis-sandbox/klavis_sandbox.ipynb"
+  >
+    Create sandboxes, seed data, run an agent, then dump and clean up.
+  </Card>
+  <Card title="Sandbox API" icon="box" href="/api-reference/sandbox/create">
+    Manage isolated sandbox environments for training/eval: pooling, init, export, teardown.
+  </Card>
+</CardGroup>
+
+

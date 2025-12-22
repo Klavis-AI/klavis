@@ -34,7 +34,6 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
           
           klavis_client = Klavis(api_key="YOUR_API_KEY")
           
-          # Create a Strata MCP server with YouTube
           response = klavis_client.mcp_server.create_strata_server(
               servers=[McpServerName.YOUTUBE],
               user_id="user123"
@@ -71,9 +70,32 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
         <Card title="API Reference" icon="magnifying-glass" href="/api-reference/strata/create" horizontal>
           Full Strata API endpoints
         </Card>
+      </Step>
+      
+      <Step title="Authenticate">
+        <CodeGroup>
+          ```python Python
+          import webbrowser
+          
+          # Open OAuth authorization page
+          webbrowser.open(response.oauth_urls[McpServerName.YOUTUBE])
+          ```
+          
+          ```typescript TypeScript
+          import open from 'open';
+          
+          // Open OAuth authorization page
+          await open(response.oauthUrls[Klavis.McpServerName.YouTube]);
+          ```
+          
+          ```bash cURL
+          # Copy and paste the OAuth URL into your browser
+          echo "Visit this URL to authorize: https://api.klavis.ai/oauth/youtube/authorize?instance_id=YOUR_INSTANCE_ID"
+          ```
+        </CodeGroup>
         
         <Check>
-          🎉 **Your YouTube MCP Server is ready!** You can now use your MCP server URL with any MCP-compatible client.
+          🎉 **Your YouTube MCP Server is ready!** Once authentication is complete, you can use your MCP server URL with any MCP-compatible client.
         </Check>
       </Step>
       
@@ -91,8 +113,8 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
         Select YouTube from the list of available integrations.
       </Step>
       
-      <Step title="Ready to use">
-        No authentication required - your server is immediately ready.
+      <Step title="Authenticate">
+        Complete the OAuth flow to connect your YouTube account.
       </Step>
       
       <Step title="Use in your app">
@@ -115,8 +137,9 @@ Connect to YouTube to extract video transcripts, analyze content, and automate v
         # Pull the Docker image
         docker pull ghcr.io/klavis-ai/youtube-mcp-server:latest
         
-        # Run the server
+        # Run with OAuth support (requires Klavis API key)
         docker run -p 5000:5000 \
+          -e KLAVIS_API_KEY=$KLAVIS_API_KEY \
           ghcr.io/klavis-ai/youtube-mcp-server:latest
         ```
       </Step>
@@ -146,6 +169,14 @@ With our progressive discovery approach, Klavis System is capable of enabling al
 
 <CardGroup>
   <Card
+    title="White-label Authentication"
+    icon="palette"
+    href="/auth/white-label"
+  >
+    Customize OAuth flows with your own branding
+  </Card>
+  
+  <Card
     title="AI Platform Integrations"
     icon="robot"
     href="/ai-platform-integration/overview"
@@ -167,12 +198,5 @@ With our progressive discovery approach, Klavis System is capable of enabling al
     href="/api-reference/introduction"
   >
     REST endpoints and schemas
-  </Card>
-    <Card
-    title="White-label Authentication"
-    icon="palette"
-    href="/auth/white-label"
-  >
-    Customize OAuth flows with your own branding
   </Card>
 </CardGroup>
