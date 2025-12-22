@@ -1740,12 +1740,6 @@ def main(
             logger.info(f"Executing tool: get_video_transcript with video_id: {video_id}")
             
             try:
-
-                video_details = await get_video_details(video_id)
-                return {
-                    "video_id": video_id,
-                    "video_details": video_details,
-                }
                 # Use the initialized API with or without proxy
                 raw_transcript = youtube_transcript_api.fetch(video_id, languages=TRANSCRIPT_LANGUAGES).to_raw_data()
 
