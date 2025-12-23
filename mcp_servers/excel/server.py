@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-EXCEL_MCP_SERVER_PORT = int(os.getenv("EXCEL_MCP_SERVER_PORT", "4321"))
+EXCEL_MCP_SERVER_PORT = int(os.getenv("EXCEL_MCP_SERVER_PORT", "5000"))
 
 
 def extract_access_token(request_or_scope) -> str:
