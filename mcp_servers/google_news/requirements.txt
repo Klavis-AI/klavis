@@ -1,0 +1,6 @@
+mcp==1.12.2
+requests==2.32.4
+python-dotenv==1.0.1
+click==8.1.7
+starlette==0.40.0
+uvicorn[standard]==0.34.0
