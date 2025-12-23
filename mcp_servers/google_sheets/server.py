@@ -345,6 +345,87 @@ async def list_sheets_tool(spreadsheet_id: str) -> Dict[str, Any]:
         logger.exception(f"Error executing tool list_sheets: {e}")
         raise e
 
+async def create_sheets_tool(
+    spreadsheet_id: str,
+    sheet_names: list[str],
+) -> Dict[str, Any]:
+    """Create multiple empty sheets in a spreadsheet.
+
+    Args:
+        spreadsheet_id: The ID of the spreadsheet to add sheets to
+        sheet_names: List of names for the new sheets to create
+
+    Returns:
+        Dict containing:
+            - spreadsheet_id: The spreadsheet ID
+            - created: List of successfully created sheets with title and sheetId
+            - failed: List of sheets that failed to create with name and error
+    """
+    logger.info(f"Executing tool: create_sheets with spreadsheet_id: {spreadsheet_id}, sheet_names: {sheet_names}")
+
+    access_token = get_auth_token()
+    service = get_sheets_service(access_token)
+
+    created: list[dict[str, Any]] = []
+    failed: list[dict[str, str]] = []
+
+    for sheet_name in sheet_names:
+        try:
+            request_body = {
+                "requests": [
+                    {
+                        "addSheet": {
+                            "properties": {
+                                "title": sheet_name
+                            }
+                        }
+                    }
+                ]
+            }
+
+            response = (
+                service.spreadsheets()
+                .batchUpdate(spreadsheetId=spreadsheet_id, body=request_body)
+                .execute()
+            )
+
+            replies = response.get('replies', [])
+            if replies and 'addSheet' in replies[0]:
+                sheet_props = replies[0]['addSheet'].get('properties', {})
+                created.append({
+                    "title": sheet_props.get('title', sheet_name),
+                    "sheetId": sheet_props.get('sheetId'),
+                })
+            else:
+                created.append({
+                    "title": sheet_name,
+                    "sheetId": None,
+                })
+
+        except HttpError as e:
+            logger.error(f"Google Sheets API error creating sheet '{sheet_name}': {e}")
+            try:
+                error_detail = json.loads(e.content.decode('utf-8'))
+                error_message = error_detail.get('error', {}).get('message', 'Unknown error')
+            except (json.JSONDecodeError, AttributeError):
+                error_message = str(e)
+            failed.append({
+                "name": sheet_name,
+                "error": f"API Error ({e.resp.status}): {error_message}",
+            })
+        except Exception as e:
+            logger.exception(f"Unexpected error creating sheet '{sheet_name}': {e}")
+            failed.append({
+                "name": sheet_name,
+                "error": str(e),
+            })
+
+    return {
+        "spreadsheet_id": spreadsheet_id,
+        "created": created,
+        "failed": failed,
+    }
+
 @click.command()
 @click.option("--port", default=GOOGLE_SHEETS_MCP_SERVER_PORT, help="Port to listen on for HTTP")
 @click.option(
@@ -483,6 +564,28 @@ def main(
                     **{"category": "GOOGLE_SHEETS_SPREADSHEET", "readOnlyHint": True}
                 ),
             ),
+            types.Tool(
+                name="google_sheets_create_sheets",
+                description="Create multiple empty sheets in a spreadsheet.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["spreadsheet_id", "sheet_names"],
+                    "properties": {
+                        "spreadsheet_id": {
+                            "type": "string",
+                            "description": "The ID of the spreadsheet to add sheets to.",
+                        },
+                        "sheet_names": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of names for the new sheets to create.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_SHEETS_SHEET"}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -612,6 +715,41 @@ def main(
                     types.TextContent(
                         type="text",
                         text=str(result),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_sheets_create_sheets":
+            spreadsheet_id = arguments.get("spreadsheet_id")
+            sheet_names = arguments.get("sheet_names")
+            if not spreadsheet_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: spreadsheet_id parameter is required",
+                    )
+                ]
+            if not sheet_names or not isinstance(sheet_names, list):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: sheet_names parameter is required and must be an array",
+                    )
+                ]
+
+            try:
+                result = await create_sheets_tool(spreadsheet_id, sheet_names)
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result),
                     )
                 ]
             except Exception as e:
