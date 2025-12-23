@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token"
+      }
+    },
+    "Demo": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "C:\\Path\\To\\Your\\mcp-server-demo\\calculator.py"
+      ]
+    },
+    "snowflake": {
+      "command": "python",
+      "args": [
+        "-c",
+        "from mcp_snowflake_server import main; main()",
+        "--account",
+        "your_account_id",
+        "--user",
+        "your_username",
+        "--password",
+        "your_password",
+        "--warehouse",
+        "your_warehouse",
+        "--database",
+        "your_database",
+        "--schema",
+        "your_schema",
+        "--role",
+        "your_role",
+        "--insecure_mode",
+        "true"
+      ],
+      "cwd": "/path/to/snowflake_MCP_server"
+    }
+  }
+}
