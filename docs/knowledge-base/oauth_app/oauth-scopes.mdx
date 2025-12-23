@@ -33,10 +33,13 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     projects:write
     projects:delete
     stories:read
+    stories:write
     task_templates:read
     tasks:read
     tasks:write
     tasks:delete
+    tags:read
+    tags:write
     teams:read
     users:read
     workspaces:read
@@ -48,6 +51,20 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     <Note>
     Attio uses API key authentication rather than OAuth scopes. No specific scopes are required for this integration.
     </Note>
+  </Accordion>
+
+  <Accordion title="Box">
+    ```
+    root_readonly
+    root_readwrite
+    manage_managed_users
+    manage_app_users
+    manage_groups
+    manage_webhook
+    manage_enterprise_properties
+    manage_data_retention
+    manage_triggers
+    ```
   </Accordion>
 
   <Accordion title="Canva">
@@ -71,6 +88,12 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     folder:permission:write
     profile:read
     ```
+  </Accordion>
+
+  <Accordion title="Cal.com">
+    <Note>
+    Cal.com OAuth scopes are configured via the Cal.com app settings rather than an explicit scope string.
+    </Note>
   </Accordion>
 
   <Accordion title="ClickUp">
@@ -114,6 +137,30 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     read:account
     report:personal-data
     offline_access
+    read:content.metadata:confluence
+    delete:space:confluence
+    write:comment:confluence
+    delete:comment:confluence
+    delete:page:confluence
+    read:comment:confluence
+    ```
+  </Accordion>
+
+  <Accordion title="Dialpad">
+    ```
+    recordings_export
+    message_content_export
+    screen_pop
+    calls:list
+    fax_message
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="DocuSign">
+    ```
+    signature
+    impersonation
     ```
   </Accordion>
 
@@ -133,12 +180,60 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     ```
   </Accordion>
 
+  <Accordion title="Fathom">
+    ```
+    public_api
+    ```
+  </Accordion>
+
+  <Accordion title="Figma">
+    ```
+    current_user:read
+    file_comments:read
+    file_comments:write
+    file_content:read
+    file_metadata:read
+    file_versions:read
+    library_assets:read
+    library_content:read
+    team_library_content:read
+    webhooks:read
+    webhooks:write
+    ```
+  </Accordion>
+
   <Accordion title="GitHub">
     ```
     repo
     read:user
     read:org
     security_events
+    delete_repo
+    ```
+  </Accordion>
+
+  <Accordion title="GitLab">
+    ```
+    api
+    read_api
+    read_user
+    create_runner
+    manage_runner
+    k8s_proxy
+    read_repository
+    write_repository
+    read_registry
+    write_registry
+    read_virtual_registry
+    write_virtual_registry
+    read_observability
+    write_observability
+    ai_features
+    admin_mode
+    sudo
+    openid
+    profile
+    email
     ```
   </Accordion>
 
@@ -148,6 +243,9 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     https://www.googleapis.com/auth/gmail.send
     https://www.googleapis.com/auth/gmail.compose
     https://www.googleapis.com/auth/gmail.modify
+    https://www.googleapis.com/auth/contacts.other.readonly
+    https://www.googleapis.com/auth/contacts.readonly
+    https://www.googleapis.com/auth/directory.readonly
     ```
   </Accordion>
 
@@ -155,6 +253,15 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     ```
     https://www.googleapis.com/auth/calendar.readonly
     https://www.googleapis.com/auth/calendar.events
+    https://www.googleapis.com/auth/contacts.other.readonly
+    https://www.googleapis.com/auth/contacts.readonly
+    https://www.googleapis.com/auth/directory.readonly
+    ```
+  </Accordion>
+
+  <Accordion title="Google Cloud">
+    ```
+    https://www.googleapis.com/auth/cloud-platform
     ```
   </Accordion>
 
@@ -165,6 +272,12 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
   </Accordion>
 
   <Accordion title="Google Drive">
+    ```
+    https://www.googleapis.com/auth/drive
+    ```
+  </Accordion>
+
+  <Accordion title="Google Forms">
     ```
     https://www.googleapis.com/auth/drive
     ```
@@ -214,13 +327,83 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     ```
   </Accordion>
 
+  <Accordion title="Instagram">
+    ```
+    instagram_business_basic
+    instagram_business_manage_insights
+    instagram_business_manage_comments
+    ```
+  </Accordion>
+
   <Accordion title="Jira">
     ```
     read:jira-user
     read:jira-work
     write:jira-work
+    manage:jira-project
     manage:jira-configuration
+    manage:jira-webhook
+    manage:jira-data-provider
+    read:servicedesk-request
+    manage:servicedesk-customer
+    write:servicedesk-request
+    read:servicemanagement-insight-objects
     offline_access
+    read:sprint:jira-software
+    write:sprint:jira-software
+    read:board-scope:jira-software
+    write:board-scope:jira-software
+    read:project:jira
+    delete:sprint:jira-software
+    delete:comment:jira
+    delete:comment.property:jira
+    delete:issue:jira
+    ```
+  </Accordion>
+
+  <Accordion title="Klaviyo">
+    ```
+    accounts:read
+    campaigns:read
+    campaigns:write
+    conversations:read
+    conversations:write
+    catalogs:read
+    catalogs:write
+    coupons:read
+    coupons:write
+    coupon-codes:read
+    coupon-codes:write
+    data-privacy:read
+    data-privacy:write
+    events:read
+    events:write
+    flows:read
+    flows:write
+    forms:read
+    images:read
+    images:write
+    lists:read
+    lists:write
+    metrics:read
+    metrics:write
+    profiles:read
+    profiles:write
+    push-tokens:read
+    push-tokens:write
+    segments:read
+    segments:write
+    reviews:read
+    subscriptions:read
+    subscriptions:write
+    tags:read
+    tags:write
+    templates:read
+    templates:write
+    tracking-settings:read
+    tracking-settings:write
+    web-feeds:read
+    web-feeds:write
     ```
   </Accordion>
 
@@ -231,6 +414,7 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     issues:create
     comments:create
     timeSchedule:write
+    admin
     ```
   </Accordion>
 
@@ -243,12 +427,81 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     ```
   </Accordion>
 
+  <Accordion title="Microsoft Calendar">
+    ```
+    openid
+    profile
+    email
+    User.Read
+    Calendars.ReadWrite
+    MailboxSettings.Read
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Microsoft Outlook">
+    ```
+    openid
+    profile
+    email
+    User.Read
+    Mail.Read
+    Mail.ReadWrite
+    MailboxSettings.Read
+    MailboxSettings.ReadWrite
+    Mail.Send
+    offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="Microsoft Teams">
+    ```
+    openid
+    profile
+    email
+    offline_access
+    User.Read
+    Channel.Create
+    Channel.Delete.All
+    Channel.ReadBasic.All
+    ChannelMessage.Read.All
+    ChannelMessage.Send
+    Chat.Read
+    Chat.ReadBasic
+    Chat.ReadWrite
+    ChatMessage.Send
+    Chat.Create
+    Team.ReadBasic.All
+    Team.Create
+    TeamMember.Read.All
+    TeamMember.ReadWriteNonOwnerRole.All
+    TeamMember.ReadWrite.All
+    User.ReadBasic.All
+    Group.ReadWrite.All
+    ```
+  </Accordion>
+
   <Accordion title="Monday.com">
       ```
-      users:read
+      account:read
+      assets:read
       boards:read
       boards:write
+      docs:read
+      docs:write
+      me:read
+      notifications:write
+      tags:read
+      teams:read
+      teams:write
+      updates:read
       updates:write
+      users:read
+      users:write
+      webhooks:read
+      webhooks:write
+      workspaces:read
+      workspaces:write
       ```
   </Accordion>
 
@@ -281,8 +534,79 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
       email
       offline_access
       Files.ReadWrite.All
+      Files.Read.All
       User.Read
       ```
+  </Accordion>
+
+  <Accordion title="PagerDuty">
+    ```
+    abilities.read
+    addons.read
+    addons.write
+    analytics.read
+    audit_records.read
+    change_events.read
+    change_events.write
+    custom_fields.read
+    custom_fields.write
+    escalation_policies.read
+    escalation_policies.write
+    event_orchestrations.read
+    event_orchestrations.write
+    event_rules.read
+    event_rules.write
+    extension_schemas.read
+    extensions.read
+    extensions.write
+    incident_types.read
+    incident_types.write
+    incident_workflows.read
+    incident_workflows.write
+    incident_workflows:instances.write
+    incidents.read
+    incidents.write
+    jira_cloud_accounts.read
+    jira_cloud_rules.read
+    jira_cloud_rules.write
+    licenses.read
+    notifications.read
+    oauth_delegations.read
+    oauth_delegations.write
+    oncalls.read
+    priorities.read
+    response_plays.read
+    response_plays.write
+    schedules.read
+    schedules.write
+    services.read
+    services.write
+    standards.read
+    standards.write
+    status_dashboards.read
+    status_pages.read
+    status_pages.write
+    subscribers.read
+    subscribers.write
+    tags.read
+    tags.write
+    teams.read
+    teams.write
+    templates.read
+    templates.write
+    users.read
+    users.write
+    users:contact_methods.read
+    users:contact_methods.write
+    users:sessions.read
+    users:sessions.write
+    vendors.read
+    webhook_subscriptions.read
+    webhook_subscriptions.write
+    workflow_integrations.read
+    workflow_integrations:connections.read
+    workflow_integrations:connections.write
+    ```
   </Accordion>
 
   <Accordion title="QuickBooks">
@@ -301,25 +625,37 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     ```
   </Accordion>
 
+  <Accordion title="Shopify">
+    <Note>
+    Shopify OAuth scopes are configured via the Shopify app settings rather than an explicit scope string.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Stripe Connect">
+    ```
+    read_write
+    ```
+  </Accordion>
+
   <Accordion title="Slack">
     **Bot Scopes:**
     ```
     app_mentions:read
     channels:history
-    channels:read
     chat:write
-    chat:write.customize
-    commands
-    files:read
+    channels:join
+    channels:manage
+    channels:read
+    groups:history
     groups:read
     groups:write
     im:history
-    im:read
+    im:write
+    mpim:history
     mpim:read
+    mpim:write
     reactions:read
     reactions:write
-    team:read
-    users:read
     ```
     
     **User Scopes:**
@@ -327,18 +663,22 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     channels:history
     channels:read
     channels:write
+    channels:write.invites
     chat:write
     groups:history
     groups:read
     groups:write
+    groups:write.invites
     im:history
     im:read
     im:write
     mpim:history
     mpim:read
+    mpim:write
     users:read
-    users:write
     search:read
+    users:read.email
+    reactions:write
     ```
   </Accordion>
 
@@ -348,10 +688,22 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     </Note>
   </Accordion>
 
+  <Accordion title="Vercel">
+    <Note>
+    Vercel OAuth scopes are configured via the Vercel app settings rather than an explicit scope string.
+    </Note>
+  </Accordion>
+
   <Accordion title="WordPress">
     ```
     global
     ```
+  </Accordion>
+
+  <Accordion title="X (Twitter)">
+    <Note>
+    X (Twitter) OAuth scopes are configured via the X app settings rather than an explicit scope string.
+    </Note>
   </Accordion>
 
   <Accordion title="Xero">
@@ -359,6 +711,20 @@ These are the minimum OAuth scopes required for all tools in each Klavis MCP ser
     accounting.transactions.read
     accounting.transactions
     offline_access
+    ```
+  </Accordion>
+
+  <Accordion title="YouTube">
+    ```
+    https://www.googleapis.com/auth/youtube
+    ```
+  </Accordion>
+
+  <Accordion title="Zendesk">
+    ```
+    read
+    write
+    impersonate
     ```
   </Accordion>
 </AccordionGroup>
