@@ -151,7 +151,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only id and name/user fields. 'detailed' returns complete channel objects.",
+                            "description": "Response format. 'concise' (default) returns only id and name/user fields. 'detailed' returns complete channel objects(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -162,7 +162,7 @@ def main(
             ),
             types.Tool(
                 name="slack_get_channel_history",
-                description="Get recent messages from a channel",
+                description="Get recent messages from a channel. Can also retrieve a specific message by its timestamp using oldest/latest/inclusive parameters.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -174,6 +174,28 @@ def main(
                             "type": "number",
                             "description": "Number of messages to retrieve (default 10)",
                             "default": 10,
+                        },
+                        "cursor": {
+                            "type": "string",
+                            "description": "Pagination cursor for next page of results",
+                        },
+                        "oldest": {
+                            "type": "string",
+                            "description": "Only messages after this Unix timestamp (e.g., '1234567890.123456')",
+                        },
+                        "latest": {
+                            "type": "string",
+                            "description": "Only messages before this Unix timestamp (e.g., '1234567890.123456')",
+                        },
+                        "inclusive": {
+                            "type": "boolean",
+                            "description": "Include messages with oldest or latest timestamps in results. Set to true when fetching a specific message.",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns essential fields (user_id, ts, text, thread_ts, reply_count, reactions). In most cases, 'concise' is sufficient. 'detailed' returns complete API response(not recommended).",
+                            "default": "concise",
                         },
                     },
                     "required": ["channel_id"],
@@ -216,6 +238,12 @@ def main(
                         "inclusive": {
                             "type": "boolean",
                             "description": "Include messages with oldest or latest timestamps in results",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns only essential fields (user_id, ts, text, thread_ts, is_parent, reply_count/parent_user_id). 'detailed' returns complete API response(not recommended).",
+                            "default": "concise",
                         },
                     },
                     "required": ["channel_id", "thread_ts"],
@@ -284,7 +312,7 @@ def main(
                         "response_format": {
                             "type": "string",
                             "enum": ["concise", "detailed"],
-                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects.",
+                            "description": "Response format. 'concise' (default) returns only id, name, and real_name fields. 'detailed' returns complete user objects(not recommended).",
                             "default": "concise",
                         },
                     },
@@ -319,7 +347,7 @@ def main(
             # User Search
             types.Tool(
                 name="slack_user_search_messages",
-                description="Searches for messages matching a query.",
+                description="Searches for messages matching a query. Supports filtering by channel and searching for messages mentioning the authenticated user.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -332,7 +360,12 @@ def main(
                             "items": {
                                 "type": "string",
                             },
-                            "description": "Optional list of channel IDs to search within. If not provided, searches across all accessible channels.",
+                            "description": "Optional list of channel IDs to search within.",
+                        },
+                        "to_me": {
+                            "type": "boolean",
+                            "description": "If true, searches for messages that mention the authenticated user. Automatically adds 'to:@<user_id>' to the query.",
+                            "default": False,
                         },
                         "sort": {
                             "type": "string",
@@ -359,6 +392,12 @@ def main(
                             "type": "boolean",
                             "description": "Whether to include highlighting of matched terms",
                             "default": True,
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["concise", "detailed"],
+                            "description": "Response format. 'concise' (default) returns only essential fields (channel_id, channel_name, user_id, username, ts, text, permalink, thread_ts). 'detailed' returns complete API response(not recommended).",
+                            "default": "concise",
                         },
                     },
                     "required": ["query"],
@@ -568,9 +607,16 @@ def main(
                 ]
 
             limit = arguments.get("limit")
+            cursor = arguments.get("cursor")
+            oldest = arguments.get("oldest")
+            latest = arguments.get("latest")
+            inclusive = arguments.get("inclusive")
+            response_format = arguments.get("response_format")
 
             try:
-                result = await user_get_channel_history(channel_id, limit)
+                result = await user_get_channel_history(
+                    channel_id, limit, cursor, oldest, latest, inclusive, response_format
+                )
                 return [
                     types.TextContent(
                         type="text",
@@ -611,6 +657,7 @@ def main(
             oldest = arguments.get("oldest")
             latest = arguments.get("latest")
             inclusive = arguments.get("inclusive")
+            response_format = arguments.get("response_format")
 
             try:
                 result = await get_thread_replies(
@@ -620,7 +667,8 @@ def main(
                     cursor,
                     oldest,
                     latest,
-                    inclusive
+                    inclusive,
+                    response_format,
                 )
                 return [
                     types.TextContent(
@@ -750,14 +798,18 @@ def main(
                 ]
 
             channel_ids = arguments.get("channel_ids")
+            to_me = arguments.get("to_me", False)
             sort = arguments.get("sort")
             sort_dir = arguments.get("sort_dir")
             count = arguments.get("count")
             cursor = arguments.get("cursor")
             highlight = arguments.get("highlight")
+            response_format = arguments.get("response_format")
 
             try:
-                result = await user_search_messages(query, channel_ids, sort, sort_dir, count, cursor, highlight)
+                result = await user_search_messages(
+                    query, channel_ids, to_me, sort, sort_dir, count, cursor, highlight, response_format
+                )
                 return [
                     types.TextContent(
                         type="text",

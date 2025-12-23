@@ -91,3 +91,18 @@ class SlackAPIError(Exception):
     def __init__(self, message: str, response: Optional[Dict[str, Any]] = None):
         super().__init__(message)
         self.response = response
+
+
+def format_reactions(reactions: list[Dict[str, Any]]) -> str:
+    """Format reactions list to concise string format.
+
+    Args:
+        reactions: List of reaction objects from Slack API
+                   Each has 'name', 'count', and 'users' fields
+
+    Returns:
+        Formatted string like "thumbsup * 2, heart * 1"
+    """
+    if not reactions:
+        return ""
+    return ", ".join(f"{r['name']} * {r['count']}" for r in reactions)
