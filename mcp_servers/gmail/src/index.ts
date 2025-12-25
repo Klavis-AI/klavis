@@ -158,13 +158,13 @@ function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
 
 // Schema definitions
 const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
+    to: z.array(z.string()).describe("List of recipient email addresses. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
     subject: z.string().describe("Email subject"),
     body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
     htmlBody: z.string().optional().describe("HTML version of the email body"),
     mimeType: z.enum(['text/plain', 'text/html', 'multipart/alternative']).optional().default('text/plain').describe("Email content type"),
-    cc: z.array(z.string()).optional().describe("List of CC recipients. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
-    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided."),
+    cc: z.array(z.string()).optional().describe("List of CC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
+    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
     threadId: z.string().optional().describe("Thread ID to reply to"),
     inReplyTo: z.string().optional().describe("Message ID being replied to"),
 });
@@ -233,7 +233,7 @@ const getGmailMcpServer = () => {
         tools: [
             {
                 name: "gmail_send_email",
-                description: "Sends a new email. You can use gmail_search_contacts tool to find contact emails. You MUST NOT assume the emails unless they are explicitly provided.",
+                description: "Sends a new email. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails.",
                 inputSchema: zodToJsonSchema(SendEmailSchema),
                 annotations: { category: "GMAIL_EMAIL" },
             },
