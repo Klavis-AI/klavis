@@ -553,7 +553,7 @@ def main(
             else:
                 raise ValueError(f"Unknown tool: {name}")
 
-            return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [types.TextContent(type="text", text=json.dumps(result, indent=2, ensure_ascii=False))]
 
         except (AuthenticationError, TokenExpiredError, InvalidTokenError, ToolExecutionError) as e:
             logger.error(f"Confluence error in {name}: {e}")
@@ -561,14 +561,14 @@ def main(
                 "error": str(e),
                 "developer_message": getattr(e, "developer_message", ""),
             }
-            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2))]
+            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2, ensure_ascii=False))]
         except Exception as e:
             logger.exception(f"Unexpected error in tool {name}")
             error_response = {
                 "error": f"Unexpected error: {str(e)}",
                 "developer_message": f"Unexpected error in tool {name}: {type(e).__name__}: {str(e)}",
             }
-            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2))]
+            return [types.TextContent(type="text", text=json.dumps(error_response, indent=2, ensure_ascii=False))]
 
     # Set up SSE transport
     sse = SseServerTransport("/messages/")
