@@ -20,6 +20,7 @@ from starlette.types import Receive, Scope, Send
 from tools import (
     auth_token_context,
     excel_create_workbook,
+    excel_create_worksheets,
     excel_get_worksheet,
     excel_list_worksheets,
     excel_write_to_cell,
@@ -219,6 +220,28 @@ def main(
                     **{"category": "MICROSOFT_EXCEL_WORKBOOK", "readOnlyHint": True}
                 ),
             ),
+            types.Tool(
+                name="microsoft_excel_create_worksheets",
+                description="Create multiple empty worksheets in an Excel workbook.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["workbook_url", "sheet_names"],
+                    "properties": {
+                        "workbook_url": {
+                            "type": "string",
+                            "description": "The shared URL of the Excel workbook.",
+                        },
+                        "sheet_names": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of names for the new worksheets to create.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "MICROSOFT_EXCEL_WORKSHEET"}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -302,6 +325,20 @@ def main(
                 if not workbook_url:
                     return _tool_response({"error": "workbook_url parameter is required"})
                 result = await excel_list_worksheets(workbook_url)
+                return _tool_response(result)
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return _tool_response({"error": str(e)})
+
+        elif name == "microsoft_excel_create_worksheets":
+            try:
+                workbook_url = arguments.get("workbook_url")
+                sheet_names = arguments.get("sheet_names")
+                if not workbook_url:
+                    return _tool_response({"error": "workbook_url parameter is required"})
+                if not sheet_names or not isinstance(sheet_names, list):
+                    return _tool_response({"error": "sheet_names parameter is required and must be an array"})
+                result = await excel_create_worksheets(workbook_url, sheet_names)
                 return _tool_response(result)
             except Exception as e:
                 logger.exception(f"Error executing tool {name}: {e}")
