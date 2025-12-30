@@ -1,29 +1,43 @@
 ---
 title: "Sandbox"
-description: "Deterministic, isolated SaaS environments for agent training, evaluation, and debugging"
+description: "Scalable, isolated training and RL environments for real-world tool use"
 ---
 
-# Klavis Sandbox (Sandbox-as-a-Service)
+## The Problem
 
-Klavis Sandbox gives you **ephemeral, fully controllable** application environments (e.g., Gmail, Snowflake) to safely test and evaluate agents without touching production data.
+For LLM researchers, setting up LLM training or reinforcement learning environment for real-world tool use is complex and painful:
+
+- Managing different environment or test accounts
+- Implementing MCP Servers and handling various authentication issues
+- Initializing realistic data
+- Resetting states between multiple runs
+- Ensuring isolation across concurrent sessions
+
+## The Solution
+
+Klavis MCP Sandbox as a Service solves these challenges. In addition to letting your model interact with our comprehensive MCP server ecosystem, you can use our sandbox infrastructure to easily **dump and reset data** on any concurrent run.
+
+<Info>
+Our sandbox infrastructure is **horizontally scalable**, so it can handle any number of concurrent sessions as you need.
+</Info>
 
 ## Lifecycle
 
 <Steps>
   <Step title="Create">
-    Request a sandbox and get an MCP server URL for that isolated instance.
+    Request a sandbox based on the external services you need (Snowflake, Gmail, CRM, ERP, etc.) and get an MCP server URL for that isolated instance.
   </Step>
   <Step title="Initialize (seed)">
-    Load a deterministic “world state” (records, messages, files, etc.) via the Sandbox API.
+    Load a deterministic "world state" in JSON format. We handle everything—creating databases, setting up CRM data, ERP systems, and more.
   </Step>
   <Step title="Interact (MCP)">
-    Let your agent use MCP tools against the sandbox as if it were the real app.
+    Let your LLM / AI agent use MCP tools against the sandbox as if it were the real app. You can use multiple MCP servers with many tools simultaneously.
   </Step>
   <Step title="Dump (verify)">
-    Snapshot the full sandbox state to programmatically validate outcomes.
+    Snapshot the full sandbox state to programmatically compare against your ground truth—whether your LLM completed the task correctly or not.
   </Step>
   <Step title="Reset / Delete">
-    Wipe the sandbox back to a clean slate for the next test run.
+    Wipe the sandbox back to a clean slate and kick off the next run.
   </Step>
 </Steps>
 
@@ -53,6 +67,13 @@ Klavis Sandbox gives you **ephemeral, fully controllable** application environme
   </Card>
   <Card title="Sandbox API" icon="box" href="/api-reference/sandbox/create">
     Manage isolated sandbox environments for training/eval: pooling, init, export, teardown.
+  </Card>
+  <Card
+    title="Fireworks + Klavis"
+    icon="fire"
+    href="https://evalprotocol.io/integrations/klavis-mcp"
+  >
+    Use Klavis MCP Sandbox with Eval Protocol for model training and RL at scale.
   </Card>
 </CardGroup>
 
