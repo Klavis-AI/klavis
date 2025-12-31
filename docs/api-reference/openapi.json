@@ -18504,6 +18504,7 @@
         "enum": [
           "Affinity",
           "Airtable",
+          "Amplitude",
           "Asana",
           "Attio",
           "Box",
