@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@langchain/openai": "^1.1.1",
-    "langchain": "^1.0.4",
+    "langchain": "^1.2.3",
     "@langchain/mcp-adapters": "^1.0.0",
     "klavis": "^2.12.2",
     "dotenv": "^16.4.7",
