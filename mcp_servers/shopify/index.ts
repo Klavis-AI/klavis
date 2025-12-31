@@ -88,6 +88,32 @@ class ShopifyClient {
     throw new Error(errorMessage);
   }
 
+  private async graphqlRequest<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+    this.refreshToken();
+    await this.respectRateLimit();
+    
+    const response = await fetch(
+      `https://${this.shopDomain}/admin/api/${this.apiVersion}/graphql.json`,
+      {
+        method: 'POST',
+        headers: this.apiHeaders,
+        body: JSON.stringify({ query, variables }),
+      }
+    );
+
+    const result = await response.json() as { data?: T; errors?: unknown[] };
+    
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+    
+    if (!result.data) {
+      throw new Error('GraphQL response missing data');
+    }
+    
+    return result.data;
+  }
+
   refreshToken(): boolean {
     const credentials = getShopifyCredentials();
     if (credentials.accessToken && credentials.shopDomain) {
@@ -377,29 +403,57 @@ class ShopifyClient {
     return this.handleApiResponse<Record<string, unknown>>(response);
   }
 
-  // Inventory
-  async listInventoryItems(limit: number = 50, ids?: string, cursor?: string): Promise<Record<string, unknown>> {
-    this.refreshToken();
-    await this.respectRateLimit();
-    
-    const params = new URLSearchParams({
-      limit: Math.min(limit, 250).toString(),
+  // Inventory - Using GraphQL for better querying capabilities
+  async listInventoryItems(
+    limit: number = 50,
+    query?: string,
+    cursor?: string
+  ): Promise<Record<string, unknown>> {
+    const graphqlQuery = `
+      query inventoryItems($first: Int!, $query: String, $after: String) {
+        inventoryItems(first: $first, query: $query, after: $after) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+            startCursor
+            endCursor
+          }
+          nodes {
+            id
+            sku
+            tracked
+            requiresShipping
+            createdAt
+            updatedAt
+            unitCost {
+              amount
+              currencyCode
+            }
+            countryCodeOfOrigin
+            harmonizedSystemCode
+            inventoryLevels(first: 10) {
+              nodes {
+                id
+                quantities(names: ["available", "incoming", "committed", "reserved", "on_hand"]) {
+                  name
+                  quantity
+                }
+                location {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    return this.graphqlRequest(graphqlQuery, {
+      first: Math.min(limit, 250),
+      query: query || null,
+      after: cursor || null,
     });
-
-    if (ids) {
-      params.append("ids", ids);
-    }
-
-    if (cursor) {
-      params.append("page_info", cursor);
-    }
-
-    const response = await fetch(
-      `https://${this.shopDomain}/admin/api/${this.apiVersion}/inventory_items.json?${params}`,
-      { headers: this.apiHeaders }
-    );
-
-    return this.handleApiResponse<Record<string, unknown>>(response);
   }
 
   async getInventoryLevels(inventory_item_ids?: string, location_ids?: string, limit: number = 50): Promise<Record<string, unknown>> {
@@ -816,7 +870,7 @@ const getShopifyMcpServer = (): Server => {
             const args = request.params.arguments as unknown as ListInventoryItemsArgs;
             const response = await shopifyClient.listInventoryItems(
               args.limit,
-              args.ids,
+              args.query,
               args.cursor
             );
             return {

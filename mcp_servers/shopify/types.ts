@@ -137,7 +137,7 @@ export interface CreateCollectionArgs {
 // Inventory types
 export interface ListInventoryItemsArgs {
     limit?: number;
-    ids?: string;
+    query?: string;
     cursor?: string;
 }
 

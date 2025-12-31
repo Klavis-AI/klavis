@@ -506,7 +506,7 @@ export const getLocationTool: Tool = {
 
 export const listInventoryItemsTool: Tool = {
     name: "shopify_list_inventory_items",
-    description: "List inventory items in your Shopify store. Each product variant has an associated inventory item that tracks stock across locations. Returns inventory item details including SKU, cost, tracked status (whether inventory is tracked), shipping requirements, country/province of origin, and harmonized system codes for customs. Use this to audit inventory items, check cost information, or verify which items are tracked. Results include up to 250 items per page.",
+    description: "List inventory items in your Shopify store with optional filtering. Each product variant has an associated inventory item that tracks stock across locations. Returns inventory item details including SKU, cost, tracked status, shipping requirements, country of origin, harmonized system codes, AND current inventory levels at all locations in a single request. Use the query parameter to filter by SKU (sku:'ABC123'), creation date (created_at:>2024-01-01), update date (updated_at:>2024-01-01), or ID range (id:>=12345). Results include up to 250 items per page with cursor-based pagination.",
     inputSchema: {
       type: "object",
       properties: {
@@ -515,13 +515,13 @@ export const listInventoryItemsTool: Tool = {
           description: "Maximum number of inventory items to return (default 50, max 250)",
           default: 50,
         },
-        ids: {
+        query: {
           type: "string",
-          description: "Comma-separated list of inventory item IDs to retrieve specific items",
+          description: "Search filter using Shopify query syntax. Examples: \"sku:'ABC123'\", \"created_at:>2024-01-01\", \"updated_at:>2024-06-01\", \"id:>=12345\". Can combine with OR/AND operators.",
         },
         cursor: {
           type: "string",
-          description: "Pagination cursor for fetching the next page of results",
+          description: "Pagination cursor (endCursor from previous response's pageInfo) for fetching the next page of results",
         },
       },
     },
