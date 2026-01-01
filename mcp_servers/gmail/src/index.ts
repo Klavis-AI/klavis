@@ -9,55 +9,78 @@ import {
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { google } from 'googleapis';
-import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { createEmailMessage, extractPdfText, extractDocxText, extractXlsxText } from "./utl.js";
 import { AsyncLocalStorage } from 'async_hooks';
+
+// Import schemas and types
+import {
+    type GmailMessagePart,
+    type EmailAttachment,
+    type EmailContent,
+    SendEmailSchema,
+    ReadEmailSchema,
+    SearchEmailsSchema,
+    AdvancedSearchEmailsSchema,
+    ListLabelsSchema,
+    ListThreadsSchema,
+    GetThreadSchema,
+    ModifyThreadSchema,
+    TrashThreadSchema,
+    GetVacationSettingsSchema,
+    UpdateVacationSettingsSchema,
+    MoveToTrashSchema,
+    ListDraftsSchema,
+    ModifyEmailSchema,
+    DeleteEmailSchema,
+    SearchContactsSchema,
+    GetEmailAttachmentsSchema,
+    BatchModifyEmailsSchema,
+    BatchDeleteEmailsSchema,
+    SYSTEM_LABEL_IDS,
+    DIRECTORY_SOURCE_MAP,
+} from "./schemas.js";
+
+// Import utilities
+import {
+    createEmailMessage,
+    extractPdfText,
+    extractDocxText,
+    extractXlsxText,
+    base64UrlToBase64,
+    extractEmailContent,
+    processBatches,
+    validateEmail,
+    // Error handling
+    GmailMCPError,
+    GmailErrorType,
+    createGmailError,
+    parseGoogleApiError,
+    parseZodError,
+    formatGmailError,
+    addErrorGuidance,
+    // Retry logic
+    type RetryConfig,
+    DEFAULT_RETRY_CONFIG,
+    RATE_LIMIT_RETRY_CONFIG,
+    BATCH_RETRY_CONFIG,
+    withRetry,
+    // Validation
+    validateEmailAddresses,
+    validateMessageId,
+    validateThreadId,
+    validateLabelIds,
+    validateSearchQuery,
+    validateApiResponse,
+    validateMessageResponse,
+    validateThreadResponse,
+    sanitizeEmailContent,
+} from "./utils.js";
 
 // Create AsyncLocalStorage for request context
 const asyncLocalStorage = new AsyncLocalStorage<{
     gmailClient: any;
     peopleClient: any;
 }>();
-
-// Type definitions for Gmail API responses
-interface GmailMessagePart {
-    partId?: string;
-    mimeType?: string;
-    filename?: string;
-    headers?: Array<{
-        name: string;
-        value: string;
-    }>;
-    body?: {
-        attachmentId?: string;
-        size?: number;
-        data?: string;
-    };
-    parts?: GmailMessagePart[];
-}
-
-interface EmailAttachment {
-    id: string;
-    filename: string;
-    mimeType: string;
-    size: number;
-}
-
-interface EmailContent {
-    text: string;
-    html: string;
-}
-
-// Convert base64url (Gmail) -> standard base64
-function base64UrlToBase64(input: string): string {
-    let output = input.replace(/-/g, '+').replace(/_/g, '/');
-    const padLen = output.length % 4;
-    if (padLen === 2) output += '==';
-    else if (padLen === 3) output += '=';
-    else if (padLen === 1) output += '==='; // extremely rare, but safe guard
-    return output;
-}
 
 // Helper function to get Gmail client from context
 function getGmailClient() {
@@ -121,172 +144,6 @@ function extractAccessToken(req: Request): string {
     const authDataJson = JSON.parse(authData);
     return authDataJson.access_token ?? '';
 }
-
-/**
- * Recursively extract email body content from MIME message parts
- * Handles complex email structures with nested parts
- */
-function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
-    // Initialize containers for different content types
-    let textContent = '';
-    let htmlContent = '';
-
-    // If the part has a body with data, process it based on MIME type
-    if (messagePart.body && messagePart.body.data) {
-        const content = Buffer.from(messagePart.body.data, 'base64').toString('utf8');
-
-        // Store content based on its MIME type
-        if (messagePart.mimeType === 'text/plain') {
-            textContent = content;
-        } else if (messagePart.mimeType === 'text/html') {
-            htmlContent = content;
-        }
-    }
-
-    // If the part has nested parts, recursively process them
-    if (messagePart.parts && messagePart.parts.length > 0) {
-        for (const part of messagePart.parts) {
-            const { text, html } = extractEmailContent(part);
-            if (text) textContent += text;
-            if (html) htmlContent += html;
-        }
-    }
-
-    // Return both plain text and HTML content
-    return { text: textContent, html: htmlContent };
-}
-
-// Schema definitions
-const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    subject: z.string().describe("Email subject"),
-    body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
-    htmlBody: z.string().optional().describe("HTML version of the email body"),
-    mimeType: z.enum(['text/plain', 'text/html', 'multipart/alternative']).optional().default('text/plain').describe("Email content type"),
-    cc: z.array(z.string()).optional().describe("List of CC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    bcc: z.array(z.string()).optional().describe("List of BCC recipients. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
-    threadId: z.string().optional().describe("Thread ID to reply to"),
-    inReplyTo: z.string().optional().describe("Message ID being replied to"),
-});
-
-const ReadEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to retrieve"),
-});
-
-const SearchEmailsSchema = z.object({
-    query: z.string().describe("Gmail search query (e.g., 'from:example@gmail.com')"),
-    maxResults: z.number().optional().describe("Maximum number of results to return"),
-});
-
-const AdvancedSearchEmailsSchema = z.object({
-    from: z.string().optional().describe("Filter by sender email address"),
-    to: z.string().optional().describe("Filter by recipient email address"),
-    subject: z.string().optional().describe("Filter by email subject (partial match)"),
-    hasAttachment: z.boolean().optional().describe("Filter emails with attachments (true) or without (false)"),
-    after: z.string().optional().describe("Filter emails after this date (YYYY/MM/DD format or relative like '7d' for 7 days ago)"),
-    before: z.string().optional().describe("Filter emails before this date (YYYY/MM/DD format)"),
-    isUnread: z.boolean().optional().describe("Filter unread emails (true) or read emails (false)"),
-    hasLabel: z.string().optional().describe("Filter by label name (e.g., 'Important', 'Work')"),
-    excludeLabel: z.string().optional().describe("Exclude emails with this label"),
-    largerThan: z.number().optional().describe("Filter emails larger than this size in bytes (e.g., 1048576 for 1MB)"),
-    smallerThan: z.number().optional().describe("Filter emails smaller than this size in bytes"),
-    hasWords: z.string().optional().describe("Filter emails containing all these words"),
-    exactPhrase: z.string().optional().describe("Filter emails containing this exact phrase"),
-    excludeWords: z.string().optional().describe("Exclude emails containing these words"),
-    maxResults: z.number().optional().default(10).describe("Maximum number of results to return (default: 10)"),
-    includeSpamTrash: z.boolean().optional().default(false).describe("Include emails from Spam and Trash (default: false)"),
-});
-
-const ListLabelsSchema = z.object({
-    includeSystemLabels: z.boolean().optional().default(true).describe("Include system labels like INBOX, SENT, DRAFT (default: true)"),
-    includeUserLabels: z.boolean().optional().default(true).describe("Include user-created labels (default: true)"),
-});
-
-// Thread Management Schemas
-const ListThreadsSchema = z.object({
-    query: z.string().optional().describe("Gmail search query to filter threads (e.g., 'is:unread')"),
-    maxResults: z.number().optional().default(10).describe("Maximum number of threads to return (default: 10)"),
-    labelIds: z.array(z.string()).optional().describe("Only return threads with these label IDs"),
-    includeSpamTrash: z.boolean().optional().default(false).describe("Include threads from Spam and Trash (default: false)"),
-});
-
-const GetThreadSchema = z.object({
-    threadId: z.string().describe("ID of the thread to retrieve"),
-    format: z.enum(['full', 'metadata', 'minimal']).optional().default('full').describe("Format of the returned thread messages (default: full)"),
-});
-
-const ModifyThreadSchema = z.object({
-    threadId: z.string().describe("ID of the thread to modify"),
-    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to all messages in the thread"),
-    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from all messages in the thread"),
-});
-
-const TrashThreadSchema = z.object({
-    threadId: z.string().describe("ID of the thread to move to trash"),
-});
-
-// Vacation/Auto-reply Settings Schema
-const GetVacationSettingsSchema = z.object({});
-
-const UpdateVacationSettingsSchema = z.object({
-    enableAutoReply: z.boolean().describe("Enable or disable vacation auto-reply"),
-    responseSubject: z.string().optional().describe("Subject line for the auto-reply message"),
-    responseBodyPlainText: z.string().optional().describe("Plain text body of the auto-reply message"),
-    responseBodyHtml: z.string().optional().describe("HTML body of the auto-reply message"),
-    restrictToContacts: z.boolean().optional().describe("Only send auto-reply to contacts (default: false)"),
-    restrictToDomain: z.boolean().optional().describe("Only send auto-reply to domain members (default: false)"),
-    startTime: z.number().optional().describe("Start time for vacation (Unix timestamp in milliseconds)"),
-    endTime: z.number().optional().describe("End time for vacation (Unix timestamp in milliseconds)"),
-});
-
-// Additional Email Operations
-const MoveToTrashSchema = z.object({
-    messageId: z.string().describe("ID of the email message to move to trash"),
-});
-
-const ListDraftsSchema = z.object({
-    maxResults: z.number().optional().default(10).describe("Maximum number of drafts to return (default: 10)"),
-    query: z.string().optional().describe("Gmail search query to filter drafts"),
-    includeSpamTrash: z.boolean().optional().default(false).describe("Include drafts from Spam and Trash (default: false)"),
-});
-
-// Updated schema to include removeLabelIds
-const ModifyEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to modify"),
-    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to the message"),
-    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from the message"),
-});
-
-const DeleteEmailSchema = z.object({
-    messageId: z.string().describe("ID of the email message to delete"),
-});
-
-// Schema for searching contacts
-const SearchContactsSchema = z.object({
-    query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
-    contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
-    pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
-    pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
-    directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
-});
-
-// Schema for getting attachments of an email
-const GetEmailAttachmentsSchema = z.object({
-    messageId: z.string().describe("ID of the email message to retrieve attachments for"),
-});
-
-// Schemas for batch operations
-const BatchModifyEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to modify"),
-    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to all messages"),
-    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from all messages"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
-});
-
-const BatchDeleteEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to delete"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
-});
 
 // Get Gmail MCP Server
 const getGmailMcpServer = () => {
@@ -431,96 +288,120 @@ const getGmailMcpServer = () => {
         const gmail = getGmailClient();
 
         async function handleEmailAction(action: "send" | "draft", validatedArgs: any) {
-            const message = createEmailMessage(validatedArgs);
-
-            const encodedMessage = Buffer.from(message).toString('base64')
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-
-            // Define the type for messageRequest
-            interface GmailMessageRequest {
-                raw: string;
-                threadId?: string;
-            }
-
-            const messageRequest: GmailMessageRequest = {
-                raw: encodedMessage,
-            };
-
-            // Add threadId if specified
-            if (validatedArgs.threadId) {
-                messageRequest.threadId = validatedArgs.threadId;
-            }
-
-            if (action === "send") {
-                const response = await gmail.users.messages.send({
-                    userId: 'me',
-                    requestBody: messageRequest,
-                });
-                const resultPayload = {
-                    message: `Email sent successfully with ID: ${response.data.id}`,
-                    messageId: response.data.id ?? null,
-                };
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(resultPayload, null, 2),
-                        },
-                    ],
-                };
-            } else {
-                const response = await gmail.users.drafts.create({
-                    userId: 'me',
-                    requestBody: {
-                        message: messageRequest,
-                    },
-                });
-                const resultPayload = {
-                    message: `Email draft created successfully with ID: ${response.data.id}`,
-                    draftId: response.data.id ?? null,
-                };
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(resultPayload, null, 2),
-                        },
-                    ],
-                };
-            }
-        }
-
-        // Helper function to process operations in batches
-        async function processBatches<T, U>(
-            items: T[],
-            batchSize: number,
-            processFn: (batch: T[]) => Promise<U[]>
-        ): Promise<{ successes: U[], failures: { item: T, error: Error }[] }> {
-            const successes: U[] = [];
-            const failures: { item: T, error: Error }[] = [];
-
-            // Process in batches
-            for (let i = 0; i < items.length; i += batchSize) {
-                const batch = items.slice(i, i + batchSize);
-                try {
-                    const results = await processFn(batch);
-                    successes.push(...results);
-                } catch (error) {
-                    // If batch fails, try individual items
-                    for (const item of batch) {
-                        try {
-                            const result = await processFn([item]);
-                            successes.push(...result);
-                        } catch (itemError) {
-                            failures.push({ item, error: itemError as Error });
-                        }
-                    }
+            try {
+                // Validate all email addresses
+                validateEmailAddresses(validatedArgs.to);
+                if (validatedArgs.cc) {
+                    validateEmailAddresses(validatedArgs.cc);
                 }
-            }
+                if (validatedArgs.bcc) {
+                    validateEmailAddresses(validatedArgs.bcc);
+                }
 
-            return { successes, failures };
+                // Validate thread ID if provided
+                if (validatedArgs.threadId) {
+                    validateThreadId(validatedArgs.threadId);
+                }
+
+                const message = createEmailMessage(validatedArgs);
+
+                const encodedMessage = Buffer.from(message).toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+
+                // Define the type for messageRequest
+                interface GmailMessageRequest {
+                    raw: string;
+                    threadId?: string;
+                }
+
+                const messageRequest: GmailMessageRequest = {
+                    raw: encodedMessage,
+                };
+
+                // Add threadId if specified
+                if (validatedArgs.threadId) {
+                    messageRequest.threadId = validatedArgs.threadId;
+                }
+
+                if (action === "send") {
+                    // Send with retry logic
+                    const response = await withRetry(
+                        async () => await gmail.users.messages.send({
+                            userId: 'me',
+                            requestBody: messageRequest,
+                        }),
+                        DEFAULT_RETRY_CONFIG,
+                        'gmail_send_email'
+                    );
+
+                    // Validate response
+                    validateApiResponse((response as any).data, ['id'], 'sent message');
+
+                    const resultPayload = {
+                        message: `Email sent successfully with ID: ${(response as any).data.id}`,
+                        messageId: (response as any).data.id ?? null,
+                    };
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                } else {
+                    // Create draft with retry logic
+                    const response = await withRetry(
+                        async () => await gmail.users.drafts.create({
+                            userId: 'me',
+                            requestBody: {
+                                message: messageRequest,
+                            },
+                        }),
+                        DEFAULT_RETRY_CONFIG,
+                        'gmail_draft_email'
+                    );
+
+                    // Validate response
+                    validateApiResponse((response as any).data, ['id'], 'draft');
+
+                    const resultPayload = {
+                        message: `Email draft created successfully with ID: ${(response as any).data.id}`,
+                        draftId: (response as any).data.id ?? null,
+                    };
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+            } catch (error: any) {
+                const gmailError = error instanceof GmailMCPError
+                    ? error
+                    : parseGoogleApiError(error);
+
+                const errorMessage = formatGmailError(
+                    gmailError,
+                    action === 'send' ? 'send email' : 'create draft'
+                );
+                const enhanced = addErrorGuidance(errorMessage, gmailError, {
+                    operation: action === 'send' ? 'gmail_send_email' : 'gmail_draft_email',
+                    suggestions: [
+                        'Verify all email addresses are valid',
+                        'Check that the access token has Gmail send permissions',
+                    ],
+                });
+
+                throw createGmailError(gmailError.type, enhanced, {
+                    originalError: error,
+                    retryable: gmailError.retryable,
+                });
+            }
         }
 
         try {               
@@ -1233,12 +1114,7 @@ const getGmailMcpServer = () => {
                             });
                         } else if (contactType === 'directory') {
                             typeLabel = 'directory contact(s)';
-                            const sourceMap: { [key: string]: string[] } = {
-                                'UNSPECIFIED': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE', 'DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
-                                'DOMAIN_DIRECTORY': ['DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE'],
-                                'DOMAIN_CONTACTS': ['DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT'],
-                            };
-                            const directorySources = sourceMap[validatedArgs.directorySources || 'UNSPECIFIED'];
+                            const directorySources = DIRECTORY_SOURCE_MAP[validatedArgs.directorySources || 'UNSPECIFIED'];
 
                             response = await peopleClient.people.searchDirectoryPeople({
                                 query: validatedArgs.query,
@@ -1407,15 +1283,13 @@ const getGmailMcpServer = () => {
                     });
 
                     let labels = response.data.labels || [];
-                    
+
                     // Filter based on user preferences
-                    const systemLabelIds = ['INBOX', 'SENT', 'DRAFT', 'SPAM', 'TRASH', 'UNREAD', 'STARRED', 'IMPORTANT', 'CHAT', 'CATEGORY_PERSONAL', 'CATEGORY_SOCIAL', 'CATEGORY_PROMOTIONS', 'CATEGORY_UPDATES', 'CATEGORY_FORUMS'];
-                    
                     if (!validatedArgs.includeSystemLabels) {
-                        labels = labels.filter((label: any) => !systemLabelIds.includes(label.id || ''));
+                        labels = labels.filter((label: any) => !SYSTEM_LABEL_IDS.includes(label.id || ''));
                     }
                     if (!validatedArgs.includeUserLabels) {
-                        labels = labels.filter((label: any) => systemLabelIds.includes(label.id || ''));
+                        labels = labels.filter((label: any) => SYSTEM_LABEL_IDS.includes(label.id || ''));
                     }
 
                     const formattedLabels = labels.map((label: any) => ({
@@ -1773,15 +1647,44 @@ const getGmailMcpServer = () => {
                 }
 
                 default:
-                    throw new Error(`Unknown tool: ${name}`);
+                    throw createGmailError(
+                        GmailErrorType.VALIDATION_ERROR,
+                        `Unknown tool: ${name}`,
+                        { retryable: false }
+                    );
             }
         } catch (error: any) {
-            const errorPayload = { error: error.message };
+            // Comprehensive error handling
+            let gmailError: GmailMCPError;
+
+            if (error instanceof GmailMCPError) {
+                gmailError = error;
+            } else if (error.name === 'ZodError') {
+                gmailError = parseZodError(error);
+            } else {
+                gmailError = parseGoogleApiError(error);
+            }
+
+            // Log error details
+            console.error(`[${name}] Error:`, {
+                type: gmailError.type,
+                message: gmailError.message,
+                status: gmailError.status,
+                retryable: gmailError.retryable,
+                timestamp: gmailError.timestamp.toISOString(),
+            });
+
+            // Return user-friendly error response
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(errorPayload, null, 2),
+                        text: JSON.stringify({
+                            error: gmailError.message,
+                            type: gmailError.type,
+                            retryable: gmailError.retryable,
+                            ...(gmailError.status && { httpStatus: gmailError.status }),
+                        }, null, 2),
                     },
                 ],
             };
