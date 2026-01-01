@@ -178,6 +178,30 @@ const SearchEmailsSchema = z.object({
     maxResults: z.number().optional().describe("Maximum number of results to return"),
 });
 
+const AdvancedSearchEmailsSchema = z.object({
+    from: z.string().optional().describe("Filter by sender email address"),
+    to: z.string().optional().describe("Filter by recipient email address"),
+    subject: z.string().optional().describe("Filter by email subject (partial match)"),
+    hasAttachment: z.boolean().optional().describe("Filter emails with attachments (true) or without (false)"),
+    after: z.string().optional().describe("Filter emails after this date (YYYY/MM/DD format or relative like '7d' for 7 days ago)"),
+    before: z.string().optional().describe("Filter emails before this date (YYYY/MM/DD format)"),
+    isUnread: z.boolean().optional().describe("Filter unread emails (true) or read emails (false)"),
+    hasLabel: z.string().optional().describe("Filter by label name (e.g., 'Important', 'Work')"),
+    excludeLabel: z.string().optional().describe("Exclude emails with this label"),
+    largerThan: z.number().optional().describe("Filter emails larger than this size in bytes (e.g., 1048576 for 1MB)"),
+    smallerThan: z.number().optional().describe("Filter emails smaller than this size in bytes"),
+    hasWords: z.string().optional().describe("Filter emails containing all these words"),
+    exactPhrase: z.string().optional().describe("Filter emails containing this exact phrase"),
+    excludeWords: z.string().optional().describe("Exclude emails containing these words"),
+    maxResults: z.number().optional().default(10).describe("Maximum number of results to return (default: 10)"),
+    includeSpamTrash: z.boolean().optional().default(false).describe("Include emails from Spam and Trash (default: false)"),
+});
+
+const ListLabelsSchema = z.object({
+    includeSystemLabels: z.boolean().optional().default(true).describe("Include system labels like INBOX, SENT, DRAFT (default: true)"),
+    includeUserLabels: z.boolean().optional().default(true).describe("Include user-created labels (default: true)"),
+});
+
 // Updated schema to include removeLabelIds
 const ModifyEmailSchema = z.object({
     messageId: z.string().describe("ID of the email message to modify"),
@@ -254,6 +278,18 @@ const getGmailMcpServer = () => {
                 description: "Searches for emails using Gmail search syntax",
                 inputSchema: zodToJsonSchema(SearchEmailsSchema),
                 annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
+            },
+            {
+                name: "gmail_search_emails_advanced",
+                description: "Advanced email search with structured filters. Build complex queries using dedicated parameters for sender, subject, dates, attachments, labels, size, and keywords. Automatically constructs optimal Gmail search syntax from your criteria.",
+                inputSchema: zodToJsonSchema(AdvancedSearchEmailsSchema),
+                annotations: { category: "GMAIL_EMAIL", readOnlyHint: true },
+            },
+            {
+                name: "gmail_list_labels",
+                description: "Lists all available Gmail labels including system labels (INBOX, SENT, DRAFT, etc.) and user-created labels. Essential for knowing which label IDs to use with other operations like modify_email or batch_modify_emails.",
+                inputSchema: zodToJsonSchema(ListLabelsSchema),
+                annotations: { category: "GMAIL_LABELS", readOnlyHint: true },
             },
             {
                 name: "gmail_modify_email",
@@ -1162,6 +1198,156 @@ const getGmailMcpServer = () => {
                     } catch (error: any) {
                         throw new Error(`Failed to search ${contactType} contacts: ${error.message}`);
                     }
+                }
+
+                case "gmail_search_emails_advanced": {
+                    const validatedArgs = AdvancedSearchEmailsSchema.parse(args);
+                    
+                    // Build Gmail search query from advanced search parameters
+                    const queryParts: string[] = [];
+                    
+                    if (validatedArgs.from) {
+                        queryParts.push(`from:${validatedArgs.from}`);
+                    }
+                    if (validatedArgs.to) {
+                        queryParts.push(`to:${validatedArgs.to}`);
+                    }
+                    if (validatedArgs.subject) {
+                        queryParts.push(`subject:(${validatedArgs.subject})`);
+                    }
+                    if (validatedArgs.hasAttachment !== undefined) {
+                        queryParts.push(validatedArgs.hasAttachment ? 'has:attachment' : '-has:attachment');
+                    }
+                    if (validatedArgs.after) {
+                        // Handle relative dates like '7d', '1w', '1m', '1y' or absolute dates
+                        const afterDate = validatedArgs.after.match(/^(\d+)([dwmy])$/) 
+                            ? validatedArgs.after 
+                            : validatedArgs.after;
+                        queryParts.push(`after:${afterDate}`);
+                    }
+                    if (validatedArgs.before) {
+                        queryParts.push(`before:${validatedArgs.before}`);
+                    }
+                    if (validatedArgs.isUnread !== undefined) {
+                        queryParts.push(validatedArgs.isUnread ? 'is:unread' : 'is:read');
+                    }
+                    if (validatedArgs.hasLabel) {
+                        queryParts.push(`label:${validatedArgs.hasLabel}`);
+                    }
+                    if (validatedArgs.excludeLabel) {
+                        queryParts.push(`-label:${validatedArgs.excludeLabel}`);
+                    }
+                    if (validatedArgs.largerThan) {
+                        queryParts.push(`larger:${validatedArgs.largerThan}`);
+                    }
+                    if (validatedArgs.smallerThan) {
+                        queryParts.push(`smaller:${validatedArgs.smallerThan}`);
+                    }
+                    if (validatedArgs.hasWords) {
+                        queryParts.push(validatedArgs.hasWords);
+                    }
+                    if (validatedArgs.exactPhrase) {
+                        queryParts.push(`"${validatedArgs.exactPhrase}"`);
+                    }
+                    if (validatedArgs.excludeWords) {
+                        queryParts.push(`-${validatedArgs.excludeWords}`);
+                    }
+                    
+                    const searchQuery = queryParts.join(' ');
+                    
+                    // Use the Gmail API to search with the constructed query
+                    const response = await gmail.users.messages.list({
+                        userId: 'me',
+                        q: searchQuery,
+                        maxResults: validatedArgs.maxResults || 10,
+                        includeSpamTrash: validatedArgs.includeSpamTrash || false,
+                    });
+
+                    const messages = response.data.messages || [];
+                    const results = await Promise.all(
+                        messages.map(async (msg: any) => {
+                            const detail = await gmail.users.messages.get({
+                                userId: 'me',
+                                id: msg.id!,
+                                format: 'metadata',
+                                metadataHeaders: ['Subject', 'From', 'To', 'Date'],
+                            });
+                            const headers = detail.data.payload?.headers || [];
+                            return {
+                                id: msg.id,
+                                threadId: msg.threadId,
+                                subject: headers.find((h: any) => h.name === 'Subject')?.value || '',
+                                from: headers.find((h: any) => h.name === 'From')?.value || '',
+                                to: headers.find((h: any) => h.name === 'To')?.value || '',
+                                date: headers.find((h: any) => h.name === 'Date')?.value || '',
+                                snippet: detail.data.snippet || '',
+                                labelIds: detail.data.labelIds || [],
+                            };
+                        })
+                    );
+
+                    const resultPayload = {
+                        message: `Found ${results.length} email(s) matching advanced search criteria`,
+                        searchQuery: searchQuery,
+                        resultCount: results.length,
+                        emails: results,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_list_labels": {
+                    const validatedArgs = ListLabelsSchema.parse(args);
+                    
+                    const response = await gmail.users.labels.list({
+                        userId: 'me',
+                    });
+
+                    let labels = response.data.labels || [];
+                    
+                    // Filter based on user preferences
+                    const systemLabelIds = ['INBOX', 'SENT', 'DRAFT', 'SPAM', 'TRASH', 'UNREAD', 'STARRED', 'IMPORTANT', 'CHAT', 'CATEGORY_PERSONAL', 'CATEGORY_SOCIAL', 'CATEGORY_PROMOTIONS', 'CATEGORY_UPDATES', 'CATEGORY_FORUMS'];
+                    
+                    if (!validatedArgs.includeSystemLabels) {
+                        labels = labels.filter((label: any) => !systemLabelIds.includes(label.id || ''));
+                    }
+                    if (!validatedArgs.includeUserLabels) {
+                        labels = labels.filter((label: any) => systemLabelIds.includes(label.id || ''));
+                    }
+
+                    const formattedLabels = labels.map((label: any) => ({
+                        id: label.id,
+                        name: label.name,
+                        type: label.type || 'user',
+                        messageListVisibility: label.messageListVisibility,
+                        labelListVisibility: label.labelListVisibility,
+                        messagesTotal: label.messagesTotal,
+                        messagesUnread: label.messagesUnread,
+                        threadsTotal: label.threadsTotal,
+                        threadsUnread: label.threadsUnread,
+                    }));
+
+                    const resultPayload = {
+                        message: `Found ${formattedLabels.length} label(s)`,
+                        labelCount: formattedLabels.length,
+                        labels: formattedLabels,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
                 }
 
                 default:

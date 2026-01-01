@@ -48,8 +48,12 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 - **Email Sending**: Send new emails with attachments and rich formatting
 - **Email Management**: Mark as read/unread, archive, delete emails
 - **Label Management**: Apply, remove, and manage Gmail labels
+  - `gmail_list_labels`: List all available labels (system and user-created) with message counts and visibility settings
 - **Thread Management**: Handle email conversations and threads
 - **Attachments**: Download and extract content from email attachments (PDF, Word, Excel, images, etc.)
+- **Advanced Search**: Search emails with structured filters
+  - `gmail_search_emails`: Basic search using Gmail search syntax
+  - `gmail_search_emails_advanced`: Advanced search with dedicated parameters for sender, recipient, subject, dates, attachments, labels, size, and keywords
 
 ### Contact Search
 - **Search Contacts**: Search for contacts by name or email address using `gmail_search_contacts`
