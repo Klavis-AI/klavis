@@ -45,15 +45,40 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 
 ### Email Operations
 - **Email Reading**: Fetch emails, search messages, get message details
-- **Email Sending**: Send new emails with attachments and rich formatting
-- **Email Management**: Mark as read/unread, archive, delete emails
-- **Label Management**: Apply, remove, and manage Gmail labels
-  - `gmail_list_labels`: List all available labels (system and user-created) with message counts and visibility settings
-- **Thread Management**: Handle email conversations and threads
-- **Attachments**: Download and extract content from email attachments (PDF, Word, Excel, images, etc.)
-- **Advanced Search**: Search emails with structured filters
+  - `gmail_read_email`: Retrieve a specific email and all messages in its thread
   - `gmail_search_emails`: Basic search using Gmail search syntax
   - `gmail_search_emails_advanced`: Advanced search with dedicated parameters for sender, recipient, subject, dates, attachments, labels, size, and keywords
+- **Email Sending**: Send new emails with attachments and rich formatting
+  - `gmail_send_email`: Send a new email
+  - `gmail_draft_email`: Create a draft email
+- **Email Management**: Mark as read/unread, archive, delete emails
+  - `gmail_modify_email`: Modify email labels (move to different folders)
+  - `gmail_delete_email`: Permanently delete an email
+  - `gmail_move_to_trash`: Move an email to trash (recoverable)
+  - `gmail_batch_modify_emails`: Modify labels for multiple emails in batches
+  - `gmail_batch_delete_emails`: Permanently delete multiple emails in batches
+- **Attachments**: Download and extract content from email attachments (PDF, Word, Excel, images, etc.)
+  - `gmail_get_email_attachments`: Get and extract text from various attachment types
+
+### Draft Management
+- **Draft Operations**: Create, list, and manage draft messages
+  - `gmail_list_drafts`: List all draft messages with optional search filtering
+
+### Label Management
+- **Label Operations**: Apply, remove, and manage Gmail labels
+  - `gmail_list_labels`: List all available labels (system and user-created) with message counts and visibility settings
+
+### Thread Management
+- **Thread Operations**: Handle email conversations and threads
+  - `gmail_list_threads`: List email threads with optional filtering
+  - `gmail_get_thread`: Retrieve a complete thread with all messages
+  - `gmail_modify_thread`: Modify labels for all messages in a thread
+  - `gmail_trash_thread`: Move an entire thread to trash
+
+### Vacation/Auto-Reply Settings
+- **Vacation Responder**: Manage automatic out-of-office replies
+  - `gmail_get_vacation_settings`: Get current vacation responder settings
+  - `gmail_update_vacation_settings`: Update vacation responder configuration with custom messages, scheduling, and recipient restrictions
 
 ### Contact Search
 - **Search Contacts**: Search for contacts by name or email address using `gmail_search_contacts`

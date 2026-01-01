@@ -202,6 +202,54 @@ const ListLabelsSchema = z.object({
     includeUserLabels: z.boolean().optional().default(true).describe("Include user-created labels (default: true)"),
 });
 
+// Thread Management Schemas
+const ListThreadsSchema = z.object({
+    query: z.string().optional().describe("Gmail search query to filter threads (e.g., 'is:unread')"),
+    maxResults: z.number().optional().default(10).describe("Maximum number of threads to return (default: 10)"),
+    labelIds: z.array(z.string()).optional().describe("Only return threads with these label IDs"),
+    includeSpamTrash: z.boolean().optional().default(false).describe("Include threads from Spam and Trash (default: false)"),
+});
+
+const GetThreadSchema = z.object({
+    threadId: z.string().describe("ID of the thread to retrieve"),
+    format: z.enum(['full', 'metadata', 'minimal']).optional().default('full').describe("Format of the returned thread messages (default: full)"),
+});
+
+const ModifyThreadSchema = z.object({
+    threadId: z.string().describe("ID of the thread to modify"),
+    addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to all messages in the thread"),
+    removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from all messages in the thread"),
+});
+
+const TrashThreadSchema = z.object({
+    threadId: z.string().describe("ID of the thread to move to trash"),
+});
+
+// Vacation/Auto-reply Settings Schema
+const GetVacationSettingsSchema = z.object({});
+
+const UpdateVacationSettingsSchema = z.object({
+    enableAutoReply: z.boolean().describe("Enable or disable vacation auto-reply"),
+    responseSubject: z.string().optional().describe("Subject line for the auto-reply message"),
+    responseBodyPlainText: z.string().optional().describe("Plain text body of the auto-reply message"),
+    responseBodyHtml: z.string().optional().describe("HTML body of the auto-reply message"),
+    restrictToContacts: z.boolean().optional().describe("Only send auto-reply to contacts (default: false)"),
+    restrictToDomain: z.boolean().optional().describe("Only send auto-reply to domain members (default: false)"),
+    startTime: z.number().optional().describe("Start time for vacation (Unix timestamp in milliseconds)"),
+    endTime: z.number().optional().describe("End time for vacation (Unix timestamp in milliseconds)"),
+});
+
+// Additional Email Operations
+const MoveToTrashSchema = z.object({
+    messageId: z.string().describe("ID of the email message to move to trash"),
+});
+
+const ListDraftsSchema = z.object({
+    maxResults: z.number().optional().default(10).describe("Maximum number of drafts to return (default: 10)"),
+    query: z.string().optional().describe("Gmail search query to filter drafts"),
+    includeSpamTrash: z.boolean().optional().default(false).describe("Include drafts from Spam and Trash (default: false)"),
+});
+
 // Updated schema to include removeLabelIds
 const ModifyEmailSchema = z.object({
     messageId: z.string().describe("ID of the email message to modify"),
@@ -326,6 +374,54 @@ const getGmailMcpServer = () => {
                 description: "Search for contacts when you need to know the contact details. Supports searching personal contacts, other contact sources, domain directory, or all sources simultaneously. When contactType is 'all' (default), returns three separate result sets (personal, other, directory) each with independent pagination tokens for flexible paginated access to individual sources.",
                 inputSchema: zodToJsonSchema(SearchContactsSchema),
                 annotations: { category: "GMAIL_CONTACTS", readOnlyHint: true },
+            },
+            {
+                name: "gmail_list_threads",
+                description: "Lists email threads with optional filtering by query or labels. Returns thread IDs, snippet, and participant information.",
+                inputSchema: zodToJsonSchema(ListThreadsSchema),
+                annotations: { category: "GMAIL_THREADS", readOnlyHint: true },
+            },
+            {
+                name: "gmail_get_thread",
+                description: "Retrieves a complete thread with all messages. Returns all emails in the conversation with full content, headers, and metadata.",
+                inputSchema: zodToJsonSchema(GetThreadSchema),
+                annotations: { category: "GMAIL_THREADS", readOnlyHint: true },
+            },
+            {
+                name: "gmail_modify_thread",
+                description: "Modifies labels for all messages in a thread. Useful for bulk operations like archiving or labeling entire conversations.",
+                inputSchema: zodToJsonSchema(ModifyThreadSchema),
+                annotations: { category: "GMAIL_THREADS" },
+            },
+            {
+                name: "gmail_trash_thread",
+                description: "Moves an entire thread to trash. All messages in the conversation will be trashed.",
+                inputSchema: zodToJsonSchema(TrashThreadSchema),
+                annotations: { category: "GMAIL_THREADS" },
+            },
+            {
+                name: "gmail_get_vacation_settings",
+                description: "Retrieves current vacation responder (auto-reply) settings including enabled status, response message, and schedule.",
+                inputSchema: zodToJsonSchema(GetVacationSettingsSchema),
+                annotations: { category: "GMAIL_SETTINGS", readOnlyHint: true },
+            },
+            {
+                name: "gmail_update_vacation_settings",
+                description: "Updates vacation responder (auto-reply) settings. Configure automatic replies for when you're away, including custom messages, scheduling, and recipient restrictions.",
+                inputSchema: zodToJsonSchema(UpdateVacationSettingsSchema),
+                annotations: { category: "GMAIL_SETTINGS" },
+            },
+            {
+                name: "gmail_move_to_trash",
+                description: "Moves an email message to trash by adding the TRASH label. The message can be recovered from trash before permanent deletion.",
+                inputSchema: zodToJsonSchema(MoveToTrashSchema),
+                annotations: { category: "GMAIL_EMAIL" },
+            },
+            {
+                name: "gmail_list_drafts",
+                description: "Lists draft messages with optional search filtering. Returns draft IDs, message details, and snippets.",
+                inputSchema: zodToJsonSchema(ListDraftsSchema),
+                annotations: { category: "GMAIL_DRAFTS", readOnlyHint: true },
             },
         ],
     }));
@@ -1338,6 +1434,332 @@ const getGmailMcpServer = () => {
                         message: `Found ${formattedLabels.length} label(s)`,
                         labelCount: formattedLabels.length,
                         labels: formattedLabels,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_list_threads": {
+                    const validatedArgs = ListThreadsSchema.parse(args);
+                    
+                    const response = await gmail.users.threads.list({
+                        userId: 'me',
+                        q: validatedArgs.query,
+                        maxResults: validatedArgs.maxResults || 10,
+                        labelIds: validatedArgs.labelIds,
+                        includeSpamTrash: validatedArgs.includeSpamTrash || false,
+                    });
+
+                    const threads = response.data.threads || [];
+                    const results = await Promise.all(
+                        threads.map(async (thread: any) => {
+                            const detail = await gmail.users.threads.get({
+                                userId: 'me',
+                                id: thread.id!,
+                                format: 'metadata',
+                                metadataHeaders: ['Subject', 'From', 'Date'],
+                            });
+                            
+                            const firstMessage = detail.data.messages?.[0];
+                            const headers = firstMessage?.payload?.headers || [];
+                            
+                            return {
+                                id: thread.id,
+                                snippet: thread.snippet,
+                                historyId: thread.historyId,
+                                messageCount: detail.data.messages?.length || 0,
+                                subject: headers.find((h: any) => h.name === 'Subject')?.value || '',
+                                participants: [...new Set(
+                                    detail.data.messages?.flatMap((msg: any) => {
+                                        const msgHeaders = msg.payload?.headers || [];
+                                        const from = msgHeaders.find((h: any) => h.name === 'From')?.value || '';
+                                        return from;
+                                    }) || []
+                                )],
+                                lastMessageDate: headers.find((h: any) => h.name === 'Date')?.value || '',
+                            };
+                        })
+                    );
+
+                    const resultPayload = {
+                        message: `Found ${results.length} thread(s)`,
+                        threadCount: results.length,
+                        threads: results,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_get_thread": {
+                    const validatedArgs = GetThreadSchema.parse(args);
+                    
+                    const response = await gmail.users.threads.get({
+                        userId: 'me',
+                        id: validatedArgs.threadId,
+                        format: validatedArgs.format || 'full',
+                    });
+
+                    const threadMessages = response.data.messages || [];
+                    const emails = threadMessages.map((msg: any) => {
+                        const headers = msg.payload?.headers || [];
+                        const subject = headers.find((h: any) => h.name?.toLowerCase() === 'subject')?.value || '';
+                        const from = headers.find((h: any) => h.name?.toLowerCase() === 'from')?.value || '';
+                        const to = headers.find((h: any) => h.name?.toLowerCase() === 'to')?.value || '';
+                        const cc = headers.find((h: any) => h.name?.toLowerCase() === 'cc')?.value || '';
+                        const date = headers.find((h: any) => h.name?.toLowerCase() === 'date')?.value || '';
+                        const messageId = msg.id || '';
+
+                        let body = { text: '', html: '', preferredFormat: null as string | null };
+                        
+                        if (validatedArgs.format === 'full') {
+                            const { text, html } = extractEmailContent(msg.payload as GmailMessagePart || {});
+                            const preferredFormat = text ? 'text/plain' : (html ? 'text/html' : null);
+                            body = { text: text || '', html: html || '', preferredFormat };
+                        }
+
+                        return {
+                            messageId,
+                            subject,
+                            from,
+                            to,
+                            cc: cc || undefined,
+                            date,
+                            snippet: msg.snippet || '',
+                            labelIds: msg.labelIds || [],
+                            body: validatedArgs.format === 'full' ? body : undefined,
+                        };
+                    });
+
+                    const resultPayload = {
+                        threadId: validatedArgs.threadId,
+                        messageCount: emails.length,
+                        historyId: response.data.historyId,
+                        emails,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_modify_thread": {
+                    const validatedArgs = ModifyThreadSchema.parse(args);
+
+                    const requestBody: any = {};
+                    if (validatedArgs.addLabelIds) {
+                        requestBody.addLabelIds = validatedArgs.addLabelIds;
+                    }
+                    if (validatedArgs.removeLabelIds) {
+                        requestBody.removeLabelIds = validatedArgs.removeLabelIds;
+                    }
+
+                    await gmail.users.threads.modify({
+                        userId: 'me',
+                        id: validatedArgs.threadId,
+                        requestBody: requestBody,
+                    });
+
+                    const resultPayload: Record<string, unknown> = {
+                        message: `Thread ${validatedArgs.threadId} labels updated successfully`,
+                        threadId: validatedArgs.threadId,
+                    };
+                    if (validatedArgs.addLabelIds) {
+                        resultPayload.addedLabels = validatedArgs.addLabelIds;
+                    }
+                    if (validatedArgs.removeLabelIds) {
+                        resultPayload.removedLabels = validatedArgs.removeLabelIds;
+                    }
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_trash_thread": {
+                    const validatedArgs = TrashThreadSchema.parse(args);
+                    
+                    await gmail.users.threads.trash({
+                        userId: 'me',
+                        id: validatedArgs.threadId,
+                    });
+
+                    const resultPayload = {
+                        message: `Thread ${validatedArgs.threadId} moved to trash successfully`,
+                        threadId: validatedArgs.threadId,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_get_vacation_settings": {
+                    const response = await gmail.users.settings.getVacation({
+                        userId: 'me',
+                    });
+
+                    const settings = response.data;
+                    const resultPayload = {
+                        enableAutoReply: settings.enableAutoReply || false,
+                        responseSubject: settings.responseSubject || '',
+                        responseBodyPlainText: settings.responseBodyPlainText || '',
+                        responseBodyHtml: settings.responseBodyHtml || '',
+                        restrictToContacts: settings.restrictToContacts || false,
+                        restrictToDomain: settings.restrictToDomain || false,
+                        startTime: settings.startTime ? parseInt(settings.startTime) : undefined,
+                        endTime: settings.endTime ? parseInt(settings.endTime) : undefined,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_update_vacation_settings": {
+                    const validatedArgs = UpdateVacationSettingsSchema.parse(args);
+
+                    const requestBody: any = {
+                        enableAutoReply: validatedArgs.enableAutoReply,
+                    };
+
+                    if (validatedArgs.responseSubject !== undefined) {
+                        requestBody.responseSubject = validatedArgs.responseSubject;
+                    }
+                    if (validatedArgs.responseBodyPlainText !== undefined) {
+                        requestBody.responseBodyPlainText = validatedArgs.responseBodyPlainText;
+                    }
+                    if (validatedArgs.responseBodyHtml !== undefined) {
+                        requestBody.responseBodyHtml = validatedArgs.responseBodyHtml;
+                    }
+                    if (validatedArgs.restrictToContacts !== undefined) {
+                        requestBody.restrictToContacts = validatedArgs.restrictToContacts;
+                    }
+                    if (validatedArgs.restrictToDomain !== undefined) {
+                        requestBody.restrictToDomain = validatedArgs.restrictToDomain;
+                    }
+                    if (validatedArgs.startTime !== undefined) {
+                        requestBody.startTime = validatedArgs.startTime.toString();
+                    }
+                    if (validatedArgs.endTime !== undefined) {
+                        requestBody.endTime = validatedArgs.endTime.toString();
+                    }
+
+                    await gmail.users.settings.updateVacation({
+                        userId: 'me',
+                        requestBody: requestBody,
+                    });
+
+                    const resultPayload = {
+                        message: 'Vacation settings updated successfully',
+                        enableAutoReply: validatedArgs.enableAutoReply,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_move_to_trash": {
+                    const validatedArgs = MoveToTrashSchema.parse(args);
+                    
+                    await gmail.users.messages.trash({
+                        userId: 'me',
+                        id: validatedArgs.messageId,
+                    });
+
+                    const resultPayload = {
+                        message: `Email ${validatedArgs.messageId} moved to trash successfully`,
+                        messageId: validatedArgs.messageId,
+                    };
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+
+                case "gmail_list_drafts": {
+                    const validatedArgs = ListDraftsSchema.parse(args);
+                    
+                    const response = await gmail.users.drafts.list({
+                        userId: 'me',
+                        maxResults: validatedArgs.maxResults || 10,
+                        q: validatedArgs.query,
+                        includeSpamTrash: validatedArgs.includeSpamTrash || false,
+                    });
+
+                    const drafts = response.data.drafts || [];
+                    const results = await Promise.all(
+                        drafts.map(async (draft: any) => {
+                            const detail = await gmail.users.drafts.get({
+                                userId: 'me',
+                                id: draft.id!,
+                                format: 'metadata',
+                            });
+                            
+                            const message = detail.data.message;
+                            const headers = message?.payload?.headers || [];
+                            
+                            return {
+                                id: draft.id,
+                                messageId: message?.id,
+                                threadId: message?.threadId,
+                                subject: headers.find((h: any) => h.name === 'Subject')?.value || '',
+                                to: headers.find((h: any) => h.name === 'To')?.value || '',
+                                from: headers.find((h: any) => h.name === 'From')?.value || '',
+                                snippet: message?.snippet || '',
+                                labelIds: message?.labelIds || [],
+                            };
+                        })
+                    );
+
+                    const resultPayload = {
+                        message: `Found ${results.length} draft(s)`,
+                        draftCount: results.length,
+                        drafts: results,
                     };
 
                     return {
