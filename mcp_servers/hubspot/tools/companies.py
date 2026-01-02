@@ -1,12 +1,35 @@
+"""
+HubSpot Companies API tools with Klavis sanitization layer.
+
+All responses are validated through Pydantic schemas.
+All errors are sanitized to expose only HTTP status codes.
+"""
+
 import logging
 import json
 from hubspot.crm.companies import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+
+from .base import get_hubspot_client, safe_api_call
+from .schemas import (
+    Company,
+    CompanyList,
+    CompanyProperties,
+    CreateResult,
+    UpdateResult,
+    DeleteResult,
+    normalize_company
+)
+from .errors import (
+    KlavisError,
+    ValidationError,
+    sanitize_exception
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def hubspot_create_companies(properties: str) -> str:
+
+async def hubspot_create_companies(properties: str) -> CreateResult:
     """
     Create a new company using JSON string of properties.
 
@@ -14,17 +37,20 @@ async def hubspot_create_companies(properties: str) -> str:
     - properties: JSON string of company fields
 
     Returns:
-    - Status message
+    - Klavis-normalized CreateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info("Creating company...")
-        properties_dict = json.loads(properties)
         
-        # Common property name mistakes mapping
+        # Parse and validate input
+        try:
+            properties_dict = json.loads(properties)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="company")
+        
+        # Common property name validation
         property_corrections = {
             'postal_code': 'zip',
             'postalcode': 'zip',
@@ -39,29 +65,35 @@ async def hubspot_create_companies(properties: str) -> str:
             'url': 'website',
         }
         
-        # Check for common mistakes and provide helpful suggestions
-        suggestions = []
+        # Check for common mistakes
+        invalid_props = []
         for prop_key in properties_dict.keys():
             if prop_key in property_corrections:
-                suggestions.append(
-                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
-                )
+                invalid_props.append(prop_key)
         
-        if suggestions:
-            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
-            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='companies' to see all valid property names."
-            logger.warning(error_msg)
-            return f"Error: {error_msg}"
+        if invalid_props:
+            raise ValidationError(resource_type="company")
         
         data = SimplePublicObjectInputForCreate(properties=properties_dict)
-        client.crm.companies.basic_api.create(simple_public_object_input_for_create=data)
+        result = safe_api_call(
+            client.crm.companies.basic_api.create,
+            resource_type="company",
+            simple_public_object_input_for_create=data
+        )
+        
         logger.info("Company created successfully.")
-        return "Created"
+        return CreateResult(
+            status="success",
+            message="Company created successfully",
+            resource_id=getattr(result, 'id', None)
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error creating company: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="company")
 
-async def hubspot_get_companies(limit: int = 10):
+
+async def hubspot_get_companies(limit: int = 10) -> CompanyList:
     """
     Fetch a list of companies from HubSpot.
 
@@ -69,22 +101,37 @@ async def hubspot_get_companies(limit: int = 10):
     - limit: Number of companies to retrieve
 
     Returns:
-    - Paginated companies response
+    - Klavis-normalized CompanyList schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching up to {limit} companies...")
-        result = client.crm.companies.basic_api.get_page(limit=limit)
-        logger.info(f"Fetched {len(result.results)} companies successfully.")
-        return result
+        
+        result = safe_api_call(
+            client.crm.companies.basic_api.get_page,
+            resource_type="company",
+            limit=limit
+        )
+        
+        # Normalize response through Klavis schema
+        companies = []
+        for raw_company in getattr(result, 'results', []) or []:
+            companies.append(normalize_company(raw_company))
+        
+        logger.info(f"Fetched {len(companies)} companies successfully.")
+        return CompanyList(
+            companies=companies,
+            total=len(companies),
+            has_more=bool(getattr(result, 'paging', None))
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching companies: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="company")
 
-async def hubspot_get_company_by_id(company_id: str):
+
+async def hubspot_get_company_by_id(company_id: str) -> Company:
     """
     Get a company by ID.
 
@@ -92,22 +139,29 @@ async def hubspot_get_company_by_id(company_id: str):
     - company_id: ID of the company
 
     Returns:
-    - Company object
+    - Klavis-normalized Company schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching company with ID: {company_id}...")
-        result = client.crm.companies.basic_api.get_by_id(company_id)
+        
+        result = safe_api_call(
+            client.crm.companies.basic_api.get_by_id,
+            resource_type="company",
+            resource_id=company_id,
+            company_id=company_id
+        )
+        
         logger.info(f"Fetched company ID: {company_id} successfully.")
-        return result
+        return normalize_company(result)
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching company by ID: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="company", resource_id=company_id)
 
-async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
+
+async def hubspot_update_company_by_id(company_id: str, updates: str) -> UpdateResult:
     """
     Update a company by ID.
 
@@ -116,24 +170,41 @@ async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
     - updates: JSON string of property updates
 
     Returns:
-    - Status message
+    - Klavis-normalized UpdateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Updating company ID: {company_id}...")
-        updates = json.loads(updates)
-        update = SimplePublicObjectInput(properties=updates)
-        client.crm.companies.basic_api.update(company_id, update)
+        
+        # Parse and validate input
+        try:
+            updates_dict = json.loads(updates)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="company")
+        
+        update = SimplePublicObjectInput(properties=updates_dict)
+        safe_api_call(
+            client.crm.companies.basic_api.update,
+            resource_type="company",
+            resource_id=company_id,
+            company_id=company_id,
+            simple_public_object_input=update
+        )
+        
         logger.info(f"Company ID: {company_id} updated successfully.")
-        return "Done"
+        return UpdateResult(
+            status="success",
+            message="Company updated successfully",
+            resource_id=company_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Update failed: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="company", resource_id=company_id)
 
-async def hubspot_delete_company_by_id(company_id: str) -> str:
+
+async def hubspot_delete_company_by_id(company_id: str) -> DeleteResult:
     """
     Delete a company by ID.
 
@@ -141,17 +212,27 @@ async def hubspot_delete_company_by_id(company_id: str) -> str:
     - company_id: ID of the company
 
     Returns:
-    - Status message
+    - Klavis-normalized DeleteResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Deleting company ID: {company_id}...")
-        client.crm.companies.basic_api.archive(company_id)
+        
+        safe_api_call(
+            client.crm.companies.basic_api.archive,
+            resource_type="company",
+            resource_id=company_id,
+            company_id=company_id
+        )
+        
         logger.info(f"Company ID: {company_id} deleted successfully.")
-        return "Deleted"
+        return DeleteResult(
+            status="success",
+            message="Company deleted successfully",
+            resource_id=company_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error deleting company: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="company", resource_id=company_id)

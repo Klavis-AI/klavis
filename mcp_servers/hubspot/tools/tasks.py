@@ -1,20 +1,48 @@
+"""
+HubSpot Tasks API tools with Klavis sanitization layer.
+
+All responses are validated through Pydantic schemas.
+All errors are sanitized to expose only HTTP status codes.
+"""
+
 import logging
 import json
-from typing import Optional
-
 from hubspot.crm.objects import (
     SimplePublicObjectInputForCreate,
     SimplePublicObjectInput,
 )
 
-from .base import get_hubspot_client
-
+from .base import get_hubspot_client, safe_api_call
+from .schemas import (
+    Task,
+    TaskList,
+    TaskProperties,
+    CreateResult,
+    UpdateResult,
+    DeleteResult,
+    normalize_task
+)
+from .errors import (
+    KlavisError,
+    ValidationError,
+    sanitize_exception
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Common task properties to request
+TASK_PROPERTIES = [
+    "hs_task_subject",
+    "hs_task_body",
+    "hs_task_status",
+    "hs_task_priority",
+    "hs_timestamp",
+    "hubspot_owner_id",
+]
 
-async def hubspot_get_tasks(limit: int = 10):
+
+async def hubspot_get_tasks(limit: int = 10) -> TaskList:
     """
     Fetch a list of tasks from HubSpot.
 
@@ -22,34 +50,38 @@ async def hubspot_get_tasks(limit: int = 10):
     - limit: Number of tasks to return
 
     Returns:
-    - List of task records
+    - Klavis-normalized TaskList schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
-
+    
     try:
         logger.info(f"Fetching up to {limit} tasks...")
-        common_properties = [
-            "hs_task_subject",
-            "hs_task_body",
-            "hs_task_status",
-            "hs_task_priority",
-            "hs_timestamp",
-            "hubspot_owner_id",
-        ]
-        result = client.crm.objects.tasks.basic_api.get_page(
+        
+        result = safe_api_call(
+            client.crm.objects.tasks.basic_api.get_page,
+            resource_type="task",
             limit=limit,
-            properties=common_properties,
+            properties=TASK_PROPERTIES
         )
-        logger.info(f"Fetched {len(result.results)} tasks successfully.")
-        return result
+        
+        # Normalize response through Klavis schema
+        tasks = []
+        for raw_task in getattr(result, 'results', []) or []:
+            tasks.append(normalize_task(raw_task))
+        
+        logger.info(f"Fetched {len(tasks)} tasks successfully.")
+        return TaskList(
+            tasks=tasks,
+            total=len(tasks),
+            has_more=bool(getattr(result, 'paging', None))
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching tasks: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="task")
 
 
-async def hubspot_get_task_by_id(task_id: str):
+async def hubspot_get_task_by_id(task_id: str) -> Task:
     """
     Fetch a task by its ID.
 
@@ -57,63 +89,70 @@ async def hubspot_get_task_by_id(task_id: str):
     - task_id: HubSpot task ID
 
     Returns:
-    - Task object
+    - Klavis-normalized Task schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
-
+    
     try:
         logger.info(f"Fetching task ID: {task_id}...")
-        common_properties = [
-            "hs_task_subject",
-            "hs_task_body",
-            "hs_task_status",
-            "hs_task_priority",
-            "hs_timestamp",
-            "hubspot_owner_id",
-        ]
-        result = client.crm.objects.tasks.basic_api.get_by_id(
-            task_id,
-            properties=common_properties,
+        
+        result = safe_api_call(
+            client.crm.objects.tasks.basic_api.get_by_id,
+            resource_type="task",
+            resource_id=task_id,
+            task_id=task_id,
+            properties=TASK_PROPERTIES
         )
-        print(f"---Result: {result}")
+        
         logger.info(f"Fetched task ID: {task_id} successfully.")
-        return result
+        return normalize_task(result)
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching task by ID: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="task", resource_id=task_id)
 
 
-async def hubspot_create_task(properties: str):
+async def hubspot_create_task(properties: str) -> CreateResult:
     """
     Create a new task.
 
     Parameters:
-    - properties: JSON string of task properties (see HubSpot docs)
+    - properties: JSON string of task properties
 
     Returns:
-    - Newly created task
+    - Klavis-normalized CreateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
-
+    
     try:
         logger.info("Creating new task...")
-        props = json.loads(properties)
+        
+        # Parse and validate input
+        try:
+            props = json.loads(properties)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="task")
+        
         data = SimplePublicObjectInputForCreate(properties=props)
-        result = client.crm.objects.tasks.basic_api.create(
+        result = safe_api_call(
+            client.crm.objects.tasks.basic_api.create,
+            resource_type="task",
             simple_public_object_input_for_create=data
         )
+        
         logger.info("Task created successfully.")
-        return result
+        return CreateResult(
+            status="success",
+            message="Task created successfully",
+            resource_id=getattr(result, 'id', None)
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error creating task: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="task")
 
 
-async def hubspot_update_task_by_id(task_id: str, updates: str):
+async def hubspot_update_task_by_id(task_id: str, updates: str) -> UpdateResult:
     """
     Update a task by ID.
 
@@ -122,24 +161,41 @@ async def hubspot_update_task_by_id(task_id: str, updates: str):
     - updates: JSON string of updated fields
 
     Returns:
-    - "Done" on success, error message otherwise
+    - Klavis-normalized UpdateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
-
+    
     try:
         logger.info(f"Updating task ID: {task_id}...")
-        data = SimplePublicObjectInput(properties=json.loads(updates))
-        client.crm.objects.tasks.basic_api.update(task_id, data)
+        
+        # Parse and validate input
+        try:
+            updates_dict = json.loads(updates)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="task")
+        
+        data = SimplePublicObjectInput(properties=updates_dict)
+        safe_api_call(
+            client.crm.objects.tasks.basic_api.update,
+            resource_type="task",
+            resource_id=task_id,
+            task_id=task_id,
+            simple_public_object_input=data
+        )
+        
         logger.info(f"Task ID: {task_id} updated successfully.")
-        return "Done"
+        return UpdateResult(
+            status="success",
+            message="Task updated successfully",
+            resource_id=task_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Update failed for task ID {task_id}: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="task", resource_id=task_id)
 
 
-async def hubspot_delete_task_by_id(task_id: str):
+async def hubspot_delete_task_by_id(task_id: str) -> DeleteResult:
     """
     Delete a task by ID.
 
@@ -147,19 +203,27 @@ async def hubspot_delete_task_by_id(task_id: str):
     - task_id: HubSpot task ID
 
     Returns:
-    - "Deleted" on success, error message otherwise
+    - Klavis-normalized DeleteResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
-
+    
     try:
         logger.info(f"Deleting task ID: {task_id}...")
-        client.crm.objects.tasks.basic_api.archive(task_id)
+        
+        safe_api_call(
+            client.crm.objects.tasks.basic_api.archive,
+            resource_type="task",
+            resource_id=task_id,
+            task_id=task_id
+        )
+        
         logger.info(f"Task ID: {task_id} deleted successfully.")
-        return "Deleted"
+        return DeleteResult(
+            status="success",
+            message="Task deleted successfully",
+            resource_id=task_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error deleting task ID {task_id}: {e}")
-        return f"Error occurred: {e}"
-
-
+        raise sanitize_exception(e, resource_type="task", resource_id=task_id)

@@ -1,19 +1,43 @@
+"""
+HubSpot Deals API tools with Klavis sanitization layer.
+
+All responses are validated through Pydantic schemas.
+All errors are sanitized to expose only HTTP status codes.
+"""
+
 import logging
 import json
+from typing import Dict, Optional
 from hubspot.crm.deals import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+
+from .base import get_hubspot_client, safe_api_call
+from .schemas import (
+    Deal,
+    DealList,
+    DealProperties,
+    CreateResult,
+    UpdateResult,
+    DeleteResult,
+    normalize_deal
+)
+from .errors import (
+    KlavisError,
+    ValidationError,
+    sanitize_exception
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-def _build_dealstage_label_map(client) -> dict:
+
+def _build_dealstage_label_map(client) -> Dict[str, str]:
     """
     Build a mapping from deal stage ID to its human-readable label across all deal pipelines.
 
     Returns:
-    - dict mapping stage_id -> label (e.g., {"appointmentscheduled": "Appointment Scheduled", "1890285259": "POC"})
+    - dict mapping stage_id -> label (e.g., {"appointmentscheduled": "Appointment Scheduled"})
     """
-    stage_id_to_label: dict = {}
+    stage_id_to_label: Dict[str, str] = {}
     try:
         pipelines = client.crm.pipelines.pipelines_api.get_all("deals")
         for pipeline in getattr(pipelines, "results", []) or []:
@@ -22,13 +46,16 @@ def _build_dealstage_label_map(client) -> dict:
                 for stage in getattr(stages, "results", []) or []:
                     if getattr(stage, "id", None) and getattr(stage, "label", None):
                         stage_id_to_label[stage.id] = stage.label
-            except Exception as inner_exc:
-                logger.debug(f"Failed to fetch stages for pipeline {getattr(pipeline, 'id', 'unknown')}: {inner_exc}")
-    except Exception as exc:
-        logger.debug(f"Failed to fetch pipelines for deals: {exc}")
+            except Exception:
+                # Silently ignore pipeline stage fetch errors
+                pass
+    except Exception:
+        # Silently ignore pipeline fetch errors
+        pass
     return stage_id_to_label
 
-async def hubspot_get_deals(limit: int = 10):
+
+async def hubspot_get_deals(limit: int = 10) -> DealList:
     """
     Fetch a list of deals from HubSpot.
 
@@ -36,30 +63,40 @@ async def hubspot_get_deals(limit: int = 10):
     - limit: Number of deals to return
 
     Returns:
-    - List of deal records
+    - Klavis-normalized DealList schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching up to {limit} deals...")
-        result = client.crm.deals.basic_api.get_page(limit=limit)
-        # Enrich with human-readable dealstage label
+        
+        result = safe_api_call(
+            client.crm.deals.basic_api.get_page,
+            resource_type="deal",
+            limit=limit
+        )
+        
+        # Build stage label map for human-readable stage names
         stage_label_map = _build_dealstage_label_map(client)
-        for obj in getattr(result, "results", []) or []:
-            props = getattr(obj, "properties", {}) or {}
-            stage_id = props.get("dealstage")
-            if stage_id and stage_id in stage_label_map:
-                props["dealstage_label"] = stage_label_map[stage_id]
-                obj.properties = props
-        logger.info(f"Fetched {len(result.results)} deals successfully.")
-        return result
+        
+        # Normalize response through Klavis schema
+        deals = []
+        for raw_deal in getattr(result, 'results', []) or []:
+            deals.append(normalize_deal(raw_deal, stage_label_map))
+        
+        logger.info(f"Fetched {len(deals)} deals successfully.")
+        return DealList(
+            deals=deals,
+            total=len(deals),
+            has_more=bool(getattr(result, 'paging', None))
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching deals: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="deal")
 
-async def hubspot_get_deal_by_id(deal_id: str):
+
+async def hubspot_get_deal_by_id(deal_id: str) -> Deal:
     """
     Fetch a deal by its ID.
 
@@ -67,29 +104,32 @@ async def hubspot_get_deal_by_id(deal_id: str):
     - deal_id: HubSpot deal ID
 
     Returns:
-    - Deal object
+    - Klavis-normalized Deal schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching deal ID: {deal_id}...")
-        result = client.crm.deals.basic_api.get_by_id(deal_id)
-        # Enrich with human-readable dealstage label
+        
+        result = safe_api_call(
+            client.crm.deals.basic_api.get_by_id,
+            resource_type="deal",
+            resource_id=deal_id,
+            deal_id=deal_id
+        )
+        
+        # Build stage label map for human-readable stage name
         stage_label_map = _build_dealstage_label_map(client)
-        props = getattr(result, "properties", {}) or {}
-        stage_id = props.get("dealstage")
-        if stage_id and stage_id in stage_label_map:
-            props["dealstage_label"] = stage_label_map[stage_id]
-            result.properties = props
+        
         logger.info(f"Fetched deal ID: {deal_id} successfully.")
-        return result
+        return normalize_deal(result, stage_label_map)
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching deal by ID: {e}")
-        return None
+        raise sanitize_exception(e, resource_type="deal", resource_id=deal_id)
 
-async def hubspot_create_deal(properties: str):
+
+async def hubspot_create_deal(properties: str) -> CreateResult:
     """
     Create a new deal.
 
@@ -97,17 +137,20 @@ async def hubspot_create_deal(properties: str):
     - properties: JSON string of deal properties
 
     Returns:
-    - Newly created deal
+    - Klavis-normalized CreateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info("Creating a new deal...")
-        props = json.loads(properties)
         
-        # Common property name mistakes mapping
+        # Parse and validate input
+        try:
+            props = json.loads(properties)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="deal")
+        
+        # Common property name validation
         property_corrections = {
             'deal_name': 'dealname',
             'name': 'dealname',
@@ -119,29 +162,35 @@ async def hubspot_create_deal(properties: str):
             'deal_type': 'dealtype',
         }
         
-        # Check for common mistakes and provide helpful suggestions
-        suggestions = []
+        # Check for common mistakes
+        invalid_props = []
         for prop_key in props.keys():
             if prop_key in property_corrections:
-                suggestions.append(
-                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
-                )
+                invalid_props.append(prop_key)
         
-        if suggestions:
-            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
-            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='deals' to see all valid property names."
-            logger.warning(error_msg)
-            return f"Error: {error_msg}"
+        if invalid_props:
+            raise ValidationError(resource_type="deal")
         
         data = SimplePublicObjectInputForCreate(properties=props)
-        result = client.crm.deals.basic_api.create(simple_public_object_input_for_create=data)
+        result = safe_api_call(
+            client.crm.deals.basic_api.create,
+            resource_type="deal",
+            simple_public_object_input_for_create=data
+        )
+        
         logger.info("Deal created successfully.")
-        return result
+        return CreateResult(
+            status="success",
+            message="Deal created successfully",
+            resource_id=getattr(result, 'id', None)
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error creating deal: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="deal")
 
-async def hubspot_update_deal_by_id(deal_id: str, updates: str):
+
+async def hubspot_update_deal_by_id(deal_id: str, updates: str) -> UpdateResult:
     """
     Update a deal by ID.
 
@@ -150,23 +199,41 @@ async def hubspot_update_deal_by_id(deal_id: str, updates: str):
     - updates: JSON string of updated fields
 
     Returns:
-    - "Done" on success, error message otherwise
+    - Klavis-normalized UpdateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Updating deal ID: {deal_id}...")
-        data = SimplePublicObjectInput(properties=json.loads(updates))
-        client.crm.deals.basic_api.update(deal_id, data)
+        
+        # Parse and validate input
+        try:
+            updates_dict = json.loads(updates)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="deal")
+        
+        data = SimplePublicObjectInput(properties=updates_dict)
+        safe_api_call(
+            client.crm.deals.basic_api.update,
+            resource_type="deal",
+            resource_id=deal_id,
+            deal_id=deal_id,
+            simple_public_object_input=data
+        )
+        
         logger.info(f"Deal ID: {deal_id} updated successfully.")
-        return "Done"
+        return UpdateResult(
+            status="success",
+            message="Deal updated successfully",
+            resource_id=deal_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Update failed for deal ID {deal_id}: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="deal", resource_id=deal_id)
 
-async def hubspot_delete_deal_by_id(deal_id: str):
+
+async def hubspot_delete_deal_by_id(deal_id: str) -> DeleteResult:
     """
     Delete a deal by ID.
 
@@ -174,17 +241,27 @@ async def hubspot_delete_deal_by_id(deal_id: str):
     - deal_id: HubSpot deal ID
 
     Returns:
-    - None
+    - Klavis-normalized DeleteResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Deleting deal ID: {deal_id}...")
-        client.crm.deals.basic_api.archive(deal_id)
+        
+        safe_api_call(
+            client.crm.deals.basic_api.archive,
+            resource_type="deal",
+            resource_id=deal_id,
+            deal_id=deal_id
+        )
+        
         logger.info(f"Deal ID: {deal_id} deleted successfully.")
-        return "Deleted"
+        return DeleteResult(
+            status="success",
+            message="Deal deleted successfully",
+            resource_id=deal_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error deleting deal: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="deal", resource_id=deal_id)

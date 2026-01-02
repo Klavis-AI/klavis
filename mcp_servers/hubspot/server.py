@@ -1,3 +1,12 @@
+"""
+HubSpot MCP Server with Klavis Sanitization Layer.
+
+This server ensures that:
+1. All responses are validated through Klavis-defined Pydantic schemas
+2. Raw third-party API data is NEVER exposed to the LLM
+3. Errors are sanitized to only expose HTTP status codes
+"""
+
 import contextlib
 import base64
 import logging
@@ -19,6 +28,9 @@ from dotenv import load_dotenv
 
 from tools import (
     auth_token_context,
+    # Error handling
+    KlavisError,
+    format_error_response,
     # Properties
     hubspot_list_properties,
     hubspot_search_by_property,
@@ -60,6 +72,8 @@ from tools import (
     hubspot_delete_association,
     hubspot_get_associations,
     hubspot_batch_create_associations,
+    # Schemas for type hints
+    KlavisBaseModel,
 )
 
 # Configure logging
@@ -68,6 +82,40 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 HUBSPOT_MCP_SERVER_PORT = int(os.getenv("HUBSPOT_MCP_SERVER_PORT", "5000"))
+
+
+def serialize_response(result: Any) -> str:
+    """
+    Serialize a response to JSON string.
+    
+    This function ensures that all responses are properly serialized,
+    whether they are Pydantic models or plain dictionaries.
+    """
+    if result is None:
+        return json.dumps({"status": "success"})
+    
+    # If it's a Pydantic model, use model_dump for serialization
+    if isinstance(result, KlavisBaseModel):
+        return json.dumps(result.model_dump(), indent=2, default=str)
+    
+    # If it has a model_dump method (Pydantic v2)
+    if hasattr(result, 'model_dump'):
+        return json.dumps(result.model_dump(), indent=2, default=str)
+    
+    # If it has a dict method (Pydantic v1 or custom)
+    if hasattr(result, 'dict'):
+        return json.dumps(result.dict(), indent=2, default=str)
+    
+    # If it's a dict, serialize directly
+    if isinstance(result, dict):
+        return json.dumps(result, indent=2, default=str)
+    
+    # For any other type, try to serialize or convert to string
+    try:
+        return json.dumps(result, indent=2, default=str)
+    except (TypeError, ValueError):
+        return str(result)
+
 
 def extract_access_token(request_or_scope) -> str:
     """Extract access token from x-auth-data header."""
@@ -94,9 +142,11 @@ def extract_access_token(request_or_scope) -> str:
         # Parse the JSON auth data to extract access_token
         auth_json = json.loads(auth_data)
         return auth_json.get('access_token', '')
-    except (json.JSONDecodeError, TypeError) as e:
-        logger.warning(f"Failed to parse auth data JSON: {e}")
+    except (json.JSONDecodeError, TypeError):
+        # Don't log the actual auth data
+        logger.warning("Failed to parse auth data JSON")
         return ""
+
 
 @click.command()
 @click.option("--port", default=HUBSPOT_MCP_SERVER_PORT, help="Port to listen on for HTTP")
@@ -1009,575 +1059,237 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
     async def call_tool(
         name: str, arguments: dict
     ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        """
+        Handle tool calls with sanitized error handling.
         
-        # Properties
-        if name == "hubspot_list_properties":
-            try:
+        All responses are serialized through Klavis schemas.
+        All errors are sanitized to never expose raw third-party API data.
+        """
+        try:
+            result = None
+            
+            # Properties
+            if name == "hubspot_list_properties":
                 object_type = arguments.get("object_type")
                 result = await hubspot_list_properties(object_type)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_search_by_property":
-            object_type = arguments.get("object_type")
-            property_name = arguments.get("property_name")
-            operator = arguments.get("operator")
-            value = arguments.get("value")
-            properties = arguments.get("properties", [])
-            limit = arguments.get("limit", 10)
+            
+            elif name == "hubspot_search_by_property":
+                object_type = arguments.get("object_type")
+                property_name = arguments.get("property_name")
+                operator = arguments.get("operator")
+                value = arguments.get("value")
+                properties = arguments.get("properties", [])
+                limit = arguments.get("limit", 10)
 
-            if not all([object_type, property_name, operator, value, properties]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Missing required parameters. Required: object_type, property_name, operator, value, properties.",
-                    )
-                ]
+                if not all([object_type, property_name, operator, value, properties]):
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error INVALID_INPUT (HTTP 400) for search",
+                        )
+                    ]
 
-            try:
                 result = await hubspot_search_by_property(
                     object_type, property_name, operator, value, properties, limit
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_property":
-            try:
+            
+            elif name == "hubspot_create_property":
                 result = await hubspot_create_property(
                     name=arguments["name"],
                     label=arguments["label"],
                     description=arguments["description"],
                     object_type=arguments["object_type"]
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Contacts
-        elif name == "hubspot_get_contacts":
-            try:
+            
+            # Contacts
+            elif name == "hubspot_get_contacts":
                 limit = arguments.get("limit", 10)
                 result = await hubspot_get_contacts(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_contact_by_id":
-            contact_id = arguments.get("contact_id")
-            if not contact_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: contact_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_get_contact_by_id":
+                contact_id = arguments.get("contact_id")
+                if not contact_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for contact: contact_id required",
+                        )
+                    ]
                 result = await hubspot_get_contact_by_id(contact_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_contact":
-            try:
+            
+            elif name == "hubspot_create_contact":
                 result = await hubspot_create_contact(arguments["properties"])
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_update_contact_by_id":
-            contact_id = arguments.get("contact_id")
-            updates = arguments.get("updates")
-            if not contact_id or not updates:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: contact_id and updates parameters are required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_update_contact_by_id":
+                contact_id = arguments.get("contact_id")
+                updates = arguments.get("updates")
+                if not contact_id or not updates:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for contact: contact_id and updates required",
+                        )
+                    ]
                 result = await hubspot_update_contact_by_id(
                     contact_id=contact_id,
                     updates=updates
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_contact_by_id":
-            contact_id = arguments.get("contact_id")
-            if not contact_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: contact_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_delete_contact_by_id":
+                contact_id = arguments.get("contact_id")
+                if not contact_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for contact: contact_id required",
+                        )
+                    ]
                 result = await hubspot_delete_contact_by_id(contact_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Companies
-        elif name == "hubspot_get_companies":
-            try:
+            
+            # Companies
+            elif name == "hubspot_get_companies":
                 limit = arguments.get("limit", 10)
                 result = await hubspot_get_companies(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_company_by_id":
-            company_id = arguments.get("company_id")
-            if not company_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: company_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_get_company_by_id":
+                company_id = arguments.get("company_id")
+                if not company_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for company: company_id required",
+                        )
+                    ]
                 result = await hubspot_get_company_by_id(company_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_companies":
-            try:
+            
+            elif name == "hubspot_create_companies":
                 result = await hubspot_create_companies(arguments["properties"])
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_update_company_by_id":
-            company_id = arguments.get("company_id")
-            updates = arguments.get("updates")
-            if not company_id or not updates:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: company_id and updates parameters are required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_update_company_by_id":
+                company_id = arguments.get("company_id")
+                updates = arguments.get("updates")
+                if not company_id or not updates:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for company: company_id and updates required",
+                        )
+                    ]
                 result = await hubspot_update_company_by_id(
                     company_id=company_id,
                     updates=updates
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_company_by_id":
-            company_id = arguments.get("company_id")
-            if not company_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: company_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_delete_company_by_id":
+                company_id = arguments.get("company_id")
+                if not company_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for company: company_id required",
+                        )
+                    ]
                 result = await hubspot_delete_company_by_id(company_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Deals
-        elif name == "hubspot_get_deals":
-            try:
+            
+            # Deals
+            elif name == "hubspot_get_deals":
                 limit = arguments.get("limit", 10)
                 result = await hubspot_get_deals(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_deal_by_id":
-            deal_id = arguments.get("deal_id")
-            if not deal_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: deal_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_get_deal_by_id":
+                deal_id = arguments.get("deal_id")
+                if not deal_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for deal: deal_id required",
+                        )
+                    ]
                 result = await hubspot_get_deal_by_id(deal_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_deal":
-            try:
+            
+            elif name == "hubspot_create_deal":
                 result = await hubspot_create_deal(arguments["properties"])
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_update_deal_by_id":
-            deal_id = arguments.get("deal_id")
-            updates = arguments.get("updates")
-            if not deal_id or not updates:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: deal_id and updates parameters are required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_update_deal_by_id":
+                deal_id = arguments.get("deal_id")
+                updates = arguments.get("updates")
+                if not deal_id or not updates:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for deal: deal_id and updates required",
+                        )
+                    ]
                 result = await hubspot_update_deal_by_id(
                     deal_id=deal_id,
                     updates=updates
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_deal_by_id":
-            deal_id = arguments.get("deal_id")
-            if not deal_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: deal_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_delete_deal_by_id":
+                deal_id = arguments.get("deal_id")
+                if not deal_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for deal: deal_id required",
+                        )
+                    ]
                 result = await hubspot_delete_deal_by_id(deal_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Deleted",
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Tickets
-        elif name == "hubspot_get_tickets":
-            try:
+            
+            # Tickets
+            elif name == "hubspot_get_tickets":
                 limit = arguments.get("limit", 10)
                 result = await hubspot_get_tickets(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_ticket_by_id":
-            ticket_id = arguments.get("ticket_id")
-            if not ticket_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: ticket_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_get_ticket_by_id":
+                ticket_id = arguments.get("ticket_id")
+                if not ticket_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for ticket: ticket_id required",
+                        )
+                    ]
                 result = await hubspot_get_ticket_by_id(ticket_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_ticket":
-            try:
+            
+            elif name == "hubspot_create_ticket":
                 result = await hubspot_create_ticket(arguments["properties"])
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_update_ticket_by_id":
-            ticket_id = arguments.get("ticket_id")
-            updates = arguments.get("updates")
-            if not ticket_id or not updates:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: ticket_id and updates parameters are required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_update_ticket_by_id":
+                ticket_id = arguments.get("ticket_id")
+                updates = arguments.get("updates")
+                if not ticket_id or not updates:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for ticket: ticket_id and updates required",
+                        )
+                    ]
                 result = await hubspot_update_ticket_by_id(
                     ticket_id=ticket_id,
                     updates=updates
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_ticket_by_id":
-            ticket_id = arguments.get("ticket_id")
-            if not ticket_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: ticket_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_delete_ticket_by_id":
+                ticket_id = arguments.get("ticket_id")
+                if not ticket_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for ticket: ticket_id required",
+                        )
+                    ]
                 result = await hubspot_delete_ticket_by_id(ticket_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Deleted",
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_note":
-            note_body = arguments.get("note_body")
-            if not note_body:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: note_body parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_create_note":
+                note_body = arguments.get("note_body")
+                if not note_body:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for note: note_body required",
+                        )
+                    ]
                 result = await hubspot_create_note(
                     note_body=note_body,
                     contact_ids=arguments.get("contact_ids"),
@@ -1587,157 +1299,67 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                     owner_id=arguments.get("owner_id"),
                     timestamp=arguments.get("timestamp")
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Tasks
-        elif name == "hubspot_get_tasks":
-            try:
+            
+            # Tasks
+            elif name == "hubspot_get_tasks":
                 limit = arguments.get("limit", 10)
                 result = await hubspot_get_tasks(limit)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_task_by_id":
-            task_id = arguments.get("task_id")
-            if not task_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: task_id parameter is required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_get_task_by_id":
+                task_id = arguments.get("task_id")
+                if not task_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for task: task_id required",
+                        )
+                    ]
                 result = await hubspot_get_task_by_id(task_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_create_task":
-            try:
+            
+            elif name == "hubspot_create_task":
                 result = await hubspot_create_task(arguments["properties"])
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=str(result),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_update_task_by_id":
-            task_id = arguments.get("task_id")
-            updates = arguments.get("updates")
-            if not task_id or not updates:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: task_id and updates parameters are required",
-                    )
-                ]
-            try:
+            
+            elif name == "hubspot_update_task_by_id":
+                task_id = arguments.get("task_id")
+                updates = arguments.get("updates")
+                if not task_id or not updates:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for task: task_id and updates required",
+                        )
+                    ]
                 result = await hubspot_update_task_by_id(
                     task_id=task_id,
                     updates=updates
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=result,
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_task_by_id":
-            task_id = arguments.get("task_id")
-            if not task_id:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: task_id parameter is required",
-                    )
-                ]
-            try:
-                result = await hubspot_delete_task_by_id(task_id)
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Deleted",
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        # Associations
-        elif name == "hubspot_create_association":
-            from_object_type = arguments.get("from_object_type")
-            from_object_id = arguments.get("from_object_id")
-            to_object_type = arguments.get("to_object_type")
-            to_object_id = arguments.get("to_object_id")
-            association_type_id = arguments.get("association_type_id")
             
-            if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_id are required",
-                    )
-                ]
-            try:
+            elif name == "hubspot_delete_task_by_id":
+                task_id = arguments.get("task_id")
+                if not task_id:
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for task: task_id required",
+                        )
+                    ]
+                result = await hubspot_delete_task_by_id(task_id)
+            
+            # Associations
+            elif name == "hubspot_create_association":
+                from_object_type = arguments.get("from_object_type")
+                from_object_id = arguments.get("from_object_id")
+                to_object_type = arguments.get("to_object_type")
+                to_object_id = arguments.get("to_object_id")
+                association_type_id = arguments.get("association_type_id")
+                
+                if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for association: from_object_type, from_object_id, to_object_type, to_object_id required",
+                        )
+                    ]
                 result = await hubspot_create_association(
                     from_object_type=from_object_type,
                     from_object_id=from_object_id,
@@ -1745,36 +1367,21 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                     to_object_id=to_object_id,
                     association_type_id=association_type_id
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_delete_association":
-            from_object_type = arguments.get("from_object_type")
-            from_object_id = arguments.get("from_object_id")
-            to_object_type = arguments.get("to_object_type")
-            to_object_id = arguments.get("to_object_id")
-            association_type_id = arguments.get("association_type_id")
             
-            if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_id are required",
-                    )
-                ]
-            try:
+            elif name == "hubspot_delete_association":
+                from_object_type = arguments.get("from_object_type")
+                from_object_id = arguments.get("from_object_id")
+                to_object_type = arguments.get("to_object_type")
+                to_object_id = arguments.get("to_object_id")
+                association_type_id = arguments.get("association_type_id")
+                
+                if not all([from_object_type, from_object_id, to_object_type, to_object_id]):
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for association: from_object_type, from_object_id, to_object_type, to_object_id required",
+                        )
+                    ]
                 result = await hubspot_delete_association(
                     from_object_type=from_object_type,
                     from_object_id=from_object_id,
@@ -1782,69 +1389,39 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                     to_object_id=to_object_id,
                     association_type_id=association_type_id
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_get_associations":
-            from_object_type = arguments.get("from_object_type")
-            from_object_id = arguments.get("from_object_id")
-            to_object_type = arguments.get("to_object_type")
             
-            if not all([from_object_type, from_object_id, to_object_type]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_object_type, from_object_id, and to_object_type are required",
-                    )
-                ]
-            try:
+            elif name == "hubspot_get_associations":
+                from_object_type = arguments.get("from_object_type")
+                from_object_id = arguments.get("from_object_id")
+                to_object_type = arguments.get("to_object_type")
+                
+                if not all([from_object_type, from_object_id, to_object_type]):
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for association: from_object_type, from_object_id, to_object_type required",
+                        )
+                    ]
                 result = await hubspot_get_associations(
                     from_object_type=from_object_type,
                     from_object_id=from_object_id,
                     to_object_type=to_object_type
                 )
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2),
-                    )
-                ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        elif name == "hubspot_batch_create_associations":
-            from_object_type = arguments.get("from_object_type")
-            from_object_id = arguments.get("from_object_id")
-            to_object_type = arguments.get("to_object_type")
-            to_object_ids = arguments.get("to_object_ids")
-            association_type_id = arguments.get("association_type_id")
             
-            if not all([from_object_type, from_object_id, to_object_type, to_object_ids]):
-                return [
-                    types.TextContent(
-                        type="text",
-                        text="Error: from_object_type, from_object_id, to_object_type, and to_object_ids are required",
-                    )
-                ]
-            try:
+            elif name == "hubspot_batch_create_associations":
+                from_object_type = arguments.get("from_object_type")
+                from_object_id = arguments.get("from_object_id")
+                to_object_type = arguments.get("to_object_type")
+                to_object_ids = arguments.get("to_object_ids")
+                association_type_id = arguments.get("association_type_id")
+                
+                if not all([from_object_type, from_object_id, to_object_type, to_object_ids]):
+                    return [
+                        types.TextContent(
+                            type="text",
+                            text="Error MISSING_REQUIRED_FIELD (HTTP 400) for association: from_object_type, from_object_id, to_object_type, to_object_ids required",
+                        )
+                    ]
                 result = await hubspot_batch_create_associations(
                     from_object_type=from_object_type,
                     from_object_id=from_object_id,
@@ -1852,26 +1429,40 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                     to_object_ids=to_object_ids,
                     association_type_id=association_type_id
                 )
+            
+            else:
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=f"Error OPERATION_FAILED: Unknown tool: {name}",
                     )
                 ]
-            except Exception as e:
-                logger.exception(f"Error executing tool {name}: {e}")
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=f"Error: {str(e)}",
-                    )
-                ]
-        
-        else:
+            
+            # Serialize the result through Klavis schemas
             return [
                 types.TextContent(
                     type="text",
-                    text=f"Unknown tool: {name}",
+                    text=serialize_response(result),
+                )
+            ]
+        
+        except KlavisError as e:
+            # Return sanitized error message (no vendor details)
+            logger.error(f"KlavisError in tool {name}: {e.code.value}")
+            return [
+                types.TextContent(
+                    type="text",
+                    text=format_error_response(e),
+                )
+            ]
+        except Exception as e:
+            # Catch any unexpected errors and sanitize them
+            # Log the full error internally but never expose to LLM
+            logger.exception(f"Unexpected error in tool {name}")
+            return [
+                types.TextContent(
+                    type="text",
+                    text="Error INTERNAL_ERROR",
                 )
             ]
 
