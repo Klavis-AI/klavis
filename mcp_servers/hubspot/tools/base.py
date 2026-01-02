@@ -77,11 +77,6 @@ def safe_api_call(
     """
     Execute an API call with proper error handling and sanitization.
     
-    This wrapper ensures that:
-    1. All exceptions from third-party APIs are caught
-    2. Raw vendor error messages are NEVER exposed
-    3. Only HTTP status codes and Klavis-defined error codes are returned
-    
     Args:
         func: The API function to call
         resource_type: Optional resource type for error context (e.g., "contact")
@@ -92,7 +87,7 @@ def safe_api_call(
         The result of the API call
         
     Raises:
-        KlavisError: A sanitized error with no vendor details
+        KlavisError: A sanitized error
     """
     try:
         return func(**kwargs)
@@ -117,8 +112,6 @@ async def async_safe_api_call(
     """
     Execute an async API call with proper error handling and sanitization.
     
-    This is the async version of safe_api_call.
-    
     Args:
         func: The API function to call (can be sync or async)
         resource_type: Optional resource type for error context
@@ -129,7 +122,7 @@ async def async_safe_api_call(
         The result of the API call
         
     Raises:
-        KlavisError: A sanitized error with no vendor details
+        KlavisError: A sanitized error
     """
     try:
         result = func(**kwargs)

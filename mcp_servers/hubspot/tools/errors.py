@@ -2,8 +2,6 @@
 Klavis standardized error handling for HubSpot MCP server.
 
 This module provides a sanitization layer for third-party API errors.
-Raw vendor error messages are NEVER exposed to the LLM. Only HTTP status
-codes and Klavis-defined error categories are returned.
 """
 
 import logging
@@ -16,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class KlavisErrorCode(str, Enum):
-    """Klavis-defined error codes. These are the ONLY error identifiers exposed to LLM."""
+    """Klavis-defined error codes."""
     
     # Authentication & Authorization
     AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED"
@@ -44,12 +42,7 @@ class KlavisErrorCode(str, Enum):
 
 
 class KlavisError(Exception):
-    """
-    Base Klavis error class.
-    
-    This is the ONLY error type that should be raised to the LLM layer.
-    It contains sanitized information without any third-party vendor details.
-    """
+    """Base Klavis error class with sanitized information."""
     
     def __init__(
         self,
@@ -63,7 +56,7 @@ class KlavisError(Exception):
         self.resource_type = resource_type
         self.resource_id = resource_id
         
-        # Build sanitized message - NO vendor details
+        # Build sanitized message
         message_parts = [f"Error {code.value}"]
         if http_status:
             message_parts.append(f"(HTTP {http_status})")
@@ -182,10 +175,7 @@ class OperationError(KlavisError):
 
 
 def _extract_http_status(exception: Exception) -> Optional[int]:
-    """
-    Extract HTTP status code from various exception types.
-    This is the ONLY vendor information we're allowed to return.
-    """
+    """Extract HTTP status code from various exception types."""
     # Check for status_code attribute (common in HTTP clients)
     if hasattr(exception, 'status_code'):
         return getattr(exception, 'status_code')
@@ -235,25 +225,21 @@ def sanitize_exception(
     """
     Convert any exception to a sanitized KlavisError.
     
-    This function ensures that NO raw vendor error messages are exposed.
-    Only HTTP status codes (if available) and Klavis-defined error codes
-    are included in the resulting error.
-    
     Args:
         exception: The original exception from the third-party API
         resource_type: Optional resource type for context (e.g., "contact", "deal")
         resource_id: Optional resource ID for context
         
     Returns:
-        A sanitized KlavisError with no vendor details
+        A sanitized KlavisError
     """
-    # Log the full exception for debugging (internal only, never exposed)
+    # Log the full exception for debugging
     logger.error(
         f"Third-party API error (sanitized before returning): {type(exception).__name__}",
         exc_info=True
     )
     
-    # Extract HTTP status code - the ONLY vendor info we can return
+    # Extract HTTP status code
     http_status = _extract_http_status(exception)
     
     # If it's already a KlavisError, return as-is

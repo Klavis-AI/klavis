@@ -3,8 +3,7 @@ HubSpot MCP Server with Klavis Sanitization Layer.
 
 This server ensures that:
 1. All responses are validated through Klavis-defined Pydantic schemas
-2. Raw third-party API data is NEVER exposed to the LLM
-3. Errors are sanitized to only expose HTTP status codes
+2. Errors are sanitized to expose only HTTP status codes
 """
 
 import contextlib
@@ -1447,7 +1446,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
             ]
         
         except KlavisError as e:
-            # Return sanitized error message (no vendor details)
+            # Return sanitized error message
             logger.error(f"KlavisError in tool {name}: {e.code.value}")
             return [
                 types.TextContent(
