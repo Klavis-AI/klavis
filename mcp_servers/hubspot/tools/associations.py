@@ -224,7 +224,7 @@ async def hubspot_batch_create_associations(
                 )
                 success_count += 1
             except KlavisError as e:
-                # Record the Klavis error code only, no vendor details
+                # Record the error code
                 errors.append(f"Failed for ID {to_id}: {e.code.value}")
             except Exception:
                 # Sanitize any unexpected errors
