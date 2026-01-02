@@ -1,12 +1,28 @@
+"""
+HubSpot Notes API tools with Klavis sanitization layer.
+
+All responses are validated through Pydantic schemas.
+All errors are sanitized to expose only HTTP status codes.
+"""
+
 import logging
-import json
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime
 from hubspot.crm.objects import SimplePublicObjectInputForCreate
-from .base import get_hubspot_client
+
+from .base import get_hubspot_client, safe_api_call
+from .schemas import (
+    CreateResult
+)
+from .errors import (
+    KlavisError,
+    ValidationError,
+    sanitize_exception
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
 
 async def hubspot_create_note(
     note_body: str,
@@ -16,7 +32,7 @@ async def hubspot_create_note(
     ticket_ids: Optional[List[str]] = None,
     owner_id: Optional[str] = None,
     timestamp: Optional[str] = None
-) -> str:
+) -> CreateResult:
     """
     Create a new note in HubSpot.
 
@@ -27,16 +43,17 @@ async def hubspot_create_note(
     - deal_ids: List of deal IDs to associate with the note
     - ticket_ids: List of ticket IDs to associate with the note
     - owner_id: HubSpot user ID of the note owner
-    - timestamp: ISO 8601 timestamp or milliseconds since epoch for when the note was created (defaults to current time if not provided)
+    - timestamp: ISO 8601 timestamp or milliseconds since epoch
 
     Returns:
-    - Status message with note ID
+    - Klavis-normalized CreateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
+        if not note_body:
+            raise ValidationError(resource_type="note")
+        
         # Prepare the note properties
         properties = {
             "hs_note_body": note_body
@@ -89,21 +106,28 @@ async def hubspot_create_note(
                     "types": [{"associationCategory": "HUBSPOT_DEFINED", "associationTypeId": 216}]
                 })
         
-        logger.info(f"Creating note with properties: {properties}")
+        logger.info(f"Creating note")
         
-        # Create the note using the objects API, Convert to HubSpot SDK format
+        # Create the note using the objects API
         note_input = SimplePublicObjectInputForCreate(
             properties=properties,
             associations=associations if associations else None
         )
         
-        result = client.crm.objects.notes.basic_api.create(
+        result = safe_api_call(
+            client.crm.objects.notes.basic_api.create,
+            resource_type="note",
             simple_public_object_input_for_create=note_input
         )
         
-        logger.info(f"Successfully created note with ID: {result.id}")
-        return f"Note created successfully with ID: {result.id}"
+        logger.info(f"Successfully created note")
+        return CreateResult(
+            status="success",
+            message="Note created successfully",
+            resource_id=getattr(result, 'id', None)
+        )
         
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error creating note: {e}")
-        raise e 
+        raise sanitize_exception(e, resource_type="note")

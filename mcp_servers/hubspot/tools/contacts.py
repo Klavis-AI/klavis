@@ -1,12 +1,36 @@
+"""
+HubSpot Contacts API tools with Klavis sanitization layer.
+
+All responses are validated through Pydantic schemas.
+All errors are sanitized to expose only HTTP status codes.
+"""
+
 import logging
 import json
 from hubspot.crm.contacts import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+
+from .base import get_hubspot_client, safe_api_call
+from .schemas import (
+    Contact,
+    ContactList,
+    ContactProperties,
+    CreateResult,
+    UpdateResult,
+    DeleteResult,
+    normalize_contact
+)
+from .errors import (
+    KlavisError,
+    ValidationError,
+    sanitize_exception,
+    format_error_response
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def hubspot_get_contacts(limit: int = 10):
+
+async def hubspot_get_contacts(limit: int = 10) -> ContactList:
     """
     Fetch a list of contacts from HubSpot.
 
@@ -14,22 +38,38 @@ async def hubspot_get_contacts(limit: int = 10):
     - limit: Number of contacts to retrieve
 
     Returns:
-    - Paginated contacts response
+    - Klavis-normalized ContactList schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching up to {limit} contacts from HubSpot")
-        result = client.crm.contacts.basic_api.get_page(limit=limit)
+        
+        # Make API call with error sanitization
+        result = safe_api_call(
+            client.crm.contacts.basic_api.get_page,
+            resource_type="contact",
+            limit=limit
+        )
+        
+        # Normalize response through Klavis schema
+        contacts = []
+        for raw_contact in getattr(result, 'results', []) or []:
+            contacts.append(normalize_contact(raw_contact))
+        
         logger.info("Successfully fetched contacts")
-        return result
+        return ContactList(
+            contacts=contacts,
+            total=len(contacts),
+            has_more=bool(getattr(result, 'paging', None))
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching contacts: {e}")
-        raise e
+        raise sanitize_exception(e, resource_type="contact")
 
-async def hubspot_get_contact_by_id(contact_id: str):
+
+async def hubspot_get_contact_by_id(contact_id: str) -> Contact:
     """
     Get a specific contact by ID.
 
@@ -37,22 +77,29 @@ async def hubspot_get_contact_by_id(contact_id: str):
     - contact_id: ID of the contact to retrieve
 
     Returns:
-    - Contact object
+    - Klavis-normalized Contact schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Fetching contact with ID: {contact_id}")
-        result = client.crm.contacts.basic_api.get_by_id(contact_id)
+        
+        result = safe_api_call(
+            client.crm.contacts.basic_api.get_by_id,
+            resource_type="contact",
+            resource_id=contact_id,
+            contact_id=contact_id
+        )
+        
         logger.info("Successfully fetched contact")
-        return result
+        return normalize_contact(result)
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error fetching contact by ID: {e}")
-        raise e
+        raise sanitize_exception(e, resource_type="contact", resource_id=contact_id)
 
-async def hubspot_delete_contact_by_id(contact_id: str) -> str:
+
+async def hubspot_delete_contact_by_id(contact_id: str) -> DeleteResult:
     """
     Delete a contact by ID.
 
@@ -60,22 +107,33 @@ async def hubspot_delete_contact_by_id(contact_id: str) -> str:
     - contact_id: ID of the contact to delete
 
     Returns:
-    - Status message
+    - Klavis-normalized DeleteResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
         logger.info(f"Deleting contact with ID: {contact_id}")
-        client.crm.contacts.basic_api.archive(contact_id)
+        
+        safe_api_call(
+            client.crm.contacts.basic_api.archive,
+            resource_type="contact",
+            resource_id=contact_id,
+            contact_id=contact_id
+        )
+        
         logger.info("Successfully deleted contact")
-        return "Deleted"
+        return DeleteResult(
+            status="success",
+            message="Contact deleted successfully",
+            resource_id=contact_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error deleting contact: {e}")
-        raise e
+        raise sanitize_exception(e, resource_type="contact", resource_id=contact_id)
 
-async def hubspot_create_contact(properties: str) -> str:
+
+async def hubspot_create_contact(properties: str) -> CreateResult:
     """
     Create a new contact using JSON string of properties.
 
@@ -83,16 +141,18 @@ async def hubspot_create_contact(properties: str) -> str:
     - properties: JSON string containing contact fields
 
     Returns:
-    - Status message
+    - Klavis-normalized CreateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
-        properties_dict = json.loads(properties)
+        # Parse and validate input
+        try:
+            properties_dict = json.loads(properties)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="contact")
         
-        # Common property name mistakes mapping
+        # Common property name validation
         property_corrections = {
             'first_name': 'firstname',
             'last_name': 'lastname',
@@ -105,30 +165,37 @@ async def hubspot_create_contact(properties: str) -> str:
             'zipcode': 'zip',
         }
         
-        # Check for common mistakes and provide helpful suggestions
-        suggestions = []
+        # Check for common mistakes
+        invalid_props = []
         for prop_key in properties_dict.keys():
             if prop_key in property_corrections:
-                suggestions.append(
-                    f"Property '{prop_key}' should be '{property_corrections[prop_key]}'"
-                )
+                invalid_props.append(prop_key)
         
-        if suggestions:
-            error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
-            error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='contacts' to see all valid property names."
-            logger.warning(error_msg)
-            return f"Error: {error_msg}"
+        if invalid_props:
+            raise ValidationError(resource_type="contact")
         
-        logger.info(f"Creating contact with properties: {properties_dict}")
+        logger.info(f"Creating contact")
+        
         data = SimplePublicObjectInputForCreate(properties=properties_dict)
-        client.crm.contacts.basic_api.create(simple_public_object_input_for_create=data)
+        result = safe_api_call(
+            client.crm.contacts.basic_api.create,
+            resource_type="contact",
+            simple_public_object_input_for_create=data
+        )
+        
         logger.info("Successfully created contact")
-        return "Created"
+        return CreateResult(
+            status="success",
+            message="Contact created successfully",
+            resource_id=getattr(result, 'id', None)
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Error creating contact: {e}")
-        raise e
+        raise sanitize_exception(e, resource_type="contact")
 
-async def hubspot_update_contact_by_id(contact_id: str, updates: str) -> str:
+
+async def hubspot_update_contact_by_id(contact_id: str, updates: str) -> UpdateResult:
     """
     Update a contact by ID.
 
@@ -137,19 +204,35 @@ async def hubspot_update_contact_by_id(contact_id: str, updates: str) -> str:
     - updates: JSON string of properties to update
 
     Returns:
-    - Status message
+    - Klavis-normalized UpdateResult schema
     """
     client = get_hubspot_client()
-    if not client:
-        raise ValueError("HubSpot client not available. Please check authentication.")
     
     try:
-        updates = json.loads(updates)
-        logger.info(f"Updating contact ID: {contact_id} with updates: {updates}")
-        data = SimplePublicObjectInput(properties=updates)
-        client.crm.contacts.basic_api.update(contact_id, data)
+        # Parse and validate input
+        try:
+            updates_dict = json.loads(updates)
+        except json.JSONDecodeError:
+            raise ValidationError(resource_type="contact")
+        
+        logger.info(f"Updating contact ID: {contact_id}")
+        
+        data = SimplePublicObjectInput(properties=updates_dict)
+        safe_api_call(
+            client.crm.contacts.basic_api.update,
+            resource_type="contact",
+            resource_id=contact_id,
+            contact_id=contact_id,
+            simple_public_object_input=data
+        )
+        
         logger.info("Successfully updated contact")
-        return "Done"
+        return UpdateResult(
+            status="success",
+            message="Contact updated successfully",
+            resource_id=contact_id
+        )
+    except KlavisError:
+        raise
     except Exception as e:
-        logger.error(f"Update failed: {e}")
-        return f"Error occurred: {e}"
+        raise sanitize_exception(e, resource_type="contact", resource_id=contact_id)

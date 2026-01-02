@@ -1,5 +1,73 @@
+"""
+HubSpot MCP Server Tools Module.
+
+This module provides sanitized tools for interacting with HubSpot CRM.
+All responses are validated through Klavis-defined Pydantic schemas, and all errors are sanitized.
+"""
+
 from .base import (
     auth_token_context,
+    get_hubspot_client,
+    safe_api_call,
+)
+
+from .errors import (
+    KlavisError,
+    KlavisErrorCode,
+    AuthenticationError,
+    AuthorizationError,
+    ResourceNotFoundError,
+    ValidationError,
+    RateLimitError,
+    ServiceUnavailableError,
+    OperationError,
+    sanitize_exception,
+    format_error_response,
+)
+
+from .schemas import (
+    # Base
+    KlavisBaseModel,
+    # Contact schemas
+    Contact,
+    ContactList,
+    ContactProperties,
+    # Company schemas
+    Company,
+    CompanyList,
+    CompanyProperties,
+    # Deal schemas
+    Deal,
+    DealList,
+    DealProperties,
+    # Ticket schemas
+    Ticket,
+    TicketList,
+    TicketProperties,
+    # Task schemas
+    Task,
+    TaskList,
+    TaskProperties,
+    # Note schemas
+    Note,
+    NoteProperties,
+    # Property schemas
+    PropertyDefinition,
+    PropertyList,
+    # Association schemas
+    AssociationType,
+    AssociationRecord,
+    AssociationResult,
+    AssociationCreateResult,
+    BatchAssociationResult,
+    # Search schemas
+    SearchResults,
+    SearchResultItem,
+    # Operation results
+    OperationResult,
+    CreateResult,
+    UpdateResult,
+    DeleteResult,
 )
 
 from .properties import (
@@ -62,6 +130,54 @@ from .associations import (
 __all__ = [
     # Base
     "auth_token_context",
+    "get_hubspot_client",
+    "safe_api_call",
+    
+    # Errors
+    "KlavisError",
+    "KlavisErrorCode",
+    "AuthenticationError",
+    "AuthorizationError",
+    "ResourceNotFoundError",
+    "ValidationError",
+    "RateLimitError",
+    "ServiceUnavailableError",
+    "OperationError",
+    "sanitize_exception",
+    "format_error_response",
+    
+    # Schemas
+    "KlavisBaseModel",
+    "Contact",
+    "ContactList",
+    "ContactProperties",
+    "Company",
+    "CompanyList",
+    "CompanyProperties",
+    "Deal",
+    "DealList",
+    "DealProperties",
+    "Ticket",
+    "TicketList",
+    "TicketProperties",
+    "Task",
+    "TaskList",
+    "TaskProperties",
+    "Note",
+    "NoteProperties",
+    "PropertyDefinition",
+    "PropertyList",
+    "AssociationType",
+    "AssociationRecord",
+    "AssociationResult",
+    "AssociationCreateResult",
+    "BatchAssociationResult",
+    "SearchResults",
+    "SearchResultItem",
+    "OperationResult",
+    "CreateResult",
+    "UpdateResult",
+    "DeleteResult",
 
     # Properties
     "hubspot_list_properties",
