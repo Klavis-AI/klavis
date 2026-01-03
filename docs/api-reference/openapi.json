@@ -17149,12 +17149,12 @@
       },
       "HubSpotCompany": {
         "properties": {
-          "name": {
+          "company_name": {
             "type": "string",
-            "title": "Name",
+            "title": "Company Name",
             "description": "Company name"
           },
-          "domain": {
+          "website_domain": {
             "anyOf": [
               {
                 "type": "string"
@@ -17163,8 +17163,8 @@
                 "type": "null"
               }
             ],
-            "title": "Domain",
-            "description": "Company domain/website"
+            "title": "Website Domain",
+            "description": "Company website domain"
           },
           "industry": {
             "anyOf": [
@@ -17190,7 +17190,7 @@
             "title": "City",
             "description": "Company city"
           },
-          "state": {
+          "state_region": {
             "anyOf": [
               {
                 "type": "string"
@@ -17199,7 +17199,7 @@
                 "type": "null"
               }
             ],
-            "title": "State",
+            "title": "State Region",
             "description": "Company state/region"
           },
           "country": {
@@ -17214,7 +17214,7 @@
             "title": "Country",
             "description": "Company country"
           },
-          "phone": {
+          "phone_number": {
             "anyOf": [
               {
                 "type": "string"
@@ -17223,10 +17223,10 @@
                 "type": "null"
               }
             ],
-            "title": "Phone",
+            "title": "Phone Number",
             "description": "Company phone number"
           },
-          "number_of_employees": {
+          "employee_count": {
             "anyOf": [
               {
                 "type": "string"
@@ -17235,10 +17235,10 @@
                 "type": "null"
               }
             ],
-            "title": "Number Of Employees",
+            "title": "Employee Count",
             "description": "Number of employees"
           },
-          "annual_revenue": {
+          "yearly_revenue": {
             "anyOf": [
               {
                 "type": "string"
@@ -17247,35 +17247,35 @@
                 "type": "null"
               }
             ],
-            "title": "Annual Revenue",
-            "description": "Annual revenue"
+            "title": "Yearly Revenue",
+            "description": "Yearly revenue"
           }
         },
         "type": "object",
         "required": [
-          "name"
+          "company_name"
         ],
         "title": "HubSpotCompany",
         "description": "HubSpot Company object.\nBase object, typically doesn't associate upwards in this schema, but contacts/deals associate to it."
       },
       "HubSpotContact": {
         "properties": {
-          "firstname": {
+          "first_name": {
             "type": "string",
-            "title": "Firstname",
+            "title": "First Name",
             "description": "Contact first name"
           },
-          "lastname": {
+          "last_name": {
             "type": "string",
-            "title": "Lastname",
+            "title": "Last Name",
             "description": "Contact last name"
           },
-          "email": {
+          "email_address": {
             "type": "string",
-            "title": "Email",
+            "title": "Email Address",
             "description": "Contact email address"
           },
-          "phone": {
+          "phone_number": {
             "anyOf": [
               {
                 "type": "string"
@@ -17284,7 +17284,7 @@
                 "type": "null"
               }
             ],
-            "title": "Phone",
+            "title": "Phone Number",
             "description": "Contact phone number"
           },
           "job_title": {
@@ -17302,9 +17302,9 @@
         },
         "type": "object",
         "required": [
-          "firstname",
-          "lastname",
-          "email"
+          "first_name",
+          "last_name",
+          "email_address"
         ],
         "title": "HubSpotContact",
         "description": "HubSpot Contact object.\nCan be associated with: Companies."
@@ -17397,12 +17397,12 @@
       },
       "HubSpotDeal": {
         "properties": {
-          "deal_name": {
+          "title": {
             "type": "string",
-            "title": "Deal Name",
-            "description": "Deal name"
+            "title": "Title",
+            "description": "Deal title"
           },
-          "amount": {
+          "value": {
             "anyOf": [
               {
                 "type": "string"
@@ -17411,10 +17411,10 @@
                 "type": "null"
               }
             ],
-            "title": "Amount",
-            "description": "Deal amount"
+            "title": "Value",
+            "description": "Deal value/amount"
           },
-          "deal_stage": {
+          "stage": {
             "anyOf": [
               {
                 "type": "string"
@@ -17423,7 +17423,7 @@
                 "type": "null"
               }
             ],
-            "title": "Deal Stage",
+            "title": "Stage",
             "description": "Deal stage"
           },
           "pipeline": {
@@ -17438,7 +17438,7 @@
             "title": "Pipeline",
             "description": "Deal pipeline"
           },
-          "close_date": {
+          "expected_close_date": {
             "anyOf": [
               {
                 "type": "string"
@@ -17447,25 +17447,25 @@
                 "type": "null"
               }
             ],
-            "title": "Close Date",
+            "title": "Expected Close Date",
             "description": "Expected close date"
           }
         },
         "type": "object",
         "required": [
-          "deal_name"
+          "title"
         ],
         "title": "HubSpotDeal",
         "description": "HubSpot Deal object.\nCan be associated with: Contacts, Companies."
       },
       "HubSpotTask": {
         "properties": {
-          "subject": {
+          "title": {
             "type": "string",
-            "title": "Subject",
-            "description": "Task subject/title"
+            "title": "Title",
+            "description": "Task title"
           },
-          "body": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -17474,10 +17474,10 @@
                 "type": "null"
               }
             ],
-            "title": "Body",
-            "description": "Task body/description"
+            "title": "Description",
+            "description": "Task description/details"
           },
-          "status": {
+          "task_status": {
             "anyOf": [
               {
                 "type": "string"
@@ -17486,10 +17486,10 @@
                 "type": "null"
               }
             ],
-            "title": "Status",
+            "title": "Task Status",
             "description": "Task status (NOT_STARTED, IN_PROGRESS, COMPLETED, WAITING, DEFERRED)"
           },
-          "priority": {
+          "priority_level": {
             "anyOf": [
               {
                 "type": "string"
@@ -17498,10 +17498,10 @@
                 "type": "null"
               }
             ],
-            "title": "Priority",
+            "title": "Priority Level",
             "description": "Task priority (HIGH, MEDIUM, LOW)"
           },
-          "due_date": {
+          "deadline": {
             "anyOf": [
               {
                 "type": "string"
@@ -17510,25 +17510,25 @@
                 "type": "null"
               }
             ],
-            "title": "Due Date",
-            "description": "Task due date (ISO 8601 format)"
+            "title": "Deadline",
+            "description": "Task deadline (ISO 8601 format)"
           }
         },
         "type": "object",
         "required": [
-          "subject"
+          "title"
         ],
         "title": "HubSpotTask",
         "description": "HubSpot Task object.\nCan be associated with: Contacts, Companies, Deals, Tickets."
       },
       "HubSpotTicket": {
         "properties": {
-          "subject": {
+          "title": {
             "type": "string",
-            "title": "Subject",
-            "description": "Ticket subject"
+            "title": "Title",
+            "description": "Ticket title"
           },
-          "content": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -17537,8 +17537,8 @@
                 "type": "null"
               }
             ],
-            "title": "Content",
-            "description": "Ticket content/description"
+            "title": "Description",
+            "description": "Ticket description/details"
           },
           "pipeline": {
             "anyOf": [
@@ -17552,7 +17552,7 @@
             "title": "Pipeline",
             "description": "Ticket pipeline"
           },
-          "pipeline_stage": {
+          "workflow_stage": {
             "anyOf": [
               {
                 "type": "string"
@@ -17561,10 +17561,10 @@
                 "type": "null"
               }
             ],
-            "title": "Pipeline Stage",
-            "description": "Ticket pipeline stage"
+            "title": "Workflow Stage",
+            "description": "Ticket workflow stage"
           },
-          "priority": {
+          "priority_level": {
             "anyOf": [
               {
                 "type": "string"
@@ -17573,13 +17573,13 @@
                 "type": "null"
               }
             ],
-            "title": "Priority",
+            "title": "Priority Level",
             "description": "Ticket priority (HIGH, MEDIUM, LOW)"
           }
         },
         "type": "object",
         "required": [
-          "subject"
+          "title"
         ],
         "title": "HubSpotTicket",
         "description": "HubSpot Ticket object.\nCan be associated with: Contacts, Companies."
