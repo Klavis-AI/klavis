@@ -294,7 +294,7 @@ async def search_documents(
     include_shared_drives: bool = False,
     include_organization_domain_documents: bool = False,
     order_by: list[str] | None = None,
-    limit: int = 50,
+    limit: int = 10,
     pagination_token: str | None = None,
 ) -> Dict[str, Any]:
     """Search for documents in the user's Google Drive."""
@@ -337,6 +337,8 @@ async def search_documents(
 
             results = service.files().list(**params).execute()
             batch = results.get("files", [])
+            # Extract only id, name, and mimeType fields from each file
+            batch = [{"id": f.get("id"), "name": f.get("name"), "mimeType": f.get("mimeType")} for f in batch]
             files.extend(batch[: limit - len(files)])
 
             pagination_token = results.get("nextPageToken")
@@ -360,7 +362,7 @@ async def search_and_retrieve_documents(
     include_shared_drives: bool = False,
     include_organization_domain_documents: bool = False,
     order_by: list[str] | None = None,
-    limit: int = 50,
+    limit: int = 10,
     pagination_token: str | None = None,
 ) -> Dict[str, Any]:
     """Search and retrieve the contents of Google documents in the user's Google Drive."""
@@ -612,7 +614,7 @@ def main(
                         "limit": {
                             "type": "integer",
                             "description": "The number of documents to list.",
-                            "default": 50,
+                            "default": 10,
                         },
                         "pagination_token": {
                             "type": "string",
@@ -671,7 +673,7 @@ def main(
                         "limit": {
                             "type": "integer",
                             "description": "The number of documents to list.",
-                            "default": 50,
+                            "default": 10,
                         },
                         "pagination_token": {
                             "type": "string",
@@ -796,7 +798,7 @@ def main(
                     include_shared_drives=arguments.get("include_shared_drives", False),
                     include_organization_domain_documents=arguments.get("include_organization_domain_documents", False),
                     order_by=arguments.get("order_by"),
-                    limit=arguments.get("limit", 50),
+                    limit=arguments.get("limit", 10),
                     pagination_token=arguments.get("pagination_token"),
                 )
                 return [
@@ -824,7 +826,7 @@ def main(
                     include_shared_drives=arguments.get("include_shared_drives", False),
                     include_organization_domain_documents=arguments.get("include_organization_domain_documents", False),
                     order_by=arguments.get("order_by"),
-                    limit=arguments.get("limit", 50),
+                    limit=arguments.get("limit", 10),
                     pagination_token=arguments.get("pagination_token"),
                 )
                 return [
