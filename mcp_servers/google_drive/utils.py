@@ -7,18 +7,19 @@ def convert_document_to_html(document: dict) -> str:
         "</head><body>"
     )
     for element in document["body"]["content"]:
-        html += convert_structural_element(element)
+        html += _convert_structural_element_html(element)
     html += "</body></html>"
     return html
 
-def convert_structural_element(element: dict, wrap_paragraphs: bool = True) -> str:
+
+def _convert_structural_element_html(element: dict, wrap_paragraphs: bool = True) -> str:
     if "sectionBreak" in element or "tableOfContents" in element:
         return ""
 
     elif "paragraph" in element:
         paragraph_content = ""
 
-        prepend, append = get_paragraph_style_tags(
+        prepend, append = _get_paragraph_style_tags_html(
             style=element["paragraph"]["paragraphStyle"],
             wrap_paragraphs=wrap_paragraphs,
         )
@@ -26,7 +27,7 @@ def convert_structural_element(element: dict, wrap_paragraphs: bool = True) -> s
         for item in element["paragraph"]["elements"]:
             if "textRun" not in item:
                 continue
-            paragraph_content += extract_paragraph_content(item["textRun"])
+            paragraph_content += _extract_paragraph_content_html(item["textRun"])
 
         if not paragraph_content:
             return ""
@@ -37,26 +38,26 @@ def convert_structural_element(element: dict, wrap_paragraphs: bool = True) -> s
         table = [
             [
                 "".join([
-                    convert_structural_element(element=cell_element, wrap_paragraphs=False)
+                    _convert_structural_element_html(element=cell_element, wrap_paragraphs=False)
                     for cell_element in cell["content"]
                 ])
                 for cell in row["tableCells"]
             ]
             for row in element["table"]["tableRows"]
         ]
-        return table_list_to_html(table)
+        return _table_list_to_html(table)
 
     else:
         raise ValueError(f"Unknown document body element type: {element}")
 
 
-def extract_paragraph_content(text_run: dict) -> str:
+def _extract_paragraph_content_html(text_run: dict) -> str:
     content = text_run["content"]
     style = text_run["textStyle"]
-    return apply_text_style(content, style)
+    return _apply_text_style_html(content, style)
 
 
-def apply_text_style(content: str, style: dict) -> str:
+def _apply_text_style_html(content: str, style: dict) -> str:
     content = content.rstrip("\n")
     content = content.replace("\n", "<br>")
     italic = style.get("italic", False)
@@ -68,7 +69,7 @@ def apply_text_style(content: str, style: dict) -> str:
     return content
 
 
-def get_paragraph_style_tags(style: dict, wrap_paragraphs: bool = True) -> tuple[str, str]:
+def _get_paragraph_style_tags_html(style: dict, wrap_paragraphs: bool = True) -> tuple[str, str]:
     named_style = style["namedStyleType"]
     if named_style == "NORMAL_TEXT":
         return ("<p>", "</p>") if wrap_paragraphs else ("", "")
@@ -86,7 +87,7 @@ def get_paragraph_style_tags(style: dict, wrap_paragraphs: bool = True) -> tuple
     return ("<p>", "</p>") if wrap_paragraphs else ("", "")
 
 
-def table_list_to_html(table: list[list[str]]) -> str:
+def _table_list_to_html(table: list[list[str]]) -> str:
     html = "<table>"
     for row in table:
         html += "<tr>"
@@ -98,44 +99,48 @@ def table_list_to_html(table: list[list[str]]) -> str:
     html += "</table>"
     return html
 
+
 # doc to markdown
 def convert_document_to_markdown(document: dict) -> str:
     md = f"---\ntitle: {document['title']}\ndocumentId: {document['documentId']}\n---\n"
     for element in document["body"]["content"]:
-        md += convert_structural_element(element)
+        md += _convert_structural_element_md(element)
     return md
 
 
-def convert_structural_element(element: dict) -> str:
+def _convert_structural_element_md(element: dict, in_table: bool = False) -> str:
     if "sectionBreak" in element or "tableOfContents" in element:
         return ""
 
     elif "paragraph" in element:
         md = ""
-        prepend = get_paragraph_style_prepend_str(element["paragraph"]["paragraphStyle"])
+        prepend = _get_paragraph_style_prepend_str_md(element["paragraph"]["paragraphStyle"]) if not in_table else ""
         for item in element["paragraph"]["elements"]:
             if "textRun" not in item:
                 continue
-            content = extract_paragraph_content(item["textRun"])
+            content = _extract_paragraph_content_md(item["textRun"], in_table=in_table)
             md += f"{prepend}{content}"
         return md
 
     elif "table" in element:
-        return convert_structural_element(element)
+        return _table_to_markdown(element["table"])
 
     else:
         raise ValueError(f"Unknown document body element type: {element}")
 
 
-def extract_paragraph_content(text_run: dict) -> str:
+def _extract_paragraph_content_md(text_run: dict, in_table: bool = False) -> str:
     content = text_run["content"]
     style = text_run["textStyle"]
-    return apply_text_style(content, style)
+    return _apply_text_style_md(content, style, in_table=in_table)
 
 
-def apply_text_style(content: str, style: dict) -> str:
-    append = "\n" if content.endswith("\n") else ""
+def _apply_text_style_md(content: str, style: dict, in_table: bool = False) -> str:
+    append = "\n" if content.endswith("\n") and not in_table else ""
     content = content.rstrip("\n")
+    if in_table:
+        # Replace newlines with spaces in table cells, and escape pipes
+        content = content.replace("\n", " ").replace("|", "\\|")
     italic = style.get("italic", False)
     bold = style.get("bold", False)
     if italic:
@@ -145,7 +150,7 @@ def apply_text_style(content: str, style: dict) -> str:
     return f"{content}{append}"
 
 
-def get_paragraph_style_prepend_str(style: dict) -> str:
+def _get_paragraph_style_prepend_str_md(style: dict) -> str:
     named_style = style["namedStyleType"]
     if named_style == "NORMAL_TEXT":
         return ""
@@ -160,3 +165,41 @@ def get_paragraph_style_prepend_str(style: dict) -> str:
         except ValueError:
             return ""
     return ""
+
+
+def _table_to_markdown(table: dict) -> str:
+    """Convert a Google Docs table to Markdown format."""
+    rows = table.get("tableRows", [])
+    if not rows:
+        return ""
+
+    md_rows = []
+    for row in rows:
+        cells = []
+        for cell in row.get("tableCells", []):
+            cell_content = "".join([
+                _convert_structural_element_md(element, in_table=True)
+                for element in cell.get("content", [])
+            ])
+            # Clean up cell content for markdown table
+            cell_content = cell_content.strip()
+            cells.append(cell_content)
+        md_rows.append(cells)
+
+    if not md_rows:
+        return ""
+
+    # Build markdown table
+    md = "\n"
+    # Header row
+    md += "| " + " | ".join(md_rows[0]) + " |\n"
+    # Separator row
+    md += "| " + " | ".join(["---"] * len(md_rows[0])) + " |\n"
+    # Data rows
+    for row in md_rows[1:]:
+        # Ensure row has same number of columns as header
+        while len(row) < len(md_rows[0]):
+            row.append("")
+        md += "| " + " | ".join(row) + " |\n"
+    md += "\n"
+    return md
