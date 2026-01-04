@@ -25,6 +25,115 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
+def get_path(data: Dict, path: str) -> Any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: Dict, mapping: Dict[str, Any]) -> Dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules
+
+ATTENDEE_RULES = {
+    "email": "email",
+    "name": "displayName",
+    "responseStatus": "responseStatus",
+    "isOrganizer": "organizer",
+    "isSelf": "self",
+    "isOptional": "optional",
+    "comment": "comment",
+}
+
+CALENDAR_RULES = {
+    "id": "id",
+    "name": "summary",
+    "description": "description",
+    "location": "location",
+    "timezone": "timeZone",
+}
+
+ATTACHMENT_RULES = {
+    "url": "fileUrl",
+    "title": "title",
+    "mimeType": "mimeType",
+    "fileId": "fileId",
+}
+
+EVENT_RULES = {
+    "id": "id",
+    "title": "summary",
+    "description": "description",
+    "location": "location",
+    "status": "status",
+    "type": "eventType",
+    "visibility": "visibility",
+    "link": "htmlLink",
+    "meetingLink": "hangoutLink",
+    "created": "created",
+    "updated": "updated",
+    # Creator/Organizer
+    "creatorEmail": "creator.email",
+    "creatorName": "creator.displayName",
+    "organizerEmail": "organizer.email",
+    "organizerName": "organizer.displayName",
+    # Recurrence
+    "recurrenceId": "recurringEventId",
+    "recurrence": "recurrence",
+    # Date/time handling
+    "startTime": lambda x: x.get('start', {}).get('dateTime'),
+    "endTime": lambda x: x.get('end', {}).get('dateTime'),
+    "startDate": lambda x: x.get('start', {}).get('date'),
+    "endDate": lambda x: x.get('end', {}).get('date'),
+    "timezone": lambda x: x.get('start', {}).get('timeZone') or x.get('end', {}).get('timeZone'),
+    # Nested objects
+    "attendees": lambda x: [
+        normalize(a, ATTENDEE_RULES) for a in x.get('attendees', [])
+    ] if x.get('attendees') else None,
+    "attachments": lambda x: [
+        normalize(a, ATTACHMENT_RULES) for a in x.get('attachments', [])
+    ] if x.get('attachments') else None,
+}
+
+
+def normalize_event(raw_event: Dict) -> Dict:
+    """Normalize a single event and add computed fields."""
+    event = normalize(raw_event, EVENT_RULES)
+    # Add day of week (computed field)
+    datetime_str = event.get('startTime') or event.get('startDate')
+    if datetime_str:
+        event['dayOfWeek'] = get_day_of_week(datetime_str)
+    return event
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -158,7 +267,7 @@ async def list_calendars(
         service = get_calendar_service(access_token)
         
         max_results = max(1, min(max_results, 250))
-        calendars = (
+        raw_response = (
             service.calendarList()
             .list(
                 pageToken=next_page_token,
@@ -169,13 +278,14 @@ async def list_calendars(
             .execute()
         )
 
-        items = calendars.get("items", [])
-        keys = ["description", "id", "summary", "timeZone"]
-        relevant_items = [{k: i.get(k) for k in keys if i.get(k)} for i in items]
+        calendars = [
+            normalize(item, CALENDAR_RULES)
+            for item in raw_response.get("items", [])
+        ]
         return {
-            "next_page_token": calendars.get("nextPageToken"),
-            "num_calendars": len(relevant_items),
-            "calendars": relevant_items,
+            "nextPageToken": raw_response.get("nextPageToken"),
+            "count": len(calendars),
+            "calendars": calendars,
         }
     except HttpError as e:
         logger.error(f"Google Calendar API error: {e}")
@@ -242,21 +352,14 @@ async def create_event(
         # Set conferenceDataVersion to 1 when creating conferences
         conference_data_version = 1 if add_google_meet else 0
 
-        created_event = service.events().insert(
+        raw_event = service.events().insert(
             calendarId=calendar_id, 
             body=event,
             sendUpdates=send_updates,
             conferenceDataVersion=conference_data_version
         ).execute()
         
-        # Add day of the week to the created event
-        start_time = created_event.get("start", {})
-        datetime_str = start_time.get("dateTime") or start_time.get("date")
-        day_of_week = get_day_of_week(datetime_str)
-        if day_of_week:
-            created_event["dayOfWeek"] = day_of_week
-        
-        return {"event": created_event}
+        return {"event": normalize_event(raw_event)}
     except HttpError as e:
         logger.error(f"Google Calendar API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -288,7 +391,7 @@ async def list_events(
         if min_end_dt > max_start_dt:
             min_end_dt, max_start_dt = max_start_dt, min_end_dt
 
-        events_result = (
+        raw_response = (
             service.events()
             .list(
                 calendarId=calendar_id,
@@ -301,38 +404,12 @@ async def list_events(
             .execute()
         )
 
-        items_keys = [
-            "attachments",
-            "attendees",
-            "creator",
-            "description",
-            "end",
-            "eventType",
-            "htmlLink",
-            "id",
-            "location",
-            "organizer",
-            "recurrence",
-            "recurringEventId",
-            "start",
-            "summary",
-            "visibility",
-        ]
-
         events = [
-            {key: event[key] for key in items_keys if key in event}
-            for event in events_result.get("items", [])
+            normalize_event(item)
+            for item in raw_response.get("items", [])
         ]
-        
-        # Add day of the week to each event
-        for event in events:
-            start_time = event.get("start", {})
-            datetime_str = start_time.get("dateTime") or start_time.get("date")
-            day_of_week = get_day_of_week(datetime_str)
-            if day_of_week:
-                event["dayOfWeek"] = day_of_week
 
-        return {"events_count": len(events), "events": events}
+        return {"count": len(events), "events": events}
     except HttpError as e:
         logger.error(f"Google Calendar API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
