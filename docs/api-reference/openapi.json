@@ -11785,7 +11785,7 @@
             "title": "Name",
             "description": "Project name"
           },
-          "notes": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -11794,8 +11794,8 @@
                 "type": "null"
               }
             ],
-            "title": "Notes",
-            "description": "Project notes/description"
+            "title": "Description",
+            "description": "Project description"
           },
           "tasks": {
             "anyOf": [
@@ -11866,7 +11866,7 @@
             "title": "Name",
             "description": "Task name"
           },
-          "notes": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -11875,8 +11875,8 @@
                 "type": "null"
               }
             ],
-            "title": "Notes",
-            "description": "Task notes/description"
+            "title": "Description",
+            "description": "Task description"
           },
           "completed": {
             "anyOf": [
@@ -11903,7 +11903,7 @@
             "title": "Assignee",
             "description": "User GID assigned to task"
           },
-          "due_on": {
+          "due_date": {
             "anyOf": [
               {
                 "type": "string"
@@ -11912,10 +11912,10 @@
                 "type": "null"
               }
             ],
-            "title": "Due On",
+            "title": "Due Date",
             "description": "Due date (YYYY-MM-DD)"
           },
-          "due_at": {
+          "due_datetime": {
             "anyOf": [
               {
                 "type": "string"
@@ -11924,10 +11924,10 @@
                 "type": "null"
               }
             ],
-            "title": "Due At",
+            "title": "Due Datetime",
             "description": "Due datetime (ISO 8601)"
           },
-          "start_on": {
+          "start_date": {
             "anyOf": [
               {
                 "type": "string"
@@ -11936,7 +11936,7 @@
                 "type": "null"
               }
             ],
-            "title": "Start On",
+            "title": "Start Date",
             "description": "Start date (YYYY-MM-DD)"
           },
           "stories": {
@@ -12582,15 +12582,15 @@
       },
       "ClickUpComment": {
         "properties": {
-          "comment_text": {
+          "body": {
             "type": "string",
-            "title": "Comment Text",
-            "description": "Comment text content"
+            "title": "Body",
+            "description": "Comment body content"
           }
         },
         "type": "object",
         "required": [
-          "comment_text"
+          "body"
         ],
         "title": "ClickUpComment",
         "description": "ClickUp Comment object"
@@ -12658,7 +12658,7 @@
             "title": "Name",
             "description": "List name"
           },
-          "content": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -12667,8 +12667,8 @@
                 "type": "null"
               }
             ],
-            "title": "Content",
-            "description": "List description/content"
+            "title": "Description",
+            "description": "List description"
           },
           "tasks": {
             "anyOf": [
@@ -12876,7 +12876,7 @@
             "title": "Name",
             "description": "Lead name/company name"
           },
-          "status_label": {
+          "status": {
             "anyOf": [
               {
                 "type": "string"
@@ -12885,7 +12885,7 @@
                 "type": "null"
               }
             ],
-            "title": "Status Label",
+            "title": "Status",
             "description": "Lead status"
           },
           "contacts": {
@@ -12972,7 +12972,7 @@
             "title": "Confidence",
             "description": "Confidence percentage (0-100)"
           },
-          "value_period": {
+          "period": {
             "anyOf": [
               {
                 "type": "string"
@@ -12981,8 +12981,8 @@
                 "type": "null"
               }
             ],
-            "title": "Value Period",
-            "description": "Value period (e.g., 'one_time', 'monthly', 'annual')"
+            "title": "Period",
+            "description": "Billing period (e.g., 'one_time', 'monthly', 'annual')"
           }
         },
         "type": "object",
@@ -12994,9 +12994,9 @@
       },
       "CloseTask": {
         "properties": {
-          "text": {
+          "description": {
             "type": "string",
-            "title": "Text",
+            "title": "Description",
             "description": "Task description"
           },
           "date": {
@@ -13009,9 +13009,9 @@
               }
             ],
             "title": "Date",
-            "description": "The date of a task represents the point in time of when the task is actionable and appears in the inbox"
+            "description": "The date when the task is actionable"
           },
-          "is_complete": {
+          "completed": {
             "anyOf": [
               {
                 "type": "boolean"
@@ -13020,10 +13020,10 @@
                 "type": "null"
               }
             ],
-            "title": "Is Complete",
+            "title": "Completed",
             "description": "Whether task is completed"
           },
-          "assigned_to": {
+          "assignee_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -13032,13 +13032,13 @@
                 "type": "null"
               }
             ],
-            "title": "Assigned To",
+            "title": "Assignee Id",
             "description": "User ID assigned to"
           }
         },
         "type": "object",
         "required": [
-          "text"
+          "description"
         ],
         "title": "CloseTask",
         "description": "Close Task object - child of Lead"
@@ -13141,15 +13141,15 @@
       },
       "ConfluenceComment": {
         "properties": {
-          "body": {
+          "content": {
             "type": "string",
-            "title": "Body",
-            "description": "Comment text content (storage format)"
+            "title": "Content",
+            "description": "Comment text content"
           }
         },
         "type": "object",
         "required": [
-          "body"
+          "content"
         ],
         "title": "ConfluenceComment",
         "description": "Confluence Comment object"
@@ -13180,10 +13180,10 @@
             "title": "Title",
             "description": "Page title"
           },
-          "body": {
+          "content": {
             "type": "string",
-            "title": "Body",
-            "description": "Page content (storage format)"
+            "title": "Content",
+            "description": "Page content"
           },
           "children": {
             "anyOf": [
@@ -13219,7 +13219,7 @@
         "type": "object",
         "required": [
           "title",
-          "body"
+          "content"
         ],
         "title": "ConfluencePage",
         "description": "Confluence Page object"
@@ -13230,10 +13230,10 @@
       },
       "ConfluenceSpace": {
         "properties": {
-          "key": {
+          "identifier": {
             "type": "string",
-            "title": "Key",
-            "description": "Space key (e.g., DS)"
+            "title": "Identifier",
+            "description": "Space identifier"
           },
           "name": {
             "type": "string",
@@ -13270,7 +13270,7 @@
         },
         "type": "object",
         "required": [
-          "key",
+          "identifier",
           "name"
         ],
         "title": "ConfluenceSpace",
@@ -20705,12 +20705,12 @@
             "title": "Id",
             "description": "Message ID (read-only, set by Outlook)"
           },
-          "subject": {
+          "title": {
             "type": "string",
-            "title": "Subject",
+            "title": "Title",
             "description": "Email subject"
           },
-          "body": {
+          "content": {
             "anyOf": [
               {
                 "additionalProperties": true,
@@ -20720,7 +20720,7 @@
                 "type": "null"
               }
             ],
-            "title": "Body",
+            "title": "Content",
             "description": "Email body with content and contentType"
           },
           "from": {
@@ -20736,7 +20736,7 @@
             "title": "From",
             "description": "From address with emailAddress object"
           },
-          "to_recipients": {
+          "to_addresses": {
             "anyOf": [
               {
                 "items": {
@@ -20748,10 +20748,10 @@
                 "type": "null"
               }
             ],
-            "title": "To Recipients",
+            "title": "To Addresses",
             "description": "List of recipient email addresses"
           },
-          "cc_recipients": {
+          "cc_addresses": {
             "anyOf": [
               {
                 "items": {
@@ -20763,7 +20763,7 @@
                 "type": "null"
               }
             ],
-            "title": "Cc Recipients",
+            "title": "Cc Addresses",
             "description": "List of CC recipient email addresses"
           },
           "is_read": {
@@ -20794,7 +20794,7 @@
         },
         "type": "object",
         "required": [
-          "subject"
+          "title"
         ],
         "title": "OutlookMailMessage",
         "description": "Outlook Mail Message object"
@@ -23213,7 +23213,7 @@
             "description": "Whether the column can be NULL",
             "default": true
           },
-          "default": {
+          "default_value": {
             "anyOf": [
               {
                 "type": "string"
@@ -23222,7 +23222,7 @@
                 "type": "null"
               }
             ],
-            "title": "Default",
+            "title": "Default Value",
             "description": "Default value for the column"
           }
         },
@@ -23260,7 +23260,7 @@
             "title": "Name",
             "description": "Database name, cannot be 'SNOWFLAKE' or 'USER$...' since they are default databases"
           },
-          "comment": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -23269,8 +23269,8 @@
                 "type": "null"
               }
             ],
-            "title": "Comment",
-            "description": "Database comment/description"
+            "title": "Description",
+            "description": "Database description"
           },
           "schemas": {
             "anyOf": [
