@@ -282,9 +282,9 @@ async def list_spreadsheets_tool() -> Dict[str, Any]:
             spreadsheet_info = {
                 "id": file.get('id'),
                 "name": file.get('name'),
-                "createdTime": file.get('createdTime'),
-                "modifiedTime": file.get('modifiedTime'),
-                "webViewLink": file.get('webViewLink'),
+                "createdAt": file.get('createdTime'),
+                "modifiedAt": file.get('modifiedTime'),
+                "link": file.get('webViewLink'),
                 "owners": [owner.get('displayName', owner.get('emailAddress', 'Unknown')) 
                           for owner in file.get('owners', [])]
             }
@@ -333,7 +333,7 @@ async def list_sheets_tool(spreadsheet_id: str) -> Dict[str, Any]:
 
         return {
             "spreadsheetId": response.get('spreadsheetId', ''),
-            "spreadsheetUrl": response.get('spreadsheetUrl', ''),
+            "url": response.get('spreadsheetUrl', ''),
             "title": response.get('properties', {}).get('title', ''),
             "sheets": sheets,
         }
