@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_sms_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -53,9 +54,9 @@ async def list_sms(
     response = await client.get("/activity/sms/", params=params)
     
     return {
-        "sms": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "messages": [normalize_sms_activity(s) for s in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -71,7 +72,7 @@ async def get_sms(sms_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/sms/{sms_id}/")
     
-    return response
+    return {"message": normalize_sms_activity(response)}
 
 
 async def create_sms(
@@ -120,7 +121,7 @@ async def create_sms(
     
     response = await client.post("/activity/sms/", json_data=sms_data)
     
-    return response
+    return {"message": normalize_sms_activity(response)}
 
 
 async def update_sms(
@@ -156,7 +157,7 @@ async def update_sms(
     
     response = await client.put(f"/activity/sms/{sms_id}/", json_data=sms_data)
     
-    return response
+    return {"message": normalize_sms_activity(response)}
 
 
 async def delete_sms(sms_id: str) -> ToolResponse:
@@ -169,9 +170,9 @@ async def delete_sms(sms_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/sms/{sms_id}/")
+    await client.delete(f"/activity/sms/{sms_id}/")
     
-    return {"success": True, "sms_id": sms_id}
+    return {"success": True, "messageId": sms_id}
 
 
 async def send_sms(
@@ -189,7 +190,7 @@ async def send_sms(
     
     response = await client.post(f"/activity/sms/{sms_id}/send/", json_data={})
     
-    return response
+    return {"message": normalize_sms_activity(response)}
 
 
 async def search_sms(
@@ -215,8 +216,7 @@ async def search_sms(
     response = await client.get("/activity/sms/", params=params)
     
     return {
-        "sms": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "messages": [normalize_sms_activity(s) for s in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

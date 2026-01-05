@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_whatsapp_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -53,9 +54,9 @@ async def list_whatsapp(
     response = await client.get("/activity/whatsapp_message/", params=params)
     
     return {
-        "whatsapp_messages": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "messages": [normalize_whatsapp_activity(m) for m in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -71,7 +72,7 @@ async def get_whatsapp(whatsapp_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/whatsapp_message/{whatsapp_id}/")
     
-    return response
+    return {"message": normalize_whatsapp_activity(response)}
 
 
 async def create_whatsapp(
@@ -140,7 +141,7 @@ async def create_whatsapp(
     
     response = await client.post("/activity/whatsapp_message/", json_data=whatsapp_data, params=params if params else None)
     
-    return response
+    return {"message": normalize_whatsapp_activity(response)}
 
 
 async def update_whatsapp(
@@ -181,7 +182,7 @@ async def update_whatsapp(
     
     response = await client.put(f"/activity/whatsapp_message/{whatsapp_id}/", json_data=whatsapp_data)
     
-    return response
+    return {"message": normalize_whatsapp_activity(response)}
 
 
 async def delete_whatsapp(whatsapp_id: str) -> ToolResponse:
@@ -194,9 +195,9 @@ async def delete_whatsapp(whatsapp_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/whatsapp_message/{whatsapp_id}/")
+    await client.delete(f"/activity/whatsapp_message/{whatsapp_id}/")
     
-    return {"success": True, "whatsapp_id": whatsapp_id}
+    return {"success": True, "messageId": whatsapp_id}
 
 
 async def search_whatsapp(
@@ -222,8 +223,7 @@ async def search_whatsapp(
     response = await client.get("/activity/whatsapp_message/", params=params)
     
     return {
-        "whatsapp_messages": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "messages": [normalize_whatsapp_activity(m) for m in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

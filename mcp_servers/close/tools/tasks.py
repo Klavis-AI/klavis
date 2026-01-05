@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_task,
 )
 from .constants import CLOSE_MAX_LIMIT, TaskType
 
@@ -39,9 +40,9 @@ async def list_tasks(
     response = await client.get("/task/", params=params)
     
     return {
-        "tasks": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "tasks": [normalize_task(t) for t in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -52,7 +53,7 @@ async def get_task(task_id: str) -> ToolResponse:
     
     response = await client.get(f"/task/{task_id}/")
     
-    return response
+    return {"task": normalize_task(response)}
 
 
 async def create_task(
@@ -77,7 +78,7 @@ async def create_task(
     
     response = await client.post("/task/", json_data=task_data)
     
-    return response
+    return {"task": normalize_task(response)}
 
 
 async def update_task(
@@ -104,7 +105,7 @@ async def update_task(
     
     response = await client.put(f"/task/{task_id}/", json_data=task_data)
     
-    return response
+    return {"task": normalize_task(response)}
 
 
 async def delete_task(task_id: str) -> ToolResponse:
@@ -112,9 +113,9 @@ async def delete_task(task_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/task/{task_id}/")
+    await client.delete(f"/task/{task_id}/")
     
-    return {"success": True, "task_id": task_id}
+    return {"success": True, "taskId": task_id}
 
 
 async def bulk_update_tasks(
@@ -144,7 +145,7 @@ async def bulk_update_tasks(
     
     response = await client.put("/task/", params=params, json_data=task_data)
     
-    return response
+    return {"tasks": [normalize_task(t) for t in response.get("data", [])]}
 
 
 async def search_tasks(
@@ -166,7 +167,7 @@ async def search_tasks(
     response = await client.get("/task/", params=params)
     
     return {
-        "tasks": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "tasks": [normalize_task(t) for t in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     } 

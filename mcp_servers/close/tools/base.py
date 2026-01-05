@@ -2,7 +2,7 @@ import asyncio
 import json
 from dataclasses import dataclass
 import logging
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, List, Optional, Callable, Union, cast
 from contextvars import ContextVar
 from functools import wraps
 
@@ -19,7 +19,359 @@ auth_token_context: ContextVar[str] = ContextVar('auth_token')
 # Type definitions
 ToolResponse = dict[str, Any]
 
+
+# ============================================================================
+# Response Normalization Utilities (Klavis Interface Layer)
+# ============================================================================
+# These utilities transform raw API responses into Klavis-defined schemas,
+
+def get_path(data: Dict, path: str) -> Any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: Dict, mapping: Dict[str, Any]) -> Dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw API JSON.
+        mapping: Dict of { "targetFieldName": "source.path" OR lambda_function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+def normalize_list(items: List[Dict], mapping: Dict[str, Any]) -> List[Dict]:
+    """Normalize a list of items using the provided mapping."""
+    return [normalize(item, mapping) for item in items if item]
+
+
+# ============================================================================
+# Klavis Interface Mapping Rules
+# ============================================================================
+
+# Email/Phone nested object rules
+EMAIL_RULES = {
+    "address": "email",
+    "type": "type",
+}
+
+PHONE_RULES = {
+    "number": "phone",
+    "type": "type",
+}
+
+URL_RULES = {
+    "url": "url",
+    "type": "type",
+}
+
+ADDRESS_RULES = {
+    "line1": "address_1",
+    "line2": "address_2",
+    "city": "city",
+    "state": "state",
+    "postalCode": "zipcode",
+    "country": "country",
+}
+
+# Contact rules
+CONTACT_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "name": "name",
+    "firstName": "first_name",
+    "lastName": "last_name",
+    "title": "title",
+    "emails": lambda x: normalize_list(x.get("emails", []), EMAIL_RULES) if x.get("emails") else None,
+    "phones": lambda x: normalize_list(x.get("phones", []), PHONE_RULES) if x.get("phones") else None,
+    "urls": lambda x: normalize_list(x.get("urls", []), URL_RULES) if x.get("urls") else None,
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# Lead rules
+LEAD_RULES = {
+    "id": "id",
+    "name": "name",
+    "description": "description",
+    "statusId": "status_id",
+    "statusLabel": "status_label",
+    "url": "url",
+    "addresses": lambda x: normalize_list(x.get("addresses", []), ADDRESS_RULES) if x.get("addresses") else None,
+    "contacts": lambda x: normalize_list(x.get("contacts", []), CONTACT_RULES) if x.get("contacts") else None,
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+    "createdBy": "created_by",
+    "updatedBy": "updated_by",
+}
+
+# Opportunity rules
+OPPORTUNITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "leadName": "lead_name",
+    "contactId": "contact_id",
+    "contactName": "contact_name",
+    "userId": "user_id",
+    "userName": "user_name",
+    "statusId": "status_id",
+    "statusLabel": "status_label",
+    "statusType": "status_type",
+    "note": "note",
+    "confidence": "confidence",
+    "value": "value",
+    "valueCurrency": "value_currency",
+    "valuePeriod": "value_period",
+    "valueFormatted": "value_formatted",
+    "expectedValue": "expected_value",
+    "annualizedValue": "annualized_value",
+    "annualizedExpectedValue": "annualized_expected_value",
+    "expectedCloseDate": "date_won",
+    "dateLost": "date_lost",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+    "createdBy": "created_by",
+    "updatedBy": "updated_by",
+}
+
+# Task rules
+TASK_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "leadName": "lead_name",
+    "assignedTo": "assigned_to",
+    "assignedToName": "assigned_to_name",
+    "text": "text",
+    "dueDate": "date",
+    "isComplete": "is_complete",
+    "isDateless": "is_dateless",
+    "type": "_type",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# User rules
+USER_RULES = {
+    "id": "id",
+    "email": "email",
+    "firstName": "first_name",
+    "lastName": "last_name",
+    "displayName": lambda x: f"{x.get('first_name', '')} {x.get('last_name', '')}".strip() or x.get('email'),
+    "image": "image",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# Email Activity rules
+EMAIL_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "contactId": "contact_id",
+    "userId": "user_id",
+    "direction": "direction",
+    "status": "status",
+    "subject": "subject",
+    "bodyText": "body_text",
+    "bodyHtml": "body_html",
+    "sender": "sender",
+    "to": "to",
+    "cc": "cc",
+    "bcc": "bcc",
+    "templateId": "template_id",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+    "sentAt": "date_sent",
+}
+
+# Call Activity rules
+CALL_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "contactId": "contact_id",
+    "userId": "user_id",
+    "direction": "direction",
+    "disposition": "disposition",
+    "durationSeconds": "duration",
+    "phone": "phone",
+    "note": "note",
+    "recordingUrl": "recording_url",
+    "voicemailUrl": "voicemail_url",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# SMS Activity rules
+SMS_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "contactId": "contact_id",
+    "userId": "user_id",
+    "direction": "direction",
+    "status": "status",
+    "text": "text",
+    "remotePhone": "remote_phone",
+    "localPhone": "local_phone",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# Note Activity rules
+NOTE_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "userId": "user_id",
+    "note": "note",
+    "noteHtml": "note_html",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# Meeting Activity rules
+MEETING_ATTENDEE_RULES = {
+    "contactId": "contact_id",
+    "status": "status",
+}
+
+MEETING_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "userId": "user_id",
+    "status": "status",
+    "startsAt": "starts_at",
+    "endsAt": "ends_at",
+    "attendees": lambda x: normalize_list(x.get("attendees", []), MEETING_ATTENDEE_RULES) if x.get("attendees") else None,
+    "noteHtml": "user_note_html",
+    "outcomeId": "outcome_id",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# WhatsApp Activity rules
+WHATSAPP_ATTACHMENT_RULES = {
+    "url": "url",
+    "filename": "filename",
+    "contentType": "content_type",
+}
+
+WHATSAPP_ACTIVITY_RULES = {
+    "id": "id",
+    "leadId": "lead_id",
+    "contactId": "contact_id",
+    "userId": "user_id",
+    "direction": "direction",
+    "externalMessageId": "external_whatsapp_message_id",
+    "messageMarkdown": "message_markdown",
+    "attachments": lambda x: normalize_list(x.get("attachments", []), WHATSAPP_ATTACHMENT_RULES) if x.get("attachments") else None,
+    "integrationLink": "integration_link",
+    "replyToId": "response_to_id",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+# Generic Activity rules (for list_activities)
+ACTIVITY_RULES = {
+    "id": "id",
+    "type": "_type",
+    "leadId": "lead_id",
+    "userId": "user_id",
+    "createdAt": "date_created",
+    "updatedAt": "date_updated",
+}
+
+
+# ============================================================================
+# Normalization Functions
+# ============================================================================
+
+def normalize_lead(raw: Dict) -> Dict:
+    """Normalize a single lead response."""
+    lead = normalize(raw, LEAD_RULES)
+    # Handle nested opportunities
+    if raw.get("opportunities"):
+        lead["opportunities"] = normalize_list(raw["opportunities"], OPPORTUNITY_RULES)
+    return lead
+
+
+def normalize_contact(raw: Dict) -> Dict:
+    """Normalize a single contact response."""
+    return normalize(raw, CONTACT_RULES)
+
+
+def normalize_opportunity(raw: Dict) -> Dict:
+    """Normalize a single opportunity response."""
+    return normalize(raw, OPPORTUNITY_RULES)
+
+
+def normalize_task(raw: Dict) -> Dict:
+    """Normalize a single task response."""
+    return normalize(raw, TASK_RULES)
+
+
+def normalize_user(raw: Dict) -> Dict:
+    """Normalize a single user response."""
+    return normalize(raw, USER_RULES)
+
+
+def normalize_email_activity(raw: Dict) -> Dict:
+    """Normalize a single email activity response."""
+    return normalize(raw, EMAIL_ACTIVITY_RULES)
+
+
+def normalize_call_activity(raw: Dict) -> Dict:
+    """Normalize a single call activity response."""
+    return normalize(raw, CALL_ACTIVITY_RULES)
+
+
+def normalize_sms_activity(raw: Dict) -> Dict:
+    """Normalize a single SMS activity response."""
+    return normalize(raw, SMS_ACTIVITY_RULES)
+
+
+def normalize_note_activity(raw: Dict) -> Dict:
+    """Normalize a single note activity response."""
+    return normalize(raw, NOTE_ACTIVITY_RULES)
+
+
+def normalize_meeting_activity(raw: Dict) -> Dict:
+    """Normalize a single meeting activity response."""
+    return normalize(raw, MEETING_ACTIVITY_RULES)
+
+
+def normalize_whatsapp_activity(raw: Dict) -> Dict:
+    """Normalize a single WhatsApp activity response."""
+    return normalize(raw, WHATSAPP_ACTIVITY_RULES)
+
+
+def normalize_activity(raw: Dict) -> Dict:
+    """Normalize a generic activity response."""
+    return normalize(raw, ACTIVITY_RULES)
+
+
+# ============================================================================
 # Exception classes
+# ============================================================================
+
 class ToolExecutionError(Exception):
     def __init__(self, message: str, developer_message: str = ""):
         super().__init__(message)
@@ -47,66 +399,12 @@ class RetryableToolError(Exception):
         self.developer_message = developer_message
 
 
+# ============================================================================
 # Utility functions
+# ============================================================================
+
 def remove_none_values(data: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in data.items() if v is not None}
-
-
-def format_currency_from_cents(amount_cents: Optional[int], currency: str = "USD") -> Optional[str]:
-    """Convert cents to formatted currency string."""
-    if amount_cents is None:
-        return None
-    amount_dollars = amount_cents / 100
-    if currency == "USD":
-        return f"${amount_dollars:,.2f}"
-    return f"{amount_dollars:,.2f} {currency}"
-
-
-def format_opportunity_values(opportunity: dict[str, Any]) -> dict[str, Any]:
-    """Format opportunity monetary values from cents to readable currency strings."""
-    formatted_opp = opportunity.copy()
-    
-    # List of fields that contain monetary values in cents
-    money_fields = ['value', 'expected_value', 'annualized_value', 'annualized_expected_value']
-    
-    for field in money_fields:
-        if field in formatted_opp and formatted_opp[field] is not None:
-            # Store original value with _cents suffix for reference
-            formatted_opp[f"{field}_cents"] = formatted_opp[field]
-            # Replace with formatted dollar amount
-            currency = formatted_opp.get('value_currency', 'USD')
-            formatted_opp[field] = format_currency_from_cents(formatted_opp[field], currency)
-    
-    return formatted_opp
-
-
-def format_leads_response(response: dict[str, Any]) -> dict[str, Any]:
-    """Format lead response to convert opportunity values from cents to dollars."""
-    formatted_response = response.copy()
-    
-    if 'leads' in formatted_response:
-        formatted_leads = []
-        for lead in formatted_response['leads']:
-            formatted_lead = lead.copy()
-            if 'opportunities' in formatted_lead:
-                formatted_opportunities = []
-                for opp in formatted_lead['opportunities']:
-                    formatted_opportunities.append(format_opportunity_values(opp))
-                formatted_lead['opportunities'] = formatted_opportunities
-            formatted_leads.append(formatted_lead)
-        formatted_response['leads'] = formatted_leads
-    
-    return formatted_response
-
-
-def get_next_page(response: dict[str, Any]) -> dict[str, Any]:
-    """Extract next page information from response."""
-    has_more = response.get("has_more", False)
-    next_cursor = response.get("next_cursor")
-    return {
-        "has_more": has_more,
-        "next_cursor": next_cursor
-    }
 
 
 # Decorator function to clean Close response
@@ -234,6 +532,7 @@ class CloseClient:
         json_data: Optional[dict] = None,
         files: Optional[dict] = None,
         headers: Optional[dict] = None,
+        params: Optional[dict] = None,
         api_version: str | None = None,
     ) -> dict:
         default_headers = {
@@ -251,6 +550,9 @@ class CloseClient:
             "headers": headers,
             "timeout": CLOSE_MAX_TIMEOUT_SECONDS,
         }
+
+        if params:
+            kwargs["params"] = params
 
         if files is not None:
             kwargs["files"] = files
@@ -324,7 +626,6 @@ class CloseClient:
 
 def get_close_client() -> CloseClient:
     access_token = get_auth_token()
-    logger.info(f"Access Token: {access_token}")
     return CloseClient(access_token=access_token)
 
 
