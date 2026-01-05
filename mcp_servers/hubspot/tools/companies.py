@@ -1,7 +1,8 @@
 import logging
 import json
+from typing import Dict, Any
 from hubspot.crm.companies import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+from .base import get_hubspot_client, normalize_company
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ async def hubspot_create_companies(properties: str) -> str:
         logger.error(f"Error creating company: {e}")
         return f"Error occurred: {e}"
 
-async def hubspot_get_companies(limit: int = 10):
+async def hubspot_get_companies(limit: int = 10) -> Dict[str, Any]:
     """
     Fetch a list of companies from HubSpot.
 
@@ -69,7 +70,7 @@ async def hubspot_get_companies(limit: int = 10):
     - limit: Number of companies to retrieve
 
     Returns:
-    - Paginated companies response
+    - Normalized companies response
     """
     client = get_hubspot_client()
     if not client:
@@ -78,13 +79,22 @@ async def hubspot_get_companies(limit: int = 10):
     try:
         logger.info(f"Fetching up to {limit} companies...")
         result = client.crm.companies.basic_api.get_page(limit=limit)
-        logger.info(f"Fetched {len(result.results)} companies successfully.")
-        return result
+        
+        # Normalize response
+        companies = [normalize_company(obj) for obj in (result.results or [])]
+        
+        logger.info(f"Fetched {len(companies)} companies successfully.")
+        return {
+            "count": len(companies),
+            "companies": companies,
+            "hasMore": result.paging.next.after is not None if result.paging and result.paging.next else False,
+        }
     except Exception as e:
         logger.error(f"Error fetching companies: {e}")
-        return None
+        raise e
 
-async def hubspot_get_company_by_id(company_id: str):
+
+async def hubspot_get_company_by_id(company_id: str) -> Dict[str, Any]:
     """
     Get a company by ID.
 
@@ -92,7 +102,7 @@ async def hubspot_get_company_by_id(company_id: str):
     - company_id: ID of the company
 
     Returns:
-    - Company object
+    - Normalized company object
     """
     client = get_hubspot_client()
     if not client:
@@ -101,11 +111,15 @@ async def hubspot_get_company_by_id(company_id: str):
     try:
         logger.info(f"Fetching company with ID: {company_id}...")
         result = client.crm.companies.basic_api.get_by_id(company_id)
+        
+        # Normalize response
+        company = normalize_company(result)
+        
         logger.info(f"Fetched company ID: {company_id} successfully.")
-        return result
+        return {"company": company}
     except Exception as e:
         logger.error(f"Error fetching company by ID: {e}")
-        return None
+        raise e
 
 async def hubspot_update_company_by_id(company_id: str, updates: str) -> str:
     """

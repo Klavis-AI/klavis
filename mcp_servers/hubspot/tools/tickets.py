@@ -1,12 +1,14 @@
 import logging
 import json
+from typing import Dict, Any
 from hubspot.crm.tickets import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+from .base import get_hubspot_client, normalize_ticket
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def hubspot_get_tickets(limit: int = 10):
+
+async def hubspot_get_tickets(limit: int = 10) -> Dict[str, Any]:
     """
     Fetch a list of tickets from HubSpot.
 
@@ -14,7 +16,7 @@ async def hubspot_get_tickets(limit: int = 10):
     - limit: Number of tickets to return
 
     Returns:
-    - List of ticket records
+    - Normalized list of ticket records
     """
     client = get_hubspot_client()
     if not client:
@@ -23,13 +25,22 @@ async def hubspot_get_tickets(limit: int = 10):
     try:
         logger.info(f"Fetching up to {limit} tickets...")
         result = client.crm.tickets.basic_api.get_page(limit=limit)
-        logger.info(f"Fetched {len(result.results)} tickets successfully.")
-        return result
+        
+        # Normalize response
+        tickets = [normalize_ticket(obj) for obj in (result.results or [])]
+        
+        logger.info(f"Fetched {len(tickets)} tickets successfully.")
+        return {
+            "count": len(tickets),
+            "tickets": tickets,
+            "hasMore": result.paging.next.after is not None if result.paging and result.paging.next else False,
+        }
     except Exception as e:
         logger.error(f"Error fetching tickets: {e}")
-        return None
+        raise e
 
-async def hubspot_get_ticket_by_id(ticket_id: str):
+
+async def hubspot_get_ticket_by_id(ticket_id: str) -> Dict[str, Any]:
     """
     Fetch a ticket by its ID.
 
@@ -37,7 +48,7 @@ async def hubspot_get_ticket_by_id(ticket_id: str):
     - ticket_id: HubSpot ticket ID
 
     Returns:
-    - Ticket object
+    - Normalized ticket object
     """
     client = get_hubspot_client()
     if not client:
@@ -46,13 +57,18 @@ async def hubspot_get_ticket_by_id(ticket_id: str):
     try:
         logger.info(f"Fetching ticket ID: {ticket_id}...")
         result = client.crm.tickets.basic_api.get_by_id(ticket_id)
+        
+        # Normalize response
+        ticket = normalize_ticket(result)
+        
         logger.info(f"Fetched ticket ID: {ticket_id} successfully.")
-        return result
+        return {"ticket": ticket}
     except Exception as e:
         logger.error(f"Error fetching ticket by ID: {e}")
-        return None
+        raise e
 
-async def hubspot_create_ticket(properties: str):
+
+async def hubspot_create_ticket(properties: str) -> Dict[str, Any]:
     """
     Create a new ticket.
 
@@ -60,7 +76,7 @@ async def hubspot_create_ticket(properties: str):
     - properties: JSON string of ticket properties
 
     Returns:
-    - Newly created ticket
+    - Normalized newly created ticket
     """
     client = get_hubspot_client()
     if not client:
@@ -71,11 +87,15 @@ async def hubspot_create_ticket(properties: str):
         props = json.loads(properties)
         data = SimplePublicObjectInputForCreate(properties=props)
         result = client.crm.tickets.basic_api.create(simple_public_object_input_for_create=data)
+        
+        # Normalize response
+        ticket = normalize_ticket(result)
+        
         logger.info("Ticket created successfully.")
-        return result
+        return {"ticket": ticket, "status": "created"}
     except Exception as e:
         logger.error(f"Error creating ticket: {e}")
-        return f"Error occurred: {e}"
+        raise e
 
 async def hubspot_update_ticket_by_id(ticket_id: str, updates: str):
     """

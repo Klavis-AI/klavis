@@ -1,15 +1,24 @@
 import logging
 import json
 import ast
+from typing import Dict, Any, List
 from hubspot.crm.objects import Filter, FilterGroup, PublicObjectSearchRequest
 from hubspot.crm.properties import PropertyCreate
-from .base import get_hubspot_client
+from .base import (
+    get_hubspot_client,
+    normalize_property,
+    normalize_contact,
+    normalize_company,
+    normalize_deal,
+    normalize_ticket,
+)
 from .deals import _build_dealstage_label_map
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def hubspot_list_properties(object_type: str) -> list[dict]:
+
+async def hubspot_list_properties(object_type: str) -> Dict[str, Any]:
     """
     List all properties for a given object type.
 
@@ -17,7 +26,7 @@ async def hubspot_list_properties(object_type: str) -> list[dict]:
     - object_type: One of "contacts", "companies", "deals", or "tickets"
 
     Returns:
-    - List of property metadata
+    - Normalized list of property metadata
     """
     client = get_hubspot_client()
     if not client:
@@ -26,16 +35,16 @@ async def hubspot_list_properties(object_type: str) -> list[dict]:
     logger.info(f"Executing hubspot_list_properties for object_type: {object_type}")
     try:
         props = client.crm.properties.core_api.get_all(object_type)
+        
+        # Normalize response
+        properties = [normalize_property(p) for p in props.results]
+        
         logger.info(f"Successfully Executed hubspot_list_properties for object_type: {object_type}")
-        return [
-            {
-                "name": p.name,
-                "label": p.label,
-                "type": p.type,
-                "field_type": p.field_type
-            }
-            for p in props.results
-        ]
+        return {
+            "objectType": object_type,
+            "count": len(properties),
+            "properties": properties,
+        }
     except Exception as e:
         logger.exception(f"Error executing hubspot_list_properties: {e}")
         raise e
@@ -45,9 +54,9 @@ async def hubspot_search_by_property(
     property_name: str,
     operator: str,
     value: str,
-    properties: list[str],
+    properties: List[str],
     limit: int = 10
-) -> list[dict]:
+) -> Dict[str, Any]:
     """
     Search HubSpot objects by property.
 
@@ -200,23 +209,38 @@ async def hubspot_search_by_property(
             raise ValueError(f"Unsupported object type: {object_type}")
 
         logger.info(f"hubspot_search_by_property: Found {len(results.results)} result(s)")
-        # Enrich deals with human-readable dealstage label
+        
+        # Normalize results based on object type
+        normalized_results = []
         if object_type == "deals":
+            # Enrich deals with human-readable dealstage label
             stage_label_map = _build_dealstage_label_map(client)
-            enriched: list[dict] = []
             for obj in results.results:
                 props = (getattr(obj, "properties", {}) or {}).copy()
                 stage_id = props.get("dealstage")
                 if stage_id and stage_id in stage_label_map:
                     props["dealstage_label"] = stage_label_map[stage_id]
-                enriched.append(props)
-            return enriched
-        # For other objects, return properties as-is
-        return [obj.properties for obj in results.results]
+                obj.properties = props
+                normalized_results.append(normalize_deal(obj))
+        elif object_type == "contacts":
+            normalized_results = [normalize_contact(obj) for obj in results.results]
+        elif object_type == "companies":
+            normalized_results = [normalize_company(obj) for obj in results.results]
+        elif object_type == "tickets":
+            normalized_results = [normalize_ticket(obj) for obj in results.results]
+        else:
+            # Fallback for other object types
+            normalized_results = [obj.properties for obj in results.results]
+        
+        return {
+            "objectType": object_type,
+            "count": len(normalized_results),
+            "results": normalized_results,
+        }
 
     except Exception as e:
         logger.exception(f"Error executing hubspot_search_by_property: {e}")
-        return (f"Error executing hubspot_search_by_property: {e}")
+        raise e
 
 async def hubspot_create_property(name: str, label: str, description: str, object_type: str) -> str:
     """
