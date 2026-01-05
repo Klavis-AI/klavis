@@ -60,11 +60,11 @@ def build_child_url(base_url: str, child: dict) -> str | None:
 def build_hierarchy(transformed_children: list, parent_id: str, parent_node: dict) -> None:
     """Build parent-child hierarchy from a flat list of descendants.
 
-    This function takes a flat list of items that have parent_id references and
+    This function takes a flat list of items that have parentId references and
     builds a hierarchical tree structure. It modifies the parent_node in place.
 
     Args:
-        transformed_children: List of child nodes with parent_id fields
+        transformed_children: List of child nodes with parentId fields
         parent_id: The ID of the parent node
         parent_node: The parent node to attach direct children to
 
@@ -77,11 +77,11 @@ def build_hierarchy(transformed_children: list, parent_id: str, parent_node: dic
     # Find all direct children of the given parent_id
     direct_children = []
     for child in transformed_children:
-        if child.get("parent_id") == parent_id:
+        if child.get("parentId") == parent_id:
             direct_children.append(child)
-        elif child.get("parent_id") in child_map:
+        elif child.get("parentId") in child_map:
             # Add child to its parent's children list
-            parent = child_map[child.get("parent_id")]
+            parent = child_map[child.get("parentId")]
             if "children" not in parent:
                 parent["children"] = []
             parent["children"].append(child)
