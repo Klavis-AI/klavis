@@ -13,6 +13,220 @@ from .constants import ASANA_API_VERSION, ASANA_BASE_URL, ASANA_MAX_CONCURRENT_R
 # Configure logging
 logger = logging.getLogger(__name__)
 
+
+# ============================================================================
+# Response Normalization Utilities
+# ============================================================================
+
+def get_path(data: Dict, path: str) -> Any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: Dict, mapping: Dict[str, Any]) -> Dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# ============================================================================
+# Normalization Mapping Rules
+# ============================================================================
+
+# User normalization rules
+USER_RULES = {
+    "id": "id",
+    "name": "name",
+    "email": "email",
+    "photo": "photo",
+    "workspaces": lambda x: [
+        normalize(ws, WORKSPACE_COMPACT_RULES) for ws in x.get("workspaces", [])
+    ] if x.get("workspaces") else None,
+}
+
+USER_COMPACT_RULES = {
+    "id": "id",
+    "name": "name",
+}
+
+# Workspace normalization rules
+WORKSPACE_RULES = {
+    "id": "id",
+    "name": "name",
+    "emailDomains": "email_domains",
+    "isOrganization": "is_organization",
+}
+
+WORKSPACE_COMPACT_RULES = {
+    "id": "id",
+    "name": "name",
+}
+
+# Team normalization rules
+TEAM_RULES = {
+    "id": "id",
+    "name": "name",
+    "description": "description",
+    "organization": lambda x: normalize(x.get("organization", {}), WORKSPACE_COMPACT_RULES) if x.get("organization") else None,
+    "url": "permalink_url",
+}
+
+TEAM_COMPACT_RULES = {
+    "id": "id",
+    "name": "name",
+}
+
+# Tag normalization rules
+TAG_RULES = {
+    "id": "id",
+    "name": "name",
+    "color": "color",
+    "description": "notes",
+    "workspace": lambda x: normalize(x.get("workspace", {}), WORKSPACE_COMPACT_RULES) if x.get("workspace") else None,
+}
+
+TAG_COMPACT_RULES = {
+    "id": "id",
+    "name": "name",
+}
+
+# Project normalization rules
+PROJECT_RULES = {
+    "id": "id",
+    "name": "name",
+    "description": "notes",
+    "color": "color",
+    "isCompleted": "completed",
+    "completedAt": "completed_at",
+    "completedBy": lambda x: normalize(x.get("completed_by", {}), USER_COMPACT_RULES) if x.get("completed_by") else None,
+    "createdAt": "created_at",
+    "modifiedAt": "modified_at",
+    "dueDate": "due_on",
+    "owner": lambda x: normalize(x.get("owner", {}), USER_COMPACT_RULES) if x.get("owner") else None,
+    "team": lambda x: normalize(x.get("team", {}), TEAM_COMPACT_RULES) if x.get("team") else None,
+    "workspace": lambda x: normalize(x.get("workspace", {}), WORKSPACE_COMPACT_RULES) if x.get("workspace") else None,
+    "url": "permalink_url",
+    "statusUpdate": "current_status_update",
+    "members": lambda x: [
+        normalize(m, USER_COMPACT_RULES) for m in x.get("members", [])
+    ] if x.get("members") else None,
+}
+
+PROJECT_COMPACT_RULES = {
+    "id": "id",
+    "name": "name",
+}
+
+# Membership normalization rules
+MEMBERSHIP_RULES = {
+    "project": lambda x: normalize(x.get("project", {}), PROJECT_COMPACT_RULES) if x.get("project") else None,
+    "section": lambda x: {"id": x.get("section", {}).get("id"), "name": x.get("section", {}).get("name")} if x.get("section") else None,
+}
+
+# Task normalization rules
+TASK_RULES = {
+    "id": "id",
+    "name": "name",
+    "description": "notes",
+    "isCompleted": "completed",
+    "completedAt": "completed_at",
+    "completedBy": lambda x: normalize(x.get("completed_by", {}), USER_COMPACT_RULES) if x.get("completed_by") else None,
+    "createdAt": "created_at",
+    "createdBy": lambda x: normalize(x.get("created_by", {}), USER_COMPACT_RULES) if x.get("created_by") else None,
+    "dueDate": "due_on",
+    "startDate": "start_on",
+    "assignee": lambda x: normalize(x.get("assignee", {}), USER_COMPACT_RULES) if x.get("assignee") else None,
+    "assigneeStatus": "assignee_status",
+    "approvalStatus": "approval_status",
+    "subtaskCount": "num_subtasks",
+    "parent": lambda x: {"id": x.get("parent", {}).get("id"), "name": x.get("parent", {}).get("name")} if x.get("parent") else None,
+    "workspace": lambda x: normalize(x.get("workspace", {}), WORKSPACE_COMPACT_RULES) if x.get("workspace") else None,
+    "url": "permalink_url",
+    "tags": lambda x: [
+        normalize(t, TAG_COMPACT_RULES) for t in x.get("tags", [])
+    ] if x.get("tags") else None,
+    "memberships": lambda x: [
+        normalize(m, MEMBERSHIP_RULES) for m in x.get("memberships", [])
+    ] if x.get("memberships") else None,
+    "dependencies": lambda x: [
+        {"id": d.get("id")} for d in x.get("dependencies", [])
+    ] if x.get("dependencies") else None,
+    "dependents": lambda x: [
+        {"id": d.get("id")} for d in x.get("dependents", [])
+    ] if x.get("dependents") else None,
+}
+
+# Attachment normalization rules
+ATTACHMENT_RULES = {
+    "id": "id",
+    "name": "name",
+    "url": "download_url",
+    "host": "host",
+    "viewUrl": "view_url",
+    "createdAt": "created_at",
+    "parent": lambda x: {"id": x.get("parent", {}).get("id")} if x.get("parent") else None,
+}
+
+
+def normalize_task(raw_task: Dict) -> Dict:
+    """Normalize a single task."""
+    return normalize(raw_task, TASK_RULES)
+
+
+def normalize_project(raw_project: Dict) -> Dict:
+    """Normalize a single project."""
+    return normalize(raw_project, PROJECT_RULES)
+
+
+def normalize_workspace(raw_workspace: Dict) -> Dict:
+    """Normalize a single workspace."""
+    return normalize(raw_workspace, WORKSPACE_RULES)
+
+
+def normalize_user(raw_user: Dict) -> Dict:
+    """Normalize a single user."""
+    return normalize(raw_user, USER_RULES)
+
+
+def normalize_team(raw_team: Dict) -> Dict:
+    """Normalize a single team."""
+    return normalize(raw_team, TEAM_RULES)
+
+
+def normalize_tag(raw_tag: Dict) -> Dict:
+    """Normalize a single tag."""
+    return normalize(raw_tag, TAG_RULES)
+
+
+def normalize_attachment(raw_attachment: Dict) -> Dict:
+    """Normalize a single attachment."""
+    return normalize(raw_attachment, ATTACHMENT_RULES)
+
 # Context variable to store the access token for each request
 auth_token_context: ContextVar[str] = ContextVar('auth_token')
 
