@@ -9,6 +9,7 @@ from .base import (
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
     AsanaToolExecutionError,
+    normalize_project,
 )
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ async def get_project_by_id(
             f"/projects/{project_id}",
             params={"opt_fields": ",".join(PROJECT_OPT_FIELDS)},
         )
-        return {"project": response["data"]}
+        return {"project": normalize_project(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -173,6 +174,9 @@ async def list_projects(
             projects = filter_projects_by_timestamps(projects, filter)
             # Trim to requested limit after filtering
             projects = projects[:limit]
+        
+        # Normalize projects
+        projects = [normalize_project(p) for p in projects]
         
         return {
             "projects": projects,

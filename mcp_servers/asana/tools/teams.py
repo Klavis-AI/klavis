@@ -8,6 +8,7 @@ from .base import (
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
     AsanaToolExecutionError,
+    normalize_team,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ async def get_team_by_id(
             f"/teams/{team_id}",
             params=remove_none_values({"opt_fields": ",".join(TEAM_OPT_FIELDS)}),
         )
-        return {"team": response["data"]}
+        return {"team": normalize_team(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -55,9 +56,10 @@ async def list_teams_the_current_user_is_a_member_of(
             }),
         )
 
+        teams = [normalize_team(t) for t in response["data"]]
         return {
-            "teams": response["data"],
-            "count": len(response["data"]),
+            "teams": teams,
+            "count": len(teams),
             "next_page": get_next_page(response),
         }
 
@@ -90,9 +92,10 @@ async def list_teams(
             }),
         )
 
+        teams = [normalize_team(t) for t in response["data"]]
         return {
-            "teams": response["data"],
-            "count": len(response["data"]),
+            "teams": teams,
+            "count": len(teams),
             "next_page": get_next_page(response),
         }
 
