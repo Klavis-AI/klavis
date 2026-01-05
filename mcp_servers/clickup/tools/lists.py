@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, Optional
 from .base import make_clickup_request
+from .normalize import normalize_lists, normalize_list
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ async def get_lists(folder_id: Optional[str] = None, space_id: Optional[str] = N
             result = await make_clickup_request(f"space/{space_id}/list")
         else:
             raise ValueError("Either folder_id or space_id must be provided")
-        return result
+        return normalize_lists(result)
     except Exception as e:
         logger.exception(f"Error executing tool get_lists: {e}")
         raise e
@@ -51,7 +52,7 @@ async def create_list(
             result = await make_clickup_request(f"space/{space_id}/list", "POST", data)
         else:
             raise ValueError("Either folder_id or space_id must be provided")
-        return result
+        return normalize_list(result)
     except Exception as e:
         logger.exception(f"Error executing tool create_list: {e}")
         raise e
@@ -83,7 +84,7 @@ async def update_list(
             data["unset_status"] = unset_status
             
         result = await make_clickup_request(f"list/{list_id}", "PUT", data)
-        return result
+        return normalize_list(result)
     except Exception as e:
         logger.exception(f"Error executing tool update_list: {e}")
         raise e 
