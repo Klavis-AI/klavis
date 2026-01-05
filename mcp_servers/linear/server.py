@@ -4,8 +4,6 @@ import os
 import json
 import base64
 from collections.abc import AsyncIterator
-from typing import Any, Dict
-from contextvars import ContextVar
 
 import click
 import mcp.types as types
@@ -17,6 +15,224 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
+
+
+def get_path(data: dict, path: str) -> any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: dict, mapping: dict[str, any]) -> dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules for Linear Objects
+
+USER_RULES = {
+    "userId": "id",
+    "displayName": "name",
+    "userEmail": "email",
+    "nickname": "displayName",
+}
+
+STATE_RULES = {
+    "stateId": "id",
+    "stateName": "name",
+    "category": "type",
+    "stateColor": "color",
+}
+
+TEAM_RULES = {
+    "teamId": "id",
+    "teamName": "name",
+    "teamKey": "key",
+    "summary": "description",
+    "isPrivate": "private",
+    "dateCreated": "createdAt",
+    "dateModified": "updatedAt",
+    "workflowStates": lambda x: [
+        normalize(s, STATE_RULES) for s in get_path(x, 'states.nodes') or []
+    ] if get_path(x, 'states.nodes') else None,
+    "teamMembers": lambda x: [
+        normalize(m, USER_RULES) for m in get_path(x, 'members.nodes') or []
+    ] if get_path(x, 'members.nodes') else None,
+}
+
+ISSUE_RULES = {
+    "itemId": "id",
+    "ticketNumber": "identifier",
+    "subject": "title",
+    "details": "description",
+    "priorityLevel": "priority",
+    "priorityName": "priorityLabel",
+    "deadline": "dueDate",
+    "status": lambda x: normalize(get_path(x, 'state') or {}, STATE_RULES),
+    "assignedTo": lambda x: normalize(get_path(x, 'assignee') or {}, USER_RULES),
+    "reportedBy": lambda x: normalize(get_path(x, 'creator') or {}, USER_RULES),
+    "owningTeam": lambda x: normalize(get_path(x, 'team') or {}, {"teamId": "id", "teamName": "name", "teamKey": "key"}),
+    "parentProject": lambda x: normalize(get_path(x, 'project') or {}, {"projectId": "id", "projectName": "name"}),
+    "dateCreated": "createdAt",
+    "dateModified": "updatedAt",
+    "externalLink": "url",
+    "responses": lambda x: [
+        normalize(c, {
+            "responseId": "id",
+            "content": "body",
+            "author": lambda c: normalize(get_path(c, 'user') or {}, USER_RULES),
+            "dateCreated": "createdAt",
+            "dateModified": "updatedAt"
+        }) for c in get_path(x, 'comments.nodes') or []
+    ] if get_path(x, 'comments.nodes') else None,
+}
+
+PROJECT_RULES = {
+    "projectId": "id",
+    "projectName": "name",
+    "summary": "description",
+    "currentState": "state",
+    "completion": "progress",
+    "targetCompletion": "targetDate",
+    "projectLead": lambda x: normalize(get_path(x, 'lead') or {}, USER_RULES),
+    "contributors": lambda x: [
+        normalize(m, USER_RULES) for m in get_path(x, 'members.nodes') or []
+    ] if get_path(x, 'members.nodes') else None,
+    "associatedTeams": lambda x: [
+        normalize(t, {"teamId": "id", "teamName": "name", "teamKey": "key"})
+        for t in get_path(x, 'teams.nodes') or []
+    ] if get_path(x, 'teams.nodes') else None,
+    "dateCreated": "createdAt",
+    "dateModified": "updatedAt",
+    "externalLink": "url",
+}
+
+COMMENT_RULES = {
+    "responseId": "id",
+    "content": "body",
+    "author": lambda x: normalize(get_path(x, 'user') or {}, USER_RULES),
+    "relatedIssue": lambda x: normalize(get_path(x, 'issue') or {}, {
+        "itemId": "id",
+        "ticketNumber": "identifier", 
+        "subject": "title"
+    }),
+    "dateCreated": "createdAt",
+    "dateModified": "updatedAt",
+    "externalLink": "url",
+}
+
+
+def normalize_team(raw_team: dict) -> dict:
+    """Normalize a single team and add computed fields."""
+    return normalize(raw_team, TEAM_RULES)
+
+
+def normalize_issue(raw_issue: dict) -> dict:
+    """Normalize a single issue and add computed fields."""
+    return normalize(raw_issue, ISSUE_RULES)
+
+
+def normalize_project(raw_project: dict) -> dict:
+    """Normalize a single project and add computed fields."""
+    return normalize(raw_project, PROJECT_RULES)
+
+
+def normalize_comment(raw_comment: dict) -> dict:
+    """Normalize a single comment and add computed fields."""
+    return normalize(raw_comment, COMMENT_RULES)
+
+
+def normalize_linear_response(data: dict, data_type: str) -> dict:
+    """Normalize Linear API response to avoid IP conflicts."""
+    if not data or 'data' not in data:
+        return data
+    
+    normalized_data = {"data": {}}
+    
+    # Copy errors if they exist
+    if 'errors' in data:
+        normalized_data['errors'] = data['errors']
+    
+    original_data = data['data']
+    
+    if data_type == 'teams':
+        if 'teams' in original_data and 'nodes' in original_data['teams']:
+            normalized_data['data']['workspaceTeams'] = {
+                "items": [normalize_team(team) for team in original_data['teams']['nodes']]
+            }
+    
+    elif data_type == 'issues':
+        if 'issues' in original_data and 'nodes' in original_data['issues']:
+            normalized_data['data']['workItems'] = {
+                "items": [normalize_issue(issue) for issue in original_data['issues']['nodes']]
+            }
+    
+    elif data_type == 'issue':
+        if 'issue' in original_data:
+            normalized_data['data']['workItem'] = normalize_issue(original_data['issue'])
+    
+    elif data_type == 'projects':
+        if 'projects' in original_data and 'nodes' in original_data['projects']:
+            normalized_data['data']['initiatives'] = {
+                "items": [normalize_project(project) for project in original_data['projects']['nodes']]
+            }
+    
+    elif data_type == 'comments':
+        if 'issue' in original_data and 'comments' in original_data['issue']:
+            issue_data = normalize_issue(original_data['issue'])
+            normalized_data['data']['workItemResponses'] = {
+                "parentItem": {
+                    "itemId": issue_data.get('itemId'),
+                    "ticketNumber": issue_data.get('ticketNumber'),
+                    "subject": issue_data.get('subject')
+                },
+                "items": issue_data.get('responses', [])
+            }
+    
+    elif data_type in ['issueCreate', 'issueUpdate', 'projectCreate', 'projectUpdate', 'commentCreate', 'commentUpdate']:
+        # Handle mutation responses
+        for key, value in original_data.items():
+            if key.endswith('Create') or key.endswith('Update'):
+                normalized_key = key.replace('issue', 'workItem').replace('comment', 'response').replace('project', 'initiative')
+                normalized_data['data'][normalized_key] = {}
+                
+                if 'success' in value:
+                    normalized_data['data'][normalized_key]['success'] = value['success']
+                
+                if 'issue' in value:
+                    normalized_data['data'][normalized_key]['workItem'] = normalize_issue(value['issue'])
+                elif 'comment' in value:
+                    normalized_data['data'][normalized_key]['response'] = normalize_comment(value['comment'])
+                elif 'project' in value:
+                    normalized_data['data'][normalized_key]['initiative'] = normalize_project(value['project'])
+    
+    return normalized_data
+
 
 from tools import (
     auth_token_context,
@@ -478,10 +694,11 @@ def main(
         if name == "linear_get_teams":
             try:
                 result = await get_teams()
+                normalized_result = normalize_linear_response(result, 'teams')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -499,10 +716,11 @@ def main(
             filter_param = arguments.get("filter")
             try:
                 result = await get_issues(team_id, limit, filter_param)
+                normalized_result = normalize_linear_response(result, 'issues')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -525,10 +743,11 @@ def main(
                 ]
             try:
                 result = await get_issue_by_id(issue_id)
+                normalized_result = normalize_linear_response(result, 'issue')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -560,10 +779,11 @@ def main(
             
             try:
                 result = await create_issue(team_id, title, description, assignee_id, priority, state_id, project_id, due_date)
+                normalized_result = normalize_linear_response(result, 'issueCreate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -595,10 +815,11 @@ def main(
             
             try:
                 result = await update_issue(issue_id, title, description, assignee_id, priority, state_id, project_id, due_date)
+                normalized_result = normalize_linear_response(result, 'issueUpdate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -616,10 +837,11 @@ def main(
             filter_param = arguments.get("filter")
             try:
                 result = await get_projects(team_id, limit, filter_param)
+                normalized_result = normalize_linear_response(result, 'projects')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -648,10 +870,11 @@ def main(
             
             try:
                 result = await create_project(name, description, team_ids, lead_id, target_date)
+                normalized_result = normalize_linear_response(result, 'projectCreate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -681,10 +904,11 @@ def main(
             
             try:
                 result = await update_project(project_id, name, description, state, target_date, lead_id)
+                normalized_result = normalize_linear_response(result, 'projectUpdate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -707,10 +931,11 @@ def main(
                 ]
             try:
                 result = await get_comments(issue_id)
+                normalized_result = normalize_linear_response(result, 'comments')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -734,10 +959,11 @@ def main(
                 ]
             try:
                 result = await create_comment(issue_id, body)
+                normalized_result = normalize_linear_response(result, 'commentCreate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -761,10 +987,11 @@ def main(
                 ]
             try:
                 result = await update_comment(comment_id, body)
+                normalized_result = normalize_linear_response(result, 'commentUpdate')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -791,10 +1018,11 @@ def main(
             
             try:
                 result = await search_issues(query_text, team_id, limit)
+                normalized_result = normalize_linear_response(result, 'issues')
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
