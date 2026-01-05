@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from collections.abc import AsyncIterator
-from typing import Any, Dict, List
+from typing import List
 
 import click
 import mcp.types as types
@@ -16,6 +16,160 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
+
+
+def get_path(data: dict, path: str) -> any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: dict, mapping: dict[str, any]) -> dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules for OneDrive Objects
+
+ITEM_RULES = {
+    "itemId": "id",
+    "name": "name",
+    "size": "size",
+    "lastModified": "lastModifiedDateTime",
+    "created": "createdDateTime",
+    "webUrl": "webUrl",
+    "downloadUrl": lambda x: x.get("@microsoft.graph.downloadUrl"),
+    "isFolder": lambda x: bool(x.get('folder')),
+    "isFile": lambda x: bool(x.get('file')),
+    "parentId": "parentReference.id",
+    "parentPath": "parentReference.path",
+    "parentName": "parentReference.name",
+    "driveId": "parentReference.driveId",
+    "driveType": "parentReference.driveType",
+    "siteId": "parentReference.siteId",
+    "mimeType": "file.mimeType",
+    "hashSha1": "file.hashes.sha1Hash",
+    "hashSha256": "file.hashes.sha256Hash",
+    "hashQuickXor": "file.hashes.quickXorHash",
+    "folderChildCount": "folder.childCount",
+    "createdBy": "createdBy.user.displayName",
+    "createdBy": "createdBy.user.email",
+    "modifiedBy": "lastModifiedBy.user.displayName",
+    "modifiedBy": "lastModifiedBy.user.email",
+    "shared": lambda x: bool(x.get('shared'))
+}
+
+FOLDER_RULES = {
+    "folderId": "id",
+    "name": "name",
+    "childCount": "folder.childCount",
+    "lastModified": "lastModifiedDateTime",
+    "created": "createdDateTime",
+    "webUrl": "webUrl",
+    "parentId": "parentReference.id",
+    "parentPath": "parentReference.path",
+    "parentName": "parentReference.name",
+    "driveId": "parentReference.driveId",
+    "driveType": "parentReference.driveType",
+    "siteId": "parentReference.siteId",
+    "size": "size",
+    "createdBy": "createdBy.user.displayName",
+    "createdBy": "createdBy.user.email",
+    "modifiedBy": "lastModifiedBy.user.displayName",
+    "modifiedBy": "lastModifiedBy.user.email",
+    "shared": lambda x: bool(x.get('shared'))
+}
+
+SHARED_ITEM_RULES = {
+    "sharedItemId": "remoteItem.id",
+    "name": "remoteItem.name",
+    "size": "remoteItem.size",
+    "lastModified": "remoteItem.lastModifiedDateTime",
+    "created": "remoteItem.createdDateTime",
+    "webUrl": "remoteItem.webUrl",
+    "isFolder": lambda x: bool(get_path(x, 'remoteItem.folder')),
+    "isFile": lambda x: bool(get_path(x, 'remoteItem.file')),
+    "mimeType": "remoteItem.file.mimeType",
+    "parentId": "remoteItem.parentReference.id",
+    "driveId": "remoteItem.parentReference.driveId",
+    "sharedBy": "remoteItem.shared.sharedBy.user.displayName",
+    "sharedDateTime": "remoteItem.shared.sharedDateTime",
+    "permissions": "remoteItem.shared.scope"
+}
+
+
+def normalize_item(raw_item: dict) -> dict:
+    """Normalize a single item (file or folder) and add computed fields."""
+    item = normalize(raw_item, ITEM_RULES)
+    return item
+
+
+def normalize_folder(raw_folder: dict) -> dict:
+    """Normalize a single folder and add computed fields."""
+    folder = normalize(raw_folder, FOLDER_RULES)
+    return folder
+
+
+def normalize_file(raw_file: dict) -> dict:
+    """Normalize a single file and add computed fields."""
+    file_item = normalize(raw_file, ITEM_RULES)
+    return file_item
+
+
+def normalize_shared_item(raw_shared_item: dict) -> dict:
+    """Normalize a single shared item and add computed fields."""
+    shared_item = normalize(raw_shared_item, SHARED_ITEM_RULES)
+    return shared_item
+
+
+def normalize_items_response(response_data: dict) -> dict:
+    """Normalize a response containing multiple items (like list operations)."""
+    if not isinstance(response_data, dict):
+        return response_data
+    
+    normalized_response = {}
+    
+    # Handle pagination info
+    if "@odata.nextLink" in response_data:
+        normalized_response["nextPageToken"] = response_data["@odata.nextLink"]
+    
+    if "@odata.count" in response_data:
+        normalized_response["totalCount"] = response_data["@odata.count"]
+    
+    # Normalize items
+    if "value" in response_data and isinstance(response_data["value"], list):
+        normalized_response["items"] = [
+            normalize_item(item) for item in response_data["value"]
+        ]
+        normalized_response["count"] = len(normalized_response["items"])
+    
+    return normalized_response
+
 
 from tools import (
     # Base
@@ -296,10 +450,18 @@ def main(
                     file_id=arguments["file_id"],
                     new_name=arguments["new_name"]
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_item(raw_data)
+                    response = {"status": "success", "item": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -317,10 +479,18 @@ def main(
                     item_id=arguments["item_id"],
                     new_parent_id=arguments["new_parent_id"]
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_item(raw_data)
+                    response = {"status": "success", "item": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -337,10 +507,20 @@ def main(
                 result = await onedrive_delete_item(
                     item_id=arguments["item_id"]
                 )
+                # For delete operations, wrap in a normalized structure
+                if isinstance(result, tuple) and len(result) == 1:
+                    response = {
+                        "status": "success",
+                        "itemId": arguments["item_id"],
+                        "message": result[0]
+                    }
+                else:
+                    response = {"status": "error", "details": result}
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=result,
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -382,10 +562,18 @@ def main(
                     data=arguments.get("data"),
                     if_exists=arguments.get("if_exists", "error")
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_file(raw_data)
+                    response = {"status": "success", "file": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -405,10 +593,18 @@ def main(
                     new_folder_name=arguments["new_folder_name"],
                     behavior=arguments.get("behavior", "fail")
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_folder(raw_data)
+                    response = {"status": "success", "folder": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -424,10 +620,18 @@ def main(
         elif name == "onedrive_list_root_files_folders":
             try:
                 result = await onedrive_list_root_files_folders()
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_items_response(raw_data)
+                    response = {"status": "success", "data": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -444,10 +648,18 @@ def main(
                 result = await onedrive_list_inside_folder(
                     folder_id=arguments["folder_id"]
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_items_response(raw_data)
+                    response = {"status": "success", "data": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -464,10 +676,18 @@ def main(
                 result = await onedrive_search_item_by_name(
                     itemname=arguments["itemname"]
                 )
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    normalized_data = normalize_items_response(raw_data)
+                    response = {"status": "success", "data": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -484,10 +704,18 @@ def main(
                 result = await onedrive_search_folder_by_name(
                     folder_name=arguments["folder_name"]
                 )
+                # Normalize the response for folder search results
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], list):
+                    _, raw_folders = result
+                    normalized_folders = [normalize_folder(folder) for folder in raw_folders]
+                    response = {"status": "success", "folders": normalized_folders, "count": len(normalized_folders)}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -504,10 +732,17 @@ def main(
                 result = await onedrive_get_item_by_id(
                     item_id=arguments["item_id"]
                 )
+                # Normalize the response
+                if isinstance(result, dict) and "id" in result:
+                    normalized_data = normalize_item(result)
+                    response = {"status": "success", "item": normalized_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
@@ -523,10 +758,25 @@ def main(
         elif name == "onedrive_list_shared_items":
             try:
                 result = await onedrive_list_shared_items()
+                # Normalize the response
+                if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], dict):
+                    _, raw_data = result
+                    if "value" in raw_data and isinstance(raw_data["value"], list):
+                        normalized_items = [normalize_shared_item(item) for item in raw_data["value"]]
+                        response = {
+                            "status": "success", 
+                            "sharedItems": normalized_items,
+                            "count": len(normalized_items)
+                        }
+                    else:
+                        response = {"status": "success", "data": raw_data}
+                else:
+                    response = result
+                
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(response, indent=2),
                     )
                 ]
             except Exception as e:
