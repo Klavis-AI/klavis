@@ -17,6 +17,13 @@ from utils import (
     build_hierarchy,
     remove_none_values,
 )
+from normalizers import (
+    normalize_page,
+    normalize_space,
+    normalize_attachment,
+    normalize_search_result,
+    normalize_tree_node,
+)
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -322,15 +329,8 @@ class ConfluenceClientV1(ConfluenceClient):
         base_url = response.get("_links", {}).get("base", "")
         transformed_results = []
         for result in response.get("results", []):
-            content = result.get("content", {})
-            transformed_result = {
-                "id": content.get("id"),
-                "title": content.get("title"),
-                "type": content.get("type"),
-                "status": content.get("status"),
-                "excerpt": result.get("excerpt"),
-                "url": f"{base_url}{result.get('url')}",
-            }
+            url = f"{base_url}{result.get('url')}"
+            transformed_result = normalize_search_result(result, url=url)
             transformed_results.append(transformed_result)
 
         return {"results": transformed_results}
@@ -343,33 +343,28 @@ class ConfluenceClientV2(ConfluenceClient):
             logger.warning("No auth token found in context")
         super().__init__(auth_token, api_version=ConfluenceAPIVersion.V2)
 
-    def _transform_links(
-        self, response: dict[str, Any], base_url: str | None = None
-    ) -> dict[str, Any]:
+    def _build_url(self, response: dict[str, Any], base_url: str | None = None) -> str | None:
         """
-        Transform the links in a page response by converting relative URLs to absolute URLs.
-
+        Build absolute URL from response _links.
+        
         Args:
-            response: A page object from the API
-            base_url: The base URL to use for the transformation
-
+            response: A raw response object from the API
+            base_url: Optional base URL override
+            
         Returns:
-            The transformed response
+            The absolute URL or None if not available
         """
-        result = response.copy()
-        if "_links" in result:
-            base_url = base_url or result["_links"].get("base", "")
-            webui_path = result["_links"].get("webui", "")
-            result["url"] = f"{base_url}{webui_path}"
-            del result["_links"]
-        return result
+        if "_links" not in response:
+            return None
+        base = base_url or response["_links"].get("base", "")
+        webui_path = response["_links"].get("webui", "")
+        return f"{base}{webui_path}" if webui_path else None
 
     def transform_get_spaces_response(
         self, response: dict[str, Any]
     ) -> dict[str, list[dict[str, Any]]]:
         """
-        Transform the response from the GET /spaces endpoint by converting relative webui paths
-        to absolute URLs using the base URL from the response.
+        Transform the response from the GET /spaces endpoint using Klavis normalizers.
         """
         pagination_token = parse_qs(urlparse(response.get("_links", {}).get("next", "")).query).get(
             "cursor",
@@ -381,48 +376,53 @@ class ConfluenceClientV2(ConfluenceClient):
 
         transformed_results = []
         for space in results:
-            space_copy = space.copy()
-            if "_links" in space_copy and "webui" in space_copy["_links"]:
-                webui_path = space_copy["_links"]["webui"]
-                space_copy["url"] = base_url + webui_path
-                del space_copy["_links"]
-            transformed_results.append(space_copy)
+            url = self._build_url(space, base_url)
+            normalized = normalize_space(space, url=url)
+            transformed_results.append(normalized)
 
-        results = {"spaces": transformed_results, "pagination_token": pagination_token}
+        results = {"spaces": transformed_results, "paginationToken": pagination_token}
         return remove_none_values(results)
 
     def transform_list_pages_response(self, response: dict[str, Any]) -> dict[str, Any]:
-        """Transform the response from the GET /pages endpoint."""
+        """Transform the response from the GET /pages endpoint using Klavis normalizers."""
         pagination_token = parse_qs(urlparse(response.get("_links", {}).get("next", "")).query).get(
             "cursor",
             [None],  # type: ignore[list-item]
         )[0]
 
         base_url = response.get("_links", {}).get("base", "")
-        pages = [self._transform_links(page, base_url) for page in response["results"]]
-        results = {"pages": pages, "pagination_token": pagination_token}
+        pages = []
+        for page in response["results"]:
+            url = self._build_url(page, base_url)
+            pages.append(normalize_page(page, url=url))
+        results = {"pages": pages, "paginationToken": pagination_token}
         return remove_none_values(results)
 
     def transform_get_multiple_pages_response(
         self, response: dict[str, Any]
     ) -> dict[str, list[dict[str, Any]]]:
-        """Transform the response from the GET /pages endpoint."""
+        """Transform the response from the GET /pages endpoint using Klavis normalizers."""
         base_url = response.get("_links", {}).get("base", "")
-        pages = [self._transform_links(page, base_url) for page in response["results"]]
+        pages = []
+        for page in response["results"]:
+            url = self._build_url(page, base_url)
+            pages.append(normalize_page(page, url=url))
         return {"pages": pages}
 
     def transform_space_response(
         self, response: dict[str, Any], base_url: str | None = None
     ) -> dict[str, dict[str, Any]]:
-        """Transform API responses that return a space object."""
-        return {"space": self._transform_links(response, base_url)}
+        """Transform API responses that return a space object using Klavis normalizers."""
+        url = self._build_url(response, base_url)
+        return {"space": normalize_space(response, url=url)}
 
     def transform_page_response(self, response: dict[str, Any]) -> dict[str, dict[str, Any]]:
-        """Transform API responses that return a page object."""
-        return {"page": self._transform_links(response)}
+        """Transform API responses that return a page object using Klavis normalizers."""
+        url = self._build_url(response)
+        return {"page": normalize_page(response, url=url)}
 
     def transform_get_attachments_response(self, response: dict[str, Any]) -> dict[str, Any]:
-        """Transform the response from the GET /pages/{id}/attachments endpoint."""
+        """Transform the response from the GET /pages/{id}/attachments endpoint using Klavis normalizers."""
         pagination_token = parse_qs(urlparse(response.get("_links", {}).get("next", "")).query).get(
             "cursor",
             [None],  # type: ignore[list-item]
@@ -431,19 +431,30 @@ class ConfluenceClientV2(ConfluenceClient):
         base_url = response.get("_links", {}).get("base", "")
         attachments = []
         for attachment in response["results"]:
-            result = attachment.copy()
-            if "_links" in result:
-                webui_path = result["_links"].get("webui", "")
-                download_path = result["_links"].get("download", "")
-                result["url"] = f"{base_url}{webui_path}"
-                result["download_link"] = f"{base_url}{download_path}"
-                del result["_links"]
-                del result["webuiLink"]
-                del result["downloadLink"]
-                del result["version"]
-            attachments.append(result)
+            url = None
+            download_link = None
+            if "_links" in attachment:
+                webui_path = attachment["_links"].get("webui", "")
+                download_path = attachment["_links"].get("download", "")
+                url = f"{base_url}{webui_path}" if webui_path else None
+                download_link = f"{base_url}{download_path}" if download_path else None
+            normalized = normalize_attachment(attachment, url=url, download_link=download_link)
+            attachments.append(normalized)
 
-        return {"attachments": attachments, "pagination_token": pagination_token}
+        result = {"attachments": attachments, "paginationToken": pagination_token}
+        return remove_none_values(result)
+    
+    def transform_attachment_response(self, response: dict[str, Any]) -> dict[str, Any]:
+        """Transform a single attachment response using Klavis normalizers."""
+        base_url = response.get("_links", {}).get("base", "")
+        url = None
+        download_link = None
+        if "_links" in response:
+            webui_path = response["_links"].get("webui", "")
+            download_path = response["_links"].get("download", "")
+            url = f"{base_url}{webui_path}" if webui_path else None
+            download_link = f"{base_url}{download_path}" if download_path else None
+        return {"attachment": normalize_attachment(response, url=url, download_link=download_link)}
 
     def prepare_update_page_payload(
         self,
@@ -530,7 +541,11 @@ class ConfluenceClientV2(ConfluenceClient):
         }
         pages = await self.get(f"spaces/{space_id}/pages", params=params)
         base_url = pages.get("_links", {}).get("base", "")
-        return {"pages": [self._transform_links(page, base_url) for page in pages["results"]]}
+        normalized_pages = []
+        for page in pages["results"]:
+            url = self._build_url(page, base_url)
+            normalized_pages.append(normalize_page(page, url=url))
+        return {"pages": normalized_pages}
 
     async def get_space_homepage(self, space_id: str) -> dict[str, Any]:
         """
@@ -541,7 +556,8 @@ class ConfluenceClientV2(ConfluenceClient):
         root_pages = await self.get_root_pages_in_space(space_id)
         for page in root_pages["pages"]:
             if page.get("url", "").endswith("overview"):
-                return self._transform_links(page)
+                # Page is already normalized from get_root_pages_in_space
+                return page
         raise ToolExecutionError(message="No homepage found for space.")
 
     async def get_page_by_id(
@@ -679,7 +695,7 @@ class ConfluenceClientV2(ConfluenceClient):
         return space["space"]["id"]
 
     def create_space_tree(self, space: dict) -> dict:
-        """Create a space tree structure from space data."""
+        """Create a space tree structure from normalized space data."""
         space_data = space.get("space", {})
         
         return {
@@ -688,23 +704,17 @@ class ConfluenceClientV2(ConfluenceClient):
             "name": space_data.get("name"),
             "type": "space",
             "url": space_data.get("url", ""),
-            "description": space_data.get("description", {}).get("plain", ""),
+            "description": space_data.get("description", ""),
             "children": []
         }
 
     def convert_root_pages_to_tree_nodes(self, pages: list) -> list:
-        """Convert root pages to tree nodes."""
+        """Convert normalized root pages to tree nodes."""
         tree_nodes = []
         
         for page in pages:
-            node = {
-                "id": page.get("id"),
-                "title": page.get("title"),
-                "type": page.get("type", "page"),
-                "status": page.get("status", "current"),
-                "url": page.get("url", ""),
-                "children": []
-            }
+            # Pages are already normalized, extract tree node fields
+            node = normalize_tree_node(page, url=page.get("url"))
             tree_nodes.append(node)
         
         return tree_nodes
@@ -726,22 +736,16 @@ class ConfluenceClientV2(ConfluenceClient):
                     if descendants:
                         transformed_children = []
                         for desc in descendants:
-                            child_node = {
-                                "id": desc.get("id"),
-                                "title": desc.get("title"),
-                                "type": desc.get("type", "page"),
-                                "status": desc.get("status", "current"),
-                                "parent_id": None,
-                                "children": []
-                            }
+                            # Build URL first
+                            url = build_child_url(base_url, desc) or ""
+                            
+                            # Use normalizer for consistent field names
+                            child_node = normalize_tree_node(desc, url=url)
                             
                             # Determine parent ID from ancestors
                             ancestors = desc.get("ancestors", [])
                             if ancestors:
-                                child_node["parent_id"] = ancestors[-1].get("id")
-                            
-                            # Build URL
-                            child_node["url"] = build_child_url(base_url, child_node) or ""
+                                child_node["parentId"] = ancestors[-1].get("id")
                             
                             transformed_children.append(child_node)
                         
