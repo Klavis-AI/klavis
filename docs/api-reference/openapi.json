@@ -15249,7 +15249,7 @@
               }
             ],
             "title": "Content",
-            "description": "File content (base64 encoded for binary files)"
+            "description": "File content"
           }
         },
         "type": "object",
@@ -15376,12 +15376,12 @@
             "title": "Id",
             "description": "Issue ID (read-only, set by GitHub)"
           },
-          "title": {
+          "issue_title": {
             "type": "string",
-            "title": "Title",
+            "title": "Issue Title",
             "description": "Issue title"
           },
-          "body": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -15390,10 +15390,10 @@
                 "type": "null"
               }
             ],
-            "title": "Body",
+            "title": "Description",
             "description": "Issue description/body"
           },
-          "state": {
+          "status": {
             "anyOf": [
               {
                 "type": "string"
@@ -15402,7 +15402,7 @@
                 "type": "null"
               }
             ],
-            "title": "State",
+            "title": "Status",
             "description": "Issue state: open or closed",
             "default": "open"
           },
@@ -15424,7 +15424,7 @@
         },
         "type": "object",
         "required": [
-          "title"
+          "issue_title"
         ],
         "title": "GitHubIssue",
         "description": "GitHub Issue object"
@@ -15443,12 +15443,12 @@
             "title": "Id",
             "description": "PR ID (read-only, set by GitHub)"
           },
-          "title": {
+          "pr_title": {
             "type": "string",
-            "title": "Title",
+            "title": "Pr Title",
             "description": "Pull request title"
           },
-          "body": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -15457,10 +15457,10 @@
                 "type": "null"
               }
             ],
-            "title": "Body",
+            "title": "Description",
             "description": "Pull request description/body"
           },
-          "state": {
+          "status": {
             "anyOf": [
               {
                 "type": "string"
@@ -15469,18 +15469,18 @@
                 "type": "null"
               }
             ],
-            "title": "State",
+            "title": "Status",
             "description": "PR state: open, closed, or merged",
             "default": "open"
           },
-          "head": {
+          "source_branch": {
             "type": "string",
-            "title": "Head",
+            "title": "Source Branch",
             "description": "Head branch name"
           },
-          "base": {
+          "target_branch": {
             "type": "string",
-            "title": "Base",
+            "title": "Target Branch",
             "description": "Base branch name",
             "default": "main"
           },
@@ -15502,8 +15502,8 @@
         },
         "type": "object",
         "required": [
-          "title",
-          "head"
+          "pr_title",
+          "source_branch"
         ],
         "title": "GitHubPullRequest",
         "description": "GitHub Pull Request object"
@@ -16481,20 +16481,28 @@
         "title": "GoogleDriveFile",
         "description": "Google Drive file or folder object"
       },
+      "GoogleFormsChoiceOption": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "The text value of the choice option"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "GoogleFormsChoiceOption",
+        "description": "A single choice option for choice-based questions"
+      },
       "GoogleFormsData-Input": {
         "properties": {
           "forms": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleFormsForm-Input"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "items": {
+              "$ref": "#/components/schemas/GoogleFormsForm-Input"
+            },
+            "type": "array",
             "title": "Forms",
             "description": "List of Google Forms"
           }
@@ -16506,17 +16514,10 @@
       "GoogleFormsData-Output": {
         "properties": {
           "forms": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleFormsForm-Output"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "items": {
+              "$ref": "#/components/schemas/GoogleFormsForm-Output"
+            },
+            "type": "array",
             "title": "Forms",
             "description": "List of Google Forms"
           }
@@ -16527,108 +16528,10 @@
       },
       "GoogleFormsForm-Input": {
         "properties": {
-          "info": {
-            "$ref": "#/components/schemas/GoogleFormsInfo",
-            "description": "Required. The title and description of the form"
-          },
-          "settings": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/GoogleFormsFormSettings"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The form's settings"
-          },
-          "items": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleFormsItem"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Items",
-            "description": "A list of the form's items"
-          }
-        },
-        "type": "object",
-        "required": [
-          "info"
-        ],
-        "title": "GoogleFormsForm",
-        "description": "Google Forms form object - matches API Form resource"
-      },
-      "GoogleFormsForm-Output": {
-        "properties": {
-          "info": {
-            "$ref": "#/components/schemas/GoogleFormsInfo",
-            "description": "Required. The title and description of the form"
-          },
-          "settings": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/GoogleFormsFormSettings"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The form's settings"
-          },
-          "items": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleFormsItem"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Items",
-            "description": "A list of the form's items"
-          }
-        },
-        "type": "object",
-        "required": [
-          "info"
-        ],
-        "title": "GoogleFormsForm",
-        "description": "Google Forms form object - matches API Form resource"
-      },
-      "GoogleFormsFormSettings": {
-        "properties": {
-          "quizSettings": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/GoogleFormsQuizSettings"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Settings related to quiz forms"
-          }
-        },
-        "type": "object",
-        "title": "GoogleFormsFormSettings",
-        "description": "Form settings - matches API FormSettings object"
-      },
-      "GoogleFormsInfo": {
-        "properties": {
           "title": {
             "type": "string",
             "title": "Title",
-            "description": "The title of the form visible to responders"
+            "description": "The form title visible to responders"
           },
           "description": {
             "anyOf": [
@@ -16640,53 +16543,36 @@
               }
             ],
             "title": "Description",
-            "description": "The description of the form"
+            "description": "The form description"
           },
-          "documentTitle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Documenttitle",
-            "description": "The title of the document visible in Drive (output only, can be set on create)"
+          "is_quiz": {
+            "type": "boolean",
+            "title": "Is Quiz",
+            "description": "Whether this form is a quiz",
+            "default": false
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleFormsItem-Input"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of form items (questions and section headers)"
           }
         },
         "type": "object",
         "required": [
           "title"
         ],
-        "title": "GoogleFormsInfo",
-        "description": "Form info - matches API Info object"
+        "title": "GoogleFormsForm",
+        "description": "A Google Form with simplified structure"
       },
-      "GoogleFormsItem": {
+      "GoogleFormsForm-Output": {
         "properties": {
-          "itemId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Itemid",
-            "description": "The item ID"
-          },
           "title": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Title",
-            "description": "The title of the item"
+            "description": "The form title visible to responders"
           },
           "description": {
             "anyOf": [
@@ -16698,94 +16584,216 @@
               }
             ],
             "title": "Description",
-            "description": "The description of the item"
+            "description": "The form description"
           },
-          "questionItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Questionitem",
-            "description": "Poses a question to the user"
+          "is_quiz": {
+            "type": "boolean",
+            "title": "Is Quiz",
+            "description": "Whether this form is a quiz",
+            "default": false
           },
-          "questionGroupItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Questiongroupitem",
-            "description": "Poses one or more questions with a single major prompt"
-          },
-          "pageBreakItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagebreakitem",
-            "description": "Starts a new page with a title"
-          },
-          "textItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Textitem",
-            "description": "Displays a title and description on the page"
-          },
-          "imageItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Imageitem",
-            "description": "Displays an image on the page"
-          },
-          "videoItem": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Videoitem",
-            "description": "Displays a video on the page"
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleFormsItem-Output"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of form items (questions and section headers)"
           }
         },
         "type": "object",
-        "title": "GoogleFormsItem",
-        "description": "Form item - matches API Item object. Uses Dict for flexibility to match API structure."
+        "required": [
+          "title"
+        ],
+        "title": "GoogleFormsForm",
+        "description": "A Google Form with simplified structure"
       },
-      "GoogleFormsQuizSettings": {
+      "GoogleFormsItem-Input": {
         "properties": {
-          "isQuiz": {
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "question",
+              "section_header"
+            ],
+            "title": "Item Type",
+            "description": "Type of form item"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Question details (when item_type is 'question')"
+          },
+          "section_header": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsSectionHeader"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Section header details (when item_type is 'section_header')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_type"
+        ],
+        "title": "GoogleFormsItem",
+        "description": "A single item in a form - can be a question or section header"
+      },
+      "GoogleFormsItem-Output": {
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "enum": [
+              "question",
+              "section_header"
+            ],
+            "title": "Item Type",
+            "description": "Type of form item"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Question details (when item_type is 'question')"
+          },
+          "section_header": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoogleFormsSectionHeader"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Section header details (when item_type is 'section_header')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_type"
+        ],
+        "title": "GoogleFormsItem",
+        "description": "A single item in a form - can be a question or section header"
+      },
+      "GoogleFormsQuestion": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "The question title/prompt"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Additional description for the question"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required",
+            "description": "Whether this question is required",
+            "default": false
+          },
+          "question_type": {
+            "type": "string",
+            "enum": [
+              "short_text",
+              "paragraph",
+              "multiple_choice",
+              "checkbox",
+              "dropdown",
+              "scale",
+              "date",
+              "time"
+            ],
+            "title": "Question Type",
+            "description": "The type of question"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleFormsChoiceOption"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options",
+            "description": "List of options for choice-based questions"
+          },
+          "scale_low": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Low",
+            "description": "Low end of scale (for scale questions)"
+          },
+          "scale_high": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale High",
+            "description": "High end of scale (for scale questions)"
+          },
+          "scale_low_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Low Label",
+            "description": "Label for low end of scale"
+          },
+          "scale_high_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale High Label",
+            "description": "Label for high end of scale"
+          },
+          "include_year": {
             "anyOf": [
               {
                 "type": "boolean"
@@ -16794,13 +16802,56 @@
                 "type": "null"
               }
             ],
-            "title": "Isquiz",
-            "description": "Whether this form is a quiz"
+            "title": "Include Year",
+            "description": "Whether to include year in date questions"
+          },
+          "include_time": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Include Time",
+            "description": "Whether to include time in date questions"
           }
         },
         "type": "object",
-        "title": "GoogleFormsQuizSettings",
-        "description": "Quiz settings - matches API QuizSettings object"
+        "required": [
+          "title",
+          "question_type"
+        ],
+        "title": "GoogleFormsQuestion",
+        "description": "A question item in the form - simplified structure"
+      },
+      "GoogleFormsSectionHeader": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "The section title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Section description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleFormsSectionHeader",
+        "description": "A section header/text item in the form"
       },
       "GoogleSheetsCell": {
         "properties": {
@@ -18494,12 +18545,12 @@
       },
       "Mem0Data-Input": {
         "properties": {
-          "memories": {
+          "memory_list": {
             "items": {
               "$ref": "#/components/schemas/Mem0Memory"
             },
             "type": "array",
-            "title": "Memories",
+            "title": "Memory List",
             "description": "List of memories"
           }
         },
@@ -18509,12 +18560,12 @@
       },
       "Mem0Data-Output": {
         "properties": {
-          "memories": {
+          "memory_list": {
             "items": {
               "$ref": "#/components/schemas/Mem0Memory"
             },
             "type": "array",
-            "title": "Memories",
+            "title": "Memory List",
             "description": "List of memories"
           }
         },
@@ -18536,7 +18587,7 @@
             "title": "Id",
             "description": "Memory ID (read-only, set by Mem0)"
           },
-          "memory": {
+          "content_text": {
             "anyOf": [
               {
                 "type": "string"
@@ -18545,10 +18596,10 @@
                 "type": "null"
               }
             ],
-            "title": "Memory",
+            "title": "Content Text",
             "description": "Memory content (returned from API)"
           },
-          "messages": {
+          "message_list": {
             "anyOf": [
               {
                 "items": {
@@ -18560,7 +18611,7 @@
                 "type": "null"
               }
             ],
-            "title": "Messages",
+            "title": "Message List",
             "description": "Array of message objects representing the content"
           },
           "agent_id": {
@@ -18624,7 +18675,7 @@
             "title": "Metadata",
             "description": "Additional metadata"
           },
-          "includes": {
+          "include_preferences": {
             "anyOf": [
               {
                 "type": "string"
@@ -18633,10 +18684,10 @@
                 "type": "null"
               }
             ],
-            "title": "Includes",
+            "title": "Include Preferences",
             "description": "String to include specific preferences in the memory"
           },
-          "excludes": {
+          "exclude_preferences": {
             "anyOf": [
               {
                 "type": "string"
@@ -18645,16 +18696,16 @@
                 "type": "null"
               }
             ],
-            "title": "Excludes",
+            "title": "Exclude Preferences",
             "description": "String to exclude specific preferences in the memory"
           },
-          "infer": {
+          "auto_infer": {
             "type": "boolean",
-            "title": "Infer",
+            "title": "Auto Infer",
             "description": "Whether to infer memories or directly store messages",
             "default": true
           },
-          "output_format": {
+          "response_format": {
             "anyOf": [
               {
                 "type": "string"
@@ -18663,11 +18714,11 @@
                 "type": "null"
               }
             ],
-            "title": "Output Format",
+            "title": "Response Format",
             "description": "Response format structure (v1.0 or v1.1)",
             "default": "v1.1"
           },
-          "custom_categories": {
+          "category_definitions": {
             "anyOf": [
               {
                 "items": {
@@ -18682,10 +18733,10 @@
                 "type": "null"
               }
             ],
-            "title": "Custom Categories",
+            "title": "Category Definitions",
             "description": "List of custom categories with name and description"
           },
-          "custom_instructions": {
+          "processing_instructions": {
             "anyOf": [
               {
                 "type": "string"
@@ -18694,18 +18745,18 @@
                 "type": "null"
               }
             ],
-            "title": "Custom Instructions",
+            "title": "Processing Instructions",
             "description": "Project-specific guidelines for handling memories"
           },
-          "immutable": {
+          "read_only": {
             "type": "boolean",
-            "title": "Immutable",
+            "title": "Read Only",
             "description": "Whether the memory is immutable",
             "default": false
           },
-          "async_mode": {
+          "background_processing": {
             "type": "boolean",
-            "title": "Async Mode",
+            "title": "Background Processing",
             "description": "Whether to add memory asynchronously",
             "default": true
           },
@@ -18720,30 +18771,6 @@
             ],
             "title": "Timestamp",
             "description": "Unix timestamp of the memory"
-          },
-          "expiration_date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expiration Date",
-            "description": "Expiration date (YYYY-MM-DD)"
-          },
-          "version": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Version",
-            "description": "Memory version (v1 deprecated, use v2)"
           },
           "created_at": {
             "anyOf": [
@@ -18768,30 +18795,6 @@
             ],
             "title": "Updated At",
             "description": "Last update timestamp"
-          },
-          "owner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Owner",
-            "description": "Memory owner"
-          },
-          "organization": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Organization",
-            "description": "Organization"
           }
         },
         "type": "object",
