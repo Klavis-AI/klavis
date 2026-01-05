@@ -5,7 +5,6 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import List
-from contextvars import ContextVar
 
 import click
 import mcp.types as types
@@ -17,6 +16,136 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
+
+
+def get_path(data: dict, path: str) -> any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: dict, mapping: dict[str, any]) -> dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules for Outlook Mail Objects
+
+RECIPIENT_RULES = {
+    "email": "emailAddress.address",
+    "name": "emailAddress.name",
+}
+
+FOLDER_RULES = {
+    "itemId": "id",
+    "name": "displayName",
+    "messageCount": "totalItemCount",
+    "unreadCount": "unreadItemCount",
+    "parentId": "parentFolderId",
+    "childCount": "childFolderCount",
+    "size": "sizeInBytes",
+    "hidden": "isHidden",
+    "wellKnownName": "wellKnownName",
+}
+
+ATTACHMENT_RULES = {
+    "attachmentId": "id",
+    "name": "name",
+    "size": "size",
+    "type": "contentType",
+    "inline": "isInline",
+    "lastModified": "lastModifiedDateTime",
+}
+
+MESSAGE_RULES = {
+    "id": "id",
+    "title": "subject",
+    "preview": "bodyPreview",
+    "content": "body.content",
+    "contentType": "body.contentType",
+    "importance": "importance",
+    "priority": "priority",
+    "isRead": "isRead",
+    "isDraft": "isDraft",
+    "hasAttachments": "hasAttachments",
+    "conversationId": "conversationId",
+    "conversationIndex": "conversationIndex",
+    "internetMessageId": "internetMessageId",
+    "webLink": "webLink",
+    "created": "createdDateTime",
+    "lastModified": "lastModifiedDateTime",
+    "received": "receivedDateTime",
+    "sent": "sentDateTime",
+    "changeKey": "changeKey",
+    "categories": "categories",
+    "isDeliveryReceiptRequested": "isDeliveryReceiptRequested",
+    "isReadReceiptRequested": "isReadReceiptRequested",
+    "inferenceClassification": "inferenceClassification",
+    "flagStatus": "flag.flagStatus",
+    # Sender/From
+    "senderEmail": "sender.emailAddress.address",
+    "senderName": "sender.emailAddress.name",
+    "fromEmail": "from.emailAddress.address",
+    "fromName": "from.emailAddress.name",
+    # Recipients
+    "toRecipients": lambda x: [
+        normalize(r, RECIPIENT_RULES) for r in x.get('toRecipients', [])
+    ] if x.get('toRecipients') else None,
+    "ccRecipients": lambda x: [
+        normalize(r, RECIPIENT_RULES) for r in x.get('ccRecipients', [])
+    ] if x.get('ccRecipients') else None,
+    "bccRecipients": lambda x: [
+        normalize(r, RECIPIENT_RULES) for r in x.get('bccRecipients', [])
+    ] if x.get('bccRecipients') else None,
+    "replyTo": lambda x: [
+        normalize(r, RECIPIENT_RULES) for r in x.get('replyTo', [])
+    ] if x.get('replyTo') else None,
+    # Attachments
+    "attachments": lambda x: [
+        normalize(a, ATTACHMENT_RULES) for a in x.get('attachments', [])
+    ] if x.get('attachments') else None,
+    # Folder
+    "folderId": "parentFolderId",
+}
+
+
+def normalize_message(raw_message: dict) -> dict:
+    """Normalize a single message and add computed fields."""
+    message = normalize(raw_message, MESSAGE_RULES)
+    # Add computed fields if needed
+    return message
+
+
+def normalize_folder(raw_folder: dict) -> dict:
+    """Normalize a single folder and add computed fields."""
+    folder = normalize(raw_folder, FOLDER_RULES)
+    return folder
+
 
 from tools import (
     auth_token_context,
@@ -511,6 +640,7 @@ def main(
                 result = await outlookMail_delete_folder(
                     folder_id=arguments["folder_id"]
                 )
+                # No normalization needed for delete operations
                 return [
                     types.TextContent(
                         type="text",
@@ -532,6 +662,9 @@ def main(
                     display_name=arguments["display_name"],
                     is_hidden=arguments.get("is_hidden", False)
                 )
+                # Normalize the created folder if successful
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_folder(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -552,6 +685,13 @@ def main(
                 result = await outlookMail_list_folders(
                     include_hidden=arguments.get("include_hidden", True)
                 )
+                # Normalize the folder list from raw API response
+                if isinstance(result, dict) and 'value' in result and 'error' not in result:
+                    normalized_folders = [normalize_folder(folder) for folder in result['value']]
+                    result = {
+                        "count": len(normalized_folders),
+                        "folders": normalized_folders
+                    }
                 return [
                     types.TextContent(
                         type="text",
@@ -568,10 +708,20 @@ def main(
                 ]
 
         elif name == "outlookMail_get_mail_folder_details":
+            if not arguments.get("folder_id"):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: 'folder_id' argument is required."
+                    )
+                ]
             try:
                 result = await outlookMail_get_mail_folder_details(
                     folder_id=arguments["folder_id"]
                 )
+                # Normalize the single folder object from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_folder(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -593,6 +743,9 @@ def main(
                     folder_id=arguments["folder_id"],
                     display_name=arguments["display_name"]
                 )
+                # Normalize the updated folder from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_folder(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -610,10 +763,20 @@ def main(
 
         # Message Operations
         elif name == "outlookMail_read_message":
+            if not arguments.get("message_id"):
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: 'message_id' argument is required."
+                    )
+                ]
             try:
                 result = await outlookMail_read_message(
                     message_id=arguments["message_id"]
                 )
+                # Normalize the single message object from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -636,6 +799,13 @@ def main(
                     orderby=arguments.get("orderby"),
                     select=arguments.get("select")
                 )
+                # Normalize the message list from raw API response
+                if isinstance(result, dict) and 'value' in result and 'error' not in result:
+                    normalized_messages = [normalize_message(message) for message in result['value']]
+                    result = {
+                        "count": len(normalized_messages),
+                        "messages": normalized_messages
+                    }
                 return [
                     types.TextContent(
                         type="text",
@@ -660,6 +830,13 @@ def main(
                     orderby=arguments.get("orderby"),
                     select=arguments.get("select")
                 )
+                # Normalize the message list from raw API response
+                if isinstance(result, dict) and 'value' in result and 'error' not in result:
+                    normalized_messages = [normalize_message(message) for message in result['value']]
+                    result = {
+                        "count": len(normalized_messages),
+                        "messages": normalized_messages
+                    }
                 return [
                     types.TextContent(
                         type="text",
@@ -685,6 +862,9 @@ def main(
                     cc_recipients=arguments.get("cc_recipients"),
                     bcc_recipients=arguments.get("bcc_recipients"),
                 )
+                # Normalize the updated message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -705,6 +885,7 @@ def main(
                 result = await outlookMail_delete_draft(
                     message_id=arguments["message_id"]
                 )
+                # No normalization needed for delete operations
                 return [
                     types.TextContent(
                         type="text",
@@ -727,6 +908,9 @@ def main(
                     comment=arguments["comment"],
                     to_recipients=arguments["to_recipients"]
                 )
+                # Normalize the created draft message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -748,6 +932,9 @@ def main(
                     message_id=arguments["message_id"],
                     comment=arguments["comment"]
                 )
+                # Normalize the created draft message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -769,6 +956,9 @@ def main(
                     message_id=arguments["message_id"],
                     comment=arguments.get("comment", "")
                 )
+                # Normalize the created draft message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -789,6 +979,7 @@ def main(
                 result = await outlookMail_send_draft(
                     message_id=arguments["message_id"]
                 )
+                # No normalization needed for send operations (typically returns success status)
                 return [
                     types.TextContent(
                         type="text",
@@ -813,6 +1004,9 @@ def main(
                     cc_recipients=arguments.get("cc_recipients"),
                     bcc_recipients=arguments.get("bcc_recipients"),
                 )
+                # Normalize the created draft message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
@@ -833,6 +1027,9 @@ def main(
                     message_id=arguments["message_id"],
                     destination_folder_id=arguments["destination_folder_id"]
                 )
+                # Normalize the moved message from raw API response
+                if isinstance(result, dict) and 'error' not in result and 'id' in result:
+                    result = normalize_message(result)
                 return [
                     types.TextContent(
                         type="text",
