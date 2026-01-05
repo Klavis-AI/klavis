@@ -49,7 +49,7 @@
         <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <h2>MCP Sandbox</h2>
-            <p><strong>scalable, isolated MCP environments for LLM training and RL</strong></p>
+            <p><strong>scalable MCP environments for LLM training and RL</strong></p>
           </div>
           <div>
             <a href="https://www.klavis.ai/docs/concepts/sandbox">
