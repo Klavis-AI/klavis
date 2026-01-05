@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, Optional, List
 from .base import make_clickup_request
+from .normalize import normalize_tasks, normalize_task
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ async def get_tasks(
             params["date_updated_lt"] = date_updated_lt
             
         result = await make_clickup_request(f"list/{list_id}/task", params=params)
-        return result
+        return normalize_tasks(result)
     except Exception as e:
         logger.exception(f"Error executing tool get_tasks: {e}")
         raise e
@@ -74,7 +75,7 @@ async def get_task_by_id(task_id: str, custom_task_ids: bool = False, team_id: O
             params["team_id"] = team_id
             
         result = await make_clickup_request(f"task/{task_id}", params=params)
-        return result
+        return normalize_task(result)
     except Exception as e:
         logger.exception(f"Error executing tool get_task_by_id: {e}")
         raise e
@@ -140,7 +141,7 @@ async def create_task(
             params["team_id"] = team_id
             
         result = await make_clickup_request(f"list/{list_id}/task", "POST", data, params)
-        return result
+        return normalize_task(result)
     except Exception as e:
         logger.exception(f"Error executing tool create_task: {e}")
         raise e
@@ -199,7 +200,7 @@ async def update_task(
             params["team_id"] = team_id
             
         result = await make_clickup_request(f"task/{task_id}", "PUT", data, params)
-        return result
+        return normalize_task(result)
     except Exception as e:
         logger.exception(f"Error executing tool update_task: {e}")
         raise e
@@ -220,7 +221,7 @@ async def search_tasks(
         }
         
         result = await make_clickup_request(f"team/{team_id}/task", params=params)
-        return result
+        return normalize_tasks(result)
     except Exception as e:
         logger.exception(f"Error executing tool search_tasks: {e}")
         raise e 
