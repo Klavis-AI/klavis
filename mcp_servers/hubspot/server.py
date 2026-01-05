@@ -1096,7 +1096,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1122,7 +1122,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1216,7 +1216,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1242,7 +1242,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1336,7 +1336,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1362,7 +1362,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1380,7 +1380,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1456,7 +1456,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1482,7 +1482,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1500,7 +1500,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1610,7 +1610,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1636,7 +1636,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1654,7 +1654,7 @@ For custom properties or the complete list, call 'hubspot_list_properties' with 
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, indent=2),
                     )
                 ]
             except Exception as e:

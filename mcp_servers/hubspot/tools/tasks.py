@@ -1,20 +1,20 @@
 import logging
 import json
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from hubspot.crm.objects import (
     SimplePublicObjectInputForCreate,
     SimplePublicObjectInput,
 )
 
-from .base import get_hubspot_client
+from .base import get_hubspot_client, normalize_task
 
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
-async def hubspot_get_tasks(limit: int = 10):
+async def hubspot_get_tasks(limit: int = 10) -> Dict[str, Any]:
     """
     Fetch a list of tasks from HubSpot.
 
@@ -22,7 +22,7 @@ async def hubspot_get_tasks(limit: int = 10):
     - limit: Number of tasks to return
 
     Returns:
-    - List of task records
+    - Normalized list of task records
     """
     client = get_hubspot_client()
     if not client:
@@ -42,14 +42,22 @@ async def hubspot_get_tasks(limit: int = 10):
             limit=limit,
             properties=common_properties,
         )
-        logger.info(f"Fetched {len(result.results)} tasks successfully.")
-        return result
+        
+        # Normalize response
+        tasks = [normalize_task(obj) for obj in (result.results or [])]
+        
+        logger.info(f"Fetched {len(tasks)} tasks successfully.")
+        return {
+            "count": len(tasks),
+            "tasks": tasks,
+            "hasMore": result.paging.next.after is not None if result.paging and result.paging.next else False,
+        }
     except Exception as e:
         logger.error(f"Error fetching tasks: {e}")
-        return None
+        raise e
 
 
-async def hubspot_get_task_by_id(task_id: str):
+async def hubspot_get_task_by_id(task_id: str) -> Dict[str, Any]:
     """
     Fetch a task by its ID.
 
@@ -57,7 +65,7 @@ async def hubspot_get_task_by_id(task_id: str):
     - task_id: HubSpot task ID
 
     Returns:
-    - Task object
+    - Normalized task object
     """
     client = get_hubspot_client()
     if not client:
@@ -77,15 +85,18 @@ async def hubspot_get_task_by_id(task_id: str):
             task_id,
             properties=common_properties,
         )
-        print(f"---Result: {result}")
+        
+        # Normalize response
+        task = normalize_task(result)
+        
         logger.info(f"Fetched task ID: {task_id} successfully.")
-        return result
+        return {"task": task}
     except Exception as e:
         logger.error(f"Error fetching task by ID: {e}")
-        return None
+        raise e
 
 
-async def hubspot_create_task(properties: str):
+async def hubspot_create_task(properties: str) -> Dict[str, Any]:
     """
     Create a new task.
 
@@ -93,7 +104,7 @@ async def hubspot_create_task(properties: str):
     - properties: JSON string of task properties (see HubSpot docs)
 
     Returns:
-    - Newly created task
+    - Normalized newly created task
     """
     client = get_hubspot_client()
     if not client:
@@ -106,11 +117,15 @@ async def hubspot_create_task(properties: str):
         result = client.crm.objects.tasks.basic_api.create(
             simple_public_object_input_for_create=data
         )
+        
+        # Normalize response
+        task = normalize_task(result)
+        
         logger.info("Task created successfully.")
-        return result
+        return {"task": task, "status": "created"}
     except Exception as e:
         logger.error(f"Error creating task: {e}")
-        return f"Error occurred: {e}"
+        raise e
 
 
 async def hubspot_update_task_by_id(task_id: str, updates: str):

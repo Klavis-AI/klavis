@@ -1,7 +1,8 @@
 import logging
 import json
+from typing import Dict, Any
 from hubspot.crm.deals import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+from .base import get_hubspot_client, normalize_deal
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def _build_dealstage_label_map(client) -> dict:
         logger.debug(f"Failed to fetch pipelines for deals: {exc}")
     return stage_id_to_label
 
-async def hubspot_get_deals(limit: int = 10):
+async def hubspot_get_deals(limit: int = 10) -> Dict[str, Any]:
     """
     Fetch a list of deals from HubSpot.
 
@@ -36,7 +37,7 @@ async def hubspot_get_deals(limit: int = 10):
     - limit: Number of deals to return
 
     Returns:
-    - List of deal records
+    - Normalized list of deal records
     """
     client = get_hubspot_client()
     if not client:
@@ -45,6 +46,7 @@ async def hubspot_get_deals(limit: int = 10):
     try:
         logger.info(f"Fetching up to {limit} deals...")
         result = client.crm.deals.basic_api.get_page(limit=limit)
+        
         # Enrich with human-readable dealstage label
         stage_label_map = _build_dealstage_label_map(client)
         for obj in getattr(result, "results", []) or []:
@@ -53,13 +55,22 @@ async def hubspot_get_deals(limit: int = 10):
             if stage_id and stage_id in stage_label_map:
                 props["dealstage_label"] = stage_label_map[stage_id]
                 obj.properties = props
-        logger.info(f"Fetched {len(result.results)} deals successfully.")
-        return result
+        
+        # Normalize response
+        deals = [normalize_deal(obj) for obj in (result.results or [])]
+        
+        logger.info(f"Fetched {len(deals)} deals successfully.")
+        return {
+            "count": len(deals),
+            "deals": deals,
+            "hasMore": result.paging.next.after is not None if result.paging and result.paging.next else False,
+        }
     except Exception as e:
         logger.error(f"Error fetching deals: {e}")
-        return None
+        raise e
 
-async def hubspot_get_deal_by_id(deal_id: str):
+
+async def hubspot_get_deal_by_id(deal_id: str) -> Dict[str, Any]:
     """
     Fetch a deal by its ID.
 
@@ -67,7 +78,7 @@ async def hubspot_get_deal_by_id(deal_id: str):
     - deal_id: HubSpot deal ID
 
     Returns:
-    - Deal object
+    - Normalized deal object
     """
     client = get_hubspot_client()
     if not client:
@@ -76,6 +87,7 @@ async def hubspot_get_deal_by_id(deal_id: str):
     try:
         logger.info(f"Fetching deal ID: {deal_id}...")
         result = client.crm.deals.basic_api.get_by_id(deal_id)
+        
         # Enrich with human-readable dealstage label
         stage_label_map = _build_dealstage_label_map(client)
         props = getattr(result, "properties", {}) or {}
@@ -83,13 +95,17 @@ async def hubspot_get_deal_by_id(deal_id: str):
         if stage_id and stage_id in stage_label_map:
             props["dealstage_label"] = stage_label_map[stage_id]
             result.properties = props
+        
+        # Normalize response
+        deal = normalize_deal(result)
+        
         logger.info(f"Fetched deal ID: {deal_id} successfully.")
-        return result
+        return {"deal": deal}
     except Exception as e:
         logger.error(f"Error fetching deal by ID: {e}")
-        return None
+        raise e
 
-async def hubspot_create_deal(properties: str):
+async def hubspot_create_deal(properties: str) -> Dict[str, Any]:
     """
     Create a new deal.
 
@@ -97,7 +113,7 @@ async def hubspot_create_deal(properties: str):
     - properties: JSON string of deal properties
 
     Returns:
-    - Newly created deal
+    - Normalized newly created deal
     """
     client = get_hubspot_client()
     if not client:
@@ -131,15 +147,19 @@ async def hubspot_create_deal(properties: str):
             error_msg = "Invalid property names detected:\n" + "\n".join(suggestions)
             error_msg += "\n\nTip: Call 'hubspot_list_properties' with object_type='deals' to see all valid property names."
             logger.warning(error_msg)
-            return f"Error: {error_msg}"
+            return {"error": error_msg}
         
         data = SimplePublicObjectInputForCreate(properties=props)
         result = client.crm.deals.basic_api.create(simple_public_object_input_for_create=data)
+        
+        # Normalize response
+        deal = normalize_deal(result)
+        
         logger.info("Deal created successfully.")
-        return result
+        return {"deal": deal, "status": "created"}
     except Exception as e:
         logger.error(f"Error creating deal: {e}")
-        return f"Error occurred: {e}"
+        raise e
 
 async def hubspot_update_deal_by_id(deal_id: str, updates: str):
     """
