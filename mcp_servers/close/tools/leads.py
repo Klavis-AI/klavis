@@ -6,7 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
-    format_leads_response,
+    normalize_lead,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -33,13 +33,11 @@ async def list_leads(
     
     response = await client.get("/lead/", params=params)
     
-    result = {
-        "leads": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+    return {
+        "leads": [normalize_lead(lead) for lead in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-    
-    return format_leads_response(result)
 
 
 async def get_lead(lead_id: str, fields: Optional[str] = None) -> ToolResponse:
@@ -53,13 +51,7 @@ async def get_lead(lead_id: str, fields: Optional[str] = None) -> ToolResponse:
     
     response = await client.get(f"/lead/{lead_id}/", params=params)
     
-    # Format opportunities if they exist in the lead
-    if 'opportunities' in response:
-        result = {"leads": [response]}
-        formatted = format_leads_response(result)
-        return formatted["leads"][0]
-    
-    return response
+    return {"lead": normalize_lead(response)}
 
 
 async def create_lead(
@@ -87,7 +79,7 @@ async def create_lead(
     
     response = await client.post("/lead/", json_data=lead_data)
     
-    return response
+    return {"lead": normalize_lead(response)}
 
 
 async def update_lead(
@@ -115,7 +107,7 @@ async def update_lead(
     
     response = await client.put(f"/lead/{lead_id}/", json_data=lead_data)
     
-    return response
+    return {"lead": normalize_lead(response)}
 
 
 async def delete_lead(lead_id: str) -> ToolResponse:
@@ -123,9 +115,9 @@ async def delete_lead(lead_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/lead/{lead_id}/")
+    await client.delete(f"/lead/{lead_id}/")
     
-    return {"success": True, "lead_id": lead_id}
+    return {"success": True, "leadId": lead_id}
 
 
 async def search_leads(
@@ -146,13 +138,11 @@ async def search_leads(
     
     response = await client.get("/lead/", params=params)
     
-    result = {
-        "leads": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+    return {
+        "leads": [normalize_lead(lead) for lead in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-    
-    return format_leads_response(result)
 
 
 async def merge_leads(
@@ -170,4 +160,4 @@ async def merge_leads(
     
     response = await client.post("/lead/merge/", json_data=merge_data)
     
-    return response 
+    return {"lead": normalize_lead(response)} 

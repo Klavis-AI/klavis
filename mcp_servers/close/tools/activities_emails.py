@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_email_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -53,9 +54,9 @@ async def list_emails(
     response = await client.get("/activity/email/", params=params)
     
     return {
-        "emails": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "emails": [normalize_email_activity(e) for e in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -71,7 +72,7 @@ async def get_email(email_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/email/{email_id}/")
     
-    return response
+    return {"email": normalize_email_activity(response)}
 
 
 async def create_email(
@@ -123,7 +124,7 @@ async def create_email(
     
     response = await client.post("/activity/email/", json_data=email_data)
     
-    return response
+    return {"email": normalize_email_activity(response)}
 
 
 async def update_email(
@@ -168,7 +169,7 @@ async def update_email(
     
     response = await client.put(f"/activity/email/{email_id}/", json_data=email_data)
     
-    return response
+    return {"email": normalize_email_activity(response)}
 
 
 async def delete_email(email_id: str) -> ToolResponse:
@@ -181,9 +182,9 @@ async def delete_email(email_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/email/{email_id}/")
+    await client.delete(f"/activity/email/{email_id}/")
     
-    return {"success": True, "email_id": email_id}
+    return {"success": True, "emailId": email_id}
 
 
 async def send_email(
@@ -201,7 +202,7 @@ async def send_email(
     
     response = await client.post(f"/activity/email/{email_id}/send/", json_data={})
     
-    return response
+    return {"email": normalize_email_activity(response)}
 
 
 async def search_emails(
@@ -227,8 +228,8 @@ async def search_emails(
     response = await client.get("/activity/email/", params=params)
     
     return {
-        "emails": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "emails": [normalize_email_activity(e) for e in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
