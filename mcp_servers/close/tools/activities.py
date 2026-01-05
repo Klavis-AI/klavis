@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -55,9 +56,9 @@ async def list_activities(
     response = await client.get("/activity/", params=params)
     
     return {
-        "activities": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "activities": [normalize_activity(a) for a in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -84,8 +85,7 @@ async def search_activities(
     response = await client.get("/activity/", params=params)
     
     return {
-        "activities": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "activities": [normalize_activity(a) for a in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

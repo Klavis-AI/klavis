@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_note_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -53,9 +54,9 @@ async def list_notes(
     response = await client.get("/activity/note/", params=params)
     
     return {
-        "notes": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "notes": [normalize_note_activity(n) for n in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -71,7 +72,7 @@ async def get_note(note_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/note/{note_id}/")
     
-    return response
+    return {"note": normalize_note_activity(response)}
 
 
 async def create_note(
@@ -102,7 +103,7 @@ async def create_note(
     
     response = await client.post("/activity/note/", json_data=note_data)
     
-    return response
+    return {"note": normalize_note_activity(response)}
 
 
 async def update_note(
@@ -129,7 +130,7 @@ async def update_note(
     
     response = await client.put(f"/activity/note/{note_id}/", json_data=note_data)
     
-    return response
+    return {"note": normalize_note_activity(response)}
 
 
 async def delete_note(note_id: str) -> ToolResponse:
@@ -142,9 +143,9 @@ async def delete_note(note_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/note/{note_id}/")
+    await client.delete(f"/activity/note/{note_id}/")
     
-    return {"success": True, "note_id": note_id}
+    return {"success": True, "noteId": note_id}
 
 
 async def search_notes(
@@ -170,8 +171,7 @@ async def search_notes(
     response = await client.get("/activity/note/", params=params)
     
     return {
-        "notes": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "notes": [normalize_note_activity(n) for n in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_contact,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -33,9 +34,9 @@ async def list_contacts(
     response = await client.get("/contact/", params=params)
     
     return {
-        "contacts": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "contacts": [normalize_contact(c) for c in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -46,7 +47,7 @@ async def get_contact(contact_id: str) -> ToolResponse:
     
     response = await client.get(f"/contact/{contact_id}/")
     
-    return response
+    return {"contact": normalize_contact(response)}
 
 
 async def create_contact(
@@ -74,7 +75,7 @@ async def create_contact(
     
     response = await client.post("/contact/", json_data=contact_data)
     
-    return response
+    return {"contact": normalize_contact(response)}
 
 
 async def update_contact(
@@ -104,7 +105,7 @@ async def update_contact(
     
     response = await client.put(f"/contact/{contact_id}/", json_data=contact_data)
     
-    return response
+    return {"contact": normalize_contact(response)}
 
 
 async def delete_contact(contact_id: str) -> ToolResponse:
@@ -112,9 +113,9 @@ async def delete_contact(contact_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/contact/{contact_id}/")
+    await client.delete(f"/contact/{contact_id}/")
     
-    return {"success": True, "contact_id": contact_id}
+    return {"success": True, "contactId": contact_id}
 
 
 async def search_contacts(
@@ -134,7 +135,7 @@ async def search_contacts(
     response = await client.get("/contact/", params=params)
     
     return {
-        "contacts": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "contacts": [normalize_contact(c) for c in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     } 

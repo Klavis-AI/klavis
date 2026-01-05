@@ -6,7 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
-    format_opportunity_values,
+    normalize_opportunity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -33,15 +33,10 @@ async def list_opportunities(
     
     response = await client.get("/opportunity/", params=params)
     
-    # Format monetary values in opportunities
-    formatted_opportunities = []
-    for opp in response.get("data", []):
-        formatted_opportunities.append(format_opportunity_values(opp))
-    
     return {
-        "opportunities": formatted_opportunities,
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "opportunities": [normalize_opportunity(opp) for opp in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -52,7 +47,7 @@ async def get_opportunity(opportunity_id: str) -> ToolResponse:
     
     response = await client.get(f"/opportunity/{opportunity_id}/")
     
-    return format_opportunity_values(response)
+    return {"opportunity": normalize_opportunity(response)}
 
 
 async def create_opportunity(
@@ -82,7 +77,7 @@ async def create_opportunity(
     
     response = await client.post("/opportunity/", json_data=opportunity_data)
     
-    return format_opportunity_values(response)
+    return {"opportunity": normalize_opportunity(response)}
 
 
 async def update_opportunity(
@@ -114,7 +109,7 @@ async def update_opportunity(
     
     response = await client.put(f"/opportunity/{opportunity_id}/", json_data=opportunity_data)
     
-    return format_opportunity_values(response)
+    return {"opportunity": normalize_opportunity(response)}
 
 
 async def delete_opportunity(opportunity_id: str) -> ToolResponse:
@@ -122,9 +117,9 @@ async def delete_opportunity(opportunity_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/opportunity/{opportunity_id}/")
+    await client.delete(f"/opportunity/{opportunity_id}/")
     
-    return {"success": True, "opportunity_id": opportunity_id}
+    return {"success": True, "opportunityId": opportunity_id}
 
 
 async def search_opportunities(
@@ -143,13 +138,8 @@ async def search_opportunities(
     
     response = await client.get("/opportunity/", params=params)
     
-    # Format monetary values in opportunities
-    formatted_opportunities = []
-    for opp in response.get("data", []):
-        formatted_opportunities.append(format_opportunity_values(opp))
-    
     return {
-        "opportunities": formatted_opportunities,
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "opportunities": [normalize_opportunity(opp) for opp in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     } 
