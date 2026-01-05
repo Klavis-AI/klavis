@@ -29,6 +29,6 @@ __all__ = [
     "create_records",
     "update_records",
     "delete_records",
-    # Base
+    # Base utilities
     "auth_token_context",
 ]

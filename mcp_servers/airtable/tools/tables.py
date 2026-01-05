@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from .base import make_airtable_request
+from .base import make_airtable_request, normalize_table
 
 # Configure logging
 logger = logging.getLogger("airtable_tools")
@@ -11,7 +11,13 @@ async def get_tables_info(base_id: str) -> Dict[str, Any]:
     """Get information about all tables in a base."""
     endpoint = f"meta/bases/{base_id}/tables"
     logger.info(f"Executing tool: get_tables_info for base_id: {base_id}")
-    return await make_airtable_request("GET", endpoint)
+    raw_response = await make_airtable_request("GET", endpoint)
+    
+    tables = [normalize_table(t) for t in raw_response.get("tables", [])]
+    return {
+        "count": len(tables),
+        "tables": tables,
+    }
 
 
 async def create_table(
@@ -31,7 +37,8 @@ async def create_table(
         payload["description"] = description
 
     logger.info(f"Executing tool: create_table for base_id: {base_id}")
-    return await make_airtable_request("POST", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("POST", endpoint, json_data=payload)
+    return normalize_table(raw_response)
 
 
 async def update_table(
@@ -50,4 +57,5 @@ async def update_table(
         payload["description"] = description
 
     logger.info(f"Executing tool: update_table for table {table_id} in base {base_id}")
-    return await make_airtable_request("PATCH", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("PATCH", endpoint, json_data=payload)
+    return normalize_table(raw_response)
