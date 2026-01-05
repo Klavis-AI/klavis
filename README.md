@@ -48,8 +48,8 @@
       <td align="center" width="33%" valign="top" style="vertical-align: top; height: 250px;">
         <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <h2>Sandbox</h2>
-            <p><strong>scalable, isolated environments for LLM training and RL</strong></p>
+            <h2>MCP Sandbox</h2>
+            <p><strong>scalable, isolated MCP environments for LLM training and RL</strong></p>
           </div>
           <div>
             <a href="https://www.klavis.ai/docs/concepts/sandbox">
