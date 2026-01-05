@@ -8,6 +8,7 @@ from .base import (
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
     AsanaToolExecutionError,
+    normalize_tag,
 )
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ async def get_tag_by_id(
     try:
         client = get_asana_client()
         response = await client.get(f"/tags/{tag_id}")
-        return {"tag": response["data"]}
+        return {"tag": normalize_tag(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -52,7 +53,7 @@ async def create_tag(
 
         client = get_asana_client()
         response = await client.post("/tags", json_data={"data": data})
-        return {"tag": response["data"]}
+        return {"tag": normalize_tag(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -84,9 +85,10 @@ async def list_tags(
             }),
         )
 
+        tags = [normalize_tag(t) for t in response["data"]]
         return {
-            "tags": response["data"],
-            "count": len(response["data"]),
+            "tags": tags,
+            "count": len(tags),
             "next_page": get_next_page(response),
         }
 

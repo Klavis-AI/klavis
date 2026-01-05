@@ -7,6 +7,7 @@ from .base import (
     get_next_page,
     remove_none_values,
     AsanaToolExecutionError,
+    normalize_workspace,
 )
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ async def get_workspace_by_id(
     try:
         client = get_asana_client()
         response = await client.get(f"/workspaces/{workspace_id}")
-        return {"workspace": response["data"]}
+        return {"workspace": normalize_workspace(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -47,9 +48,10 @@ async def list_workspaces(
             }),
         )
 
+        workspaces = [normalize_workspace(ws) for ws in response["data"]]
         return {
-            "workspaces": response["data"],
-            "count": len(response["data"]),
+            "workspaces": workspaces,
+            "count": len(workspaces),
             "next_page": get_next_page(response),
         }
 

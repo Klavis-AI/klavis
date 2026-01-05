@@ -8,6 +8,7 @@ from .base import (
     get_unique_workspace_id_or_raise_error,
     remove_none_values,
     AsanaToolExecutionError,
+    normalize_user,
 )
 
 logger = logging.getLogger(__name__)
@@ -36,9 +37,10 @@ async def list_users(
             }),
         )
 
+        users = [normalize_user(u) for u in response["data"]]
         return {
-            "users": response["data"],
-            "count": len(response["data"]),
+            "users": users,
+            "count": len(users),
             "next_page": get_next_page(response),
         }
 
@@ -57,7 +59,7 @@ async def get_user_by_id(
     try:
         client = get_asana_client()
         response = await client.get(f"/users/{user_id}", params={"opt_fields": ",".join(USER_OPT_FIELDS)})
-        return {"user": response["data"]}
+        return {"user": normalize_user(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")

@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Optional
+from typing import Any, Dict, Optional
 from contextvars import ContextVar
 
 import aiohttp
@@ -8,6 +8,112 @@ from dotenv import load_dotenv
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# Response Normalization Utilities
+# ============================================================
+
+def get_path(data: Dict, path: str) -> Any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: Dict, mapping: Dict[str, Any]) -> Dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# ============================================================
+# Mapping Rules for Airtable Entities
+# ============================================================
+
+BASE_RULES = {
+    "id": "id",
+    "name": "name",
+    "accessLevel": "permissionLevel",
+}
+
+TABLE_RULES = {
+    "id": "id",
+    "name": "name",
+    "description": "description",
+    "primaryFieldId": "primaryFieldId",
+}
+
+FIELD_RULES = {
+    "id": "id",
+    "name": "name",
+    "type": "type",
+    "description": "description",
+    "options": "options",
+}
+
+VIEW_RULES = {
+    "id": "id",
+    "name": "name",
+    "type": "type",
+}
+
+RECORD_RULES = {
+    "id": "id",
+    "createdAt": "createdTime",
+    "data": "fields",
+    "commentCount": "commentCount",
+}
+
+
+def normalize_field(raw_field: Dict) -> Dict:
+    """Normalize a single field."""
+    return normalize(raw_field, FIELD_RULES)
+
+
+def normalize_view(raw_view: Dict) -> Dict:
+    """Normalize a single view."""
+    return normalize(raw_view, VIEW_RULES)
+
+
+def normalize_table(raw_table: Dict) -> Dict:
+    """Normalize a single table with nested fields and views."""
+    table = normalize(raw_table, TABLE_RULES)
+    if raw_table.get('fields'):
+        table['fields'] = [normalize_field(f) for f in raw_table['fields']]
+    if raw_table.get('views'):
+        table['views'] = [normalize_view(v) for v in raw_table['views']]
+    return table
+
+
+def normalize_record(raw_record: Dict) -> Dict:
+    """Normalize a single record."""
+    return normalize(raw_record, RECORD_RULES)
+
+
+def normalize_base(raw_base: Dict) -> Dict:
+    """Normalize a single base."""
+    return normalize(raw_base, BASE_RULES)
 
 
 class AirtableValidationError(Exception):
