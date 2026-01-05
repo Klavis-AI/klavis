@@ -65,7 +65,13 @@ def extract_access_token(request_or_scope) -> str:
                 logger.warning(f"Failed to parse auth data JSON: {e}")
                 return ""
     
-    return ""
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
 
 @click.command()
 @click.option("--port", default=CLICKUP_MCP_SERVER_PORT, help="Port to listen on for HTTP")
