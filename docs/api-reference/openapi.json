@@ -15864,7 +15864,19 @@
             "title": "Email",
             "description": "Attendee email address (required)"
           },
-          "optional": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Attendee display name"
+          },
+          "isOptional": {
             "anyOf": [
               {
                 "type": "boolean"
@@ -15873,8 +15885,20 @@
                 "type": "null"
               }
             ],
-            "title": "Optional",
+            "title": "Isoptional",
             "description": "Whether attendance is optional"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment",
+            "description": "Attendee's response comment"
           }
         },
         "type": "object",
@@ -15930,19 +15954,71 @@
       },
       "GoogleCalendarEvent": {
         "properties": {
-          "summary": {
+          "title": {
             "type": "string",
             "minLength": 1,
-            "title": "Summary",
+            "title": "Title",
             "description": "Event title/summary (required)"
           },
-          "start": {
-            "$ref": "#/components/schemas/GoogleCalendarEventDateTime",
-            "description": "Event start time (required)"
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
           },
-          "end": {
-            "$ref": "#/components/schemas/GoogleCalendarEventDateTime",
-            "description": "Event end time (required)"
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "RFC3339 timestamp for timed events"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdate",
+            "description": "All-day event start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "All-day event end date in YYYY-MM-DD format"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., America/Los_Angeles)"
           },
           "description": {
             "anyOf": [
@@ -15968,6 +16044,33 @@
             "title": "Location",
             "description": "Event location"
           },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility",
+            "description": "Visibility (default, public, private, confidential)"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence",
+            "description": "Recurrence rules (RRULE format)"
+          },
           "attendees": {
             "anyOf": [
               {
@@ -15982,95 +16085,14 @@
             ],
             "title": "Attendees",
             "description": "List of event attendees"
-          },
-          "colorId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Colorid",
-            "description": "Event color (1-11)"
-          },
-          "visibility": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Visibility",
-            "description": "Visibility (default, public, private, confidential)"
-          },
-          "transparency": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Transparency",
-            "description": "Transparency (opaque, transparent)"
           }
         },
         "type": "object",
         "required": [
-          "summary",
-          "start",
-          "end"
+          "title"
         ],
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
-      },
-      "GoogleCalendarEventDateTime": {
-        "properties": {
-          "dateTime": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Datetime",
-            "description": "RFC3339 timestamp (e.g., 2025-12-01T09:00:00-07:00)"
-          },
-          "date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date",
-            "description": "All-day event date in YYYY-MM-DD format"
-          },
-          "timeZone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Timezone",
-            "description": "IANA timezone (e.g., America/Los_Angeles)"
-          }
-        },
-        "type": "object",
-        "title": "GoogleCalendarEventDateTime",
-        "description": "Event date/time with timezone support"
       },
       "GoogleCloudData-Input": {
         "properties": {
@@ -16780,25 +16802,59 @@
         "title": "GoogleFormsQuizSettings",
         "description": "Quiz settings - matches API QuizSettings object"
       },
-      "GoogleSheetsCellValue": {
+      "GoogleSheetsCell": {
         "properties": {
-          "userEnteredValue": {
+          "row": {
+            "type": "integer",
+            "title": "Row",
+            "description": "Row index (0-based)"
+          },
+          "col": {
+            "type": "integer",
+            "title": "Col",
+            "description": "Column index (0-based)"
+          },
+          "value": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Userenteredvalue",
-            "description": "The value entered by the user"
+            "title": "Value",
+            "description": "Cell value (string, number, boolean, or null)"
+          },
+          "formula": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formula",
+            "description": "Formula if the cell contains one (e.g., '=A1+B1')"
           }
         },
         "type": "object",
-        "title": "GoogleSheetsCellValue",
-        "description": "Cell value containing only user-entered data"
+        "required": [
+          "row",
+          "col"
+        ],
+        "title": "GoogleSheetsCell",
+        "description": "A single cell with its position and value"
       },
       "GoogleSheetsData-Input": {
         "properties": {
@@ -16844,189 +16900,13 @@
         "title": "GoogleSheetsData",
         "description": "Complete Google Sheets sandbox data structure"
       },
-      "GoogleSheetsGridData-Input": {
-        "properties": {
-          "startRow": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startrow",
-            "description": "Starting row index",
-            "default": 0
-          },
-          "startColumn": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startcolumn",
-            "description": "Starting column index",
-            "default": 0
-          },
-          "rowData": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsRowData"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rowdata",
-            "description": "Row data with values array"
-          }
-        },
-        "type": "object",
-        "title": "GoogleSheetsGridData",
-        "description": "Grid data for a sheet"
-      },
-      "GoogleSheetsGridData-Output": {
-        "properties": {
-          "startRow": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startrow",
-            "description": "Starting row index",
-            "default": 0
-          },
-          "startColumn": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startcolumn",
-            "description": "Starting column index",
-            "default": 0
-          },
-          "rowData": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsRowData"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rowdata",
-            "description": "Row data with values array"
-          }
-        },
-        "type": "object",
-        "title": "GoogleSheetsGridData",
-        "description": "Grid data for a sheet"
-      },
-      "GoogleSheetsRowData": {
-        "properties": {
-          "values": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsCellValue"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Values",
-            "description": "Cell values in the row"
-          }
-        },
-        "type": "object",
-        "title": "GoogleSheetsRowData",
-        "description": "Row data containing cell values"
-      },
-      "GoogleSheetsSheet-Input": {
-        "properties": {
-          "properties": {
-            "$ref": "#/components/schemas/GoogleSheetsSheetProperties",
-            "description": "Sheet properties (required)"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsGridData-Input"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data",
-            "description": "Grid data for the sheet"
-          }
-        },
-        "type": "object",
-        "required": [
-          "properties"
-        ],
-        "title": "GoogleSheetsSheet",
-        "description": "A sheet within a Google Sheets spreadsheet"
-      },
-      "GoogleSheetsSheet-Output": {
-        "properties": {
-          "properties": {
-            "$ref": "#/components/schemas/GoogleSheetsSheetProperties",
-            "description": "Sheet properties (required)"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsGridData-Output"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data",
-            "description": "Grid data for the sheet"
-          }
-        },
-        "type": "object",
-        "required": [
-          "properties"
-        ],
-        "title": "GoogleSheetsSheet",
-        "description": "A sheet within a Google Sheets spreadsheet"
-      },
-      "GoogleSheetsSheetProperties": {
+      "GoogleSheetsSheet": {
         "properties": {
           "title": {
             "type": "string",
             "minLength": 1,
             "title": "Title",
-            "description": "Sheet title (required)"
+            "description": "Sheet title"
           },
           "index": {
             "anyOf": [
@@ -17040,38 +16920,65 @@
             "title": "Index",
             "description": "Sheet index position"
           },
-          "gridProperties": {
+          "rowCount": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Gridproperties",
-            "description": "Grid properties (rowCount, columnCount)"
+            "title": "Rowcount",
+            "description": "Number of rows in the sheet"
+          },
+          "columnCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columncount",
+            "description": "Number of columns in the sheet"
+          },
+          "cells": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleSheetsCell"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cells",
+            "description": "List of cells with data"
           }
         },
         "type": "object",
         "required": [
           "title"
         ],
-        "title": "GoogleSheetsSheetProperties",
-        "description": "Properties for a sheet within a spreadsheet"
+        "title": "GoogleSheetsSheet",
+        "description": "A sheet within a spreadsheet"
       },
       "GoogleSheetsSpreadsheet-Input": {
         "properties": {
-          "properties": {
-            "$ref": "#/components/schemas/GoogleSheetsSpreadsheetProperties",
-            "description": "Spreadsheet properties including title (required)"
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Spreadsheet title"
           },
           "sheets": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsSheet-Input"
+                  "$ref": "#/components/schemas/GoogleSheetsSheet"
                 },
                 "type": "array"
               },
@@ -17085,22 +16992,23 @@
         },
         "type": "object",
         "required": [
-          "properties"
+          "title"
         ],
         "title": "GoogleSheetsSpreadsheet",
         "description": "Google Sheets spreadsheet object"
       },
       "GoogleSheetsSpreadsheet-Output": {
         "properties": {
-          "properties": {
-            "$ref": "#/components/schemas/GoogleSheetsSpreadsheetProperties",
-            "description": "Spreadsheet properties including title (required)"
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Spreadsheet title"
           },
           "sheets": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleSheetsSheet-Output"
+                  "$ref": "#/components/schemas/GoogleSheetsSheet"
                 },
                 "type": "array"
               },
@@ -17114,25 +17022,10 @@
         },
         "type": "object",
         "required": [
-          "properties"
+          "title"
         ],
         "title": "GoogleSheetsSpreadsheet",
         "description": "Google Sheets spreadsheet object"
-      },
-      "GoogleSheetsSpreadsheetProperties": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "title": "Title",
-            "description": "Spreadsheet title (required)"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title"
-        ],
-        "title": "GoogleSheetsSpreadsheetProperties",
-        "description": "Properties for a spreadsheet - only includes title"
       },
       "HTTPValidationError": {
         "properties": {
@@ -18594,7 +18487,8 @@
           "Honeycomb",
           "Zoho Mail",
           "Sharesight",
-          "Weights and Biases"
+          "Weights and Biases",
+          "Instagram"
         ],
         "title": "McpServerName"
       },
@@ -19995,7 +19889,7 @@
       },
       "MsTeamsData-Input": {
         "properties": {
-          "channels": {
+          "team_channels": {
             "anyOf": [
               {
                 "items": {
@@ -20007,10 +19901,10 @@
                 "type": "null"
               }
             ],
-            "title": "Channels",
+            "title": "Team Channels",
             "description": "List of team channels"
           },
-          "chats": {
+          "team_chats": {
             "anyOf": [
               {
                 "items": {
@@ -20022,7 +19916,7 @@
                 "type": "null"
               }
             ],
-            "title": "Chats",
+            "title": "Team Chats",
             "description": "List of one-on-one chats"
           }
         },
@@ -20032,7 +19926,7 @@
       },
       "MsTeamsData-Output": {
         "properties": {
-          "channels": {
+          "team_channels": {
             "anyOf": [
               {
                 "items": {
@@ -20044,10 +19938,10 @@
                 "type": "null"
               }
             ],
-            "title": "Channels",
+            "title": "Team Channels",
             "description": "List of team channels"
           },
-          "chats": {
+          "team_chats": {
             "anyOf": [
               {
                 "items": {
@@ -20059,7 +19953,7 @@
                 "type": "null"
               }
             ],
-            "title": "Chats",
+            "title": "Team Chats",
             "description": "List of one-on-one chats"
           }
         },
@@ -20381,15 +20275,20 @@
           "Jotform",
           "Honeycomb",
           "Zoho Mail",
-          "Sharesight"
+          "Sharesight",
+          "Instagram"
         ],
         "title": "OAuthServerName"
       },
       "OneDriveData-Input": {
         "properties": {
           "root": {
-            "$ref": "#/components/schemas/OneDriveFolder-Input",
-            "description": "Root folder containing all subfolders and files"
+            "items": {
+              "$ref": "#/components/schemas/OneDriveFolder-Input"
+            },
+            "type": "array",
+            "title": "Root",
+            "description": "List containing root folder (should contain only one element)"
           }
         },
         "type": "object",
@@ -20402,8 +20301,12 @@
       "OneDriveData-Output": {
         "properties": {
           "root": {
-            "$ref": "#/components/schemas/OneDriveFolder-Output",
-            "description": "Root folder containing all subfolders and files"
+            "items": {
+              "$ref": "#/components/schemas/OneDriveFolder-Output"
+            },
+            "type": "array",
+            "title": "Root",
+            "description": "List containing root folder (should contain only one element)"
           }
         },
         "type": "object",
@@ -20568,7 +20471,7 @@
       },
       "OutlookCalendarData": {
         "properties": {
-          "events": {
+          "calendar_events": {
             "anyOf": [
               {
                 "items": {
@@ -20580,7 +20483,7 @@
                 "type": "null"
               }
             ],
-            "title": "Events",
+            "title": "Calendar Events",
             "description": "List of calendar events"
           }
         },
@@ -20590,7 +20493,7 @@
       },
       "OutlookCalendarEvent": {
         "properties": {
-          "id": {
+          "event_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -20599,15 +20502,15 @@
                 "type": "null"
               }
             ],
-            "title": "Id",
+            "title": "Event Id",
             "description": "Event ID (read-only, set by Outlook)"
           },
-          "subject": {
+          "title": {
             "type": "string",
-            "title": "Subject",
+            "title": "Title",
             "description": "Event subject/title"
           },
-          "start": {
+          "start_time": {
             "anyOf": [
               {
                 "additionalProperties": true,
@@ -20617,10 +20520,10 @@
                 "type": "null"
               }
             ],
-            "title": "Start",
+            "title": "Start Time",
             "description": "Start time with dateTime and timeZone"
           },
-          "end": {
+          "end_time": {
             "anyOf": [
               {
                 "additionalProperties": true,
@@ -20630,23 +20533,22 @@
                 "type": "null"
               }
             ],
-            "title": "End",
+            "title": "End Time",
             "description": "End time with dateTime and timeZone"
           },
-          "location": {
+          "event_location": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Location",
-            "description": "Location object with displayName"
+            "title": "Event Location",
+            "description": "Location name"
           },
-          "attendees": {
+          "event_attendees": {
             "anyOf": [
               {
                 "items": {
@@ -20658,13 +20560,13 @@
                 "type": "null"
               }
             ],
-            "title": "Attendees",
+            "title": "Event Attendees",
             "description": "List of attendee email addresses (e.g., ['user@example.com'])"
           }
         },
         "type": "object",
         "required": [
-          "subject"
+          "title"
         ],
         "title": "OutlookCalendarEvent",
         "description": "Outlook Calendar Event object"
@@ -24324,7 +24226,7 @@
       },
       "TeamsChannel": {
         "properties": {
-          "id": {
+          "channel_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -24333,15 +24235,15 @@
                 "type": "null"
               }
             ],
-            "title": "Id",
+            "title": "Channel Id",
             "description": "Channel ID (read-only, set by Teams)"
           },
-          "displayName": {
+          "name": {
             "type": "string",
-            "title": "Displayname",
+            "title": "Name",
             "description": "Channel display name"
           },
-          "description": {
+          "channel_description": {
             "anyOf": [
               {
                 "type": "string"
@@ -24350,10 +24252,10 @@
                 "type": "null"
               }
             ],
-            "title": "Description",
+            "title": "Channel Description",
             "description": "Channel description"
           },
-          "messages": {
+          "channel_messages": {
             "anyOf": [
               {
                 "items": {
@@ -24365,20 +24267,20 @@
                 "type": "null"
               }
             ],
-            "title": "Messages",
+            "title": "Channel Messages",
             "description": "List of messages in the channel"
           }
         },
         "type": "object",
         "required": [
-          "displayName"
+          "name"
         ],
         "title": "TeamsChannel",
         "description": "Teams Channel object"
       },
       "TeamsChat": {
         "properties": {
-          "id": {
+          "chat_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -24387,10 +24289,10 @@
                 "type": "null"
               }
             ],
-            "title": "Id",
+            "title": "Chat Id",
             "description": "Chat ID (read-only, set by Teams)"
           },
-          "members": {
+          "chat_members": {
             "anyOf": [
               {
                 "items": {
@@ -24402,10 +24304,10 @@
                 "type": "null"
               }
             ],
-            "title": "Members",
+            "title": "Chat Members",
             "description": "List of chat members"
           },
-          "messages": {
+          "chat_messages": {
             "anyOf": [
               {
                 "items": {
@@ -24417,7 +24319,7 @@
                 "type": "null"
               }
             ],
-            "title": "Messages",
+            "title": "Chat Messages",
             "description": "List of messages in the chat"
           }
         },
@@ -24427,7 +24329,7 @@
       },
       "TeamsChatMember": {
         "properties": {
-          "id": {
+          "member_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -24436,10 +24338,10 @@
                 "type": "null"
               }
             ],
-            "title": "Id",
+            "title": "Member Id",
             "description": "Member ID (read-only, set by Teams)"
           },
-          "displayName": {
+          "member_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -24448,10 +24350,10 @@
                 "type": "null"
               }
             ],
-            "title": "Displayname",
+            "title": "Member Name",
             "description": "Member display name"
           },
-          "email": {
+          "member_email": {
             "anyOf": [
               {
                 "type": "string"
@@ -24460,7 +24362,7 @@
                 "type": "null"
               }
             ],
-            "title": "Email",
+            "title": "Member Email",
             "description": "User email for creating chats"
           }
         },
@@ -24470,7 +24372,7 @@
       },
       "TeamsMessage": {
         "properties": {
-          "id": {
+          "message_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -24479,18 +24381,18 @@
                 "type": "null"
               }
             ],
-            "title": "Id",
+            "title": "Message Id",
             "description": "Message ID (read-only, set by Teams)"
           },
-          "body": {
+          "content": {
             "type": "string",
-            "title": "Body",
+            "title": "Content",
             "description": "Message content"
           }
         },
         "type": "object",
         "required": [
-          "body"
+          "content"
         ],
         "title": "TeamsMessage",
         "description": "Teams Message object"
