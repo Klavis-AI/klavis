@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from .base import make_airtable_request
+from .base import make_airtable_request, normalize_field
 
 # Configure logging
 logger = logging.getLogger("airtable_tools")
@@ -32,7 +32,8 @@ async def create_field(
     logger.info(
         f"Executing tool: create_field '{name}' of type '{type}' in table {table_id}, base {base_id}"
     )
-    return await make_airtable_request("POST", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("POST", endpoint, json_data=payload)
+    return normalize_field(raw_response)
 
 
 async def update_field(
@@ -56,4 +57,5 @@ async def update_field(
     logger.info(
         f"Executing tool: update_field '{field_id}' in table {table_id}, base {base_id}"
     )
-    return await make_airtable_request("PATCH", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("PATCH", endpoint, json_data=payload)
+    return normalize_field(raw_response)

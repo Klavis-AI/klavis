@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from .base import make_airtable_request
+from .base import make_airtable_request, normalize_record
 
 # Configure logging
 logger = logging.getLogger("airtable_tools")
@@ -65,7 +65,14 @@ async def list_records(
             endpoint = f"{endpoint}?{'&'.join(query_parts)}"
 
     logger.info(f"Executing tool: list_records for table {table_id} in base {base_id}")
-    return await make_airtable_request("GET", endpoint)
+    raw_response = await make_airtable_request("GET", endpoint)
+    
+    records = [normalize_record(r) for r in raw_response.get("records", [])]
+    return {
+        "nextPageToken": raw_response.get("offset"),
+        "count": len(records),
+        "records": records,
+    }
 
 
 async def get_record(base_id: str, table_id: str, record_id: str) -> Dict[str, Any]:
@@ -74,7 +81,8 @@ async def get_record(base_id: str, table_id: str, record_id: str) -> Dict[str, A
     logger.info(
         f"Executing tool: get_record for record {record_id} in table {table_id}, base {base_id}"
     )
-    return await make_airtable_request("GET", endpoint)
+    raw_response = await make_airtable_request("GET", endpoint)
+    return normalize_record(raw_response)
 
 
 async def create_records(
@@ -96,7 +104,13 @@ async def create_records(
     logger.info(
         f"Executing tool: create_records for table {table_id} in base {base_id}"
     )
-    return await make_airtable_request("POST", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("POST", endpoint, json_data=payload)
+    
+    records = [normalize_record(r) for r in raw_response.get("records", [])]
+    return {
+        "count": len(records),
+        "records": records,
+    }
 
 
 async def update_records(
@@ -126,7 +140,19 @@ async def update_records(
     logger.info(
         f"Executing tool: update_records for table {table_id} in base {base_id}"
     )
-    return await make_airtable_request("PATCH", endpoint, json_data=payload)
+    raw_response = await make_airtable_request("PATCH", endpoint, json_data=payload)
+    
+    normalized_records = [normalize_record(r) for r in raw_response.get("records", [])]
+    result = {
+        "count": len(normalized_records),
+        "records": normalized_records,
+    }
+    # Include upsert-specific fields if present
+    if raw_response.get("createdRecords"):
+        result["createdRecordIds"] = raw_response["createdRecords"]
+    if raw_response.get("updatedRecords"):
+        result["updatedRecordIds"] = raw_response["updatedRecords"]
+    return result
 
 
 async def delete_records(
@@ -144,4 +170,14 @@ async def delete_records(
     logger.info(
         f"Executing tool: delete_records for table {table_id} in base {base_id}"
     )
-    return await make_airtable_request("DELETE", endpoint)
+    raw_response = await make_airtable_request("DELETE", endpoint)
+    
+    # Normalize delete response
+    deleted = []
+    for item in raw_response.get("records", []):
+        if item.get("deleted"):
+            deleted.append(item.get("id"))
+    return {
+        "deletedCount": len(deleted),
+        "deletedRecordIds": deleted,
+    }
