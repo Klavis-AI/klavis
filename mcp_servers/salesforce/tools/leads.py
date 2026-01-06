@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 from .base import get_salesforce_conn, handle_salesforce_error, format_success_response
+from .normalization import normalize_leads_result
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -77,7 +78,7 @@ async def get_leads(status: Optional[str] = None, limit: int = 50, fields: Optio
         query = f"SELECT {field_list} FROM Lead{where_clause} ORDER BY CreatedDate DESC LIMIT {limit}"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_leads_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_leads: {e}")
@@ -101,7 +102,7 @@ async def get_lead_by_id(lead_id: str, fields: Optional[List[str]] = None) -> Di
         query = f"SELECT {field_list} FROM Lead WHERE Id = '{lead_id}'"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_leads_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_lead_by_id: {e}")

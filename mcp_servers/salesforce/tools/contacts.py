@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 from .base import get_salesforce_conn, handle_salesforce_error, format_success_response
+from .normalization import normalize_contacts_result
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ async def get_contacts(account_id: Optional[str] = None, limit: int = 50, fields
         query = f"SELECT {field_list} FROM Contact{where_clause} ORDER BY LastName, FirstName LIMIT {limit}"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_contacts_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_contacts: {e}")
@@ -97,7 +98,7 @@ async def get_contact_by_id(contact_id: str, fields: Optional[List[str]] = None)
         query = f"SELECT {field_list} FROM Contact WHERE Id = '{contact_id}'"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_contacts_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_contact_by_id: {e}")

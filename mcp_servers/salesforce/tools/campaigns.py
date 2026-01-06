@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 from .base import get_salesforce_conn, handle_salesforce_error, format_success_response
+from .normalization import normalize_campaigns_result
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ async def get_campaigns(status: Optional[str] = None, type_filter: Optional[str]
         query = f"SELECT {field_list} FROM Campaign{where_clause} ORDER BY StartDate DESC LIMIT {limit}"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_campaigns_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_campaigns: {e}")
@@ -82,7 +83,7 @@ async def get_campaign_by_id(campaign_id: str, fields: Optional[List[str]] = Non
         query = f"SELECT {field_list} FROM Campaign WHERE Id = '{campaign_id}'"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_campaigns_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_campaign_by_id: {e}")
