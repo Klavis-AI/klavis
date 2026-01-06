@@ -237,6 +237,7 @@
             "pages": [
               "api-reference/mcp-server/create-a-server-instance",
               "api-reference/mcp-server/get-server-instance",
+              "api-reference/mcp-server/update-a-server-instance",
               "api-reference/mcp-server/delete-a-server-instance",
               "api-reference/mcp-server/list-raw-actions",
               {
