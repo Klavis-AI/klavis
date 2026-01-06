@@ -717,6 +717,65 @@
           }
         }
       },
+      "patch": {
+        "tags": [
+          "mcp-server"
+        ],
+        "summary": "Update",
+        "description": "Updates the settings of a specific server connection instance.\nCurrently supports updating the read-only status of the connection.",
+        "operationId": "updateServerInstance",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The ID of the connection integration instance to update.",
+              "title": "Instanceid"
+            },
+            "description": "The ID of the connection integration instance to update."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServerInstanceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateServerInstanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "mcp-server"
@@ -24140,6 +24199,51 @@
           "mcp_native"
         ],
         "title": "ToolFormat"
+      },
+      "UpdateServerInstanceRequest": {
+        "properties": {
+          "isReadOnly": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isreadonly",
+            "description": "Whether the MCP server connection is read-only. When true, write operations will be restricted."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UpdateServerInstanceRequest"
+      },
+      "UpdateServerInstanceResponse": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid",
+            "description": "The unique identifier of the updated connection integration instance."
+          },
+          "isReadOnly": {
+            "type": "boolean",
+            "title": "Isreadonly",
+            "description": "The current read-only status of the connection."
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "A message indicating the result of the update operation."
+          }
+        },
+        "type": "object",
+        "required": [
+          "instanceId",
+          "isReadOnly",
+          "message"
+        ],
+        "title": "UpdateServerInstanceResponse"
       },
       "UserInfo": {
         "properties": {
