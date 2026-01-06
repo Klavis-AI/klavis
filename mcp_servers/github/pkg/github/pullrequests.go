@@ -6,12 +6,200 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/github/github-mcp-server/pkg/translations"
 	"github.com/google/go-github/v69/github"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
+
+// PullRequestData represents the restructured pull request response
+type PullRequestData struct {
+	PRID          int64          `json:"pr_id"`
+	PRNumber      int            `json:"pr_number"`
+	Title         string         `json:"title"`
+	Description   string         `json:"description"`
+	State         string         `json:"state"`
+	IsDraft       bool           `json:"is_draft"`
+	SourceBranch  BranchRef      `json:"source_branch"`
+	TargetBranch  BranchRef      `json:"target_branch"`
+	Author        UserInfo       `json:"author"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	MergedAt      *time.Time     `json:"merged_at,omitempty"`
+	ClosedAt      *time.Time     `json:"closed_at,omitempty"`
+	IsMerged      bool           `json:"is_merged"`
+}
+
+// BranchRef represents branch reference information
+type BranchRef struct {
+	Name string `json:"name"`
+	SHA  string `json:"sha"`
+}
+
+// PRReviewData represents the restructured review response
+type PRReviewData struct {
+	ReviewID   int64     `json:"review_id"`
+	Reviewer   UserInfo  `json:"reviewer"`
+	State      string    `json:"state"`
+	Content    string    `json:"content"`
+	SubmittedAt time.Time `json:"submitted_at"`
+}
+
+// PRCommentData represents the restructured PR comment response
+type PRCommentData struct {
+	CommentID  int64     `json:"comment_id"`
+	FilePath   string    `json:"file_path"`
+	Content    string    `json:"content"`
+	Author     UserInfo  `json:"author"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	LineNumber int       `json:"line_number,omitempty"`
+}
+
+// FileChangeData represents the restructured file change response
+type FileChangeData struct {
+	Filename      string `json:"filename"`
+	Status        string `json:"status"`
+	Additions     int    `json:"additions"`
+	Deletions     int    `json:"deletions"`
+	Changes       int    `json:"changes"`
+	PatchContent  string `json:"patch_content,omitempty"`
+}
+
+// MergeResultData represents the restructured merge result
+type MergeResultData struct {
+	Success       bool   `json:"success"`
+	MergeCommitSHA string `json:"merge_commit_sha,omitempty"`
+	Message       string `json:"message"`
+}
+
+// StatusCheckData represents the restructured status check response
+type StatusCheckData struct {
+	State      string           `json:"state"`
+	TotalCount int              `json:"total_count"`
+	Statuses   []IndividualStatusData `json:"statuses"`
+}
+
+// IndividualStatusData represents individual status information
+type IndividualStatusData struct {
+	Context     string    `json:"context"`
+	State       string    `json:"state"`
+	Description string    `json:"description"`
+	TargetURL   string    `json:"target_url,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// BranchUpdateResultData represents branch update result
+type BranchUpdateResultData struct {
+	Message string `json:"message"`
+	URL     string `json:"url,omitempty"`
+}
+
+// transformPRToPullRequestData converts GitHub PR to PullRequestData
+func transformPRToPullRequestData(pr *github.PullRequest) PullRequestData {
+	data := PullRequestData{
+		PRID:         pr.GetID(),
+		PRNumber:     pr.GetNumber(),
+		Title:        pr.GetTitle(),
+		Description:  pr.GetBody(),
+		State:        pr.GetState(),
+		IsDraft:      pr.GetDraft(),
+		Author:       transformUserToUserInfo(pr.User),
+		CreatedAt:    pr.GetCreatedAt().Time,
+		UpdatedAt:    pr.GetUpdatedAt().Time,
+		IsMerged:     pr.GetMerged(),
+	}
+
+	if pr.Head != nil {
+		data.SourceBranch = BranchRef{
+			Name: pr.Head.GetRef(),
+			SHA:  pr.Head.GetSHA(),
+		}
+	}
+
+	if pr.Base != nil {
+		data.TargetBranch = BranchRef{
+			Name: pr.Base.GetRef(),
+			SHA:  pr.Base.GetSHA(),
+		}
+	}
+
+	if pr.MergedAt != nil {
+		mergedAt := pr.GetMergedAt().Time
+		data.MergedAt = &mergedAt
+	}
+
+	if pr.ClosedAt != nil {
+		closedAt := pr.GetClosedAt().Time
+		data.ClosedAt = &closedAt
+	}
+
+	return data
+}
+
+// transformReviewToPRReviewData converts GitHub review to PRReviewData
+func transformReviewToPRReviewData(review *github.PullRequestReview) PRReviewData {
+	return PRReviewData{
+		ReviewID:    review.GetID(),
+		Reviewer:    transformUserToUserInfo(review.User),
+		State:       review.GetState(),
+		Content:     review.GetBody(),
+		SubmittedAt: review.GetSubmittedAt().Time,
+	}
+}
+
+// transformCommentToPRCommentData converts GitHub PR comment to PRCommentData
+func transformCommentToPRCommentData(comment *github.PullRequestComment) PRCommentData {
+	return PRCommentData{
+		CommentID:  comment.GetID(),
+		FilePath:   comment.GetPath(),
+		Content:    comment.GetBody(),
+		Author:     transformUserToUserInfo(comment.User),
+		CreatedAt:  comment.GetCreatedAt().Time,
+		UpdatedAt:  comment.GetUpdatedAt().Time,
+		LineNumber: comment.GetLine(),
+	}
+}
+
+// transformFilesToFileChangeData converts GitHub commit files to FileChangeData
+func transformFilesToFileChangeData(files []*github.CommitFile) []FileChangeData {
+	result := make([]FileChangeData, 0, len(files))
+	for _, file := range files {
+		result = append(result, FileChangeData{
+			Filename:     file.GetFilename(),
+			Status:       file.GetStatus(),
+			Additions:    file.GetAdditions(),
+			Deletions:    file.GetDeletions(),
+			Changes:      file.GetChanges(),
+			PatchContent: file.GetPatch(),
+		})
+	}
+	return result
+}
+
+// transformStatusToStatusCheckData converts GitHub combined status to StatusCheckData
+func transformStatusToStatusCheckData(status *github.CombinedStatus) StatusCheckData {
+	statuses := make([]IndividualStatusData, 0, len(status.Statuses))
+	for _, s := range status.Statuses {
+		statuses = append(statuses, IndividualStatusData{
+			Context:     s.GetContext(),
+			State:       s.GetState(),
+			Description: s.GetDescription(),
+			TargetURL:   s.GetTargetURL(),
+			CreatedAt:   s.GetCreatedAt().Time,
+			UpdatedAt:   s.GetUpdatedAt().Time,
+		})
+	}
+
+	return StatusCheckData{
+		State:      status.GetState(),
+		TotalCount: status.GetTotalCount(),
+		Statuses:   statuses,
+	}
+}
 
 // GetPullRequest creates a tool to get details of a specific pull request.
 func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
@@ -62,7 +250,10 @@ func GetPullRequest(getClient GetClientFn, t translations.TranslationHelperFunc)
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get pull request: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(pr)
+			// Transform to custom structure
+			prData := transformPRToPullRequestData(pr)
+
+			r, err := json.Marshal(prData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -179,7 +370,10 @@ func UpdatePullRequest(getClient GetClientFn, t translations.TranslationHelperFu
 				return mcp.NewToolResultError(fmt.Sprintf("failed to update pull request: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(pr)
+			// Transform to custom structure
+			prData := transformPRToPullRequestData(pr)
+
+			r, err := json.Marshal(prData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -281,7 +475,13 @@ func ListPullRequests(getClient GetClientFn, t translations.TranslationHelperFun
 				return mcp.NewToolResultError(fmt.Sprintf("failed to list pull requests: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(prs)
+			// Transform to custom structure
+			prList := make([]PullRequestData, 0, len(prs))
+			for _, pr := range prs {
+				prList = append(prList, transformPRToPullRequestData(pr))
+			}
+
+			r, err := json.Marshal(prList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -365,7 +565,14 @@ func MergePullRequest(getClient GetClientFn, t translations.TranslationHelperFun
 				return mcp.NewToolResultError(fmt.Sprintf("failed to merge pull request: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(result)
+			// Transform to custom structure
+			mergeResult := MergeResultData{
+				Success:       result.GetMerged(),
+				MergeCommitSHA: result.GetSHA(),
+				Message:       result.GetMessage(),
+			}
+
+			r, err := json.Marshal(mergeResult)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -424,7 +631,10 @@ func GetPullRequestFiles(getClient GetClientFn, t translations.TranslationHelper
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get pull request files: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(files)
+			// Transform to custom structure
+			fileChanges := transformFilesToFileChangeData(files)
+
+			r, err := json.Marshal(fileChanges)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -497,7 +707,10 @@ func GetPullRequestStatus(getClient GetClientFn, t translations.TranslationHelpe
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get combined status: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(status)
+			// Transform to custom structure
+			statusData := transformStatusToStatusCheckData(status)
+
+			r, err := json.Marshal(statusData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -571,7 +784,13 @@ func UpdatePullRequestBranch(getClient GetClientFn, t translations.TranslationHe
 				return mcp.NewToolResultError(fmt.Sprintf("failed to update pull request branch: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(result)
+			// Transform to custom structure
+			updateResult := BranchUpdateResultData{
+				Message: result.GetMessage(),
+				URL:     result.GetURL(),
+			}
+
+			r, err := json.Marshal(updateResult)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -635,7 +854,13 @@ func GetPullRequestComments(getClient GetClientFn, t translations.TranslationHel
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get pull request comments: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(comments)
+			// Transform to custom structure
+			commentList := make([]PRCommentData, 0, len(comments))
+			for _, comment := range comments {
+				commentList = append(commentList, transformCommentToPRCommentData(comment))
+			}
+
+			r, err := json.Marshal(commentList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -693,7 +918,13 @@ func GetPullRequestReviews(getClient GetClientFn, t translations.TranslationHelp
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get pull request reviews: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(reviews)
+			// Transform to custom structure
+			reviewList := make([]PRReviewData, 0, len(reviews))
+			for _, review := range reviews {
+				reviewList = append(reviewList, transformReviewToPRReviewData(review))
+			}
+
+			r, err := json.Marshal(reviewList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -889,7 +1120,10 @@ func CreatePullRequestReview(getClient GetClientFn, t translations.TranslationHe
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create pull request review: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(review)
+			// Transform to custom structure
+			reviewData := transformReviewToPRReviewData(review)
+
+			r, err := json.Marshal(reviewData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -1000,7 +1234,10 @@ func CreatePullRequest(getClient GetClientFn, t translations.TranslationHelperFu
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create pull request: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(pr)
+			// Transform to custom structure
+			prData := transformPRToPullRequestData(pr)
+
+			r, err := json.Marshal(prData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
