@@ -8395,7 +8395,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SalesforceData"
+                "$ref": "#/components/schemas/SalesforceData-Input"
               }
             }
           }
@@ -11557,6 +11557,130 @@
   },
   "components": {
     "schemas": {
+      "Account": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Company name"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry",
+            "description": "e.g., Technology, Healthcare, Finance"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "e.g., Customer, Prospect, Partner"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "revenue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue",
+            "description": "Annual revenue"
+          },
+          "employees": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employees"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "e.g., Hot, Warm, Cold"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Account",
+        "description": "Company/organization record"
+      },
       "AcquireSandboxRequest": {
         "properties": {
           "test_account_email": {
@@ -11575,6 +11699,73 @@
         "type": "object",
         "title": "AcquireSandboxRequest",
         "description": "Request model for acquiring a sandbox"
+      },
+      "Address": {
+        "properties": {
+          "street": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          }
+        },
+        "type": "object",
+        "title": "Address",
+        "description": "Reusable address structure"
       },
       "AirtableData-Input": {
         "properties": {
@@ -12537,6 +12728,275 @@
         "title": "CallToolResult",
         "description": "The server's response to a tool call."
       },
+      "Campaign": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "e.g., Email, Webinar, Conference"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "default": "Planned"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date",
+            "description": "YYYY-MM-DD"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "description": "YYYY-MM-DD"
+          },
+          "expected_revenue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Revenue"
+          },
+          "budget": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget"
+          },
+          "actual_cost": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Cost"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Campaign",
+        "description": "Marketing campaign"
+      },
+      "Case": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Subject"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "default": "New"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority",
+            "description": "High, Medium, or Low",
+            "default": "Medium"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin",
+            "description": "e.g., Phone, Email, Web"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "e.g., Problem, Question, Feature Request"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id"
+          },
+          "contact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "customer_phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Phone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject"
+        ],
+        "title": "Case",
+        "description": "Customer support ticket"
+      },
       "ClickUpComment": {
         "properties": {
           "body": {
@@ -13217,6 +13677,141 @@
         ],
         "title": "ConnectionType"
       },
+      "Contact": {
+        "properties": {
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Last Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "Job title"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id",
+            "description": "Related account ID"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "e.g., Web, Phone, Referral"
+          }
+        },
+        "type": "object",
+        "required": [
+          "last_name"
+        ],
+        "title": "Contact",
+        "description": "Individual person associated with an account"
+      },
       "CreateSandboxResponse": {
         "properties": {
           "sandbox_id": {
@@ -13334,6 +13929,12 @@
             "type": "boolean",
             "title": "Legacy",
             "description": "Whether to use the legacy server. Default is False.",
+            "default": false
+          },
+          "isReadOnly": {
+            "type": "boolean",
+            "title": "Isreadonly",
+            "description": "Whether the MCP server connection is read-only. When true, write operations will be restricted. Default is False.",
             "default": false
           }
         },
@@ -14555,7 +15156,7 @@
             "description": "Timestamp of dump"
           },
           "data": {
-            "$ref": "#/components/schemas/SalesforceData",
+            "$ref": "#/components/schemas/SalesforceData-Output",
             "description": "Dumped sandbox data in server-specific format"
           }
         },
@@ -17816,6 +18417,194 @@
         "title": "JiraSprint",
         "description": "Jira Sprint object"
       },
+      "Lead": {
+        "properties": {
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Last Name"
+          },
+          "company": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Company"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "default": "Open - Not Contacted"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "e.g., Web, Phone, Referral"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "e.g., Hot, Warm, Cold"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "employees": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employees"
+          },
+          "revenue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "last_name",
+          "company"
+        ],
+        "title": "Lead",
+        "description": "Potential customer not yet qualified"
+      },
       "LifecycleRule": {
         "properties": {
           "action": {
@@ -20482,6 +21271,119 @@
         "title": "OneDriveFolder",
         "description": "OneDrive Folder object"
       },
+      "Opportunity": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "stage": {
+            "type": "string",
+            "title": "Stage",
+            "description": "e.g., Prospecting, Qualification, Closed Won"
+          },
+          "close_date": {
+            "type": "string",
+            "title": "Close Date",
+            "description": "Expected close date (YYYY-MM-DD)"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "probability": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probability"
+          },
+          "account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Id",
+            "description": "Related account ID"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "description": "e.g., New Business, Renewal"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source",
+            "description": "Lead source"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "stage",
+          "close_date"
+        ],
+        "title": "Opportunity",
+        "description": "Sales deal/potential revenue"
+      },
       "OutlookCalendarData": {
         "properties": {
           "calendar_events": {
@@ -21372,678 +22274,13 @@
         "title": "ResetSandboxResponse",
         "description": "Response model for sandbox reset"
       },
-      "SalesforceAccount": {
-        "properties": {
-          "Name": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Name",
-            "description": "Account name (required)"
-          },
-          "Industry": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Industry",
-            "description": "Industry (e.g., Technology, Healthcare, Finance)"
-          },
-          "Type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type",
-            "description": "Account type (e.g., Customer, Prospect, Partner)"
-          },
-          "Phone": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone",
-            "description": "Phone number"
-          },
-          "Website": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Website",
-            "description": "Website URL"
-          },
-          "AnnualRevenue": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Annualrevenue",
-            "description": "Annual revenue"
-          },
-          "NumberOfEmployees": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Numberofemployees",
-            "description": "Number of employees"
-          },
-          "BillingStreet": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billingstreet",
-            "description": "Billing street address"
-          },
-          "BillingCity": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billingcity",
-            "description": "Billing city"
-          },
-          "BillingState": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billingstate",
-            "description": "Billing state/province"
-          },
-          "BillingPostalCode": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billingpostalcode",
-            "description": "Billing postal code"
-          },
-          "BillingCountry": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billingcountry",
-            "description": "Billing country"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Account description"
-          },
-          "Rating": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rating",
-            "description": "Account rating (e.g., Hot, Warm, Cold)"
-          }
-        },
-        "type": "object",
-        "required": [
-          "Name"
-        ],
-        "title": "SalesforceAccount",
-        "description": "Salesforce Account object with comprehensive field support"
-      },
-      "SalesforceCampaign": {
-        "properties": {
-          "Name": {
-            "type": "string",
-            "maxLength": 80,
-            "minLength": 1,
-            "title": "Name",
-            "description": "Campaign name (required)"
-          },
-          "Type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type",
-            "description": "Campaign type (e.g., Email, Webinar, Conference)"
-          },
-          "Status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status",
-            "description": "Campaign status (e.g., Planned, In Progress, Completed)",
-            "default": "Planned"
-          },
-          "StartDate": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startdate",
-            "description": "Start date (format: YYYY-MM-DD)"
-          },
-          "EndDate": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddate",
-            "description": "End date (format: YYYY-MM-DD)"
-          },
-          "ExpectedRevenue": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expectedrevenue",
-            "description": "Expected revenue"
-          },
-          "BudgetedCost": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Budgetedcost",
-            "description": "Budgeted cost"
-          },
-          "ActualCost": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actualcost",
-            "description": "Actual cost"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Campaign description"
-          },
-          "IsActive": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Isactive",
-            "description": "Is campaign active"
-          }
-        },
-        "type": "object",
-        "required": [
-          "Name"
-        ],
-        "title": "SalesforceCampaign",
-        "description": "Salesforce Campaign object"
-      },
-      "SalesforceCase": {
-        "properties": {
-          "Subject": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Subject",
-            "description": "Case subject (required)"
-          },
-          "Status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status",
-            "description": "Case status (e.g., New, Working, Closed)",
-            "default": "New"
-          },
-          "Priority": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Priority",
-            "description": "Priority (e.g., High, Medium, Low)",
-            "default": "Medium"
-          },
-          "Origin": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Origin",
-            "description": "Case origin (e.g., Phone, Email, Web)"
-          },
-          "Type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type",
-            "description": "Case type (e.g., Problem, Question, Feature Request)"
-          },
-          "Reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason",
-            "description": "Case reason"
-          },
-          "AccountId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accountid",
-            "description": "Related account ID (18-char Salesforce ID)"
-          },
-          "ContactId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contactid",
-            "description": "Related contact ID (18-char Salesforce ID)"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Case description"
-          },
-          "SuppliedEmail": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Suppliedemail",
-            "description": "Supplied email address"
-          },
-          "SuppliedName": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Suppliedname",
-            "description": "Supplied name"
-          },
-          "SuppliedPhone": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Suppliedphone",
-            "description": "Supplied phone number"
-          }
-        },
-        "type": "object",
-        "required": [
-          "Subject"
-        ],
-        "title": "SalesforceCase",
-        "description": "Salesforce Case object with comprehensive field support"
-      },
-      "SalesforceContact": {
-        "properties": {
-          "FirstName": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Firstname",
-            "description": "First name"
-          },
-          "LastName": {
-            "type": "string",
-            "maxLength": 80,
-            "minLength": 1,
-            "title": "Lastname",
-            "description": "Last name (required)"
-          },
-          "Email": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email",
-            "description": "Email address"
-          },
-          "Phone": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone",
-            "description": "Phone number"
-          },
-          "MobilePhone": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mobilephone",
-            "description": "Mobile phone number"
-          },
-          "Title": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Title",
-            "description": "Job title"
-          },
-          "Department": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Department",
-            "description": "Department"
-          },
-          "AccountId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accountid",
-            "description": "Related account ID (18-char Salesforce ID)"
-          },
-          "MailingStreet": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mailingstreet",
-            "description": "Mailing street address"
-          },
-          "MailingCity": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mailingcity",
-            "description": "Mailing city"
-          },
-          "MailingState": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mailingstate",
-            "description": "Mailing state/province"
-          },
-          "MailingPostalCode": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mailingpostalcode",
-            "description": "Mailing postal code"
-          },
-          "MailingCountry": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mailingcountry",
-            "description": "Mailing country"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Contact description"
-          },
-          "LeadSource": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Leadsource",
-            "description": "Lead source (e.g., Web, Phone Inquiry, Partner Referral)"
-          }
-        },
-        "type": "object",
-        "required": [
-          "LastName"
-        ],
-        "title": "SalesforceContact",
-        "description": "Salesforce Contact object with comprehensive field support"
-      },
-      "SalesforceData": {
+      "SalesforceData-Input": {
         "properties": {
           "accounts": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceAccount"
+                  "$ref": "#/components/schemas/Account"
                 },
                 "type": "array"
               },
@@ -22051,14 +22288,13 @@
                 "type": "null"
               }
             ],
-            "title": "Accounts",
-            "description": "List of Salesforce accounts"
+            "title": "Accounts"
           },
           "contacts": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceContact"
+                  "$ref": "#/components/schemas/Contact"
                 },
                 "type": "array"
               },
@@ -22066,14 +22302,13 @@
                 "type": "null"
               }
             ],
-            "title": "Contacts",
-            "description": "List of Salesforce contacts"
+            "title": "Contacts"
           },
           "opportunities": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceOpportunity"
+                  "$ref": "#/components/schemas/Opportunity"
                 },
                 "type": "array"
               },
@@ -22081,14 +22316,13 @@
                 "type": "null"
               }
             ],
-            "title": "Opportunities",
-            "description": "List of Salesforce opportunities"
+            "title": "Opportunities"
           },
           "leads": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceLead"
+                  "$ref": "#/components/schemas/Lead"
                 },
                 "type": "array"
               },
@@ -22096,14 +22330,13 @@
                 "type": "null"
               }
             ],
-            "title": "Leads",
-            "description": "List of Salesforce leads"
+            "title": "Leads"
           },
           "cases": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceCase"
+                  "$ref": "#/components/schemas/Case"
                 },
                 "type": "array"
               },
@@ -22111,14 +22344,13 @@
                 "type": "null"
               }
             ],
-            "title": "Cases",
-            "description": "List of Salesforce cases"
+            "title": "Cases"
           },
           "campaigns": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SalesforceCampaign"
+                  "$ref": "#/components/schemas/Campaign"
                 },
                 "type": "array"
               },
@@ -22126,387 +22358,103 @@
                 "type": "null"
               }
             ],
-            "title": "Campaigns",
-            "description": "List of Salesforce campaigns"
+            "title": "Campaigns"
           }
         },
         "type": "object",
         "title": "SalesforceData",
-        "description": "Complete Salesforce sandbox data structure with all supported objects"
+        "description": "Complete Salesforce sandbox data"
       },
-      "SalesforceLead": {
+      "SalesforceData-Output": {
         "properties": {
-          "FirstName": {
+          "accounts": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 40
+                "items": {
+                  "$ref": "#/components/schemas/Account"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Firstname",
-            "description": "First name"
+            "title": "Accounts"
           },
-          "LastName": {
-            "type": "string",
-            "maxLength": 80,
-            "minLength": 1,
-            "title": "Lastname",
-            "description": "Last name (required)"
-          },
-          "Company": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Company",
-            "description": "Company name (required)"
-          },
-          "Email": {
+          "contacts": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "email"
+                "items": {
+                  "$ref": "#/components/schemas/Contact"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Email",
-            "description": "Email address"
+            "title": "Contacts"
           },
-          "Phone": {
+          "opportunities": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 40
+                "items": {
+                  "$ref": "#/components/schemas/Opportunity"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Phone",
-            "description": "Phone number"
+            "title": "Opportunities"
           },
-          "MobilePhone": {
+          "leads": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 40
+                "items": {
+                  "$ref": "#/components/schemas/Lead"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Mobilephone",
-            "description": "Mobile phone number"
+            "title": "Leads"
           },
-          "Title": {
+          "cases": {
             "anyOf": [
               {
-                "type": "string",
-                "maxLength": 128
+                "items": {
+                  "$ref": "#/components/schemas/Case"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Title",
-            "description": "Job title"
+            "title": "Cases"
           },
-          "Status": {
+          "campaigns": {
             "anyOf": [
               {
-                "type": "string"
+                "items": {
+                  "$ref": "#/components/schemas/Campaign"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Status",
-            "description": "Lead status (e.g., Open, Contacted, Qualified)",
-            "default": "Open - Not Contacted"
-          },
-          "LeadSource": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Leadsource",
-            "description": "Lead source (e.g., Web, Phone Inquiry, Partner Referral)"
-          },
-          "Industry": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Industry",
-            "description": "Industry (e.g., Technology, Healthcare, Finance)"
-          },
-          "Rating": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rating",
-            "description": "Lead rating (e.g., Hot, Warm, Cold)"
-          },
-          "Street": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Street",
-            "description": "Street address"
-          },
-          "City": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 40
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "City",
-            "description": "City"
-          },
-          "State": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "State",
-            "description": "State/province"
-          },
-          "PostalCode": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Postalcode",
-            "description": "Postal code"
-          },
-          "Country": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Country",
-            "description": "Country"
-          },
-          "Website": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Website",
-            "description": "Website URL"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Lead description"
-          },
-          "NumberOfEmployees": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Numberofemployees",
-            "description": "Number of employees"
-          },
-          "AnnualRevenue": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Annualrevenue",
-            "description": "Annual revenue"
+            "title": "Campaigns"
           }
         },
         "type": "object",
-        "required": [
-          "LastName",
-          "Company"
-        ],
-        "title": "SalesforceLead",
-        "description": "Salesforce Lead object with comprehensive field support"
-      },
-      "SalesforceOpportunity": {
-        "properties": {
-          "Name": {
-            "type": "string",
-            "maxLength": 120,
-            "minLength": 1,
-            "title": "Name",
-            "description": "Opportunity name (required)"
-          },
-          "StageName": {
-            "type": "string",
-            "title": "Stagename",
-            "description": "Sales stage (required, e.g., Prospecting, Qualification, Closed Won)"
-          },
-          "CloseDate": {
-            "type": "string",
-            "title": "Closedate",
-            "description": "Close date (required, format: YYYY-MM-DD)"
-          },
-          "Amount": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Amount",
-            "description": "Opportunity amount"
-          },
-          "Probability": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 100,
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Probability",
-            "description": "Probability of closing (0-100)"
-          },
-          "AccountId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accountid",
-            "description": "Related account ID (18-char Salesforce ID)"
-          },
-          "Type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type",
-            "description": "Opportunity type (e.g., New Business, Existing Business)"
-          },
-          "LeadSource": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Leadsource",
-            "description": "Lead source (e.g., Web, Phone Inquiry, Partner Referral)"
-          },
-          "NextStep": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Nextstep",
-            "description": "Next step in the sales process"
-          },
-          "Description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Opportunity description"
-          }
-        },
-        "type": "object",
-        "required": [
-          "Name",
-          "StageName",
-          "CloseDate"
-        ],
-        "title": "SalesforceOpportunity",
-        "description": "Salesforce Opportunity object with comprehensive field support"
+        "title": "SalesforceData",
+        "description": "Complete Salesforce sandbox data"
       },
       "SandboxInfo": {
         "properties": {
