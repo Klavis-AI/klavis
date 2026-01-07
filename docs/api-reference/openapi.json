@@ -8863,14 +8863,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/initialize": {
+    "/sandbox/cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize Cal.com sandbox with data",
-        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
+        "summary": "Initialize cal.com sandbox with data",
+        "description": "Initialize the sandbox with cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -8923,14 +8923,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/dump": {
+    "/sandbox/cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export Cal.com sandbox data",
+        "summary": "Export cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -22589,7 +22589,7 @@
           "onedrive",
           "microsoft_teams",
           "outlook_mail",
-          "Cal.com",
+          "cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
