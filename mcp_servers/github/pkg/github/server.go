@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/github/github-mcp-server/pkg/translations"
 	"github.com/google/go-github/v69/github"
@@ -16,14 +17,59 @@ import (
 
 type GetClientFn func(context.Context) (*github.Client, error)
 
+// AuthenticatedUserData represents the restructured authenticated user response
+type AuthenticatedUserData struct {
+	UserID          int64     `json:"user_id"`
+	Username        string    `json:"username"`
+	DisplayName     string    `json:"display_name,omitempty"`
+	Email           string    `json:"email,omitempty"`
+	Bio             string    `json:"bio,omitempty"`
+	Company         string    `json:"company,omitempty"`
+	Location        string    `json:"location,omitempty"`
+	ProfileURL      string    `json:"profile_url"`
+	AvatarURL       string    `json:"avatar_url"`
+	AccountType     string    `json:"account_type"`
+	IsHireable      bool      `json:"is_hireable,omitempty"`
+	PublicRepos     int       `json:"public_repos"`
+	PublicGists     int       `json:"public_gists"`
+	FollowerCount   int       `json:"follower_count"`
+	FollowingCount  int       `json:"following_count"`
+	AccountCreated  time.Time `json:"account_created"`
+	LastUpdated     time.Time `json:"last_updated"`
+}
+
+// transformUserToAuthenticatedUserData converts GitHub user to AuthenticatedUserData
+func transformUserToAuthenticatedUserData(user *github.User) AuthenticatedUserData {
+	data := AuthenticatedUserData{
+		UserID:         user.GetID(),
+		Username:       user.GetLogin(),
+		DisplayName:    user.GetName(),
+		Email:          user.GetEmail(),
+		Bio:            user.GetBio(),
+		Company:        user.GetCompany(),
+		Location:       user.GetLocation(),
+		ProfileURL:     user.GetHTMLURL(),
+		AvatarURL:      user.GetAvatarURL(),
+		AccountType:    user.GetType(),
+		IsHireable:     user.GetHireable(),
+		PublicRepos:    user.GetPublicRepos(),
+		PublicGists:    user.GetPublicGists(),
+		FollowerCount:  user.GetFollowers(),
+		FollowingCount: user.GetFollowing(),
+		AccountCreated: user.GetCreatedAt().Time,
+		LastUpdated:    user.GetUpdatedAt().Time,
+	}
+
+	return data
+}
+
 // NewServer creates a new GitHub MCP server with the specified GH client and logger.
 func NewServer(getClient GetClientFn, version string, readOnly bool, t translations.TranslationHelperFunc) *server.MCPServer {
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"github-mcp-server",
 		version,
-		server.WithResourceCapabilities(true, true),
-		server.WithLogging())
+		server.WithToolCapabilities(false))
 
 	// Add GitHub Resources
 	s.AddResourceTemplate(GetRepositoryResourceContent(getClient, t))
@@ -111,7 +157,10 @@ func GetMe(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mc
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get user: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(user)
+			// Transform to custom structure
+			userData := transformUserToAuthenticatedUserData(user)
+
+			r, err := json.Marshal(userData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal user: %w", err)
 			}
