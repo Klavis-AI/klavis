@@ -6,12 +6,88 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/github/github-mcp-server/pkg/translations"
 	"github.com/google/go-github/v69/github"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
+
+// SecurityAlertData represents the restructured code scanning alert response
+type SecurityAlertData struct {
+	AlertID      int64       `json:"alert_id"`
+	AlertNumber  int         `json:"alert_number"`
+	State        string      `json:"state"`
+	Severity     string      `json:"severity"`
+	Description  string      `json:"description"`
+	RuleName     string      `json:"rule_name"`
+	RuleID       string      `json:"rule_id"`
+	Tool         ToolInfo    `json:"tool"`
+	Location     LocationInfo `json:"location,omitempty"`
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+	DismissedAt  *time.Time  `json:"dismissed_at,omitempty"`
+	FixedAt      *time.Time  `json:"fixed_at,omitempty"`
+}
+
+// ToolInfo represents security tool information
+type ToolInfo struct {
+	Name    string `json:"name"`
+	Version string `json:"version,omitempty"`
+}
+
+// LocationInfo represents alert location information
+type LocationInfo struct {
+	FilePath   string `json:"file_path"`
+	StartLine  int    `json:"start_line,omitempty"`
+	EndLine    int    `json:"end_line,omitempty"`
+}
+
+// transformAlertToSecurityAlertData converts GitHub alert to SecurityAlertData
+func transformAlertToSecurityAlertData(alert *github.Alert) SecurityAlertData {
+	data := SecurityAlertData{
+		AlertID:     int64(alert.GetNumber()),
+		AlertNumber: alert.GetNumber(),
+		State:       alert.GetState(),
+		CreatedAt:   alert.GetCreatedAt().Time,
+		UpdatedAt:   alert.GetUpdatedAt().Time,
+	}
+
+	if alert.Rule != nil {
+		data.Severity = alert.Rule.GetSeverity()
+		data.Description = alert.Rule.GetDescription()
+		data.RuleName = alert.Rule.GetName()
+		data.RuleID = alert.Rule.GetID()
+	}
+
+	if alert.Tool != nil {
+		data.Tool = ToolInfo{
+			Name:    alert.Tool.GetName(),
+			Version: alert.Tool.GetVersion(),
+		}
+	}
+
+	if alert.MostRecentInstance != nil && alert.MostRecentInstance.Location != nil {
+		data.Location = LocationInfo{
+			FilePath:  alert.MostRecentInstance.Location.GetPath(),
+			StartLine: alert.MostRecentInstance.Location.GetStartLine(),
+			EndLine:   alert.MostRecentInstance.Location.GetEndLine(),
+		}
+	}
+
+	if alert.DismissedAt != nil {
+		dismissedAt := alert.GetDismissedAt().Time
+		data.DismissedAt = &dismissedAt
+	}
+
+	if alert.FixedAt != nil {
+		fixedAt := alert.GetFixedAt().Time
+		data.FixedAt = &fixedAt
+	}
+
+	return data
+}
 
 func GetCodeScanningAlert(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("github_get_code_scanning_alert",
@@ -62,7 +138,10 @@ func GetCodeScanningAlert(getClient GetClientFn, t translations.TranslationHelpe
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get alert: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(alert)
+			// Transform to custom structure
+			alertData := transformAlertToSecurityAlertData(alert)
+
+			r, err := json.Marshal(alertData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal alert: %w", err)
 			}
@@ -133,7 +212,13 @@ func ListCodeScanningAlerts(getClient GetClientFn, t translations.TranslationHel
 				return mcp.NewToolResultError(fmt.Sprintf("failed to list alerts: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(alerts)
+			// Transform to custom structure
+			alertList := make([]SecurityAlertData, 0, len(alerts))
+			for _, alert := range alerts {
+				alertList = append(alertList, transformAlertToSecurityAlertData(alert))
+			}
+
+			r, err := json.Marshal(alertList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal alerts: %w", err)
 			}

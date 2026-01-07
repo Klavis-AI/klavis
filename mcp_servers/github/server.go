@@ -113,7 +113,7 @@ func runServer() error {
 		Handler: mux,
 	}
 	// Create servers with context function
-	ghServer := github.NewServer(getClient, "", false, t)
+	ghServer := github.NewServer(getClient, "1.0.0", false, t)
 	sseServer := server.NewSSEServer(ghServer,
 		server.WithBaseURL(baseURL),
 		server.WithSSEContextFunc(contextFunc),
