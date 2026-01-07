@@ -8863,14 +8863,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/initialize": {
+    "/sandbox/cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize Cal.com sandbox with data",
-        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
+        "summary": "Initialize cal.com sandbox with data",
+        "description": "Initialize the sandbox with cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -8923,14 +8923,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/dump": {
+    "/sandbox/cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export Cal.com sandbox data",
+        "summary": "Export cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -21702,6 +21702,110 @@
         "title": "Override",
         "description": "Represents a date-specific override to the regular schedule.\n\nAttributes:\n    date: Date in YYYY-MM-DD format\n    startTime: Start time in HH:MM format (24-hour)\n    endTime: End time in HH:MM format (24-hour)"
       },
+      "Post": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "publish",
+              "private",
+              "pending",
+              "trash"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories",
+            "default": []
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          },
+          "publish_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Date"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "aside",
+                  "gallery",
+                  "link",
+                  "image",
+                  "quote",
+                  "status",
+                  "video",
+                  "audio",
+                  "chat"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "title": "Post",
+        "description": "WordPress post data"
+      },
       "QuickBooksData": {
         "properties": {
           "accounts": {
@@ -22589,7 +22693,7 @@
           "onedrive",
           "microsoft_teams",
           "outlook_mail",
-          "Cal.com",
+          "cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
@@ -24340,131 +24444,17 @@
       "WordPressData": {
         "properties": {
           "posts": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/WordPressPost"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "type": "array",
             "title": "Posts",
-            "description": "List of WordPress posts to create"
+            "default": []
           }
         },
         "type": "object",
         "title": "WordPressData",
-        "description": "Complete WordPress sandbox data structure\n\nNote: Posts are created in a single batch without dependencies.\nFuture expansion could include pages, media, categories, etc."
-      },
-      "WordPressPost": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Title",
-            "description": "Post title"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content",
-            "description": "Post content (HTML or plain text)"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Post status: draft, publish, private, pending, trash",
-            "default": "draft"
-          },
-          "excerpt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Excerpt",
-            "description": "Post excerpt/summary"
-          },
-          "categories": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Categories",
-            "description": "List of category names"
-          },
-          "tags": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tags",
-            "description": "List of tag names"
-          },
-          "featured_image": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Featured Image",
-            "description": "URL to featured image"
-          },
-          "date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date",
-            "description": "Post publish date in ISO format (e.g., 2025-01-15T10:00:00)"
-          },
-          "format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Format",
-            "description": "Post format: standard, aside, gallery, link, image, quote, status, video, audio, chat",
-            "default": "standard"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "content"
-        ],
-        "title": "WordPressPost",
-        "description": "WordPress post data for creation/update\n\nAttributes:\n    title: Post title\n    content: Post content (HTML or plain text)\n    status: Post status (draft, publish, private, pending)\n    excerpt: Post excerpt/summary (optional)\n    categories: List of category names (optional, created if not exist)\n    tags: List of tag names (optional, created if not exist)\n    featured_image: URL to featured image (optional)\n    date: Post publish date in ISO format (optional)\n    format: Post format (standard, aside, gallery, etc.) (optional)"
+        "description": "WordPress sandbox data structure"
       }
     },
     "securitySchemes": {
