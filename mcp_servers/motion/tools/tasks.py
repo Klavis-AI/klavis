@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, Optional
 from .base import make_api_request
+from .normalize import normalize_task, normalize_tasks
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -18,7 +19,12 @@ async def get_tasks(workspace_id: Optional[str] = None) -> Dict[str, Any]:
             query_string = "&".join([f"{k}={v}" for k, v in params.items()])
             endpoint += f"?{query_string}"
             
-        return await make_api_request(endpoint)
+        raw_response = await make_api_request(endpoint)
+        tasks = normalize_tasks(raw_response.get("tasks", []))
+        return {
+            "count": len(tasks),
+            "tasks": tasks,
+        }
     except Exception as e:
         logger.exception(f"Error executing tool get_tasks: {e}")
         raise e
@@ -28,7 +34,8 @@ async def get_task(task_id: str) -> Dict[str, Any]:
     logger.info(f"Executing tool: get_task with task_id={task_id}")
     try:
         endpoint = f"/tasks/{task_id}"
-        return await make_api_request(endpoint)
+        raw_response = await make_api_request(endpoint)
+        return normalize_task(raw_response)
     except Exception as e:
         logger.exception(f"Error executing tool get_task: {e}")
         raise e
@@ -64,7 +71,8 @@ async def create_task(
         if due_date:
             data["dueDate"] = due_date
             
-        return await make_api_request("/tasks", method="POST", data=data)
+        raw_response = await make_api_request("/tasks", method="POST", data=data)
+        return normalize_task(raw_response)
     except Exception as e:
         logger.exception(f"Error executing tool create_task: {e}")
         raise e
@@ -99,7 +107,8 @@ async def update_task(
         if due_date is not None:
             data["dueDate"] = due_date
             
-        return await make_api_request(f"/tasks/{task_id}", method="PATCH", data=data)
+        raw_response = await make_api_request(f"/tasks/{task_id}", method="PATCH", data=data)
+        return normalize_task(raw_response)
     except Exception as e:
         logger.exception(f"Error executing tool update_task: {e}")
         raise e
@@ -122,7 +131,12 @@ async def search_tasks(query: str, workspace_id: Optional[str] = None) -> Dict[s
         if workspace_id:
             endpoint += f"&workspaceId={workspace_id}"
             
-        return await make_api_request(endpoint)
+        raw_response = await make_api_request(endpoint)
+        tasks = normalize_tasks(raw_response.get("tasks", []))
+        return {
+            "count": len(tasks),
+            "tasks": tasks,
+        }
     except Exception as e:
         logger.exception(f"Error executing tool search_tasks: {e}")
         raise e
