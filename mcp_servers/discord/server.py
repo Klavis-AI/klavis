@@ -24,6 +24,113 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("discord-mcp-server")
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Normalization Helpers - Creates Klavis-defined response schemas
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_path(data: Dict, path: str) -> Any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: Dict, mapping: Dict[str, Any]) -> Dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mapping Rules - Klavis-defined field names
+# ─────────────────────────────────────────────────────────────────────────────
+
+USER_RULES = {
+    "id": "id",
+    "username": "username",
+    "displayName": "global_name",
+    "tag": "discriminator",
+    "isBot": "bot",
+    "avatarId": "avatar",
+}
+
+AUTHOR_RULES = {
+    "id": "id",
+    "username": "username",
+    "displayName": "global_name",
+    "tag": "discriminator",
+    "isBot": "bot",
+}
+
+MEMBER_RULES = {
+    "id": "user.id",
+    "username": "user.username",
+    "displayName": "user.global_name",
+    "tag": "user.discriminator",
+    "nickname": "nick",
+    "joinedAt": "joined_at",
+    "roleIds": "roles",
+}
+
+SERVER_RULES = {
+    "id": "id",
+    "name": "name",
+    "ownerId": "owner_id",
+    "memberCount": "approximate_member_count",
+    "onlineCount": "approximate_presence_count",
+    "iconId": "icon",
+    "description": "description",
+    "boostLevel": "premium_tier",
+    "contentFilter": "explicit_content_filter",
+}
+
+CHANNEL_RULES = {
+    "id": "id",
+    "name": "name",
+    "topic": "topic",
+    "categoryId": "parent_id",
+}
+
+REACTION_RULES = {
+    "name": "emoji.name",
+    "emojiId": "emoji.id",
+    "count": "count",
+}
+
+MESSAGE_RULES = {
+    "id": "id",
+    "content": "content",
+    "createdAt": "timestamp",
+    "author": lambda x: normalize(x.get('author', {}), AUTHOR_RULES) if x.get('author') else None,
+    "reactions": lambda x: [
+        normalize(r, REACTION_RULES) for r in x.get('reactions', [])
+    ] if x.get('reactions') else None,
+}
+
 # Discord API constants and configuration
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 if not DISCORD_TOKEN:
@@ -91,21 +198,9 @@ async def get_server_info(server_id: str) -> Dict[str, Any]:
     """Get information about a Discord server (guild)."""
     logger.info(f"Executing tool: get_server_info with server_id: {server_id}")
     try:
-        # API: GET /guilds/{guild.id}
         endpoint = f"/guilds/{server_id}?with_counts=true"
-        guild_data = await _make_discord_request("GET", endpoint)
-        info = {
-            "name": guild_data.get("name"),
-            "id": guild_data.get("id"),
-            "owner_id": guild_data.get("owner_id"),
-            "member_count": guild_data.get("approximate_member_count", "N/A"),
-            "presence_count": guild_data.get("approximate_presence_count", "N/A"),
-            "icon_hash": guild_data.get("icon"),
-            "description": guild_data.get("description"),
-            "premium_tier": guild_data.get("premium_tier"),
-            "explicit_content_filter": guild_data.get("explicit_content_filter")
-        }
-        return info
+        raw_data = await _make_discord_request("GET", endpoint)
+        return normalize(raw_data, SERVER_RULES)
     except Exception as e:
         logger.exception(f"Error executing tool get_server_info: {e}")
         raise e
@@ -115,27 +210,14 @@ async def list_members(server_id: str, limit: int = 100) -> List[Dict[str, Any]]
     logger.info(f"Executing tool: list_members with server_id: {server_id}, limit: {limit}")
     try:
         clamped_limit = max(1, min(limit, 1000))
-        # API: GET /guilds/{guild.id}/members
         endpoint = f"/guilds/{server_id}/members?limit={clamped_limit}"
-        members_data = await _make_discord_request("GET", endpoint)
+        raw_data = await _make_discord_request("GET", endpoint)
 
-        if not isinstance(members_data, list):
-             logger.error(f"Unexpected response type for list_members: {type(members_data)}")
-             return [{"error": "Received unexpected data format for members."}]
+        if not isinstance(raw_data, list):
+            logger.error(f"Unexpected response type for list_members: {type(raw_data)}")
+            return [{"error": "Received unexpected data format for members."}]
 
-        members_list = []
-        for member in members_data:
-            user = member.get('user', {})
-            members_list.append({
-                "id": user.get("id"),
-                "username": user.get('username', 'UnknownUser'),
-                "discriminator": user.get('discriminator', '0000'),
-                "global_name": user.get("global_name"),
-                "nick": member.get("nick"),
-                "joined_at": member.get("joined_at"),
-                "roles": member.get("roles", [])
-            })
-        return members_list
+        return [normalize(member, MEMBER_RULES) for member in raw_data]
     except Exception as e:
         logger.exception(f"Error executing tool list_members: {e}")
         raise e
@@ -144,23 +226,16 @@ async def create_text_channel(server_id: str, name: str, category_id: Optional[s
     """Create a new text channel."""
     logger.info(f"Executing tool: create_text_channel '{name}' in server {server_id}")
     try:
-        # API: POST /guilds/{guild.id}/channels
         endpoint = f"/guilds/{server_id}/channels"
         payload = {
             "name": name,
-            "type": 0, # 0 indicates a text channel
+            "type": 0,
             "topic": topic,
-            "parent_id": category_id # API uses parent_id
+            "parent_id": category_id
         }
-        # Filter out None values from payload
         payload = {k: v for k, v in payload.items() if v is not None}
-        channel_data = await _make_discord_request("POST", endpoint, json_data=payload)
-        return {
-             "id": channel_data.get("id"),
-             "name": channel_data.get("name"),
-             "topic": channel_data.get("topic"),
-             "parent_id": channel_data.get("parent_id")
-        }
+        raw_data = await _make_discord_request("POST", endpoint, json_data=payload)
+        return normalize(raw_data, CHANNEL_RULES)
     except Exception as e:
         logger.exception(f"Error executing tool create_text_channel: {e}")
         raise e
@@ -224,15 +299,12 @@ async def send_message(channel_id: str, content: str) -> Dict[str, Any]:
     """Send a message to a specific channel."""
     logger.info(f"Executing tool: send_message to channel {channel_id}")
     try:
-        # API: POST /channels/{channel.id}/messages
         endpoint = f"/channels/{channel_id}/messages"
         payload = {"content": content}
-        message_data = await _make_discord_request("POST", endpoint, json_data=payload)
-        return {
-            "message_id": message_data.get("id"),
-            "channel_id": message_data.get("channel_id"),
-            "content_preview": content[:100] + ("..." if len(content) > 100 else "")
-        }
+        raw_data = await _make_discord_request("POST", endpoint, json_data=payload)
+        result = normalize(raw_data, MESSAGE_RULES)
+        result["channelId"] = raw_data.get("channel_id")
+        return result
     except Exception as e:
         logger.exception(f"Error executing tool send_message: {e}")
         raise e
@@ -242,41 +314,14 @@ async def read_messages(channel_id: str, limit: int = 50) -> List[Dict[str, Any]
     logger.info(f"Executing tool: read_messages from channel {channel_id}, limit: {limit}")
     try:
         clamped_limit = max(1, min(limit, 100))
-        # API: GET /channels/{channel.id}/messages
         endpoint = f"/channels/{channel_id}/messages?limit={clamped_limit}"
-        messages_data = await _make_discord_request("GET", endpoint)
+        raw_data = await _make_discord_request("GET", endpoint)
 
-        if not isinstance(messages_data, list):
-             logger.error(f"Unexpected response type for read_messages: {type(messages_data)}")
-             return [{"error": "Received unexpected data format for messages."}]
+        if not isinstance(raw_data, list):
+            logger.error(f"Unexpected response type for read_messages: {type(raw_data)}")
+            return [{"error": "Received unexpected data format for messages."}]
 
-        messages_list = []
-        for msg in messages_data:
-            author = msg.get('author', {})
-            reactions_list = []
-            if 'reactions' in msg and msg['reactions']:
-                 for r in msg['reactions']:
-                     emoji = r.get('emoji', {})
-                     reactions_list.append({
-                         "name": emoji.get('name', '<?>'),
-                         "id": emoji.get('id'),
-                         "count": r.get('count', 0)
-                     })
-
-            messages_list.append({
-                "id": msg.get("id"),
-                "content": msg.get('content', ''),
-                "timestamp": msg.get('timestamp', 'No Timestamp'),
-                "author": {
-                    "id": author.get("id"),
-                    "username": author.get('username', 'UnknownUser'),
-                    "discriminator": author.get('discriminator', '0000'),
-                    "global_name": author.get('global_name'),
-                     "is_bot": author.get('bot', False)
-                },
-                "reactions": reactions_list
-            })
-        return messages_list
+        return [normalize(msg, MESSAGE_RULES) for msg in raw_data]
     except Exception as e:
         logger.exception(f"Error executing tool read_messages: {e}")
         raise e
@@ -285,21 +330,12 @@ async def get_user_info(user_id: str) -> Dict[str, Any]:
     """Get information about a Discord user."""
     logger.info(f"Executing tool: get_user_info for user {user_id}")
     try:
-        # API: GET /users/{user.id}
         endpoint = f"/users/{user_id}"
-        user_data = await _make_discord_request("GET", endpoint)
-        user_info = {
-            "id": user_data.get("id"),
-            "username": user_data.get("username"),
-            "discriminator": user_data.get("discriminator"),
-            "global_name": user_data.get("global_name"),
-            "is_bot": user_data.get("bot", False),
-            "avatar_hash": user_data.get("avatar"),
-        }
-        return user_info
+        raw_data = await _make_discord_request("GET", endpoint)
+        return normalize(raw_data, USER_RULES)
     except Exception as e:
-         logger.exception(f"Error executing tool get_user_info: {e}")
-         raise e
+        logger.exception(f"Error executing tool get_user_info: {e}")
+        raise e
 
 
 @click.command()
