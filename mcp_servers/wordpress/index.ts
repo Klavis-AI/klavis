@@ -9,6 +9,197 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { AsyncLocalStorage } from 'async_hooks';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Normalization Helpers - Creates Klavis-defined response schemas
+// ─────────────────────────────────────────────────────────────────────────────
+
+type MappingRule = string | ((source: Record<string, any>) => any);
+type MappingRules = Record<string, MappingRule>;
+
+/**
+ * Safe dot-notation access. Returns undefined if path fails.
+ */
+function getPath(data: Record<string, any> | null | undefined, path: string): any {
+  if (!data) return undefined;
+  let current: any = data;
+  for (const key of path.split('.')) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  return current;
+}
+
+/**
+ * Creates a new clean dictionary based strictly on the mapping rules.
+ * Excludes fields with null/undefined values from the output.
+ */
+function normalize(source: Record<string, any>, mapping: MappingRules): Record<string, any> {
+  const cleanData: Record<string, any> = {};
+  for (const [targetKey, rule] of Object.entries(mapping)) {
+    let value: any;
+    if (typeof rule === 'string') {
+      value = getPath(source, rule);
+    } else if (typeof rule === 'function') {
+      try {
+        value = rule(source);
+      } catch {
+        value = undefined;
+      }
+    }
+    if (value !== undefined && value !== null) {
+      cleanData[targetKey] = value;
+    }
+  }
+  return cleanData;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mapping Rules - Klavis-defined field names
+// ─────────────────────────────────────────────────────────────────────────────
+
+const AUTHOR_RULES: MappingRules = {
+  id: "ID",
+  name: "name",
+  url: "URL",
+  avatarUrl: "avatar_URL",
+  profileUrl: "profile_URL",
+};
+
+const CATEGORY_RULES: MappingRules = {
+  id: "ID",
+  name: "name",
+  slug: "slug",
+  postCount: "post_count",
+};
+
+const TAG_RULES: MappingRules = {
+  id: "ID",
+  name: "name",
+  slug: "slug",
+  postCount: "post_count",
+};
+
+const POST_RULES: MappingRules = {
+  id: "ID",
+  siteId: "site_ID",
+  title: "title",
+  content: "content",
+  excerpt: "excerpt",
+  slug: "slug",
+  status: "status",
+  type: "type",
+  url: "URL",
+  shortUrl: "short_URL",
+  createdAt: "date",
+  modifiedAt: "modified",
+  likeCount: "like_count",
+  commentCount: (x) => x.discussion?.comment_count,
+  commentsOpen: (x) => x.discussion?.comments_open,
+  featuredImage: "featured_image",
+  format: "format",
+  author: (x) => x.author ? normalize(x.author, AUTHOR_RULES) : undefined,
+  categories: (x) => {
+    const cats = x.categories;
+    if (!cats || typeof cats !== 'object') return undefined;
+    return Object.values(cats).map((c: any) => normalize(c, CATEGORY_RULES));
+  },
+  tags: (x) => {
+    const tags = x.tags;
+    if (!tags || typeof tags !== 'object') return undefined;
+    return Object.values(tags).map((t: any) => normalize(t, TAG_RULES));
+  },
+};
+
+const POST_LIST_RULES: MappingRules = {
+  id: "ID",
+  title: "title",
+  content: "content",
+  excerpt: "excerpt",
+  slug: "slug",
+  status: "status",
+  type: "type",
+  url: "URL",
+  shortUrl: "short_URL",
+  createdAt: "date",
+  modifiedAt: "modified",
+  likeCount: "like_count",
+  commentCount: (x) => x.discussion?.comment_count,
+  commentsOpen: (x) => x.discussion?.comments_open,
+  featuredImage: "featured_image",
+  format: "format",
+  author: (x) => x.author ? normalize(x.author, AUTHOR_RULES) : undefined,
+  categories: (x) => {
+    const cats = x.categories;
+    if (!cats || typeof cats !== 'object') return undefined;
+    return Object.values(cats).map((c: any) => normalize(c, CATEGORY_RULES));
+  },
+  tags: (x) => {
+    const tags = x.tags;
+    if (!tags || typeof tags !== 'object') return undefined;
+    return Object.values(tags).map((t: any) => normalize(t, TAG_RULES));
+  },
+};
+
+const TOP_POST_RULES: MappingRules = {
+  id: "id",
+  title: "title",
+  url: "href",
+  views: "views",
+};
+
+const SITE_RULES: MappingRules = {
+  id: "ID",
+  name: "name",
+  description: "description",
+  url: "URL",
+  slug: "slug",
+  isPrivate: "is_private",
+  isComingSoon: "is_coming_soon",
+  language: "lang",
+  postCount: "post_count",
+  subscriberCount: "subscribers_count",
+  iconUrl: (x) => x.icon?.img,
+  logoUrl: (x) => x.logo?.url,
+  isJetpack: "jetpack",
+  isMultisite: "is_multisite",
+  ownerId: "site_owner",
+  plan: (x) => x.plan ? {
+    id: x.plan.product_id,
+    name: x.plan.product_name_short,
+    slug: x.plan.product_slug,
+  } : undefined,
+};
+
+const SITE_STATS_RULES: MappingRules = {
+  visitors: "stats.visitors",
+  views: "stats.views",
+  visitorsToday: "stats.visitors_today",
+  viewsToday: "stats.views_today",
+  viewsBestDay: "stats.views_best_day",
+  viewsBestDayTotal: "stats.views_best_day_total",
+  postCount: "stats.posts",
+  commentCount: "stats.comments",
+  followers: "stats.followers",
+};
+
+const USER_SITE_RULES: MappingRules = {
+  id: "ID",
+  name: "name",
+  description: "description",
+  url: "URL",
+  slug: "slug",
+  isPrivate: "is_private",
+  isVisible: "visible",
+  iconUrl: (x) => x.icon?.img,
+  plan: (x) => x.plan ? {
+    name: x.plan.product_name_short,
+    slug: x.plan.product_slug,
+  } : undefined,
+};
+
 const getWordPressMcpServer = () => {
   const server = new Server(
     {
@@ -138,9 +329,10 @@ const getWordPressMcpServer = () => {
             status: params.status || 'draft',
           });
           const data = await response.json();
+          const normalizedPost = normalize(data, POST_RULES);
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedPost, null, 2) }],
             isError: false,
           };
         }
@@ -155,9 +347,13 @@ const getWordPressMcpServer = () => {
           const page = params.page || 1;
           const response = await client.get(`/sites/${params.site}/posts/?number=${number}&page=${page}`);
           const data = await response.json();
+          const normalizedData = {
+            totalCount: data.found,
+            posts: (data.posts || []).map((post: Record<string, any>) => normalize(post, POST_LIST_RULES)),
+          };
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedData, null, 2) }],
             isError: false,
           };
         }
@@ -175,9 +371,10 @@ const getWordPressMcpServer = () => {
           const client = getClient();
           const response = await client.post(`/sites/${params.site}/posts/${params.postId}`, updateData);
           const data = await response.json();
+          const normalizedPost = normalize(data, POST_RULES);
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedPost, null, 2) }],
             isError: false,
           };
         }
@@ -190,9 +387,27 @@ const getWordPressMcpServer = () => {
           const client = getClient();
           const response = await client.get(`/sites/${params.site}/stats/top-posts`);
           const data = await response.json();
+          
+          // Extract posts from the summary array and normalize them
+          const topPosts: Record<string, any>[] = [];
+          if (data.summary && Array.isArray(data.summary)) {
+            for (const period of data.summary) {
+              if (period.postviews && Array.isArray(period.postviews)) {
+                for (const post of period.postviews) {
+                  topPosts.push(normalize(post, TOP_POST_RULES));
+                }
+              }
+            }
+          }
+          
+          const normalizedData = {
+            date: data.date,
+            period: data.period,
+            posts: topPosts,
+          };
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedData, null, 2) }],
             isError: false,
           };
         }
@@ -205,9 +420,10 @@ const getWordPressMcpServer = () => {
           const client = getClient();
           const response = await client.get(`/sites/${params.site}`);
           const data = await response.json();
+          const normalizedSite = normalize(data, SITE_RULES);
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedSite, null, 2) }],
             isError: false,
           };
         }
@@ -220,9 +436,10 @@ const getWordPressMcpServer = () => {
           const client = getClient();
           const response = await client.get(`/sites/${params.site}/stats`);
           const data = await response.json();
+          const normalizedStats = normalize(data, SITE_STATS_RULES);
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedStats, null, 2) }],
             isError: false,
           };
         }
@@ -231,9 +448,12 @@ const getWordPressMcpServer = () => {
           const client = getClient();
           const response = await client.get('/me/sites');
           const data = await response.json();
+          const normalizedData = {
+            sites: (data.sites || []).map((site: Record<string, any>) => normalize(site, USER_SITE_RULES)),
+          };
 
           return {
-            content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify(normalizedData, null, 2) }],
             isError: false,
           };
         }
