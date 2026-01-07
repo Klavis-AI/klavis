@@ -17,6 +17,226 @@ from starlette.responses import Response
 from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
+
+def get_path(data: dict, path: str) -> any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: dict, mapping: dict[str, any]) -> dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules for Notion Objects
+
+PAGE_RULES = {
+    "pageId": "id",
+    "objectType": "object",
+    "createdAt": "created_time",
+    "lastEditedAt": "last_edited_time",
+    "createdBy": "created_by.id",
+    "lastEditedBy": "last_edited_by.id",
+    "coverImage": "cover",
+    "iconData": "icon",
+    "parentInfo": "parent",
+    "isArchived": "archived",
+    "isInTrash": "in_trash",
+    "pageProperties": "properties",
+    "publicUrl": "public_url",
+    "urlPath": "url"
+}
+
+DATABASE_RULES = {
+    "databaseId": "id",
+    "objectType": "object",
+    "createdAt": "created_time",
+    "lastEditedAt": "last_edited_time",
+    "createdBy": "created_by.id",
+    "lastEditedBy": "last_edited_by.id",
+    "titleData": "title",
+    "descriptionData": "description",
+    "iconData": "icon",
+    "coverImage": "cover",
+    "databaseProperties": "properties",
+    "parentInfo": "parent",
+    "publicUrl": "public_url",
+    "urlPath": "url",
+    "isArchived": "archived",
+    "isInline": "is_inline"
+}
+
+BLOCK_RULES = {
+    "blockId": "id",
+    "objectType": "object",
+    "parentInfo": "parent",
+    "createdAt": "created_time",
+    "lastEditedAt": "last_edited_time",
+    "createdBy": "created_by.id",
+    "lastEditedBy": "last_edited_by.id",
+    "hasChildren": "has_children",
+    "isArchived": "archived",
+    "isInTrash": "in_trash",
+    "blockType": "type"
+}
+
+USER_RULES = {
+    "userId": "id",
+    "objectType": "object",
+    "userType": "type",
+    "displayName": "name",
+    "avatarUrl": "avatar_url",
+    "personEmail": "person.email",
+    "botOwner": "bot.owner",
+    "botWorkspaceName": "bot.workspace_name"
+}
+
+COMMENT_RULES = {
+    "commentId": "id",
+    "objectType": "object",
+    "parentInfo": "parent",
+    "discussionId": "discussion_id",
+    "createdAt": "created_time",
+    "lastEditedAt": "last_edited_time",
+    "createdBy": "created_by.id",
+    "richTextContent": "rich_text"
+}
+
+SEARCH_RESULT_RULES = {
+    "resultId": "id",
+    "objectType": "object",
+    "createdAt": "created_time",
+    "lastEditedAt": "last_edited_time",
+    "parentInfo": "parent",
+    "isArchived": "archived",
+    "urlPath": "url"
+}
+
+
+def normalize_page(raw_page: dict) -> dict:
+    """Normalize a page object."""
+    if not isinstance(raw_page, dict):
+        return raw_page
+    page = normalize(raw_page, PAGE_RULES)
+    # Add type-specific fields dynamically
+    for key, value in raw_page.items():
+        if key == raw_page.get("type"):
+            page[f"{key}Data"] = value
+    return page
+
+
+def normalize_database(raw_database: dict) -> dict:
+    """Normalize a database object."""
+    if not isinstance(raw_database, dict):
+        return raw_database
+    return normalize(raw_database, DATABASE_RULES)
+
+
+def normalize_block(raw_block: dict) -> dict:
+    """Normalize a block object."""
+    if not isinstance(raw_block, dict):
+        return raw_block
+    block = normalize(raw_block, BLOCK_RULES)
+    # Add the specific block type data
+    block_type = raw_block.get("type")
+    if block_type and block_type in raw_block:
+        block[f"{block_type}Data"] = raw_block[block_type]
+    return block
+
+
+def normalize_user(raw_user: dict) -> dict:
+    """Normalize a user object."""
+    if not isinstance(raw_user, dict):
+        return raw_user
+    return normalize(raw_user, USER_RULES)
+
+
+def normalize_comment(raw_comment: dict) -> dict:
+    """Normalize a comment object."""
+    if not isinstance(raw_comment, dict):
+        return raw_comment
+    return normalize(raw_comment, COMMENT_RULES)
+
+
+def normalize_list_response(response_data: dict, item_normalizer) -> dict:
+    """Normalize a response containing multiple items (like list or query operations)."""
+    if not isinstance(response_data, dict):
+        return response_data
+    
+    normalized_response = {}
+    
+    # Handle pagination info
+    if "next_cursor" in response_data:
+        normalized_response["nextPageCursor"] = response_data["next_cursor"]
+    
+    if "has_more" in response_data:
+        normalized_response["hasMoreResults"] = response_data["has_more"]
+    
+    # Normalize results/items
+    if "results" in response_data and isinstance(response_data["results"], list):
+        normalized_response["items"] = [
+            item_normalizer(item) for item in response_data["results"]
+        ]
+        normalized_response["itemCount"] = len(normalized_response["items"])
+    
+    # Handle object type for search results
+    if "object" in response_data:
+        normalized_response["objectType"] = response_data["object"]
+    
+    return normalized_response
+
+
+def normalize_property_item(raw_item: dict) -> dict:
+    """Normalize a property item response."""
+    if not isinstance(raw_item, dict):
+        return raw_item
+    
+    normalized = {}
+    if "object" in raw_item:
+        normalized["objectType"] = raw_item["object"]
+    if "id" in raw_item:
+        normalized["propertyId"] = raw_item["id"]
+    if "type" in raw_item:
+        normalized["propertyType"] = raw_item["type"]
+    if "next_cursor" in raw_item:
+        normalized["nextPageCursor"] = raw_item["next_cursor"]
+    if "has_more" in raw_item:
+        normalized["hasMoreResults"] = raw_item["has_more"]
+    
+    # Copy the actual property value
+    prop_type = raw_item.get("type")
+    if prop_type and prop_type in raw_item:
+        normalized[f"{prop_type}Data"] = raw_item[prop_type]
+    
+    return normalized
+
+
 from tools import (
     auth_token_context,
     create_page,
@@ -703,10 +923,12 @@ def main(
                     icon=arguments.get("icon"),
                     cover=arguments.get("cover"),
                 )
+                # Normalize the response
+                normalized = normalize_page(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -723,10 +945,12 @@ def main(
                     page_id=arguments.get("page_id"),
                     filter_properties=arguments.get("filter_properties"),
                 )
+                # Normalize the response
+                normalized = normalize_page(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -747,10 +971,12 @@ def main(
                     archived=arguments.get("archived"),
                     in_trash=arguments.get("in_trash"),
                 )
+                # Normalize the response
+                normalized = normalize_page(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -773,10 +999,12 @@ def main(
                     archived=arguments.get("archived"),
                     in_trash=arguments.get("in_trash"),
                 )
+                # Normalize the response (list of pages)
+                normalized = normalize_list_response(result, normalize_page) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -790,10 +1018,12 @@ def main(
         elif name == "notion_get_database":
             try:
                 result = await get_database(database_id=arguments.get("database_id"))
+                # Normalize the response
+                normalized = normalize_database(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -814,10 +1044,12 @@ def main(
                     cover=arguments.get("cover"),
                     description=arguments.get("description"),
                 )
+                # Normalize the response
+                normalized = normalize_database(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -839,10 +1071,12 @@ def main(
                     cover=arguments.get("cover"),
                     archived=arguments.get("archived"),
                 )
+                # Normalize the response
+                normalized = normalize_database(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -862,10 +1096,12 @@ def main(
                     icon=arguments.get("icon"),
                     cover=arguments.get("cover"),
                 )
+                # Normalize the response (returns a page)
+                normalized = normalize_page(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -886,10 +1122,22 @@ def main(
                     start_cursor=arguments.get("start_cursor"),
                     page_size=arguments.get("page_size"),
                 )
+                # Normalize the response - search can return pages or databases
+                if isinstance(result, dict) and "results" in result:
+                    def normalize_search_item(item):
+                        obj_type = item.get("object")
+                        if obj_type == "page":
+                            return normalize_page(item)
+                        elif obj_type == "database":
+                            return normalize_database(item)
+                        return item
+                    normalized = normalize_list_response(result, normalize_search_item)
+                else:
+                    normalized = result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -903,10 +1151,12 @@ def main(
         elif name == "notion_get_user":
             try:
                 result = await get_user(user_id=arguments.get("user_id"))
+                # Normalize the response
+                normalized = normalize_user(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -923,10 +1173,12 @@ def main(
                     start_cursor=arguments.get("start_cursor"),
                     page_size=arguments.get("page_size"),
                 )
+                # Normalize the response (list of users)
+                normalized = normalize_list_response(result, normalize_user) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -945,10 +1197,12 @@ def main(
                     rich_text=arguments.get("rich_text"),
                     discussion_id=arguments.get("discussion_id"),
                 )
+                # Normalize the response
+                normalized = normalize_comment(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -966,10 +1220,12 @@ def main(
                     start_cursor=arguments.get("start_cursor"),
                     page_size=arguments.get("page_size"),
                 )
+                # Normalize the response (list of comments)
+                normalized = normalize_list_response(result, normalize_comment) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -983,10 +1239,12 @@ def main(
         elif name == "notion_get_me":
             try:
                 result = await get_me()
+                # Normalize the response (returns a user/bot object)
+                normalized = normalize_user(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1005,10 +1263,12 @@ def main(
                     start_cursor=arguments.get("start_cursor"),
                     page_size=arguments.get("page_size"),
                 )
+                # Normalize the response (property item)
+                normalized = normalize_property_item(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1022,10 +1282,12 @@ def main(
         elif name == "notion_retrieve_block":
             try:
                 result = await retrieve_block(block_id=arguments.get("block_id"))
+                # Normalize the response
+                normalized = normalize_block(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1043,10 +1305,12 @@ def main(
                     block_type=arguments.get("block_type"),
                     archived=arguments.get("archived"),
                 )
+                # Normalize the response
+                normalized = normalize_block(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1060,10 +1324,12 @@ def main(
         elif name == "notion_delete_block":
             try:
                 result = await delete_block(block_id=arguments.get("block_id"))
+                # Normalize the response
+                normalized = normalize_block(result) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1081,10 +1347,12 @@ def main(
                     start_cursor=arguments.get("start_cursor"),
                     page_size=arguments.get("page_size"),
                 )
+                # Normalize the response (list of blocks)
+                normalized = normalize_list_response(result, normalize_block) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
@@ -1102,10 +1370,12 @@ def main(
                     children=arguments.get("children"),
                     after=arguments.get("after"),
                 )
+                # Normalize the response (list of blocks)
+                normalized = normalize_list_response(result, normalize_block) if isinstance(result, dict) else result
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized, indent=2),
                     )
                 ]
             except Exception as e:
