@@ -4,135 +4,104 @@ from mcp.types import Tool
 import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
-# Minimal properties for vendor creation (required by QuickBooks)
-# Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required
+# Minimal properties for vendor creation
 vendor_properties_minimal = {
-    "DisplayName": {
+    "display_name": {
         "type": "string",
-        "description": "The name of the vendor as displayed. Must be unique across all Vendor, Customer, and Employee objects. Cannot be removed with sparse update. If not supplied, the system generates DisplayName by concatenating vendor name components supplied in the request from the following list: GivenName, MiddleName, FamilyName."
+        "description": "Display name (must be unique)"
     },
-    "GivenName": {
+    "first_name": {
         "type": "string",
-        "description": "Given name or first name of a person. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
+        "description": "First/given name"
     },
-    "MiddleName": {
+    "last_name": {
         "type": "string",
-        "description": "Middle name of the person. The person can have zero or more middle names. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
-    },
-    "FamilyName": {
-        "type": "string",
-        "description": "Family name or the last name of the person. The DisplayName attribute or at least one of GivenName, MiddleName, FamilyName attributes is required for object create."
+        "description": "Last/family name"
     }
 }
 
-# Vendor properties mapping (based on QuickBooks API documentation)
+# Vendor properties mapping
 vendor_properties_user_define = {
     **vendor_properties_minimal,
-    "PrimaryEmailAddr": {
+    "middle_name": {
         "type": "string",
-        "description": "Primary email address."
+        "description": "Middle name"
     },
-    "CompanyName": {
+    "company": {
         "type": "string",
-        "description": "The name of the company associated with the person or organization."
+        "description": "Company name"
     },
-    "PrintOnCheckName": {
+    "email": {
         "type": "string",
-        "description": "Name of the person or organization as printed on a check. If not provided, this is populated from DisplayName. Cannot be removed with sparse update."
+        "description": "Email address"
     },
-    "PrimaryPhone": {
+    "phone": {
         "type": "string",
-        "description": "Primary phone number."
+        "description": "Phone number"
     },
-    "WebAddr": {
+    "website": {
         "type": "string",
-        "description": "Website address."
+        "description": "Website URL"
     },
-    "BusinessNumber": {
+    "check_name": {
         "type": "string",
-        "description": "Also called, PAN (in India) is a code that acts as an identification for individuals, families and corporates, especially for those who pay taxes on their income."
+        "description": "Name printed on checks"
     },
-    "CurrencyRefValue": {
-        "type": "string",
-        "description": "A three letter string representing the ISO 4217 code for the currency. For example, USD, AUD, EUR, and so on."
-    },
-    "CurrencyRefName": {
-        "type": "string",
-        "description": "The full name of the currency."
-    },
-    "Vendor1099": {
+    "is_1099_vendor": {
         "type": "boolean",
-        "description": "This vendor is an independent contractor; someone who is given a 1099-MISC form at the end of the year. A 1099 vendor is paid with regular checks, and taxes are not withheld on their behalf."
+        "description": "1099 independent contractor"
     },
-    "CostRate": {
+    "cost_rate": {
         "type": "number",
-        "description": "Pay rate of the vendor"
+        "description": "Pay rate"
     },
-    "BillRate": {
+    "bill_rate": {
         "type": "number",
-        "description": "BillRate can be set to specify this vendor's hourly billing rate."
+        "description": "Hourly billing rate"
     },
-    "TaxIdentifier": {
+    "tax_id": {
         "type": "string",
-        "description": "The tax ID of the Person or Organization. The value is masked in responses, exposing only last four characters. For example, the ID of 123-45-6789 is returned as XXXXXXX6789."
+        "description": "Tax ID (SSN or EIN)"
     },
-    "AcctNum": {
+    "account_number": {
         "type": "string",
-        "description": "Name or number of the account associated with this vendor."
+        "description": "Account number"
     },
-    "GSTRegistrationType": {
+    "currency": {
         "type": "string",
-        "description": "For the filing of GSTR, transactions need to be classified depending on the type of vendor from whom the purchase is made. Possible values are: GST_REG_REG, GST_REG_COMP, GST_UNREG, CONSUMER, OVERSEAS, SEZ, DEEMED."
+        "description": "Currency code (e.g., USD)"
     },
-    # Billing Address fields
-    "BillAddrLine1": {
+    "street": {
         "type": "string",
-        "description": "First line of the billing address."
+        "description": "Street address"
     },
-    "BillAddrLine2": {
+    "street2": {
         "type": "string",
-        "description": "Second line of the billing address."
+        "description": "Street address line 2"
     },
-    "BillAddrCity": {
+    "city": {
         "type": "string",
-        "description": "City name for the billing address."
+        "description": "City"
     },
-    "BillAddrCountry": {
+    "state": {
         "type": "string",
-        "description": "Country name for the billing address. For international addresses - countries should be passed as 3 ISO alpha-3 characters or the full name of the country."
+        "description": "State/province"
     },
-    "BillAddrCountrySubDivisionCode": {
+    "postal_code": {
         "type": "string",
-        "description": "Region within a country for the billing address. For example, state name for USA, province name for Canada."
+        "description": "Postal code"
     },
-    "BillAddrPostalCode": {
+    "country": {
         "type": "string",
-        "description": "Postal code for the billing address."
-    },
-    # Vendor Payment Bank Detail fields
-    "VendorPaymentBankDetailBankAccountName": {
-        "type": "string",
-        "description": "Name on the Bank Account"
-    },
-    "VendorPaymentBankDetailBankBranchIdentifier": {
-        "type": "string",
-        "description": "Bank identification number used to identify the Bank Branch. 6 digit value in format xxx-xxx."
-    },
-    "VendorPaymentBankDetailBankAccountNumber": {
-        "type": "string",
-        "description": "Vendor's Bank Account number. In response the value is masked and last four digit is only returned"
-    },
-    "VendorPaymentBankDetailStatementText": {
-        "type": "string",
-        "description": "Text/note/comment for Remittance"
+        "description": "Country"
     }
 }
 
 vendor_properties = {
     **vendor_properties_user_define,
-    "Id": {
+    "id": {
         "type": "string",
-        "description": "The unique QuickBooks vendor ID"
+        "description": "Vendor ID"
     }
 }
 
@@ -140,10 +109,10 @@ vendor_properties = {
 create_vendor_tool = Tool(
     name="quickbooks_create_vendor",
     title="Create Vendor",
-    description="Create a new vendor in QuickBooks. Either DisplayName or at least one of GivenName, MiddleName, FamilyName is required.",
+    description="Create a new vendor. Requires display_name or first_name/last_name.",
     inputSchema={
         "type": "object",
-        "properties": vendor_properties_minimal,
+        "properties": vendor_properties_user_define,
         "required": []
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
@@ -152,13 +121,13 @@ create_vendor_tool = Tool(
 get_vendor_tool = Tool(
     name="quickbooks_get_vendor",
     title="Get Vendor",
-    description="Get a specific vendor by ID from QuickBooks",
+    description="Get a vendor by ID",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks vendor ID"}
+            "id": {"type": "string", "description": "Vendor ID"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
@@ -166,14 +135,14 @@ get_vendor_tool = Tool(
 list_vendors_tool = Tool(
     name="quickbooks_list_vendors",
     title="List Vendors",
-    description="List all vendors from QuickBooks",
+    description="List all vendors",
     inputSchema={
         "type": "object",
         "properties": {
-            "ActiveOnly": {"type": "boolean", "description": "Return only active vendors", "default": True},
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
+            "active_only": {"type": "boolean", "description": "Return only active vendors (default: true)"},
+            "max_results": {"type": "integer", "description": "Maximum results (default: 100)"}
         },
-        "required": [],
+        "required": []
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
@@ -181,27 +150,24 @@ list_vendors_tool = Tool(
 search_vendors_tool = Tool(
     name="quickbooks_search_vendors",
     title="Search Vendors",
-    description="Search vendors with various filters including name, company, contact info, and status",
+    description="Search vendors with filters",
     inputSchema={
         "type": "object",
         "properties": {
-            "Name": {"type": "string", "description": "Search by vendor name (partial match)"},
-            "DisplayName": {"type": "string", "description": "Search by vendor display name (partial match)"},
-            "CompanyName": {"type": "string", "description": "Search by company name (partial match)"},
-            "GivenName": {"type": "string", "description": "Search by given/first name (partial match)"},
-            "FamilyName": {"type": "string", "description": "Search by family/last name (partial match)"},
-            "PrimaryEmailAddr": {"type": "string", "description": "Search by email address (partial match)"},
-            "PrimaryPhone": {"type": "string", "description": "Search by phone number (partial match)"},
-            "Active": {"type": "boolean", "description": "Filter by active status"},
-            "Vendor1099": {"type": "boolean", "description": "Filter by 1099 vendor status"},
-            "GSTIN": {"type": "string", "description": "Search by GSTIN"},
-            "BusinessNumber": {"type": "string", "description": "Search by business number"},
-            "AcctNum": {"type": "string", "description": "Search by account number"},
-            "GSTRegistrationType": {"type": "string", "description": "Filter by GST registration type"},
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
+            "name": {"type": "string", "description": "Search by name (partial match)"},
+            "display_name": {"type": "string", "description": "Search by display name"},
+            "company": {"type": "string", "description": "Search by company name"},
+            "first_name": {"type": "string", "description": "Search by first name"},
+            "last_name": {"type": "string", "description": "Search by last name"},
+            "email": {"type": "string", "description": "Search by email"},
+            "phone": {"type": "string", "description": "Search by phone"},
+            "is_active": {"type": "boolean", "description": "Filter by active status"},
+            "is_1099_vendor": {"type": "boolean", "description": "Filter by 1099 status"},
+            "account_number": {"type": "string", "description": "Search by account number"},
+            "max_results": {"type": "integer", "description": "Maximum results (default: 100)"},
+            "start_position": {"type": "integer", "description": "Starting position (default: 1)"}
         },
-        "required": [],
+        "required": []
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR", "readOnlyHint": True})
 )
@@ -209,14 +175,11 @@ search_vendors_tool = Tool(
 update_vendor_tool = Tool(
     name="quickbooks_update_vendor",
     title="Update Vendor",
-    description="Update an existing vendor in QuickBooks. Use activate_vendor/deactivate_vendor for status changes.",
+    description="Update a vendor",
     inputSchema={
         "type": "object",
-        "properties": {
-            key: value for key, value in vendor_properties.items() 
-            if key != "Active"  # Remove Active from update inputs
-        },
-        "required": ["Id"]
+        "properties": vendor_properties,
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
@@ -224,13 +187,13 @@ update_vendor_tool = Tool(
 activate_vendor_tool = Tool(
     name="quickbooks_activate_vendor",
     title="Activate Vendor",
-    description="Activate a vendor in QuickBooks (set Active to true)",
+    description="Activate a vendor",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks vendor ID to activate"}
+            "id": {"type": "string", "description": "Vendor ID to activate"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
@@ -238,13 +201,13 @@ activate_vendor_tool = Tool(
 deactivate_vendor_tool = Tool(
     name="quickbooks_deactivate_vendor",
     title="Deactivate Vendor",
-    description="Deactivate a vendor from QuickBooks (set Active to false)",
+    description="Deactivate a vendor",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks vendor ID to deactivate"}
+            "id": {"type": "string", "description": "Vendor ID to deactivate"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_VENDOR"})
 )
@@ -252,185 +215,190 @@ deactivate_vendor_tool = Tool(
 
 def mcp_object_to_vendor_data(**kwargs) -> Dict[str, Any]:
     """
-    Convert MCP object format to QuickBooks vendor data format.
-    This function transforms the flat MCP structure to the nested format expected by QuickBooks API.
+    Convert simplified MCP input format to QuickBooks vendor data format.
     """
     vendor_data = {}
 
-    # Basic vendor information - direct copy
-    for field in ['DisplayName', 'GivenName', 'MiddleName', 'FamilyName',
-                  'CompanyName', 'PrintOnCheckName', 'BusinessNumber', 'Vendor1099', 'CostRate',
-                  'BillRate', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType']:
-        if field in kwargs:
-            vendor_data[field] = kwargs[field]
+    # Field mappings: simplified name -> QB field name
+    direct_mappings = {
+        'display_name': 'DisplayName',
+        'first_name': 'GivenName',
+        'middle_name': 'MiddleName',
+        'last_name': 'FamilyName',
+        'company': 'CompanyName',
+        'check_name': 'PrintOnCheckName',
+        'is_1099_vendor': 'Vendor1099',
+        'cost_rate': 'CostRate',
+        'bill_rate': 'BillRate',
+        'tax_id': 'TaxIdentifier',
+        'account_number': 'AcctNum',
+        'is_active': 'Active',
+    }
 
-    # Handle Active field only for create operation (not for update)
-    if 'Active' in kwargs:
-        vendor_data['Active'] = kwargs['Active']
+    for simple_name, qb_name in direct_mappings.items():
+        if simple_name in kwargs and kwargs[simple_name] is not None:
+            vendor_data[qb_name] = kwargs[simple_name]
 
     # Email address
-    if 'PrimaryEmailAddr' in kwargs:
-        vendor_data['PrimaryEmailAddr'] = {
-            'Address': kwargs['PrimaryEmailAddr']}
+    if kwargs.get('email'):
+        vendor_data['PrimaryEmailAddr'] = {'Address': kwargs['email']}
 
-    # Phone numbers
-    phone_fields = ['PrimaryPhone']
-    for field in phone_fields:
-        if field in kwargs:
-            vendor_data[field] = {'FreeFormNumber': kwargs[field]}
+    # Phone number
+    if kwargs.get('phone'):
+        vendor_data['PrimaryPhone'] = {'FreeFormNumber': kwargs['phone']}
 
-    # Website address
-    if 'WebAddr' in kwargs:
-        vendor_data['WebAddr'] = {'URI': kwargs['WebAddr']}
+    # Website
+    if kwargs.get('website'):
+        vendor_data['WebAddr'] = {'URI': kwargs['website']}
 
-    # Reference objects - convert separate value/name fields to structured objects
-    ref_mappings = [
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName')
-        # Removed APAccountRef, TermRef from input
-    ]
+    # Currency
+    if kwargs.get('currency'):
+        vendor_data['CurrencyRef'] = {'value': kwargs['currency']}
 
-    for ref_name, value_field, name_field in ref_mappings:
-        if value_field in kwargs:
-            ref_obj = {'value': kwargs[value_field]}
-            if name_field in kwargs:
-                ref_obj['name'] = kwargs[name_field]
-            vendor_data[ref_name] = ref_obj
-
-    # Billing Address
-    bill_addr_fields = ['BillAddrLine1', 'BillAddrLine2', 'BillAddrCity', 'BillAddrCountry', 'BillAddrCountrySubDivisionCode', 'BillAddrPostalCode']
+    # Address fields
+    address_mappings = {
+        'street': 'Line1',
+        'street2': 'Line2',
+        'city': 'City',
+        'state': 'CountrySubDivisionCode',
+        'postal_code': 'PostalCode',
+        'country': 'Country',
+    }
 
     bill_addr = {}
-    for field in bill_addr_fields:
-        if field in kwargs:
-            # Remove the BillAddr prefix
-            addr_field = field.replace('BillAddr', '')
-            bill_addr[addr_field] = kwargs[field]
+    for simple_name, qb_name in address_mappings.items():
+        if kwargs.get(simple_name):
+            bill_addr[qb_name] = kwargs[simple_name]
 
     if bill_addr:
         vendor_data['BillAddr'] = bill_addr
-
-    # Vendor Payment Bank Detail
-    bank_detail_fields = {
-        'VendorPaymentBankDetailBankAccountName': 'BankAccountName',
-        'VendorPaymentBankDetailBankBranchIdentifier': 'BankBranchIdentifier',
-        'VendorPaymentBankDetailBankAccountNumber': 'BankAccountNumber',
-        'VendorPaymentBankDetailStatementText': 'StatementText'
-    }
-
-    bank_detail = {}
-    for mcp_field, qb_field in bank_detail_fields.items():
-        if mcp_field in kwargs:
-            bank_detail[qb_field] = kwargs[mcp_field]
-
-    if bank_detail:
-        vendor_data['VendorPaymentBankDetail'] = bank_detail
 
     return vendor_data
 
 
 def vendor_data_to_mcp_object(vendor_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convert QuickBooks vendor data format to MCP object format.
-    This function flattens the nested QuickBooks structure to the flat format expected by MCP tools.
+    Convert QuickBooks vendor data format to simplified MCP object format.
+    Uses cleaner, more intuitive field names for better usability.
     """
-    mcp_object = {}
+    result = {}
 
-    # Copy basic fields if present
-    for field in [
-        'Id', 'DisplayName', 'GivenName', 'MiddleName', 'FamilyName',
-        'CompanyName', 'PrintOnCheckName', 'Active', 'BusinessNumber', 'Vendor1099', 'CostRate',
-        'BillRate', 'TaxIdentifier', 'AcctNum', 'GSTRegistrationType',
-        'Balance'
-    ]:
-        if field in vendor_data:
-            mcp_object[field] = vendor_data[field]
+    # Core identification
+    if 'Id' in vendor_data:
+        result['id'] = vendor_data['Id']
+    if 'DisplayName' in vendor_data:
+        result['display_name'] = vendor_data['DisplayName']
+    if 'CompanyName' in vendor_data:
+        result['company'] = vendor_data['CompanyName']
+    if 'PrintOnCheckName' in vendor_data:
+        result['check_name'] = vendor_data['PrintOnCheckName']
 
-    # Handle fields that are output-only (not in input schema but preserved in output)
-    for field in ['Title', 'Suffix', 'AlternatePhone', 'Mobile', 'Fax', 'Source', 'GSTIN', 'T4AEligible', 'HasTPAR', 'TaxReportingBasis', 'T5018Eligible']:
-        if field in vendor_data:
-            mcp_object[field] = vendor_data[field]
+    # Personal name fields
+    name_parts = {}
+    if 'GivenName' in vendor_data:
+        name_parts['first'] = vendor_data['GivenName']
+    if 'MiddleName' in vendor_data:
+        name_parts['middle'] = vendor_data['MiddleName']
+    if 'FamilyName' in vendor_data:
+        name_parts['last'] = vendor_data['FamilyName']
+    if 'Title' in vendor_data:
+        name_parts['title'] = vendor_data['Title']
+    if 'Suffix' in vendor_data:
+        name_parts['suffix'] = vendor_data['Suffix']
+    if name_parts:
+        result['name'] = name_parts
 
-    # Email address
-    if 'PrimaryEmailAddr' in vendor_data and isinstance(vendor_data['PrimaryEmailAddr'], dict):
-        if 'Address' in vendor_data['PrimaryEmailAddr']:
-            mcp_object['PrimaryEmailAddr'] = vendor_data['PrimaryEmailAddr']['Address']
+    # Contact information
+    contact = {}
+    if 'PrimaryEmailAddr' in vendor_data:
+        email = vendor_data['PrimaryEmailAddr']
+        contact['email'] = email.get('Address') if isinstance(email, dict) else email
+    if 'PrimaryPhone' in vendor_data:
+        phone = vendor_data['PrimaryPhone']
+        contact['phone'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
+    if 'Mobile' in vendor_data:
+        phone = vendor_data['Mobile']
+        contact['mobile'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
+    if 'Fax' in vendor_data:
+        phone = vendor_data['Fax']
+        contact['fax'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
+    if 'WebAddr' in vendor_data:
+        web = vendor_data['WebAddr']
+        contact['website'] = web.get('URI') if isinstance(web, dict) else web
+    if contact:
+        result['contact'] = contact
 
-    # Phone numbers - handle primary phone as input, others as output-only
-    if 'PrimaryPhone' in vendor_data and isinstance(vendor_data['PrimaryPhone'], dict):
-        if 'FreeFormNumber' in vendor_data['PrimaryPhone']:
-            mcp_object['PrimaryPhone'] = vendor_data['PrimaryPhone']['FreeFormNumber']
-    
-    # Handle other phone fields as output-only
-    phone_mappings = ['AlternatePhone', 'Mobile', 'Fax']
-    for field in phone_mappings:
-        if field in vendor_data and isinstance(vendor_data[field], dict):
-            if 'FreeFormNumber' in vendor_data[field]:
-                mcp_object[field] = vendor_data[field]['FreeFormNumber']
-
-    # Website address
-    if 'WebAddr' in vendor_data and isinstance(vendor_data['WebAddr'], dict):
-        if 'URI' in vendor_data['WebAddr']:
-            mcp_object['WebAddr'] = vendor_data['WebAddr']['URI']
-
-    # Reference objects - flatten to separate value and name fields
-    ref_mappings = [
-        ('APAccountRef', 'APAccountRefValue', 'APAccountRefName'),
-        ('TermRef', 'TermRefValue', 'TermRefName'),
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('SyncToken', 'SyncToken', None)
-    ]
-
-    for ref_name, value_field, name_field in ref_mappings:
-        if ref_name in vendor_data:
-            ref = vendor_data[ref_name]
-            if isinstance(ref, dict):
-                if 'value' in ref:
-                    mcp_object[value_field] = ref['value']
-                if name_field and 'name' in ref:
-                    mcp_object[name_field] = ref['name']
-            else:
-                # Handle cases where SyncToken might be directly in vendor_data
-                mcp_object[value_field] = ref
-
-    # Billing Address
+    # Address
     if 'BillAddr' in vendor_data and isinstance(vendor_data['BillAddr'], dict):
-        bill_addr = vendor_data['BillAddr']
-        addr_mappings = {
-            'Line1': 'BillAddrLine1',
-            'Line2': 'BillAddrLine2',
-            'City': 'BillAddrCity',
-            'Country': 'BillAddrCountry',
-            'CountrySubDivisionCode': 'BillAddrCountrySubDivisionCode',
-            'PostalCode': 'BillAddrPostalCode'
-        }
+        addr = vendor_data['BillAddr']
+        address = {}
+        if 'Line1' in addr:
+            address['street'] = addr['Line1']
+        if 'Line2' in addr:
+            address['street2'] = addr['Line2']
+        if 'City' in addr:
+            address['city'] = addr['City']
+        if 'CountrySubDivisionCode' in addr:
+            address['state'] = addr['CountrySubDivisionCode']
+        if 'PostalCode' in addr:
+            address['postal_code'] = addr['PostalCode']
+        if 'Country' in addr:
+            address['country'] = addr['Country']
+        if address:
+            result['address'] = address
 
-        for qb_field, mcp_field in addr_mappings.items():
-            if qb_field in bill_addr:
-                mcp_object[mcp_field] = bill_addr[qb_field]
+    # Financial info
+    if 'Balance' in vendor_data:
+        result['balance'] = vendor_data['Balance']
+    if 'CostRate' in vendor_data:
+        result['cost_rate'] = vendor_data['CostRate']
+    if 'BillRate' in vendor_data:
+        result['bill_rate'] = vendor_data['BillRate']
 
-    # Vendor Payment Bank Detail
+    # Status
+    if 'Active' in vendor_data:
+        result['is_active'] = vendor_data['Active']
+    if 'Vendor1099' in vendor_data:
+        result['is_1099_vendor'] = vendor_data['Vendor1099']
+
+    # Tax info
+    if 'TaxIdentifier' in vendor_data:
+        result['tax_id'] = vendor_data['TaxIdentifier']
+    if 'BusinessNumber' in vendor_data:
+        result['business_number'] = vendor_data['BusinessNumber']
+    if 'AcctNum' in vendor_data:
+        result['account_number'] = vendor_data['AcctNum']
+
+    # Currency
+    if 'CurrencyRef' in vendor_data and isinstance(vendor_data['CurrencyRef'], dict):
+        result['currency'] = vendor_data['CurrencyRef'].get('value')
+
+    # Terms
+    if 'TermRef' in vendor_data and isinstance(vendor_data['TermRef'], dict):
+        result['payment_terms'] = vendor_data['TermRef'].get('name') or vendor_data['TermRef'].get('value')
+
+    # Bank details (simplified)
     if 'VendorPaymentBankDetail' in vendor_data and isinstance(vendor_data['VendorPaymentBankDetail'], dict):
-        bank_detail = vendor_data['VendorPaymentBankDetail']
-        bank_mappings = {
-            'BankAccountName': 'VendorPaymentBankDetailBankAccountName',
-            'BankBranchIdentifier': 'VendorPaymentBankDetailBankBranchIdentifier',
-            'BankAccountNumber': 'VendorPaymentBankDetailBankAccountNumber',
-            'StatementText': 'VendorPaymentBankDetailStatementText'
-        }
+        bank = vendor_data['VendorPaymentBankDetail']
+        bank_info = {}
+        if 'BankAccountName' in bank:
+            bank_info['account_name'] = bank['BankAccountName']
+        if 'BankBranchIdentifier' in bank:
+            bank_info['branch_id'] = bank['BankBranchIdentifier']
+        if 'BankAccountNumber' in bank:
+            bank_info['account_number'] = bank['BankAccountNumber']
+        if bank_info:
+            result['bank_details'] = bank_info
 
-        for qb_field, mcp_field in bank_mappings.items():
-            if qb_field in bank_detail:
-                mcp_object[mcp_field] = bank_detail[qb_field]
-
-    # MetaData fields
+    # Timestamps
     if 'MetaData' in vendor_data and isinstance(vendor_data['MetaData'], dict):
         metadata = vendor_data['MetaData']
         if 'CreateTime' in metadata:
-            mcp_object['MetaDataCreateTime'] = metadata['CreateTime']
+            result['created_at'] = metadata['CreateTime']
         if 'LastUpdatedTime' in metadata:
-            mcp_object['MetaDataLastUpdatedTime'] = metadata['LastUpdatedTime']
+            result['updated_at'] = metadata['LastUpdatedTime']
 
-    return mcp_object
+    return result
 
 
 class VendorManager:
@@ -438,29 +406,27 @@ class VendorManager:
         self.client = client
 
     async def create_vendor(self, **kwargs) -> Dict[str, Any]:
-        """Create a new vendor with comprehensive property support."""
+        """Create a new vendor."""
         vendor_data = mcp_object_to_vendor_data(**kwargs)
-
         response = await self.client._post('vendor', vendor_data)
         return vendor_data_to_mcp_object(response['Vendor'])
 
-    async def get_vendor(self, Id: str) -> Dict[str, Any]:
-        """Get a specific vendor by ID."""
-        response = await self.client._get(f"vendor/{Id}")
+    async def get_vendor(self, id: str) -> Dict[str, Any]:
+        """Get a vendor by ID."""
+        response = await self.client._get(f"vendor/{id}")
         return vendor_data_to_mcp_object(response['Vendor'])
 
-    async def list_vendors(self, ActiveOnly: bool = True, MaxResults: int = 100) -> List[Dict[str, Any]]:
-        """List all vendors with comprehensive properties and pagination support."""
-        query = f"select * from Vendor"
+    async def list_vendors(self, active_only: bool = True, max_results: int = 100) -> List[Dict[str, Any]]:
+        """List all vendors."""
+        query = "select * from Vendor"
 
-        if ActiveOnly:
+        if active_only:
             query += " WHERE Active = true"
 
-        query += f" MAXRESULTS {MaxResults}"
+        query += f" MAXRESULTS {max_results}"
 
         response = await self.client._get('query', params={'query': query})
 
-        # Handle case when no vendors are returned
         if 'Vendor' not in response['QueryResponse']:
             return []
 
@@ -469,111 +435,85 @@ class VendorManager:
 
     async def search_vendors(self, **kwargs) -> List[Dict[str, Any]]:
         """
-        Search vendors with various filters and pagination support.
+        Search vendors with filters.
 
         Args:
-            Name: Search by vendor name (partial match)
-            DisplayName: Search by vendor display name (partial match)
-            CompanyName: Search by company name (partial match)
-            GivenName: Search by given/first name (partial match)
-            FamilyName: Search by family/last name (partial match)
-            PrimaryEmailAddr: Search by email address (partial match)
-            PrimaryPhone: Search by phone number (partial match)
-            Active: Filter by active status
-            Vendor1099: Filter by 1099 vendor status
-            GSTIN: Search by GSTIN
-            BusinessNumber: Search by business number
-            AcctNum: Search by account number
-            GSTRegistrationType: Filter by GST registration type
-            MaxResults: Maximum number of results to return (default: 100)
-            StartPosition: Starting position for pagination (default: 1)
-
-        Returns:
-            List of vendors matching the search criteria
+            name: Search by name (partial match)
+            display_name: Search by display name
+            company: Search by company name
+            first_name: Search by first name
+            last_name: Search by last name
+            email: Search by email
+            phone: Search by phone
+            is_active: Filter by active status
+            is_1099_vendor: Filter by 1099 status
+            account_number: Search by account number
+            max_results/start_position: Pagination
         """
-        # Build WHERE clause conditions
         conditions = []
 
         # Name-based filters (partial match)
         name_filters = {
-            'Name': 'Name',
-            'DisplayName': 'DisplayName',
-            'CompanyName': 'CompanyName',
-            'GivenName': 'GivenName',
-            'FamilyName': 'FamilyName'
+            'name': 'Name',
+            'display_name': 'DisplayName',
+            'company': 'CompanyName',
+            'first_name': 'GivenName',
+            'last_name': 'FamilyName'
         }
 
-        for param, field in name_filters.items():
-            if kwargs.get(param):
-                value = kwargs[param].replace(
-                    "'", "''")  # Escape single quotes
-                conditions.append(f"{field} LIKE '%{value}%'")
+        for simple_name, qb_field in name_filters.items():
+            if kwargs.get(simple_name):
+                value = kwargs[simple_name].replace("'", "''")
+                conditions.append(f"{qb_field} LIKE '%{value}%'")
+
+        # Boolean filters
+        if kwargs.get('is_active') is not None:
+            conditions.append(f"Active = {str(kwargs['is_active']).lower()}")
+
+        if kwargs.get('is_1099_vendor') is not None:
+            conditions.append(f"Vendor1099 = {str(kwargs['is_1099_vendor']).lower()}")
 
         # Exact match filters
-        exact_filters = {
-            'Active': 'Active',
-            'Vendor1099': 'Vendor1099',
-            'GSTIN': 'GSTIN',
-            'BusinessNumber': 'BusinessNumber',
-            'AcctNum': 'AcctNum',
-            'GSTRegistrationType': 'GSTRegistrationType'
-        }
+        if kwargs.get('account_number'):
+            conditions.append(f"AcctNum = '{kwargs['account_number']}'")
 
-        for param, field in exact_filters.items():
-            if kwargs.get(param) is not None:
-                value = kwargs[param]
-                if isinstance(value, bool):
-                    conditions.append(f"{field} = {str(value).lower()}")
-                else:
-                    conditions.append(f"{field} = '{value}'")
-
-        # Contact info filters (partial match)
-        if kwargs.get('PrimaryEmailAddr'):
-            email = kwargs['PrimaryEmailAddr'].replace("'", "''")
+        # Contact filters (partial match)
+        if kwargs.get('email'):
+            email = kwargs['email'].replace("'", "''")
             conditions.append(f"PrimaryEmailAddr LIKE '%{email}%'")
 
-        if kwargs.get('PrimaryPhone'):
-            phone = kwargs['PrimaryPhone'].replace("'", "''")
+        if kwargs.get('phone'):
+            phone = kwargs['phone'].replace("'", "''")
             conditions.append(f"PrimaryPhone LIKE '%{phone}%'")
 
-        # Build the complete query
         base_query = "SELECT * FROM Vendor"
-
         if conditions:
-            where_clause = " WHERE " + " AND ".join(conditions)
-            base_query += where_clause
+            base_query += " WHERE " + " AND ".join(conditions)
 
-        # Add pagination
-        start_position = kwargs.get('StartPosition', 1)
-        max_results = kwargs.get('MaxResults', 100)
-
+        start_position = kwargs.get('start_position', 1)
+        max_results = kwargs.get('max_results', 100)
         query = f"{base_query} STARTPOSITION {start_position} MAXRESULTS {max_results}"
 
         response = await self.client._get('query', params={'query': query})
 
-        # Handle case when no vendors are returned
         if 'Vendor' not in response['QueryResponse']:
             return []
 
         vendors = response['QueryResponse']['Vendor']
-        results = [vendor_data_to_mcp_object(vendor) for vendor in vendors]
-
-        return results
+        return [vendor_data_to_mcp_object(vendor) for vendor in vendors]
 
     async def update_vendor(self, **kwargs) -> Dict[str, Any]:
-        """Update an existing vendor with comprehensive property support."""
-        Id = kwargs.get('Id')
-        if not Id:
-            raise ValueError("Id is required for updating a vendor")
+        """Update a vendor."""
+        vendor_id = kwargs.get('id')
+        if not vendor_id:
+            raise ValueError("id is required for updating a vendor")
 
-        # Auto-fetch current sync token
-        current_vendor_response = await self.client._get(f"vendor/{Id}")
-        sync_token = current_vendor_response.get(
-            'Vendor', {}).get('SyncToken', '0')
+        current_vendor_response = await self.client._get(f"vendor/{vendor_id}")
+        sync_token = current_vendor_response.get('Vendor', {}).get('SyncToken', '0')
 
         vendor_data = mcp_object_to_vendor_data(**kwargs)
         vendor_data.update({
-            "Id": Id,
+            "Id": vendor_id,
             "SyncToken": sync_token,
             "sparse": True,
         })
@@ -581,13 +521,13 @@ class VendorManager:
         response = await self.client._post('vendor', vendor_data)
         return vendor_data_to_mcp_object(response['Vendor'])
 
-    async def activate_vendor(self, Id: str) -> Dict[str, Any]:
-        """Activate a vendor (set Active to true)."""
-        return await self.update_vendor(Id=Id, Active=True)
+    async def activate_vendor(self, id: str) -> Dict[str, Any]:
+        """Activate a vendor."""
+        return await self.update_vendor(id=id, is_active=True)
 
-    async def deactivate_vendor(self, Id: str) -> Dict[str, Any]:
-        """Deactivate a vendor (set Active to false)."""
-        return await self.update_vendor(Id=Id, Active=False)
+    async def deactivate_vendor(self, id: str) -> Dict[str, Any]:
+        """Deactivate a vendor."""
+        return await self.update_vendor(id=id, is_active=False)
 
 
 # Export tools
