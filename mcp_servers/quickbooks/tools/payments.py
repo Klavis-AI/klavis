@@ -6,117 +6,54 @@ from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for payment creation (required by QuickBooks)
 payment_properties_minimal = {
-    "TotalAmt": {
+    "amount": {
         "type": "number",
-        "description": "Indicates the total amount of the transaction. This includes the total of all the charges, allowances, and taxes."
+        "description": "Total payment amount"
     },
-    "CustomerRefValue": {
+    "customer_id": {
         "type": "string",
         "description": "Customer ID for the payment"
-    },
-    "CustomerRefName": {
-        "type": "string",
-        "description": "Name of the customer associated with the payment"
     }
 }
 
-# Payment properties mapping (based on QuickBooks API documentation)
+# Payment properties mapping
 payment_properties_user_define = {
     **payment_properties_minimal,
-    "TransactionDate": {
+    "date": {
         "type": "string",
-        "description": "The date entered by the user when this transaction occurred. For posting transactions, this is the posting date that affects the financial statements. If the date is not supplied, the current date on the server is used. Format: yyyy/MM/dd"
+        "description": "Payment date (YYYY-MM-DD)"
     },
-    "PaymentRefNum": {
+    "reference_number": {
         "type": "string",
-        "description": "The reference number for the payment received. For example, Check # for a check, envelope # for a cash donation. Required for France locales."
+        "description": "Reference number (e.g., check number)"
     },
-    "PaymentMethodRefValue": {
+    "payment_method_id": {
         "type": "string",
-        "description": "Reference to a PaymentMethod associated with this transaction"
+        "description": "Payment method ID"
     },
-    "PaymentMethodRefName": {
+    "deposit_account_id": {
         "type": "string",
-        "description": "Name of the PaymentMethod associated with this transaction"
+        "description": "Account ID to deposit funds (defaults to Undeposited Funds)"
     },
-    "DepositToAccountRefValue": {
+    "currency": {
         "type": "string",
-        "description": "Account to which money is deposited. If you do not specify this account, payment is applied to the Undeposited Funds account."
+        "description": "Currency code (e.g., USD, EUR)"
     },
-    "DepositToAccountRefName": {
-        "type": "string",
-        "description": "Name of the account to which money is deposited"
-    },
-    "CurrencyRefValue": {
-        "type": "string",
-        "description": "A three letter string representing the ISO 4217 code for the currency. For example, USD, AUD, EUR, and so on."
-    },
-    "CurrencyRefName": {
-        "type": "string",
-        "description": "The full name of the currency"
-    },
-    "ExchangeRate": {
+    "exchange_rate": {
         "type": "number",
-        "description": "The number of home currency units it takes to equal one unit of currency specified by CurrencyRef. Applicable if multicurrency is enabled for the company"
+        "description": "Exchange rate for multicurrency"
     },
-    # Credit Card Payment fields - flattened structure with parent node keywords
-    # CreditChargeInfo fields
-    "CreditCardPaymentCcExpiryMonth": {
-        "type": "integer",
-        "description": "Expiration Month on card, expressed as a number: 1=January, 2=February, etc."
-    },
-    "CreditCardPaymentCcExpiryYear": {
-        "type": "integer",
-        "description": "Expiration Year on card, expressed as a 4 digit number 1999, 2003, etc."
-    },
-    "CreditCardPaymentProcessPayment": {
-        "type": "boolean",
-        "description": "false or no value-Store credit card information only. true-Store credit card payment transaction information in CreditChargeResponse"
-    },
-    "CreditCardPaymentPostalCode": {
+    "private_note": {
         "type": "string",
-        "description": "Credit card holder billing postal code. Five digits in the USA. Max 30 characters"
-    },
-    "CreditCardPaymentAmount": {
-        "type": "number",
-        "description": "The amount processed using the credit card"
-    },
-    "CreditCardPaymentNameOnAcct": {
-        "type": "string",
-        "description": "Account holder name, as printed on the card"
-    },
-    "CreditCardPaymentType": {
-        "type": "string",
-        "description": "Type of credit card. For example, MasterCard, Visa, Discover, American Express, and so on"
-    },
-    "CreditCardPaymentBillAddrStreet": {
-        "type": "string",
-        "description": "Credit card holder billing address of record: the street address to which credit card statements are sent. Max 255 characters"
-    },
-    # CreditChargeResponse fields
-    "CreditCardPaymentStatus": {
-        "type": "string",
-        "description": "Indicates the status of the payment transaction. Possible values include Completed, Unknown."
-    },
-    "CreditCardPaymentAuthCode": {
-        "type": "string",
-        "description": "Code returned from the credit card processor to indicate that the charge will be paid by the card issuer. Max 100 characters"
-    },
-    "CreditCardPaymentTransactionAuthorizationTime": {
-        "type": "string",
-        "description": "Timestamp indicating the time in which the card processor authorized the transaction. Format: YYYY-MM-DDTHH:MM:SS (Local time zone: YYYY-MM-DDTHH:MM:SS UTC: YYYY-MM-DDT HH:MM:SSZ Specific time zone: YYYY-MM-DDT HH:MM:SS +/- HH:MM)"
-    },
-    "CreditCardPaymentCCTransId": {
-        "type": "string",
-        "description": "Unique identifier of the payment transaction. It can be used to track the status of transactions, or to search transactions. Max 100 characters"
+        "description": "Private note for internal use"
     }
 }
 
 payment_properties = {
     **payment_properties_user_define,
-    "Id": {
+    "id": {
         "type": "string",
-        "description": "The unique QuickBooks payment ID"
+        "description": "Payment ID"
     }
 }
 
@@ -124,11 +61,11 @@ payment_properties = {
 create_payment_tool = Tool(
     name="quickbooks_create_payment",
     title="Create Payment",
-    description="Create New Payment - Create a new payment in QuickBooks. Requires TotalAmt and CustomerRef. Can be applied to specific invoices/credit memos or created as unapplied credit.",
+    description="Create a new payment in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": payment_properties_minimal,
-        "required": ["TotalAmt", "CustomerRefValue"]
+        "required": ["amount", "customer_id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
@@ -136,13 +73,13 @@ create_payment_tool = Tool(
 get_payment_tool = Tool(
     name="quickbooks_get_payment",
     title="Get Payment",
-    description="Get Single Payment - Retrieve a specific payment by ID from QuickBooks with all its details including line items, amounts, and linked transactions",
+    description="Get a payment by ID",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks payment ID"}
+            "id": {"type": "string", "description": "Payment ID"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
@@ -150,14 +87,14 @@ get_payment_tool = Tool(
 list_payments_tool = Tool(
     name="quickbooks_list_payments",
     title="List Payments",
-    description="List All Payments - Retrieve all payments from QuickBooks with pagination support. Use for browsing or getting overview of payments",
+    description="List all payments with pagination",
     inputSchema={
         "type": "object",
         "properties": {
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
+            "max_results": {"type": "integer", "description": "Maximum results (default: 100)"},
+            "start_position": {"type": "integer", "description": "Starting position (default: 1)"}
         },
-        "required": [],
+        "required": []
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
@@ -165,33 +102,25 @@ list_payments_tool = Tool(
 search_payments_tool = Tool(
     name="quickbooks_search_payments",
     title="Search Payments",
-    description="Advanced Payment Search - Search payments with powerful filters including dates, amounts, customer info, and status. Perfect for finding specific payments based on criteria",
+    description="Search payments with filters",
     inputSchema={
         "type": "object",
         "properties": {
-            "CustomerRefValue": {"type": "string", "description": "Search by customer ID"},
-            "CustomerName": {"type": "string", "description": "Search by customer name (partial match)"},
-            "PaymentRefNum": {"type": "string", "description": "Search by payment reference number"},
-
-            # Date filters
-            "TransactionDateFrom": {"type": "string", "description": "Search payments from this transaction date (YYYY-MM-DD format)"},
-            "TransactionDateTo": {"type": "string", "description": "Search payments to this transaction date (YYYY-MM-DD format)"},
-
-            # Amount filters
-            "MinAmount": {"type": "number", "description": "Minimum total amount"},
-            "MaxAmount": {"type": "number", "description": "Maximum total amount"},
-            "MinUnappliedAmt": {"type": "number", "description": "Minimum unapplied amount"},
-            "MaxUnappliedAmt": {"type": "number", "description": "Maximum unapplied amount"},
-
-            # Reference filters
-            "PaymentMethodRefValue": {"type": "string", "description": "Search by payment method ID"},
-            "DepositToAccountRefValue": {"type": "string", "description": "Search by deposit account ID"},
-
-            # Pagination
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
+            "customer_id": {"type": "string", "description": "Filter by customer ID"},
+            "customer_name": {"type": "string", "description": "Filter by customer name (partial match)"},
+            "reference_number": {"type": "string", "description": "Filter by reference number"},
+            "date_from": {"type": "string", "description": "From date (YYYY-MM-DD)"},
+            "date_to": {"type": "string", "description": "To date (YYYY-MM-DD)"},
+            "min_amount": {"type": "number", "description": "Minimum amount"},
+            "max_amount": {"type": "number", "description": "Maximum amount"},
+            "min_unapplied": {"type": "number", "description": "Minimum unapplied amount"},
+            "max_unapplied": {"type": "number", "description": "Maximum unapplied amount"},
+            "payment_method_id": {"type": "string", "description": "Filter by payment method ID"},
+            "deposit_account_id": {"type": "string", "description": "Filter by deposit account ID"},
+            "max_results": {"type": "integer", "description": "Maximum results (default: 100)"},
+            "start_position": {"type": "integer", "description": "Starting position (default: 1)"}
         },
-        "required": [],
+        "required": []
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT", "readOnlyHint": True})
 )
@@ -199,11 +128,11 @@ search_payments_tool = Tool(
 update_payment_tool = Tool(
     name="quickbooks_update_payment",
     title="Update Payment",
-    description="Update Existing Payment - Modify an existing payment in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
+    description="Update an existing payment",
     inputSchema={
         "type": "object",
         "properties": payment_properties,
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
@@ -211,13 +140,13 @@ update_payment_tool = Tool(
 delete_payment_tool = Tool(
     name="quickbooks_delete_payment",
     title="Delete Payment",
-    description="️Delete Payment - Permanently delete a payment from QuickBooks. Use with caution as this action cannot be undone",
+    description="Delete a payment",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks payment ID to delete"}
+            "id": {"type": "string", "description": "Payment ID to delete"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
@@ -225,20 +154,14 @@ delete_payment_tool = Tool(
 send_payment_tool = Tool(
     name="quickbooks_send_payment",
     title="Send Payment",
-    description="Send Payment via Email - Send a payment receipt to customer via email",
+    description="Send payment receipt via email",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {
-                "type": "string",
-                "description": "The QuickBooks payment ID to send"
-            },
-            "SendTo": {
-                "type": "string",
-                "description": "Email address to send the payment receipt to",
-            }
+            "id": {"type": "string", "description": "Payment ID to send"},
+            "send_to": {"type": "string", "description": "Email address to send receipt to"}
         },
-        "required": ["Id", "SendTo"]
+        "required": ["id", "send_to"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
@@ -246,16 +169,13 @@ send_payment_tool = Tool(
 void_payment_tool = Tool(
     name="quickbooks_void_payment",
     title="Void Payment",
-    description="Void Payment - Void an existing payment in QuickBooks. Sets all amounts to zero and marks as 'Voided' while keeping the record for audit trail. If funds have been deposited, you must delete the associated deposit object before voiding the payment.",
+    description="Void a payment (zeroes amounts, keeps record for audit)",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {
-                "type": "string",
-                "description": "The QuickBooks payment ID to void"
-            }
+            "id": {"type": "string", "description": "Payment ID to void"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_PAYMENT"})
 )
@@ -263,208 +183,134 @@ void_payment_tool = Tool(
 
 def mcp_object_to_payment_data(**kwargs) -> Dict[str, Any]:
     """
-    Convert MCP object format to QuickBooks payment data format.
-    This function transforms the flat MCP structure to the nested format expected by QuickBooks API.
+    Convert simplified MCP input format to QuickBooks payment data format.
     """
     payment_data = {}
 
-    # Basic payment information - direct copy
-    for field in ['TotalAmt', 'PaymentRefNum', 'ExchangeRate']:
-        if field in kwargs:
-            payment_data[field] = kwargs[field]
-
-    # Handle renamed field: TransactionDate -> TxnDate
-    if 'TransactionDate' in kwargs:
-        payment_data['TxnDate'] = kwargs['TransactionDate']
-
-    # Reference objects - convert separate value/name fields to structured objects
-    ref_mappings = [
-        ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('PaymentMethodRef', 'PaymentMethodRefValue', 'PaymentMethodRefName'),
-        ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName'),
-    ]
-
-    for ref_name, value_field, name_field in ref_mappings:
-        if value_field in kwargs:
-            ref_obj = {'value': kwargs[value_field]}
-            if name_field in kwargs:
-                ref_obj['name'] = kwargs[name_field]
-            payment_data[ref_name] = ref_obj
-
-    # Credit Card Payment information - reconstruct nested structure from flattened fields
-    credit_card_fields = {
-        'CreditCardPaymentCcExpiryMonth': 'CcExpiryMonth',
-        'CreditCardPaymentCcExpiryYear': 'CcExpiryYear',
-        'CreditCardPaymentProcessPayment': 'ProcessPayment',
-        'CreditCardPaymentPostalCode': 'PostalCode',
-        'CreditCardPaymentAmount': 'Amount',
-        'CreditCardPaymentNameOnAcct': 'NameOnAcct',
-        'CreditCardPaymentType': 'Type',
-        'CreditCardPaymentBillAddrStreet': 'BillAddrStreet'
+    # Field mappings: simplified name -> QB field name
+    direct_mappings = {
+        'amount': 'TotalAmt',
+        'reference_number': 'PaymentRefNum',
+        'exchange_rate': 'ExchangeRate',
+        'date': 'TxnDate',
+        'private_note': 'PrivateNote',
     }
 
-    credit_charge_response_fields = {
-        'CreditCardPaymentStatus': 'Status',
-        'CreditCardPaymentAuthCode': 'AuthCode',
-        'CreditCardPaymentTransactionAuthorizationTime': ('TxnAuthorizationTime', 'dateTime'),
-        'CreditCardPaymentCCTransId': 'CCTransId'
-    }
+    for simple_name, qb_name in direct_mappings.items():
+        if simple_name in kwargs and kwargs[simple_name] is not None:
+            payment_data[qb_name] = kwargs[simple_name]
 
-    # Build CreditChargeInfo if any credit card fields are present
-    credit_charge_info = {}
-    for mcp_field, qb_field in credit_card_fields.items():
-        if mcp_field in kwargs:
-            credit_charge_info[qb_field] = kwargs[mcp_field]
+    # Reference fields: simplified -> QB ref object
+    if kwargs.get('customer_id'):
+        payment_data['CustomerRef'] = {'value': kwargs['customer_id']}
 
-    # Build CreditChargeResponse if any response fields are present
-    credit_charge_response = {}
-    for mcp_field, qb_field in credit_charge_response_fields.items():
-        if mcp_field in kwargs:
-            if isinstance(qb_field, tuple):
-                # Handle nested fields like TxnAuthorizationTime.dateTime
-                parent_field, child_field = qb_field
-                if parent_field not in credit_charge_response:
-                    credit_charge_response[parent_field] = {}
-                credit_charge_response[parent_field][child_field] = kwargs[mcp_field]
-            else:
-                credit_charge_response[qb_field] = kwargs[mcp_field]
+    if kwargs.get('payment_method_id'):
+        payment_data['PaymentMethodRef'] = {'value': kwargs['payment_method_id']}
 
-    # Construct CreditCardPayment object if we have any credit card data
-    if credit_charge_info or credit_charge_response:
-        cc_payment = {}
-        if credit_charge_info:
-            cc_payment['CreditChargeInfo'] = credit_charge_info
-        if credit_charge_response:
-            cc_payment['CreditChargeResponse'] = credit_charge_response
-        payment_data['CreditCardPayment'] = cc_payment
+    if kwargs.get('deposit_account_id'):
+        payment_data['DepositToAccountRef'] = {'value': kwargs['deposit_account_id']}
+
+    if kwargs.get('currency'):
+        payment_data['CurrencyRef'] = {'value': kwargs['currency']}
 
     return payment_data
 
 
 def payment_data_to_mcp_object(payment_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convert QuickBooks payment data format to MCP object format.
-    This function flattens the nested QuickBooks structure to the flat format expected by MCP tools.
+    Convert QuickBooks payment data format to simplified MCP object format.
+    Uses cleaner, more intuitive field names for better usability.
     """
-    mcp_object = {}
+    result = {}
 
-    # Copy basic fields if present
-    for field in [
-        'Id', 'TotalAmt', 'PaymentRefNum',
-        'ExchangeRate', 'UnappliedAmt'
-    ]:
-        if field in payment_data:
-            mcp_object[field] = payment_data[field]
+    # Core identification
+    if 'Id' in payment_data:
+        result['id'] = payment_data['Id']
+    if 'PaymentRefNum' in payment_data:
+        result['reference_number'] = payment_data['PaymentRefNum']
 
-    # Handle fields that are output-only (not in input schema but preserved in output)
-    for field in ['PrivateNote', 'TransactionLocationType']:
-        if field in payment_data:
-            mcp_object[field] = payment_data[field]
+    # Customer info
+    if 'CustomerRef' in payment_data and isinstance(payment_data['CustomerRef'], dict):
+        result['customer_id'] = payment_data['CustomerRef'].get('value')
+        result['customer_name'] = payment_data['CustomerRef'].get('name')
 
-    # Handle renamed field: TxnDate -> TransactionDate
+    # Date
     if 'TxnDate' in payment_data:
-        mcp_object['TransactionDate'] = payment_data['TxnDate']
+        result['date'] = payment_data['TxnDate']
 
-    # Reference objects - flatten to separate value and name fields
-    ref_mappings = [
-        ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('PaymentMethodRef', 'PaymentMethodRefValue', 'PaymentMethodRefName'),
-        ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName'),
-        ('ProjectRef', 'ProjectRefValue', 'ProjectRefName'),
-        ('TaxExemptionRef', 'TaxExemptionRefValue', 'TaxExemptionRefName'),
-        ('SyncToken', 'SyncToken', None)
-    ]
+    # Amounts
+    if 'TotalAmt' in payment_data:
+        result['amount'] = payment_data['TotalAmt']
+    if 'UnappliedAmt' in payment_data:
+        result['unapplied_amount'] = payment_data['UnappliedAmt']
 
-    for ref_name, value_field, name_field in ref_mappings:
-        if ref_name in payment_data:
-            ref = payment_data[ref_name]
-            if isinstance(ref, dict):
-                if 'value' in ref:
-                    mcp_object[value_field] = ref['value']
-                if name_field and 'name' in ref:
-                    mcp_object[name_field] = ref['name']
-            else:
-                # Handle cases where SyncToken might be directly in payment_data
-                mcp_object[value_field] = ref
+    # Payment method
+    if 'PaymentMethodRef' in payment_data and isinstance(payment_data['PaymentMethodRef'], dict):
+        result['payment_method'] = payment_data['PaymentMethodRef'].get('name') or payment_data['PaymentMethodRef'].get('value')
 
-    # Line items - flatten to Line array
+    # Deposit account
+    if 'DepositToAccountRef' in payment_data and isinstance(payment_data['DepositToAccountRef'], dict):
+        result['deposit_account'] = payment_data['DepositToAccountRef'].get('name') or payment_data['DepositToAccountRef'].get('value')
+
+    # Currency
+    if 'CurrencyRef' in payment_data and isinstance(payment_data['CurrencyRef'], dict):
+        result['currency'] = payment_data['CurrencyRef'].get('value')
+    if 'ExchangeRate' in payment_data:
+        result['exchange_rate'] = payment_data['ExchangeRate']
+
+    # Notes
+    if 'PrivateNote' in payment_data:
+        result['private_note'] = payment_data['PrivateNote']
+
+    # Linked transactions (invoices/credit memos this payment applies to)
     if 'Line' in payment_data and isinstance(payment_data['Line'], list):
-        lines = []
+        applied_to = []
         for line in payment_data['Line']:
-            if isinstance(line, dict):
-                line_item = {}
-                if 'Amount' in line:
-                    line_item['Amount'] = line['Amount']
+            if isinstance(line, dict) and 'LinkedTxn' in line:
+                for linked in line.get('LinkedTxn', []):
+                    if isinstance(linked, dict):
+                        txn = {
+                            'amount': line.get('Amount'),
+                            'transaction_id': linked.get('TxnId'),
+                            'transaction_type': linked.get('TxnType')
+                        }
+                        applied_to.append(txn)
+        if applied_to:
+            result['applied_to'] = applied_to
 
-                if 'LinkedTxn' in line and isinstance(line['LinkedTxn'], list):
-                    linked_txns = []
-                    for linked_txn in line['LinkedTxn']:
-                        if isinstance(linked_txn, dict):
-                            txn = {}
-                            if 'TxnId' in linked_txn:
-                                txn['TxnId'] = linked_txn['TxnId']
-                            if 'TxnType' in linked_txn:
-                                txn['TxnType'] = linked_txn['TxnType']
-                            if 'TxnLineId' in linked_txn:
-                                txn['TxnLineId'] = linked_txn['TxnLineId']
-                            linked_txns.append(txn)
-                    line_item['LinkedTxn'] = linked_txns
-
-                lines.append(line_item)
-        mcp_object['Line'] = lines
-
-    # Credit Card Payment information - flatten nested structure
-    if 'CreditCardPayment' in payment_data:
+    # Credit card info (simplified - only include essential fields)
+    if 'CreditCardPayment' in payment_data and isinstance(payment_data['CreditCardPayment'], dict):
         cc_payment = payment_data['CreditCardPayment']
-        if isinstance(cc_payment, dict):
-            # Flatten CreditChargeInfo fields
-            if 'CreditChargeInfo' in cc_payment:
-                charge_info = cc_payment['CreditChargeInfo']
-                if isinstance(charge_info, dict):
-                    charge_info_mapping = {
-                        'CcExpiryMonth': 'CreditCardPaymentCcExpiryMonth',
-                        'CcExpiryYear': 'CreditCardPaymentCcExpiryYear',
-                        'ProcessPayment': 'CreditCardPaymentProcessPayment',
-                        'PostalCode': 'CreditCardPaymentPostalCode',
-                        'Amount': 'CreditCardPaymentAmount',
-                        'NameOnAcct': 'CreditCardPaymentNameOnAcct',
-                        'Type': 'CreditCardPaymentType',
-                        'BillAddrStreet': 'CreditCardPaymentBillAddrStreet'
-                    }
-                    for qb_field, mcp_field in charge_info_mapping.items():
-                        if qb_field in charge_info:
-                            mcp_object[mcp_field] = charge_info[qb_field]
+        cc_info = {}
+        
+        if 'CreditChargeInfo' in cc_payment and isinstance(cc_payment['CreditChargeInfo'], dict):
+            info = cc_payment['CreditChargeInfo']
+            if 'Type' in info:
+                cc_info['card_type'] = info['Type']
+            if 'NameOnAcct' in info:
+                cc_info['cardholder_name'] = info['NameOnAcct']
+        
+        if 'CreditChargeResponse' in cc_payment and isinstance(cc_payment['CreditChargeResponse'], dict):
+            response = cc_payment['CreditChargeResponse']
+            if 'Status' in response:
+                cc_info['status'] = response['Status']
+            if 'AuthCode' in response:
+                cc_info['auth_code'] = response['AuthCode']
+            if 'CCTransId' in response:
+                cc_info['transaction_id'] = response['CCTransId']
+        
+        if cc_info:
+            result['credit_card'] = cc_info
 
-            # Flatten CreditChargeResponse fields
-            if 'CreditChargeResponse' in cc_payment:
-                charge_response = cc_payment['CreditChargeResponse']
-                if isinstance(charge_response, dict):
-                    response_mapping = {
-                        'Status': 'CreditCardPaymentStatus',
-                        'AuthCode': 'CreditCardPaymentAuthCode',
-                        'CCTransId': 'CreditCardPaymentCCTransId'
-                    }
-                    for qb_field, mcp_field in response_mapping.items():
-                        if qb_field in charge_response:
-                            mcp_object[mcp_field] = charge_response[qb_field]
-
-                    # Handle nested TxnAuthorizationTime.dateTime
-                    if 'TxnAuthorizationTime' in charge_response:
-                        txn_auth_time = charge_response['TxnAuthorizationTime']
-                        if isinstance(txn_auth_time, dict) and 'dateTime' in txn_auth_time:
-                            mcp_object['CreditCardPaymentTransactionAuthorizationTime'] = txn_auth_time['dateTime']
-
-    # MetaData fields
+    # Timestamps
     if 'MetaData' in payment_data and isinstance(payment_data['MetaData'], dict):
         metadata = payment_data['MetaData']
         if 'CreateTime' in metadata:
-            mcp_object['MetaDataCreateTime'] = metadata['CreateTime']
+            result['created_at'] = metadata['CreateTime']
         if 'LastUpdatedTime' in metadata:
-            mcp_object['MetaDataLastUpdatedTime'] = metadata['LastUpdatedTime']
+            result['updated_at'] = metadata['LastUpdatedTime']
 
-    return mcp_object
+    return result
 
 
 class PaymentManager:
@@ -472,29 +318,21 @@ class PaymentManager:
         self.client = client
 
     async def create_payment(self, **kwargs) -> Dict[str, Any]:
-        """Create a new payment with comprehensive property support."""
+        """Create a new payment."""
         payment_data = mcp_object_to_payment_data(**kwargs)
-
-        # Ensure CustomerRef is included
-        if 'CustomerRef' not in payment_data and 'CustomerRefValue' in kwargs:
-            payment_data['CustomerRef'] = {'value': kwargs['CustomerRefValue']}
-            if 'CustomerRefName' in kwargs:
-                payment_data['CustomerRef']['name'] = kwargs['CustomerRefName']
-
         response = await self.client._post('payment', payment_data)
         return payment_data_to_mcp_object(response['Payment'])
 
-    async def get_payment(self, Id: str) -> Dict[str, Any]:
-        """Get a specific payment by ID."""
-        response = await self.client._get(f"payment/{Id}")
+    async def get_payment(self, id: str) -> Dict[str, Any]:
+        """Get a payment by ID."""
+        response = await self.client._get(f"payment/{id}")
         return payment_data_to_mcp_object(response['Payment'])
 
-    async def list_payments(self, MaxResults: int = 100, StartPosition: int = 1) -> List[Dict[str, Any]]:
-        """List all payments with comprehensive properties and pagination support."""
-        query = f"select * from Payment STARTPOSITION {StartPosition} MAXRESULTS {MaxResults}"
+    async def list_payments(self, max_results: int = 100, start_position: int = 1) -> List[Dict[str, Any]]:
+        """List all payments with pagination."""
+        query = f"select * from Payment STARTPOSITION {start_position} MAXRESULTS {max_results}"
         response = await self.client._get('query', params={'query': query})
 
-        # Handle case when no payments are returned
         if 'Payment' not in response['QueryResponse']:
             return []
 
@@ -503,110 +341,80 @@ class PaymentManager:
 
     async def search_payments(self, **kwargs) -> List[Dict[str, Any]]:
         """
-        Search payments with various filters and pagination support.
+        Search payments with filters.
 
         Args:
-            CustomerRefValue: Search by customer ID
-            CustomerName: Search by customer name (partial match)
-            PaymentRefNum: Search by payment reference number
-
-            # Date filters
-            TransactionDateFrom/TransactionDateTo: Search by transaction date range
-
-            # Amount filters
-            MinAmount/MaxAmount: Search by total amount range
-            MinUnappliedAmt/MaxUnappliedAmt: Search by unapplied amount range
-
-            # Reference filters
-            PaymentMethodRefValue: Search by payment method ID
-            DepositToAccountRefValue: Search by deposit account ID
-
-            MaxResults: Maximum number of results to return (default: 100)
-            StartPosition: Starting position for pagination (default: 1)
-
-        Returns:
-            List of payments matching the search criteria
+            customer_id: Filter by customer ID
+            customer_name: Filter by customer name (partial match)
+            reference_number: Filter by reference number
+            date_from/date_to: Date range filter
+            min_amount/max_amount: Amount range filter
+            min_unapplied/max_unapplied: Unapplied amount range
+            payment_method_id: Filter by payment method
+            deposit_account_id: Filter by deposit account
+            max_results/start_position: Pagination
         """
-        # Build WHERE clause conditions
         conditions = []
 
-        # Basic filters
-        if kwargs.get('CustomerRefValue'):
-            conditions.append(f"CustomerRef = '{kwargs['CustomerRefValue']}'")
+        if kwargs.get('customer_id'):
+            conditions.append(f"CustomerRef = '{kwargs['customer_id']}'")
 
-        if kwargs.get('PaymentRefNum'):
-            conditions.append(f"PaymentRefNum = '{kwargs['PaymentRefNum']}'")
+        if kwargs.get('reference_number'):
+            conditions.append(f"PaymentRefNum = '{kwargs['reference_number']}'")
 
-        if kwargs.get('CustomerName'):
-            # For customer name search, we need to use a subquery
-            customer_name = kwargs['CustomerName'].replace(
-                "'", "''")  # Escape single quotes
+        if kwargs.get('customer_name'):
+            customer_name = kwargs['customer_name'].replace("'", "''")
             conditions.append(
                 f"CustomerRef IN (SELECT Id FROM Customer WHERE Name LIKE '%{customer_name}%')")
 
-        # Date range filters
-        if kwargs.get('TransactionDateFrom'):
-            conditions.append(f"TxnDate >= '{kwargs['TransactionDateFrom']}'")
-        if kwargs.get('TransactionDateTo'):
-            conditions.append(f"TxnDate <= '{kwargs['TransactionDateTo']}'")
+        if kwargs.get('date_from'):
+            conditions.append(f"TxnDate >= '{kwargs['date_from']}'")
+        if kwargs.get('date_to'):
+            conditions.append(f"TxnDate <= '{kwargs['date_to']}'")
 
-        # Amount range filters
-        if kwargs.get('MinAmount'):
-            conditions.append(f"TotalAmt >= {kwargs['MinAmount']}")
-        if kwargs.get('MaxAmount'):
-            conditions.append(f"TotalAmt <= {kwargs['MaxAmount']}")
+        if kwargs.get('min_amount') is not None:
+            conditions.append(f"TotalAmt >= {kwargs['min_amount']}")
+        if kwargs.get('max_amount') is not None:
+            conditions.append(f"TotalAmt <= {kwargs['max_amount']}")
 
-        if kwargs.get('MinUnappliedAmt'):
-            conditions.append(f"UnappliedAmt >= {kwargs['MinUnappliedAmt']}")
-        if kwargs.get('MaxUnappliedAmt'):
-            conditions.append(f"UnappliedAmt <= {kwargs['MaxUnappliedAmt']}")
+        if kwargs.get('min_unapplied') is not None:
+            conditions.append(f"UnappliedAmt >= {kwargs['min_unapplied']}")
+        if kwargs.get('max_unapplied') is not None:
+            conditions.append(f"UnappliedAmt <= {kwargs['max_unapplied']}")
 
-        # Reference filters
-        if kwargs.get('PaymentMethodRefValue'):
-            conditions.append(
-                f"PaymentMethodRef = '{kwargs['PaymentMethodRefValue']}'")
-        if kwargs.get('DepositToAccountRefValue'):
-            conditions.append(
-                f"DepositToAccountRef = '{kwargs['DepositToAccountRefValue']}'")
+        if kwargs.get('payment_method_id'):
+            conditions.append(f"PaymentMethodRef = '{kwargs['payment_method_id']}'")
+        if kwargs.get('deposit_account_id'):
+            conditions.append(f"DepositToAccountRef = '{kwargs['deposit_account_id']}'")
 
-        # Build the complete query
         base_query = "SELECT * FROM Payment"
-
         if conditions:
-            where_clause = " WHERE " + " AND ".join(conditions)
-            base_query += where_clause
+            base_query += " WHERE " + " AND ".join(conditions)
 
-        # Add pagination
-        start_position = kwargs.get('StartPosition', 1)
-        max_results = kwargs.get('MaxResults', 100)
-
+        start_position = kwargs.get('start_position', 1)
+        max_results = kwargs.get('max_results', 100)
         query = f"{base_query} STARTPOSITION {start_position} MAXRESULTS {max_results}"
 
         response = await self.client._get('query', params={'query': query})
 
-        # Handle case when no payments are returned
         if 'Payment' not in response['QueryResponse']:
             return []
 
         payments = response['QueryResponse']['Payment']
-        results = [payment_data_to_mcp_object(payment) for payment in payments]
-
-        return results
+        return [payment_data_to_mcp_object(payment) for payment in payments]
 
     async def update_payment(self, **kwargs) -> Dict[str, Any]:
-        """Update an existing payment with comprehensive property support."""
-        Id = kwargs.get('Id')
-        if not Id:
-            raise ValueError("Id is required for updating a payment")
+        """Update an existing payment."""
+        payment_id = kwargs.get('id')
+        if not payment_id:
+            raise ValueError("id is required for updating a payment")
 
-        # Auto-fetch current sync token
-        current_payment_response = await self.client._get(f"payment/{Id}")
-        sync_token = current_payment_response.get(
-            'Payment', {}).get('SyncToken', '0')
+        current_payment_response = await self.client._get(f"payment/{payment_id}")
+        sync_token = current_payment_response.get('Payment', {}).get('SyncToken', '0')
 
         payment_data = mcp_object_to_payment_data(**kwargs)
         payment_data.update({
-            "Id": Id,
+            "Id": payment_id,
             "SyncToken": sync_token,
             "sparse": True,
         })
@@ -614,87 +422,50 @@ class PaymentManager:
         response = await self.client._post('payment', payment_data)
         return payment_data_to_mcp_object(response['Payment'])
 
-    async def delete_payment(self, Id: str) -> Dict[str, Any]:
+    async def delete_payment(self, id: str) -> Dict[str, Any]:
         """Delete a payment."""
-        # Auto-fetch current sync token
-        current_payment_response = await self.client._get(f"payment/{Id}")
+        current_payment_response = await self.client._get(f"payment/{id}")
         current_payment = current_payment_response.get('Payment', {})
 
         if not current_payment:
-            raise ValueError(f"Payment with ID {Id} not found")
+            raise ValueError(f"Payment with ID {id} not found")
 
         sync_token = current_payment.get('SyncToken', '0')
-
-        # For delete operation, wrap in Payment object
         delete_data = {
-            "Id": Id,
+            "Id": id,
             "SyncToken": sync_token,
         }
         return await self.client._post("payment", delete_data, params={'operation': 'delete'})
 
-    async def send_payment(self, Id: str, SendTo: str) -> Dict[str, Any]:
-        """
-        Send a payment receipt via email.
-
-        Args:
-            Id: The QuickBooks payment ID to send
-            SendTo: Email address to send the payment receipt to
-
-        Returns:
-            The payment response body.
-        """
-        # Construct the endpoint URL
-        endpoint = f"payment/{Id}/send"
-
-        # Build query parameters
-        params = {'sendTo': SendTo}
-
-        # Send request with POST method (empty body as per API spec)
+    async def send_payment(self, id: str, send_to: str) -> Dict[str, Any]:
+        """Send a payment receipt via email."""
+        endpoint = f"payment/{id}/send"
+        params = {'sendTo': send_to}
         response = await self.client._make_request('POST', endpoint, params=params)
 
-        # The response should contain the updated payment data
         if 'Payment' in response:
             return payment_data_to_mcp_object(response['Payment'])
-
         return response
 
-    async def void_payment(self, Id: str) -> Dict[str, Any]:
-        """
-        Void an existing payment in QuickBooks.
-
-        The transaction remains active but all amounts and quantities are zeroed 
-        and the string "Voided" is injected into Payment.PrivateNote, prepended 
-        to existing text if present. If funds for the payment have been deposited, 
-        you must delete the associated deposit object before voiding the payment object.
-
-        Args:
-            Id: The QuickBooks payment ID to void
-
-        Returns:
-            The payment response body with voided status.
-        """
-        # Auto-fetch current sync token
-        current_payment_response = await self.client._get(f"payment/{Id}")
+    async def void_payment(self, id: str) -> Dict[str, Any]:
+        """Void a payment (zeroes amounts, keeps record for audit)."""
+        current_payment_response = await self.client._get(f"payment/{id}")
         current_payment = current_payment_response.get('Payment', {})
 
         if not current_payment:
-            raise ValueError(f"Payment with ID {Id} not found")
+            raise ValueError(f"Payment with ID {id} not found")
 
         sync_token = current_payment.get('SyncToken', '0')
-
-        # For void operation, wrap in Payment object
         void_data = {
-            "Id": Id,
+            "Id": id,
             "SyncToken": sync_token,
             "sparse": True,
         }
 
         response = await self.client._post("payment", void_data, params={'operation': 'void'})
 
-        # The response should contain the voided payment data
         if 'Payment' in response:
             return payment_data_to_mcp_object(response['Payment'])
-
         return response
 
 
