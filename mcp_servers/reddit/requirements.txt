@@ -1,0 +1,6 @@
+mcp>=1.12.0
+click
+python-dotenv
+requests
+starlette
+uvicorn[standard]
