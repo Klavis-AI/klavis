@@ -8863,14 +8863,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/initialize": {
+    "/sandbox/cal.com/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize Cal.com sandbox with data",
-        "description": "Initialize the sandbox with Cal.com-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_Cal_com__sandbox_id__initialize_post",
+        "summary": "Initialize cal.com sandbox with data",
+        "description": "Initialize the sandbox with cal.com-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_cal_com__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -8923,14 +8923,14 @@
         }
       }
     },
-    "/sandbox/Cal.com/{sandbox_id}/dump": {
+    "/sandbox/cal.com/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export Cal.com sandbox data",
+        "summary": "Export cal.com sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_Cal_com__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_cal_com__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -21702,6 +21702,110 @@
         "title": "Override",
         "description": "Represents a date-specific override to the regular schedule.\n\nAttributes:\n    date: Date in YYYY-MM-DD format\n    startTime: Start time in HH:MM format (24-hour)\n    endTime: End time in HH:MM format (24-hour)"
       },
+      "Post": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "publish",
+              "private",
+              "pending",
+              "trash"
+            ],
+            "title": "Status",
+            "default": "draft"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories",
+            "default": []
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image"
+          },
+          "publish_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Date"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "aside",
+                  "gallery",
+                  "link",
+                  "image",
+                  "quote",
+                  "status",
+                  "video",
+                  "audio",
+                  "chat"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "title": "Post",
+        "description": "WordPress post data"
+      },
       "QuickBooksData": {
         "properties": {
           "accounts": {
@@ -22589,7 +22693,7 @@
           "onedrive",
           "microsoft_teams",
           "outlook_mail",
-          "Cal.com",
+          "cal.com",
           "quickbooks",
           "moneybird",
           "dropbox",
@@ -22695,9 +22799,22 @@
         ],
         "title": "SetUserAuthRequest"
       },
-      "ShopifyAddress": {
+      "ShopifyCustomer": {
         "properties": {
-          "address1": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Customer email address"
+          },
+          "name": {
             "anyOf": [
               {
                 "type": "string"
@@ -22706,8 +22823,20 @@
                 "type": "null"
               }
             ],
-            "title": "Address1",
-            "description": "Street address line 1"
+            "title": "Name",
+            "description": "Customer full name"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address",
+            "description": "Street address"
           },
           "city": {
             "anyOf": [
@@ -22721,7 +22850,7 @@
             "title": "City",
             "description": "City name"
           },
-          "province": {
+          "state": {
             "anyOf": [
               {
                 "type": "string"
@@ -22730,7 +22859,7 @@
                 "type": "null"
               }
             ],
-            "title": "Province",
+            "title": "State",
             "description": "State/province code"
           },
           "zip": {
@@ -22755,71 +22884,13 @@
               }
             ],
             "title": "Country",
-            "description": "Country code (e.g., 'US')"
-          }
-        },
-        "type": "object",
-        "title": "ShopifyAddress",
-        "description": "Customer address information\n\nAttributes:\n    address1: Street address line 1 (optional - may not be present in API response)\n    city: City name (optional - may not be present in API response)\n    province: State/province code (optional - may not be present in API response)\n    zip: Postal/ZIP code (optional - may not be present in API response)\n    country: Country code (e.g., 'US') (optional - may not be present in API response)"
-      },
-      "ShopifyCustomer": {
-        "properties": {
-          "email": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email",
-            "description": "Customer email address"
-          },
-          "first_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "First Name",
-            "description": "Customer first name"
-          },
-          "last_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Name",
-            "description": "Customer last name"
-          },
-          "addresses": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ShopifyAddress"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Addresses",
-            "description": "List of customer addresses"
+            "description": "Country code (e.g., 'US')",
+            "default": "US"
           }
         },
         "type": "object",
         "title": "ShopifyCustomer",
-        "description": "Shopify customer data\n\nAttributes:\n    email: Customer email address (optional - may not be present in API response)\n    first_name: Customer first name (optional - may not be present in API response)\n    last_name: Customer last name (optional - may not be present in API response)\n    addresses: List of customer addresses"
+        "description": "Simplified Shopify customer data with flattened address.\n\nAttributes:\n    email: Customer email address\n    name: Customer full name (will be split into first/last for API)\n    address: Street address\n    city: City name\n    state: State/province code\n    zip: Postal/ZIP code\n    country: Country code (e.g., 'US')"
       },
       "ShopifyData-Input": {
         "properties": {
@@ -22852,11 +22923,26 @@
             ],
             "title": "Customers",
             "description": "List of customers to create"
+          },
+          "orders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyOrder"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders",
+            "description": "List of orders to create"
           }
         },
         "type": "object",
         "title": "ShopifyData",
-        "description": "Complete Shopify sandbox data structure\n\nNote: Orders are created automatically by the sandbox based on products and customers.\nThe initialize method will generate orders that link customers to products."
+        "description": "Complete Shopify sandbox data structure.\n\nOrders reference customers and products by their index in the respective lists.\nProducts and customers are created first, then orders are created with proper references."
       },
       "ShopifyData-Output": {
         "properties": {
@@ -22889,11 +22975,81 @@
             ],
             "title": "Customers",
             "description": "List of customers to create"
+          },
+          "orders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ShopifyOrder"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders",
+            "description": "List of orders to create"
           }
         },
         "type": "object",
         "title": "ShopifyData",
-        "description": "Complete Shopify sandbox data structure\n\nNote: Orders are created automatically by the sandbox based on products and customers.\nThe initialize method will generate orders that link customers to products."
+        "description": "Complete Shopify sandbox data structure.\n\nOrders reference customers and products by their index in the respective lists.\nProducts and customers are created first, then orders are created with proper references."
+      },
+      "ShopifyOrder": {
+        "properties": {
+          "customer_index": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Customer Index",
+            "description": "Index of the customer in the customers list (0-based)"
+          },
+          "line_items": {
+            "items": {
+              "$ref": "#/components/schemas/ShopifyOrderLineItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Line Items",
+            "description": "List of line items"
+          },
+          "financial_status": {
+            "type": "string",
+            "title": "Financial Status",
+            "description": "Order financial status (pending, paid, refunded, etc.)",
+            "default": "pending"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_index",
+          "line_items"
+        ],
+        "title": "ShopifyOrder",
+        "description": "Simplified Shopify order data.\n\nOrders reference customers and products by their index in the respective lists.\nThis allows orders to be created with proper references after products and customers exist.\n\nAttributes:\n    customer_index: Index of the customer in the customers list (0-based)\n    line_items: List of line items (products and quantities)\n    financial_status: Order financial status (pending, paid, refunded, etc.)"
+      },
+      "ShopifyOrderLineItem": {
+        "properties": {
+          "product_index": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Product Index",
+            "description": "Index of the product in the products list (0-based)"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "title": "Quantity",
+            "description": "Quantity of the product to order",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_index"
+        ],
+        "title": "ShopifyOrderLineItem",
+        "description": "Line item for a Shopify order.\n\nAttributes:\n    product_index: Index of the product in the products list (0-based)\n    quantity: Quantity of the product to order"
       },
       "ShopifyProduct": {
         "properties": {
@@ -22901,9 +23057,9 @@
             "type": "string",
             "minLength": 1,
             "title": "Title",
-            "description": "Product title/name"
+            "description": "Product name"
           },
-          "body_html": {
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -22912,72 +23068,53 @@
                 "type": "null"
               }
             ],
-            "title": "Body Html",
-            "description": "HTML description of the product"
+            "title": "Description",
+            "description": "Product description"
           },
           "vendor": {
             "type": "string",
             "title": "Vendor",
-            "description": "Product vendor/brand name"
+            "description": "Brand or vendor name"
           },
-          "product_type": {
+          "category": {
             "type": "string",
-            "title": "Product Type",
-            "description": "Category/type of product"
+            "title": "Category",
+            "description": "Product category/type"
           },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Product status (active, draft, archived)",
-            "default": "active"
-          },
-          "variants": {
-            "items": {
-              "$ref": "#/components/schemas/ShopifyProductVariant"
-            },
-            "type": "array",
-            "minItems": 1,
-            "title": "Variants",
-            "description": "List of product variants"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "vendor",
-          "product_type",
-          "variants"
-        ],
-        "title": "ShopifyProduct",
-        "description": "Shopify product data\n\nAttributes:\n    title: Product title/name\n    body_html: HTML description of the product\n    vendor: Product vendor/brand name\n    product_type: Category/type of product\n    status: Product status (active, draft, archived)\n    variants: List of product variants (at least one required)"
-      },
-      "ShopifyProductVariant": {
-        "properties": {
           "price": {
             "type": "string",
             "title": "Price",
-            "description": "Product variant price (e.g., '29.99')"
+            "description": "Product price (e.g., '29.99')"
           },
           "sku": {
             "type": "string",
             "title": "Sku",
             "description": "Stock Keeping Unit identifier"
           },
-          "inventory_quantity": {
+          "stock": {
             "type": "integer",
             "minimum": 0,
-            "title": "Inventory Quantity",
-            "description": "Available inventory count"
+            "title": "Stock",
+            "description": "Available inventory count",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Product status (active, draft, archived)",
+            "default": "active"
           }
         },
         "type": "object",
         "required": [
+          "title",
+          "vendor",
+          "category",
           "price",
-          "sku",
-          "inventory_quantity"
+          "sku"
         ],
-        "title": "ShopifyProductVariant",
-        "description": "Product variant within a Shopify product\n\nAttributes:\n    price: Product variant price\n    sku: Stock Keeping Unit identifier\n    inventory_quantity: Available inventory count"
+        "title": "ShopifyProduct",
+        "description": "Simplified Shopify product data.\n\nSingle-variant products are supported directly with price/sku/stock fields.\nFor multi-variant products, use the implementation's API directly.\n\nAttributes:\n    title: Product name\n    description: Product description (plain text or HTML)\n    vendor: Brand or vendor name\n    category: Product category/type\n    price: Product price as string (e.g., '29.99')\n    sku: Stock Keeping Unit identifier\n    stock: Available inventory count\n    status: Product status (active, draft, archived)"
       },
       "SlackChannel": {
         "properties": {
@@ -24340,131 +24477,17 @@
       "WordPressData": {
         "properties": {
           "posts": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/WordPressPost"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "type": "array",
             "title": "Posts",
-            "description": "List of WordPress posts to create"
+            "default": []
           }
         },
         "type": "object",
         "title": "WordPressData",
-        "description": "Complete WordPress sandbox data structure\n\nNote: Posts are created in a single batch without dependencies.\nFuture expansion could include pages, media, categories, etc."
-      },
-      "WordPressPost": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Title",
-            "description": "Post title"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content",
-            "description": "Post content (HTML or plain text)"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Post status: draft, publish, private, pending, trash",
-            "default": "draft"
-          },
-          "excerpt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Excerpt",
-            "description": "Post excerpt/summary"
-          },
-          "categories": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Categories",
-            "description": "List of category names"
-          },
-          "tags": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tags",
-            "description": "List of tag names"
-          },
-          "featured_image": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Featured Image",
-            "description": "URL to featured image"
-          },
-          "date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Date",
-            "description": "Post publish date in ISO format (e.g., 2025-01-15T10:00:00)"
-          },
-          "format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Format",
-            "description": "Post format: standard, aside, gallery, link, image, quote, status, video, audio, chat",
-            "default": "standard"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "content"
-        ],
-        "title": "WordPressPost",
-        "description": "WordPress post data for creation/update\n\nAttributes:\n    title: Post title\n    content: Post content (HTML or plain text)\n    status: Post status (draft, publish, private, pending)\n    excerpt: Post excerpt/summary (optional)\n    categories: List of category names (optional, created if not exist)\n    tags: List of tag names (optional, created if not exist)\n    featured_image: URL to featured image (optional)\n    date: Post publish date in ISO format (optional)\n    format: Post format (standard, aside, gallery, etc.) (optional)"
+        "description": "WordPress sandbox data structure"
       }
     },
     "securitySchemes": {
