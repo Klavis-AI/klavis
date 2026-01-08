@@ -1,0 +1,14 @@
+# Core MCP server dependencies
+mcp>=1.12.0
+click
+
+# Web framework
+starlette
+uvicorn[standard]
+
+# Utilities
+python-dotenv
+requests
+
+# Replicate client for image generation tool
+replicate
