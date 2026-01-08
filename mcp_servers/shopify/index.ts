@@ -14,6 +14,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import { setTimeout } from 'timers/promises';
 import { ApiErrorResponse, ApiHeaders, AsyncLocalStorageState, CreateOrderArgs, CreateProductArgs, GetCustomerArgs, GetOrderArgs, GetProductArgs, ListCustomersArgs, ListOrdersArgs, ListProductsArgs, OrderStatus, ShopifyCredentials, UpdateProductArgs } from './types.js';
 import { createOrderTool, createProductTool, getCustomerTool, getOrderTool, getProductTool, listCustomersTool, listOrdersTool, listProductsTool, updateProductTool } from './tools.js';
+import { normalize, normalizeListResponse, normalizeItemResponse, PRODUCT_RULES, CUSTOMER_RULES, ORDER_RULES } from './normalize.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -46,7 +47,13 @@ class ShopifyClient {
 
   private async handleApiResponse<T>(response: globalThis.Response): Promise<T> {
     if (response.ok) {
-      return await response.json() as T;
+      const data = await response.json() as T;
+      // Preserve Link header for pagination
+      const linkHeader = response.headers.get('Link');
+      if (linkHeader && typeof data === 'object' && data !== null) {
+        (data as any)._linkHeader = linkHeader;
+      }
+      return data;
     }
     
     const errorText = await response.text();
@@ -108,7 +115,6 @@ class ShopifyClient {
 
     if (cursor) {
       params.append("page_info", cursor);
-      params.append("limit", Math.min(limit, 250).toString());
     }
 
     if (collection_id) {
@@ -178,7 +184,6 @@ class ShopifyClient {
 
     if (cursor) {
       params.append("page_info", cursor);
-      params.append("limit", Math.min(limit, 250).toString());
     }
 
     const response = await fetch(
@@ -227,7 +232,6 @@ class ShopifyClient {
 
     if (cursor) {
       params.append("page_info", cursor);
-      params.append("limit", Math.min(limit, 250).toString());
     }
 
     const response = await fetch(
@@ -305,8 +309,9 @@ const getShopifyMcpServer = (): Server => {
               args.cursor,
               args.collection_id
             );
+            const normalized = normalizeListResponse(response, 'products', PRODUCT_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -316,8 +321,9 @@ const getShopifyMcpServer = (): Server => {
               throw new Error("Missing required argument: product_id");
             }
             const response = await shopifyClient.getProduct(args.product_id);
+            const normalized = normalizeItemResponse(response, 'product', PRODUCT_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -327,8 +333,9 @@ const getShopifyMcpServer = (): Server => {
               throw new Error("Missing required argument: title");
             }
             const response = await shopifyClient.createProduct(args);
+            const normalized = normalizeItemResponse(response, 'product', PRODUCT_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -339,8 +346,9 @@ const getShopifyMcpServer = (): Server => {
             }
             const { product_id, ...productData } = args;
             const response = await shopifyClient.updateProduct(product_id, productData);
+            const normalized = normalizeItemResponse(response, 'product', PRODUCT_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -351,8 +359,9 @@ const getShopifyMcpServer = (): Server => {
               args.status as OrderStatus,
               args.cursor
             );
+            const normalized = normalizeListResponse(response, 'orders', ORDER_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -362,8 +371,9 @@ const getShopifyMcpServer = (): Server => {
               throw new Error("Missing required argument: order_id");
             }
             const response = await shopifyClient.getOrder(args.order_id);
+            const normalized = normalizeItemResponse(response, 'order', ORDER_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -373,8 +383,9 @@ const getShopifyMcpServer = (): Server => {
               throw new Error("Missing required argument: line_items");
             }
             const response = await shopifyClient.createOrder(args);
+            const normalized = normalizeItemResponse(response, 'order', ORDER_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -384,8 +395,9 @@ const getShopifyMcpServer = (): Server => {
               args.limit,
               args.cursor
             );
+            const normalized = normalizeListResponse(response, 'customers', CUSTOMER_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
@@ -395,8 +407,9 @@ const getShopifyMcpServer = (): Server => {
               throw new Error("Missing required argument: customer_id");
             }
             const response = await shopifyClient.getCustomer(args.customer_id);
+            const normalized = normalizeItemResponse(response, 'customer', CUSTOMER_RULES);
             return {
-              content: [{ type: "text", text: JSON.stringify(response) }],
+              content: [{ type: "text", text: JSON.stringify(normalized, null, 2) }],
             } as const;
           }
 
