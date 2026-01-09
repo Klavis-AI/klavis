@@ -18,6 +18,11 @@
     "default": "light",
     "strict": true
   },
+  "api": {
+    "examples": {
+      "prefill": true
+    }
+  },
   "navigation": {
     "global": {
       "anchors": [
