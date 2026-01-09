@@ -1699,9 +1699,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1798,9 +1796,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1897,9 +1893,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -1978,9 +1972,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2077,9 +2069,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2176,9 +2166,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2275,9 +2263,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2374,9 +2360,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2473,9 +2457,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2572,9 +2554,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2671,9 +2651,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2770,9 +2748,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2869,9 +2845,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -2968,9 +2942,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3067,9 +3039,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3148,9 +3118,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3265,9 +3233,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3364,9 +3330,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3463,9 +3427,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3562,9 +3524,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3643,9 +3603,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3742,9 +3700,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3841,9 +3797,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -3940,9 +3894,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4039,9 +3991,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4138,9 +4088,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4237,9 +4185,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4336,9 +4282,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4451,9 +4395,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4561,9 +4503,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4660,9 +4600,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4741,9 +4679,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4840,9 +4776,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -4939,9 +4873,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5038,9 +4970,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5136,9 +5066,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5235,9 +5163,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5334,9 +5260,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5470,9 +5394,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5568,9 +5490,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5720,9 +5640,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -5872,9 +5790,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6024,9 +5940,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6177,9 +6091,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6276,9 +6188,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6374,9 +6284,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6473,9 +6381,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6571,9 +6477,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6669,9 +6573,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6768,9 +6670,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6843,9 +6743,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6918,9 +6816,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -6993,9 +6889,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7068,9 +6962,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7143,9 +7035,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7218,9 +7108,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7293,9 +7181,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7368,9 +7254,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7443,9 +7327,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -7518,9 +7400,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-
-                }
+                "schema": {}
               }
             }
           },
@@ -11250,7 +11130,7 @@
                         "title": "Welcome to the Team!",
                         "content": {
                           "contentType": "HTML",
-                          "content": "\u003Cp\u003EHi there!\u003C/p\u003E\u003Cp\u003EWelcome to our team. We're excited to have you on board. Please feel free to reach out if you have any questions.\u003C/p\u003E\u003Cp\u003EBest regards,\u003Cbr\u003EHR Team\u003C/p\u003E"
+                          "content": "<p>Hi there!</p><p>Welcome to our team. We're excited to have you on board. Please feel free to reach out if you have any questions.</p><p>Best regards,<br>HR Team</p>"
                         },
                         "to_addresses": [
                           "newemployee@company.com"
@@ -11277,7 +11157,7 @@
                         "title": "Project Alpha - Status Update",
                         "content": {
                           "contentType": "HTML",
-                          "content": "\u003Ch3\u003EProject Alpha Status Report\u003C/h3\u003E\u003Cp\u003ECurrent Status: \u003Cstrong\u003EOn Track\u003C/strong\u003E\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EPhase 1: Completed\u003C/li\u003E\u003Cli\u003EPhase 2: 75% complete\u003C/li\u003E\u003Cli\u003EPhase 3: Planning\u003C/li\u003E\u003C/ul\u003E\u003Cp\u003ENext milestone: December 15th\u003C/p\u003E"
+                          "content": "<h3>Project Alpha Status Report</h3><p>Current Status: <strong>On Track</strong></p><ul><li>Phase 1: Completed</li><li>Phase 2: 75% complete</li><li>Phase 3: Planning</li></ul><p>Next milestone: December 15th</p>"
                         },
                         "to_addresses": [
                           "projectteam@company.com",
@@ -11303,7 +11183,7 @@
                         "title": "Team Lunch - Friday 12:30 PM",
                         "content": {
                           "contentType": "HTML",
-                          "content": "\u003Cp\u003EHey team! \u003C/p\u003E\u003Cp\u003ELet's grab lunch together this Friday at 12:30 PM. I've made a reservation at the Italian place downtown.\u003C/p\u003E\u003Cp\u003EPlease RSVP by Wednesday so I can confirm the headcount.\u003C/p\u003E\u003Cp\u003ELooking forward to it!\u003Cbr\u003ESarah\u003C/p\u003E"
+                          "content": "<p>Hey team! </p><p>Let's grab lunch together this Friday at 12:30 PM. I've made a reservation at the Italian place downtown.</p><p>Please RSVP by Wednesday so I can confirm the headcount.</p><p>Looking forward to it!<br>Sarah</p>"
                         },
                         "to_addresses": [
                           "dev-team@company.com"
@@ -14641,7 +14521,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "Exclusive Premium Member Benefits This Month",
                             "name": "Premium Benefits December",
-                            "html": "\u003Ch1\u003EPremium Member Exclusive\u003C/h1\u003E\u003Cp\u003EAs a valued premium member, enjoy these exclusive benefits this month...\u003C/p\u003E\u003Cul\u003E\u003Cli\u003E20% off all products\u003C/li\u003E\u003Cli\u003EEarly access to new features\u003C/li\u003E\u003Cli\u003EPriority support\u003C/li\u003E\u003C/ul\u003E",
+                            "html": "<h1>Premium Member Exclusive</h1><p>As a valued premium member, enjoy these exclusive benefits this month...</p><ul><li>20% off all products</li><li>Early access to new features</li><li>Priority support</li></ul>",
                             "text": "Premium Member Exclusive - Enjoy 20% off all products, early access to new features, and priority support this month.",
                             "status": "draft"
                           }
@@ -14654,7 +14534,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "ACME Monthly Newsletter - December 2025",
                             "name": "December Newsletter",
-                            "html": "\u003Cdiv\u003E\u003Ch1\u003EDecember Newsletter\u003C/h1\u003E\u003Ch2\u003EWhat's New This Month\u003C/h2\u003E\u003Cp\u003EHere are the highlights from December...\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EProduct updates\u003C/li\u003E\u003Cli\u003ECustomer success stories\u003C/li\u003E\u003Cli\u003EUpcoming events\u003C/li\u003E\u003C/ul\u003E\u003C/div\u003E",
+                            "html": "<div><h1>December Newsletter</h1><h2>What's New This Month</h2><p>Here are the highlights from December...</p><ul><li>Product updates</li><li>Customer success stories</li><li>Upcoming events</li></ul></div>",
                             "text": "December Newsletter - What's New This Month: Product updates, customer success stories, and upcoming events.",
                             "reply_to": "feedback@acmecorp.com",
                             "status": "draft"
@@ -14668,7 +14548,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "Getting Started with Your Free Trial",
                             "name": "Trial Onboarding Sequence",
-                            "html": "\u003Ch1\u003EWelcome to Your Free Trial!\u003C/h1\u003E\u003Cp\u003ELet's get you started with some helpful resources...\u003C/p\u003E\u003Cdiv\u003E\u003Ch3\u003EQuick Start Guide\u003C/h3\u003E\u003Col\u003E\u003Cli\u003EComplete your profile\u003C/li\u003E\u003Cli\u003EExplore the dashboard\u003C/li\u003E\u003Cli\u003ETry our key features\u003C/li\u003E\u003C/ol\u003E\u003C/div\u003E",
+                            "html": "<h1>Welcome to Your Free Trial!</h1><p>Let's get you started with some helpful resources...</p><div><h3>Quick Start Guide</h3><ol><li>Complete your profile</li><li>Explore the dashboard</li><li>Try our key features</li></ol></div>",
                             "text": "Welcome to Your Free Trial! Quick Start Guide: 1) Complete your profile 2) Explore the dashboard 3) Try our key features",
                             "status": "draft"
                           }
@@ -14814,7 +14694,7 @@
                     "posts": [
                       {
                         "title": "Welcome to Klavis AI WordPress Integration",
-                        "content": "\u003Cp\u003EThis is the first test post created through Klavis AI's WordPress sandbox.\u003C/p\u003E\u003Cp\u003EWe're testing the full CRUD functionality with WordPress.com REST API v1.1.\u003C/p\u003E\u003Cp\u003EKey features being tested:\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EPost creation with multiple statuses\u003C/li\u003E\u003Cli\u003ECategories and tags management\u003C/li\u003E\u003Cli\u003EDifferent post formats\u003C/li\u003E\u003Cli\u003EContent formatting with HTML\u003C/li\u003E\u003C/ul\u003E",
+                        "content": "<p>This is the first test post created through Klavis AI's WordPress sandbox.</p><p>We're testing the full CRUD functionality with WordPress.com REST API v1.1.</p><p>Key features being tested:</p><ul><li>Post creation with multiple statuses</li><li>Categories and tags management</li><li>Different post formats</li><li>Content formatting with HTML</li></ul>",
                         "status": "publish",
                         "summary": "Testing Klavis AI WordPress sandbox integration with full CRUD support",
                         "categories": [
@@ -14833,7 +14713,7 @@
                       },
                       {
                         "title": "Understanding MCP (Model Context Protocol)",
-                        "content": "\u003Ch2\u003EWhat is MCP?\u003C/h2\u003E\u003Cp\u003EThe Model Context Protocol (MCP) is a revolutionary approach to AI integrations.\u003C/p\u003E\u003Ch3\u003EKey Benefits\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003EStandardized integration patterns\u003C/li\u003E\u003Cli\u003ESecure authentication flows\u003C/li\u003E\u003Cli\u003ESandbox testing environments\u003C/li\u003E\u003Cli\u003ERate limiting and error handling\u003C/li\u003E\u003C/ul\u003E\u003Cblockquote\u003EMCP enables AI agents to reliably interact with 100+ tools at scale.\u003C/blockquote\u003E",
+                        "content": "<h2>What is MCP?</h2><p>The Model Context Protocol (MCP) is a revolutionary approach to AI integrations.</p><h3>Key Benefits</h3><ul><li>Standardized integration patterns</li><li>Secure authentication flows</li><li>Sandbox testing environments</li><li>Rate limiting and error handling</li></ul><blockquote>MCP enables AI agents to reliably interact with 100+ tools at scale.</blockquote>",
                         "status": "publish",
                         "summary": "Learn about the Model Context Protocol and how it revolutionizes AI integrations",
                         "categories": [
@@ -14850,7 +14730,7 @@
                       },
                       {
                         "title": "Draft Post: Future Features Roadmap",
-                        "content": "\u003Cp\u003EThis is a draft post about upcoming features in the WordPress sandbox...\u003C/p\u003E\u003Ch3\u003EPlanned Features\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003E\u003Cstrong\u003EPages Support\u003C/strong\u003E: Create and manage WordPress pages\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EMedia Management\u003C/strong\u003E: Upload and attach featured images\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EComments\u003C/strong\u003E: Handle post comments via API\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003ECustom Post Types\u003C/strong\u003E: Support for custom content types\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EPost Relationships\u003C/strong\u003E: Parent/child post hierarchies\u003C/li\u003E\u003C/ul\u003E\u003Cp\u003EStay tuned for updates!\u003C/p\u003E",
+                        "content": "<p>This is a draft post about upcoming features in the WordPress sandbox...</p><h3>Planned Features</h3><ul><li><strong>Pages Support</strong>: Create and manage WordPress pages</li><li><strong>Media Management</strong>: Upload and attach featured images</li><li><strong>Comments</strong>: Handle post comments via API</li><li><strong>Custom Post Types</strong>: Support for custom content types</li><li><strong>Post Relationships</strong>: Parent/child post hierarchies</li></ul><p>Stay tuned for updates!</p>",
                         "status": "draft",
                         "summary": "Planning future WordPress integration features and enhancements",
                         "categories": [
@@ -14866,7 +14746,7 @@
                       },
                       {
                         "title": "Quick Note: Integration Best Practices",
-                        "content": "\u003Cp\u003EA quick aside about best practices when integrating with WordPress.com API:\u003C/p\u003E\u003Col\u003E\u003Cli\u003EAlways handle rate limits gracefully\u003C/li\u003E\u003Cli\u003EUse OAuth 2.0 for authentication\u003C/li\u003E\u003Cli\u003EValidate data before sending to API\u003C/li\u003E\u003Cli\u003ENormalize responses for consistency\u003C/li\u003E\u003C/ol\u003E",
+                        "content": "<p>A quick aside about best practices when integrating with WordPress.com API:</p><ol><li>Always handle rate limits gracefully</li><li>Use OAuth 2.0 for authentication</li><li>Validate data before sending to API</li><li>Normalize responses for consistency</li></ol>",
                         "status": "publish",
                         "summary": "Best practices for WordPress API integration",
                         "categories": [
@@ -14881,7 +14761,7 @@
                       },
                       {
                         "title": "Image Gallery: Integration Screenshots",
-                        "content": "\u003Cp\u003EThis post showcases screenshots of the integration process.\u003C/p\u003E\u003Cp\u003E[Gallery would go here with multiple images showing the OAuth flow, sandbox dashboard, and API responses]\u003C/p\u003E",
+                        "content": "<p>This post showcases screenshots of the integration process.</p><p>[Gallery would go here with multiple images showing the OAuth flow, sandbox dashboard, and API responses]</p>",
                         "status": "publish",
                         "summary": "Visual guide to WordPress integration",
                         "categories": [
@@ -14897,7 +14777,7 @@
                       },
                       {
                         "title": "Link: WordPress REST API Documentation",
-                        "content": "\u003Cp\u003ECheck out the official WordPress.com REST API documentation for more details:\u003C/p\u003E\u003Cp\u003E\u003Ca href=\"https://developer.wordpress.com/docs/api/\"\u003Ehttps://developer.wordpress.com/docs/api/\u003C/a\u003E\u003C/p\u003E",
+                        "content": "<p>Check out the official WordPress.com REST API documentation for more details:</p><p><a href=\"https://developer.wordpress.com/docs/api/\">https://developer.wordpress.com/docs/api/</a></p>",
                         "status": "publish",
                         "categories": [
                           "Resources"
@@ -14911,7 +14791,7 @@
                       },
                       {
                         "title": "Inspirational Quote",
-                        "content": "\u003Cblockquote\u003E\"The best way to predict the future is to implement it.\" - Klavis AI Team\u003C/blockquote\u003E\u003Cp\u003EThis quote inspires our approach to building robust integrations.\u003C/p\u003E",
+                        "content": "<blockquote>\"The best way to predict the future is to implement it.\" - Klavis AI Team</blockquote><p>This quote inspires our approach to building robust integrations.</p>",
                         "status": "publish",
                         "categories": [
                           "Inspiration"
@@ -14924,7 +14804,7 @@
                       },
                       {
                         "title": "Private Internal Note",
-                        "content": "\u003Cp\u003EThis is a private post for internal team use only.\u003C/p\u003E\u003Cp\u003EInternal metrics:\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EOAuth completion rate: 98%\u003C/li\u003E\u003Cli\u003EAPI success rate: 99.5%\u003C/li\u003E\u003Cli\u003EAverage response time: 250ms\u003C/li\u003E\u003C/ul\u003E",
+                        "content": "<p>This is a private post for internal team use only.</p><p>Internal metrics:</p><ul><li>OAuth completion rate: 98%</li><li>API success rate: 99.5%</li><li>Average response time: 250ms</li></ul>",
                         "status": "private",
                         "summary": "Internal metrics and notes",
                         "categories": [
@@ -14939,7 +14819,7 @@
                       },
                       {
                         "title": "Testing Categories and Tags",
-                        "content": "\u003Cp\u003EThis post tests extensive categorization and tagging capabilities.\u003C/p\u003E\u003Cp\u003EWordPress allows multiple categories and tags per post, which we're testing here.\u003C/p\u003E",
+                        "content": "<p>This post tests extensive categorization and tagging capabilities.</p><p>WordPress allows multiple categories and tags per post, which we're testing here.</p>",
                         "status": "publish",
                         "summary": "Testing multi-category and multi-tag support",
                         "categories": [
@@ -14960,7 +14840,7 @@
                       },
                       {
                         "title": "Draft: Pending Review Article",
-                        "content": "\u003Cp\u003EThis article is pending editorial review before publication.\u003C/p\u003E\u003Cp\u003EIt covers advanced topics in WordPress automation and sandbox testing.\u003C/p\u003E",
+                        "content": "<p>This article is pending editorial review before publication.</p><p>It covers advanced topics in WordPress automation and sandbox testing.</p>",
                         "status": "pending",
                         "summary": "Advanced WordPress automation topics - pending review",
                         "categories": [
@@ -16753,7 +16633,7 @@
                                 "content_blocks": [
                                   {
                                     "block_type": "paragraph",
-                                    "content": "Navigation menu was broken on screens \u003C 768px"
+                                    "content": "Navigation menu was broken on screens < 768px"
                                   },
                                   {
                                     "block_type": "heading_3",
@@ -17285,29 +17165,29 @@
                         "pages": [
                           {
                             "title": "Welcome to the Team",
-                            "content": "\u003Cp\u003EThis is the home page for our team.\u003C/p\u003E",
+                            "content": "<p>This is the home page for our team.</p>",
                             "comments": [
                               {
-                                "content": "\u003Cp\u003EGreat start!\u003C/p\u003E"
+                                "content": "<p>Great start!</p>"
                               }
                             ],
                             "children": [
                               {
                                 "title": "Project Alpha",
-                                "content": "\u003Ch1\u003EProject Alpha\u003C/h1\u003E\u003Cp\u003EDetails about the project.\u003C/p\u003E",
+                                "content": "<h1>Project Alpha</h1><p>Details about the project.</p>",
                                 "comments": [
                                   {
-                                    "content": "\u003Cp\u003ELooking forward to this.\u003C/p\u003E"
+                                    "content": "<p>Looking forward to this.</p>"
                                   }
                                 ]
                               },
                               {
                                 "title": "Meeting Notes",
-                                "content": "\u003Cp\u003EWeekly meeting notes go here.\u003C/p\u003E",
+                                "content": "<p>Weekly meeting notes go here.</p>",
                                 "children": [
                                   {
                                     "title": "2023-10-27 Sync",
-                                    "content": "\u003Cp\u003EDiscussed Q4 goals.\u003C/p\u003E"
+                                    "content": "<p>Discussed Q4 goals.</p>"
                                   }
                                 ]
                               }
@@ -17322,7 +17202,7 @@
                         "pages": [
                           {
                             "title": "Getting Started",
-                            "content": "\u003Cp\u003EHow to use the product.\u003C/p\u003E"
+                            "content": "<p>How to use the product.</p>"
                           }
                         ]
                       }
@@ -19208,7 +19088,7 @@
                       },
                       {
                         "name": "error-logs-sink",
-                        "filter": "severity\u003E=ERROR",
+                        "filter": "severity>=ERROR",
                         "description": "Capture error logs"
                       },
                       {
@@ -21456,9 +21336,7 @@
       "CallToolResult": {
         "properties": {
           "content": {
-            "items": {
-
-            },
+            "items": {},
             "type": "array",
             "title": "Content",
             "description": "The content of the tool call"
@@ -27697,9 +27575,7 @@
           "tools": {
             "anyOf": [
               {
-                "items": {
-
-                },
+                "items": {},
                 "type": "array"
               },
               {
