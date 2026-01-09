@@ -558,7 +558,8 @@
                   "mcp-server/local/woocommerce",
                   "mcp-server/local/word"
                 ]
-              }
+              },
+              "api-reference/sandbox/stateless_mcp"
             ]
           },
           {
