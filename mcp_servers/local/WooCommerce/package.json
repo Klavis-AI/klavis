@@ -31,7 +31,7 @@
     },
     "homepage": "https://github.com/lockon-n/woocommerce-mcp#readme",
     "dependencies": {
-      "@modelcontextprotocol/sdk": "^0.5.0",
+      "@modelcontextprotocol/sdk": "^1.25.2",
       "axios": "^1.6.2"
     },
     "devDependencies": {
