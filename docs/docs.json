@@ -543,6 +543,7 @@
                   }
                 ]
               },
+              "api-reference/sandbox/stateless_mcp",
               {
                 "group": "Local MCP Servers",
                 "pages": [
@@ -558,8 +559,7 @@
                   "mcp-server/local/woocommerce",
                   "mcp-server/local/word"
                 ]
-              },
-              "api-reference/sandbox/stateless_mcp"
+              }
             ]
           },
           {
