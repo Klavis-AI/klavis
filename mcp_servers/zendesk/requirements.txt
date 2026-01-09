@@ -1,0 +1,4 @@
+httpx>=0.27,<1
+mcp>=0.1.0
+fastmcp
+python-dotenv
