@@ -5,6 +5,7 @@ import os
 import json
 from collections.abc import AsyncIterator
 from typing import Any, Dict
+import re
 from contextvars import ContextVar
 
 import click
@@ -78,10 +79,214 @@ def get_auth_token() -> str:
         raise RuntimeError("Authentication token not found in request context")
 
 
+# ============================================================================
+# Document Format Conversion Helpers
+# ============================================================================
+
+def extract_text_from_document(document: dict[str, Any]) -> str:
+    """Extract plain text from a Google Docs document structure."""
+    text_parts = []
+    body = document.get("body", {})
+    content = body.get("content", [])
+
+    for element in content:
+        if "paragraph" in element:
+            paragraph = element["paragraph"]
+            for elem in paragraph.get("elements", []):
+                if "textRun" in elem:
+                    text_parts.append(elem["textRun"].get("content", ""))
+
+    return "".join(text_parts)
+
+
+def get_paragraph_heading_type(paragraph: dict[str, Any]) -> str:
+    """Get the heading type of a paragraph."""
+    style = paragraph.get("paragraphStyle", {})
+    return style.get("namedStyleType", "NORMAL_TEXT")
+
+
+def convert_document_to_markdown(document: dict[str, Any]) -> str:
+    """Convert a Google Docs document to markdown format."""
+    markdown_parts = []
+    body = document.get("body", {})
+    content = body.get("content", [])
+
+    for element in content:
+        if "paragraph" in element:
+            paragraph = element["paragraph"]
+            heading_type = get_paragraph_heading_type(paragraph)
+
+            # Build paragraph text with inline formatting
+            para_text = ""
+            for elem in paragraph.get("elements", []):
+                if "textRun" in elem:
+                    text_run = elem["textRun"]
+                    text = text_run.get("content", "")
+                    style = text_run.get("textStyle", {})
+
+                    # Apply inline formatting
+                    if text.strip():  # Don't format whitespace-only content
+                        if style.get("bold") and style.get("italic"):
+                            text = f"***{text.strip()}***"
+                            if text_run.get("content", "").endswith(" "):
+                                text += " "
+                        elif style.get("bold"):
+                            text = f"**{text.strip()}**"
+                            if text_run.get("content", "").endswith(" "):
+                                text += " "
+                        elif style.get("italic"):
+                            text = f"*{text.strip()}*"
+                            if text_run.get("content", "").endswith(" "):
+                                text += " "
+                        if style.get("strikethrough"):
+                            text = f"~~{text.strip()}~~"
+                            if text_run.get("content", "").endswith(" "):
+                                text += " "
+
+                        # Handle links
+                        link = style.get("link", {})
+                        if link.get("url"):
+                            text = f"[{text.strip()}]({link['url']})"
+                            if text_run.get("content", "").endswith(" "):
+                                text += " "
+
+                    para_text += text
+
+            # Apply heading formatting
+            para_text = para_text.rstrip("\n")
+            if para_text.strip():
+                if heading_type == "TITLE":
+                    para_text = f"# {para_text}"
+                elif heading_type == "SUBTITLE":
+                    para_text = f"## {para_text}"
+                elif heading_type == "HEADING_1":
+                    para_text = f"# {para_text}"
+                elif heading_type == "HEADING_2":
+                    para_text = f"## {para_text}"
+                elif heading_type == "HEADING_3":
+                    para_text = f"### {para_text}"
+                elif heading_type == "HEADING_4":
+                    para_text = f"#### {para_text}"
+                elif heading_type == "HEADING_5":
+                    para_text = f"##### {para_text}"
+                elif heading_type == "HEADING_6":
+                    para_text = f"###### {para_text}"
+
+                # Handle bullet points
+                bullet = paragraph.get("bullet")
+                if bullet:
+                    para_text = f"- {para_text}"
+
+                markdown_parts.append(para_text)
+            else:
+                markdown_parts.append("")  # Preserve empty lines
+
+    return "\n".join(markdown_parts)
+
+
+def convert_document_to_structured(document: dict[str, Any]) -> dict[str, Any]:
+    """Convert a Google Docs document to structured format with indices."""
+    elements = []
+    body = document.get("body", {})
+    content = body.get("content", [])
+
+    for element in content:
+        if "paragraph" in element:
+            paragraph = element["paragraph"]
+            start_index = element.get("startIndex", 0)
+            end_index = element.get("endIndex", 0)
+            heading_type = get_paragraph_heading_type(paragraph)
+
+            # Extract text runs with styles
+            text_runs = []
+            full_content = ""
+            for elem in paragraph.get("elements", []):
+                if "textRun" in elem:
+                    text_run = elem["textRun"]
+                    run_content = text_run.get("content", "")
+                    run_style = text_run.get("textStyle", {})
+                    run_start = elem.get("startIndex", 0)
+                    run_end = elem.get("endIndex", 0)
+
+                    # Simplify style to only include set properties
+                    simplified_style = {}
+                    if run_style.get("bold"):
+                        simplified_style["bold"] = True
+                    if run_style.get("italic"):
+                        simplified_style["italic"] = True
+                    if run_style.get("underline"):
+                        simplified_style["underline"] = True
+                    if run_style.get("strikethrough"):
+                        simplified_style["strikethrough"] = True
+                    if run_style.get("link", {}).get("url"):
+                        simplified_style["link_url"] = run_style["link"]["url"]
+
+                    text_runs.append({
+                        "content": run_content,
+                        "start_index": run_start,
+                        "end_index": run_end,
+                        "style": simplified_style
+                    })
+                    full_content += run_content
+
+            elements.append({
+                "type": "paragraph",
+                "start_index": start_index,
+                "end_index": end_index,
+                "content": full_content.rstrip("\n"),
+                "paragraph_style": {"heading_type": heading_type},
+                "text_runs": text_runs
+            })
+
+    return {
+        "document_id": document.get("documentId", ""),
+        "title": document.get("title", ""),
+        "elements": elements
+    }
+
+
+def format_document_response(
+    document: dict[str, Any],
+    response_format: str = "raw"
+) -> dict[str, Any]:
+    """Format document response based on requested format."""
+    if response_format == "raw":
+        return document
+
+    elif response_format == "plain_text":
+        text = extract_text_from_document(document)
+        return {
+            "document_id": document.get("documentId", ""),
+            "title": document.get("title", ""),
+            "content": text,
+            "word_count": len(text.split())
+        }
+
+    elif response_format == "markdown":
+        markdown = convert_document_to_markdown(document)
+        return {
+            "document_id": document.get("documentId", ""),
+            "title": document.get("title", ""),
+            "content": markdown,
+            "word_count": len(extract_text_from_document(document).split())
+        }
+
+    elif response_format == "structured":
+        return convert_document_to_structured(document)
+
+    elif response_format == "normalized":
+        return normalize_document_response(document)
+
+    else:
+        # Default to raw if unknown format
+        return document
+
+
 def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
     """
     Normalize the Google Docs API response to a simplified structure.
     Reduces complexity while preserving important information.
+    Includes table processing, page info, and list definitions.
     """
     
     def extract_text_from_paragraph(paragraph: Dict) -> Dict[str, Any]:
@@ -229,6 +434,189 @@ def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
     
     return normalized
 
+
+# ============================================================================
+# Markdown Parsing Helpers
+# ============================================================================
+
+def parse_markdown_text(text: str) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
+    """Parse markdown-like text and extract plain text with style ranges.
+
+    Returns:
+        tuple: (plain_text, style_ranges, paragraph_styles)
+        - plain_text: Text with markdown syntax removed
+        - style_ranges: List of dicts with 'start', 'end', 'style' keys
+        - paragraph_styles: List of paragraph-level style dicts
+    """
+    style_ranges = []
+    plain_text = ""
+    lines = text.split('\n')
+    current_index = 0
+    paragraph_styles = []  # Track paragraph-level styles
+
+    for line_num, line in enumerate(lines):
+        line_start_index = current_index
+
+        # Check for headings at line start
+        heading_match = re.match(r'^(#{1,6})\s+(.*)$', line)
+        if heading_match:
+            heading_level = len(heading_match.group(1))
+            heading_text = heading_match.group(2)
+            heading_types = {
+                1: "HEADING_1",
+                2: "HEADING_2",
+                3: "HEADING_3",
+                4: "HEADING_4",
+                5: "HEADING_5",
+                6: "HEADING_6"
+            }
+            # Process inline formatting within heading
+            processed_text, inline_styles = parse_inline_formatting(heading_text, current_index)
+            style_ranges.extend(inline_styles)
+            plain_text += processed_text
+
+            # Mark paragraph style for this line
+            paragraph_styles.append({
+                "start": line_start_index,
+                "end": current_index + len(processed_text) + 1,  # +1 for newline
+                "paragraph_style": {"namedStyleType": heading_types[heading_level]}
+            })
+            current_index += len(processed_text)
+        # Check for bullet points
+        elif re.match(r'^[\-\*]\s+', line):
+            bullet_text = re.sub(r'^[\-\*]\s+', '', line)
+            processed_text, inline_styles = parse_inline_formatting(bullet_text, current_index)
+            # Adjust for bullet marker we're preserving
+            plain_text += "• " + processed_text
+            # Adjust inline style indices
+            for style in inline_styles:
+                style["start"] += 2  # "• " is 2 characters
+                style["end"] += 2
+            style_ranges.extend(inline_styles)
+            current_index += 2 + len(processed_text)
+        else:
+            # Regular line - process inline formatting
+            processed_text, inline_styles = parse_inline_formatting(line, current_index)
+            style_ranges.extend(inline_styles)
+            plain_text += processed_text
+            current_index += len(processed_text)
+
+        # Add newline between lines (except last line)
+        if line_num < len(lines) - 1:
+            plain_text += '\n'
+            current_index += 1
+
+    return plain_text, style_ranges, paragraph_styles
+
+
+def parse_inline_formatting(text: str, base_index: int) -> tuple[str, list[dict[str, Any]]]:
+    """Parse inline markdown formatting (bold, italic, links, strikethrough).
+
+    Returns:
+        tuple: (plain_text, style_ranges)
+    """
+    style_ranges = []
+    result = ""
+    i = 0
+
+    while i < len(text):
+        # Bold + Italic: ***text*** or ___text___
+        match = re.match(r'\*\*\*(.+?)\*\*\*|___(.+?)___', text[i:])
+        if match:
+            content = match.group(1) or match.group(2)
+            start_pos = base_index + len(result)
+            result += content
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(content),
+                "style": {"bold": True, "italic": True}
+            })
+            i += len(match.group(0))
+            continue
+
+        # Bold: **text** or __text__
+        match = re.match(r'\*\*(.+?)\*\*|__(.+?)__', text[i:])
+        if match:
+            content = match.group(1) or match.group(2)
+            start_pos = base_index + len(result)
+            result += content
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(content),
+                "style": {"bold": True}
+            })
+            i += len(match.group(0))
+            continue
+
+        # Italic: *text* or _text_
+        match = re.match(r'\*([^*]+?)\*|_([^_]+?)_', text[i:])
+        if match:
+            content = match.group(1) or match.group(2)
+            start_pos = base_index + len(result)
+            result += content
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(content),
+                "style": {"italic": True}
+            })
+            i += len(match.group(0))
+            continue
+
+        # Strikethrough: ~~text~~
+        match = re.match(r'~~(.+?)~~', text[i:])
+        if match:
+            content = match.group(1)
+            start_pos = base_index + len(result)
+            result += content
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(content),
+                "style": {"strikethrough": True}
+            })
+            i += len(match.group(0))
+            continue
+
+        # Links: [text](url)
+        match = re.match(r'\[([^\]]+)\]\(([^)]+)\)', text[i:])
+        if match:
+            link_text = match.group(1)
+            url = match.group(2)
+            start_pos = base_index + len(result)
+            result += link_text
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(link_text),
+                "style": {"link": {"url": url}}
+            })
+            i += len(match.group(0))
+            continue
+
+        # Regular character
+        result += text[i]
+        i += 1
+
+    return result, style_ranges
+
+
+# ============================================================================
+# Hex Color Conversion Helper
+# ============================================================================
+
+def hex_to_rgb(hex_color: str) -> dict[str, float]:
+    """Convert hex color to Google Docs RGB format (0.0-1.0 range)."""
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) != 6:
+        raise ValueError(f"Invalid hex color: {hex_color}")
+    r = int(hex_color[0:2], 16) / 255.0
+    g = int(hex_color[2:4], 16) / 255.0
+    b = int(hex_color[4:6], 16) / 255.0
+    return {"red": r, "green": g, "blue": b}
+
+
+# ============================================================================
+# Core Document Operations
+# ============================================================================
+
 async def _get_document_raw(document_id: str) -> Dict[str, Any]:
     """Internal function to get raw Google Docs API response."""
     access_token = get_auth_token()
@@ -238,19 +626,24 @@ async def _get_document_raw(document_id: str) -> Dict[str, Any]:
     return dict(response)
 
 
-async def get_document_by_id(document_id: str) -> Dict[str, Any]:
+async def get_document_by_id(document_id: str, response_format: str = "raw") -> Dict[str, Any]:
     """Get the latest version of the specified Google Docs document.
     
     Args:
-        document_id: The ID of the Google Docs document to retrieve.
-    
-    Returns:
-        Normalized document response with simplified structure.
+        document_id: The ID of the Google Docs document.
+        response_format: Output format - 'raw', 'plain_text', 'markdown', or 'structured'.
+                        Default is 'raw' for backward compatibility.
     """
-    logger.info(f"Executing tool: get_document_by_id with document_id: {document_id}")
+    logger.info(f"Executing tool: get_document_by_id with document_id: {document_id}, format: {response_format}")
     try:
-        raw_response = await _get_document_raw(document_id)
-        return normalize_document_response(raw_response)
+        access_token = get_auth_token()
+        service = get_docs_service(access_token)
+
+        request = service.documents().get(documentId=document_id)
+        response = request.execute()
+
+        # Format the response based on requested format
+        return format_document_response(dict(response), response_format)
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -366,6 +759,406 @@ async def create_document_from_text(title: str, text_content: str) -> Dict[str, 
         logger.exception(f"Error executing tool create_document_from_text: {e}")
         raise e
 
+async def edit_text(
+    document_id: str,
+    old_text: str,
+    new_text: str,
+    match_case: bool = True,
+    replace_all: bool = False,
+    append_to_end: bool = False
+) -> dict[str, Any]:
+    """Edit text in a Google Docs document by replacing old text with new text.
+
+    This unified operation handles insert, delete, and replace:
+    - Insert: old_text="anchor", new_text="anchor + new content"
+    - Delete: old_text="text to delete", new_text=""
+    - Replace: old_text="old", new_text="new"
+    - Append: old_text="", new_text="content", append_to_end=True
+    """
+    logger.info(f"Executing tool: edit_text with document_id: {document_id}")
+    try:
+        access_token = get_auth_token()
+        service = get_docs_service(access_token)
+
+        # Handle append to end case
+        if append_to_end and old_text == "":
+            document = await _get_document_raw(document_id)
+            end_index = document["body"]["content"][-1]["endIndex"]
+
+            requests = [
+                {
+                    'insertText': {
+                        'location': {'index': int(end_index) - 1},
+                        'text': new_text
+                    }
+                }
+            ]
+
+            response = service.documents().batchUpdate(
+                documentId=document_id,
+                body={"requests": requests}
+            ).execute()
+
+            return {
+                "success": True,
+                "document_id": document_id,
+                "operation": "append",
+                "characters_inserted": len(new_text),
+                "message": f"Appended {len(new_text)} characters to end of document"
+            }
+
+        # Handle normal replace case
+        if not old_text:
+            return {
+                "success": False,
+                "error": "old_text is required for replace operations. Use append_to_end=true to insert at end.",
+                "hint": "Provide the text you want to find and replace."
+            }
+
+        # Use replaceAllText for the replacement
+        requests = [
+            {
+                'replaceAllText': {
+                    'containsText': {
+                        'text': old_text,
+                        'matchCase': match_case
+                    },
+                    'replaceText': new_text
+                }
+            }
+        ]
+
+        response = service.documents().batchUpdate(
+            documentId=document_id,
+            body={"requests": requests}
+        ).execute()
+
+        # Count replacements from response
+        replies = response.get("replies", [])
+        occurrences_changed = 0
+        if replies and "replaceAllText" in replies[0]:
+            occurrences_changed = replies[0]["replaceAllText"].get("occurrencesChanged", 0)
+
+        if occurrences_changed == 0:
+            return {
+                "success": False,
+                "document_id": document_id,
+                "error": f"Text not found: '{old_text}' does not exist in the document.",
+                "hint": "Check for typos or use get_document_by_id with response_format='plain_text' to view current content."
+            }
+
+        # If replace_all is False but multiple occurrences were replaced, note it
+        message = f"Replaced '{old_text}' with '{new_text}' at {occurrences_changed} location(s)"
+        if not replace_all and occurrences_changed > 1:
+            message += " (Note: all occurrences were replaced. Google Docs API replaces all matches.)"
+
+        return {
+            "success": True,
+            "document_id": document_id,
+            "operation": "replace",
+            "replacements_made": occurrences_changed,
+            "message": message
+        }
+
+    except HttpError as e:
+        logger.error(f"Google Docs API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool edit_text: {e}")
+        raise e
+
+
+async def apply_style(
+    document_id: str,
+    start_index: int,
+    end_index: int,
+    # Character styles
+    bold: bool | None = None,
+    italic: bool | None = None,
+    underline: bool | None = None,
+    strikethrough: bool | None = None,
+    font_size: float | None = None,
+    font_family: str | None = None,
+    foreground_color: str | None = None,
+    background_color: str | None = None,
+    link_url: str | None = None,
+    # Paragraph styles
+    heading_type: str | None = None,
+    alignment: str | None = None,
+    line_spacing: float | None = None,
+    space_above: float | None = None,
+    space_below: float | None = None
+) -> dict[str, Any]:
+    """Apply formatting styles to a specified range in a Google Docs document."""
+    logger.info(f"Executing tool: apply_style with document_id: {document_id}, range: [{start_index}, {end_index})")
+    try:
+        access_token = get_auth_token()
+        service = get_docs_service(access_token)
+
+        requests = []
+        applied_styles = []
+
+        # Build text style request
+        text_style = {}
+        text_style_fields = []
+
+        if bold is not None:
+            text_style["bold"] = bold
+            text_style_fields.append("bold")
+            applied_styles.append("bold" if bold else "no-bold")
+
+        if italic is not None:
+            text_style["italic"] = italic
+            text_style_fields.append("italic")
+            applied_styles.append("italic" if italic else "no-italic")
+
+        if underline is not None:
+            text_style["underline"] = underline
+            text_style_fields.append("underline")
+            applied_styles.append("underline" if underline else "no-underline")
+
+        if strikethrough is not None:
+            text_style["strikethrough"] = strikethrough
+            text_style_fields.append("strikethrough")
+            applied_styles.append("strikethrough" if strikethrough else "no-strikethrough")
+
+        if font_size is not None:
+            text_style["fontSize"] = {"magnitude": font_size, "unit": "PT"}
+            text_style_fields.append("fontSize")
+            applied_styles.append(f"fontSize:{font_size}pt")
+
+        if font_family is not None:
+            text_style["weightedFontFamily"] = {"fontFamily": font_family}
+            text_style_fields.append("weightedFontFamily")
+            applied_styles.append(f"fontFamily:{font_family}")
+
+        if foreground_color is not None:
+            rgb = hex_to_rgb(foreground_color)
+            text_style["foregroundColor"] = {"color": {"rgbColor": rgb}}
+            text_style_fields.append("foregroundColor")
+            applied_styles.append(f"foregroundColor:{foreground_color}")
+
+        if background_color is not None:
+            rgb = hex_to_rgb(background_color)
+            text_style["backgroundColor"] = {"color": {"rgbColor": rgb}}
+            text_style_fields.append("backgroundColor")
+            applied_styles.append(f"backgroundColor:{background_color}")
+
+        if link_url is not None:
+            text_style["link"] = {"url": link_url}
+            text_style_fields.append("link")
+            applied_styles.append(f"link:{link_url}")
+
+        if text_style_fields:
+            requests.append({
+                "updateTextStyle": {
+                    "range": {
+                        "startIndex": start_index,
+                        "endIndex": end_index
+                    },
+                    "textStyle": text_style,
+                    "fields": ",".join(text_style_fields)
+                }
+            })
+
+        # Build paragraph style request
+        paragraph_style = {}
+        paragraph_style_fields = []
+
+        if heading_type is not None:
+            paragraph_style["namedStyleType"] = heading_type
+            paragraph_style_fields.append("namedStyleType")
+            applied_styles.append(f"heading:{heading_type}")
+
+        if alignment is not None:
+            paragraph_style["alignment"] = alignment
+            paragraph_style_fields.append("alignment")
+            applied_styles.append(f"alignment:{alignment}")
+
+        if line_spacing is not None:
+            paragraph_style["lineSpacing"] = line_spacing
+            paragraph_style_fields.append("lineSpacing")
+            applied_styles.append(f"lineSpacing:{line_spacing}")
+
+        if space_above is not None:
+            paragraph_style["spaceAbove"] = {"magnitude": space_above, "unit": "PT"}
+            paragraph_style_fields.append("spaceAbove")
+            applied_styles.append(f"spaceAbove:{space_above}pt")
+
+        if space_below is not None:
+            paragraph_style["spaceBelow"] = {"magnitude": space_below, "unit": "PT"}
+            paragraph_style_fields.append("spaceBelow")
+            applied_styles.append(f"spaceBelow:{space_below}pt")
+
+        if paragraph_style_fields:
+            requests.append({
+                "updateParagraphStyle": {
+                    "range": {
+                        "startIndex": start_index,
+                        "endIndex": end_index
+                    },
+                    "paragraphStyle": paragraph_style,
+                    "fields": ",".join(paragraph_style_fields)
+                }
+            })
+
+        if not requests:
+            return {
+                "success": False,
+                "error": "No styles specified. Provide at least one style parameter.",
+                "hint": "Available styles: bold, italic, underline, strikethrough, font_size, font_family, foreground_color, background_color, link_url, heading_type, alignment, line_spacing, space_above, space_below"
+            }
+
+        # Execute batch update
+        response = service.documents().batchUpdate(
+            documentId=document_id,
+            body={"requests": requests}
+        ).execute()
+
+        return {
+            "success": True,
+            "document_id": document_id,
+            "styled_range": {
+                "start_index": start_index,
+                "end_index": end_index
+            },
+            "applied_styles": applied_styles,
+            "message": f"Applied {len(applied_styles)} style(s) to range [{start_index}, {end_index})"
+        }
+
+    except HttpError as e:
+        logger.error(f"Google Docs API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool apply_style: {e}")
+        raise e
+
+
+async def insert_formatted_text(
+    document_id: str,
+    formatted_text: str,
+    position: str = "end"
+) -> dict[str, Any]:
+    """Insert formatted text using markdown-like syntax.
+
+    Supported markup:
+    - **bold** or __bold__
+    - *italic* or _italic_
+    - ~~strikethrough~~
+    - [link text](url)
+    - # Heading 1 through ###### Heading 6
+    - - or * for bullet points
+    """
+    logger.info(f"Executing tool: insert_formatted_text with document_id: {document_id}, position: {position}")
+    try:
+        access_token = get_auth_token()
+        service = get_docs_service(access_token)
+
+        # Parse markdown
+        plain_text, style_ranges, paragraph_styles = parse_markdown_text(formatted_text)
+
+        # Get document to find insertion point
+        document = await _get_document_raw(document_id)
+
+        if position == "beginning":
+            insert_index = 1
+        else:  # "end"
+            insert_index = document["body"]["content"][-1]["endIndex"] - 1
+
+        # Build requests list
+        requests = []
+
+        # First, insert the plain text
+        requests.append({
+            'insertText': {
+                'location': {'index': insert_index},
+                'text': plain_text
+            }
+        })
+
+        # Apply text styles (in reverse order to maintain indices)
+        # All style indices need to be offset by insert_index
+        for style_range in reversed(style_ranges):
+            style = style_range["style"]
+            start = insert_index + style_range["start"]
+            end = insert_index + style_range["end"]
+
+            text_style = {}
+            fields = []
+
+            if style.get("bold"):
+                text_style["bold"] = True
+                fields.append("bold")
+            if style.get("italic"):
+                text_style["italic"] = True
+                fields.append("italic")
+            if style.get("strikethrough"):
+                text_style["strikethrough"] = True
+                fields.append("strikethrough")
+            if style.get("link"):
+                text_style["link"] = style["link"]
+                fields.append("link")
+
+            if fields:
+                requests.append({
+                    "updateTextStyle": {
+                        "range": {"startIndex": start, "endIndex": end},
+                        "textStyle": text_style,
+                        "fields": ",".join(fields)
+                    }
+                })
+
+        # Apply paragraph styles (headings)
+        for para_style in reversed(paragraph_styles):
+            start = insert_index + para_style["start"]
+            end = insert_index + para_style["end"]
+
+            requests.append({
+                "updateParagraphStyle": {
+                    "range": {"startIndex": start, "endIndex": end},
+                    "paragraphStyle": para_style["paragraph_style"],
+                    "fields": "namedStyleType"
+                }
+            })
+
+        # Execute all requests in a single batch
+        response = service.documents().batchUpdate(
+            documentId=document_id,
+            body={"requests": requests}
+        ).execute()
+
+        # Count applied styles
+        style_counts = {
+            "headings": len(paragraph_styles),
+            "bold_ranges": sum(1 for s in style_ranges if s["style"].get("bold")),
+            "italic_ranges": sum(1 for s in style_ranges if s["style"].get("italic")),
+            "strikethrough_ranges": sum(1 for s in style_ranges if s["style"].get("strikethrough")),
+            "links": sum(1 for s in style_ranges if s["style"].get("link"))
+        }
+
+        return {
+            "success": True,
+            "document_id": document_id,
+            "inserted_range": {
+                "start_index": insert_index,
+                "end_index": insert_index + len(plain_text)
+            },
+            "characters_inserted": len(plain_text),
+            "styles_applied": style_counts,
+            "message": f"Inserted {len(plain_text)} characters with formatting at {position} of document"
+        }
+
+    except HttpError as e:
+        logger.error(f"Google Docs API error: {e}")
+        error_detail = json.loads(e.content.decode('utf-8'))
+        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+    except Exception as e:
+        logger.exception(f"Error executing tool insert_formatted_text: {e}")
+        raise e
+
+
 async def get_all_documents() -> Dict[str, Any]:
     """Get all Google Docs documents from the user's Drive."""
     logger.info(f"Executing tool: get_all_documents")
@@ -437,7 +1230,15 @@ def main(
         return [
             types.Tool(
                 name="google_docs_get_document_by_id",
-                description="Retrieve a Google Docs document by ID.",
+                description="""Retrieve a Google Docs document by ID.
+
+Response formats:
+- 'raw': Full API response with all metadata (default, backward compatible)
+- 'plain_text': Text content only, no formatting
+- 'markdown': Text with formatting converted to markdown syntax
+- 'structured': JSON with text runs and style information, including character indices for editing
+- 'normalized': Simplified structure with tables, page info, and list definitions
+""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id"],
@@ -445,6 +1246,11 @@ def main(
                         "document_id": {
                             "type": "string",
                             "description": "The ID of the Google Docs document to retrieve.",
+                        },
+                        "response_format": {
+                            "type": "string",
+                            "enum": ["raw", "plain_text", "markdown", "structured", "normalized"],
+                            "description": "Output format. Default: 'raw' (for backward compatibility)",
                         },
                     },
                 },
@@ -522,6 +1328,206 @@ def main(
                     **{"category": "GOOGLE_DOCS_DOCUMENT"}
                 ),
             ),
+            # New tools
+            types.Tool(
+                name="google_docs_edit_text",
+                description="""Edit text in a Google Docs document by replacing old text with new text.
+
+This single operation handles insert, delete, and replace:
+
+- **Insert after anchor**:
+  old_text: "# Introduction"
+  new_text: "# Introduction\\n\\nThis is the new paragraph."
+
+- **Delete**:
+  old_text: "Remove this sentence."
+  new_text: ""
+
+- **Replace**:
+  old_text: "old word"
+  new_text: "new word"
+
+- **Insert at end**:
+  old_text: "" (empty)
+  new_text: "Appended text"
+  append_to_end: true
+""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "old_text", "new_text"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "old_text": {
+                            "type": "string",
+                            "description": "The text to find and replace. Use empty string with append_to_end=true to insert at end.",
+                        },
+                        "new_text": {
+                            "type": "string",
+                            "description": "The replacement text. Use empty string to delete.",
+                        },
+                        "match_case": {
+                            "type": "boolean",
+                            "description": "Whether to match case when finding old_text. Default: true",
+                        },
+                        "replace_all": {
+                            "type": "boolean",
+                            "description": "Replace all occurrences or just the first one. Default: false (Note: Google Docs API always replaces all)",
+                        },
+                        "append_to_end": {
+                            "type": "boolean",
+                            "description": "If true and old_text is empty, append new_text to the end of document. Default: false",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
+            types.Tool(
+                name="google_docs_apply_style",
+                description="""Apply formatting styles to a specified range in a Google Docs document.
+
+Supports both character-level styles (bold, italic, etc.) and paragraph-level styles (headings, alignment, etc.).
+
+To find the correct indices, use google_docs_get_document_by_id with response_format='structured'.
+""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "start_index", "end_index"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "start_index": {
+                            "type": "integer",
+                            "description": "Start position of the range (1-based, inclusive).",
+                        },
+                        "end_index": {
+                            "type": "integer",
+                            "description": "End position of the range (exclusive).",
+                        },
+                        # Character styles
+                        "bold": {
+                            "type": "boolean",
+                            "description": "Apply bold formatting.",
+                        },
+                        "italic": {
+                            "type": "boolean",
+                            "description": "Apply italic formatting.",
+                        },
+                        "underline": {
+                            "type": "boolean",
+                            "description": "Apply underline formatting.",
+                        },
+                        "strikethrough": {
+                            "type": "boolean",
+                            "description": "Apply strikethrough formatting.",
+                        },
+                        "font_size": {
+                            "type": "number",
+                            "description": "Font size in points (e.g., 12, 14, 18).",
+                        },
+                        "font_family": {
+                            "type": "string",
+                            "description": "Font family name (e.g., 'Arial', 'Times New Roman').",
+                        },
+                        "foreground_color": {
+                            "type": "string",
+                            "description": "Text color in hex format (e.g., '#FF0000' for red).",
+                        },
+                        "background_color": {
+                            "type": "string",
+                            "description": "Background/highlight color in hex format.",
+                        },
+                        "link_url": {
+                            "type": "string",
+                            "description": "URL to create a hyperlink.",
+                        },
+                        # Paragraph styles
+                        "heading_type": {
+                            "type": "string",
+                            "enum": ["NORMAL_TEXT", "TITLE", "SUBTITLE", "HEADING_1", "HEADING_2", "HEADING_3", "HEADING_4", "HEADING_5", "HEADING_6"],
+                            "description": "Paragraph heading style.",
+                        },
+                        "alignment": {
+                            "type": "string",
+                            "enum": ["START", "CENTER", "END", "JUSTIFIED"],
+                            "description": "Text alignment.",
+                        },
+                        "line_spacing": {
+                            "type": "number",
+                            "description": "Line spacing (100 = single, 150 = 1.5, 200 = double).",
+                        },
+                        "space_above": {
+                            "type": "number",
+                            "description": "Space above paragraph in points.",
+                        },
+                        "space_below": {
+                            "type": "number",
+                            "description": "Space below paragraph in points.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
+            types.Tool(
+                name="google_docs_insert_formatted_text",
+                description="""Insert formatted text into a Google Docs document using markdown-like syntax.
+
+Supported markup:
+- **bold** or __bold__ for bold text
+- *italic* or _italic_ for italic text
+- ~~strikethrough~~ for strikethrough
+- [link text](url) for hyperlinks
+- # Heading 1, ## Heading 2, ... ###### Heading 6 (must be at line start)
+- - item or * item for bullet points
+
+Example:
+```
+# Meeting Notes
+
+**Important**: This is a _critical_ update.
+
+## Action Items
+- Review the ~~old~~ new proposal
+- Contact [John](mailto:john@example.com)
+```
+
+This high-level API internally:
+1. Parses the markdown syntax
+2. Inserts plain text
+3. Applies styles (bold, italic, headings, etc.)
+4. Executes all as a single atomic batchUpdate
+""",
+                inputSchema={
+                    "type": "object",
+                    "required": ["document_id", "formatted_text"],
+                    "properties": {
+                        "document_id": {
+                            "type": "string",
+                            "description": "The ID of the Google Docs document.",
+                        },
+                        "formatted_text": {
+                            "type": "string",
+                            "description": "Text with markdown-like syntax for formatting.",
+                        },
+                        "position": {
+                            "type": "string",
+                            "enum": ["end", "beginning"],
+                            "description": "Where to insert the text. Default: 'end'",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "GOOGLE_DOCS_DOCUMENT"}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -537,13 +1543,16 @@ def main(
                         text="Error: document_id parameter is required",
                     )
                 ]
-            
+
+            # Get response_format with default 'raw' for backward compatibility
+            response_format = arguments.get("response_format", "raw")
+
             try:
-                result = await get_document_by_id(document_id)
+                result = await get_document_by_id(document_id, response_format)
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else str(result),
                     )
                 ]
             except Exception as e:
@@ -655,7 +1664,140 @@ def main(
                         text=f"Error: {str(e)}",
                     )
                 ]
-        
+
+        elif name == "google_docs_edit_text":
+            document_id = arguments.get("document_id")
+            old_text = arguments.get("old_text")
+            new_text = arguments.get("new_text")
+
+            if not document_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id parameter is required",
+                    )
+                ]
+
+            # old_text and new_text can be empty strings, so check for None explicitly
+            if old_text is None or new_text is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: old_text and new_text parameters are required",
+                    )
+                ]
+
+            match_case = arguments.get("match_case", True)
+            replace_all = arguments.get("replace_all", False)
+            append_to_end = arguments.get("append_to_end", False)
+
+            try:
+                result = await edit_text(
+                    document_id=document_id,
+                    old_text=old_text,
+                    new_text=new_text,
+                    match_case=match_case,
+                    replace_all=replace_all,
+                    append_to_end=append_to_end
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_docs_apply_style":
+            document_id = arguments.get("document_id")
+            start_index = arguments.get("start_index")
+            end_index = arguments.get("end_index")
+
+            if not document_id or start_index is None or end_index is None:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id, start_index, and end_index parameters are required",
+                    )
+                ]
+
+            try:
+                result = await apply_style(
+                    document_id=document_id,
+                    start_index=start_index,
+                    end_index=end_index,
+                    bold=arguments.get("bold"),
+                    italic=arguments.get("italic"),
+                    underline=arguments.get("underline"),
+                    strikethrough=arguments.get("strikethrough"),
+                    font_size=arguments.get("font_size"),
+                    font_family=arguments.get("font_family"),
+                    foreground_color=arguments.get("foreground_color"),
+                    background_color=arguments.get("background_color"),
+                    link_url=arguments.get("link_url"),
+                    heading_type=arguments.get("heading_type"),
+                    alignment=arguments.get("alignment"),
+                    line_spacing=arguments.get("line_spacing"),
+                    space_above=arguments.get("space_above"),
+                    space_below=arguments.get("space_below")
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
+        elif name == "google_docs_insert_formatted_text":
+            document_id = arguments.get("document_id")
+            formatted_text = arguments.get("formatted_text")
+
+            if not document_id or not formatted_text:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: document_id and formatted_text parameters are required",
+                    )
+                ]
+
+            position = arguments.get("position", "end")
+
+            try:
+                result = await insert_formatted_text(
+                    document_id=document_id,
+                    formatted_text=formatted_text,
+                    position=position
+                )
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+
         return [
             types.TextContent(
                 type="text",
