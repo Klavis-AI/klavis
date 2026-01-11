@@ -6,6 +6,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 const LIST_TAGS_TOOL: Tool = {
   name: 'intercom_list_tags',
   description: 'List all tags in your Intercom workspace.',
+  annotations: {
+    title: 'List Tags',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {},
@@ -19,6 +23,10 @@ const LIST_TAGS_TOOL: Tool = {
 const GET_TAG_TOOL: Tool = {
   name: 'intercom_get_tag',
   description: 'Retrieve a specific tag by its ID.',
+  annotations: {
+    title: 'Get Tag',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -38,6 +46,10 @@ const GET_TAG_TOOL: Tool = {
 const CREATE_OR_UPDATE_TAG_TOOL: Tool = {
   name: 'intercom_create_or_update_tag',
   description: 'Create a new tag or update an existing tag by name or ID.',
+  annotations: {
+    title: 'Create or Update Tag',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -64,6 +76,10 @@ const TAG_COMPANIES_TOOL: Tool = {
   name: 'intercom_tag_companies',
   description:
     "Tag a single company or a list of companies. If the tag doesn't exist, a new one will be created automatically.",
+  annotations: {
+    title: 'Tag Companies',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -103,6 +119,10 @@ const TAG_COMPANIES_TOOL: Tool = {
 const UNTAG_COMPANIES_TOOL: Tool = {
   name: 'intercom_untag_companies',
   description: 'Remove a tag from a single company or a list of companies.',
+  annotations: {
+    title: 'Untag Companies',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -149,6 +169,10 @@ const TAG_USERS_TOOL: Tool = {
   name: 'intercom_tag_users',
   description:
     "Tag a list of users/contacts. If the tag doesn't exist, a new one will be created automatically.",
+  annotations: {
+    title: 'Tag Users',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -184,6 +208,10 @@ const DELETE_TAG_TOOL: Tool = {
   name: 'intercom_delete_tag',
   description:
     'Delete a tag from your workspace. Note: tags with dependent objects (like segments) cannot be deleted.',
+  annotations: {
+    title: 'Delete Tag',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {

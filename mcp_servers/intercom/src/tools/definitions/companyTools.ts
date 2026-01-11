@@ -6,6 +6,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 const LIST_COMPANIES_TOOL: Tool = {
   name: 'intercom_list_companies',
   description: 'List all companies in your Intercom workspace with pagination support.',
+  annotations: {
+    title: 'List Companies',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -37,6 +41,10 @@ const LIST_COMPANIES_TOOL: Tool = {
 const GET_COMPANY_TOOL: Tool = {
   name: 'intercom_get_company',
   description: 'Retrieve a specific company by their Intercom ID.',
+  annotations: {
+    title: 'Get Company',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -56,6 +64,10 @@ const GET_COMPANY_TOOL: Tool = {
 const CREATE_COMPANY_TOOL: Tool = {
   name: 'intercom_create_company',
   description: 'Create a new company in Intercom workspace.',
+  annotations: {
+    title: 'Create Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -133,6 +145,10 @@ const CREATE_COMPANY_TOOL: Tool = {
 const UPDATE_COMPANY_TOOL: Tool = {
   name: 'intercom_update_company',
   description: 'Update an existing company in Intercom workspace.',
+  annotations: {
+    title: 'Update Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -201,6 +217,10 @@ const UPDATE_COMPANY_TOOL: Tool = {
 const DELETE_COMPANY_TOOL: Tool = {
   name: 'intercom_delete_company',
   description: 'Delete a single company from Intercom workspace.',
+  annotations: {
+    title: 'Delete Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -220,6 +240,10 @@ const DELETE_COMPANY_TOOL: Tool = {
 const FIND_COMPANY_TOOL: Tool = {
   name: 'intercom_find_company',
   description: 'Find a company using your own company_id (external identifier).',
+  annotations: {
+    title: 'Find Company',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -239,6 +263,10 @@ const FIND_COMPANY_TOOL: Tool = {
 const LIST_COMPANY_USERS_TOOL: Tool = {
   name: 'intercom_list_company_users',
   description: 'List all users that belong to a specific company.',
+  annotations: {
+    title: 'List Company Users',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -258,6 +286,10 @@ const LIST_COMPANY_USERS_TOOL: Tool = {
 const ATTACH_CONTACT_TO_COMPANY_TOOL: Tool = {
   name: 'intercom_attach_contact_to_company',
   description: 'Attach a contact to a company.',
+  annotations: {
+    title: 'Attach Contact to Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -282,6 +314,10 @@ const ATTACH_CONTACT_TO_COMPANY_TOOL: Tool = {
 const DETACH_CONTACT_FROM_COMPANY_TOOL: Tool = {
   name: 'intercom_detach_contact_from_company',
   description: 'Detach a contact from a company.',
+  annotations: {
+    title: 'Detach Contact from Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -306,6 +342,10 @@ const DETACH_CONTACT_FROM_COMPANY_TOOL: Tool = {
 const LIST_COMPANY_SEGMENTS_TOOL: Tool = {
   name: 'intercom_list_company_segments',
   description: 'List all segments that a specific company belongs to.',
+  annotations: {
+    title: 'List Company Segments',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -325,6 +365,10 @@ const LIST_COMPANY_SEGMENTS_TOOL: Tool = {
 const LIST_COMPANY_TAGS_TOOL: Tool = {
   name: 'intercom_list_company_tags',
   description: 'List all tags attached to a specific company.',
+  annotations: {
+    title: 'List Company Tags',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -344,6 +388,10 @@ const LIST_COMPANY_TAGS_TOOL: Tool = {
 const TAG_COMPANY_TOOL: Tool = {
   name: 'intercom_tag_company',
   description: 'Add a tag to a specific company.',
+  annotations: {
+    title: 'Tag Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -383,6 +431,10 @@ const TAG_COMPANY_TOOL: Tool = {
 const UNTAG_COMPANY_TOOL: Tool = {
   name: 'intercom_untag_company',
   description: 'Remove a tag from a specific company.',
+  annotations: {
+    title: 'Untag Company',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
