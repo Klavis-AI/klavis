@@ -6692,7 +6692,7 @@
         "tags": [
           "intercom-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Intercom",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeintercom_oauth",
         "parameters": [
@@ -6765,7 +6765,7 @@
         "tags": [
           "paypal-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize PayPal",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizepaypal_oauth",
         "parameters": [
@@ -6838,7 +6838,7 @@
         "tags": [
           "sentry-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Sentry",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizesentry_oauth",
         "parameters": [
@@ -6911,7 +6911,7 @@
         "tags": [
           "netlify-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Netlify",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizenetlify_oauth",
         "parameters": [
@@ -6984,7 +6984,7 @@
         "tags": [
           "huggingface-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Hugging Face",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizehuggingface_oauth",
         "parameters": [
@@ -7057,7 +7057,7 @@
         "tags": [
           "square-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Square",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizesquare_oauth",
         "parameters": [
@@ -7130,7 +7130,7 @@
         "tags": [
           "clockwise-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Clockwise",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeclockwise_oauth",
         "parameters": [
@@ -7203,7 +7203,7 @@
         "tags": [
           "jotform-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Jotform",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizejotform_oauth",
         "parameters": [
@@ -7276,7 +7276,7 @@
         "tags": [
           "honeycomb-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Honeycomb",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizehoneycomb_oauth",
         "parameters": [
@@ -7349,7 +7349,7 @@
         "tags": [
           "amplitude-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Amplitude",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeamplitude_oauth",
         "parameters": [
