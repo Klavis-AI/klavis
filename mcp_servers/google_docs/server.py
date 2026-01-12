@@ -77,17 +77,180 @@ def get_auth_token() -> str:
     except LookupError:
         raise RuntimeError("Authentication token not found in request context")
 
+
+def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Normalize the Google Docs API response to a simplified structure.
+    Reduces complexity while preserving important information.
+    """
+    
+    def extract_text_from_paragraph(paragraph: Dict) -> Dict[str, Any]:
+        """Extract text content and styling from a paragraph."""
+        elements = paragraph.get('elements', [])
+        text_parts = []
+        
+        for element in elements:
+            if 'textRun' in element:
+                text_run = element['textRun']
+                content = text_run.get('content', '')
+                text_style = text_run.get('textStyle', {})
+                
+                part = {'text': content}
+                if text_style.get('bold'):
+                    part['bold'] = True
+                if text_style.get('italic'):
+                    part['italic'] = True
+                if text_style.get('underline'):
+                    part['underline'] = True
+                
+                text_parts.append(part)
+        
+        # Combine text for simple display
+        full_text = ''.join(p['text'] for p in text_parts).strip()
+        
+        result = {'text': full_text}
+        
+        # Add paragraph style info
+        para_style = paragraph.get('paragraphStyle', {})
+        named_style = para_style.get('namedStyleType')
+        if named_style and named_style != 'NORMAL_TEXT':
+            result['style'] = named_style
+        
+        heading_id = para_style.get('headingId')
+        if heading_id:
+            result['headingId'] = heading_id
+        
+        # Add bullet info if present
+        if 'bullet' in paragraph:
+            bullet = paragraph['bullet']
+            result['isBullet'] = True
+            result['listId'] = bullet.get('listId')
+            if bullet.get('nestingLevel', 0) > 0:
+                result['nestingLevel'] = bullet['nestingLevel']
+        
+        # Include rich text parts if there's formatting
+        has_formatting = any(
+            p.get('bold') or p.get('italic') or p.get('underline')
+            for p in text_parts
+        )
+        if has_formatting:
+            result['formattedParts'] = [p for p in text_parts if p['text'].strip()]
+        
+        return result
+    
+    def extract_table(table: Dict) -> Dict[str, Any]:
+        """Extract table content in a simplified format."""
+        rows = table.get('rows', 0)
+        columns = table.get('columns', 0)
+        table_rows = table.get('tableRows', [])
+        
+        extracted_rows = []
+        for table_row in table_rows:
+            cells = []
+            for cell in table_row.get('tableCells', []):
+                cell_content = []
+                for content_item in cell.get('content', []):
+                    if 'paragraph' in content_item:
+                        para_data = extract_text_from_paragraph(content_item['paragraph'])
+                        if para_data['text']:
+                            cell_content.append(para_data['text'])
+                cells.append(' '.join(cell_content))
+            extracted_rows.append(cells)
+        
+        return {
+            'type': 'table',
+            'rows': rows,
+            'columns': columns,
+            'data': extracted_rows
+        }
+    
+    def process_content(content_list: list) -> list:
+        """Process the document content into a simplified structure."""
+        processed = []
+        
+        for item in content_list:
+            # Skip section breaks
+            if 'sectionBreak' in item:
+                continue
+            
+            # Process paragraphs
+            if 'paragraph' in item:
+                para_data = extract_text_from_paragraph(item['paragraph'])
+                if para_data['text']:  # Only include non-empty paragraphs
+                    processed.append({
+                        'type': 'paragraph',
+                        **para_data
+                    })
+            
+            # Process tables
+            elif 'table' in item:
+                table_data = extract_table(item['table'])
+                processed.append(table_data)
+        
+        return processed
+    
+    # Build the normalized response
+    normalized = {
+        'documentId': raw_response.get('documentId'),
+        'title': raw_response.get('title'),
+        'revisionId': raw_response.get('revisionId'),
+    }
+    
+    # Process body content
+    body = raw_response.get('body', {})
+    content = body.get('content', [])
+    normalized['content'] = process_content(content)
+    
+    # Extract document metadata
+    doc_style = raw_response.get('documentStyle', {})
+    if doc_style:
+        page_size = doc_style.get('pageSize', {})
+        normalized['pageInfo'] = {
+            'width': page_size.get('width', {}).get('magnitude'),
+            'height': page_size.get('height', {}).get('magnitude'),
+            'unit': page_size.get('width', {}).get('unit', 'PT'),
+            'margins': {
+                'top': doc_style.get('marginTop', {}).get('magnitude'),
+                'bottom': doc_style.get('marginBottom', {}).get('magnitude'),
+                'left': doc_style.get('marginLeft', {}).get('magnitude'),
+                'right': doc_style.get('marginRight', {}).get('magnitude'),
+            }
+        }
+    
+    # Include list definitions (simplified)
+    lists = raw_response.get('lists', {})
+    if lists:
+        normalized['lists'] = {
+            list_id: {
+                'type': 'bullet' if props.get('listProperties', {}).get('nestingLevels', [{}])[0].get('glyphSymbol') else 'numbered'
+            }
+            for list_id, props in lists.items()
+        }
+    
+    return normalized
+
+async def _get_document_raw(document_id: str) -> Dict[str, Any]:
+    """Internal function to get raw Google Docs API response."""
+    access_token = get_auth_token()
+    service = get_docs_service(access_token)
+    request = service.documents().get(documentId=document_id)
+    response = request.execute()
+    return dict(response)
+
+
 async def get_document_by_id(document_id: str) -> Dict[str, Any]:
-    """Get the latest version of the specified Google Docs document."""
+    """Get the latest version of the specified Google Docs document.
+    
+    Args:
+        document_id: The ID of the Google Docs document to retrieve.
+    
+    Returns:
+        Normalized document response with simplified structure.
+    """
     logger.info(f"Executing tool: get_document_by_id with document_id: {document_id}")
     try:
-        access_token = get_auth_token()
-        service = get_docs_service(access_token)
-        
-        request = service.documents().get(documentId=document_id)
-        response = request.execute()
-        
-        return dict(response)
+        raw_response = await _get_document_raw(document_id)
+        return normalize_document_response(raw_response)
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -103,7 +266,8 @@ async def insert_text_at_end(document_id: str, text: str) -> Dict[str, Any]:
         access_token = get_auth_token()
         service = get_docs_service(access_token)
         
-        document = await get_document_by_id(document_id)
+        # Need raw response to get endIndex
+        document = await _get_document_raw(document_id)
         
         end_index = document["body"]["content"][-1]["endIndex"]
         
@@ -125,7 +289,10 @@ async def insert_text_at_end(document_id: str, text: str) -> Dict[str, Any]:
             .execute()
         )
         
-        return dict(response)
+        return {
+            "id": document_id,
+            "status": "success",
+        }
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")
         error_detail = json.loads(e.content.decode('utf-8'))
@@ -148,8 +315,8 @@ async def create_blank_document(title: str) -> Dict[str, Any]:
         
         return {
             "title": response["title"],
-            "document_id": response["documentId"],
-            "document_url": f"https://docs.google.com/document/d/{response['documentId']}/edit",
+            "id": response["documentId"],
+            "url": f"https://docs.google.com/document/d/{response['documentId']}/edit",
         }
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")
@@ -188,8 +355,8 @@ async def create_document_from_text(title: str, text_content: str) -> Dict[str, 
         
         return {
             "title": document["title"],
-            "documentId": document["document_id"],
-            "documentUrl": f"https://docs.google.com/document/d/{document['document_id']}/edit",
+            "id": document["document_id"],
+            "url": f"https://docs.google.com/document/d/{document['document_id']}/edit",
         }
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")
@@ -221,9 +388,9 @@ async def get_all_documents() -> Dict[str, Any]:
             documents.append({
                 'id': file['id'],
                 'name': file['name'],
-                'createdTime': file.get('createdTime'),
-                'modifiedTime': file.get('modifiedTime'),
-                'webViewLink': file.get('webViewLink')
+                'createdAt': file.get('createdTime'),
+                'modifiedAt': file.get('modifiedTime'),
+                'url': file.get('webViewLink')
             })
         
         return {

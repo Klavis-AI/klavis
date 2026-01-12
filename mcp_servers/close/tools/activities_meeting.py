@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_meeting_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -59,9 +60,9 @@ async def list_meetings(
     response = await client.get("/activity/meeting/", params=params)
     
     return {
-        "meetings": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "meetings": [normalize_meeting_activity(m) for m in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -77,7 +78,7 @@ async def get_meeting(meeting_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/meeting/{meeting_id}/")
     
-    return response
+    return {"meeting": normalize_meeting_activity(response)}
 
 
 async def create_meeting(
@@ -137,7 +138,7 @@ async def create_meeting(
     
     response = await client.post("/activity/meeting/", json_data=meeting_data)
     
-    return response
+    return {"meeting": normalize_meeting_activity(response)}
 
 
 async def update_meeting(
@@ -185,7 +186,7 @@ async def update_meeting(
     
     response = await client.put(f"/activity/meeting/{meeting_id}/", json_data=meeting_data)
     
-    return response
+    return {"meeting": normalize_meeting_activity(response)}
 
 
 async def delete_meeting(meeting_id: str) -> ToolResponse:
@@ -198,9 +199,9 @@ async def delete_meeting(meeting_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/meeting/{meeting_id}/")
+    await client.delete(f"/activity/meeting/{meeting_id}/")
     
-    return {"success": True, "meeting_id": meeting_id}
+    return {"success": True, "meetingId": meeting_id}
 
 
 async def search_meetings(
@@ -226,8 +227,7 @@ async def search_meetings(
     response = await client.get("/activity/meeting/", params=params)
     
     return {
-        "meetings": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "meetings": [normalize_meeting_activity(m) for m in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

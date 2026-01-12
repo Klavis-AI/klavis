@@ -1,6 +1,12 @@
 import logging
 from typing import Any, Dict, List
 from .base import get_salesforce_conn
+from .normalization import (
+    normalize_soql_result,
+    normalize_tooling_result,
+    normalize_object_description,
+    normalize_component_source_result,
+)
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -11,7 +17,7 @@ async def execute_soql_query(query: str) -> Dict[str, Any]:
     try:
         sf = get_salesforce_conn()
         result = sf.query(query)
-        return dict(result)
+        return normalize_soql_result(dict(result))
     except Exception as e:
         logger.exception(f"Error executing SOQL query: {e}")
         raise e
@@ -22,7 +28,7 @@ async def execute_tooling_query(query: str) -> Dict[str, Any]:
     try:
         sf = get_salesforce_conn()
         result = sf.toolingexecute(f"query/?q={query}")
-        return dict(result)
+        return normalize_tooling_result(dict(result))
     except Exception as e:
         logger.exception(f"Error executing tooling query: {e}")
         raise e
@@ -39,11 +45,11 @@ async def describe_object(object_name: str, detailed: bool = False) -> Dict[str,
             # For custom objects, get additional metadata if requested
             metadata_result = sf.restful(f"sobjects/{object_name}/describe/")
             return {
-                "describe": dict(result),
-                "metadata": metadata_result
+                "describe": normalize_object_description(dict(result)),
+                "metadata": normalize_object_description(metadata_result) if metadata_result else None
             }
         
-        return dict(result)
+        return normalize_object_description(dict(result))
     except Exception as e:
         logger.exception(f"Error describing object: {e}")
         raise e
@@ -90,7 +96,7 @@ async def get_component_source(metadata_type: str, component_names: List[str]) -
                     "error": str(e)
                 })
         
-        return {"results": results}
+        return normalize_component_source_result({"results": results}, metadata_type)
     except Exception as e:
         logger.exception(f"Error retrieving metadata: {e}")
         raise e 

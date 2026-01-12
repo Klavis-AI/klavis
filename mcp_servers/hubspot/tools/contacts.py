@@ -1,12 +1,14 @@
 import logging
 import json
+from typing import Dict, Any
 from hubspot.crm.contacts import SimplePublicObjectInputForCreate, SimplePublicObjectInput
-from .base import get_hubspot_client
+from .base import get_hubspot_client, normalize_contact
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-async def hubspot_get_contacts(limit: int = 10):
+
+async def hubspot_get_contacts(limit: int = 10) -> Dict[str, Any]:
     """
     Fetch a list of contacts from HubSpot.
 
@@ -14,7 +16,7 @@ async def hubspot_get_contacts(limit: int = 10):
     - limit: Number of contacts to retrieve
 
     Returns:
-    - Paginated contacts response
+    - Normalized contacts response
     """
     client = get_hubspot_client()
     if not client:
@@ -23,13 +25,22 @@ async def hubspot_get_contacts(limit: int = 10):
     try:
         logger.info(f"Fetching up to {limit} contacts from HubSpot")
         result = client.crm.contacts.basic_api.get_page(limit=limit)
+        
+        # Normalize response
+        contacts = [normalize_contact(obj) for obj in (result.results or [])]
+        
         logger.info("Successfully fetched contacts")
-        return result
+        return {
+            "count": len(contacts),
+            "contacts": contacts,
+            "hasMore": result.paging.next.after is not None if result.paging and result.paging.next else False,
+        }
     except Exception as e:
         logger.error(f"Error fetching contacts: {e}")
         raise e
 
-async def hubspot_get_contact_by_id(contact_id: str):
+
+async def hubspot_get_contact_by_id(contact_id: str) -> Dict[str, Any]:
     """
     Get a specific contact by ID.
 
@@ -37,7 +48,7 @@ async def hubspot_get_contact_by_id(contact_id: str):
     - contact_id: ID of the contact to retrieve
 
     Returns:
-    - Contact object
+    - Normalized contact object
     """
     client = get_hubspot_client()
     if not client:
@@ -46,8 +57,12 @@ async def hubspot_get_contact_by_id(contact_id: str):
     try:
         logger.info(f"Fetching contact with ID: {contact_id}")
         result = client.crm.contacts.basic_api.get_by_id(contact_id)
+        
+        # Normalize response
+        contact = normalize_contact(result)
+        
         logger.info("Successfully fetched contact")
-        return result
+        return {"contact": contact}
     except Exception as e:
         logger.error(f"Error fetching contact by ID: {e}")
         raise e

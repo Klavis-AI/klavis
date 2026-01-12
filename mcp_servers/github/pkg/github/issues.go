@@ -14,6 +14,63 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+// IssueData represents the restructured issue response
+type IssueData struct {
+	IssueID       int64     `json:"issue_id"`
+	IssueNumber   int       `json:"issue_number"`
+	Subject       string    `json:"subject"`
+	Description   string    `json:"description"`
+	Status        string    `json:"status"`
+	SubmittedAt   time.Time `json:"submitted_at"`
+	LastUpdatedAt time.Time `json:"last_updated_at"`
+	Reporter      UserInfo  `json:"reporter"`
+	Tags          []string  `json:"tags"`
+	Assignees     []UserInfo `json:"assignees"`
+}
+
+// UserInfo represents restructured user information
+type UserInfo struct {
+	Username  string `json:"username"`
+	ProfileID int64  `json:"profile_id"`
+}
+
+// transformUserToUserInfo converts GitHub user to UserInfo
+func transformUserToUserInfo(user *github.User) UserInfo {
+	if user == nil {
+		return UserInfo{}
+	}
+	return UserInfo{
+		Username:  user.GetLogin(),
+		ProfileID: user.GetID(),
+	}
+}
+
+// transformIssueToIssueData converts GitHub issue to IssueData
+func transformIssueToIssueData(issue *github.Issue) IssueData {
+	tags := []string{}
+	for _, label := range issue.Labels {
+		tags = append(tags, label.GetName())
+	}
+
+	assignees := []UserInfo{}
+	for _, assignee := range issue.Assignees {
+		assignees = append(assignees, transformUserToUserInfo(assignee))
+	}
+
+	return IssueData{
+		IssueID:       issue.GetID(),
+		IssueNumber:   issue.GetNumber(),
+		Subject:       issue.GetTitle(),
+		Description:   issue.GetBody(),
+		Status:        issue.GetState(),
+		SubmittedAt:   issue.GetCreatedAt().Time,
+		LastUpdatedAt: issue.GetUpdatedAt().Time,
+		Reporter:      transformUserToUserInfo(issue.User),
+		Tags:          tags,
+		Assignees:     assignees,
+	}
+}
+
 // GetIssue creates a tool to get details of a specific issue in a GitHub repository.
 func GetIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("github_get_issue",
@@ -63,13 +120,36 @@ func GetIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (tool
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get issue: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(issue)
+			// Transform to custom structure
+			issueData := transformIssueToIssueData(issue)
+
+			r, err := json.Marshal(issueData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal issue: %w", err)
 			}
 
 			return mcp.NewToolResultText(string(r)), nil
 		}
+}
+
+// CommentData represents the restructured comment response
+type CommentData struct {
+	CommentID  int64     `json:"comment_id"`
+	Content    string    `json:"content"`
+	Author     UserInfo  `json:"author"`
+	PostedAt   time.Time `json:"posted_at"`
+	ModifiedAt time.Time `json:"modified_at"`
+}
+
+// transformCommentToCommentData converts GitHub comment to CommentData
+func transformCommentToCommentData(comment *github.IssueComment) CommentData {
+	return CommentData{
+		CommentID:  comment.GetID(),
+		Content:    comment.GetBody(),
+		Author:     transformUserToUserInfo(comment.User),
+		PostedAt:   comment.GetCreatedAt().Time,
+		ModifiedAt: comment.GetUpdatedAt().Time,
+	}
 }
 
 // AddIssueComment creates a tool to add a comment to an issue.
@@ -133,13 +213,22 @@ func AddIssueComment(getClient GetClientFn, t translations.TranslationHelperFunc
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create comment: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(createdComment)
+			// Transform to custom structure
+			commentData := transformCommentToCommentData(createdComment)
+
+			r, err := json.Marshal(commentData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
 
 			return mcp.NewToolResultText(string(r)), nil
 		}
+}
+
+// SearchResultsData represents the restructured search results
+type SearchResultsData struct {
+	TotalMatches int          `json:"total_matches"`
+	Items        []IssueData  `json:"items"`
 }
 
 // SearchIssues creates a tool to search for issues and pull requests.
@@ -217,7 +306,18 @@ func SearchIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (
 				return mcp.NewToolResultError(fmt.Sprintf("failed to search issues: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(result)
+			// Transform to custom structure
+			items := []IssueData{}
+			for _, issue := range result.Issues {
+				items = append(items, transformIssueToIssueData(issue))
+			}
+
+			searchResults := SearchResultsData{
+				TotalMatches: result.GetTotal(),
+				Items:        items,
+			}
+
+			r, err := json.Marshal(searchResults)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -335,7 +435,10 @@ func CreateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create issue: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(issue)
+			// Transform to custom structure
+			issueData := transformIssueToIssueData(issue)
+
+			r, err := json.Marshal(issueData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -453,7 +556,13 @@ func ListIssues(getClient GetClientFn, t translations.TranslationHelperFunc) (to
 				return mcp.NewToolResultError(fmt.Sprintf("failed to list issues: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(issues)
+			// Transform to custom structure
+			issueList := []IssueData{}
+			for _, issue := range issues {
+				issueList = append(issueList, transformIssueToIssueData(issue))
+			}
+
+			r, err := json.Marshal(issueList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal issues: %w", err)
 			}
@@ -595,7 +704,10 @@ func UpdateIssue(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 				return mcp.NewToolResultError(fmt.Sprintf("failed to update issue: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(updatedIssue)
+			// Transform to custom structure
+			issueData := transformIssueToIssueData(updatedIssue)
+
+			r, err := json.Marshal(issueData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -674,7 +786,13 @@ func GetIssueComments(getClient GetClientFn, t translations.TranslationHelperFun
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get issue comments: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(comments)
+			// Transform to custom structure
+			commentList := []CommentData{}
+			for _, comment := range comments {
+				commentList = append(commentList, transformCommentToCommentData(comment))
+			}
+
+			r, err := json.Marshal(commentList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}

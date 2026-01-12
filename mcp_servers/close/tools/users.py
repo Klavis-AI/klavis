@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_user,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -19,7 +20,7 @@ async def get_current_user() -> ToolResponse:
     
     response = await client.get_current_user()
     
-    return response
+    return {"user": normalize_user(response)}
 
 
 async def list_users(
@@ -39,9 +40,9 @@ async def list_users(
     response = await client.get("/user/", params=params)
     
     return {
-        "users": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "users": [normalize_user(u) for u in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -52,7 +53,7 @@ async def get_user(user_id: str) -> ToolResponse:
     
     response = await client.get(f"/user/{user_id}/")
     
-    return response
+    return {"user": normalize_user(response)}
 
 
 async def search_users(
@@ -72,7 +73,7 @@ async def search_users(
     response = await client.get("/user/", params=params)
     
     return {
-        "users": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "users": [normalize_user(u) for u in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     } 

@@ -21,7 +21,7 @@
     "content-processing"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "express": "^4.18.2",
     "jsdom": "^25.0.1",
     "turndown": "^7.2.0",

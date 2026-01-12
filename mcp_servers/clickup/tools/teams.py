@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict
 from .base import make_clickup_request
+from .normalize import normalize_teams
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ async def get_teams() -> Dict[str, Any]:
     logger.info("Executing tool: get_teams")
     try:
         result = await make_clickup_request("team")
-        return result
+        return normalize_teams(result)
     except Exception as e:
         logger.exception(f"Error executing tool get_teams: {e}")
         raise e

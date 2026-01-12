@@ -35,6 +35,142 @@ from tools import (
 
 load_dotenv()
 
+
+def get_path(data: dict, path: str) -> any:
+    """Safe dot-notation access. Returns None if path fails."""
+    if not data:
+        return None
+    current = data
+    for key in path.split('.'):
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+def normalize(source: dict, mapping: dict[str, any]) -> dict:
+    """
+    Creates a new clean dictionary based strictly on the mapping rules.
+    Excludes fields with None/null values from the output.
+    Args:
+        source: Raw vendor JSON.
+        mapping: Dict of { "TargetFieldName": "Source.Path" OR Lambda_Function }
+    """
+    clean_data = {}
+    for target_key, rule in mapping.items():
+        value = None
+        if isinstance(rule, str):
+            value = get_path(source, rule)
+        elif callable(rule):
+            try:
+                value = rule(source)
+            except Exception:
+                value = None
+        if value is not None:
+            clean_data[target_key] = value
+    return clean_data
+
+
+# Mapping Rules for Mem0 Objects
+
+MEMORY_RULES = {
+    "memoryId": "id",
+    "content": "memory",
+    "created": "created_at",
+    "updated": "updated_at",
+    "userId": "user_id",
+    "agentId": "agent_id",
+    "appId": "app_id",
+    "runId": "run_id",
+    "score": "score",
+    "metadata": "metadata",
+    "categories": "categories",
+    "expirationDate": "expiration_date",
+    "structuredData": "structured_attributes",
+}
+
+MEMORY_LIST_RULES = {
+    "items": lambda x: [
+        normalize(memory, MEMORY_RULES) for memory in x.get('result', {}).get('results', [])
+    ] if x.get('success') and x.get('result', {}).get('results') else None,
+    "totalCount": lambda x: len(x.get('result', {}).get('results', [])) if x.get('success') and x.get('result', {}).get('results') else None,
+    "success": "success",
+    "error": "error",
+}
+
+MEMORY_SEARCH_RULES = {
+    "results": lambda x: [
+        normalize(memory, MEMORY_RULES) for memory in (x.get('result', {}).get('results', []) if x.get('result', {}).get('results') else x.get('result', []))
+    ] if x.get('success') and x.get('result') else None,
+    "query": lambda x: x.get('query') or getattr(x, '_original_query', None),
+    "totalFound": lambda x: len(x.get('result', {}).get('results', []) if x.get('result', {}).get('results') else x.get('result', [])) if x.get('success') and x.get('result') else None,
+    "success": "success",
+    "error": "error",
+}
+
+MEMORY_OPERATION_RULES = {
+    "success": "success",
+    "memoryId": "result.id",
+    "operation": lambda x: x.get('operation', 'unknown'),
+    "message": lambda x: x.get('result', {}).get('message') or x.get('error', 'Operation completed'),
+    "error": "error",
+    "status": "status",
+}
+
+ENTITY_LIST_RULES = {
+    "entities": lambda x: [
+        {
+            "name": entity.get('name'),  # 'name' field contains the actual user_id
+            "entityType": entity.get('type', 'user'),
+            "memoryCount": entity.get('total_memories', 0),
+            "created": entity.get('created_at'),
+            "updated": entity.get('updated_at'),
+            "owner": entity.get('owner'),
+            "metadata": entity.get('metadata'),
+        } for entity in x.get('result', {}).get('results', [])
+    ] if x.get('success') and x.get('result', {}).get('results') else None,
+    "totalEntities": lambda x: x.get('result', {}).get('count', 0) if x.get('success') and x.get('result') else None,
+    "totalUsers": lambda x: x.get('result', {}).get('total_users', 0) if x.get('success') and x.get('result') else None,
+    "totalAgents": lambda x: x.get('result', {}).get('total_agents', 0) if x.get('success') and x.get('result') else None,
+    "totalApps": lambda x: x.get('result', {}).get('total_apps', 0) if x.get('success') and x.get('result') else None,
+    "totalRuns": lambda x: x.get('result', {}).get('total_runs', 0) if x.get('success') and x.get('result') else None,
+    "nextPage": lambda x: x.get('result', {}).get('next') if x.get('success') and x.get('result') else None,
+    "previousPage": lambda x: x.get('result', {}).get('previous') if x.get('success') and x.get('result') else None,
+    "success": "success",
+    "error": "error",
+}
+
+
+def normalize_memory(raw_memory: dict) -> dict:
+    """Normalize a single memory and add computed fields."""
+    memory = normalize(raw_memory, MEMORY_RULES)
+    return memory
+
+
+def normalize_memory_list(raw_response: dict) -> dict:
+    """Normalize a memory list response and add computed fields."""
+    response = normalize(raw_response, MEMORY_LIST_RULES)
+    return response
+
+
+def normalize_memory_search(raw_response: dict) -> dict:
+    """Normalize a memory search response and add computed fields."""
+    response = normalize(raw_response, MEMORY_SEARCH_RULES)
+    return response
+
+
+def normalize_memory_operation(raw_response: dict) -> dict:
+    """Normalize a memory operation response (add/update/delete) and add computed fields."""
+    response = normalize(raw_response, MEMORY_OPERATION_RULES)
+    return response
+
+
+def normalize_entity_list(raw_response: dict) -> dict:
+    """Normalize an entity list response and add computed fields."""
+    response = normalize(raw_response, ENTITY_LIST_RULES)
+    return response
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mem0-mcp-server")
@@ -380,10 +516,12 @@ def main(
                     metadata=metadata,
                     enable_graph=enable_graph,
                 )
+                # Normalize the response
+                normalized_result = normalize_memory_operation(result)
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -416,10 +554,12 @@ def main(
                     filters = _with_default_filters(default_user, filters)
 
                 result = await get_memories(filters=filters, page=page, page_size=page_size, enable_graph=enable_graph)
+                # Normalize the response
+                normalized_result = normalize_memory_list(result)
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -465,10 +605,12 @@ def main(
                     limit=limit,
                     enable_graph=enable_graph,
                 )
+                # Normalize the response
+                normalized_result = normalize_memory_search(result)
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -486,7 +628,12 @@ def main(
                 return [types.TextContent(type="text", text="Error: memory_id parameter is required")]
             try:
                 result = await get_memory(memory_id)
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+                # Normalize the response - single memory from result field
+                if result.get('success') and result.get('result'):
+                    normalized_result = normalize_memory(result['result'])
+                else:
+                    normalized_result = normalize_memory_operation(result)
+                return [types.TextContent(type="text", text=json.dumps(normalized_result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error executing tool {name}: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]
@@ -494,7 +641,9 @@ def main(
         elif name == "mem0_list_entities":
             try:
                 result = await list_entities()
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+                # Normalize the response
+                normalized_result = normalize_entity_list(result)
+                return [types.TextContent(type="text", text=json.dumps(normalized_result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error executing tool {name}: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]
@@ -511,10 +660,12 @@ def main(
                 ]
             try:
                 result = await update_memory(memory_id, text)
+                # Normalize the response
+                normalized_result = normalize_memory_operation(result)
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -532,10 +683,12 @@ def main(
                 return [types.TextContent(type="text", text="Error: memory_id parameter is required")]
             try:
                 result = await delete_memory(memory_id)
+                # Normalize the response
+                normalized_result = normalize_memory_operation(result)
                 return [
                     types.TextContent(
                         type="text",
-                        text=json.dumps(result, indent=2),
+                        text=json.dumps(normalized_result, indent=2),
                     )
                 ]
             except Exception as e:
@@ -555,7 +708,9 @@ def main(
                     app_id=arguments.get("app_id"),
                     run_id=arguments.get("run_id"),
                 )
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+                # Normalize the response
+                normalized_result = normalize_memory_operation(result)
+                return [types.TextContent(type="text", text=json.dumps(normalized_result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error executing tool {name}: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]
@@ -568,7 +723,9 @@ def main(
                     app_id=arguments.get("app_id"),
                     run_id=arguments.get("run_id"),
                 )
-                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+                # Normalize the response
+                normalized_result = normalize_memory_operation(result)
+                return [types.TextContent(type="text", text=json.dumps(normalized_result, indent=2))]
             except Exception as e:
                 logger.exception(f"Error executing tool {name}: {e}")
                 return [types.TextContent(type="text", text=f"Error: {str(e)}")]

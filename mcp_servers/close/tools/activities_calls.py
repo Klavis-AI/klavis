@@ -6,6 +6,7 @@ from .base import (
     ToolResponse,
     get_close_client,
     remove_none_values,
+    normalize_call_activity,
 )
 from .constants import CLOSE_MAX_LIMIT
 
@@ -56,9 +57,9 @@ async def list_calls(
     response = await client.get("/activity/call/", params=params)
     
     return {
-        "calls": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "calls": [normalize_call_activity(c) for c in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
 
 
@@ -74,7 +75,7 @@ async def get_call(call_id: str) -> ToolResponse:
     
     response = await client.get(f"/activity/call/{call_id}/")
     
-    return response
+    return {"call": normalize_call_activity(response)}
 
 
 async def create_call(
@@ -129,7 +130,7 @@ async def create_call(
     
     response = await client.post("/activity/call/", json_data=call_data)
     
-    return response
+    return {"call": normalize_call_activity(response)}
 
 
 async def update_call(
@@ -171,7 +172,7 @@ async def update_call(
     
     response = await client.put(f"/activity/call/{call_id}/", json_data=call_data)
     
-    return response
+    return {"call": normalize_call_activity(response)}
 
 
 async def delete_call(call_id: str) -> ToolResponse:
@@ -184,9 +185,9 @@ async def delete_call(call_id: str) -> ToolResponse:
     
     client = get_close_client()
     
-    response = await client.delete(f"/activity/call/{call_id}/")
+    await client.delete(f"/activity/call/{call_id}/")
     
-    return {"success": True, "call_id": call_id}
+    return {"success": True, "callId": call_id}
 
 
 async def search_calls(
@@ -212,8 +213,7 @@ async def search_calls(
     response = await client.get("/activity/call/", params=params)
     
     return {
-        "calls": response.get("data", []),
-        "has_more": response.get("has_more", False),
-        "total_results": response.get("total_results"),
+        "calls": [normalize_call_activity(c) for c in response.get("data", [])],
+        "hasMore": response.get("has_more", False),
+        "totalCount": response.get("total_results"),
     }
-

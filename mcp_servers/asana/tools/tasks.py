@@ -12,6 +12,8 @@ from .base import (
     get_unique_workspace_id_or_raise_error,
     AsanaToolExecutionError,
     RetryableToolError,
+    normalize_task,
+    normalize_attachment,
 )
 
 logger = logging.getLogger(__name__)
@@ -445,7 +447,7 @@ async def search_tasks(
         )
 
         tasks_by_id = {task["id"]: task for task in response["data"]}
-        tasks = list(tasks_by_id.values())
+        tasks = [normalize_task(task) for task in tasks_by_id.values()]
 
         return {"tasks": tasks, "count": len(tasks)}
 
@@ -468,11 +470,12 @@ async def get_task_by_id(
             f"/tasks/{task_id}",
             params={"opt_fields": ",".join(TASK_OPT_FIELDS)},
         )
+        task = normalize_task(response["data"])
         if max_subtasks > 0:
             max_subtasks = min(max_subtasks, 100)
             subtasks = await get_subtasks_from_a_task(task_id=task_id, limit=max_subtasks)
-            response["data"]["subtasks"] = subtasks["subtasks"]
-        return {"task": response["data"]}
+            task["subtasks"] = subtasks["subtasks"]
+        return {"task": task}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -500,9 +503,10 @@ async def get_subtasks_from_a_task(
             }),
         )
 
+        subtasks = [normalize_task(subtask) for subtask in response["data"]]
         return {
-            "subtasks": response["data"],
-            "count": len(response["data"]),
+            "subtasks": subtasks,
+            "count": len(subtasks),
             "next_page": get_next_page(response),
         }
 
@@ -540,7 +544,7 @@ async def update_task(
         })
 
         response = await client.put(f"/tasks/{task_id}", json_data={"data": update_data})
-        return {"task": response["data"]}
+        return {"task": normalize_task(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -594,7 +598,7 @@ async def create_task(
         })
 
         response = await client.post("/tasks", json_data={"data": task_data})
-        return {"task": response["data"]}
+        return {"task": normalize_task(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")
@@ -641,7 +645,7 @@ async def attach_file_to_task(
             
             response = await client.post("/attachments", data=data, files=files)
 
-        return {"attachment": response["data"]}
+        return {"attachment": normalize_attachment(response["data"])}
 
     except AsanaToolExecutionError as e:
         logger.error(f"Asana API error: {e}")

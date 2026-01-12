@@ -6,47 +6,36 @@ from .http_client import QuickBooksHTTPClient
 
 # Minimal properties for invoice creation (required by QuickBooks)
 invoice_properties_minimal = {
-    "CustomerRefValue": {
+    "customer_id": {
         "type": "string",
         "description": "Customer ID for the invoice"
     },
-    "CustomerRefName": {
-        "type": "string",
-        "description": "Name of the customer associated with the invoice"
-    },
-    "LineItems": {
+    "line_items": {
         "type": "array",
         "items": {
             "type": "object",
             "properties": {
-                "LineId": {"type": "string", "description": "Unique ID for this line item. Required for updates, ignored for creates"},
-                "Amount": {"type": "number", "description": "Line total amount"},
-                "Description": {"type": "string", "description": "Line item description"},
-                "DetailType": {"type": "string", "description": "Line detail type: SalesItemLineDetail, DescriptionOnlyLine, DiscountLine, SubTotalLine", "default": "SalesItemLineDetail"},
-                "LineNum": {"type": "number", "description": "Position of the line in the collection"},
+                "line_id": {"type": "string", "description": "Unique ID for this line item (required for updates)"},
+                "amount": {"type": "number", "description": "Line total amount"},
+                "description": {"type": "string", "description": "Line item description"},
+                "type": {"type": "string", "description": "Line type: sales_item, description_only, discount, subtotal", "default": "sales_item"},
 
-                # SalesItemLineDetail fields
-                "ItemId": {"type": "string", "description": "Reference to the inventory item"},
-                "ItemName": {"type": "string", "description": "Name of the inventory item"},
-                "Quantity": {"type": "number", "description": "Quantity of the item"},
-                "UnitPrice": {"type": "number", "description": "Unit price of the item"},
-                "DiscountRate": {"type": "number", "description": "Discount rate applied to this line as a percentage"},
-                "DiscountAmount": {"type": "number", "description": "Discount amount applied to this line"},
-                "ServiceDate": {"type": "string", "description": "Date when the service is performed (YYYY-MM-DD format)"},
+                # Sales item fields
+                "item_id": {"type": "string", "description": "Inventory item ID"},
+                "item_name": {"type": "string", "description": "Inventory item name"},
+                "quantity": {"type": "number", "description": "Quantity"},
+                "unit_price": {"type": "number", "description": "Unit price"},
+                "discount_rate": {"type": "number", "description": "Discount rate percentage"},
+                "discount_amount": {"type": "number", "description": "Discount amount"},
+                "service_date": {"type": "string", "description": "Service date (YYYY-MM-DD)"},
 
-                # DescriptionOnlyLine fields
-                "IsSubtotal": {"type": "boolean", "description": "Set to true for subtotal lines"},
+                # Discount fields
+                "discount_percent": {"type": "number", "description": "Discount percentage (10 for 10%)"},
+                "is_percent": {"type": "boolean", "description": "True if discount is percentage-based"},
 
-                # DiscountLineDetail fields
-                "DiscountPercent": {"type": "number", "description": "Percentage discount as a number (10 for 10%)"},
-                "DiscountAccountId": {"type": "string", "description": "Income account used to track discounts"},
-                "DiscountAccountName": {"type": "string", "description": "Name of the discount account"},
-                "IsPercentBased": {"type": "boolean", "description": "True if the discount is a percentage"},
-
-                "TaxCodeId": {"type": "string", "description": "Reference to the TaxCode for this item"},
-                "TaxCodeName": {"type": "string", "description": "Name of the TaxCode"}
+                "tax_code_id": {"type": "string", "description": "Tax code ID"}
             },
-            "required": ["Amount"]
+            "required": ["amount"]
         }
     },
 }
@@ -54,145 +43,107 @@ invoice_properties_minimal = {
 # Invoice properties mapping (based on QuickBooks API documentation)
 invoice_properties_user_define = {
     **invoice_properties_minimal,
-    "DocNumber": {
+    "invoice_number": {
         "type": "string",
-        "description": "Reference number for the transaction. If not explicitly provided at create time, this field is populated based on the setting of Preferences:CustomTxnNumber"
+        "description": "Invoice/document number"
     },
-    "TransactionDate": {
+    "date": {
         "type": "string",
-        "description": "The date entered by the user when this transaction occurred. Format: yyyy/MM/dd"
+        "description": "Transaction date (YYYY-MM-DD)"
     },
-    "ShipDate": {
+    "ship_date": {
         "type": "string",
-        "description": "Date for delivery of goods or services. Format: yyyy/MM/dd"
+        "description": "Ship date (YYYY-MM-DD)"
     },
-    "DueDate": {
+    "due_date": {
         "type": "string",
-        "description": "Date when the payment of the transaction is due. If date is not provided, the number of days specified in SalesTermRef added the transaction date will be used. Format: yyyy/MM/dd"
+        "description": "Due date (YYYY-MM-DD)"
     },
-    "CustomerMemo": {
+    "customer_memo": {
         "type": "string",
-        "description": "User-entered message to the customer; this message is visible to end user on their transactions"
+        "description": "Message to the customer"
     },
-    "BillEmail": {
+    "bill_email": {
         "type": "string",
-        "description": "Identifies the e-mail address where the invoice is sent"
+        "description": "Email address to send invoice"
     },
-    "BillEmailCc": {
+    "bill_email_cc": {
         "type": "string",
-        "description": "Identifies the carbon copy e-mail address where the invoice is sent"
+        "description": "CC email address"
     },
-    "ShipFromAddrLine1": {
+    "currency": {
         "type": "string",
-        "description": "First line of the address where goods are shipped from"
+        "description": "Currency code (e.g., USD)"
     },
-    "ShipFromAddrLine2": {
+    "tracking_number": {
         "type": "string",
-        "description": "Second line of the address where goods are shipped from"
+        "description": "Shipping tracking number"
     },
-    "ShipFromAddrCity": {
-        "type": "string",
-        "description": "City name for the shipping address where goods are shipped from"
-    },
-    "ShipFromAddrCountrySubDivisionCode": {
-        "type": "string",
-        "description": "Region within a country for the shipping address where goods are shipped from"
-    },
-    "ShipFromAddrPostalCode": {
-        "type": "string",
-        "description": "Postal code for the shipping address where goods are shipped from"
-    },
-    "ShipFromAddrCountry": {
-        "type": "string",
-        "description": "Country name for the shipping address where goods are shipped from"
-    },
-    "ShipAddrLine1": {
-        "type": "string",
-        "description": "First line of the shipping address where goods must be shipped"
-    },
-    "ShipAddrLine2": {
-        "type": "string",
-        "description": "Second line of the shipping address"
-    },
-    "ShipAddrCity": {
-        "type": "string",
-        "description": "City name for the shipping address"
-    },
-    "ShipAddrCountrySubDivisionCode": {
-        "type": "string",
-        "description": "Region within a country for the shipping address"
-    },
-    "ShipAddrPostalCode": {
-        "type": "string",
-        "description": "Postal code for the shipping address"
-    },
-    "ShipAddrCountry": {
-        "type": "string",
-        "description": "Country name for the shipping address"
-    },
-    "BillAddrLine1": {
-        "type": "string",
-        "description": "First line of the billing address"
-    },
-    "BillAddrLine2": {
-        "type": "string",
-        "description": "Second line of the billing address"
-    },
-    "BillAddrCity": {
-        "type": "string",
-        "description": "City name for the billing address"
-    },
-    "BillAddrCountrySubDivisionCode": {
-        "type": "string",
-        "description": "Region within a country for the billing address"
-    },
-    "BillAddrPostalCode": {
-        "type": "string",
-        "description": "Postal code for the billing address"
-    },
-    "BillAddrCountry": {
-        "type": "string",
-        "description": "Country name for the billing address"
-    },
-    "ShipMethodRefValue": {
-        "type": "string",
-        "description": "Reference to the ShipMethod associated with the transaction"
-    },
-    "ShipMethodRefName": {
-        "type": "string",
-        "description": "Name of the ShipMethod associated with the transaction"
-    },
-    "CurrencyRefValue": {
-        "type": "string",
-        "description": "Three letter ISO code representing the currency"
-    },
-    "CurrencyRefName": {
-        "type": "string",
-        "description": "Full name of the currency"
-    },
-    "TrackingNum": {
-        "type": "string",
-        "description": "Shipping provider's tracking number for the delivery of the goods"
-    },
-    "Deposit": {
+    "deposit": {
         "type": "number",
-        "description": "The deposit made towards this invoice"
+        "description": "Deposit amount"
     },
-    "DepositToAccountRefValue": {
+    "ship_method_id": {
         "type": "string",
-        "description": "Account to which money is deposited"
+        "description": "Shipping method ID"
     },
-    "DepositToAccountRefName": {
+    # Billing address
+    "billing_street": {
         "type": "string",
-        "description": "Name of the account to which money is deposited"
+        "description": "Billing address street"
+    },
+    "billing_street2": {
+        "type": "string",
+        "description": "Billing address street line 2"
+    },
+    "billing_city": {
+        "type": "string",
+        "description": "Billing address city"
+    },
+    "billing_state": {
+        "type": "string",
+        "description": "Billing address state"
+    },
+    "billing_postal_code": {
+        "type": "string",
+        "description": "Billing address postal code"
+    },
+    "billing_country": {
+        "type": "string",
+        "description": "Billing address country"
+    },
+    # Shipping address
+    "shipping_street": {
+        "type": "string",
+        "description": "Shipping address street"
+    },
+    "shipping_street2": {
+        "type": "string",
+        "description": "Shipping address street line 2"
+    },
+    "shipping_city": {
+        "type": "string",
+        "description": "Shipping address city"
+    },
+    "shipping_state": {
+        "type": "string",
+        "description": "Shipping address state"
+    },
+    "shipping_postal_code": {
+        "type": "string",
+        "description": "Shipping address postal code"
+    },
+    "shipping_country": {
+        "type": "string",
+        "description": "Shipping address country"
     }
 }
 
 invoice_properties = {
     **invoice_properties_user_define,
-    "Id": {
+    "id": {
         "type": "string",
-        "description": "The unique QuickBooks invoice ID"
+        "description": "The invoice ID"
     }
 }
 
@@ -200,11 +151,11 @@ invoice_properties = {
 create_invoice_tool = Tool(
     name="quickbooks_create_invoice",
     title="Create Invoice",
-    description="Create New Invoice - Create a new invoice in QuickBooks. Requires CustomerRef and at least one valid line (SalesItemLine or DescriptionOnlyLine).",
+    description="Create a new invoice in QuickBooks",
     inputSchema={
         "type": "object",
         "properties": invoice_properties_minimal,
-        "required": ["CustomerRefValue", "LineItems"]
+        "required": ["customer_id", "line_items"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
@@ -212,13 +163,13 @@ create_invoice_tool = Tool(
 get_invoice_tool = Tool(
     name="quickbooks_get_invoice",
     title="Get Invoice",
-    description="Get Single Invoice - Retrieve a specific invoice by ID from QuickBooks with all its details including line items, amounts, and status",
+    description="Get a specific invoice by ID",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks invoice ID"}
+            "id": {"type": "string", "description": "The invoice ID"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
@@ -226,14 +177,13 @@ get_invoice_tool = Tool(
 list_invoices_tool = Tool(
     name="quickbooks_list_invoices",
     title="List Invoices",
-    description="List All Invoices - Retrieve all invoices from QuickBooks with pagination support. Use for browsing or getting overview of invoices",
+    description="List all invoices with pagination support",
     inputSchema={
         "type": "object",
         "properties": {
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1},
-        },
-        "required": [],
+            "max_results": {"type": "integer", "description": "Maximum results to return", "default": 100},
+            "start_position": {"type": "integer", "description": "Starting position (1-based)", "default": 1},
+        }
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
@@ -241,54 +191,36 @@ list_invoices_tool = Tool(
 search_invoices_tool = Tool(
     name="quickbooks_search_invoices",
     title="Search Invoices",
-    description="Advanced Invoice Search - Search invoices with powerful filters including dates, amounts, addresses, customer info, and status. Perfect for finding specific invoices based on criteria",
+    description="Search invoices with filters for dates, amounts, customer, and addresses",
     inputSchema={
         "type": "object",
         "properties": {
-            "DocNumber": {"type": "string", "description": "Search by document/invoice number"},
-            "CustomerRefValue": {"type": "string", "description": "Search by customer ID"},
-            "CustomerName": {"type": "string", "description": "Search by customer name (partial match)"},
+            "invoice_number": {"type": "string", "description": "Search by invoice number"},
+            "customer_id": {"type": "string", "description": "Search by customer ID"},
+            "customer_name": {"type": "string", "description": "Search by customer name (partial match)"},
 
             # Date filters
-            "TransactionDateFrom": {"type": "string", "description": "Search invoices from this transaction date (YYYY-MM-DD format)"},
-            "TransactionDateTo": {"type": "string", "description": "Search invoices to this transaction date (YYYY-MM-DD format)"},
-            "DueDateFrom": {"type": "string", "description": "Search invoices from this due date (YYYY-MM-DD format)"},
-            "DueDateTo": {"type": "string", "description": "Search invoices to this due date (YYYY-MM-DD format)"},
-            "ShipDateFrom": {"type": "string", "description": "Search invoices from this ship date (YYYY-MM-DD format)"},
-            "ShipDateTo": {"type": "string", "description": "Search invoices to this ship date (YYYY-MM-DD format)"},
+            "date_from": {"type": "string", "description": "Transaction date from (YYYY-MM-DD)"},
+            "date_to": {"type": "string", "description": "Transaction date to (YYYY-MM-DD)"},
+            "due_date_from": {"type": "string", "description": "Due date from (YYYY-MM-DD)"},
+            "due_date_to": {"type": "string", "description": "Due date to (YYYY-MM-DD)"},
 
             # Amount filters
-            "MinAmount": {"type": "number", "description": "Minimum total amount"},
-            "MaxAmount": {"type": "number", "description": "Maximum total amount"},
-            "MinBalance": {"type": "number", "description": "Minimum balance amount"},
-            "MaxBalance": {"type": "number", "description": "Maximum balance amount"},
+            "min_amount": {"type": "number", "description": "Minimum total amount"},
+            "max_amount": {"type": "number", "description": "Maximum total amount"},
+            "min_balance": {"type": "number", "description": "Minimum balance due"},
+            "max_balance": {"type": "number", "description": "Maximum balance due"},
 
-            # Address filters - Billing Address
-            "BillAddrCity": {"type": "string", "description": "Search by billing address city"},
-            "BillAddrState": {"type": "string", "description": "Search by billing address state/province"},
-            "BillAddrPostalCode": {"type": "string", "description": "Search by billing address postal code"},
-            "BillAddrCountry": {"type": "string", "description": "Search by billing address country"},
-            "BillAddrLine1": {"type": "string", "description": "Search by billing address line 1 (partial match)"},
-
-            # Address filters - Shipping Address
-            "ShipAddrCity": {"type": "string", "description": "Search by shipping address city"},
-            "ShipAddrState": {"type": "string", "description": "Search by shipping address state/province"},
-            "ShipAddrPostalCode": {"type": "string", "description": "Search by shipping address postal code"},
-            "ShipAddrCountry": {"type": "string", "description": "Search by shipping address country"},
-            "ShipAddrLine1": {"type": "string", "description": "Search by shipping address line 1 (partial match)"},
-
-            # Address filters - Ship From Address
-            "ShipFromAddrCity": {"type": "string", "description": "Search by ship from address city"},
-            "ShipFromAddrState": {"type": "string", "description": "Search by ship from address state/province"},
-            "ShipFromAddrPostalCode": {"type": "string", "description": "Search by ship from address postal code"},
-            "ShipFromAddrCountry": {"type": "string", "description": "Search by ship from address country"},
-            "ShipFromAddrLine1": {"type": "string", "description": "Search by ship from address line 1 (partial match)"},
+            # Address filters
+            "billing_city": {"type": "string", "description": "Filter by billing city"},
+            "billing_state": {"type": "string", "description": "Filter by billing state"},
+            "shipping_city": {"type": "string", "description": "Filter by shipping city"},
+            "shipping_state": {"type": "string", "description": "Filter by shipping state"},
 
             # Pagination
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
-        },
-        "required": [],
+            "max_results": {"type": "integer", "description": "Maximum results to return", "default": 100},
+            "start_position": {"type": "integer", "description": "Starting position (1-based)", "default": 1}
+        }
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE", "readOnlyHint": True})
 )
@@ -296,11 +228,11 @@ search_invoices_tool = Tool(
 update_invoice_tool = Tool(
     name="quickbooks_update_invoice",
     title="Update Invoice",
-    description="Update Existing Invoice - Modify an existing invoice in QuickBooks. Automatically handles sync tokens for safe concurrent updates",
+    description="Update an existing invoice",
     inputSchema={
         "type": "object",
         "properties": invoice_properties,
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
@@ -308,13 +240,13 @@ update_invoice_tool = Tool(
 delete_invoice_tool = Tool(
     name="quickbooks_delete_invoice",
     title="Delete Invoice",
-    description="️Delete Invoice - Permanently delete an invoice from QuickBooks. Use with caution as this action cannot be undone",
+    description="Permanently delete an invoice (cannot be undone)",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks invoice ID to delete"}
+            "id": {"type": "string", "description": "The invoice ID to delete"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
@@ -322,20 +254,14 @@ delete_invoice_tool = Tool(
 send_invoice_tool = Tool(
     name="quickbooks_send_invoice",
     title="Send Invoice",
-    description="Send Invoice via Email - Send an invoice to customer via email with delivery tracking. Updates email status and delivery info automatically",
+    description="Send invoice via email to customer",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {
-                "type": "string",
-                "description": "The QuickBooks invoice ID to send"
-            },
-            "SendTo": {
-                "type": "string",
-                "description": "Optional email address to send the invoice to. If not provided, uses the invoice's BillEmail address",
-            }
+            "id": {"type": "string", "description": "The invoice ID to send"},
+            "send_to": {"type": "string", "description": "Email address (uses invoice's bill_email if not provided)"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
@@ -343,16 +269,13 @@ send_invoice_tool = Tool(
 void_invoice_tool = Tool(
     name="quickbooks_void_invoice",
     title="Void Invoice",
-    description="Void Invoice - Void an existing invoice in QuickBooks. Sets all amounts to zero and marks as 'Voided' while keeping the record for audit trail",
+    description="Void an invoice (zeroes amounts, marks as voided)",
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {
-                "type": "string",
-                "description": "The QuickBooks invoice ID to void"
-            }
+            "id": {"type": "string", "description": "The invoice ID to void"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_INVOICE"})
 )
@@ -360,387 +283,293 @@ void_invoice_tool = Tool(
 
 def mcp_object_to_invoice_data(**kwargs) -> Dict[str, Any]:
     """
-    Convert MCP object format to QuickBooks invoice data format.
-    This function transforms the flat MCP structure to the nested format expected by QuickBooks API.
+    Convert simplified MCP object format to QuickBooks invoice data format.
+    Maps user-friendly snake_case fields to QuickBooks API structure.
     """
     invoice_data = {}
 
-    # Basic invoice information - direct copy
-    for field in ['DocNumber', 'ShipDate', 'DueDate',
-                  'PrintStatus', 'EmailStatus', 'TrackingNum']:
-        if field in kwargs:
-            invoice_data[field] = kwargs[field]
-
-    # Handle renamed field: TransactionDate -> TxnDate
-    if 'TransactionDate' in kwargs:
-        invoice_data['TxnDate'] = kwargs['TransactionDate']
+    # Basic invoice information - map simplified names to QB names
+    if 'invoice_number' in kwargs:
+        invoice_data['DocNumber'] = kwargs['invoice_number']
+    if 'date' in kwargs:
+        invoice_data['TxnDate'] = kwargs['date']
+    if 'ship_date' in kwargs:
+        invoice_data['ShipDate'] = kwargs['ship_date']
+    if 'due_date' in kwargs:
+        invoice_data['DueDate'] = kwargs['due_date']
+    if 'tracking_number' in kwargs:
+        invoice_data['TrackingNum'] = kwargs['tracking_number']
+    if 'deposit' in kwargs:
+        invoice_data['Deposit'] = kwargs['deposit']
 
     # CustomerMemo needs to be in object format
-    if 'CustomerMemo' in kwargs:
-        invoice_data['CustomerMemo'] = {'value': kwargs['CustomerMemo']}
-
-    # Boolean fields
-    for field in ['ApplyTaxAfterDiscount', 'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment']:
-        if field in kwargs:
-            invoice_data[field] = kwargs[field]
-
-    # Numeric fields
-    for field in ['Deposit', 'ExchangeRate']:
-        if field in kwargs:
-            invoice_data[field] = kwargs[field]
-
-    # String fields
-    for field in ['GlobalTaxCalculation']:
-        if field in kwargs:
-            invoice_data[field] = kwargs[field]
+    if 'customer_memo' in kwargs:
+        invoice_data['CustomerMemo'] = {'value': kwargs['customer_memo']}
 
     # Email addresses - convert to structured objects
-    for email_field in ['BillEmail', 'BillEmailCc']:
-        if email_field in kwargs:
-            invoice_data[email_field] = {'Address': kwargs[email_field]}
+    if 'bill_email' in kwargs:
+        invoice_data['BillEmail'] = {'Address': kwargs['bill_email']}
+    if 'bill_email_cc' in kwargs:
+        invoice_data['BillEmailCc'] = {'Address': kwargs['bill_email_cc']}
 
-    # Line items - handle the LineItems parameter with all detail types
-    if 'LineItems' in kwargs:
+    # Customer reference
+    if 'customer_id' in kwargs:
+        invoice_data['CustomerRef'] = {'value': kwargs['customer_id']}
+
+    # Currency reference
+    if 'currency' in kwargs:
+        invoice_data['CurrencyRef'] = {'value': kwargs['currency']}
+
+    # Ship method reference
+    if 'ship_method_id' in kwargs:
+        invoice_data['ShipMethodRef'] = {'value': kwargs['ship_method_id']}
+
+    # Line items - handle the line_items parameter
+    if 'line_items' in kwargs:
         lines = []
-        for item in kwargs['LineItems']:
+        for item in kwargs['line_items']:
+            # Map simplified type to QuickBooks DetailType
+            type_mapping = {
+                'sales_item': 'SalesItemLineDetail',
+                'description_only': 'DescriptionOnlyLine',
+                'discount': 'DiscountLineDetail',
+                'subtotal': 'SubTotalLineDetail',
+            }
+            detail_type = type_mapping.get(item.get('type', 'sales_item'), 'SalesItemLineDetail')
+
             line = {
-                "Amount": item["Amount"],
-                "DetailType": item.get("DetailType", "SalesItemLineDetail"),
-                "Description": item.get("Description")
+                "Amount": item["amount"],
+                "DetailType": detail_type,
             }
 
-            if item.get("LineId"):
-                line["Id"] = item["LineId"]
-            if item.get("LineNum"):
-                line["LineNum"] = item["LineNum"]
-
-            detail_type = item.get("DetailType", "SalesItemLineDetail")
+            if item.get("description"):
+                line["Description"] = item["description"]
+            if item.get("line_id"):
+                line["Id"] = item["line_id"]
 
             if detail_type == "SalesItemLineDetail":
                 sales_detail = {}
-                if item.get("ItemId"):
-                    sales_detail["ItemRef"] = {"value": item["ItemId"]}
-                    if item.get("ItemName"):
-                        sales_detail["ItemRef"]["name"] = item["ItemName"]
-                if item.get("Quantity"):
-                    sales_detail["Qty"] = item["Quantity"]
-                if item.get("UnitPrice"):
-                    sales_detail["UnitPrice"] = item["UnitPrice"]
-                if item.get("DiscountRate"):
-                    sales_detail["DiscountRate"] = item["DiscountRate"]
-                if item.get("DiscountAmount"):
-                    sales_detail["DiscountAmt"] = item["DiscountAmount"]
-                if item.get("ServiceDate"):
-                    sales_detail["ServiceDate"] = item["ServiceDate"]
-                if item.get("TaxCodeId"):
-                    sales_detail["TaxCodeRef"] = {"value": item["TaxCodeId"]}
-                    if item.get("TaxCodeName"):
-                        sales_detail["TaxCodeRef"]["name"] = item["TaxCodeName"]
+                if item.get("item_id"):
+                    sales_detail["ItemRef"] = {"value": item["item_id"]}
+                    if item.get("item_name"):
+                        sales_detail["ItemRef"]["name"] = item["item_name"]
+                if item.get("quantity"):
+                    sales_detail["Qty"] = item["quantity"]
+                if item.get("unit_price"):
+                    sales_detail["UnitPrice"] = item["unit_price"]
+                if item.get("discount_rate"):
+                    sales_detail["DiscountRate"] = item["discount_rate"]
+                if item.get("discount_amount"):
+                    sales_detail["DiscountAmt"] = item["discount_amount"]
+                if item.get("service_date"):
+                    sales_detail["ServiceDate"] = item["service_date"]
+                if item.get("tax_code_id"):
+                    sales_detail["TaxCodeRef"] = {"value": item["tax_code_id"]}
 
                 if sales_detail:
                     line["SalesItemLineDetail"] = sales_detail
 
-            elif detail_type == "GroupLineDetail":
-                group_detail = {}
-                if item.get("GroupItemId"):
-                    group_detail["GroupItemRef"] = {
-                        "value": item["GroupItemId"]}
-                    if item.get("GroupItemName"):
-                        group_detail["GroupItemRef"]["name"] = item["GroupItemName"]
-                if item.get("GroupQuantity"):
-                    group_detail["Quantity"] = item["GroupQuantity"]
-
-                # Handle nested lines for GroupLine
-                if item.get("GroupLines") and isinstance(item["GroupLines"], list):
-                    group_lines = []
-                    for group_item in item["GroupLines"]:
-                        group_line = {
-                            "Amount": group_item.get("Amount", 0),
-                            "DetailType": "SalesItemLineDetail"
-                        }
-                        group_sales_detail = {}
-                        if group_item.get("ItemId"):
-                            group_sales_detail["ItemRef"] = {
-                                "value": group_item["ItemId"]}
-                        if group_item.get("Quantity"):
-                            group_sales_detail["Qty"] = group_item["Quantity"]
-                        if group_item.get("UnitPrice"):
-                            group_sales_detail["UnitPrice"] = group_item["UnitPrice"]
-                        if group_item.get("DiscountRate"):
-                            group_sales_detail["DiscountRate"] = group_item["DiscountRate"]
-                        if group_item.get("TaxCodeId"):
-                            group_sales_detail["TaxCodeRef"] = {
-                                "value": group_item["TaxCodeId"]}
-
-                        if group_sales_detail:
-                            group_line["SalesItemLineDetail"] = group_sales_detail
-                        group_lines.append(group_line)
-
-                    group_detail["Line"] = group_lines
-
-                line["GroupLineDetail"] = group_detail
-
-            elif detail_type == "DescriptionOnlyLine":
-                description_detail = {}
-                if item.get("ServiceDate"):
-                    description_detail["ServiceDate"] = item["ServiceDate"]
-                if item.get("TaxCodeId"):
-                    description_detail["TaxCodeRef"] = {
-                        "value": item["TaxCodeId"]}
-                    if item.get("TaxCodeName"):
-                        description_detail["TaxCodeRef"]["name"] = item["TaxCodeName"]
-
-                line["DescriptionLineDetail"] = description_detail
-
             elif detail_type == "DiscountLineDetail":
                 discount_detail = {}
-                if item.get("IsPercentBased") is not None:
-                    discount_detail["PercentBased"] = item["IsPercentBased"]
-                if item.get("DiscountPercent"):
-                    discount_detail["DiscountPercent"] = item["DiscountPercent"]
-                if item.get("DiscountAccountId"):
-                    discount_detail["DiscountAccountRef"] = {
-                        "value": item["DiscountAccountId"]}
-                    if item.get("DiscountAccountName"):
-                        discount_detail["DiscountAccountRef"]["name"] = item["DiscountAccountName"]
-                if item.get("TaxCodeId"):
-                    discount_detail["TaxCodeRef"] = {
-                        "value": item["TaxCodeId"], "name": item.get("TaxCodeName", "")}
-
+                if item.get("is_percent") is not None:
+                    discount_detail["PercentBased"] = item["is_percent"]
+                if item.get("discount_percent"):
+                    discount_detail["DiscountPercent"] = item["discount_percent"]
                 line["DiscountLineDetail"] = discount_detail
-
-            elif detail_type == "SubTotalLineDetail":
-                subtotal_detail = {}
-                if item.get("ItemId"):
-                    subtotal_detail["ItemRef"] = {
-                        "value": item["ItemId"], "name": item.get("ItemName", "")}
-
-                line["SubTotalLineDetail"] = subtotal_detail
 
             lines.append(line)
         invoice_data['Line'] = lines
 
-    # Reference objects - convert separate value/name fields to structured objects
-    ref_mappings = [
-        ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('ShipMethodRef', 'ShipMethodRefValue', 'ShipMethodRefName'),
-        ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName')
-    ]
+    # Billing address
+    billing_field_mappings = {
+        'billing_street': 'Line1',
+        'billing_street2': 'Line2',
+        'billing_city': 'City',
+        'billing_state': 'CountrySubDivisionCode',
+        'billing_postal_code': 'PostalCode',
+        'billing_country': 'Country',
+    }
+    billing_addr = {}
+    for simple_name, qb_name in billing_field_mappings.items():
+        if simple_name in kwargs:
+            billing_addr[qb_name] = kwargs[simple_name]
+    if billing_addr:
+        invoice_data['BillAddr'] = billing_addr
 
-    for ref_name, value_field, name_field in ref_mappings:
-        if value_field in kwargs:
-            ref_obj = {'value': kwargs[value_field]}
-            if name_field in kwargs:
-                ref_obj['name'] = kwargs[name_field]
-            invoice_data[ref_name] = ref_obj
-
-    # Address fields - convert flattened fields to structured objects
-    for addr_type in ['BillAddr', 'ShipAddr', 'ShipFromAddr']:
-        address_fields = ['Line1', 'Line2',
-                          'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']
-
-        has_address = any(kwargs.get(f'{addr_type}{field}')
-                          for field in address_fields)
-        if has_address:
-            addr_obj = {}
-            for field in address_fields:
-                if kwargs.get(f'{addr_type}{field}'):
-                    addr_obj[field] = kwargs[f'{addr_type}{field}']
-            invoice_data[addr_type] = addr_obj
+    # Shipping address
+    shipping_field_mappings = {
+        'shipping_street': 'Line1',
+        'shipping_street2': 'Line2',
+        'shipping_city': 'City',
+        'shipping_state': 'CountrySubDivisionCode',
+        'shipping_postal_code': 'PostalCode',
+        'shipping_country': 'Country',
+    }
+    shipping_addr = {}
+    for simple_name, qb_name in shipping_field_mappings.items():
+        if simple_name in kwargs:
+            shipping_addr[qb_name] = kwargs[simple_name]
+    if shipping_addr:
+        invoice_data['ShipAddr'] = shipping_addr
 
     return invoice_data
 
 
 def invoice_data_to_mcp_object(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convert QuickBooks invoice data format to MCP object format.
-    This function flattens the nested QuickBooks structure to the flat format expected by MCP tools.
+    Convert QuickBooks invoice data format to simplified MCP object format.
+    Uses cleaner, more intuitive field names for better usability.
     """
-    mcp_object = {}
+    result = {}
 
-    # Copy basic fields if present
-    for field in [
-        'Id', 'DocNumber', 'ShipDate', 'DueDate', 'TrackingNum', 'Deposit'
-    ]:
-        if field in invoice_data:
-            mcp_object[field] = invoice_data[field]
+    # Core identification
+    if 'Id' in invoice_data:
+        result['id'] = invoice_data['Id']
+    if 'DocNumber' in invoice_data:
+        result['invoice_number'] = invoice_data['DocNumber']
 
-    # Copy fields that are preserved in output only (not in input schema)
-    for field in [
-        'PrintStatus', 'EmailStatus', 'AllowOnlineACHPayment', 'AllowOnlineCreditCardPayment',
-        'ApplyTaxAfterDiscount', 'ExchangeRate', 'GlobalTaxCalculation'
-    ]:
-        if field in invoice_data:
-            mcp_object[field] = invoice_data[field]
+    # Customer info
+    if 'CustomerRef' in invoice_data and isinstance(invoice_data['CustomerRef'], dict):
+        result['customer_id'] = invoice_data['CustomerRef'].get('value')
+        result['customer_name'] = invoice_data['CustomerRef'].get('name')
 
-    # Handle renamed field: TxnDate -> TransactionDate
+    # Dates
     if 'TxnDate' in invoice_data:
-        mcp_object['TransactionDate'] = invoice_data['TxnDate']
+        result['date'] = invoice_data['TxnDate']
+    if 'DueDate' in invoice_data:
+        result['due_date'] = invoice_data['DueDate']
+    if 'ShipDate' in invoice_data:
+        result['ship_date'] = invoice_data['ShipDate']
 
-    # Handle fields that are output-only (not in input schema but preserved in output)
-    if 'PrivateNote' in invoice_data:
-        mcp_object['PrivateNote'] = invoice_data['PrivateNote']
+    # Financial amounts
+    if 'TotalAmt' in invoice_data:
+        result['total'] = invoice_data['TotalAmt']
+    if 'Balance' in invoice_data:
+        result['balance_due'] = invoice_data['Balance']
+    if 'Deposit' in invoice_data:
+        result['deposit'] = invoice_data['Deposit']
 
-    # Handle CustomerMemo which might be in object format
+    # Status
+    if 'EmailStatus' in invoice_data:
+        result['email_status'] = invoice_data['EmailStatus']
+    if 'PrintStatus' in invoice_data:
+        result['print_status'] = invoice_data['PrintStatus']
+
+    # Notes/memos
     if 'CustomerMemo' in invoice_data:
         memo = invoice_data['CustomerMemo']
-        if isinstance(memo, dict) and 'value' in memo:
-            mcp_object['CustomerMemo'] = memo['value']
-        else:
-            mcp_object['CustomerMemo'] = memo
+        result['customer_memo'] = memo.get('value') if isinstance(memo, dict) else memo
+    if 'PrivateNote' in invoice_data:
+        result['private_note'] = invoice_data['PrivateNote']
 
-    # Handle read-only fields
-    for field in ['TotalAmt', 'Balance', 'InvoiceLink']:
-        if field in invoice_data:
-            mcp_object[field] = invoice_data[field]
+    # Shipping info
+    if 'TrackingNum' in invoice_data:
+        result['tracking_number'] = invoice_data['TrackingNum']
+    if 'ShipMethodRef' in invoice_data and isinstance(invoice_data['ShipMethodRef'], dict):
+        result['ship_method'] = invoice_data['ShipMethodRef'].get('name') or invoice_data['ShipMethodRef'].get('value')
 
-    # Email addresses - flatten structured objects
-    for email_field in ['BillEmail', 'BillEmailCc', 'BillEmailBcc']:
-        if email_field in invoice_data:
-            addr = invoice_data[email_field]
-            if isinstance(addr, dict) and 'Address' in addr:
-                mcp_object[email_field] = addr['Address']
+    # Currency
+    if 'CurrencyRef' in invoice_data and isinstance(invoice_data['CurrencyRef'], dict):
+        result['currency'] = invoice_data['CurrencyRef'].get('value')
+    if 'ExchangeRate' in invoice_data:
+        result['exchange_rate'] = invoice_data['ExchangeRate']
 
-    # Line items - flatten all line types to LineItems
+    # Link
+    if 'InvoiceLink' in invoice_data:
+        result['link'] = invoice_data['InvoiceLink']
+
+    # Billing address (simplified)
+    if 'BillAddr' in invoice_data and isinstance(invoice_data['BillAddr'], dict):
+        addr = invoice_data['BillAddr']
+        billing = {}
+        if 'Line1' in addr:
+            billing['street'] = addr['Line1']
+        if 'Line2' in addr:
+            billing['street2'] = addr['Line2']
+        if 'City' in addr:
+            billing['city'] = addr['City']
+        if 'CountrySubDivisionCode' in addr:
+            billing['state'] = addr['CountrySubDivisionCode']
+        if 'PostalCode' in addr:
+            billing['postal_code'] = addr['PostalCode']
+        if 'Country' in addr:
+            billing['country'] = addr['Country']
+        if billing:
+            result['billing_address'] = billing
+
+    # Shipping address (simplified)
+    if 'ShipAddr' in invoice_data and isinstance(invoice_data['ShipAddr'], dict):
+        addr = invoice_data['ShipAddr']
+        shipping = {}
+        if 'Line1' in addr:
+            shipping['street'] = addr['Line1']
+        if 'Line2' in addr:
+            shipping['street2'] = addr['Line2']
+        if 'City' in addr:
+            shipping['city'] = addr['City']
+        if 'CountrySubDivisionCode' in addr:
+            shipping['state'] = addr['CountrySubDivisionCode']
+        if 'PostalCode' in addr:
+            shipping['postal_code'] = addr['PostalCode']
+        if 'Country' in addr:
+            shipping['country'] = addr['Country']
+        if shipping:
+            result['shipping_address'] = shipping
+
+    # Line items (simplified structure)
     if 'Line' in invoice_data and isinstance(invoice_data['Line'], list):
-        line_items = []
+        items = []
         for line in invoice_data['Line']:
             if isinstance(line, dict) and 'Amount' in line:
+                detail_type = line.get('DetailType', 'SalesItemLineDetail')
+                
+                # Skip SubTotalLine as it's just a computed summary
+                if detail_type == 'SubTotalLine':
+                    continue
+
                 item = {
-                    'Amount': line['Amount'],
-                    'Description': line.get('Description'),
-                    'LineId': line.get('Id'),
-                    'LineNum': line.get('LineNum'),
-                    'DetailType': line.get('DetailType', 'SalesItemLineDetail')
+                    'amount': line['Amount'],
+                    'type': detail_type.replace('LineDetail', '').replace('Line', '').lower()
                 }
 
-                detail_type = line.get('DetailType', 'SalesItemLineDetail')
+                if line.get('Description'):
+                    item['description'] = line['Description']
 
-                # Handle different detail types
+                # Handle SalesItemLineDetail
                 if detail_type == 'SalesItemLineDetail' and 'SalesItemLineDetail' in line:
                     detail = line['SalesItemLineDetail']
                     if 'ItemRef' in detail:
-                        item['ItemId'] = detail['ItemRef'].get('value')
-                        item['ItemName'] = detail['ItemRef'].get('name')
+                        item['item_id'] = detail['ItemRef'].get('value')
+                        item['item_name'] = detail['ItemRef'].get('name')
                     if 'Qty' in detail:
-                        item['Quantity'] = detail['Qty']
+                        item['quantity'] = detail['Qty']
                     if 'UnitPrice' in detail:
-                        item['UnitPrice'] = detail['UnitPrice']
-                    if 'DiscountRate' in detail:
-                        item['DiscountRate'] = detail['DiscountRate']
-                    if 'DiscountAmt' in detail:
-                        item['DiscountAmount'] = detail['DiscountAmt']
+                        item['unit_price'] = detail['UnitPrice']
                     if 'ServiceDate' in detail:
-                        item['ServiceDate'] = detail['ServiceDate']
-                    if 'TaxCodeRef' in detail:
-                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
-                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
-                            'name')
+                        item['service_date'] = detail['ServiceDate']
 
-                elif detail_type == 'GroupLineDetail' and 'GroupLineDetail' in line:
-                    detail = line['GroupLineDetail']
-                    if 'GroupItemRef' in detail:
-                        item['GroupItemId'] = detail['GroupItemRef'].get(
-                            'value')
-                        item['GroupItemName'] = detail['GroupItemRef'].get(
-                            'name')
-                    if 'Quantity' in detail:
-                        item['GroupQuantity'] = detail['Quantity']
-
-                    # Handle nested group lines
-                    if 'Line' in detail and isinstance(detail['Line'], list):
-                        group_lines = []
-                        for group_line in detail['Line']:
-                            if isinstance(group_line, dict) and 'SalesItemLineDetail' in group_line:
-                                group_detail = group_line['SalesItemLineDetail']
-                                group_item = {
-                                    'ItemId': group_detail.get('ItemRef', {}).get('value'),
-                                    'Quantity': group_detail.get('Qty'),
-                                    'UnitPrice': group_detail.get('UnitPrice'),
-                                    'DiscountRate': group_detail.get('DiscountRate'),
-                                    'TaxCodeId': group_detail.get('TaxCodeRef', {}).get('value')
-                                }
-                                group_lines.append(group_item)
-                        item['GroupLines'] = group_lines
-
-                elif detail_type == 'DescriptionOnlyLine' and 'DescriptionLineDetail' in line:
-                    detail = line['DescriptionLineDetail']
-                    if 'ServiceDate' in detail:
-                        item['ServiceDate'] = detail['ServiceDate']
-                    if 'TaxCodeRef' in detail:
-                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
-                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
-                            'name')
-                    # Check if this is a subtotal line
-                    description = line.get('Description', '')
-                    if description and description.startswith('Subtotal:'):
-                        item['IsSubtotal'] = True
-
+                # Handle DiscountLineDetail
                 elif detail_type == 'DiscountLineDetail' and 'DiscountLineDetail' in line:
                     detail = line['DiscountLineDetail']
                     if 'DiscountPercent' in detail:
-                        item['DiscountPercent'] = detail['DiscountPercent']
+                        item['discount_percent'] = detail['DiscountPercent']
                     if 'PercentBased' in detail:
-                        item['IsPercentBased'] = detail['PercentBased']
-                    if 'DiscountAccountRef' in detail:
-                        item['DiscountAccountId'] = detail['DiscountAccountRef'].get(
-                            'value')
-                        item['DiscountAccountName'] = detail['DiscountAccountRef'].get(
-                            'name')
-                    if 'TaxCodeRef' in detail:
-                        item['TaxCodeId'] = detail['TaxCodeRef'].get('value')
-                        item['TaxCodeName'] = detail['TaxCodeRef'].get(
-                            'name')
+                        item['is_percent'] = detail['PercentBased']
 
-                elif detail_type == 'SubTotalLineDetail' and 'SubTotalLineDetail' in line:
-                    detail = line['SubTotalLineDetail']
-                    if 'ItemRef' in detail:
-                        item['ItemId'] = detail['ItemRef'].get('value')
-                        item['ItemName'] = detail['ItemRef'].get('name')
+                items.append(item)
 
-                line_items.append(item)
-        mcp_object['LineItems'] = line_items
+        if items:
+            result['line_items'] = items
 
-    # Reference objects - flatten to separate value and name fields
-    ref_mappings = [
-        ('CustomerRef', 'CustomerRefValue', 'CustomerRefName'),
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('SalesTermRef', 'SalesTermRefValue', 'SalesTermRefName'),
-        ('DepartmentRef', 'DepartmentRefValue', 'DepartmentRefName'),
-        ('ShipMethodRef', 'ShipMethodRefValue', 'ShipMethodRefName'),
-        ('DepositToAccountRef', 'DepositToAccountRefValue', 'DepositToAccountRefName'),
-        ('RecurDataRef', 'RecurDataRefValue', 'RecurDataRefName'),
-        ('SyncToken', 'SyncToken', None)
-    ]
+    # Timestamps
+    if 'MetaData' in invoice_data and isinstance(invoice_data['MetaData'], dict):
+        metadata = invoice_data['MetaData']
+        if 'CreateTime' in metadata:
+            result['created_at'] = metadata['CreateTime']
+        if 'LastUpdatedTime' in metadata:
+            result['updated_at'] = metadata['LastUpdatedTime']
 
-    for ref_name, value_field, name_field in ref_mappings:
-        if ref_name in invoice_data:
-            ref = invoice_data[ref_name]
-            if isinstance(ref, dict):
-                if 'value' in ref:
-                    mcp_object[value_field] = ref['value']
-                if name_field and 'name' in ref:
-                    mcp_object[name_field] = ref['name']
-            else:
-                # Handle cases where SyncToken might be directly in invoice_data
-                mcp_object[value_field] = ref
-
-    # Address fields - flatten structured objects
-    address_mappings = [
-        ('BillAddr', 'BillAddr'),
-        ('ShipAddr', 'ShipAddr'),
-        ('ShipFromAddr', 'ShipFromAddr')
-    ]
-
-    for addr_type, prefix in address_mappings:
-        if addr_type in invoice_data and isinstance(invoice_data[addr_type], dict):
-            addr = invoice_data[addr_type]
-            for field in ['Line1', 'Line2', 'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']:
-                if field in addr:
-                    mcp_object[f'{prefix}{field}'] = addr[field]
-
-    return mcp_object
+    return result
 
 
 class InvoiceManager:
@@ -748,26 +577,19 @@ class InvoiceManager:
         self.client = client
 
     async def create_invoice(self, **kwargs) -> Dict[str, Any]:
-        """Create a new invoice with comprehensive property support."""
+        """Create a new invoice."""
         invoice_data = mcp_object_to_invoice_data(**kwargs)
-
-        # Ensure CustomerRef is included
-        if 'CustomerRef' not in invoice_data and 'CustomerRefValue' in kwargs:
-            invoice_data['CustomerRef'] = {'value': kwargs['CustomerRefValue']}
-            if 'CustomerRefName' in kwargs:
-                invoice_data['CustomerRef']['name'] = kwargs['CustomerRefName']
-
         response = await self.client._post('invoice', invoice_data)
         return invoice_data_to_mcp_object(response['Invoice'])
 
-    async def get_invoice(self, Id: str) -> Dict[str, Any]:
+    async def get_invoice(self, id: str) -> Dict[str, Any]:
         """Get a specific invoice by ID."""
-        response = await self.client._get(f"invoice/{Id}")
+        response = await self.client._get(f"invoice/{id}")
         return invoice_data_to_mcp_object(response['Invoice'])
 
-    async def list_invoices(self, MaxResults: int = 100, StartPosition: int = 1) -> List[Dict[str, Any]]:
-        """List all invoices with comprehensive properties and pagination support."""
-        query = f"select * from Invoice STARTPOSITION {StartPosition} MAXRESULTS {MaxResults}"
+    async def list_invoices(self, max_results: int = 100, start_position: int = 1) -> List[Dict[str, Any]]:
+        """List all invoices with pagination support."""
+        query = f"select * from Invoice STARTPOSITION {start_position} MAXRESULTS {max_results}"
         response = await self.client._get('query', params={'query': query})
 
         # Handle case when no invoices are returned
@@ -782,28 +604,17 @@ class InvoiceManager:
         Search invoices with various filters and pagination support.
 
         Args:
-            DocNumber: Search by document/invoice number
-            CustomerRefValue: Search by customer ID
-            CustomerName: Search by customer name (partial match)
-
-            # Date filters
-            TransactionDateFrom/TransactionDateTo: Search by transaction date range
-            DueDateFrom/DueDateTo: Search by due date range  
-            ShipDateFrom/ShipDateTo: Search by ship date range
-
-            # Amount filters
-            MinAmount/MaxAmount: Search by total amount range
-            MinBalance/MaxBalance: Search by balance amount range
-
-            # Address filters (billing, shipping, ship-from)
-            BillAddrCity, ShipAddrCity, ShipFromAddrCity: Search by city
-            BillAddrState, ShipAddrState, ShipFromAddrState: Search by state/province
-            BillAddrPostalCode, ShipAddrPostalCode, ShipFromAddrPostalCode: Search by postal code
-            BillAddrCountry, ShipAddrCountry, ShipFromAddrCountry: Search by country
-            BillAddrLine1, ShipAddrLine1, ShipFromAddrLine1: Search by address line 1 (partial match)
-
-            MaxResults: Maximum number of results to return (default: 100)
-            StartPosition: Starting position for pagination (default: 1)
+            invoice_number: Search by invoice number
+            customer_id: Search by customer ID
+            customer_name: Search by customer name (partial match)
+            date_from/date_to: Search by transaction date range
+            due_date_from/due_date_to: Search by due date range
+            min_amount/max_amount: Search by total amount range
+            min_balance/max_balance: Search by balance range
+            billing_city/billing_state: Filter by billing address
+            shipping_city/shipping_state: Filter by shipping address
+            max_results: Maximum results (default: 100)
+            start_position: Starting position (default: 1)
 
         Returns:
             List of invoices matching the search criteria
@@ -812,101 +623,60 @@ class InvoiceManager:
         conditions = []
 
         # Basic filters
-        if kwargs.get('DocNumber'):
-            conditions.append(f"DocNumber = '{kwargs['DocNumber']}'")
+        if kwargs.get('invoice_number'):
+            conditions.append(f"DocNumber = '{kwargs['invoice_number']}'")
 
-        if kwargs.get('CustomerRefValue'):
-            conditions.append(f"CustomerRef = '{kwargs['CustomerRefValue']}'")
+        if kwargs.get('customer_id'):
+            conditions.append(f"CustomerRef = '{kwargs['customer_id']}'")
 
-        if kwargs.get('CustomerName'):
-            # For customer name search, we need to use LIKE operator
-            customer_name = kwargs['CustomerName'].replace(
-                "'", "''")  # Escape single quotes
+        if kwargs.get('customer_name'):
+            customer_name = kwargs['customer_name'].replace("'", "''")
             conditions.append(
                 f"CustomerRef IN (SELECT Id FROM Customer WHERE Name LIKE '%{customer_name}%')")
 
         # Date range filters
-        if kwargs.get('TransactionDateFrom'):
-            conditions.append(f"TxnDate >= '{kwargs['TransactionDateFrom']}'")
-        if kwargs.get('TransactionDateTo'):
-            conditions.append(f"TxnDate <= '{kwargs['TransactionDateTo']}'")
+        if kwargs.get('date_from'):
+            conditions.append(f"TxnDate >= '{kwargs['date_from']}'")
+        if kwargs.get('date_to'):
+            conditions.append(f"TxnDate <= '{kwargs['date_to']}'")
 
-        if kwargs.get('DueDateFrom'):
-            conditions.append(f"DueDate >= '{kwargs['DueDateFrom']}'")
-        if kwargs.get('DueDateTo'):
-            conditions.append(f"DueDate <= '{kwargs['DueDateTo']}'")
-
-        if kwargs.get('ShipDateFrom'):
-            conditions.append(f"ShipDate >= '{kwargs['ShipDateFrom']}'")
-        if kwargs.get('ShipDateTo'):
-            conditions.append(f"ShipDate <= '{kwargs['ShipDateTo']}'")
+        if kwargs.get('due_date_from'):
+            conditions.append(f"DueDate >= '{kwargs['due_date_from']}'")
+        if kwargs.get('due_date_to'):
+            conditions.append(f"DueDate <= '{kwargs['due_date_to']}'")
 
         # Amount range filters
-        if kwargs.get('MinAmount'):
-            conditions.append(f"TotalAmt >= {kwargs['MinAmount']}")
-        if kwargs.get('MaxAmount'):
-            conditions.append(f"TotalAmt <= {kwargs['MaxAmount']}")
+        if kwargs.get('min_amount') is not None:
+            conditions.append(f"TotalAmt >= {kwargs['min_amount']}")
+        if kwargs.get('max_amount') is not None:
+            conditions.append(f"TotalAmt <= {kwargs['max_amount']}")
 
-        if kwargs.get('MinBalance'):
-            conditions.append(f"Balance >= {kwargs['MinBalance']}")
-        if kwargs.get('MaxBalance'):
-            conditions.append(f"Balance <= {kwargs['MaxBalance']}")
+        if kwargs.get('min_balance') is not None:
+            conditions.append(f"Balance >= {kwargs['min_balance']}")
+        if kwargs.get('max_balance') is not None:
+            conditions.append(f"Balance <= {kwargs['max_balance']}")
 
-        # Address filters - Note: QuickBooks API has limited support for nested object queries
-        # For address searches, we'll need to use more complex queries or post-filter results
-        address_filters = {}
+        # Address filters
+        address_field_mappings = {
+            'billing_city': 'BillAddr.City',
+            'billing_state': 'BillAddr.CountrySubDivisionCode',
+            'shipping_city': 'ShipAddr.City',
+            'shipping_state': 'ShipAddr.CountrySubDivisionCode',
+        }
 
-        # Billing Address filters
-        for field in ['BillAddrCity', 'BillAddrState', 'BillAddrPostalCode', 'BillAddrCountry']:
-            if kwargs.get(field):
-                # Map the field name to QB API format
-                qb_field = field.replace('BillAddr', 'BillAddr.').replace(
-                    'State', 'CountrySubDivisionCode')
-                if field.endswith('Line1'):
-                    # For partial match on address lines, we'll post-filter
-                    address_filters[field] = kwargs[field]
-                else:
-                    conditions.append(f"{qb_field} = '{kwargs[field]}'")
-
-        if kwargs.get('BillAddrLine1'):
-            address_filters['BillAddrLine1'] = kwargs['BillAddrLine1']
-
-        # Shipping Address filters
-        for field in ['ShipAddrCity', 'ShipAddrState', 'ShipAddrPostalCode', 'ShipAddrCountry']:
-            if kwargs.get(field):
-                qb_field = field.replace('ShipAddr', 'ShipAddr.').replace(
-                    'State', 'CountrySubDivisionCode')
-                if field.endswith('Line1'):
-                    address_filters[field] = kwargs[field]
-                else:
-                    conditions.append(f"{qb_field} = '{kwargs[field]}'")
-
-        if kwargs.get('ShipAddrLine1'):
-            address_filters['ShipAddrLine1'] = kwargs['ShipAddrLine1']
-
-        # Ship From Address filters
-        for field in ['ShipFromAddrCity', 'ShipFromAddrState', 'ShipFromAddrPostalCode', 'ShipFromAddrCountry']:
-            if kwargs.get(field):
-                qb_field = field.replace('ShipFromAddr', 'ShipFromAddr.').replace(
-                    'State', 'CountrySubDivisionCode')
-                if field.endswith('Line1'):
-                    address_filters[field] = kwargs[field]
-                else:
-                    conditions.append(f"{qb_field} = '{kwargs[field]}'")
-
-        if kwargs.get('ShipFromAddrLine1'):
-            address_filters['ShipFromAddrLine1'] = kwargs['ShipFromAddrLine1']
+        for simple_name, qb_field in address_field_mappings.items():
+            if kwargs.get(simple_name):
+                conditions.append(f"{qb_field} = '{kwargs[simple_name]}'")
 
         # Build the complete query
         base_query = "SELECT * FROM Invoice"
 
         if conditions:
-            where_clause = " WHERE " + " AND ".join(conditions)
-            base_query += where_clause
+            base_query += " WHERE " + " AND ".join(conditions)
 
         # Add pagination
-        start_position = kwargs.get('StartPosition', 1)
-        max_results = kwargs.get('MaxResults', 100)
+        start_position = kwargs.get('start_position', 1)
+        max_results = kwargs.get('max_results', 100)
 
         query = f"{base_query} STARTPOSITION {start_position} MAXRESULTS {max_results}"
 
@@ -917,57 +687,22 @@ class InvoiceManager:
             return []
 
         invoices = response['QueryResponse']['Invoice']
-        results = [invoice_data_to_mcp_object(invoice) for invoice in invoices]
-
-        # Post-filter for address line fields (partial matching)
-        if address_filters:
-            filtered_results = []
-            for invoice in results:
-                match = True
-
-                # Check BillAddrLine1
-                if address_filters.get('BillAddrLine1'):
-                    bill_line1 = invoice.get('BillAddrLine1', '').lower()
-                    search_term = address_filters['BillAddrLine1'].lower()
-                    if search_term not in bill_line1:
-                        match = False
-
-                # Check ShipAddrLine1
-                if address_filters.get('ShipAddrLine1'):
-                    ship_line1 = invoice.get('ShipAddrLine1', '').lower()
-                    search_term = address_filters['ShipAddrLine1'].lower()
-                    if search_term not in ship_line1:
-                        match = False
-
-                # Check ShipFromAddrLine1
-                if address_filters.get('ShipFromAddrLine1'):
-                    ship_from_line1 = invoice.get(
-                        'ShipFromAddrLine1', '').lower()
-                    search_term = address_filters['ShipFromAddrLine1'].lower()
-                    if search_term not in ship_from_line1:
-                        match = False
-
-                if match:
-                    filtered_results.append(invoice)
-
-            return filtered_results
-
-        return results
+        return [invoice_data_to_mcp_object(invoice) for invoice in invoices]
 
     async def update_invoice(self, **kwargs) -> Dict[str, Any]:
-        """Update an existing invoice with comprehensive property support."""
-        Id = kwargs.get('Id')
-        if not Id:
-            raise ValueError("Id is required for updating an invoice")
+        """Update an existing invoice."""
+        invoice_id = kwargs.get('id')
+        if not invoice_id:
+            raise ValueError("id is required for updating an invoice")
 
         # Auto-fetch current sync token
-        current_invoice_response = await self.client._get(f"invoice/{Id}")
+        current_invoice_response = await self.client._get(f"invoice/{invoice_id}")
         sync_token = current_invoice_response.get(
             'Invoice', {}).get('SyncToken', '0')
 
         invoice_data = mcp_object_to_invoice_data(**kwargs)
         invoice_data.update({
-            "Id": Id,
+            "Id": invoice_id,
             "SyncToken": sync_token,
             "sparse": True,
         })
@@ -975,90 +710,71 @@ class InvoiceManager:
         response = await self.client._post('invoice', invoice_data)
         return invoice_data_to_mcp_object(response['Invoice'])
 
-    async def delete_invoice(self, Id: str) -> Dict[str, Any]:
+    async def delete_invoice(self, id: str) -> Dict[str, Any]:
         """Delete an invoice."""
         # Auto-fetch current sync token
-        current_invoice_response = await self.client._get(f"invoice/{Id}")
+        current_invoice_response = await self.client._get(f"invoice/{id}")
         current_invoice = current_invoice_response.get('Invoice', {})
 
         if not current_invoice:
-            raise ValueError(f"Invoice with ID {Id} not found")
+            raise ValueError(f"Invoice with ID {id} not found")
 
         sync_token = current_invoice.get('SyncToken', '0')
 
-        # For delete operation, wrap in Invoice object
         delete_data = {
-            "Id": Id,
+            "Id": id,
             "SyncToken": sync_token,
         }
         return await self.client._post("invoice", delete_data, params={'operation': 'delete'})
 
-    async def send_invoice(self, Id: str, SendTo: str = None) -> Dict[str, Any]:
+    async def send_invoice(self, id: str, send_to: str = None) -> Dict[str, Any]:
         """
-        Send an invoice via email with delivery info and email status updates.
-
-        The Invoice.EmailStatus parameter is set to EmailSent.
-        The Invoice.DeliveryInfo element is populated with sending information.
-        The Invoice.BillEmail.Address parameter is updated to the address specified
-        with the value of the sendTo query parameter, if specified.
+        Send an invoice via email.
 
         Args:
-            Id: The QuickBooks invoice ID to send
-            sendTo: Optional email address to send the invoice to. If not provided,
-                   uses the invoice's BillEmail address.
+            id: The invoice ID to send
+            send_to: Optional email address (uses invoice's bill_email if not provided)
 
         Returns:
-            The invoice response body with updated email status and delivery info.
+            The invoice with updated email status and delivery info.
         """
-        # Construct the endpoint URL
-        endpoint = f"invoice/{Id}/send"
-
-        # Build query parameters
+        endpoint = f"invoice/{id}/send"
         params = {}
-        if SendTo:
-            params['sendTo'] = SendTo
+        if send_to:
+            params['sendTo'] = send_to
 
-        # Send request with POST method (empty body as per API spec)
         response = await self.client._make_request('POST', endpoint, params=params)
 
-        # The response should contain the updated invoice data
         if 'Invoice' in response:
             return invoice_data_to_mcp_object(response['Invoice'])
 
         return response
 
-    async def void_invoice(self, Id: str) -> Dict[str, Any]:
+    async def void_invoice(self, id: str) -> Dict[str, Any]:
         """
-        Void an existing invoice in QuickBooks.
-
-        The transaction remains active but all amounts and quantities are zeroed 
-        and the string "Voided" is injected into Invoice.PrivateNote, prepended 
-        to existing text if present.
+        Void an existing invoice. Amounts are zeroed and "Voided" is added to notes.
 
         Args:
-            Id: The QuickBooks invoice ID to void
+            id: The invoice ID to void
 
         Returns:
-            The invoice response body with voided status.
+            The voided invoice.
         """
-        # Auto-fetch current sync token
-        current_invoice_response = await self.client._get(f"invoice/{Id}")
+        current_invoice_response = await self.client._get(f"invoice/{id}")
         current_invoice = current_invoice_response.get('Invoice', {})
 
         if not current_invoice:
-            raise ValueError(f"Invoice with ID {Id} not found")
+            raise ValueError(f"Invoice with ID {id} not found")
 
         sync_token = current_invoice.get('SyncToken', '0')
 
-        # For void operation, wrap in Invoice object
         void_data = {
-            "Id": Id,
+            "Id": id,
             "SyncToken": sync_token,
         }
 
         response = await self.client._post("invoice", void_data, params={'operation': 'void'})
 
-        # The response should contain the voided invoice data
         if 'Invoice' in response:
             return invoice_data_to_mcp_object(response['Invoice'])
 

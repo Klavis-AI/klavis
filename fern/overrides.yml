@@ -93,6 +93,10 @@ components:
       x-fern-type-name: ResendDataInput
     ResendData-Output:
       x-fern-type-name: ResendDataOutput
+    SalesforceData-Input:
+      x-fern-type-name: SalesforceDataInput
+    SalesforceData-Output:
+      x-fern-type-name: SalesforceDataOutput
     ShopifyData-Input:
       x-fern-type-name: ShopifyDataInput
     ShopifyData-Output:

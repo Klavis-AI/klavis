@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 from .base import get_salesforce_conn, handle_salesforce_error, format_success_response
+from .normalization import normalize_cases_result
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ async def get_cases(account_id: Optional[str] = None, status: Optional[str] = No
         query = f"SELECT {field_list} FROM Case{where_clause} ORDER BY CreatedDate DESC LIMIT {limit}"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_cases_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_cases: {e}")
@@ -89,7 +90,7 @@ async def get_case_by_id(case_id: str, fields: Optional[List[str]] = None) -> Di
         query = f"SELECT {field_list} FROM Case WHERE Id = '{case_id}'"
         
         result = sf.query(query)
-        return dict(result)
+        return normalize_cases_result(dict(result))
         
     except Exception as e:
         logger.exception(f"Error executing tool get_case_by_id: {e}")

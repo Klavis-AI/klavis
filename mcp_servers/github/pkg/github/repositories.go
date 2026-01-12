@@ -15,6 +15,183 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+// CommitData represents the restructured commit response
+type CommitData struct {
+	SHA           string     `json:"sha"`
+	Message       string     `json:"message"`
+	Committer     AuthorInfo `json:"committer"`
+	Author        AuthorInfo `json:"author"`
+	CommittedDate time.Time  `json:"committed_date"`
+	AuthoredDate  time.Time  `json:"authored_date"`
+}
+
+// AuthorInfo represents commit author/committer information
+type AuthorInfo struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+// FileContentData represents the restructured file content response
+type FileContentData struct {
+	FileName    string `json:"file_name"`
+	FilePath    string `json:"file_path"`
+	Content     string `json:"content"`
+	Size        int    `json:"size"`
+	SHA         string `json:"sha"`
+	DownloadURL string `json:"download_url,omitempty"`
+}
+
+// DirectoryContentData represents directory listing
+type DirectoryContentData struct {
+	Name        string `json:"name"`
+	Path        string `json:"path"`
+	Type        string `json:"type"`
+	Size        int    `json:"size"`
+	SHA         string `json:"sha"`
+	DownloadURL string `json:"download_url,omitempty"`
+}
+
+// RepositoryData represents the restructured repository response
+type RepositoryData struct {
+	RepoID          int64     `json:"repo_id"`
+	Name            string    `json:"name"`
+	FullName        string    `json:"full_name"`
+	Description     string    `json:"description"`
+	Owner           UserInfo  `json:"owner"`
+	IsPrivate       bool      `json:"is_private"`
+	IsFork          bool      `json:"is_fork"`
+	DefaultBranch   string    `json:"default_branch"`
+	Language        string    `json:"language,omitempty"`
+	StarCount       int       `json:"star_count"`
+	ForkCount       int       `json:"fork_count"`
+	WatcherCount    int       `json:"watcher_count"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	PushedAt        time.Time `json:"pushed_at,omitempty"`
+	CloneURL        string    `json:"clone_url"`
+	HTMLURL         string    `json:"html_url"`
+}
+
+// FileOperationResultData represents file create/update result
+type FileOperationResultData struct {
+	FilePath      string        `json:"file_path"`
+	CommitMessage string        `json:"commit_message"`
+	CommitSHA     string        `json:"commit_sha"`
+	Content       FileMetaData  `json:"content"`
+}
+
+// FileMetaData represents file metadata
+type FileMetaData struct {
+	Name        string `json:"name"`
+	Path        string `json:"path"`
+	SHA         string `json:"sha"`
+	Size        int    `json:"size"`
+	DownloadURL string `json:"download_url,omitempty"`
+}
+
+// BranchData represents branch information
+type BranchData struct {
+	Name      string `json:"name"`
+	CommitSHA string `json:"commit_sha"`
+	Protected bool   `json:"protected,omitempty"`
+}
+
+// StargazerData represents a user who starred a repository
+type StargazerData struct {
+	Username  string    `json:"username"`
+	StarredAt time.Time `json:"starred_at,omitempty"`
+}
+
+// transformCommitToCommitData converts GitHub commit to CommitData
+func transformCommitToCommitData(commit *github.RepositoryCommit) CommitData {
+	data := CommitData{
+		SHA:     commit.GetSHA(),
+		Message: commit.GetCommit().GetMessage(),
+	}
+
+	if commit.Commit != nil {
+		if commit.Commit.Committer != nil {
+			data.Committer = AuthorInfo{
+				Name:  commit.Commit.Committer.GetName(),
+				Email: commit.Commit.Committer.GetEmail(),
+			}
+			data.CommittedDate = commit.Commit.Committer.GetDate().Time
+		}
+
+		if commit.Commit.Author != nil {
+			data.Author = AuthorInfo{
+				Name:  commit.Commit.Author.GetName(),
+				Email: commit.Commit.Author.GetEmail(),
+			}
+			data.AuthoredDate = commit.Commit.Author.GetDate().Time
+		}
+	}
+
+	return data
+}
+
+// transformRepoToRepositoryData converts GitHub repository to RepositoryData
+func transformRepoToRepositoryData(repo *github.Repository) RepositoryData {
+	data := RepositoryData{
+		RepoID:        repo.GetID(),
+		Name:          repo.GetName(),
+		FullName:      repo.GetFullName(),
+		Description:   repo.GetDescription(),
+		Owner:         transformUserToUserInfo(repo.Owner),
+		IsPrivate:     repo.GetPrivate(),
+		IsFork:        repo.GetFork(),
+		DefaultBranch: repo.GetDefaultBranch(),
+		Language:      repo.GetLanguage(),
+		StarCount:     repo.GetStargazersCount(),
+		ForkCount:     repo.GetForksCount(),
+		WatcherCount:  repo.GetWatchersCount(),
+		CreatedAt:     repo.GetCreatedAt().Time,
+		UpdatedAt:     repo.GetUpdatedAt().Time,
+		CloneURL:      repo.GetCloneURL(),
+		HTMLURL:       repo.GetHTMLURL(),
+	}
+
+	if !repo.GetPushedAt().Time.IsZero() {
+		data.PushedAt = repo.GetPushedAt().Time
+	}
+
+	return data
+}
+
+// transformFileContentToFileContentData converts repository content to FileContentData
+func transformFileContentToFileContentData(content *github.RepositoryContent) FileContentData {
+	data := FileContentData{
+		FileName:    content.GetName(),
+		FilePath:    content.GetPath(),
+		Size:        content.GetSize(),
+		SHA:         content.GetSHA(),
+		DownloadURL: content.GetDownloadURL(),
+	}
+
+	// Decode content if available
+	if contentStr, err := content.GetContent(); err == nil {
+		data.Content = contentStr
+	}
+
+	return data
+}
+
+// transformDirContentToDirectoryContentData converts repository content list to DirectoryContentData
+func transformDirContentToDirectoryContentData(contents []*github.RepositoryContent) []DirectoryContentData {
+	result := make([]DirectoryContentData, 0, len(contents))
+	for _, item := range contents {
+		result = append(result, DirectoryContentData{
+			Name:        item.GetName(),
+			Path:        item.GetPath(),
+			Type:        item.GetType(),
+			Size:        item.GetSize(),
+			SHA:         item.GetSHA(),
+			DownloadURL: item.GetDownloadURL(),
+		})
+	}
+	return result
+}
+
 // ListCommits creates a tool to get commits of a branch in a repository.
 func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (tool mcp.Tool, handler server.ToolHandlerFunc) {
 	return mcp.NewTool("github_list_commits",
@@ -76,7 +253,13 @@ func ListCommits(getClient GetClientFn, t translations.TranslationHelperFunc) (t
 				return mcp.NewToolResultError(fmt.Sprintf("failed to list commits: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(commits)
+			// Transform to custom structure
+			commitList := make([]CommitData, 0, len(commits))
+			for _, commit := range commits {
+				commitList = append(commitList, transformCommitToCommitData(commit))
+			}
+
+			r, err := json.Marshal(commitList)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -181,7 +364,21 @@ func CreateOrUpdateFile(getClient GetClientFn, t translations.TranslationHelperF
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create/update file: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(fileContent)
+			// Transform to custom structure
+			result := FileOperationResultData{
+				FilePath:      path,
+				CommitMessage: message,
+				CommitSHA:     fileContent.Commit.GetSHA(),
+				Content: FileMetaData{
+					Name:        fileContent.Content.GetName(),
+					Path:        fileContent.Content.GetPath(),
+					SHA:         fileContent.Content.GetSHA(),
+					Size:        fileContent.Content.GetSize(),
+					DownloadURL: fileContent.Content.GetDownloadURL(),
+				},
+			}
+
+			r, err := json.Marshal(result)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -251,7 +448,10 @@ func CreateRepository(getClient GetClientFn, t translations.TranslationHelperFun
 				return mcp.NewToolResultError(fmt.Sprintf("failed to create repository: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(createdRepo)
+			// Transform to custom structure
+			repoData := transformRepoToRepositoryData(createdRepo)
+
+			r, err := json.Marshal(repoData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -317,11 +517,12 @@ func GetFileContents(getClient GetClientFn, t translations.TranslationHelperFunc
 				return mcp.NewToolResultError(fmt.Sprintf("failed to get file contents: %s", string(body))), nil
 			}
 
+			// Transform to custom structure
 			var result interface{}
 			if fileContent != nil {
-				result = fileContent
+				result = transformFileContentToFileContentData(fileContent)
 			} else {
-				result = dirContent
+				result = transformDirContentToDirectoryContentData(dirContent)
 			}
 
 			r, err := json.Marshal(result)
@@ -391,7 +592,10 @@ func ForkRepository(getClient GetClientFn, t translations.TranslationHelperFunc)
 				return mcp.NewToolResultError(fmt.Sprintf("failed to fork repository: %s", string(body))), nil
 			}
 
-			r, err := json.Marshal(forkedRepo)
+			// Transform to custom structure
+			repoData := transformRepoToRepositoryData(forkedRepo)
+
+			r, err := json.Marshal(repoData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -476,7 +680,13 @@ func CreateBranch(getClient GetClientFn, t translations.TranslationHelperFunc) (
 			}
 			defer func() { _ = resp.Body.Close() }()
 
-			r, err := json.Marshal(createdRef)
+			// Transform to custom structure
+			branchData := BranchData{
+				Name:      branch,
+				CommitSHA: createdRef.Object.GetSHA(),
+			}
+
+			r, err := json.Marshal(branchData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -624,7 +834,13 @@ func PushFiles(getClient GetClientFn, t translations.TranslationHelperFunc) (too
 			}
 			defer func() { _ = resp.Body.Close() }()
 
-			r, err := json.Marshal(updatedRef)
+			// Transform to custom structure
+			result := BranchData{
+				Name:      branch,
+				CommitSHA: updatedRef.Object.GetSHA(),
+			}
+
+			r, err := json.Marshal(result)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal response: %w", err)
 			}
@@ -737,16 +953,11 @@ func ListStargazers(getClient GetClientFn, t translations.TranslationHelperFunc)
 				return mcp.NewToolResultError(fmt.Sprintf("GraphQL errors: %s", strings.Join(errMsgs, "; "))), nil
 			}
 
-			type Stargazer struct {
-				Login     string    `json:"login"`
-				StarredAt time.Time `json:"starred_at,omitempty"`
-			}
-
-			stargazers := make([]Stargazer, 0, len(response.Data.Repository.Stargazers.Edges))
+			stargazers := make([]StargazerData, 0, len(response.Data.Repository.Stargazers.Edges))
 			for _, edge := range response.Data.Repository.Stargazers.Edges {
 				starredAt, _ := time.Parse(time.RFC3339, edge.StarredAt)
-				stargazers = append(stargazers, Stargazer{
-					Login:     edge.Node.Login,
+				stargazers = append(stargazers, StargazerData{
+					Username:  edge.Node.Login,
 					StarredAt: starredAt,
 				})
 			}

@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict
 from datetime import datetime, timedelta
 from .base import get_salesforce_conn, handle_salesforce_error, format_success_response
+from .normalization import normalize_content_document_link, normalize_attachment
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -37,31 +38,13 @@ async def get_attachments_for_record(
         """
         
         content_result = sf.query(content_query)
-        files = []
-        
-        for record in content_result.get('records', []):
-            version_id = record.get('ContentDocument', {}).get('LatestPublishedVersionId')
-            doc_id = record.get('ContentDocumentId')
-            
-            file_info = {
-                'id': doc_id,
-                'title': record.get('ContentDocument', {}).get('Title'),
-                'file_type': record.get('ContentDocument', {}).get('FileType'),
-                'size': record.get('ContentDocument', {}).get('ContentSize'),
-                'created_date': record.get('ContentDocument', {}).get('CreatedDate'),
-                'last_modified_date': record.get('ContentDocument', {}).get('LastModifiedDate'),
-                'owner_name': record.get('ContentDocument', {}).get('Owner', {}).get('Name'),
-                'latest_version_id': version_id,
-                'type': 'ContentDocument'
-            }
-            
-            files.append(file_info)
+        files = [normalize_content_document_link(record) for record in content_result.get('records', [])]
         
         return {
             'success': True,
-            'record_id': record_id,
+            'recordId': record_id,
             'files': files,
-            'total_count': len(files),
+            'totalCount': len(files),
         }
         
     except Exception as e:
@@ -139,20 +122,16 @@ async def get_attachment_temporary_download_url(
         
         dist_record = dist_result['records'][0]
         
+        # Normalize the document record and add download info
+        normalized_doc = normalize_attachment(doc_record)
+        normalized_doc['downloadUrl'] = dist_record.get('ContentDownloadUrl')
+        normalized_doc['publicUrl'] = dist_record.get('DistributionPublicUrl')
+        normalized_doc['expiresAt'] = dist_record.get('ExpiryDate')
+        normalized_doc['note'] = 'Public download link expires in 1 hour.'
+        
         return {
             'success': True,
-            'id': attachment_id,
-            'title': doc_record.get('Title'),
-            'file_type': doc_record.get('FileType'),
-            'size': doc_record.get('ContentSize'),
-            'created_date': doc_record.get('CreatedDate'),
-            'last_modified_date': doc_record.get('LastModifiedDate'),
-            'owner_name': doc_record.get('Owner', {}).get('Name'),
-            'version_id': version_id,
-            'download_url': dist_record.get('ContentDownloadUrl'),
-            'public_url': dist_record.get('DistributionPublicUrl'),
-            'expires_at': dist_record.get('ExpiryDate'),
-            'note': 'Public download link expires in 1 hour.'
+            **normalized_doc
         }
         
     except Exception as e:
@@ -194,29 +173,13 @@ async def search_attachments(
             """
             
             content_result = sf.query(content_query)
-            
-            for record in content_result.get('records', []):
-                version_id = record.get('LatestPublishedVersionId')
-                doc_id = record.get('Id')
-                
-                file_info = {
-                    'id': doc_id,
-                    'title': record.get('Title'),
-                    'file_type': record.get('FileType'),
-                    'size': record.get('ContentSize'),
-                    'created_date': record.get('CreatedDate'),
-                    'last_modified_date': record.get('LastModifiedDate'),
-                    'owner_name': record.get('Owner', {}).get('Name'),
-                    'version_id': version_id,
-                    'type': 'ContentDocument'
-                }
-                files.append(file_info)
+            files = [normalize_attachment(record) for record in content_result.get('records', [])]
         
         return {
             'success': True,
             'query': query,
             'files': files,
-            'total_count': len(files)
+            'totalCount': len(files)
         }
         
     except Exception as e:

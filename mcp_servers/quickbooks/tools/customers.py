@@ -5,137 +5,125 @@ import mcp.types as types
 from .http_client import QuickBooksHTTPClient
 
 customer_properties_user_define = {
-    "DisplayName": {
+    "display_name": {
         "type": "string",
-        "description": "The name of the person or organization as displayed. Must be unique across all Customer, Vendor, and Employee objects. Cannot be removed with sparse update."
+        "description": "The display name (must be unique across all customers, vendors, employees)"
     },
-    "GivenName": {
+    "first_name": {
         "type": "string",
-        "description": "Given name or first name of a person."
+        "description": "First/given name"
     },
-    "MiddleName": {
+    "middle_name": {
         "type": "string",
-        "description": "Middle name of the person. The person can have zero or more middle names."
+        "description": "Middle name"
     },
-    "FamilyName": {
+    "last_name": {
         "type": "string",
-        "description": "Family name or the last name of the person."
+        "description": "Last/family name"
     },
-    "PrimaryEmailAddr": {
+    "company": {
         "type": "string",
-        "description": "Primary email address."
+        "description": "Company name"
     },
-    "DefaultTaxCodeRefValue": {
+    "email": {
         "type": "string",
-        "description": "The ID for the default tax code associated with this Customer object. Valid if Customer.Taxable is set to true; otherwise, it is ignored. If automated sales tax is enabled, the default tax code is set by the system and cannot be overridden."
+        "description": "Primary email address"
     },
-    "DefaultTaxCodeRefName": {
+    "phone": {
         "type": "string",
-        "description": "The name of the default tax code associated with this Customer object."
+        "description": "Primary phone number"
     },
-    "BillWithParent": {
+    "website": {
+        "type": "string",
+        "description": "Website URL"
+    },
+    "notes": {
+        "type": "string",
+        "description": "Notes or description"
+    },
+    "is_taxable": {
         "type": "boolean",
-        "description": "If true, this Customer object is billed with its parent. If false, or null the customer is not to be billed with its parent. This attribute is valid only if this entity is a Job or sub Customer."
+        "description": "Whether transactions for this customer are taxable"
     },
-    "CurrencyRefValue": {
-        "type": "string",
-        "description": "The ID for the currency in which all amounts associated with this customer are expressed. Once set, it cannot be changed."
-    },
-    "CurrencyRefName": {
-        "type": "string",
-        "description": "The name of the currency in which all amounts associated with this customer are expressed."
-    },
-    "PrimaryPhone": {
-        "type": "string",
-        "description": "Primary phone number."
-    },
-    "Taxable": {
+    "bill_with_parent": {
         "type": "boolean",
-        "description": "If true, transactions for this customer are taxable."
+        "description": "Whether to bill this customer with its parent (for sub-customers)"
     },
-    "Notes": {
+    "currency": {
         "type": "string",
-        "description": "Free form text describing the Customer."
+        "description": "Currency code (e.g., USD, EUR)"
     },
-    "WebAddr": {
+    "payment_method_id": {
         "type": "string",
-        "description": "Website address of the Customer."
+        "description": "Payment method ID"
     },
-    "CompanyName": {
+    "tax_code_id": {
         "type": "string",
-        "description": "The name of the company associated with the person or organization."
+        "description": "Default tax code ID"
     },
-    "Balance": {
+    "balance": {
         "type": "number",
-        "description": "Specifies the open balance amount or the amount unpaid by the customer. For the create operation, this represents the opening balance for the customer. When returned in response to the query request it represents the current open balance (unpaid amount) for that customer. Write-on-create."
+        "description": "Opening balance amount (write-on-create only)"
     },
-    "OpenBalanceDate": {
+    "open_balance_date": {
         "type": "string",
-        "description": "Date of the Open Balance for the create operation. Write-on-create."
+        "description": "Date of the opening balance (YYYY-MM-DD, write-on-create only)"
     },
-    "ShipAddrLine1": {
+    "billing_street": {
         "type": "string",
-        "description": "First line of the shipping address."
+        "description": "Billing address street line 1"
     },
-    "ShipAddrLine2": {
+    "billing_street2": {
         "type": "string",
-        "description": "Second line of the shipping address."
+        "description": "Billing address street line 2"
     },
-    "ShipAddrCity": {
+    "billing_city": {
         "type": "string",
-        "description": "City name for the shipping address."
+        "description": "Billing address city"
     },
-    "ShipAddrCountrySubDivisionCode": {
+    "billing_state": {
         "type": "string",
-        "description": "Region within a country for the shipping address. For example, state name for USA, province name for Canada."
+        "description": "Billing address state/province"
     },
-    "ShipAddrPostalCode": {
+    "billing_postal_code": {
         "type": "string",
-        "description": "Postal code for the shipping address."
+        "description": "Billing address postal/zip code"
     },
-    "ShipAddrCountry": {
+    "billing_country": {
         "type": "string",
-        "description": "Country name for the shipping address. For international addresses - countries should be passed as 3 ISO alpha-3 characters or the full name of the country."
+        "description": "Billing address country"
     },
-    "PaymentMethodRefValue": {
+    "shipping_street": {
         "type": "string",
-        "description": "The ID for the payment method associated with this Customer object."
+        "description": "Shipping address street line 1"
     },
-    "PaymentMethodRefName": {
+    "shipping_street2": {
         "type": "string",
-        "description": "The name of the payment method associated with this Customer object."
+        "description": "Shipping address street line 2"
     },
-    "BillAddrLine1": {
+    "shipping_city": {
         "type": "string",
-        "description": "First line of the billing address."
+        "description": "Shipping address city"
     },
-    "BillAddrLine2": {
+    "shipping_state": {
         "type": "string",
-        "description": "Second line of the billing address."
+        "description": "Shipping address state/province"
     },
-    "BillAddrCity": {
+    "shipping_postal_code": {
         "type": "string",
-        "description": "City name for the billing address."
+        "description": "Shipping address postal/zip code"
     },
-    "BillAddrCountrySubDivisionCode": {
+    "shipping_country": {
         "type": "string",
-        "description": "Region within a country for the billing address. For example, state name for USA, province name for Canada."
-    },
-    "BillAddrPostalCode": {
-        "type": "string",
-        "description": "Postal code for the billing address."
-    },
-    "BillAddrCountry": {
-        "type": "string",
-        "description": "Country name for the billing address. For international addresses - countries should be passed as 3 ISO alpha-3 characters or the full name of the country."
+        "description": "Shipping address country"
     }
 }
 
 customer_properties = {
     **customer_properties_user_define,
-    "Id": {
+    "id": {
         "type": "string",
-        "description": "The unique identifier for the customer in QuickBooks. Sort order is ASC by default. System generated"
+        "description": "The unique customer ID"
     },
 }
 
@@ -156,9 +144,9 @@ get_customer_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks customer ID"}
+            "id": {"type": "string", "description": "The customer ID"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
 )
@@ -169,8 +157,8 @@ list_customers_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": {
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "ActiveOnly": {"type": "boolean", "description": "Return only active customers", "default": True}
+            "max_results": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
+            "active_only": {"type": "boolean", "description": "Return only active customers", "default": True}
         }
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True}),
@@ -182,7 +170,7 @@ update_customer_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": customer_properties,
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
@@ -193,9 +181,9 @@ deactivate_customer_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks customer ID to deactivate"}
+            "id": {"type": "string", "description": "The customer ID to deactivate"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
@@ -206,9 +194,9 @@ activate_customer_tool = Tool(
     inputSchema={
         "type": "object",
         "properties": {
-            "Id": {"type": "string", "description": "The QuickBooks customer ID to activate"}
+            "id": {"type": "string", "description": "The customer ID to activate"}
         },
-        "required": ["Id"]
+        "required": ["id"]
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER"}),
 )
@@ -216,59 +204,47 @@ activate_customer_tool = Tool(
 search_customers_tool = Tool(
     name="quickbooks_search_customers",
     title="Search Customers",
-    description="Advanced Customer Search - Search customers with powerful filters including name, contact info, address, balance, status, and other criteria. Perfect for finding specific customers based on various parameters",
+    description="Search customers with filters including name, contact info, address, balance, and status",
     inputSchema={
         "type": "object",
         "properties": {
-            "DisplayName": {"type": "string", "description": "Search by customer display name (partial match)"},
-            "GivenName": {"type": "string", "description": "Search by given/first name (partial match)"},
-            "FamilyName": {"type": "string", "description": "Search by family/last name (partial match)"},
-            "MiddleName": {"type": "string", "description": "Search by middle name (partial match)"},
-            "CompanyName": {"type": "string", "description": "Search by company name (partial match)"},
-            "PrimaryEmailAddr": {"type": "string", "description": "Search by email address (partial match)"},
-            "PrimaryPhone": {"type": "string", "description": "Search by phone number (partial match)"},
+            # Name filters
+            "display_name": {"type": "string", "description": "Search by display name (partial match)"},
+            "first_name": {"type": "string", "description": "Search by first name (partial match)"},
+            "last_name": {"type": "string", "description": "Search by last name (partial match)"},
+            "company": {"type": "string", "description": "Search by company name (partial match)"},
+
+            # Contact filters
+            "email": {"type": "string", "description": "Search by email (partial match)"},
+            "phone": {"type": "string", "description": "Search by phone (partial match)"},
 
             # Status filters
-            "Active": {"type": "boolean", "description": "Filter by active status"},
-            "Taxable": {"type": "boolean", "description": "Filter by taxable status"},
+            "is_active": {"type": "boolean", "description": "Filter by active status"},
+            "is_taxable": {"type": "boolean", "description": "Filter by taxable status"},
 
-            # Address filters - Billing Address
-            "BillAddrCity": {"type": "string", "description": "Search by billing address city"},
-            "BillAddrCountrySubDivisionCode": {"type": "string", "description": "Search by billing address state/province"},
-            "BillAddrPostalCode": {"type": "string", "description": "Search by billing address postal code"},
-            "BillAddrCountry": {"type": "string", "description": "Search by billing address country"},
-            "BillAddrLine1": {"type": "string", "description": "Search by billing address line 1 (partial match)"},
+            # Address filters - Billing
+            "billing_city": {"type": "string", "description": "Filter by billing city"},
+            "billing_state": {"type": "string", "description": "Filter by billing state/province"},
+            "billing_postal_code": {"type": "string", "description": "Filter by billing postal code"},
+            "billing_country": {"type": "string", "description": "Filter by billing country"},
 
-            # Address filters - Shipping Address
-            "ShipAddrCity": {"type": "string", "description": "Search by shipping address city"},
-            "ShipAddrCountrySubDivisionCode": {"type": "string", "description": "Search by shipping address state/province"},
-            "ShipAddrPostalCode": {"type": "string", "description": "Search by shipping address postal code"},
-            "ShipAddrCountry": {"type": "string", "description": "Search by shipping address country"},
-            "ShipAddrLine1": {"type": "string", "description": "Search by shipping address line 1 (partial match)"},
+            # Address filters - Shipping
+            "shipping_city": {"type": "string", "description": "Filter by shipping city"},
+            "shipping_state": {"type": "string", "description": "Filter by shipping state/province"},
+            "shipping_postal_code": {"type": "string", "description": "Filter by shipping postal code"},
+            "shipping_country": {"type": "string", "description": "Filter by shipping country"},
 
             # Balance filters
-            "MinBalance": {"type": "number", "description": "Minimum balance amount"},
-            "MaxBalance": {"type": "number", "description": "Maximum balance amount"},
-
-            # Reference filters
-            "CurrencyRefValue": {"type": "string", "description": "Filter by currency code"},
-            "CurrencyRefName": {"type": "string", "description": "Search by currency name (partial match)"},
-            "PaymentMethodRefValue": {"type": "string", "description": "Filter by payment method ID"},
-            "PaymentMethodRefName": {"type": "string", "description": "Search by payment method name (partial match)"},
-
-            # Date filters
-            "OpenBalanceDateFrom": {"type": "string", "description": "Search by opening balance date from (YYYY-MM-DD format)"},
-            "OpenBalanceDateTo": {"type": "string", "description": "Search by opening balance date to (YYYY-MM-DD format)"},
+            "min_balance": {"type": "number", "description": "Minimum balance amount"},
+            "max_balance": {"type": "number", "description": "Maximum balance amount"},
 
             # Other filters
-            "WebAddr": {"type": "string", "description": "Search by website address (partial match)"},
-            "Notes": {"type": "string", "description": "Search by notes/description (partial match)"},
+            "currency": {"type": "string", "description": "Filter by currency code"},
 
             # Pagination
-            "MaxResults": {"type": "integer", "description": "Maximum number of results to return", "default": 100},
-            "StartPosition": {"type": "integer", "description": "Starting position for pagination (1-based)", "default": 1}
-        },
-        "required": []
+            "max_results": {"type": "integer", "description": "Maximum results to return", "default": 100},
+            "start_position": {"type": "integer", "description": "Starting position (1-based)", "default": 1}
+        }
     },
     annotations=types.ToolAnnotations(**{"category": "QUICKBOOKS_CUSTOMER", "readOnlyHint": True})
 )
@@ -276,194 +252,228 @@ search_customers_tool = Tool(
 
 def mcp_object_to_customer_data(**kwargs) -> Dict[str, Any]:
     """
-    Convert MCP object format to QuickBooks customer data format.
-    This function transforms the flat MCP structure to the nested format expected by QuickBooks API.
+    Convert simplified MCP object format to QuickBooks customer data format.
+    Maps user-friendly snake_case fields to QuickBooks API structure.
     """
     customer_data = {}
 
-    # Basic customer information - direct copy
-    for field in ['DisplayName', 'GivenName', 'MiddleName', 'FamilyName',
-                  'CompanyName']:
-        if field in kwargs:
-            customer_data[field] = kwargs[field]
+    # Field mappings: simplified_name -> QuickBooks_name
+    simple_field_mappings = {
+        'display_name': 'DisplayName',
+        'first_name': 'GivenName',
+        'middle_name': 'MiddleName',
+        'last_name': 'FamilyName',
+        'company': 'CompanyName',
+        'notes': 'Notes',
+    }
+
+    for simple_name, qb_name in simple_field_mappings.items():
+        if simple_name in kwargs:
+            customer_data[qb_name] = kwargs[simple_name]
 
     # Contact information - convert to structured objects
-    if 'PrimaryEmailAddr' in kwargs:
-        customer_data['PrimaryEmailAddr'] = {
-            'Address': kwargs['PrimaryEmailAddr']}
+    if 'email' in kwargs:
+        customer_data['PrimaryEmailAddr'] = {'Address': kwargs['email']}
 
-    # Handle phone fields - use PrimaryPhone as the standard input field
-    if 'PrimaryPhone' in kwargs:
-        customer_data['PrimaryPhone'] = {
-            'FreeFormNumber': kwargs['PrimaryPhone']}
+    if 'phone' in kwargs:
+        customer_data['PrimaryPhone'] = {'FreeFormNumber': kwargs['phone']}
 
-    # Handle Mobile input (for backward compatibility with existing code)
-    if 'Mobile' in kwargs:
-        customer_data['Mobile'] = {
-            'FreeFormNumber': kwargs['Mobile']}
+    if 'website' in kwargs:
+        customer_data['WebAddr'] = {'URI': kwargs['website']}
 
-    if 'WebAddr' in kwargs:
-        customer_data['WebAddr'] = {'URI': kwargs['WebAddr']}
+    # Reference objects
+    if 'currency' in kwargs:
+        customer_data['CurrencyRef'] = {'value': kwargs['currency']}
 
-    # Reference objects - convert separate value/name fields to structured objects
-    ref_mappings = [
-        ('CurrencyRef', 'CurrencyRefValue', 'CurrencyRefName'),
-        ('PaymentMethodRef', 'PaymentMethodRefValue', 'PaymentMethodRefName')
-    ]
+    if 'payment_method_id' in kwargs:
+        customer_data['PaymentMethodRef'] = {'value': kwargs['payment_method_id']}
 
-    for ref_name, value_field, name_field in ref_mappings:
-        if value_field in kwargs:
-            ref_obj = {'value': kwargs[value_field]}
-            if name_field in kwargs:
-                ref_obj['name'] = kwargs[name_field]
-            customer_data[ref_name] = ref_obj
+    if 'tax_code_id' in kwargs:
+        customer_data['DefaultTaxCodeRef'] = {'value': kwargs['tax_code_id']}
 
-    # Address fields - convert flattened fields to structured objects
-    for addr_type in ['BillAddr', 'ShipAddr']:
-        address_fields = ['Line1', 'Line2', 'City',
-                          'CountrySubDivisionCode', 'PostalCode', 'Country']
-        has_address = any(kwargs.get(f'{addr_type}{field}')
-                          for field in address_fields)
-        if has_address:
-            addr_obj = {}
-            for field in address_fields:
-                if kwargs.get(f'{addr_type}{field}'):
-                    addr_obj[field] = kwargs[f'{addr_type}{field}']
-            customer_data[addr_type] = addr_obj
+    # Billing address
+    billing_field_mappings = {
+        'billing_street': 'Line1',
+        'billing_street2': 'Line2',
+        'billing_city': 'City',
+        'billing_state': 'CountrySubDivisionCode',
+        'billing_postal_code': 'PostalCode',
+        'billing_country': 'Country',
+    }
+    billing_addr = {}
+    for simple_name, qb_name in billing_field_mappings.items():
+        if simple_name in kwargs:
+            billing_addr[qb_name] = kwargs[simple_name]
+    if billing_addr:
+        customer_data['BillAddr'] = billing_addr
+
+    # Shipping address
+    shipping_field_mappings = {
+        'shipping_street': 'Line1',
+        'shipping_street2': 'Line2',
+        'shipping_city': 'City',
+        'shipping_state': 'CountrySubDivisionCode',
+        'shipping_postal_code': 'PostalCode',
+        'shipping_country': 'Country',
+    }
+    shipping_addr = {}
+    for simple_name, qb_name in shipping_field_mappings.items():
+        if simple_name in kwargs:
+            shipping_addr[qb_name] = kwargs[simple_name]
+    if shipping_addr:
+        customer_data['ShipAddr'] = shipping_addr
 
     # Boolean fields
-    for field in ['BillWithParent', 'Taxable', 'Active']:
-        if field in kwargs:
-            customer_data[field] = kwargs[field]
+    if 'is_taxable' in kwargs:
+        customer_data['Taxable'] = kwargs['is_taxable']
+    if 'bill_with_parent' in kwargs:
+        customer_data['BillWithParent'] = kwargs['bill_with_parent']
 
     # Numeric fields
-    for field in ['Balance']:
-        if field in kwargs:
-            customer_data[field] = kwargs[field]
+    if 'balance' in kwargs:
+        customer_data['Balance'] = kwargs['balance']
 
     # Date fields
-    for field in ['OpenBalanceDate']:
-        if field in kwargs:
-            customer_data[field] = kwargs[field]
-
-    # Metadata fields - removed for input
+    if 'open_balance_date' in kwargs:
+        customer_data['OpenBalanceDate'] = kwargs['open_balance_date']
 
     return customer_data
 
 
 def customer_data_to_mcp_object(customer_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Convert QuickBooks customer data format to MCP object format.
-    This function flattens the nested QuickBooks structure to the flat format expected by MCP tools.
-    All fields from customer_properties_full are included with default values if not present.
+    Convert QuickBooks customer data format to simplified MCP object format.
+    Uses cleaner, more intuitive field names for better usability.
     """
-    mcp_object = {}
-    # Only set fields that exist in customer_data
-    for field in [
-        'Id', 'DisplayName', 'Title', 'GivenName', 'MiddleName', 'FamilyName',
-        'Suffix', 'CompanyName', 'FullyQualifiedName', 'ResaleNum', 'SecondaryTaxIdentifier',
-        'BusinessNumber', 'GSTIN', 'GSTRegistrationType', 'PrimaryTaxIdentifier',
-        'PreferredDeliveryMethod', 'Notes', 'PrintOnCheckName',
-        'ARAccountRefValue', 'ARAccountRefName', 'DefaultTaxCodeRefValue', 'DefaultTaxCodeRefName',
-        'SalesTermRefValue', 'SalesTermRefName', 'CurrencyRefValue', 'CurrencyRefName',
-        'CustomerTypeRef', 'ParentRefValue', 'ParentRefName', 'PaymentMethodRefValue', 'PaymentMethodRefName',
-        'BillAddrLine1', 'BillAddrLine2',
-        'BillAddrCity', 'BillAddrCountrySubDivisionCode', 'BillAddrPostalCode', 'BillAddrCountry',
-        'ShipAddrLine1', 'ShipAddrLine2',
-        'ShipAddrCity', 'ShipAddrCountrySubDivisionCode', 'ShipAddrPostalCode', 'ShipAddrCountry',
-        'OpenBalanceDate', 'MetaDataCreateTime', 'MetaDataLastUpdatedTime',
-        'PrimaryEmailAddr', 'PrimaryPhone', 'Mobile', 'AlternatePhone', 'Fax', 'WebAddr',
-        'Balance', 'BalanceWithJobs', 'TaxExemptionReasonId',
-            'BillWithParent', 'Job', 'Taxable', 'Active', 'IsProject']:
-        if field in customer_data:
-            mcp_object[field] = customer_data[field]
+    result = {}
 
-    # Contact information - flatten structured objects
+    # Core identification
+    if 'Id' in customer_data:
+        result['id'] = customer_data['Id']
+    if 'DisplayName' in customer_data:
+        result['display_name'] = customer_data['DisplayName']
+    if 'CompanyName' in customer_data:
+        result['company'] = customer_data['CompanyName']
+    if 'FullyQualifiedName' in customer_data:
+        result['full_name'] = customer_data['FullyQualifiedName']
+
+    # Personal name fields
+    name_parts = {}
+    if 'GivenName' in customer_data:
+        name_parts['first'] = customer_data['GivenName']
+    if 'MiddleName' in customer_data:
+        name_parts['middle'] = customer_data['MiddleName']
+    if 'FamilyName' in customer_data:
+        name_parts['last'] = customer_data['FamilyName']
+    if 'Title' in customer_data:
+        name_parts['title'] = customer_data['Title']
+    if 'Suffix' in customer_data:
+        name_parts['suffix'] = customer_data['Suffix']
+    if name_parts:
+        result['name'] = name_parts
+
+    # Contact information
+    contact = {}
     if 'PrimaryEmailAddr' in customer_data:
         addr = customer_data['PrimaryEmailAddr']
-        if isinstance(addr, dict) and 'Address' in addr:
-            mcp_object['PrimaryEmailAddr'] = addr['Address']
-    for phone_field in ['PrimaryPhone', 'Mobile', 'AlternatePhone', 'Fax']:
-        if phone_field in customer_data:
-            phone = customer_data[phone_field]
-            if isinstance(phone, dict) and 'FreeFormNumber' in phone:
-                mcp_object[phone_field] = phone['FreeFormNumber']
+        contact['email'] = addr['Address'] if isinstance(addr, dict) else addr
+    if 'PrimaryPhone' in customer_data:
+        phone = customer_data['PrimaryPhone']
+        contact['phone'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
+    if 'Mobile' in customer_data:
+        phone = customer_data['Mobile']
+        contact['mobile'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
+    if 'Fax' in customer_data:
+        phone = customer_data['Fax']
+        contact['fax'] = phone.get('FreeFormNumber') if isinstance(phone, dict) else phone
     if 'WebAddr' in customer_data:
         web = customer_data['WebAddr']
-        if isinstance(web, dict) and 'URI' in web:
-            mcp_object['WebAddr'] = web['URI']
+        contact['website'] = web.get('URI') if isinstance(web, dict) else web
+    if contact:
+        result['contact'] = contact
 
-    # Reference objects - flatten to separate value and name fields
-    if 'ARAccountRef' in customer_data:
-        ref = customer_data['ARAccountRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['ARAccountRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['ARAccountRefName'] = ref['name']
-    if 'DefaultTaxCodeRef' in customer_data:
-        ref = customer_data['DefaultTaxCodeRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['DefaultTaxCodeRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['DefaultTaxCodeRefName'] = ref['name']
-    if 'SalesTermRef' in customer_data:
-        ref = customer_data['SalesTermRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['SalesTermRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['SalesTermRefName'] = ref['name']
-    if 'CurrencyRef' in customer_data:
-        ref = customer_data['CurrencyRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['CurrencyRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['CurrencyRefName'] = ref['name']
-    if 'CustomerTypeRef' in customer_data:
-        ref = customer_data['CustomerTypeRef']
-        if isinstance(ref, dict) and 'value' in ref:
-            mcp_object['CustomerTypeRef'] = ref['value']
-    if 'ParentRef' in customer_data:
-        ref = customer_data['ParentRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['ParentRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['ParentRefName'] = ref['name']
-    if 'PaymentMethodRef' in customer_data:
-        ref = customer_data['PaymentMethodRef']
-        if isinstance(ref, dict):
-            if 'value' in ref:
-                mcp_object['PaymentMethodRefValue'] = ref['value']
-            if 'name' in ref:
-                mcp_object['PaymentMethodRefName'] = ref['name']
-
-    # Address fields - flatten structured objects
-    if 'BillAddr' in customer_data:
+    # Billing address (simplified structure)
+    if 'BillAddr' in customer_data and isinstance(customer_data['BillAddr'], dict):
         addr = customer_data['BillAddr']
-        if isinstance(addr, dict):
-            for field in ['Line1', 'Line2', 'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']:
-                if field in addr:
-                    mcp_object[f'BillAddr{field}'] = addr[field]
-    if 'ShipAddr' in customer_data:
-        addr = customer_data['ShipAddr']
-        if isinstance(addr, dict):
-            for field in ['Line1', 'Line2', 'City', 'CountrySubDivisionCode', 'PostalCode', 'Country']:
-                if field in addr:
-                    mcp_object[f'ShipAddr{field}'] = addr[field]
+        billing = {}
+        if 'Line1' in addr:
+            billing['street'] = addr['Line1']
+        if 'Line2' in addr:
+            billing['street2'] = addr['Line2']
+        if 'City' in addr:
+            billing['city'] = addr['City']
+        if 'CountrySubDivisionCode' in addr:
+            billing['state'] = addr['CountrySubDivisionCode']
+        if 'PostalCode' in addr:
+            billing['postal_code'] = addr['PostalCode']
+        if 'Country' in addr:
+            billing['country'] = addr['Country']
+        if billing:
+            result['billing_address'] = billing
 
-    # Metadata fields - flatten structured object
-    if 'MetaData' in customer_data:
+    # Shipping address (simplified structure)
+    if 'ShipAddr' in customer_data and isinstance(customer_data['ShipAddr'], dict):
+        addr = customer_data['ShipAddr']
+        shipping = {}
+        if 'Line1' in addr:
+            shipping['street'] = addr['Line1']
+        if 'Line2' in addr:
+            shipping['street2'] = addr['Line2']
+        if 'City' in addr:
+            shipping['city'] = addr['City']
+        if 'CountrySubDivisionCode' in addr:
+            shipping['state'] = addr['CountrySubDivisionCode']
+        if 'PostalCode' in addr:
+            shipping['postal_code'] = addr['PostalCode']
+        if 'Country' in addr:
+            shipping['country'] = addr['Country']
+        if shipping:
+            result['shipping_address'] = shipping
+
+    # Financial info
+    if 'Balance' in customer_data:
+        result['balance'] = customer_data['Balance']
+    if 'BalanceWithJobs' in customer_data:
+        result['balance_with_jobs'] = customer_data['BalanceWithJobs']
+    if 'OpenBalanceDate' in customer_data:
+        result['open_balance_date'] = customer_data['OpenBalanceDate']
+
+    # Status flags
+    if 'Active' in customer_data:
+        result['is_active'] = customer_data['Active']
+    if 'Taxable' in customer_data:
+        result['is_taxable'] = customer_data['Taxable']
+    if 'Job' in customer_data:
+        result['is_job'] = customer_data['Job']
+    if 'IsProject' in customer_data:
+        result['is_project'] = customer_data['IsProject']
+    if 'BillWithParent' in customer_data:
+        result['bill_with_parent'] = customer_data['BillWithParent']
+
+    # Currency and payment
+    if 'CurrencyRef' in customer_data and isinstance(customer_data['CurrencyRef'], dict):
+        result['currency'] = customer_data['CurrencyRef'].get('value')
+    if 'PaymentMethodRef' in customer_data and isinstance(customer_data['PaymentMethodRef'], dict):
+        result['payment_method'] = customer_data['PaymentMethodRef'].get('name') or customer_data['PaymentMethodRef'].get('value')
+
+    # Additional info
+    if 'Notes' in customer_data:
+        result['notes'] = customer_data['Notes']
+
+    # Parent customer (for sub-customers/jobs)
+    if 'ParentRef' in customer_data and isinstance(customer_data['ParentRef'], dict):
+        result['parent_id'] = customer_data['ParentRef'].get('value')
+        result['parent_name'] = customer_data['ParentRef'].get('name')
+
+    # Timestamps
+    if 'MetaData' in customer_data and isinstance(customer_data['MetaData'], dict):
         metadata = customer_data['MetaData']
-        if isinstance(metadata, dict):
-            if 'CreateTime' in metadata:
-                mcp_object['MetaDataCreateTime'] = metadata['CreateTime']
-            if 'LastUpdatedTime' in metadata:
-                mcp_object['MetaDataLastUpdatedTime'] = metadata['LastUpdatedTime']
-    return mcp_object
+        if 'CreateTime' in metadata:
+            result['created_at'] = metadata['CreateTime']
+        if 'LastUpdatedTime' in metadata:
+            result['updated_at'] = metadata['LastUpdatedTime']
+
+    return result
 
 
 class CustomerManager:
@@ -471,18 +481,17 @@ class CustomerManager:
         self.client = client
 
     async def create_customer(self, **kwargs) -> Dict[str, Any]:
-
-        # Validate we have DisplayName or at least one name component
-        display_name_provided = 'DisplayName' in kwargs
+        # Validate we have display_name or at least one name component
+        display_name_provided = 'display_name' in kwargs
         name_components_provided = any([
-            'GivenName' in kwargs,
-            'FamilyName' in kwargs,
-            'MiddleName' in kwargs,
+            'first_name' in kwargs,
+            'last_name' in kwargs,
+            'middle_name' in kwargs,
         ])
 
         if not display_name_provided and not name_components_provided:
             raise ValueError(
-                "At least one of: DisplayName, GivenName, FamilyName, MiddleName must be provided.")
+                "At least one of: display_name, first_name, last_name, middle_name must be provided.")
 
         customer_data = mcp_object_to_customer_data(**kwargs)
         response = await self.client._post('customer', customer_data)
@@ -490,17 +499,17 @@ class CustomerManager:
         # Convert response back to MCP format
         return customer_data_to_mcp_object(response['Customer'])
 
-    async def get_customer(self, Id: str) -> Dict[str, Any]:
-        response = await self.client._get(f"customer/{Id}")
+    async def get_customer(self, id: str) -> Dict[str, Any]:
+        response = await self.client._get(f"customer/{id}")
 
         # Convert response back to MCP format
         return customer_data_to_mcp_object(response['Customer'])
 
-    async def list_customers(self, MaxResults: int = 100, ActiveOnly: bool = True) -> List[Dict[str, Any]]:
+    async def list_customers(self, max_results: int = 100, active_only: bool = True) -> List[Dict[str, Any]]:
         query = "SELECT * FROM Customer"
-        if ActiveOnly:
+        if active_only:
             query += " WHERE Active = true"
-        query += f" STARTPOSITION 1 MAXRESULTS {MaxResults}"
+        query += f" STARTPOSITION 1 MAXRESULTS {max_results}"
         response = await self.client._get('query', params={'query': query})
 
         # Convert response back to MCP format
@@ -508,9 +517,9 @@ class CustomerManager:
         return [customer_data_to_mcp_object(customer) for customer in customers]
 
     async def update_customer(self, **kwargs) -> Dict[str, Any]:
-        customer_id = kwargs.get('Id')
+        customer_id = kwargs.get('id')
         if not customer_id:
-            raise ValueError("Id is required for updating a customer")
+            raise ValueError("id is required for updating a customer")
 
         # Auto-fetch current sync token
         current_customer_response = await self.client._get(f"customer/{customer_id}")
@@ -532,9 +541,9 @@ class CustomerManager:
         # Convert response back to MCP format
         return customer_data_to_mcp_object(response['Customer'])
 
-    async def deactivate_customer(self, Id: str) -> Dict[str, Any]:
+    async def deactivate_customer(self, id: str) -> Dict[str, Any]:
         # First get the current customer to obtain the SyncToken
-        current_customer_response = await self.client._get(f"customer/{Id}")
+        current_customer_response = await self.client._get(f"customer/{id}")
         current_data = current_customer_response.get('Customer', {})
 
         # Set Active to false for deactivation
@@ -550,9 +559,9 @@ class CustomerManager:
         # Convert response back to MCP format
         return customer_data_to_mcp_object(response['Customer'])
 
-    async def activate_customer(self, Id: str) -> Dict[str, Any]:
+    async def activate_customer(self, id: str) -> Dict[str, Any]:
         # First get the current customer to obtain the SyncToken
-        current_customer_response = await self.client._get(f"customer/{Id}")
+        current_customer_response = await self.client._get(f"customer/{id}")
         current_data = current_customer_response.get('Customer', {})
 
         # Set Active to true for activation
@@ -573,54 +582,16 @@ class CustomerManager:
         Search customers with various filters and pagination support.
 
         Args:
-            DisplayName: Search by customer display name (partial match)
-            GivenName/FamilyName/MiddleName: Search by name components (partial match)
-            CompanyName: Search by company name (partial match)
-            PrimaryEmailAddr/PrimaryPhone: Search by contact info (partial match)
-
-            # Status filters
-            Active: Filter by active status
-            Job: Filter by job status (sub-customers)
-            BillWithParent: Filter by bill with parent status
-            Taxable: Filter by taxable status
-
-            # Identification filters
-            ResaleNum/BusinessNumber/GSTIN: Search by identification numbers
-            PrimaryTaxIdentifier/SecondaryTaxIdentifier: Search by tax identifiers
-
-            # Address filters (billing and shipping)
-            BillAddrCity/ShipAddrCity: Search by city
-            BillAddrCountrySubDivisionCode/ShipAddrCountrySubDivisionCode: Search by state/province
-            BillAddrPostalCode/ShipAddrPostalCode: Search by postal code
-            BillAddrCountry/ShipAddrCountry: Search by country
-            BillAddrLine1/ShipAddrLine1: Search by address line 1 (partial match)
-
-            # Balance filters
-            MinBalance/MaxBalance: Filter by balance range
-            MinBalanceWithJobs/MaxBalanceWithJobs: Filter by balance with jobs range
-
-            # Reference filters
-            ParentRefValue: Filter by parent customer ID
-            ParentRefName: Search by parent customer name (partial match)
-            CurrencyRefValue: Filter by currency code
-            CurrencyRefName: Search by currency name (partial match)
-            SalesTermRefValue: Filter by sales term ID
-            PaymentMethodRefValue: Filter by payment method ID
-            DefaultTaxCodeRefValue: Filter by default tax code ID
-
-            # Date filters
-            CreateTimeFrom/CreateTimeTo: Filter by creation date range
-            LastUpdatedTimeFrom/LastUpdatedTimeTo: Filter by last updated date range
-            OpenBalanceDateFrom/OpenBalanceDateTo: Filter by opening balance date range
-
-            # Other filters
-            PreferredDeliveryMethod: Filter by delivery method
-            GSTRegistrationType: Filter by GST registration type
-            WebAddr: Search by website (partial match)
-            Notes: Search by notes (partial match)
-
-            MaxResults: Maximum number of results to return (default: 100)
-            StartPosition: Starting position for pagination (default: 1)
+            display_name: Search by display name (partial match)
+            first_name/last_name/company: Search by name (partial match)
+            email/phone: Search by contact info (partial match)
+            is_active/is_taxable: Filter by status
+            billing_city/billing_state/billing_postal_code/billing_country: Filter by billing address
+            shipping_city/shipping_state/shipping_postal_code/shipping_country: Filter by shipping address
+            min_balance/max_balance: Filter by balance range
+            currency: Filter by currency code
+            max_results: Maximum results (default: 100)
+            start_position: Starting position (default: 1)
 
         Returns:
             List of customers matching the search criteria
@@ -628,69 +599,27 @@ class CustomerManager:
         # Build WHERE clause conditions
         conditions = []
 
-        # Basic filters with exact matches
-        if kwargs.get('Active') is not None:
-            conditions.append(f"Active = {str(kwargs['Active']).lower()}")
+        # Status filters
+        if kwargs.get('is_active') is not None:
+            conditions.append(f"Active = {str(kwargs['is_active']).lower()}")
 
-        if kwargs.get('Job') is not None:
-            conditions.append(f"Job = {str(kwargs['Job']).lower()}")
+        if kwargs.get('is_taxable') is not None:
+            conditions.append(f"Taxable = {str(kwargs['is_taxable']).lower()}")
 
-        if kwargs.get('BillWithParent') is not None:
-            conditions.append(
-                f"BillWithParent = {str(kwargs['BillWithParent']).lower()}")
-
-        if kwargs.get('Taxable') is not None:
-            conditions.append(f"Taxable = {str(kwargs['Taxable']).lower()}")
-
-        # Reference filters
-        if kwargs.get('ParentRefValue'):
-            conditions.append(
-                f"ParentRef.value = '{kwargs['ParentRefValue']}'")
-
-        if kwargs.get('CurrencyRefValue'):
-            conditions.append(
-                f"CurrencyRef.value = '{kwargs['CurrencyRefValue']}'")
-
-        if kwargs.get('SalesTermRefValue'):
-            conditions.append(
-                f"SalesTermRef.value = '{kwargs['SalesTermRefValue']}'")
-
-        if kwargs.get('PaymentMethodRefValue'):
-            conditions.append(
-                f"PaymentMethodRef.value = '{kwargs['PaymentMethodRefValue']}'")
-
-        if kwargs.get('DefaultTaxCodeRefValue'):
-            conditions.append(
-                f"DefaultTaxCodeRef.value = '{kwargs['DefaultTaxCodeRefValue']}'")
-
-        # Exact match filters for structured data
-        if kwargs.get('ResaleNum'):
-            conditions.append(f"ResaleNum = '{kwargs['ResaleNum']}'")
-
-        if kwargs.get('BusinessNumber'):
-            conditions.append(f"BusinessNumber = '{kwargs['BusinessNumber']}'")
-
-        if kwargs.get('GSTIN'):
-            conditions.append(f"GSTIN = '{kwargs['GSTIN']}'")
-
-        if kwargs.get('PreferredDeliveryMethod'):
-            conditions.append(
-                f"PreferredDeliveryMethod = '{kwargs['PreferredDeliveryMethod']}'")
-
-        if kwargs.get('GSTRegistrationType'):
-            conditions.append(
-                f"GSTRegistrationType = '{kwargs['GSTRegistrationType']}'")
+        # Currency filter
+        if kwargs.get('currency'):
+            conditions.append(f"CurrencyRef.value = '{kwargs['currency']}'")
 
         # Address filters - exact matches for structured fields
         address_exact_fields = {
-            'BillAddrCity': 'BillAddr.City',
-            'BillAddrCountrySubDivisionCode': 'BillAddr.CountrySubDivisionCode',
-            'BillAddrPostalCode': 'BillAddr.PostalCode',
-            'BillAddrCountry': 'BillAddr.Country',
-            'ShipAddrCity': 'ShipAddr.City',
-            'ShipAddrCountrySubDivisionCode': 'ShipAddr.CountrySubDivisionCode',
-            'ShipAddrPostalCode': 'ShipAddr.PostalCode',
-            'ShipAddrCountry': 'ShipAddr.Country'
+            'billing_city': 'BillAddr.City',
+            'billing_state': 'BillAddr.CountrySubDivisionCode',
+            'billing_postal_code': 'BillAddr.PostalCode',
+            'billing_country': 'BillAddr.Country',
+            'shipping_city': 'ShipAddr.City',
+            'shipping_state': 'ShipAddr.CountrySubDivisionCode',
+            'shipping_postal_code': 'ShipAddr.PostalCode',
+            'shipping_country': 'ShipAddr.Country'
         }
 
         for field, qb_field in address_exact_fields.items():
@@ -698,65 +627,27 @@ class CustomerManager:
                 conditions.append(f"{qb_field} = '{kwargs[field]}'")
 
         # Balance range filters
-        if kwargs.get('MinBalance') is not None:
-            conditions.append(f"Balance >= {kwargs['MinBalance']}")
-        if kwargs.get('MaxBalance') is not None:
-            conditions.append(f"Balance <= {kwargs['MaxBalance']}")
-
-        if kwargs.get('MinBalanceWithJobs') is not None:
-            conditions.append(
-                f"BalanceWithJobs >= {kwargs['MinBalanceWithJobs']}")
-        if kwargs.get('MaxBalanceWithJobs') is not None:
-            conditions.append(
-                f"BalanceWithJobs <= {kwargs['MaxBalanceWithJobs']}")
-
-        # Date range filters
-        if kwargs.get('CreateTimeFrom'):
-            conditions.append(
-                f"MetaData.CreateTime >= '{kwargs['CreateTimeFrom']}'")
-        if kwargs.get('CreateTimeTo'):
-            conditions.append(
-                f"MetaData.CreateTime <= '{kwargs['CreateTimeTo']}'")
-
-        if kwargs.get('LastUpdatedTimeFrom'):
-            conditions.append(
-                f"MetaData.LastUpdatedTime >= '{kwargs['LastUpdatedTimeFrom']}'")
-        if kwargs.get('LastUpdatedTimeTo'):
-            conditions.append(
-                f"MetaData.LastUpdatedTime <= '{kwargs['LastUpdatedTimeTo']}'")
-
-        if kwargs.get('OpenBalanceDateFrom'):
-            conditions.append(
-                f"OpenBalanceDate >= '{kwargs['OpenBalanceDateFrom']}'")
-        if kwargs.get('OpenBalanceDateTo'):
-            conditions.append(
-                f"OpenBalanceDate <= '{kwargs['OpenBalanceDateTo']}'")
+        if kwargs.get('min_balance') is not None:
+            conditions.append(f"Balance >= {kwargs['min_balance']}")
+        if kwargs.get('max_balance') is not None:
+            conditions.append(f"Balance <= {kwargs['max_balance']}")
 
         # Partial match filters - we'll post-filter these due to QB API limitations
         partial_match_filters = {}
 
-        partial_fields = [
-            'DisplayName', 'GivenName', 'FamilyName', 'MiddleName', 'CompanyName',
-            'PrimaryEmailAddr', 'PrimaryPhone', 'WebAddr', 'Notes',
-            'BillAddrLine1', 'ShipAddrLine1', 'PrimaryTaxIdentifier', 'SecondaryTaxIdentifier'
-        ]
+        # Map simplified field names to QuickBooks field names
+        partial_field_mappings = {
+            'display_name': 'DisplayName',
+            'first_name': 'GivenName',
+            'last_name': 'FamilyName',
+            'company': 'CompanyName',
+            'email': 'PrimaryEmailAddr',
+            'phone': 'PrimaryPhone',
+        }
 
-        for field in partial_fields:
-            if kwargs.get(field):
-                partial_match_filters[field] = kwargs[field].lower()
-
-        # Reference name searches (requires subqueries or post-filtering)
-        if kwargs.get('ParentRefName'):
-            parent_name = kwargs['ParentRefName'].replace(
-                "'", "''")  # Escape single quotes
-            conditions.append(
-                f"ParentRef.value IN (SELECT Id FROM Customer WHERE DisplayName LIKE '%{parent_name}%')")
-
-        reference_name_fields = [
-            'CurrencyRefName', 'SalesTermRefName', 'PaymentMethodRefName', 'DefaultTaxCodeRefName']
-        for field in reference_name_fields:
-            if kwargs.get(field):
-                partial_match_filters[field] = kwargs[field].lower()
+        for simple_name, qb_name in partial_field_mappings.items():
+            if kwargs.get(simple_name):
+                partial_match_filters[qb_name] = kwargs[simple_name].lower()
 
         # Build the query
         query = "SELECT * FROM Customer"
@@ -765,8 +656,8 @@ class CustomerManager:
             query += " WHERE " + " AND ".join(conditions)
 
         # Add pagination
-        max_results = kwargs.get('MaxResults', 100)
-        start_position = kwargs.get('StartPosition', 1)
+        max_results = kwargs.get('max_results', 100)
+        start_position = kwargs.get('start_position', 1)
 
         query += f" STARTPOSITION {start_position} MAXRESULTS {max_results}"
 
@@ -785,52 +676,20 @@ class CustomerManager:
                 should_include = True
 
                 for field, search_value in partial_match_filters.items():
-                    if field in ['DisplayName', 'GivenName', 'FamilyName', 'MiddleName', 'CompanyName', 'ResaleNum', 'WebAddr', 'Notes']:
+                    if field in ['DisplayName', 'GivenName', 'FamilyName', 'CompanyName']:
                         if field in customer and search_value not in customer[field].lower():
                             should_include = False
                             break
-                    elif field in ['PrimaryEmailAddr', 'PrimaryPhone']:
-                        if field in customer and search_value not in customer[field].lower():
+                    elif field == 'PrimaryEmailAddr' and 'PrimaryEmailAddr' in customer:
+                        email_data = customer['PrimaryEmailAddr']
+                        email_str = email_data.get('Address', '') if isinstance(email_data, dict) else str(email_data)
+                        if search_value not in email_str.lower():
                             should_include = False
                             break
-                    elif field in ['PrimaryTaxIdentifier', 'SecondaryTaxIdentifier']:
-                        if field in customer and search_value not in customer[field].lower():
-                            should_include = False
-                            break
-                    elif field == 'BillAddrLine1' and 'BillAddr' in customer and isinstance(customer['BillAddr'], dict):
-                        addr_line = customer['BillAddr'].get(
-                            'Line1', '').lower()
-                        if search_value not in addr_line:
-                            should_include = False
-                            break
-                    elif field == 'ShipAddrLine1' and 'ShipAddr' in customer and isinstance(customer['ShipAddr'], dict):
-                        addr_line = customer['ShipAddr'].get(
-                            'Line1', '').lower()
-                        if search_value not in addr_line:
-                            should_include = False
-                            break
-                    elif field == 'CurrencyRefName' and 'CurrencyRef' in customer and isinstance(customer['CurrencyRef'], dict):
-                        currency_name = customer['CurrencyRef'].get(
-                            'name', '').lower()
-                        if search_value not in currency_name:
-                            should_include = False
-                            break
-                    elif field == 'SalesTermRefName' and 'SalesTermRef' in customer and isinstance(customer['SalesTermRef'], dict):
-                        term_name = customer['SalesTermRef'].get(
-                            'name', '').lower()
-                        if search_value not in term_name:
-                            should_include = False
-                            break
-                    elif field == 'PaymentMethodRefName' and 'PaymentMethodRef' in customer and isinstance(customer['PaymentMethodRef'], dict):
-                        method_name = customer['PaymentMethodRef'].get(
-                            'name', '').lower()
-                        if search_value not in method_name:
-                            should_include = False
-                            break
-                    elif field == 'DefaultTaxCodeRefName' and 'DefaultTaxCodeRef' in customer and isinstance(customer['DefaultTaxCodeRef'], dict):
-                        tax_name = customer['DefaultTaxCodeRef'].get(
-                            'name', '').lower()
-                        if search_value not in tax_name:
+                    elif field == 'PrimaryPhone' and 'PrimaryPhone' in customer:
+                        phone_data = customer['PrimaryPhone']
+                        phone_str = phone_data.get('FreeFormNumber', '') if isinstance(phone_data, dict) else str(phone_data)
+                        if search_value not in phone_str.lower():
                             should_include = False
                             break
 
