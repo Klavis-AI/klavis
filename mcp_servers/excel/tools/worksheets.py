@@ -159,7 +159,86 @@ async def fetch_worksheet_by_id(
     return response.json()
 
 
+async def excel_create_worksheets(
+    workbook_url: str,
+    sheet_names: list[str],
+) -> dict[str, Any]:
+    """
+    Create multiple empty worksheets in the specified Excel workbook.
+    Supports both OneDrive and SharePoint workbooks.
+
+    Args:
+        workbook_url: The shared URL of the Excel workbook
+        sheet_names: List of names for the new worksheets to create
+
+    Returns:
+        Dict containing:
+            - workbook_id: The workbook item ID
+            - created: List of successfully created sheets with name and id
+            - failed: List of sheets that failed to create with name and error
+    """
+    client = get_excel_client()
+    if not client:
+        raise RuntimeError("Unable to initialize Excel client")
+
+    target_item_info = await parse_workbook_url(workbook_url, client)
+    workbook_item_id = target_item_info.get("id")
+
+    if not workbook_item_id:
+        raise RuntimeError("Failed to extract workbook ID from workbook URL")
+
+    parent_ref = target_item_info.get("parentReference", {})
+    drive_id = parent_ref.get("driveId")
+
+    if not drive_id:
+        raise RuntimeError("Failed to extract drive ID from shared URL")
+
+    drive_path = f"/drives/{drive_id}"
+
+    created: list[dict[str, Any]] = []
+    failed: list[dict[str, str]] = []
+
+    async with httpx.AsyncClient(timeout=30.0) as httpx_client:
+        for sheet_name in sheet_names:
+            url = (
+                f"{client['base_url']}{drive_path}/items/"
+                f"{workbook_item_id}/workbook/worksheets/add"
+            )
+            payload = {"name": sheet_name}
+
+            try:
+                response = await httpx_client.post(
+                    url, headers=client["headers"], json=payload
+                )
+                response.raise_for_status()
+                result = response.json()
+                created.append({
+                    "name": result.get("name"),
+                    "id": result.get("id"),
+                })
+            except httpx.HTTPStatusError as exc:
+                error_detail = format_api_error(exc.response.status_code, exc.response.text)
+                logger.error("Failed to create worksheet '%s': %s", sheet_name, exc.response.text)
+                failed.append({
+                    "name": sheet_name,
+                    "error": f"API returned {exc.response.status_code}: {error_detail}",
+                })
+            except Exception as exc:
+                logger.exception("Unexpected error creating worksheet '%s'", sheet_name)
+                failed.append({
+                    "name": sheet_name,
+                    "error": str(exc),
+                })
+
+    return {
+        "workbook_id": workbook_item_id,
+        "created": created,
+        "failed": failed,
+    }
+
+
 __all__ = [
+    "excel_create_worksheets",
     "excel_list_worksheets",
     "fetch_first_worksheet",
     "fetch_named_worksheet",
