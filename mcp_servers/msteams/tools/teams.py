@@ -4,6 +4,10 @@ async def list_all_teams():
     """Lists all teams in the organization."""
     return await make_graph_api_request("GET", "/groups?$filter=resourceProvisioningOptions/Any(x:x eq 'Team')")
 
+async def list_joined_teams():
+    """Lists all teams the current user has joined."""
+    return await make_graph_api_request("GET", "/me/joinedTeams")
+
 async def get_team(team_id: str):
     """Gets the details of a specific team by its ID."""
     return await make_graph_api_request("GET", f"/teams/{team_id}")

@@ -27,6 +27,7 @@ from tools import (
     list_channels,
     create_channel,
     send_channel_message,
+    list_joined_teams,
     list_chats,
     send_chat_message,
     list_users,
@@ -71,6 +72,12 @@ def get_all_tools() -> list[types.Tool]:
             description="Lists all Microsoft Teams in the organization.",
             inputSchema={"type": "object", "properties": {}},
             annotations=types.ToolAnnotations(title="List All Teams", readOnlyHint=True),
+        ),
+        types.Tool(
+            name="msteams_list_joined_teams",
+            description="Lists all Microsoft Teams the current user has joined.",
+            inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(title="List Joined Teams", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_get_team",
@@ -201,6 +208,8 @@ async def call_tool_router(name: str, arguments: dict) -> dict:
         return await create_channel(**arguments)
     elif name == "msteams_send_channel_message":
         return await send_channel_message(**arguments)
+    elif name == "msteams_list_joined_teams":
+        return await list_joined_teams()
     elif name == "msteams_list_chats":
         return await list_chats()
     elif name == "msteams_send_chat_message":
