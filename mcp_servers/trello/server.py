@@ -43,7 +43,8 @@ def get_all_tools() -> list[types.Tool]:
         types.Tool(
             name="trello_get_my_boards",
             description="Fetches all boards that the user is a member of.",
-            inputSchema={"type": "object", "properties": {}}
+            inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(title="Get My Boards", readOnlyHint=True)
         ),
         types.Tool(
             name="trello_create_board",
@@ -61,7 +62,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["name"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Create Board", destructiveHint=True)
         ),
         types.Tool(
             name="trello_get_board_lists",
@@ -75,7 +77,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["board_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Get Board Lists", readOnlyHint=True)
         ),
         types.Tool(
             name="trello_get_list_cards",
@@ -89,7 +92,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["list_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Get List Cards", readOnlyHint=True)
         ),
         types.Tool(
             name="trello_create_card",
@@ -111,7 +115,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["idList", "name"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Create Card", destructiveHint=True)
         ),
         types.Tool(
             name="trello_update_card",
@@ -137,7 +142,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["card_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Update Card", destructiveHint=True)
         ),
         types.Tool(
             name="trello_delete_card",
@@ -151,7 +157,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["card_id"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Delete Card", destructiveHint=True)
         ),
         types.Tool(
             name="trello_create_checklist",
@@ -169,7 +176,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["idCard", "name"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Create Checklist", destructiveHint=True)
         ),
         types.Tool(
             name="trello_add_item_to_checklist",
@@ -191,7 +199,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["idChecklist", "name"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Add Checklist Item", destructiveHint=True)
         ),
         types.Tool(
             name="trello_update_checklist_item_state",
@@ -214,7 +223,8 @@ def get_all_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["idCard", "idCheckItem", "state"]
-            }
+            },
+            annotations=types.ToolAnnotations(title="Update Checklist Item", destructiveHint=True)
         ),
     ]
 

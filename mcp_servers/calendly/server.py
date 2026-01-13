@@ -70,7 +70,8 @@ def main(
                 inputSchema={
                     "type": "object",
                     "properties": {}
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get User Info", readOnlyHint=True)
             ),
             types.Tool(
                 name="calendly_list_events",
@@ -90,7 +91,8 @@ def main(
                             "maximum": 100
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="List Events", readOnlyHint=True)
             ),
             types.Tool(
                 name="calendly_get_event_details",
@@ -104,7 +106,8 @@ def main(
                             "description": "The UUID of the event to retrieve details for."
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="Get Event Details", readOnlyHint=True)
             ),
             types.Tool(
                 name="calendly_list_event_types",
@@ -124,7 +127,8 @@ def main(
                             "maximum": 100
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="List Event Types", readOnlyHint=True)
             ),
             types.Tool(
                 name="calendly_list_availability_schedules",
@@ -143,7 +147,8 @@ def main(
                             "maximum": 100
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="List Availability Schedules", readOnlyHint=True)
             ),
             types.Tool(
                 name="calendly_list_event_invitees",
@@ -172,7 +177,8 @@ def main(
                             "enum": ["active", "canceled"]
                         }
                     }
-                }
+                },
+                annotations=types.ToolAnnotations(title="List Event Invitees", readOnlyHint=True)
             ),
         ]
 

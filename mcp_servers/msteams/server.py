@@ -68,13 +68,12 @@ def get_all_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="msteams_list_all_teams",
-            title="List All Teams",
             description="Lists all Microsoft Teams in the organization.",
             inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(title="List All Teams", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_get_team",
-            title="Get Team",
             description="Gets the details of a specific team by its ID.",
             inputSchema={
                 "type": "object",
@@ -83,10 +82,10 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["team_id"],
             },
+            annotations=types.ToolAnnotations(title="Get Team", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_list_channels",
-            title="List Team Channels",
             description="Lists the channels within a specific team.",
             inputSchema={
                 "type": "object",
@@ -95,10 +94,10 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["team_id"],
             },
+            annotations=types.ToolAnnotations(title="List Team Channels", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_create_channel",
-            title="Create Team Channel",
             description="Creates a new channel within a specific team.",
             inputSchema={
                 "type": "object",
@@ -109,10 +108,10 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["team_id", "display_name"],
             },
+            annotations=types.ToolAnnotations(title="Create Team Channel", destructiveHint=True),
         ),
         types.Tool(
             name="msteams_send_channel_message",
-            title="Send Channel Message",
             description="Sends a message to a specific channel in a Team.",
             inputSchema={
                 "type": "object",
@@ -123,16 +122,16 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["team_id", "channel_id", "message"],
             },
+            annotations=types.ToolAnnotations(title="Send Channel Message", destructiveHint=True),
         ),
         types.Tool(
             name="msteams_list_chats",
-            title="List Chats",
             description="Lists all 1-on-1 and group chats the application has access to.",
             inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(title="List Chats", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_send_chat_message",
-            title="Send Chat Message",
             description="Sends a message to a specific chat.",
             inputSchema={
                 "type": "object",
@@ -142,16 +141,16 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["chat_id", "message"],
             },
+            annotations=types.ToolAnnotations(title="Send Chat Message", destructiveHint=True),
         ),
         types.Tool(
             name="msteams_list_users",
-            title="List Users",
             description="Lists all users in the organization.",
             inputSchema={"type": "object", "properties": {}},
+            annotations=types.ToolAnnotations(title="List Users", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_get_user",
-            title="Get User",
             description="Gets a specific user by their ID or userPrincipalName.",
             inputSchema={
                 "type": "object",
@@ -160,10 +159,10 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["user_id"],
             },
+            annotations=types.ToolAnnotations(title="Get User", readOnlyHint=True),
         ),
         types.Tool(
             name="msteams_create_online_meeting",
-            title="Create Online Meeting",
             description="Schedules a new online Teams meeting for a given user.",
             inputSchema={
                 "type": "object",
@@ -175,10 +174,10 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["user_id", "subject", "start_datetime", "end_datetime"],
             },
+            annotations=types.ToolAnnotations(title="Create Online Meeting", destructiveHint=True),
         ),
         types.Tool(
             name="msteams_list_online_meetings",
-            title="List Online Meetings",
             description="Lists all online meetings for a specific user.",
             inputSchema={
                 "type": "object",
@@ -187,6 +186,7 @@ def get_all_tools() -> list[types.Tool]:
                 },
                 "required": ["user_id"],
             },
+            annotations=types.ToolAnnotations(title="List Online Meetings", readOnlyHint=True),
         ),
     ]
 
