@@ -1137,6 +1137,9 @@ const getGmailMcpServer = () => {
 // Create Express App
 const app = express();
 
+// Parse JSON request bodies - required for req.body to be populated
+app.use(express.json());
+
 //=============================================================================
 // STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
 //=============================================================================
@@ -1156,7 +1159,8 @@ app.post('/mcp', async (req: Request, res: Response) => {
             sessionIdGenerator: undefined,
         });
         await server.connect(transport);
-        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
+        // Must await asyncLocalStorage.run() to ensure context is available throughout request
+        await asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport.handleRequest(req, res, req.body);
         });
         res.on('close', () => {
@@ -1245,7 +1249,8 @@ app.post("/messages", async (req: Request, res: Response) => {
         const gmailClient = google.gmail({ version: 'v1', auth });
         const peopleClient = google.people({ version: 'v1', auth });
 
-        asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
+        // Must await asyncLocalStorage.run() to ensure context is available throughout request
+        await asyncLocalStorage.run({ gmailClient, peopleClient }, async () => {
             await transport!.handlePostMessage(req, res);
         });
     } else {
