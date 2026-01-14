@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import {
+  Tool,
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 import { Fetcher } from "./Fetcher.js";
 import { RequestPayload } from "./types.js";
 import express, { Request, Response } from "express";
-import { z } from "zod";
 
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
@@ -19,68 +23,120 @@ process.on("unhandledRejection", (reason, promise) => {
 
 // Define the input schema for all fetch tools
 const fetchInputSchema = {
-  url: z.string().describe("URL of the website to fetch"),
-  headers: z.record(z.string(), z.string()).optional().describe("Optional headers to include in the request"),
+  type: "object" as const,
+  properties: {
+    url: {
+      type: "string",
+      description: "URL of the website to fetch",
+    },
+    headers: {
+      type: "object",
+      additionalProperties: { type: "string" },
+      description: "Optional headers to include in the request",
+    },
+  },
+  required: ["url"],
+};
+
+// Tool definitions
+const FETCH_HTML_TOOL: Tool = {
+  name: "fetch_html",
+  description: "Fetch a website and return the content as HTML",
+  inputSchema: fetchInputSchema,
+  annotations: {
+    category: "FETCH_URL",
+    readOnlyHint: true,
+  },
+};
+
+const FETCH_MARKDOWN_TOOL: Tool = {
+  name: "fetch_markdown",
+  description: "Fetch a website and return the content as Markdown",
+  inputSchema: fetchInputSchema,
+  annotations: {
+    category: "FETCH_URL",
+    readOnlyHint: true,
+  },
+};
+
+const FETCH_TXT_TOOL: Tool = {
+  name: "fetch_txt",
+  description: "Fetch a website, return the content as plain text (no HTML)",
+  inputSchema: fetchInputSchema,
+  annotations: {
+    category: "FETCH_URL",
+    readOnlyHint: true,
+  },
+};
+
+const FETCH_JSON_TOOL: Tool = {
+  name: "fetch_json",
+  description: "Fetch a JSON file from a URL",
+  inputSchema: fetchInputSchema,
+  annotations: {
+    category: "FETCH_URL",
+    readOnlyHint: true,
+  },
 };
 
 // Factory function to create a new MCP server instance for each request
-function createMcpServer(): McpServer {
-  const server = new McpServer({
-    name: "fetch-url-mcp",
-    version: "1.0.0",
+function createMcpServer(): Server {
+  const server = new Server(
+    {
+      name: "fetch-url-mcp",
+      version: "1.0.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: [
+        FETCH_HTML_TOOL,
+        FETCH_MARKDOWN_TOOL,
+        FETCH_TXT_TOOL,
+        FETCH_JSON_TOOL,
+      ],
+    };
   });
 
-  // Register fetch_html tool
-  server.registerTool(
-    "fetch_html",
-    {
-      description: "Fetch a website and return the content as HTML",
-      inputSchema: fetchInputSchema,
-      annotations: { category: "FETCH_URL" },
-    },
-    async (args) => {
-      return await Fetcher.html(args as RequestPayload);
-    }
-  );
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
 
-  // Register fetch_markdown tool
-  server.registerTool(
-    "fetch_markdown",
-    {
-      description: "Fetch a website and return the content as Markdown",
-      inputSchema: fetchInputSchema,
-      annotations: { category: "FETCH_URL" },
-    },
-    async (args) => {
-      return await Fetcher.markdown(args as RequestPayload);
+    try {
+      switch (name) {
+        case "fetch_html": {
+          return await Fetcher.html(args as RequestPayload);
+        }
+        case "fetch_markdown": {
+          return await Fetcher.markdown(args as RequestPayload);
+        }
+        case "fetch_txt": {
+          return await Fetcher.txt(args as RequestPayload);
+        }
+        case "fetch_json": {
+          return await Fetcher.json(args as RequestPayload);
+        }
+        default:
+          throw new Error(`Unknown tool: ${name}`);
+      }
+    } catch (error: any) {
+      console.error(`Tool ${name} failed:`, error.message);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
     }
-  );
-
-  // Register fetch_txt tool
-  server.registerTool(
-    "fetch_txt",
-    {
-      description: "Fetch a website, return the content as plain text (no HTML)",
-      inputSchema: fetchInputSchema,
-      annotations: { category: "FETCH_URL" },
-    },
-    async (args) => {
-      return await Fetcher.txt(args as RequestPayload);
-    }
-  );
-
-  // Register fetch_json tool
-  server.registerTool(
-    "fetch_json",
-    {
-      description: "Fetch a JSON file from a URL",
-      inputSchema: fetchInputSchema,
-      annotations: { category: "FETCH_URL" },
-    },
-    async (args) => {
-      return await Fetcher.json(args as RequestPayload);
-    }
-  );
+  });
 
   return server;
 }
