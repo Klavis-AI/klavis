@@ -5,7 +5,6 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { Fetcher } from "./Fetcher.js";
 import { RequestPayload } from "./types.js";
 import express, { Request, Response } from "express";
-import crypto from "crypto";
 import { z } from "zod";
 
 process.on("uncaughtException", (error) => {
@@ -18,70 +17,73 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-const server = new McpServer(
-  {
-    name: "fetch-url-mcp",
-    version: "1.0.0",
-  }
-);
-
 // Define the input schema for all fetch tools
 const fetchInputSchema = {
   url: z.string().describe("URL of the website to fetch"),
   headers: z.record(z.string(), z.string()).optional().describe("Optional headers to include in the request"),
 };
 
-// Register fetch_html tool
-server.registerTool(
-  "fetch_html",
-  {
-    description: "Fetch a website and return the content as HTML",
-    inputSchema: fetchInputSchema,
-    annotations: { category: "FETCH_URL" },
-  },
-  async (args) => {
-    return await Fetcher.html(args as RequestPayload);
-  }
-);
+// Factory function to create a new MCP server instance for each request
+function createMcpServer(): McpServer {
+  const server = new McpServer({
+    name: "fetch-url-mcp",
+    version: "1.0.0",
+  });
 
-// Register fetch_markdown tool
-server.registerTool(
-  "fetch_markdown",
-  {
-    description: "Fetch a website and return the content as Markdown",
-    inputSchema: fetchInputSchema,
-    annotations: { category: "FETCH_URL" },
-  },
-  async (args) => {
-    return await Fetcher.markdown(args as RequestPayload);
-  }
-);
+  // Register fetch_html tool
+  server.registerTool(
+    "fetch_html",
+    {
+      description: "Fetch a website and return the content as HTML",
+      inputSchema: fetchInputSchema,
+      annotations: { category: "FETCH_URL" },
+    },
+    async (args) => {
+      return await Fetcher.html(args as RequestPayload);
+    }
+  );
 
-// Register fetch_txt tool
-server.registerTool(
-  "fetch_txt",
-  {
-    description: "Fetch a website, return the content as plain text (no HTML)",
-    inputSchema: fetchInputSchema,
-    annotations: { category: "FETCH_URL" },
-  },
-  async (args) => {
-    return await Fetcher.txt(args as RequestPayload);
-  }
-);
+  // Register fetch_markdown tool
+  server.registerTool(
+    "fetch_markdown",
+    {
+      description: "Fetch a website and return the content as Markdown",
+      inputSchema: fetchInputSchema,
+      annotations: { category: "FETCH_URL" },
+    },
+    async (args) => {
+      return await Fetcher.markdown(args as RequestPayload);
+    }
+  );
 
-// Register fetch_json tool
-server.registerTool(
-  "fetch_json",
-  {
-    description: "Fetch a JSON file from a URL",
-    inputSchema: fetchInputSchema,
-    annotations: { category: "FETCH_URL" },
-  },
-  async (args) => {
-    return await Fetcher.json(args as RequestPayload);
-  }
-);
+  // Register fetch_txt tool
+  server.registerTool(
+    "fetch_txt",
+    {
+      description: "Fetch a website, return the content as plain text (no HTML)",
+      inputSchema: fetchInputSchema,
+      annotations: { category: "FETCH_URL" },
+    },
+    async (args) => {
+      return await Fetcher.txt(args as RequestPayload);
+    }
+  );
+
+  // Register fetch_json tool
+  server.registerTool(
+    "fetch_json",
+    {
+      description: "Fetch a JSON file from a URL",
+      inputSchema: fetchInputSchema,
+      annotations: { category: "FETCH_URL" },
+    },
+    async (args) => {
+      return await Fetcher.json(args as RequestPayload);
+    }
+  );
+
+  return server;
+}
 
 async function main() {
   const app = express();
@@ -89,15 +91,62 @@ async function main() {
 
   app.use(express.json());
 
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => crypto.randomUUID(),
-  });
-
-  await server.connect(transport);
-
   app.post("/mcp", async (req: Request, res: Response) => {
     console.log("MCP connection request received");
-    await transport.handleRequest(req, res, req.body);
+
+    // Create new server and transport for each request
+    const server = createMcpServer();
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+
+    try {
+      await server.connect(transport);
+      await transport.handleRequest(req, res, req.body);
+
+      // Clean up when request closes
+      res.on("close", () => {
+        console.log("Request closed");
+        transport.close();
+        server.close();
+      });
+    } catch (error) {
+      console.error("Error handling MCP request:", error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          jsonrpc: "2.0",
+          error: {
+            code: -32603,
+            message: "Internal server error",
+          },
+          id: null,
+        });
+      }
+    }
+  });
+
+  app.get("/mcp", async (req: Request, res: Response) => {
+    console.log("Received GET MCP request");
+    res.writeHead(405).end(JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Method not allowed."
+      },
+      id: null
+    }));
+  });
+
+  app.delete("/mcp", async (req: Request, res: Response) => {
+    console.log("Received DELETE MCP request");
+    res.writeHead(405).end(JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Method not allowed."
+      },
+      id: null
+    }));
   });
 
   app.get("/health", (req: Request, res: Response) => {
