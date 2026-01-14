@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express, { Request, Response } from 'express';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import {
   Tool,
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+} from '@modelcontextprotocol/sdk/types.js';
 import { Fetcher } from "./Fetcher.js";
 import { RequestPayload } from "./types.js";
-import express, { Request, Response } from "express";
 
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
@@ -21,70 +22,109 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-// Define the input schema for all fetch tools
-const fetchInputSchema = {
-  type: "object" as const,
-  properties: {
-    url: {
-      type: "string",
-      description: "URL of the website to fetch",
-    },
-    headers: {
-      type: "object",
-      additionalProperties: { type: "string" },
-      description: "Optional headers to include in the request",
-    },
-  },
-  required: ["url"],
-};
-
 // Tool definitions
 const FETCH_HTML_TOOL: Tool = {
-  name: "fetch_html",
-  description: "Fetch a website and return the content as HTML",
-  inputSchema: fetchInputSchema,
-  annotations: {
-    category: "FETCH_URL",
-    readOnlyHint: true,
+  name: 'fetch_html',
+  description: 'Fetch a website and return the content as HTML',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      url: {
+        type: 'string',
+        description: 'URL of the website to fetch',
+      },
+      headers: {
+        type: 'object',
+        additionalProperties: { type: 'string' },
+        description: 'Optional headers to include in the request',
+      },
+    },
+    required: ['url'],
   },
+  annotations: {
+    readOnlyHint: true,
+    category: 'FETCH_URL',
+  } as Tool['annotations'],
 };
 
 const FETCH_MARKDOWN_TOOL: Tool = {
-  name: "fetch_markdown",
-  description: "Fetch a website and return the content as Markdown",
-  inputSchema: fetchInputSchema,
-  annotations: {
-    category: "FETCH_URL",
-    readOnlyHint: true,
+  name: 'fetch_markdown',
+  description: 'Fetch a website and return the content as Markdown',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      url: {
+        type: 'string',
+        description: 'URL of the website to fetch',
+      },
+      headers: {
+        type: 'object',
+        additionalProperties: { type: 'string' },
+        description: 'Optional headers to include in the request',
+      },
+    },
+    required: ['url'],
   },
+  annotations: {
+    readOnlyHint: true,
+    category: 'FETCH_URL',
+  } as Tool['annotations'],
 };
 
 const FETCH_TXT_TOOL: Tool = {
-  name: "fetch_txt",
-  description: "Fetch a website, return the content as plain text (no HTML)",
-  inputSchema: fetchInputSchema,
-  annotations: {
-    category: "FETCH_URL",
-    readOnlyHint: true,
+  name: 'fetch_txt',
+  description: 'Fetch a website, return the content as plain text (no HTML)',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      url: {
+        type: 'string',
+        description: 'URL of the website to fetch',
+      },
+      headers: {
+        type: 'object',
+        additionalProperties: { type: 'string' },
+        description: 'Optional headers to include in the request',
+      },
+    },
+    required: ['url'],
   },
+  annotations: {
+    readOnlyHint: true,
+    category: 'FETCH_URL',
+  } as Tool['annotations'],
 };
 
 const FETCH_JSON_TOOL: Tool = {
-  name: "fetch_json",
-  description: "Fetch a JSON file from a URL",
-  inputSchema: fetchInputSchema,
-  annotations: {
-    category: "FETCH_URL",
-    readOnlyHint: true,
+  name: 'fetch_json',
+  description: 'Fetch a JSON file from a URL',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      url: {
+        type: 'string',
+        description: 'URL of the website to fetch',
+      },
+      headers: {
+        type: 'object',
+        additionalProperties: { type: 'string' },
+        description: 'Optional headers to include in the request',
+      },
+    },
+    required: ['url'],
   },
+  annotations: {
+    readOnlyHint: true,
+    category: 'FETCH_URL',
+  } as Tool['annotations'],
 };
 
-// Factory function to create a new MCP server instance for each request
-function createMcpServer(): Server {
+// Main server function - creates a new server instance for each request
+const getFetchMcpServer = () => {
   const server = new Server(
     {
-      name: "fetch-url-mcp",
-      version: "1.0.0",
+      name: 'fetch-url-mcp',
+      version: '1.0.0',
     },
     {
       capabilities: {
@@ -109,27 +149,35 @@ function createMcpServer(): Server {
 
     try {
       switch (name) {
-        case "fetch_html": {
-          return await Fetcher.html(args as RequestPayload);
+        case 'fetch_html': {
+          const result = await Fetcher.html(args as unknown as RequestPayload);
+          return result;
         }
-        case "fetch_markdown": {
-          return await Fetcher.markdown(args as RequestPayload);
+
+        case 'fetch_markdown': {
+          const result = await Fetcher.markdown(args as unknown as RequestPayload);
+          return result;
         }
-        case "fetch_txt": {
-          return await Fetcher.txt(args as RequestPayload);
+
+        case 'fetch_txt': {
+          const result = await Fetcher.txt(args as unknown as RequestPayload);
+          return result;
         }
-        case "fetch_json": {
-          return await Fetcher.json(args as RequestPayload);
+
+        case 'fetch_json': {
+          const result = await Fetcher.json(args as unknown as RequestPayload);
+          return result;
         }
+
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
     } catch (error: any) {
-      console.error(`Tool ${name} failed:`, error.message);
+      console.error(`Tool ${name} failed: ${error.message}`);
       return {
         content: [
           {
-            type: "text",
+            type: 'text',
             text: `Error: ${error.message}`,
           },
         ],
@@ -139,84 +187,117 @@ function createMcpServer(): Server {
   });
 
   return server;
-}
+};
 
-async function main() {
-  const app = express();
-  const PORT = process.env.PORT || 5000;
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-  app.use(express.json());
+app.use(express.json());
 
-  app.post("/mcp", async (req: Request, res: Response) => {
-    console.log("MCP connection request received");
+//=============================================================================
+// STREAMABLE HTTP TRANSPORT (PROTOCOL VERSION 2025-03-26)
+//=============================================================================
 
-    // Create new server and transport for each request
-    const server = createMcpServer();
-    const transport = new StreamableHTTPServerTransport({
+app.post('/mcp', async (req: Request, res: Response) => {
+  console.log('MCP connection request received');
+
+  const server = getFetchMcpServer();
+  try {
+    const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
-
-    try {
-      await server.connect(transport);
-      await transport.handleRequest(req, res, req.body);
-
-      // Clean up when request closes
-      res.on("close", () => {
-        console.log("Request closed");
-        transport.close();
-        server.close();
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+    res.on('close', () => {
+      console.log('Request closed');
+      transport.close();
+      server.close();
+    });
+  } catch (error) {
+    console.error('Error handling MCP request:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+        },
+        id: null,
       });
-    } catch (error) {
-      console.error("Error handling MCP request:", error);
-      if (!res.headersSent) {
-        res.status(500).json({
-          jsonrpc: "2.0",
-          error: {
-            code: -32603,
-            message: "Internal server error",
-          },
-          id: null,
-        });
-      }
+    }
+  }
+});
+
+app.get('/mcp', async (req: Request, res: Response) => {
+  console.log('Received GET MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+app.delete('/mcp', async (req: Request, res: Response) => {
+  console.log('Received DELETE MCP request');
+  res.writeHead(405).end(JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32000,
+      message: "Method not allowed."
+    },
+    id: null
+  }));
+});
+
+//=============================================================================
+// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
+//=============================================================================
+
+// to support multiple simultaneous connections we have a lookup object from
+// sessionId to transport
+const transports = new Map<string, SSEServerTransport>();
+
+app.get("/sse", async (req, res) => {
+  const transport = new SSEServerTransport(`/messages`, res);
+
+  // Set up cleanup when connection closes
+  res.on('close', async () => {
+    console.log(`SSE connection closed for transport: ${transport.sessionId}`);
+    try {
+      transports.delete(transport.sessionId);
+    } finally {
     }
   });
 
-  app.get("/mcp", async (req: Request, res: Response) => {
-    console.log("Received GET MCP request");
-    res.writeHead(405).end(JSON.stringify({
-      jsonrpc: "2.0",
-      error: {
-        code: -32000,
-        message: "Method not allowed."
-      },
-      id: null
-    }));
-  });
+  transports.set(transport.sessionId, transport);
 
-  app.delete("/mcp", async (req: Request, res: Response) => {
-    console.log("Received DELETE MCP request");
-    res.writeHead(405).end(JSON.stringify({
-      jsonrpc: "2.0",
-      error: {
-        code: -32000,
-        message: "Method not allowed."
-      },
-      id: null
-    }));
-  });
+  const server = getFetchMcpServer();
+  await server.connect(transport);
 
-  app.get("/health", (req: Request, res: Response) => {
-    res.json({ status: "ok", name: "@tokenizin/mcp-npx-fetch" });
-  });
+  console.log(`SSE connection established with transport: ${transport.sessionId}`);
+});
 
-  app.listen(PORT, () => {
-    console.log(`MCP server listening on http://localhost:${PORT}`);
-    console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
-    console.log(`Health check: http://localhost:${PORT}/health`);
-  });
-}
+app.post("/messages", async (req, res) => {
+  const sessionId = req.query.sessionId as string;
+  const transport = transports.get(sessionId);
+  if (transport) {
+    await transport.handlePostMessage(req, res);
+  } else {
+    console.error(`Transport not found for session ID: ${sessionId}`);
+    res.status(404).send({ error: "Transport not found" });
+  }
+});
 
-main().catch((error) => {
-  console.error("Fatal error in main():", error);
-  process.exit(1);
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ status: "ok", name: "fetch-url-mcp" });
+});
+
+app.listen(PORT, () => {
+  console.log(`MCP server listening on http://localhost:${PORT}`);
+  console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
+  console.log(`SSE endpoint: http://localhost:${PORT}/sse`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
 });
