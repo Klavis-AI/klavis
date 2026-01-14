@@ -20180,6 +20180,406 @@
           }
         }
       }
+    },
+    "/universes": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "List all available universes",
+        "description": "List all available universes.",
+        "operationId": "list_universes_universes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUniversesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/universes/{universe_id}": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Get or create a universe instance",
+        "description": "Get or create a universe instance.",
+        "operationId": "get_universe_universes__universe_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniverseInstance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Get task details",
+        "description": "Get task details within a universe instance.",
+        "operationId": "get_task_universes__universe_instance_id__tasks__task_num__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}/dump": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Dump task state",
+        "description": "Dump current state of MCP services.",
+        "operationId": "dump_state_universes__universe_instance_id__tasks__task_num__dump_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DumpStateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}/reinitialize": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Reinitialize task",
+        "description": "Reinitialize task to initial snapshot.",
+        "operationId": "reinitialize_task_universes__universe_instance_id__tasks__task_num__reinitialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReinitializeTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReinitializeTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}/ground-truth": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Get ground truth",
+        "description": "Get ground truth for verification.",
+        "operationId": "get_ground_truth_universes__universe_instance_id__tasks__task_num__ground_truth_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          },
+          {
+            "name": "include_detailed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Detailed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroundTruthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}/verify": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Verify task completion",
+        "description": "Verify task completion.",
+        "operationId": "verify_task_universes__universe_instance_id__tasks__task_num__verify_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -20779,6 +21179,17 @@
         ],
         "title": "AsanaTask",
         "description": "Asana Task object"
+      },
+      "AttendeeResponseStatus": {
+        "type": "string",
+        "enum": [
+          "needsAction",
+          "declined",
+          "tentative",
+          "accepted"
+        ],
+        "title": "AttendeeResponseStatus",
+        "description": "Attendee response status for calendar events"
       },
       "AzureADOAuthErrorResponse": {
         "properties": {
@@ -23951,6 +24362,86 @@
         ],
         "title": "DumpSandboxResponse[WordPressData]"
       },
+      "DumpStateRequest": {
+        "properties": {
+          "services": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Services",
+            "description": "Specific services to dump (all if not specified)"
+          },
+          "include_metadata": {
+            "type": "boolean",
+            "title": "Include Metadata",
+            "description": "Include service metadata",
+            "default": true
+          },
+          "format": {
+            "type": "string",
+            "title": "Format",
+            "description": "Output format: 'json' or 'summary'",
+            "default": "json"
+          }
+        },
+        "type": "object",
+        "title": "DumpStateRequest",
+        "description": "Request to dump current state of the universe"
+      },
+      "DumpStateResponse": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceState"
+            },
+            "type": "array",
+            "title": "Services",
+            "description": "State per service"
+          },
+          "total_records": {
+            "type": "integer",
+            "title": "Total Records",
+            "description": "Total records across all services"
+          },
+          "services_dumped": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Services Dumped",
+            "description": "List of services included in dump"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "dumped_at",
+          "services",
+          "total_records",
+          "services_dumped"
+        ],
+        "title": "DumpStateResponse",
+        "description": "Current state dump of the universe"
+      },
       "ExternalServerInfo": {
         "properties": {
           "name": {
@@ -25060,6 +25551,17 @@
             ],
             "title": "Comment",
             "description": "Attendee's response comment"
+          },
+          "accepted": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttendeeResponseStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response status"
           }
         },
         "type": "object",
@@ -25075,7 +25577,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -25097,7 +25599,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -25113,7 +25615,149 @@
         "title": "GoogleCalendarData",
         "description": "Complete Google Calendar sandbox data structure"
       },
-      "GoogleCalendarEvent": {
+      "GoogleCalendarEvent-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Event title/summary (required)"
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "RFC3339 timestamp for timed events"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdate",
+            "description": "All-day event start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "All-day event end date in YYYY-MM-DD format"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., America/Los_Angeles)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Event description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Event location"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility",
+            "description": "Visibility (default, public, private, confidential)"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence",
+            "description": "Recurrence rules (RRULE format)"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleCalendarAttendee"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attendees",
+            "description": "List of event attendees"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleCalendarEvent",
+        "description": "Google Calendar event object"
+      },
+      "GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
@@ -26238,6 +26882,64 @@
         ],
         "title": "GoogleSheetsSpreadsheet",
         "description": "Google Sheets spreadsheet object"
+      },
+      "GroundTruthResponse": {
+        "properties": {
+          "universe_id": {
+            "type": "string",
+            "title": "Universe Id",
+            "description": "Universe ID"
+          },
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number"
+          },
+          "task_description": {
+            "type": "string",
+            "title": "Task Description",
+            "description": "Task description for context"
+          },
+          "success_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Success Criteria",
+            "description": "Human-readable success criteria"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceGroundTruth"
+            },
+            "type": "array",
+            "title": "Services",
+            "description": "Expected state per service"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional task metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "universe_id",
+          "task_num",
+          "task_description",
+          "success_criteria",
+          "services"
+        ],
+        "title": "GroundTruthResponse",
+        "description": "Ground truth for verifying task completion"
       },
       "HTTPValidationError": {
         "properties": {
@@ -27609,6 +28311,24 @@
         ],
         "title": "ListToolsResponse"
       },
+      "ListUniversesResponse": {
+        "properties": {
+          "universes": {
+            "items": {
+              "$ref": "#/components/schemas/UniverseInstance"
+            },
+            "type": "array",
+            "title": "Universes",
+            "description": "List of available universes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "universes"
+        ],
+        "title": "ListUniversesResponse",
+        "description": "Response listing available universes"
+      },
       "LogBucket": {
         "properties": {
           "name": {
@@ -27819,6 +28539,39 @@
         ],
         "title": "LogSink",
         "description": "Cloud Logging sink"
+      },
+      "MCPServerConnection": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "MCP server name"
+          },
+          "server_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Url",
+            "description": "URL to connect to the MCP server"
+          },
+          "is_connected": {
+            "type": "boolean",
+            "title": "Is Connected",
+            "description": "Whether the server is currently connected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "is_connected"
+        ],
+        "title": "MCPServerConnection",
+        "description": "Connection details for an MCP server"
       },
       "McpServer": {
         "properties": {
@@ -30488,6 +31241,52 @@
         ],
         "title": "RawActionsResponse"
       },
+      "ReinitializeTaskRequest": {
+        "properties": {
+          "preserve_logs": {
+            "type": "boolean",
+            "title": "Preserve Logs",
+            "description": "Keep execution logs after reinitialization",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "ReinitializeTaskRequest",
+        "description": "Request to reinitialize a task to its initial state"
+      },
+      "ReinitializeTaskResponse": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number that was reinitialized"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus",
+            "description": "Status after reinitialization (should be 'ready')"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Reinitialization confirmation message"
+          },
+          "reinitialized_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Reinitialized At",
+            "description": "Timestamp of reinitialization"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "status",
+          "message",
+          "reinitialized_at"
+        ],
+        "title": "ReinitializeTaskResponse",
+        "description": "Response after reinitializing a task"
+      },
       "ReleaseSandboxResponse": {
         "properties": {
           "sandbox_id": {
@@ -31306,6 +32105,157 @@
           "description"
         ],
         "title": "ServerTool"
+      },
+      "ServiceGroundTruth": {
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name",
+            "description": "MCP server/service name"
+          },
+          "expected_state": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Expected State",
+            "description": "Expected state after task completion"
+          },
+          "verification_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Verification Fields",
+            "description": "Fields to check during verification"
+          },
+          "partial_match_allowed": {
+            "type": "boolean",
+            "title": "Partial Match Allowed",
+            "description": "Whether partial matches count as success",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "service_name",
+          "expected_state",
+          "verification_fields"
+        ],
+        "title": "ServiceGroundTruth",
+        "description": "Expected state for a specific service"
+      },
+      "ServiceState": {
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name",
+            "description": "MCP server/service name"
+          },
+          "state": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "State",
+            "description": "Current state data"
+          },
+          "record_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Record Counts",
+            "description": "Count of records per type"
+          },
+          "last_modified": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Modified",
+            "description": "Last modification time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service_name",
+          "state"
+        ],
+        "title": "ServiceState",
+        "description": "Current state of a specific service"
+      },
+      "ServiceVerificationResult": {
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "title": "Service Name",
+            "description": "MCP server/service name"
+          },
+          "result": {
+            "$ref": "#/components/schemas/VerificationResult",
+            "description": "Verification result"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "Score from 0.0 to 1.0"
+          },
+          "matched_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Fields",
+            "description": "Fields that matched"
+          },
+          "mismatched_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mismatched Fields",
+            "description": "Fields that didn't match"
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Fields",
+            "description": "Expected fields that are missing"
+          },
+          "extra_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Extra Fields",
+            "description": "Unexpected fields found"
+          },
+          "diff": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diff",
+            "description": "Detailed diff (expected vs actual)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service_name",
+          "result",
+          "score"
+        ],
+        "title": "ServiceVerificationResult",
+        "description": "Verification result for a specific service"
       },
       "SetAuthRequest": {
         "properties": {
@@ -32693,6 +33643,122 @@
         "title": "SupabaseTable",
         "description": "Supabase Table object"
       },
+      "TaskCategory": {
+        "type": "string",
+        "enum": [
+          "hiring",
+          "customer_support",
+          "project_management",
+          "data_analysis",
+          "communication",
+          "scheduling",
+          "document_processing",
+          "multi_domain"
+        ],
+        "title": "TaskCategory",
+        "description": "Categories of tasks for filtering and analysis"
+      },
+      "TaskDetails": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number"
+          },
+          "universe_id": {
+            "type": "string",
+            "title": "Universe Id",
+            "description": "Universe ID"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Task title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Full task description"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/TaskDifficulty",
+            "description": "Difficulty level"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TaskCategory",
+            "description": "Category"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus",
+            "description": "Current status"
+          },
+          "mcp_connections": {
+            "items": {
+              "$ref": "#/components/schemas/MCPServerConnection"
+            },
+            "type": "array",
+            "title": "Mcp Connections",
+            "description": "MCP connections"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Creation time"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At",
+            "description": "Last activity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "universe_id",
+          "title",
+          "description",
+          "difficulty",
+          "category",
+          "status",
+          "mcp_connections",
+          "created_at"
+        ],
+        "title": "TaskDetails",
+        "description": "Detailed information about a task"
+      },
+      "TaskDifficulty": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "TaskDifficulty",
+        "description": "Task difficulty levels for categorization"
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "not_initialized",
+          "initializing",
+          "ready",
+          "running",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "title": "TaskStatus",
+        "description": "Current status of a task"
+      },
       "TeamsChannel": {
         "properties": {
           "channel_id": {
@@ -32905,6 +33971,78 @@
         ],
         "title": "ToolFormat"
       },
+      "UniverseInstance": {
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "title": "Instance Id",
+            "description": "Unique instance identifier"
+          },
+          "universe_id": {
+            "type": "string",
+            "title": "Universe Id",
+            "description": "Universe template ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Universe name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Universe description"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "description": "Domain (e.g., 'Software Development')"
+          },
+          "personas": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Personas",
+            "description": "Available personas"
+          },
+          "task_nums": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Task Nums",
+            "description": "Task numbers available in this instance"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus",
+            "description": "Instance status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Instance creation time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instance_id",
+          "universe_id",
+          "name",
+          "description",
+          "domain",
+          "personas",
+          "task_nums",
+          "status",
+          "created_at"
+        ],
+        "title": "UniverseInstance",
+        "description": "A running instance of a universe (supports parallel execution)"
+      },
       "UpdateServerInstanceRequest": {
         "properties": {
           "isReadOnly": {
@@ -33002,6 +34140,108 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerificationResult": {
+        "type": "string",
+        "enum": [
+          "passed",
+          "failed",
+          "partial",
+          "error"
+        ],
+        "title": "VerificationResult",
+        "description": "Result of ground truth verification"
+      },
+      "VerifyTaskRequest": {
+        "properties": {
+          "strict_mode": {
+            "type": "boolean",
+            "title": "Strict Mode",
+            "description": "If true, all criteria must match exactly",
+            "default": false
+          },
+          "include_diff": {
+            "type": "boolean",
+            "title": "Include Diff",
+            "description": "Include detailed diff in response",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "VerifyTaskRequest",
+        "description": "Request to verify task completion against ground truth"
+      },
+      "VerifyTaskResponse": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number that was verified"
+          },
+          "overall_result": {
+            "$ref": "#/components/schemas/VerificationResult",
+            "description": "Overall verification result"
+          },
+          "overall_score": {
+            "type": "number",
+            "title": "Overall Score",
+            "description": "Overall score from 0.0 to 1.0"
+          },
+          "service_results": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceVerificationResult"
+            },
+            "type": "array",
+            "title": "Service Results",
+            "description": "Results per service"
+          },
+          "passed_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Passed Criteria",
+            "description": "Criteria that passed"
+          },
+          "failed_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Failed Criteria",
+            "description": "Criteria that failed"
+          },
+          "verified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Verified At",
+            "description": "Verification timestamp"
+          },
+          "task_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Duration Seconds",
+            "description": "Time taken to complete task"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "overall_result",
+          "overall_score",
+          "service_results",
+          "passed_criteria",
+          "failed_criteria",
+          "verified_at"
+        ],
+        "title": "VerifyTaskResponse",
+        "description": "Response from task verification"
       },
       "WhiteLabelingResponse": {
         "properties": {
