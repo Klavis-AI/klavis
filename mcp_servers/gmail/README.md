@@ -45,11 +45,18 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 
 ### Email Operations
 - **Email Reading**: Fetch emails, search messages, get message details
+  - `gmail_read_email`: Retrieve a specific email and all messages in its thread
+  - `gmail_search_emails`: Search emails using Gmail search syntax
 - **Email Sending**: Send new emails with attachments and rich formatting
+  - `gmail_send_email`: Send a new email
+  - `gmail_draft_email`: Create a draft email
 - **Email Management**: Mark as read/unread, archive, delete emails
-- **Label Management**: Apply, remove, and manage Gmail labels
-- **Thread Management**: Handle email conversations and threads
+  - `gmail_modify_email`: Modify email labels (move to different folders)
+  - `gmail_delete_email`: Permanently delete an email
+  - `gmail_batch_modify_emails`: Modify labels for multiple emails in batches
+  - `gmail_batch_delete_emails`: Permanently delete multiple emails in batches
 - **Attachments**: Download and extract content from email attachments (PDF, Word, Excel, images, etc.)
+  - `gmail_get_email_attachments`: Get and extract text from various attachment types
 
 ### Contact Search
 - **Search Contacts**: Search for contacts by name or email address using `gmail_search_contacts`
