@@ -38,7 +38,6 @@ import {
     base64UrlToBase64,
     extractEmailContent,
     processBatches,
-    validateEmail,
     // Error handling
     GmailMCPError,
     GmailErrorType,
@@ -1224,25 +1223,29 @@ app.delete('/mcp', async (req: Request, res: Response) => {
 const transports = new Map<string, SSEServerTransport>();
 
 app.get("/sse", async (req: Request, res: Response) => {
-    const accessToken = extractAccessToken(req);
+    try {
+        const accessToken = extractAccessToken(req);
 
-    const transport = new SSEServerTransport(`/messages`, res);
+        const transport = new SSEServerTransport(`/messages`, res);
 
-    // Set up cleanup when connection closes
-    res.on('close', async () => {
-        console.log(`SSE connection closed for transport: ${transport.sessionId}`);
-        try {
+        // Set up cleanup when connection closes
+        res.on('close', async () => {
+            console.log(`SSE connection closed for transport: ${transport.sessionId}`);
             transports.delete(transport.sessionId);
-        } finally {
+        });
+
+        transports.set(transport.sessionId, transport);
+
+        const server = getGmailMcpServer();
+        await server.connect(transport);
+
+        console.log(`SSE connection established with transport: ${transport.sessionId}`);
+    } catch (error: any) {
+        console.error(`SSE connection error: ${error.message}`);
+        if (!res.headersSent) {
+            res.status(500).send({ error: "Failed to establish SSE connection" });
         }
-    });
-
-    transports.set(transport.sessionId, transport);
-
-    const server = getGmailMcpServer();
-    await server.connect(transport);
-
-    console.log(`SSE connection established with transport: ${transport.sessionId}`);
+    }
 });
 
 app.post("/messages", async (req: Request, res: Response) => {

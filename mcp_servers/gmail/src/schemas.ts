@@ -68,9 +68,9 @@ export const DeleteEmailSchema = z.object({
 });
 
 export const SearchContactsSchema = z.object({
-    query: z.string().describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
+    query: z.string().min(1, "Search query cannot be empty").describe("The plain-text search query for contact names, email addresses, phone numbers, etc."),
     contactType: z.enum(['all', 'personal', 'other', 'directory']).optional().default('all').describe("Type of contacts to search: 'all' (search all types - returns three separate result sets with independent pagination tokens), 'personal' (your saved contacts), 'other' (other contact sources like Gmail suggestions), or 'directory' (domain directory)"),
-    pageSize: z.number().optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
+    pageSize: z.number().min(1).max(500).optional().default(10).describe("Number of results to return. For personal/other: max 30, for directory: max 500"),
     pageToken: z.string().optional().describe("Page token for pagination (used with directory searches)"),
     directorySources: z.enum(['UNSPECIFIED', 'DOMAIN_DIRECTORY', 'DOMAIN_CONTACTS']).optional().default('UNSPECIFIED').describe("Directory sources to search (only used for directory type)")
 });
@@ -80,15 +80,15 @@ export const GetEmailAttachmentsSchema = z.object({
 });
 
 export const BatchModifyEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to modify"),
+    messageIds: z.array(z.string()).min(1, "At least one message ID is required").max(1000, "Cannot process more than 1000 messages at once").describe("List of message IDs to modify"),
     addLabelIds: z.array(z.string()).optional().describe("List of label IDs to add to all messages"),
     removeLabelIds: z.array(z.string()).optional().describe("List of label IDs to remove from all messages"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
+    batchSize: z.number().min(1).max(100).optional().default(50).describe("Number of messages to process in each batch (default: 50, max: 100)"),
 });
 
 export const BatchDeleteEmailsSchema = z.object({
-    messageIds: z.array(z.string()).describe("List of message IDs to delete"),
-    batchSize: z.number().optional().default(50).describe("Number of messages to process in each batch (default: 50)"),
+    messageIds: z.array(z.string()).min(1, "At least one message ID is required").max(1000, "Cannot process more than 1000 messages at once").describe("List of message IDs to delete"),
+    batchSize: z.number().min(1).max(100).optional().default(50).describe("Number of messages to process in each batch (default: 50, max: 100)"),
 });
 
 // ============================================================================
