@@ -37,7 +37,7 @@ export interface EmailContent {
 // ============================================================================
 
 export const SendEmailSchema = z.object({
-    to: z.array(z.string()).describe("List of recipient email addresses. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
+    to: z.array(z.string()).min(1, "At least one recipient is required").describe("List of recipient email addresses. You MUST NOT assume the emails unless they are explicitly provided. You may use gmail_search_contacts tool to find contact emails."),
     subject: z.string().describe("Email subject"),
     body: z.string().describe("Email body content (used for text/plain or when htmlBody not provided)"),
     htmlBody: z.string().optional().describe("HTML version of the email body"),

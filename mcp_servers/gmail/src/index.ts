@@ -64,12 +64,20 @@ const asyncLocalStorage = new AsyncLocalStorage<{
 
 // Helper function to get Gmail client from context
 function getGmailClient() {
-    return asyncLocalStorage.getStore()!.gmailClient;
+    const store = asyncLocalStorage.getStore();
+    if (!store) {
+        throw new Error('Gmail client not initialized - request context missing');
+    }
+    return store.gmailClient;
 }
 
 // Helper function to get People client from context
 function getPeopleClient() {
-    return asyncLocalStorage.getStore()!.peopleClient;
+    const store = asyncLocalStorage.getStore();
+    if (!store) {
+        throw new Error('People client not initialized - request context missing');
+    }
+    return store.peopleClient;
 }
 
 function extractAccessToken(req: Request): string {
@@ -1070,6 +1078,7 @@ const getGmailMcpServer = () => {
                             query: validatedArgs.query,
                             contactType: contactType,
                             resultCount: results.length,
+                            nextPageToken: response?.data?.nextPageToken || undefined,
                             contacts: results,
                         };
 

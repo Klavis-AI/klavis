@@ -235,6 +235,9 @@ export function base64UrlToBase64(input: string): string {
 /**
  * Recursively extract email body content from MIME message parts
  * Handles complex email structures with nested parts
+ * 
+ * Note: Gmail API returns base64url-encoded data, which must be converted
+ * to standard base64 before decoding.
  */
 export function extractEmailContent(messagePart: GmailMessagePart): EmailContent {
     // Initialize containers for different content types
@@ -243,7 +246,9 @@ export function extractEmailContent(messagePart: GmailMessagePart): EmailContent
 
     // If the part has a body with data, process it based on MIME type
     if (messagePart.body && messagePart.body.data) {
-        const content = Buffer.from(messagePart.body.data, 'base64').toString('utf8');
+        // Gmail API returns base64url encoding - convert to standard base64 first
+        const standardBase64 = base64UrlToBase64(messagePart.body.data);
+        const content = Buffer.from(standardBase64, 'base64').toString('utf8');
 
         // Store content based on its MIME type
         if (messagePart.mimeType === 'text/plain') {
