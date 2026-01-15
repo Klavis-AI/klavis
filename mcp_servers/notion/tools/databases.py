@@ -14,6 +14,7 @@ async def query_database(
     in_trash: Optional[bool] = None
 ) -> Dict[str, Any]:
     """Query a database in Notion."""
+    logging.info(f"Querying database {database_id} with filters: {filter_conditions}, sorts: {sorts}, start_cursor: {start_cursor}, page_size: {page_size}, filter_properties: {filter_properties}, archived: {archived}, in_trash: {in_trash}")
     try:
         notion = get_notion_client()
         
@@ -38,6 +39,7 @@ async def query_database(
         return clean_notion_response(response)
         
     except Exception as e:
+        logging.info(f"Database query error: {e}")
         return handle_notion_error(e)
 
 
