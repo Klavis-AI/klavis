@@ -1470,7 +1470,6 @@ def main(
     import uvicorn
 
     uvicorn.run(starlette_app, host="0.0.0.0", port=port)
-
     return 0
 
 if __name__ == "__main__":
