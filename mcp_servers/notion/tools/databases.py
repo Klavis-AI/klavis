@@ -1,6 +1,5 @@
 from typing import Dict, Any, Optional, List
 from .base import get_notion_client, handle_notion_error, clean_notion_response
-import logging
 
 
 async def query_database(
@@ -14,7 +13,6 @@ async def query_database(
     in_trash: Optional[bool] = None
 ) -> Dict[str, Any]:
     """Query a database in Notion."""
-    logging.info(f"Querying database {database_id} with filters: {filter_conditions}, sorts: {sorts}, start_cursor: {start_cursor}, page_size: {page_size}, filter_properties: {filter_properties}, archived: {archived}, in_trash: {in_trash}")
     try:
         notion = get_notion_client()
         
@@ -35,11 +33,9 @@ async def query_database(
             query_params["in_trash"] = in_trash
         
         response = notion.databases.query(database_id, **query_params)
-        logging.info(f"Database query response: {response}")
         return clean_notion_response(response)
         
     except Exception as e:
-        logging.info(f"Database query error: {e}")
         return handle_notion_error(e)
 
 
@@ -48,7 +44,6 @@ async def get_database(database_id: str) -> Dict[str, Any]:
     try:
         notion = get_notion_client()
         response = notion.databases.retrieve(database_id)
-        logging.info(f"Database retrieve response: {response}")
         return clean_notion_response(response)
         
     except Exception as e:
