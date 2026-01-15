@@ -6,4 +6,4 @@ click
 python-dotenv
 starlette
 uvicorn[standard]
-notion-client 
+notion-client==2.4.0
