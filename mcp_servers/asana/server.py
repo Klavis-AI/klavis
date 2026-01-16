@@ -475,6 +475,37 @@ def main(
                 ),
             ),
             types.Tool(
+                name="asana_get_project_tasks",
+                description="Get tasks for a project from Asana. This is a free API endpoint (unlike asana_search_tasks which requires Asana Premium). Returns tasks ordered by their priority within the project.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "project_id": {
+                            "type": "string",
+                            "description": "The ID of the project to get tasks from",
+                        },
+                        "completed_since": {
+                            "type": "string",
+                            "description": "Only return tasks that are either incomplete or that have been completed since this time. Accepts an ISO 8601 date-time string (e.g., '2024-01-01T00:00:00Z') or the keyword 'now' to return only incomplete tasks.",
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of tasks to return (1-100, default 100)",
+                            "minimum": 1,
+                            "maximum": 100,
+                        },
+                        "next_page_token": {
+                            "type": "string",
+                            "description": "Token for pagination",
+                        },
+                    },
+                    "required": ["project_id"],
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "ASANA_TASK", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
                 name="asana_get_workspaces",
                 description="Get user's workspaces from Asana",
                 inputSchema={
@@ -748,6 +779,8 @@ def main(
                 result = await project_tools.list_projects(**arguments)
             elif name == "asana_get_project":
                 result = await project_tools.get_project_by_id(**arguments)
+            elif name == "asana_get_project_tasks":
+                result = await project_tools.get_tasks_for_project(**arguments)
             elif name == "asana_get_workspaces":
                 result = await workspace_tools.list_workspaces(**arguments)
             elif name == "asana_get_workspace":

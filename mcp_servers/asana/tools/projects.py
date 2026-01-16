@@ -2,7 +2,7 @@ from typing import Annotated, Any, Dict
 import logging
 from datetime import datetime, timezone
 
-from .constants import PROJECT_OPT_FIELDS
+from .constants import PROJECT_OPT_FIELDS, TASK_OPT_FIELDS_BASIC
 from .base import (
     get_asana_client,
     get_next_page,
@@ -10,6 +10,7 @@ from .base import (
     remove_none_values,
     AsanaToolExecutionError,
     normalize_project,
+    normalize_task,
 )
 
 logger = logging.getLogger(__name__)
@@ -189,4 +190,56 @@ async def list_projects(
         raise RuntimeError(f"Asana API Error: {e}")
     except Exception as e:
         logger.exception(f"Error executing list_projects: {e}")
+        raise e
+
+
+async def get_tasks_for_project(
+    project_id: str,
+    completed_since: str | None = None,
+    limit: int = 100,
+    next_page_token: str | None = None,
+) -> Dict[str, Any]:
+    """Get tasks for a project. This is a free API endpoint (unlike search_tasks which requires Asana Premium).
+    
+    Args:
+        project_id: The ID of the project to get tasks from
+        completed_since: Only return tasks that are either incomplete or that have been 
+                        completed since this time. Accepts an ISO 8601 date-time string 
+                        or the keyword 'now' to return only incomplete tasks.
+        limit: Maximum number of tasks to return (1-100)
+        next_page_token: Token for pagination
+    
+    Returns:
+        Dictionary containing tasks, count, and pagination info
+    """
+    try:
+        limit = max(1, min(100, limit))
+
+        client = get_asana_client()
+
+        params = remove_none_values({
+            "limit": limit,
+            "offset": next_page_token,
+            "completed_since": completed_since,
+            "opt_fields": ",".join(TASK_OPT_FIELDS_BASIC),
+        })
+
+        response = await client.get(
+            f"/projects/{project_id}/tasks",
+            params=params,
+        )
+
+        tasks = [normalize_task(task) for task in response["data"]]
+        
+        return {
+            "tasks": tasks,
+            "count": len(tasks),
+            "next_page": get_next_page(response),
+        }
+
+    except AsanaToolExecutionError as e:
+        logger.error(f"Asana API error: {e}")
+        raise RuntimeError(f"Asana API Error: {e}")
+    except Exception as e:
+        logger.exception(f"Error executing get_tasks_for_project: {e}")
         raise e
