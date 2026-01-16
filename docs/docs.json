@@ -558,6 +558,17 @@
             ]
           },
           {
+            "group": "Universe",
+            "pages": [
+              "api-reference/universe/list-universes",
+              "api-reference/universe/get-universe-data",
+              "api-reference/universe/acquire-universe",
+              "api-reference/universe/release-universe",
+              "api-reference/universe/get-task",
+              "api-reference/universe/verify-task"
+            ]
+          },
+          {
             "group": "Self Hosted MCP Server",
             "pages": [
               "api-reference/mcp-server/create-a-self-hosted-mcp-server-instance"
