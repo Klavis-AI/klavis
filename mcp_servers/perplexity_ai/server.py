@@ -92,6 +92,7 @@ def main(
                     },
                     "required": ["messages"],
                 },
+                annotations=types.ToolAnnotations(title="Perplexity Search", readOnlyHint=True),
             ),
             # Perplexity Reason Tool
             types.Tool(
@@ -125,6 +126,7 @@ def main(
                     },
                     "required": ["messages"],
                 },
+                annotations=types.ToolAnnotations(title="Perplexity Reason", readOnlyHint=True),
             ),
         ]
 

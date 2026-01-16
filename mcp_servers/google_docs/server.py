@@ -350,13 +350,13 @@ async def create_document_from_text(title: str, text_content: str) -> Dict[str, 
         
         # Execute the batchUpdate method to insert text
         service.documents().batchUpdate(
-            documentId=document["document_id"], body={"requests": requests}
+            documentId=document["id"], body={"requests": requests}
         ).execute()
         
         return {
             "title": document["title"],
-            "id": document["document_id"],
-            "url": f"https://docs.google.com/document/d/{document['document_id']}/edit",
+            "id": document["id"],
+            "url": f"https://docs.google.com/document/d/{document["id"]}/edit",
         }
     except HttpError as e:
         logger.error(f"Google Docs API error: {e}")

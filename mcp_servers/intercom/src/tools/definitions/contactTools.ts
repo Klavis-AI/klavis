@@ -7,6 +7,10 @@ const LIST_CONTACTS_TOOL: Tool = {
   name: 'intercom_list_contacts',
   description:
     'List all contacts (users or leads) in your Intercom workspace with pagination support.',
+  annotations: {
+    title: 'List Contacts',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -32,6 +36,10 @@ const LIST_CONTACTS_TOOL: Tool = {
 const GET_CONTACT_TOOL: Tool = {
   name: 'intercom_get_contact',
   description: 'Retrieve a specific contact by their Intercom ID.',
+  annotations: {
+    title: 'Get Contact',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -51,6 +59,10 @@ const GET_CONTACT_TOOL: Tool = {
 const CREATE_CONTACT_TOOL: Tool = {
   name: 'intercom_create_contact',
   description: 'Create a new contact in Intercom workspace.',
+  annotations: {
+    title: 'Create Contact',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -144,6 +156,10 @@ const CREATE_CONTACT_TOOL: Tool = {
 const UPDATE_CONTACT_TOOL: Tool = {
   name: 'intercom_update_contact',
   description: 'Update an existing contact in Intercom workspace.',
+  annotations: {
+    title: 'Update Contact',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -230,6 +246,10 @@ const SEARCH_CONTACTS_TOOL: Tool = {
   name: 'intercom_search_contacts',
   description:
     'Search contacts using query filters and operators with advanced search capabilities.',
+  annotations: {
+    title: 'Search Contacts',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -333,6 +353,10 @@ const SEARCH_CONTACTS_TOOL: Tool = {
 const DELETE_CONTACT_TOOL: Tool = {
   name: 'intercom_delete_contact',
   description: 'Delete a single contact from Intercom workspace.',
+  annotations: {
+    title: 'Delete Contact',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -352,6 +376,10 @@ const DELETE_CONTACT_TOOL: Tool = {
 const MERGE_CONTACT_TOOL: Tool = {
   name: 'intercom_merge_contact',
   description: 'Merge a contact with a role of lead into a contact with a role of user.',
+  annotations: {
+    title: 'Merge Contact',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -376,6 +404,10 @@ const MERGE_CONTACT_TOOL: Tool = {
 const LIST_CONTACT_NOTES_TOOL: Tool = {
   name: 'intercom_list_contact_notes',
   description: 'List all notes attached to a specific contact.',
+  annotations: {
+    title: 'List Contact Notes',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -395,6 +427,10 @@ const LIST_CONTACT_NOTES_TOOL: Tool = {
 const CREATE_CONTACT_NOTE_TOOL: Tool = {
   name: 'intercom_create_contact_note',
   description: 'Add a note to a specific contact.',
+  annotations: {
+    title: 'Create Contact Note',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -429,6 +465,10 @@ const CREATE_CONTACT_NOTE_TOOL: Tool = {
 const LIST_CONTACT_TAGS_TOOL: Tool = {
   name: 'intercom_list_contact_tags',
   description: 'List all tags attached to a specific contact.',
+  annotations: {
+    title: 'List Contact Tags',
+    readOnlyHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -448,6 +488,10 @@ const LIST_CONTACT_TAGS_TOOL: Tool = {
 const ADD_CONTACT_TAG_TOOL: Tool = {
   name: 'intercom_add_contact_tag',
   description: 'Add a tag to a specific contact.',
+  annotations: {
+    title: 'Add Contact Tag',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
@@ -472,6 +516,10 @@ const ADD_CONTACT_TAG_TOOL: Tool = {
 const REMOVE_CONTACT_TAG_TOOL: Tool = {
   name: 'intercom_remove_contact_tag',
   description: 'Remove a tag from a specific contact.',
+  annotations: {
+    title: 'Remove Contact Tag',
+    destructiveHint: true,
+  },
   inputSchema: {
     type: 'object',
     properties: {
