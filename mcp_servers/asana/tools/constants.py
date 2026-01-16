@@ -68,6 +68,34 @@ TASK_OPT_FIELDS = [
     "workspace",
 ]
 
+# Basic task fields that don't require special OAuth scopes (e.g., task_custom_types:read)
+TASK_OPT_FIELDS_BASIC = [
+    "gid",
+    "name",
+    "notes",
+    "completed",
+    "completed_at",
+    "completed_by",
+    "created_at",
+    "created_by",
+    "due_on",
+    "start_on",
+    "owner",
+    "team",
+    "workspace",
+    "permalink_url",
+    "approval_status",
+    "assignee",
+    "assignee_status",
+    "dependencies",
+    "dependents",
+    "memberships",
+    "num_subtasks",
+    "resource_type",
+    "parent",
+    "tags",
+]
+
 
 TAG_OPT_FIELDS = [
     "gid",
