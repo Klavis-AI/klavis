@@ -1699,7 +1699,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1796,7 +1798,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1893,7 +1897,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -1972,7 +1978,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2069,7 +2077,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2166,7 +2176,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2263,7 +2275,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2360,7 +2374,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2457,7 +2473,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2554,7 +2572,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2651,7 +2671,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2748,7 +2770,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2845,7 +2869,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -2942,7 +2968,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3039,7 +3067,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3118,7 +3148,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3233,7 +3265,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3330,7 +3364,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3427,7 +3463,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3524,7 +3562,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3603,7 +3643,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3700,7 +3742,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3797,7 +3841,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3894,7 +3940,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -3991,7 +4039,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4088,7 +4138,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4185,7 +4237,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4282,7 +4336,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4395,7 +4451,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4503,7 +4561,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4600,7 +4660,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4679,7 +4741,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4776,7 +4840,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4873,7 +4939,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -4970,7 +5038,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5066,7 +5136,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5163,7 +5235,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5260,7 +5334,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5394,7 +5470,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5490,7 +5568,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5640,7 +5720,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5790,7 +5872,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -5940,7 +6024,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6091,7 +6177,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6188,7 +6276,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6284,7 +6374,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6381,7 +6473,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6477,7 +6571,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6573,7 +6669,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6670,7 +6768,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6692,7 +6792,7 @@
         "tags": [
           "intercom-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Intercom",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeintercom_oauth",
         "parameters": [
@@ -6743,7 +6843,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6765,7 +6867,7 @@
         "tags": [
           "paypal-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize PayPal",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizepaypal_oauth",
         "parameters": [
@@ -6816,7 +6918,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6838,7 +6942,7 @@
         "tags": [
           "sentry-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Sentry",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizesentry_oauth",
         "parameters": [
@@ -6889,7 +6993,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6911,7 +7017,7 @@
         "tags": [
           "netlify-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Netlify",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizenetlify_oauth",
         "parameters": [
@@ -6962,7 +7068,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -6984,7 +7092,7 @@
         "tags": [
           "huggingface-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Hugging Face",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizehuggingface_oauth",
         "parameters": [
@@ -7035,7 +7143,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -7057,7 +7167,7 @@
         "tags": [
           "square-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Square",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizesquare_oauth",
         "parameters": [
@@ -7108,7 +7218,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -7130,7 +7242,7 @@
         "tags": [
           "clockwise-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Clockwise",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeclockwise_oauth",
         "parameters": [
@@ -7181,7 +7293,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -7203,7 +7317,7 @@
         "tags": [
           "jotform-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Jotform",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizejotform_oauth",
         "parameters": [
@@ -7254,7 +7368,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -7276,7 +7392,7 @@
         "tags": [
           "honeycomb-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Honeycomb",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizehoneycomb_oauth",
         "parameters": [
@@ -7327,7 +7443,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -7349,7 +7467,7 @@
         "tags": [
           "amplitude-oauth"
         ],
-        "summary": "Authorize",
+        "summary": "Authorize Amplitude",
         "description": "Start OAuth flow and redirect to authorization page.",
         "operationId": "authorizeamplitude_oauth",
         "parameters": [
@@ -7400,7 +7518,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+
+                }
               }
             }
           },
@@ -11130,7 +11250,7 @@
                         "title": "Welcome to the Team!",
                         "content": {
                           "contentType": "HTML",
-                          "content": "<p>Hi there!</p><p>Welcome to our team. We're excited to have you on board. Please feel free to reach out if you have any questions.</p><p>Best regards,<br>HR Team</p>"
+                          "content": "\u003Cp\u003EHi there!\u003C/p\u003E\u003Cp\u003EWelcome to our team. We're excited to have you on board. Please feel free to reach out if you have any questions.\u003C/p\u003E\u003Cp\u003EBest regards,\u003Cbr\u003EHR Team\u003C/p\u003E"
                         },
                         "to_addresses": [
                           "newemployee@company.com"
@@ -11157,7 +11277,7 @@
                         "title": "Project Alpha - Status Update",
                         "content": {
                           "contentType": "HTML",
-                          "content": "<h3>Project Alpha Status Report</h3><p>Current Status: <strong>On Track</strong></p><ul><li>Phase 1: Completed</li><li>Phase 2: 75% complete</li><li>Phase 3: Planning</li></ul><p>Next milestone: December 15th</p>"
+                          "content": "\u003Ch3\u003EProject Alpha Status Report\u003C/h3\u003E\u003Cp\u003ECurrent Status: \u003Cstrong\u003EOn Track\u003C/strong\u003E\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EPhase 1: Completed\u003C/li\u003E\u003Cli\u003EPhase 2: 75% complete\u003C/li\u003E\u003Cli\u003EPhase 3: Planning\u003C/li\u003E\u003C/ul\u003E\u003Cp\u003ENext milestone: December 15th\u003C/p\u003E"
                         },
                         "to_addresses": [
                           "projectteam@company.com",
@@ -11183,7 +11303,7 @@
                         "title": "Team Lunch - Friday 12:30 PM",
                         "content": {
                           "contentType": "HTML",
-                          "content": "<p>Hey team! </p><p>Let's grab lunch together this Friday at 12:30 PM. I've made a reservation at the Italian place downtown.</p><p>Please RSVP by Wednesday so I can confirm the headcount.</p><p>Looking forward to it!<br>Sarah</p>"
+                          "content": "\u003Cp\u003EHey team! \u003C/p\u003E\u003Cp\u003ELet's grab lunch together this Friday at 12:30 PM. I've made a reservation at the Italian place downtown.\u003C/p\u003E\u003Cp\u003EPlease RSVP by Wednesday so I can confirm the headcount.\u003C/p\u003E\u003Cp\u003ELooking forward to it!\u003Cbr\u003ESarah\u003C/p\u003E"
                         },
                         "to_addresses": [
                           "dev-team@company.com"
@@ -14521,7 +14641,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "Exclusive Premium Member Benefits This Month",
                             "name": "Premium Benefits December",
-                            "html": "<h1>Premium Member Exclusive</h1><p>As a valued premium member, enjoy these exclusive benefits this month...</p><ul><li>20% off all products</li><li>Early access to new features</li><li>Priority support</li></ul>",
+                            "html": "\u003Ch1\u003EPremium Member Exclusive\u003C/h1\u003E\u003Cp\u003EAs a valued premium member, enjoy these exclusive benefits this month...\u003C/p\u003E\u003Cul\u003E\u003Cli\u003E20% off all products\u003C/li\u003E\u003Cli\u003EEarly access to new features\u003C/li\u003E\u003Cli\u003EPriority support\u003C/li\u003E\u003C/ul\u003E",
                             "text": "Premium Member Exclusive - Enjoy 20% off all products, early access to new features, and priority support this month.",
                             "status": "draft"
                           }
@@ -14534,7 +14654,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "ACME Monthly Newsletter - December 2025",
                             "name": "December Newsletter",
-                            "html": "<div><h1>December Newsletter</h1><h2>What's New This Month</h2><p>Here are the highlights from December...</p><ul><li>Product updates</li><li>Customer success stories</li><li>Upcoming events</li></ul></div>",
+                            "html": "\u003Cdiv\u003E\u003Ch1\u003EDecember Newsletter\u003C/h1\u003E\u003Ch2\u003EWhat's New This Month\u003C/h2\u003E\u003Cp\u003EHere are the highlights from December...\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EProduct updates\u003C/li\u003E\u003Cli\u003ECustomer success stories\u003C/li\u003E\u003Cli\u003EUpcoming events\u003C/li\u003E\u003C/ul\u003E\u003C/div\u003E",
                             "text": "December Newsletter - What's New This Month: Product updates, customer success stories, and upcoming events.",
                             "reply_to": "feedback@acmecorp.com",
                             "status": "draft"
@@ -14548,7 +14668,7 @@
                             "from": "onboarding@resend.dev",
                             "subject": "Getting Started with Your Free Trial",
                             "name": "Trial Onboarding Sequence",
-                            "html": "<h1>Welcome to Your Free Trial!</h1><p>Let's get you started with some helpful resources...</p><div><h3>Quick Start Guide</h3><ol><li>Complete your profile</li><li>Explore the dashboard</li><li>Try our key features</li></ol></div>",
+                            "html": "\u003Ch1\u003EWelcome to Your Free Trial!\u003C/h1\u003E\u003Cp\u003ELet's get you started with some helpful resources...\u003C/p\u003E\u003Cdiv\u003E\u003Ch3\u003EQuick Start Guide\u003C/h3\u003E\u003Col\u003E\u003Cli\u003EComplete your profile\u003C/li\u003E\u003Cli\u003EExplore the dashboard\u003C/li\u003E\u003Cli\u003ETry our key features\u003C/li\u003E\u003C/ol\u003E\u003C/div\u003E",
                             "text": "Welcome to Your Free Trial! Quick Start Guide: 1) Complete your profile 2) Explore the dashboard 3) Try our key features",
                             "status": "draft"
                           }
@@ -14694,7 +14814,7 @@
                     "posts": [
                       {
                         "title": "Welcome to Klavis AI WordPress Integration",
-                        "content": "<p>This is the first test post created through Klavis AI's WordPress sandbox.</p><p>We're testing the full CRUD functionality with WordPress.com REST API v1.1.</p><p>Key features being tested:</p><ul><li>Post creation with multiple statuses</li><li>Categories and tags management</li><li>Different post formats</li><li>Content formatting with HTML</li></ul>",
+                        "content": "\u003Cp\u003EThis is the first test post created through Klavis AI's WordPress sandbox.\u003C/p\u003E\u003Cp\u003EWe're testing the full CRUD functionality with WordPress.com REST API v1.1.\u003C/p\u003E\u003Cp\u003EKey features being tested:\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EPost creation with multiple statuses\u003C/li\u003E\u003Cli\u003ECategories and tags management\u003C/li\u003E\u003Cli\u003EDifferent post formats\u003C/li\u003E\u003Cli\u003EContent formatting with HTML\u003C/li\u003E\u003C/ul\u003E",
                         "status": "publish",
                         "summary": "Testing Klavis AI WordPress sandbox integration with full CRUD support",
                         "categories": [
@@ -14713,7 +14833,7 @@
                       },
                       {
                         "title": "Understanding MCP (Model Context Protocol)",
-                        "content": "<h2>What is MCP?</h2><p>The Model Context Protocol (MCP) is a revolutionary approach to AI integrations.</p><h3>Key Benefits</h3><ul><li>Standardized integration patterns</li><li>Secure authentication flows</li><li>Sandbox testing environments</li><li>Rate limiting and error handling</li></ul><blockquote>MCP enables AI agents to reliably interact with 100+ tools at scale.</blockquote>",
+                        "content": "\u003Ch2\u003EWhat is MCP?\u003C/h2\u003E\u003Cp\u003EThe Model Context Protocol (MCP) is a revolutionary approach to AI integrations.\u003C/p\u003E\u003Ch3\u003EKey Benefits\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003EStandardized integration patterns\u003C/li\u003E\u003Cli\u003ESecure authentication flows\u003C/li\u003E\u003Cli\u003ESandbox testing environments\u003C/li\u003E\u003Cli\u003ERate limiting and error handling\u003C/li\u003E\u003C/ul\u003E\u003Cblockquote\u003EMCP enables AI agents to reliably interact with 100+ tools at scale.\u003C/blockquote\u003E",
                         "status": "publish",
                         "summary": "Learn about the Model Context Protocol and how it revolutionizes AI integrations",
                         "categories": [
@@ -14730,7 +14850,7 @@
                       },
                       {
                         "title": "Draft Post: Future Features Roadmap",
-                        "content": "<p>This is a draft post about upcoming features in the WordPress sandbox...</p><h3>Planned Features</h3><ul><li><strong>Pages Support</strong>: Create and manage WordPress pages</li><li><strong>Media Management</strong>: Upload and attach featured images</li><li><strong>Comments</strong>: Handle post comments via API</li><li><strong>Custom Post Types</strong>: Support for custom content types</li><li><strong>Post Relationships</strong>: Parent/child post hierarchies</li></ul><p>Stay tuned for updates!</p>",
+                        "content": "\u003Cp\u003EThis is a draft post about upcoming features in the WordPress sandbox...\u003C/p\u003E\u003Ch3\u003EPlanned Features\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003E\u003Cstrong\u003EPages Support\u003C/strong\u003E: Create and manage WordPress pages\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EMedia Management\u003C/strong\u003E: Upload and attach featured images\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EComments\u003C/strong\u003E: Handle post comments via API\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003ECustom Post Types\u003C/strong\u003E: Support for custom content types\u003C/li\u003E\u003Cli\u003E\u003Cstrong\u003EPost Relationships\u003C/strong\u003E: Parent/child post hierarchies\u003C/li\u003E\u003C/ul\u003E\u003Cp\u003EStay tuned for updates!\u003C/p\u003E",
                         "status": "draft",
                         "summary": "Planning future WordPress integration features and enhancements",
                         "categories": [
@@ -14746,7 +14866,7 @@
                       },
                       {
                         "title": "Quick Note: Integration Best Practices",
-                        "content": "<p>A quick aside about best practices when integrating with WordPress.com API:</p><ol><li>Always handle rate limits gracefully</li><li>Use OAuth 2.0 for authentication</li><li>Validate data before sending to API</li><li>Normalize responses for consistency</li></ol>",
+                        "content": "\u003Cp\u003EA quick aside about best practices when integrating with WordPress.com API:\u003C/p\u003E\u003Col\u003E\u003Cli\u003EAlways handle rate limits gracefully\u003C/li\u003E\u003Cli\u003EUse OAuth 2.0 for authentication\u003C/li\u003E\u003Cli\u003EValidate data before sending to API\u003C/li\u003E\u003Cli\u003ENormalize responses for consistency\u003C/li\u003E\u003C/ol\u003E",
                         "status": "publish",
                         "summary": "Best practices for WordPress API integration",
                         "categories": [
@@ -14761,7 +14881,7 @@
                       },
                       {
                         "title": "Image Gallery: Integration Screenshots",
-                        "content": "<p>This post showcases screenshots of the integration process.</p><p>[Gallery would go here with multiple images showing the OAuth flow, sandbox dashboard, and API responses]</p>",
+                        "content": "\u003Cp\u003EThis post showcases screenshots of the integration process.\u003C/p\u003E\u003Cp\u003E[Gallery would go here with multiple images showing the OAuth flow, sandbox dashboard, and API responses]\u003C/p\u003E",
                         "status": "publish",
                         "summary": "Visual guide to WordPress integration",
                         "categories": [
@@ -14777,7 +14897,7 @@
                       },
                       {
                         "title": "Link: WordPress REST API Documentation",
-                        "content": "<p>Check out the official WordPress.com REST API documentation for more details:</p><p><a href=\"https://developer.wordpress.com/docs/api/\">https://developer.wordpress.com/docs/api/</a></p>",
+                        "content": "\u003Cp\u003ECheck out the official WordPress.com REST API documentation for more details:\u003C/p\u003E\u003Cp\u003E\u003Ca href=\"https://developer.wordpress.com/docs/api/\"\u003Ehttps://developer.wordpress.com/docs/api/\u003C/a\u003E\u003C/p\u003E",
                         "status": "publish",
                         "categories": [
                           "Resources"
@@ -14791,7 +14911,7 @@
                       },
                       {
                         "title": "Inspirational Quote",
-                        "content": "<blockquote>\"The best way to predict the future is to implement it.\" - Klavis AI Team</blockquote><p>This quote inspires our approach to building robust integrations.</p>",
+                        "content": "\u003Cblockquote\u003E\"The best way to predict the future is to implement it.\" - Klavis AI Team\u003C/blockquote\u003E\u003Cp\u003EThis quote inspires our approach to building robust integrations.\u003C/p\u003E",
                         "status": "publish",
                         "categories": [
                           "Inspiration"
@@ -14804,7 +14924,7 @@
                       },
                       {
                         "title": "Private Internal Note",
-                        "content": "<p>This is a private post for internal team use only.</p><p>Internal metrics:</p><ul><li>OAuth completion rate: 98%</li><li>API success rate: 99.5%</li><li>Average response time: 250ms</li></ul>",
+                        "content": "\u003Cp\u003EThis is a private post for internal team use only.\u003C/p\u003E\u003Cp\u003EInternal metrics:\u003C/p\u003E\u003Cul\u003E\u003Cli\u003EOAuth completion rate: 98%\u003C/li\u003E\u003Cli\u003EAPI success rate: 99.5%\u003C/li\u003E\u003Cli\u003EAverage response time: 250ms\u003C/li\u003E\u003C/ul\u003E",
                         "status": "private",
                         "summary": "Internal metrics and notes",
                         "categories": [
@@ -14819,7 +14939,7 @@
                       },
                       {
                         "title": "Testing Categories and Tags",
-                        "content": "<p>This post tests extensive categorization and tagging capabilities.</p><p>WordPress allows multiple categories and tags per post, which we're testing here.</p>",
+                        "content": "\u003Cp\u003EThis post tests extensive categorization and tagging capabilities.\u003C/p\u003E\u003Cp\u003EWordPress allows multiple categories and tags per post, which we're testing here.\u003C/p\u003E",
                         "status": "publish",
                         "summary": "Testing multi-category and multi-tag support",
                         "categories": [
@@ -14840,7 +14960,7 @@
                       },
                       {
                         "title": "Draft: Pending Review Article",
-                        "content": "<p>This article is pending editorial review before publication.</p><p>It covers advanced topics in WordPress automation and sandbox testing.</p>",
+                        "content": "\u003Cp\u003EThis article is pending editorial review before publication.\u003C/p\u003E\u003Cp\u003EIt covers advanced topics in WordPress automation and sandbox testing.\u003C/p\u003E",
                         "status": "pending",
                         "summary": "Advanced WordPress automation topics - pending review",
                         "categories": [
@@ -16633,7 +16753,7 @@
                                 "content_blocks": [
                                   {
                                     "block_type": "paragraph",
-                                    "content": "Navigation menu was broken on screens < 768px"
+                                    "content": "Navigation menu was broken on screens \u003C 768px"
                                   },
                                   {
                                     "block_type": "heading_3",
@@ -17165,29 +17285,29 @@
                         "pages": [
                           {
                             "title": "Welcome to the Team",
-                            "content": "<p>This is the home page for our team.</p>",
+                            "content": "\u003Cp\u003EThis is the home page for our team.\u003C/p\u003E",
                             "comments": [
                               {
-                                "content": "<p>Great start!</p>"
+                                "content": "\u003Cp\u003EGreat start!\u003C/p\u003E"
                               }
                             ],
                             "children": [
                               {
                                 "title": "Project Alpha",
-                                "content": "<h1>Project Alpha</h1><p>Details about the project.</p>",
+                                "content": "\u003Ch1\u003EProject Alpha\u003C/h1\u003E\u003Cp\u003EDetails about the project.\u003C/p\u003E",
                                 "comments": [
                                   {
-                                    "content": "<p>Looking forward to this.</p>"
+                                    "content": "\u003Cp\u003ELooking forward to this.\u003C/p\u003E"
                                   }
                                 ]
                               },
                               {
                                 "title": "Meeting Notes",
-                                "content": "<p>Weekly meeting notes go here.</p>",
+                                "content": "\u003Cp\u003EWeekly meeting notes go here.\u003C/p\u003E",
                                 "children": [
                                   {
                                     "title": "2023-10-27 Sync",
-                                    "content": "<p>Discussed Q4 goals.</p>"
+                                    "content": "\u003Cp\u003EDiscussed Q4 goals.\u003C/p\u003E"
                                   }
                                 ]
                               }
@@ -17202,7 +17322,7 @@
                         "pages": [
                           {
                             "title": "Getting Started",
-                            "content": "<p>How to use the product.</p>"
+                            "content": "\u003Cp\u003EHow to use the product.\u003C/p\u003E"
                           }
                         ]
                       }
@@ -19088,7 +19208,7 @@
                       },
                       {
                         "name": "error-logs-sink",
-                        "filter": "severity>=ERROR",
+                        "filter": "severity\u003E=ERROR",
                         "description": "Capture error logs"
                       },
                       {
@@ -20180,6 +20300,291 @@
           }
         }
       }
+    },
+    "/universes": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "List universes",
+        "description": "List all available universes.",
+        "operationId": "list_universes_universes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUniversesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/universes/{universe_id}/initial_data": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Get init data",
+        "description": "Get universe initial data for all services.",
+        "operationId": "get_universe_data_universes__universe_id__initial_data_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_id}": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Acquire universe",
+        "description": "Acquire an idle universe instance and initialize all services.",
+        "operationId": "acquire_universe_universes__universe_id__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniverseInstance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/release": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Release universe",
+        "description": "Release and Reinitialize the universe to its initial state.\n\nThis immediately returns and handles reset/initialization in the background.\nOnly gcalendar and notion setup methods use sandbox (which call reset internally).\nOthers need explicit reset before re-initialization.",
+        "operationId": "release_universe_universes__universe_instance_id__release_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseUniverseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_id}/tasks/{task_num}": {
+      "get": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Get task details",
+        "description": "Get task details within a universe instance.",
+        "operationId": "get_task_universes__universe_id__tasks__task_num__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/universes/{universe_instance_id}/tasks/{task_num}/verify": {
+      "post": {
+        "tags": [
+          "Universe"
+        ],
+        "summary": "Verify task",
+        "description": "Verify if the task has been performed correctly by running the task's verify function.",
+        "operationId": "verify_task_universes__universe_instance_id__tasks__task_num__verify_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "universe_instance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Universe Instance Id"
+            }
+          },
+          {
+            "name": "task_num",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Num"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyTaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -20780,6 +21185,17 @@
         "title": "AsanaTask",
         "description": "Asana Task object"
       },
+      "AttendeeResponseStatus": {
+        "type": "string",
+        "enum": [
+          "needsAction",
+          "declined",
+          "tentative",
+          "accepted"
+        ],
+        "title": "AttendeeResponseStatus",
+        "description": "Attendee response status for calendar events"
+      },
       "AzureADOAuthErrorResponse": {
         "properties": {
           "error": {
@@ -21336,7 +21752,9 @@
       "CallToolResult": {
         "properties": {
           "content": {
-            "items": {},
+            "items": {
+
+            },
             "type": "array",
             "title": "Content",
             "description": "The content of the tool call"
@@ -25060,6 +25478,17 @@
             ],
             "title": "Comment",
             "description": "Attendee's response comment"
+          },
+          "accepted": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttendeeResponseStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Response status"
           }
         },
         "type": "object",
@@ -25075,7 +25504,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -25097,7 +25526,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -25113,7 +25542,149 @@
         "title": "GoogleCalendarData",
         "description": "Complete Google Calendar sandbox data structure"
       },
-      "GoogleCalendarEvent": {
+      "GoogleCalendarEvent-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Event title/summary (required)"
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "RFC3339 timestamp for timed events"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdate",
+            "description": "All-day event start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "All-day event end date in YYYY-MM-DD format"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., America/Los_Angeles)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Event description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Event location"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility",
+            "description": "Visibility (default, public, private, confidential)"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence",
+            "description": "Recurrence rules (RRULE format)"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleCalendarAttendee"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attendees",
+            "description": "List of event attendees"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleCalendarEvent",
+        "description": "Google Calendar event object"
+      },
+      "GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
@@ -27575,7 +28146,9 @@
           "tools": {
             "anyOf": [
               {
-                "items": {},
+                "items": {
+
+                },
                 "type": "array"
               },
               {
@@ -27608,6 +28181,24 @@
           "format"
         ],
         "title": "ListToolsResponse"
+      },
+      "ListUniversesResponse": {
+        "properties": {
+          "universes": {
+            "items": {
+              "$ref": "#/components/schemas/Universe"
+            },
+            "type": "array",
+            "title": "Universes",
+            "description": "List of available universes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "universes"
+        ],
+        "title": "ListUniversesResponse",
+        "description": "Response listing available universes"
       },
       "LogBucket": {
         "properties": {
@@ -30514,6 +31105,28 @@
         "title": "ReleaseSandboxResponse",
         "description": "Response model for sandbox release (delete)"
       },
+      "ReleaseUniverseResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Release confirmation message"
+          },
+          "released_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Released At",
+            "description": "Timestamp of release"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "released_at"
+        ],
+        "title": "ReleaseUniverseResponse",
+        "description": "Response after releasing a universe to idle state"
+      },
       "ResendBroadcast": {
         "properties": {
           "id": {
@@ -32693,6 +33306,65 @@
         "title": "SupabaseTable",
         "description": "Supabase Table object"
       },
+      "TaskDetails": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num",
+            "description": "Task number"
+          },
+          "universe_id": {
+            "type": "string",
+            "title": "Universe Id",
+            "description": "Universe ID"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Task title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Full task description"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "LLM prompt for the task"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/TaskDifficulty",
+            "description": "Difficulty level"
+          },
+          "verification_rationale": {
+            "type": "string",
+            "title": "Verification Rationale",
+            "description": "Detailed explanation of what verification checks for and how task completion is evaluated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "universe_id",
+          "title",
+          "description",
+          "prompt",
+          "difficulty",
+          "verification_rationale"
+        ],
+        "title": "TaskDetails",
+        "description": "Detailed information about a task"
+      },
+      "TaskDifficulty": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "TaskDifficulty"
+      },
       "TeamsChannel": {
         "properties": {
           "channel_id": {
@@ -32905,6 +33577,91 @@
         ],
         "title": "ToolFormat"
       },
+      "Universe": {
+        "properties": {
+          "universe_id": {
+            "type": "string",
+            "title": "Universe Id",
+            "description": "Universe template ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Universe name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Universe description"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain",
+            "description": "Domain (e.g., 'Software Development')"
+          },
+          "personas": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Personas",
+            "description": "Available personas"
+          },
+          "task_nums": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Task Nums",
+            "description": "Task numbers available in this instance"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Instance creation time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "universe_id",
+          "name",
+          "description",
+          "domain",
+          "personas",
+          "task_nums",
+          "created_at"
+        ],
+        "title": "Universe",
+        "description": "Universe details"
+      },
+      "UniverseInstance": {
+        "properties": {
+          "instance_id": {
+            "type": "string",
+            "title": "Instance Id",
+            "description": "Unique universe instance ID"
+          },
+          "mcp_servers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Mcp Servers",
+            "description": "MCP server connections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instance_id",
+          "mcp_servers"
+        ],
+        "title": "UniverseInstance",
+        "description": "Universe instance details"
+      },
       "UpdateServerInstanceRequest": {
         "properties": {
           "isReadOnly": {
@@ -33002,6 +33759,36 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyTaskResponse": {
+        "properties": {
+          "task_num": {
+            "type": "string",
+            "title": "Task Num"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_num",
+          "passed"
+        ],
+        "title": "VerifyTaskResponse",
+        "description": "Response from task verification"
       },
       "WhiteLabelingResponse": {
         "properties": {
