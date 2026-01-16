@@ -20186,7 +20186,7 @@
         "tags": [
           "Universe"
         ],
-        "summary": "List all available universes",
+        "summary": "List universes",
         "description": "List all available universes.",
         "operationId": "list_universes_universes_get",
         "responses": {
@@ -20213,8 +20213,8 @@
         "tags": [
           "Universe"
         ],
-        "summary": "Get universe initial data for all services",
-        "description": "Get universe data for all services.",
+        "summary": "Get init data",
+        "description": "Get universe initial data for all services.",
         "operationId": "get_universe_data_universes__universe_id__initial_data_get",
         "security": [
           {
@@ -20259,7 +20259,7 @@
         "tags": [
           "Universe"
         ],
-        "summary": "Acquire an idle universe instance and initialize it with data.",
+        "summary": "Acquire universe",
         "description": "Acquire an idle universe instance and initialize all services.",
         "operationId": "acquire_universe_universes__universe_id__post",
         "security": [
@@ -20307,7 +20307,7 @@
         "tags": [
           "Universe"
         ],
-        "summary": "Release the universe instance to idle state",
+        "summary": "Release universe",
         "description": "Release and Reinitialize the universe to its initial state.\n\nThis immediately returns and handles reset/initialization in the background.\nOnly gcalendar and notion setup methods use sandbox (which call reset internally).\nOthers need explicit reset before re-initialization.",
         "operationId": "release_universe_universes__universe_instance_id__release_post",
         "security": [
@@ -20412,8 +20412,8 @@
         "tags": [
           "Universe"
         ],
-        "summary": "Verify task completion",
-        "description": "Verify task completion by running the task's verify function.",
+        "summary": "Verify task",
+        "description": "Verify if the task has been performed correctly by running the task's verify function.",
         "operationId": "verify_task_universes__universe_instance_id__tasks__task_num__verify_post",
         "security": [
           {
@@ -33210,6 +33210,11 @@
           "difficulty": {
             "$ref": "#/components/schemas/TaskDifficulty",
             "description": "Difficulty level"
+          },
+          "verification_rationale": {
+            "type": "string",
+            "title": "Verification Rationale",
+            "description": "Detailed explanation of what verification checks for and how task completion is evaluated"
           }
         },
         "type": "object",
@@ -33219,7 +33224,8 @@
           "title",
           "description",
           "prompt",
-          "difficulty"
+          "difficulty",
+          "verification_rationale"
         ],
         "title": "TaskDetails",
         "description": "Detailed information about a task"
