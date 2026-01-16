@@ -93,29 +93,52 @@ export function createEmailMessage(validatedArgs: any): string {
 
 /**
  * Extracts text content from a PDF file encoded in base64
+ * Uses pdfjs-dist (official Mozilla PDF.js) for better compatibility
  * @param base64Data - The base64 encoded PDF data
  * @param filename - The filename for better error messages
  * @returns The extracted text content or an error message
  */
 export async function extractPdfText(base64Data: string, filename: string): Promise<string> {
     try {
-        // Dynamically import internal implementation to avoid debug harness in index.js
-        // @ts-ignore - no type declarations for internal path
-        const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default as any;
+        // Use pdfjs-dist (official Mozilla PDF.js) for better PDF format support
+        const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
         
-        // Convert base64 to buffer
+        // Convert base64 to Uint8Array
         const buffer = Buffer.from(base64Data, 'base64');
-     
-        // Parse PDF and extract text
-        const data = await pdfParse(buffer);
+        const uint8Array = new Uint8Array(buffer);
+        
+        // Load the PDF document
+        const loadingTask = pdfjsLib.getDocument({
+            data: uint8Array,
+            useSystemFonts: true,
+        });
+        const pdfDocument = await loadingTask.promise;
+        
+        const numPages = pdfDocument.numPages;
+        const textParts: string[] = [];
+        
+        // Extract text from each page
+        for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+            const page = await pdfDocument.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            
+            // Combine text items into page text
+            const pageText = textContent.items
+                .map((item: any) => item.str)
+                .join(' ');
+            
+            if (pageText.trim()) {
+                textParts.push(`--- Page ${pageNum} ---\n${pageText}`);
+            }
+        }
         
         // Return extracted text with metadata
         const result = [
             `=== PDF Content from ${filename} ===`,
-            `Pages: ${data.numpages}`,
+            `Pages: ${numPages}`,
             ``,
             `--- Text Content ---`,
-            data.text,
+            textParts.join('\n\n'),
             ``,
             `=== End of PDF Content ===`
         ].join('\n');
