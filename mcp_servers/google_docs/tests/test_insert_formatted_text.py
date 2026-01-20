@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
+from server import (
+    auth_token_context,
+    insert_formatted_text,
+)
+
 
 class TestInsertFormattedTextInput:
     """Tests for input parameter validation."""
@@ -10,24 +15,18 @@ class TestInsertFormattedTextInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_document_id_is_required(self):
         """Test that document_id parameter is required."""
-        from server import insert_formatted_text
-
         with pytest.raises(TypeError):
             await insert_formatted_text()
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_formatted_text_is_required(self):
         """Test that formatted_text parameter is required."""
-        from server import insert_formatted_text
-
         with pytest.raises(TypeError):
             await insert_formatted_text("doc123")
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_position_defaults_to_end(self):
         """Test that position parameter defaults to 'end'."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -56,8 +55,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_insert_text_request_at_end(self):
         """Test that insertText request is created at document end."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -83,8 +80,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_insert_text_request_at_beginning(self):
         """Test that insertText request is created at document beginning."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -109,8 +104,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_bold_text_generates_style_request(self):
         """Test that **bold** generates updateTextStyle request."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -142,8 +135,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_italic_text_generates_style_request(self):
         """Test that *italic* generates updateTextStyle request."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -171,8 +162,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_heading_generates_paragraph_style_request(self):
         """Test that # Heading generates updateParagraphStyle request."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -200,8 +189,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_link_generates_style_request_with_url(self):
         """Test that [text](url) generates updateTextStyle request with link."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -229,8 +216,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_inline_code_generates_monospace_style(self):
         """Test that `code` generates monospace font style."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -259,8 +244,6 @@ class TestInsertFormattedTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_escaped_underscore_not_interpreted_as_italic(self):
         """Test that \\_escaped\\_ underscores are not interpreted as italic."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -296,8 +279,6 @@ class TestInsertFormattedTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_success_response_structure(self):
         """Test that success response has correct structure."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -322,8 +303,6 @@ class TestInsertFormattedTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_style_counts_are_accurate(self):
         """Test that style counts in response are accurate."""
-        from server import insert_formatted_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -355,7 +334,6 @@ class TestInsertFormattedTextErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import insert_formatted_text, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()

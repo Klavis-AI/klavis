@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
+from server import (
+    apply_style,
+    auth_token_context,
+)
+
 
 class TestApplyStyleInput:
     """Tests for input parameter validation."""
@@ -10,16 +15,12 @@ class TestApplyStyleInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_document_id_is_required(self):
         """Test that document_id parameter is required."""
-        from server import apply_style
-
         with pytest.raises(TypeError):
             await apply_style()
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_start_and_end_index_are_required(self):
         """Test that start_index and end_index are required."""
-        from server import apply_style
-
         with pytest.raises(TypeError):
             await apply_style("doc123")
 
@@ -29,8 +30,6 @@ class TestApplyStyleInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_error_when_no_styles_specified(self):
         """Test that error is returned when no style parameters are provided."""
-        from server import apply_style, auth_token_context
-
         token = auth_token_context.set("test_token")
         try:
             result = await apply_style("doc123", 1, 10)
@@ -47,8 +46,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_bold_style_request_structure(self):
         """Test that bold style generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -72,8 +69,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_italic_style_request_structure(self):
         """Test that italic style generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -94,8 +89,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_multiple_text_styles_combined(self):
         """Test that multiple text styles are combined in single request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -127,8 +120,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_font_size_request_structure(self):
         """Test that font_size generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -150,8 +141,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_font_family_request_structure(self):
         """Test that font_family generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -172,8 +161,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_foreground_color_request_structure(self):
         """Test that foreground_color generates correct API request with RGB conversion."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -198,8 +185,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_background_color_request_structure(self):
         """Test that background_color generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -224,8 +209,6 @@ class TestApplyStyleTextStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_link_url_request_structure(self):
         """Test that link_url generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -250,8 +233,6 @@ class TestApplyStyleParagraphStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_heading_type_request_structure(self):
         """Test that heading_type generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -279,8 +260,6 @@ class TestApplyStyleParagraphStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_alignment_request_structure(self):
         """Test that alignment generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -307,8 +286,6 @@ class TestApplyStyleParagraphStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_line_spacing_request_structure(self):
         """Test that line_spacing generates correct API request."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -335,8 +312,6 @@ class TestApplyStyleParagraphStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_space_above_and_below_request_structure(self):
         """Test that space_above and space_below generate correct API requests."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -369,8 +344,6 @@ class TestApplyStyleMixedStyles:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_text_and_paragraph_styles_generate_separate_requests(self):
         """Test that text and paragraph styles generate separate API requests."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -402,8 +375,6 @@ class TestApplyStyleResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_success_response_structure(self):
         """Test that success response has correct structure."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -423,8 +394,6 @@ class TestApplyStyleResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_applied_styles_list_is_accurate(self):
         """Test that applied_styles list accurately reflects applied styles."""
-        from server import apply_style, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -452,7 +421,6 @@ class TestApplyStyleErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import apply_style, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()
@@ -474,8 +442,6 @@ class TestApplyStyleErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_invalid_hex_color(self):
         """Test that invalid hex color raises ValueError."""
-        from server import apply_style, auth_token_context
-
         token = auth_token_context.set("test_token")
         try:
             with pytest.raises(ValueError, match="Invalid hex color"):

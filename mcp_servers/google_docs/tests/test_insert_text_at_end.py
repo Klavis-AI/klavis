@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
+from server import (
+    auth_token_context,
+    insert_text_at_end,
+)
+
 
 class TestInsertTextAtEndInput:
     """Tests for input parameter validation."""
@@ -10,16 +15,12 @@ class TestInsertTextAtEndInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_document_id_is_required(self):
         """Test that document_id parameter is required."""
-        from server import insert_text_at_end
-
         with pytest.raises(TypeError):
             await insert_text_at_end()
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_text_is_required(self):
         """Test that text parameter is required."""
-        from server import insert_text_at_end
-
         with pytest.raises(TypeError):
             await insert_text_at_end("doc123")
 
@@ -30,8 +31,6 @@ class TestInsertTextAtEndApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_gets_document_to_find_end_index(self):
         """Test that document is fetched to determine end index."""
-        from server import insert_text_at_end, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -56,8 +55,6 @@ class TestInsertTextAtEndApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_batch_update_called_with_correct_insert_request(self):
         """Test that batchUpdate is called with correct insertText request."""
-        from server import insert_text_at_end, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -93,8 +90,6 @@ class TestInsertTextAtEndApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_insert_index_is_end_index_minus_one(self):
         """Test that insert index is calculated as endIndex - 1."""
-        from server import insert_text_at_end, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -132,8 +127,6 @@ class TestInsertTextAtEndApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_preserves_text_exactly(self):
         """Test that text content is preserved exactly as provided."""
-        from server import insert_text_at_end, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -172,8 +165,6 @@ class TestInsertTextAtEndResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_success_response(self):
         """Test that success response is returned."""
-        from server import insert_text_at_end, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -199,7 +190,6 @@ class TestInsertTextAtEndErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import insert_text_at_end, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()

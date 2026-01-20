@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
+from server import (
+    auth_token_context,
+    create_blank_document,
+)
+
 
 class TestCreateBlankDocumentInput:
     """Tests for input parameter validation."""
@@ -10,8 +15,6 @@ class TestCreateBlankDocumentInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_title_is_required(self):
         """Test that title parameter is required."""
-        from server import create_blank_document
-
         with pytest.raises(TypeError):
             await create_blank_document()
 
@@ -22,8 +25,6 @@ class TestCreateBlankDocumentApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_create_called_with_title_in_body(self):
         """Test that documents().create() is called with title in body."""
-        from server import create_blank_document, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.create.return_value.execute.return_value = {
             "documentId": "new_doc_123",
@@ -45,8 +46,6 @@ class TestCreateBlankDocumentApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_preserves_title_with_special_characters(self):
         """Test that titles with special characters are preserved."""
-        from server import create_blank_document, auth_token_context
-
         test_titles = [
             "Document with spaces",
             "Document_with_underscores",
@@ -83,8 +82,6 @@ class TestCreateBlankDocumentResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_document_info(self):
         """Test that response contains document info."""
-        from server import create_blank_document, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.create.return_value.execute.return_value = {
             "documentId": "abc123xyz",
@@ -105,8 +102,6 @@ class TestCreateBlankDocumentResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_url_format_is_correct(self):
         """Test that the returned URL follows correct format."""
-        from server import create_blank_document, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.create.return_value.execute.return_value = {
             "documentId": "1rcwYn0czFTu-88s5h88gqWw5nSB2WVYbo6zPvCFjPiQ",
@@ -130,7 +125,6 @@ class TestCreateBlankDocumentErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import create_blank_document, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()

@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
+from server import (
+    auth_token_context,
+    get_all_documents,
+)
+
 
 class TestGetAllDocumentsApiCalls:
     """Tests for Google Drive API call parameters."""
@@ -10,8 +15,6 @@ class TestGetAllDocumentsApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_api_called_with_correct_query(self):
         """Test that files().list() is called with correct Google Docs MIME type query."""
-        from server import get_all_documents, auth_token_context
-
         mock_service = MagicMock()
         mock_service.files.return_value.list.return_value.execute.return_value = {
             "files": []
@@ -34,8 +37,6 @@ class TestGetAllDocumentsApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_uses_drive_service_not_docs_service(self):
         """Test that get_drive_service is used instead of get_docs_service."""
-        from server import get_all_documents, auth_token_context
-
         mock_drive_service = MagicMock()
         mock_drive_service.files.return_value.list.return_value.execute.return_value = {
             "files": []
@@ -56,8 +57,6 @@ class TestGetAllDocumentsResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_formatted_documents_list(self):
         """Test that documents are formatted with correct keys."""
-        from server import get_all_documents, auth_token_context
-
         mock_service = MagicMock()
         mock_service.files.return_value.list.return_value.execute.return_value = {
             "files": [
@@ -100,8 +99,6 @@ class TestGetAllDocumentsResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_empty_list_when_no_documents(self):
         """Test that empty list is returned when no documents exist."""
-        from server import get_all_documents, auth_token_context
-
         mock_service = MagicMock()
         mock_service.files.return_value.list.return_value.execute.return_value = {
             "files": []
@@ -120,8 +117,6 @@ class TestGetAllDocumentsResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_handles_missing_optional_fields(self):
         """Test that missing optional fields are handled gracefully."""
-        from server import get_all_documents, auth_token_context
-
         mock_service = MagicMock()
         mock_service.files.return_value.list.return_value.execute.return_value = {
             "files": [
@@ -154,7 +149,6 @@ class TestGetAllDocumentsErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import get_all_documents, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()

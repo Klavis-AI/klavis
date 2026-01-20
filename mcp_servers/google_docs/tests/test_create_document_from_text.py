@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
+from server import (
+    auth_token_context,
+    create_document_from_text,
+)
+
 
 class TestCreateDocumentFromTextInput:
     """Tests for input parameter validation."""
@@ -10,16 +15,12 @@ class TestCreateDocumentFromTextInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_title_is_required(self):
         """Test that title parameter is required."""
-        from server import create_document_from_text
-
         with pytest.raises(TypeError):
             await create_document_from_text()
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_text_content_is_required(self):
         """Test that text_content parameter is required."""
-        from server import create_document_from_text
-
         with pytest.raises(TypeError):
             await create_document_from_text("My Title")
 
@@ -30,8 +31,6 @@ class TestCreateDocumentFromTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_calls_create_blank_document_first(self):
         """Test that create_blank_document is called first with title."""
-        from server import create_document_from_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -54,8 +53,6 @@ class TestCreateDocumentFromTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_batch_update_inserts_text_at_index_1(self):
         """Test that batchUpdate inserts text at index 1."""
-        from server import create_document_from_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -89,8 +86,6 @@ class TestCreateDocumentFromTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_uses_document_id_from_create_blank(self):
         """Test that document ID from create_blank_document is used for batchUpdate."""
-        from server import create_document_from_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -114,8 +109,6 @@ class TestCreateDocumentFromTextApiCalls:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_preserves_text_content_exactly(self):
         """Test that text content is preserved exactly as provided."""
-        from server import create_document_from_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -156,8 +149,6 @@ class TestCreateDocumentFromTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_returns_document_info(self):
         """Test that response contains document info."""
-        from server import create_document_from_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -186,7 +177,6 @@ class TestCreateDocumentFromTextErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_create_blank_error(self):
         """Test that errors from create_blank_document propagate as RuntimeError."""
-        from server import create_document_from_text, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_resp = MagicMock()
@@ -209,7 +199,6 @@ class TestCreateDocumentFromTextErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_batch_update_error(self):
         """Test that errors from batchUpdate propagate."""
-        from server import create_document_from_text, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()

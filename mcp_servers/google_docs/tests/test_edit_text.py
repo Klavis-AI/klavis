@@ -3,6 +3,11 @@
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
+from server import (
+    auth_token_context,
+    edit_text,
+)
+
 
 class TestEditTextInput:
     """Tests for input parameter validation."""
@@ -10,24 +15,18 @@ class TestEditTextInput:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_document_id_is_required(self):
         """Test that document_id parameter is required."""
-        from server import edit_text
-
         with pytest.raises(TypeError):
             await edit_text()
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_old_text_and_new_text_are_required(self):
         """Test that old_text and new_text parameters are required."""
-        from server import edit_text
-
         with pytest.raises(TypeError):
             await edit_text("doc123")
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_defaults_for_optional_parameters(self):
         """Test that optional parameters have correct defaults."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -54,8 +53,6 @@ class TestEditTextReplaceOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_replace_all_text_api_called(self):
         """Test that replaceAllText API is called for replace operation."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -79,8 +76,6 @@ class TestEditTextReplaceOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_replace_request_structure(self):
         """Test the structure of replaceAllText request."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -104,8 +99,6 @@ class TestEditTextReplaceOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_match_case_parameter(self):
         """Test that match_case parameter is passed correctly."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -133,8 +126,6 @@ class TestEditTextDeleteOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_delete_by_replacing_with_empty_string(self):
         """Test that deletion is achieved by replacing with empty string."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -161,8 +152,6 @@ class TestEditTextAppendOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_append_to_end_uses_insert_text(self):
         """Test that append_to_end uses insertText API."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -190,8 +179,6 @@ class TestEditTextAppendOperation:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_append_to_end_requires_empty_old_text(self):
         """Test that append_to_end with non-empty old_text still does replace."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 1}}]
@@ -218,8 +205,6 @@ class TestEditTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_success_response_for_replace(self):
         """Test success response for replace operation."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 3}}]
@@ -240,8 +225,6 @@ class TestEditTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_success_response_for_append(self):
         """Test success response for append operation."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -265,8 +248,6 @@ class TestEditTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_failure_response_when_text_not_found(self):
         """Test failure response when old_text is not found."""
-        from server import edit_text, auth_token_context
-
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {
             "replies": [{"replaceAllText": {"occurrencesChanged": 0}}]
@@ -286,8 +267,6 @@ class TestEditTextResponse:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_error_response_when_old_text_empty_without_append(self):
         """Test error response when old_text is empty without append_to_end."""
-        from server import edit_text, auth_token_context
-
         token = auth_token_context.set("test_token")
         try:
             result = await edit_text("doc123", "", "new text", append_to_end=False)
@@ -304,7 +283,6 @@ class TestEditTextErrors:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_raises_on_api_error(self):
         """Test that API errors are properly raised."""
-        from server import edit_text, auth_token_context
         from googleapiclient.errors import HttpError
 
         mock_service = MagicMock()
