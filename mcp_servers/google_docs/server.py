@@ -91,7 +91,7 @@ Use 'structured' to get character indices for editing with apply_style.""",
                         "response_format": {
                             "type": "string",
                             "enum": ["raw", "plain_text", "markdown", "structured", "normalized"],
-                            "description": "Output format. Default: 'raw' (for backward compatibility)",
+                            "description": "Output format. Default: 'normalized' (backward compatible)",
                         },
                     },
                 },
