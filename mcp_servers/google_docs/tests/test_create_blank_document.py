@@ -33,7 +33,7 @@ class TestCreateBlankDocumentApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_blank_document.get_docs_service', return_value=mock_service):
                 await create_blank_document("My New Document")
 
                 # Verify create was called with correct body
@@ -67,7 +67,7 @@ class TestCreateBlankDocumentApiCalls:
                     "title": title
                 }
 
-                with patch('server.get_docs_service', return_value=mock_service):
+                with patch('tools.create_blank_document.get_docs_service', return_value=mock_service):
                     await create_blank_document(title)
 
                     call_args = mock_service.documents.return_value.create.call_args
@@ -90,7 +90,7 @@ class TestCreateBlankDocumentResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_blank_document.get_docs_service', return_value=mock_service):
                 result = await create_blank_document("Test Document")
 
                 assert result["title"] == "Test Document"
@@ -110,7 +110,7 @@ class TestCreateBlankDocumentResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_blank_document.get_docs_service', return_value=mock_service):
                 result = await create_blank_document("Test")
 
                 expected_url = "https://docs.google.com/document/d/1rcwYn0czFTu-88s5h88gqWw5nSB2WVYbo6zPvCFjPiQ/edit"
@@ -137,7 +137,7 @@ class TestCreateBlankDocumentErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_blank_document.get_docs_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
                     await create_blank_document("Test")
         finally:

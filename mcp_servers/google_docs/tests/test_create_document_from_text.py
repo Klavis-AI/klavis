@@ -36,8 +36,8 @@ class TestCreateDocumentFromTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "Test Doc",
                     "id": "doc123",
@@ -58,8 +58,8 @@ class TestCreateDocumentFromTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "Test Doc",
                     "id": "doc123",
@@ -91,8 +91,8 @@ class TestCreateDocumentFromTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "Test Doc",
                     "id": "unique_doc_id_xyz",
@@ -125,8 +125,8 @@ class TestCreateDocumentFromTextApiCalls:
             for content in test_contents:
                 mock_service.reset_mock()
 
-                with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                     patch('server.get_docs_service', return_value=mock_service):
+                with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                     patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                     mock_create_blank.return_value = {
                         "title": "Test",
                         "id": "doc123",
@@ -154,8 +154,8 @@ class TestCreateDocumentFromTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "My Document",
                     "id": "doc_id_abc",
@@ -184,7 +184,7 @@ class TestCreateDocumentFromTextErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank:
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank:
                 mock_create_blank.side_effect = HttpError(
                     mock_resp,
                     b'{"error": {"message": "Invalid title"}}'
@@ -211,8 +211,8 @@ class TestCreateDocumentFromTextErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "Test",
                     "id": "doc123",

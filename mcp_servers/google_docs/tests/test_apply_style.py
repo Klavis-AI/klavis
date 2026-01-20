@@ -51,7 +51,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, bold=True)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -74,7 +74,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 5, 15, italic=True)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -94,7 +94,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style(
                     "doc123", 1, 10,
                     bold=True,
@@ -125,7 +125,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, font_size=14)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -146,7 +146,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, font_family="Arial")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -166,7 +166,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, foreground_color="#FF0000")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -190,7 +190,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, background_color="#00FF00")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -214,7 +214,7 @@ class TestApplyStyleTextStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 10, link_url="https://example.com")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -238,7 +238,7 @@ class TestApplyStyleParagraphStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 20, heading_type="HEADING_1")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -265,7 +265,7 @@ class TestApplyStyleParagraphStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 20, alignment="CENTER")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -291,7 +291,7 @@ class TestApplyStyleParagraphStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 20, line_spacing=150)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -317,7 +317,7 @@ class TestApplyStyleParagraphStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style("doc123", 1, 20, space_above=12, space_below=6)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -349,7 +349,7 @@ class TestApplyStyleMixedStyles:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 await apply_style(
                     "doc123", 1, 20,
                     bold=True,
@@ -380,7 +380,7 @@ class TestApplyStyleResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 result = await apply_style("doc123", 1, 10, bold=True)
 
                 assert result["success"] is True
@@ -399,7 +399,7 @@ class TestApplyStyleResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 result = await apply_style(
                     "doc123", 1, 10,
                     bold=True,
@@ -433,7 +433,7 @@ class TestApplyStyleErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.apply_style.get_docs_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
                     await apply_style("doc123", 1, 10, bold=True)
         finally:

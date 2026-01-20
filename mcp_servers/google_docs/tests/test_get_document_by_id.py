@@ -44,7 +44,7 @@ class TestGetDocumentByIdInput:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123")
                 # When format is 'raw', the response should be the full API response
                 assert result == mock_response
@@ -67,7 +67,7 @@ class TestGetDocumentByIdApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 await get_document_by_id("my_doc_id")
 
                 # Verify the API was called with correct parameters
@@ -89,7 +89,7 @@ class TestGetDocumentByIdApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 await get_document_by_id("1rcwYn0czFTu-88s5h88gqWw5nSB2WVYbo6zPvCFjPiQ")
 
                 mock_service.documents.return_value.get.assert_called_once_with(
@@ -113,7 +113,7 @@ class TestGetDocumentByIdApiCalls:
 
             token = auth_token_context.set("test_token")
             try:
-                with patch('server.get_docs_service', return_value=mock_service):
+                with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                     await get_document_by_id("doc123", fmt)
 
                     # API should be called exactly once
@@ -144,8 +144,8 @@ class TestGetDocumentByIdFormatDispatch:
         for fmt in formats_to_test:
             token = auth_token_context.set("test_token")
             try:
-                with patch('server.get_docs_service', return_value=mock_service), \
-                     patch('server.format_document_response') as mock_format:
+                with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service), \
+                     patch('tools.get_document_by_id.format_document_response') as mock_format:
                     mock_format.return_value = {"formatted": True}
 
                     await get_document_by_id("doc123", fmt)
@@ -169,7 +169,7 @@ class TestGetDocumentByIdFormatDispatch:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123", "raw")
                 assert isinstance(result, dict)
                 assert "documentId" in result
@@ -188,7 +188,7 @@ class TestGetDocumentByIdFormatDispatch:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123", "plain_text")
                 assert isinstance(result, dict)
                 assert "content" in result
@@ -208,7 +208,7 @@ class TestGetDocumentByIdFormatDispatch:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123", "markdown")
                 assert isinstance(result, dict)
                 assert "content" in result
@@ -227,7 +227,7 @@ class TestGetDocumentByIdFormatDispatch:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123", "structured")
                 assert isinstance(result, dict)
                 assert "elements" in result
@@ -246,7 +246,7 @@ class TestGetDocumentByIdFormatDispatch:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123", "normalized")
                 assert isinstance(result, dict)
                 assert "content" in result
@@ -272,7 +272,7 @@ class TestGetDocumentByIdErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
                     await get_document_by_id("nonexistent_doc")
         finally:
@@ -293,7 +293,7 @@ class TestGetDocumentByIdErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
                     await get_document_by_id("private_doc")
         finally:

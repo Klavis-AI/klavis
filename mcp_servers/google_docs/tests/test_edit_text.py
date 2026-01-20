@@ -34,7 +34,7 @@ class TestEditTextInput:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 await edit_text("doc123", "old", "new")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -60,7 +60,7 @@ class TestEditTextReplaceOperation:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 await edit_text("doc123", "old text", "new text")
 
                 mock_service.documents.return_value.batchUpdate.assert_called_once()
@@ -83,7 +83,7 @@ class TestEditTextReplaceOperation:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 await edit_text("doc123", "find this", "replace with this", match_case=False)
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -109,7 +109,7 @@ class TestEditTextReplaceOperation:
             for match_case in [True, False]:
                 mock_service.reset_mock()
 
-                with patch('server.get_docs_service', return_value=mock_service):
+                with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                     await edit_text("doc123", "text", "replacement", match_case=match_case)
 
                     call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -133,7 +133,7 @@ class TestEditTextDeleteOperation:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 await edit_text("doc123", "text to delete", "")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
@@ -157,8 +157,8 @@ class TestEditTextAppendOperation:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.edit_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 50}]}
                 }
@@ -186,7 +186,7 @@ class TestEditTextAppendOperation:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 # append_to_end is True but old_text is not empty
                 await edit_text("doc123", "some text", "new text", append_to_end=True)
 
@@ -212,7 +212,7 @@ class TestEditTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 result = await edit_text("doc123", "old", "new")
 
                 assert result["success"] is True
@@ -230,8 +230,8 @@ class TestEditTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.edit_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 50}]}
                 }
@@ -255,7 +255,7 @@ class TestEditTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 result = await edit_text("doc123", "nonexistent text", "new")
 
                 assert result["success"] is False
@@ -295,7 +295,7 @@ class TestEditTextErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.edit_text.get_docs_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
                     await edit_text("doc123", "old", "new")
         finally:

@@ -32,8 +32,8 @@ class TestInsertFormattedTextInput:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 50}]}
                 }
@@ -60,8 +60,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 100}]}
                 }
@@ -85,8 +85,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 100}]}
                 }
@@ -109,8 +109,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -140,8 +140,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -167,8 +167,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -194,8 +194,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -221,8 +221,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -249,8 +249,8 @@ class TestInsertFormattedTextApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -284,8 +284,8 @@ class TestInsertFormattedTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -308,8 +308,8 @@ class TestInsertFormattedTextResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -346,8 +346,8 @@ class TestInsertFormattedTextErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_docs_service', return_value=mock_service), \
-                 patch('server._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
+                 patch('tools.insert_formatted_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }

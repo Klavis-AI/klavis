@@ -22,7 +22,7 @@ class TestGetAllDocumentsApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_service):
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_service):
                 await get_all_documents()
 
                 # Verify the API was called with correct parameters
@@ -44,7 +44,7 @@ class TestGetAllDocumentsApiCalls:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_drive_service) as mock_get_drive:
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_drive_service) as mock_get_drive:
                 await get_all_documents()
                 mock_get_drive.assert_called_once_with("test_token")
         finally:
@@ -79,7 +79,7 @@ class TestGetAllDocumentsResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_service):
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_service):
                 result = await get_all_documents()
 
                 assert "documents" in result
@@ -106,7 +106,7 @@ class TestGetAllDocumentsResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_service):
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_service):
                 result = await get_all_documents()
 
                 assert result["documents"] == []
@@ -130,7 +130,7 @@ class TestGetAllDocumentsResponse:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_service):
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_service):
                 result = await get_all_documents()
 
                 doc = result["documents"][0]
@@ -161,7 +161,7 @@ class TestGetAllDocumentsErrors:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.get_drive_service', return_value=mock_service):
+            with patch('tools.get_all_documents.get_drive_service', return_value=mock_service):
                 with pytest.raises(RuntimeError, match="Google Drive API Error"):
                     await get_all_documents()
         finally:

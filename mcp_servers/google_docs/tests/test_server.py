@@ -6,12 +6,12 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 import pytest
 
-from server import (
+from tools import (    
     auth_token_context,
     create_document_from_text,
     extract_access_token,
-    get_auth_token,
     normalize_document_response,
+    get_auth_token,
 )
 
 
@@ -308,8 +308,8 @@ class TestCreateDocumentFromText:
 
         token = auth_token_context.set("test_token")
         try:
-            with patch('server.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
-                 patch('server.get_docs_service', return_value=mock_service):
+            with patch('tools.create_document_from_text.create_blank_document', new_callable=AsyncMock) as mock_create_blank, \
+                 patch('tools.create_document_from_text.get_docs_service', return_value=mock_service):
                 mock_create_blank.return_value = {
                     "title": "Test Doc",
                     "id": "doc123",

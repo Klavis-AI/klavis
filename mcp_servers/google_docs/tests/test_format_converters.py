@@ -15,7 +15,7 @@ It's a local conversion from the API's JSON response to markdown syntax.
 
 import pytest
 
-from server import (
+from tools import (
     convert_document_to_markdown,
     extract_text_from_document,
     format_document_response,
