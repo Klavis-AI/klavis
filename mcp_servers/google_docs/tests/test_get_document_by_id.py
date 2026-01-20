@@ -31,8 +31,8 @@ class TestGetDocumentByIdInput:
             auth_token_context.reset(token)
 
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_response_format_defaults_to_raw(self):
-        """Test that response_format defaults to 'raw' when not specified."""
+    async def test_response_format_defaults_to_normalized(self):
+        """Test that response_format defaults to 'normalized' when not specified for backward compatibility."""
         mock_response = {
             "documentId": "doc123",
             "title": "Test Doc",
@@ -46,8 +46,10 @@ class TestGetDocumentByIdInput:
         try:
             with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
                 result = await get_document_by_id("doc123")
-                # When format is 'raw', the response should be the full API response
-                assert result == mock_response
+                # When format is 'normalized' (default), the response should be normalized
+                assert "content" in result  # normalized format has 'content' key
+                assert result["documentId"] == "doc123"
+                assert result["title"] == "Test Doc"
         finally:
             auth_token_context.reset(token)
 

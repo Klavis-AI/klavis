@@ -21,13 +21,13 @@ async def _get_document_raw(document_id: str) -> Dict[str, Any]:
     return dict(response)
 
 
-async def get_document_by_id(document_id: str, response_format: str = "raw") -> Dict[str, Any]:
+async def get_document_by_id(document_id: str, response_format: str = "normalized") -> Dict[str, Any]:
     """Get the latest version of the specified Google Docs document.
 
     Args:
         document_id: The ID of the Google Docs document.
-        response_format: Output format - 'raw', 'plain_text', 'markdown', or 'structured'.
-                        Default is 'raw' for backward compatibility.
+        response_format: Output format - 'raw', 'plain_text', 'markdown', 'structured', or 'normalized'.
+                        Default is 'normalized' for backward compatibility.
     """
     logger.info(f"Executing tool: get_document_by_id with document_id: {document_id}, format: {response_format}")
     try:

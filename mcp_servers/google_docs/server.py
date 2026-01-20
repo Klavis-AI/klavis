@@ -78,13 +78,8 @@ def main(
                 name="google_docs_get_document_by_id",
                 description="""Retrieve a Google Docs document by ID.
 
-Response formats:
-- 'raw': Full API response with all metadata (default, backward compatible)
-- 'plain_text': Text content only, no formatting
-- 'markdown': Text with formatting converted to markdown syntax
-- 'structured': JSON with text runs and style information, including character indices for editing
-- 'normalized': Simplified structure with tables, page info, and list definitions
-""",
+Response formats: 'normalized' (default), 'raw', 'plain_text', 'markdown', 'structured'.
+Use 'structured' to get character indices for editing with apply_style.""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id"],
@@ -179,25 +174,8 @@ Response formats:
                 name="google_docs_edit_text",
                 description="""Edit text in a Google Docs document by replacing old text with new text.
 
-This single operation handles insert, delete, and replace:
-
-- **Insert after anchor**:
-  old_text: "# Introduction"
-  new_text: "# Introduction\\n\\nThis is the new paragraph."
-
-- **Delete**:
-  old_text: "Remove this sentence."
-  new_text: ""
-
-- **Replace**:
-  old_text: "old word"
-  new_text: "new word"
-
-- **Insert at end**:
-  old_text: "" (empty)
-  new_text: "Appended text"
-  append_to_end: true
-""",
+Operations: Replace (old_text→new_text), Delete (new_text=""), Append (old_text="" with append_to_end=true).
+Note: Google Docs API always replaces all occurrences.""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id", "old_text", "new_text"],
@@ -324,40 +302,10 @@ To find the correct indices, use google_docs_get_document_by_id with response_fo
             ),
             types.Tool(
                 name="google_docs_insert_formatted_text",
-                description="""Insert formatted text into a Google Docs document using markdown-like syntax.
+                description="""Insert formatted text using markdown-like syntax.
 
-Supported markup:
-- **bold** or __bold__ for bold text
-- *italic* or _italic_ for italic text
-- ~~strikethrough~~ for strikethrough
-- [link text](url) for hyperlinks
-- `code` for inline code (monospace font with gray background)
-- # Heading 1, ## Heading 2, ... ###### Heading 6 (must be at line start)
-- - item or * item for bullet points
-
-Escape sequences (to prevent formatting):
-- \\_  -> literal underscore
-- \\*  -> literal asterisk
-- \\`  -> literal backtick
-
-Example:
-```
-# Meeting Notes
-
-**Important**: This is a _critical_ update.
-Use `access_token` for authentication.
-
-## Action Items
-- Review the ~~old~~ new proposal
-- Contact [John](mailto:john@example.com)
-```
-
-This high-level API internally:
-1. Parses the markdown syntax
-2. Inserts plain text
-3. Applies styles (bold, italic, headings, code, etc.)
-4. Executes all as a single atomic batchUpdate
-""",
+Supported: **bold**, *italic*, ~~strikethrough~~, `code`, [link](url), # headings (1-6), - bullets.
+Escape with backslash: \\* \\_ \\` for literal characters.""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id", "formatted_text"],
@@ -397,8 +345,8 @@ This high-level API internally:
                     )
                 ]
 
-            # Get response_format with default 'raw' for backward compatibility
-            response_format = arguments.get("response_format", "raw")
+            # Get response_format with default 'normalized' for backward compatibility
+            response_format = arguments.get("response_format", "normalized")
 
             try:
                 result = await get_document_by_id(document_id, response_format)
@@ -423,7 +371,7 @@ This high-level API internally:
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -451,7 +399,7 @@ This high-level API internally:
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -478,7 +426,7 @@ This high-level API internally:
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
@@ -506,7 +454,7 @@ This high-level API internally:
                 return [
                     types.TextContent(
                         type="text",
-                        text=str(result),
+                        text=json.dumps(result, ensure_ascii=False, indent=2),
                     )
                 ]
             except Exception as e:
