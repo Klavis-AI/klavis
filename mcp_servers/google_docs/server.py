@@ -510,7 +510,12 @@ def parse_markdown_text(text: str) -> tuple[str, list[dict[str, Any]], list[dict
 
 
 def parse_inline_formatting(text: str, base_index: int) -> tuple[str, list[dict[str, Any]]]:
-    """Parse inline markdown formatting (bold, italic, links, strikethrough).
+    """Parse inline markdown formatting (bold, italic, links, strikethrough, code).
+
+    Supports escape sequences:
+    - \\_  -> literal underscore (not interpreted as italic)
+    - \\*  -> literal asterisk (not interpreted as bold/italic)
+    - \\`  -> literal backtick (not interpreted as code)
 
     Returns:
         tuple: (plain_text, style_ranges)
@@ -520,6 +525,26 @@ def parse_inline_formatting(text: str, base_index: int) -> tuple[str, list[dict[
     i = 0
 
     while i < len(text):
+        # Escape sequences: \_ \* \` -> literal characters
+        if text[i] == '\\' and i + 1 < len(text) and text[i + 1] in '_*`':
+            result += text[i + 1]
+            i += 2
+            continue
+
+        # Inline code: `code` -> monospace font with gray background
+        match = re.match(r'`([^`]+)`', text[i:])
+        if match:
+            content = match.group(1)
+            start_pos = base_index + len(result)
+            result += content
+            style_ranges.append({
+                "start": start_pos,
+                "end": start_pos + len(content),
+                "style": {"code": True}
+            })
+            i += len(match.group(0))
+            continue
+
         # Bold + Italic: ***text*** or ___text___
         match = re.match(r'\*\*\*(.+?)\*\*\*|___(.+?)___', text[i:])
         if match:
@@ -1100,6 +1125,14 @@ async def insert_formatted_text(
             if style.get("link"):
                 text_style["link"] = style["link"]
                 fields.append("link")
+            if style.get("code"):
+                # Inline code: monospace font with light gray background
+                text_style["weightedFontFamily"] = {"fontFamily": "Courier New"}
+                text_style["backgroundColor"] = {
+                    "color": {"rgbColor": {"red": 0.94, "green": 0.94, "blue": 0.94}}
+                }
+                fields.append("weightedFontFamily")
+                fields.append("backgroundColor")
 
             if fields:
                 requests.append({
@@ -1135,7 +1168,8 @@ async def insert_formatted_text(
             "bold_ranges": sum(1 for s in style_ranges if s["style"].get("bold")),
             "italic_ranges": sum(1 for s in style_ranges if s["style"].get("italic")),
             "strikethrough_ranges": sum(1 for s in style_ranges if s["style"].get("strikethrough")),
-            "links": sum(1 for s in style_ranges if s["style"].get("link"))
+            "links": sum(1 for s in style_ranges if s["style"].get("link")),
+            "code_ranges": sum(1 for s in style_ranges if s["style"].get("code"))
         }
 
         return {
@@ -1485,14 +1519,21 @@ Supported markup:
 - *italic* or _italic_ for italic text
 - ~~strikethrough~~ for strikethrough
 - [link text](url) for hyperlinks
+- `code` for inline code (monospace font with gray background)
 - # Heading 1, ## Heading 2, ... ###### Heading 6 (must be at line start)
 - - item or * item for bullet points
+
+Escape sequences (to prevent formatting):
+- \\_  -> literal underscore
+- \\*  -> literal asterisk
+- \\`  -> literal backtick
 
 Example:
 ```
 # Meeting Notes
 
 **Important**: This is a _critical_ update.
+Use `access_token` for authentication.
 
 ## Action Items
 - Review the ~~old~~ new proposal
@@ -1502,7 +1543,7 @@ Example:
 This high-level API internally:
 1. Parses the markdown syntax
 2. Inserts plain text
-3. Applies styles (bold, italic, headings, etc.)
+3. Applies styles (bold, italic, headings, code, etc.)
 4. Executes all as a single atomic batchUpdate
 """,
                 inputSchema={
