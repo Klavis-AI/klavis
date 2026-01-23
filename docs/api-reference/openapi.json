@@ -20260,7 +20260,7 @@
           "Universe"
         ],
         "summary": "Acquire universe",
-        "description": "Acquire an idle universe instance and initialize all services.",
+        "description": "Acquire the next idle universe instance.",
         "operationId": "acquire_universe_universes__universe_id__post",
         "security": [
           {
