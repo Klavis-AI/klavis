@@ -1,4 +1,4 @@
-mcp==1.12.3
+mcp==1.23.0
 httpx
 click
 starlette
