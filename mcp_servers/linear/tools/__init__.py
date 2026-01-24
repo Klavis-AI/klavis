@@ -5,6 +5,10 @@ from .teams import get_teams
 from .issues import get_issues, get_issue_by_id, create_issue, update_issue, search_issues
 from .projects import get_projects, create_project, update_project
 from .comments import get_comments, create_comment, update_comment
+from .initiatives import (
+    get_initiatives, get_initiative_by_id, create_initiative, update_initiative,
+    add_project_to_initiative, remove_project_from_initiative
+)
 from .base import auth_token_context
 
 __all__ = [
@@ -27,6 +31,14 @@ __all__ = [
     "get_comments",
     "create_comment",
     "update_comment",
+    
+    # Initiatives
+    "get_initiatives",
+    "get_initiative_by_id",
+    "create_initiative",
+    "update_initiative",
+    "add_project_to_initiative",
+    "remove_project_from_initiative",
     
     # Base
     "auth_token_context",
