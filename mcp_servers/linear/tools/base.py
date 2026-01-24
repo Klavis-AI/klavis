@@ -52,5 +52,10 @@ async def make_graphql_request(query: str, variables: Dict[str, Any] = None) -> 
     
     async with httpx.AsyncClient() as client:
         response = await client.post(LINEAR_API_ENDPOINT, json=payload, headers=headers)
+        
+        # Log response body for debugging on errors
+        if response.status_code >= 400:
+            logger.error(f"GraphQL request failed with status {response.status_code}: {response.text}")
+        
         response.raise_for_status()
         return response.json() 

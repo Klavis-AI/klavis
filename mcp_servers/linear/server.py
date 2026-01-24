@@ -146,6 +146,34 @@ COMMENT_RULES = {
     "externalLink": "url",
 }
 
+INITIATIVE_RULES = {
+    "initiativeId": "id",
+    "initiativeName": "name",
+    "summary": "description",
+    "currentStatus": "status",
+    "targetCompletion": "targetDate",
+    "displayOrder": "sortOrder",
+    "themeColor": "color",
+    "displayIcon": "icon",
+    "slugIdentifier": "slugId",
+    "initiativeCreator": lambda x: normalize(get_path(x, 'creator') or {}, USER_RULES),
+    "initiativeOwner": lambda x: normalize(get_path(x, 'owner') or {}, USER_RULES),
+    "linkedProjects": lambda x: [
+        normalize(p, {"projectId": "id", "projectName": "name", "currentState": "state", "completion": "progress"})
+        for p in get_path(x, 'projects.nodes') or []
+    ] if get_path(x, 'projects.nodes') else None,
+    "dateCreated": "createdAt",
+    "dateModified": "updatedAt",
+    "dateArchived": "archivedAt",
+}
+
+INITIATIVE_TO_PROJECT_RULES = {
+    "linkId": "id",
+    "linkedInitiative": lambda x: normalize(get_path(x, 'initiative') or {}, {"initiativeId": "id", "initiativeName": "name"}),
+    "linkedProject": lambda x: normalize(get_path(x, 'project') or {}, {"projectId": "id", "projectName": "name", "currentState": "state", "completion": "progress"}),
+    "dateCreated": "createdAt",
+}
+
 
 def normalize_team(raw_team: dict) -> dict:
     """Normalize a single team and add computed fields."""
@@ -165,6 +193,16 @@ def normalize_project(raw_project: dict) -> dict:
 def normalize_comment(raw_comment: dict) -> dict:
     """Normalize a single comment and add computed fields."""
     return normalize(raw_comment, COMMENT_RULES)
+
+
+def normalize_initiative(raw_initiative: dict) -> dict:
+    """Normalize a single initiative and add computed fields."""
+    return normalize(raw_initiative, INITIATIVE_RULES)
+
+
+def normalize_initiative_to_project(raw_link: dict) -> dict:
+    """Normalize a single initiative-to-project link."""
+    return normalize(raw_link, INITIATIVE_TO_PROJECT_RULES)
 
 
 def normalize_linear_response(data: dict, data_type: str) -> dict:
@@ -231,6 +269,45 @@ def normalize_linear_response(data: dict, data_type: str) -> dict:
                 elif 'project' in value:
                     normalized_data['data'][normalized_key]['initiative'] = normalize_project(value['project'])
     
+    elif data_type == 'initiatives':
+        if 'initiatives' in original_data and 'nodes' in original_data['initiatives']:
+            normalized_data['data']['strategicInitiatives'] = {
+                "items": [normalize_initiative(initiative) for initiative in original_data['initiatives']['nodes']]
+            }
+    
+    elif data_type == 'initiative':
+        if 'initiative' in original_data:
+            normalized_data['data']['strategicInitiative'] = normalize_initiative(original_data['initiative'])
+    
+    elif data_type in ['initiativeCreate', 'initiativeUpdate']:
+        # Handle initiative mutation responses
+        for key, value in original_data.items():
+            if key.endswith('Create') or key.endswith('Update'):
+                normalized_key = key.replace('initiative', 'strategicInitiative')
+                normalized_data['data'][normalized_key] = {}
+                
+                if 'success' in value:
+                    normalized_data['data'][normalized_key]['success'] = value['success']
+                
+                if 'initiative' in value:
+                    normalized_data['data'][normalized_key]['strategicInitiative'] = normalize_initiative(value['initiative'])
+    
+    elif data_type == 'initiativeToProjectCreate':
+        if 'initiativeToProjectCreate' in original_data:
+            value = original_data['initiativeToProjectCreate']
+            normalized_data['data']['projectLink'] = {}
+            if 'success' in value:
+                normalized_data['data']['projectLink']['success'] = value['success']
+            if 'initiativeToProject' in value:
+                normalized_data['data']['projectLink']['link'] = normalize_initiative_to_project(value['initiativeToProject'])
+    
+    elif data_type == 'initiativeToProjectDelete':
+        if 'initiativeToProjectDelete' in original_data:
+            value = original_data['initiativeToProjectDelete']
+            normalized_data['data']['projectLinkDelete'] = {}
+            if 'success' in value:
+                normalized_data['data']['projectLinkDelete']['success'] = value['success']
+    
     return normalized_data
 
 
@@ -239,7 +316,9 @@ from tools import (
     get_teams,
     get_issues, get_issue_by_id, create_issue, update_issue, search_issues,
     get_projects, create_project, update_project,
-    get_comments, create_comment, update_comment
+    get_comments, create_comment, update_comment,
+    get_initiatives, get_initiative_by_id, create_initiative, update_initiative,
+    add_project_to_initiative, remove_project_from_initiative
 )
 
 # Configure logging
@@ -684,6 +763,206 @@ def main(
                     **{"category": "LINEAR_ISSUE", "readOnlyHint": True}
                 ),
             ),
+            types.Tool(
+                name="linear_get_initiatives",
+                description="Get initiatives (strategic objectives that group projects together), optionally filtering by timestamps.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "limit": {
+                            "type": "integer",
+                            "description": "Maximum number of initiatives to return (default: 50).",
+                            "default": 50,
+                        },
+                        "filter": {
+                            "type": "object",
+                            "description": "Filter object for initiatives.",
+                            "properties": {
+                                "name": {
+                                    "type": "object",
+                                    "description": "Filter by initiative name.",
+                                    "properties": {
+                                        "eq": {"type": "string", "description": "Equal to name"},
+                                        "contains": {"type": "string", "description": "Contains substring"},
+                                        "startsWith": {"type": "string", "description": "Starts with prefix"},
+                                    },
+                                },
+                                "status": {
+                                    "type": "object",
+                                    "description": "Filter by initiative status.",
+                                    "properties": {
+                                        "eq": {"type": "string", "description": "Equal to status (planned, active, completed)"},
+                                    },
+                                },
+                                "updatedAt": {
+                                    "type": "object",
+                                    "description": "Filter by update timestamp.",
+                                    "properties": {
+                                        "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
+                                        "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},
+                                        "lte": {"type": "string", "description": "Less than or equal to timestamp (ISO 8601)"},
+                                        "lt": {"type": "string", "description": "Less than timestamp (ISO 8601)"},
+                                    },
+                                },
+                                "createdAt": {
+                                    "type": "object",
+                                    "description": "Filter by creation timestamp.",
+                                    "properties": {
+                                        "gte": {"type": "string", "description": "Greater than or equal to timestamp (ISO 8601)"},
+                                        "gt": {"type": "string", "description": "Greater than timestamp (ISO 8601)"},
+                                        "lte": {"type": "string", "description": "Less than or equal to timestamp (ISO 8601)"},
+                                        "lt": {"type": "string", "description": "Less than timestamp (ISO 8601)"},
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="linear_get_initiative_by_id",
+                description="Get a specific initiative by its ID, including its linked projects.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["initiative_id"],
+                    "properties": {
+                        "initiative_id": {
+                            "type": "string",
+                            "description": "The ID of the initiative to retrieve.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE", "readOnlyHint": True}
+                ),
+            ),
+            types.Tool(
+                name="linear_create_initiative",
+                description="Create a new initiative (strategic objective) in Linear.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the initiative.",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "The description of the initiative.",
+                        },
+                        "owner_id": {
+                            "type": "string",
+                            "description": "The ID of the user who owns this initiative.",
+                        },
+                        "target_date": {
+                            "type": "string",
+                            "description": "The target completion date (ISO date string).",
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "The status of the initiative. Must be one of: Planned, Active, Completed (case-sensitive).",
+                        },
+                        "color": {
+                            "type": "string",
+                            "description": "The color theme for the initiative.",
+                        },
+                        "icon": {
+                            "type": "string",
+                            "description": "The icon for the initiative.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE"}
+                ),
+            ),
+            types.Tool(
+                name="linear_update_initiative",
+                description="Update an existing initiative in Linear.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["initiative_id"],
+                    "properties": {
+                        "initiative_id": {
+                            "type": "string",
+                            "description": "The ID of the initiative to update.",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "The new name of the initiative.",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "The new description of the initiative.",
+                        },
+                        "owner_id": {
+                            "type": "string",
+                            "description": "The ID of the user who owns this initiative.",
+                        },
+                        "target_date": {
+                            "type": "string",
+                            "description": "The new target completion date (ISO date string).",
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "The new status (planned, active, completed).",
+                        },
+                        "color": {
+                            "type": "string",
+                            "description": "The new color theme.",
+                        },
+                        "icon": {
+                            "type": "string",
+                            "description": "The new icon.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE"}
+                ),
+            ),
+            types.Tool(
+                name="linear_add_project_to_initiative",
+                description="Link a project to an initiative.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["initiative_id", "project_id"],
+                    "properties": {
+                        "initiative_id": {
+                            "type": "string",
+                            "description": "The ID of the initiative.",
+                        },
+                        "project_id": {
+                            "type": "string",
+                            "description": "The ID of the project to add to the initiative.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE"}
+                ),
+            ),
+            types.Tool(
+                name="linear_remove_project_from_initiative",
+                description="Remove a project from an initiative by deleting the link.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["initiative_to_project_id"],
+                    "properties": {
+                        "initiative_to_project_id": {
+                            "type": "string",
+                            "description": "The ID of the initiative-to-project link to delete.",
+                        },
+                    },
+                },
+                annotations=types.ToolAnnotations(
+                    **{"category": "LINEAR_INITIATIVE"}
+                ),
+            ),
         ]
 
     @app.call_tool()
@@ -1019,6 +1298,182 @@ def main(
             try:
                 result = await search_issues(query_text, team_id, limit)
                 normalized_result = normalize_linear_response(result, 'issues')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_get_initiatives":
+            limit = arguments.get("limit", 50)
+            filter_param = arguments.get("filter")
+            try:
+                result = await get_initiatives(limit, filter_param)
+                normalized_result = normalize_linear_response(result, 'initiatives')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_get_initiative_by_id":
+            initiative_id = arguments.get("initiative_id")
+            if not initiative_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: initiative_id parameter is required",
+                    )
+                ]
+            try:
+                result = await get_initiative_by_id(initiative_id)
+                normalized_result = normalize_linear_response(result, 'initiative')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_create_initiative":
+            init_name = arguments.get("name")
+            if not init_name:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: name parameter is required",
+                    )
+                ]
+            
+            description = arguments.get("description")
+            owner_id = arguments.get("owner_id")
+            target_date = arguments.get("target_date")
+            status = arguments.get("status")
+            color = arguments.get("color")
+            icon = arguments.get("icon")
+            
+            try:
+                result = await create_initiative(init_name, description, owner_id, target_date, status, color, icon)
+                normalized_result = normalize_linear_response(result, 'initiativeCreate')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_update_initiative":
+            initiative_id = arguments.get("initiative_id")
+            if not initiative_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: initiative_id parameter is required",
+                    )
+                ]
+            
+            init_name = arguments.get("name")
+            description = arguments.get("description")
+            owner_id = arguments.get("owner_id")
+            target_date = arguments.get("target_date")
+            status = arguments.get("status")
+            color = arguments.get("color")
+            icon = arguments.get("icon")
+            
+            try:
+                result = await update_initiative(initiative_id, init_name, description, owner_id, target_date, status, color, icon)
+                normalized_result = normalize_linear_response(result, 'initiativeUpdate')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_add_project_to_initiative":
+            initiative_id = arguments.get("initiative_id")
+            project_id = arguments.get("project_id")
+            if not initiative_id or not project_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: initiative_id and project_id parameters are required",
+                    )
+                ]
+            
+            try:
+                result = await add_project_to_initiative(initiative_id, project_id)
+                normalized_result = normalize_linear_response(result, 'initiativeToProjectCreate')
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=json.dumps(normalized_result, indent=2),
+                    )
+                ]
+            except Exception as e:
+                logger.exception(f"Error executing tool {name}: {e}")
+                return [
+                    types.TextContent(
+                        type="text",
+                        text=f"Error: {str(e)}",
+                    )
+                ]
+        
+        elif name == "linear_remove_project_from_initiative":
+            initiative_to_project_id = arguments.get("initiative_to_project_id")
+            if not initiative_to_project_id:
+                return [
+                    types.TextContent(
+                        type="text",
+                        text="Error: initiative_to_project_id parameter is required",
+                    )
+                ]
+            
+            try:
+                result = await remove_project_from_initiative(initiative_to_project_id)
+                normalized_result = normalize_linear_response(result, 'initiativeToProjectDelete')
                 return [
                     types.TextContent(
                         type="text",
