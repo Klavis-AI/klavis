@@ -300,13 +300,29 @@ async function main() {
       return header;
     };
 
+    const extractAuthData = (req: express.Request): string | undefined => {
+      const authDataHeader = req.headers['x-auth-data'];
+      if (!authDataHeader) return undefined;
+
+      try {
+        const headerValue = Array.isArray(authDataHeader) ? authDataHeader[0] : authDataHeader;
+        const authDataStr = Buffer.from(headerValue, 'base64').toString('utf8');
+        const authDataJson = JSON.parse(authDataStr);
+        return authDataJson.token ?? authDataJson.api_key;
+      } catch (error) {
+        console.error('Error parsing x-auth-data JSON:', error);
+        return undefined;
+      }
+    };
+
     const extractApiKey = (req: express.Request): string | undefined => {
       return (
         extractBearerToken(req.headers.authorization) ||
         extractHeaderValue(req.headers["context7-api-key"]) ||
         extractHeaderValue(req.headers["x-api-key"]) ||
         extractHeaderValue(req.headers["context7_api_key"]) ||
-        extractHeaderValue(req.headers["x_api_key"])
+        extractHeaderValue(req.headers["x_api_key"]) ||
+        extractAuthData(req)
       );
     };
 

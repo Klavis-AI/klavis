@@ -27,4 +27,5 @@ COPY --from=builder /app/packages/mcp/dist ./packages/mcp/dist
 
 WORKDIR /app/packages/mcp
 EXPOSE 5000
-CMD ["node", "dist/index.js", "--transport", "http", "--port", "5000"]
+ENV PORT=5000
+CMD ["sh", "-c", "node dist/index.js --transport http --port ${PORT}"]
