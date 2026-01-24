@@ -1,0 +1,193 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Context7 MCP",
+  "description": "Up-to-date code docs for any prompt.",
+  "colors": {
+    "primary": "#10B981",
+    "light": "#ECFDF5",
+    "dark": "#064E3B"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ]
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": [
+          "overview",
+          "installation",
+          "plans-pricing",
+          "adding-libraries",
+          "api-guide",
+          "skills",
+          "tips"
+        ]
+      },
+      {
+        "group": "How To",
+        "pages": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "howto/api-keys",
+              "howto/oauth"
+            ]
+          },
+          "howto/claiming-libraries",
+          "howto/private-repositories",
+          "howto/team",
+          "howto/usage"
+        ]
+      },
+      {
+        "group": "Clients",
+        "pages": [
+          "clients/claude-code",
+          "clients/cursor",
+          "clients/opencode",
+          "resources/all-clients",
+          "clients/cli"
+        ]
+      },
+      {
+        "group": "SDKs",
+        "pages": [
+          {
+            "group": "TypeScript",
+            "pages": [
+              "sdks/ts/getting-started",
+              {
+                "group": "Commands",
+                "pages": [
+                  "sdks/ts/commands/search-library",
+                  "sdks/ts/commands/get-context"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "group": "Agentic Tools",
+        "pages": [
+          "agentic-tools/overview",
+          {
+            "group": "Vercel AI SDK",
+            "pages": [
+              "agentic-tools/ai-sdk/getting-started",
+              {
+                "group": "Tools",
+                "pages": [
+                  "agentic-tools/ai-sdk/tools/resolve-library-id",
+                  "agentic-tools/ai-sdk/tools/query-docs"
+                ]
+              },
+              {
+                "group": "Agents",
+                "pages": [
+                  "agentic-tools/ai-sdk/agents/context7-agent"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "group": "API Reference",
+        "openapi": "openapi.json"
+      },
+      {
+        "group": "Integrations",
+        "pages": [
+          "integrations/code-rabbit"
+        ]
+      },
+      {
+        "group": "Resources",
+        "pages": [
+          "resources/developer",
+          "resources/security",
+          "resources/troubleshooting"
+        ]
+      }
+    ]
+  },
+  "api": {
+    "playground": {
+      "display": "simple"
+    }
+  },
+  "logo": {
+    "light": "/public/logo/logo.svg",
+    "dark": "/public/logo/logo-dark.svg",
+    "href": "https://context7.com"
+  },
+  "favicon": "/public/favicon.ico",
+  "navbar": {
+    "links": [
+      {
+        "label": "Contact",
+        "href": "https://context7.com/contact"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/upstash/context7"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://context7.com"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/context7ai",
+      "github": "https://github.com/upstash/context7",
+      "discord": "https://upstash.com/discord"
+    },
+    "links": [
+      {
+        "header": "Resources",
+        "items": [
+          {
+            "label": "Website",
+            "href": "https://context7.com"
+          },
+          {
+            "label": "Submit a Library",
+            "href": "https://context7.com/add-library"
+          },
+          {
+            "label": "Dashboard",
+            "href": "https://context7.com/dashboard"
+          }
+        ]
+      },
+      {
+        "header": "Community",
+        "items": [
+          {
+            "label": "GitHub",
+            "href": "https://github.com/upstash/context7"
+          },
+          {
+            "label": "Discord",
+            "href": "https://upstash.com/discord"
+          },
+          {
+            "label": "Twitter",
+            "href": "https://x.com/context7ai"
+          }
+        ]
+      }
+    ]
+  }
+}
