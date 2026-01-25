@@ -158,7 +158,7 @@ class TestEditTextAppendOperation:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.edit_text.get_docs_service', return_value=mock_service), \
-                 patch('tools.edit_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.edit_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 50}]}
                 }
@@ -231,7 +231,7 @@ class TestEditTextResponse:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.edit_text.get_docs_service', return_value=mock_service), \
-                 patch('tools.edit_text._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.edit_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 50}]}
                 }

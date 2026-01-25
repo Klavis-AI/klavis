@@ -1,13 +1,11 @@
 """Edit text tool for Google Docs MCP Server."""
 
-import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from googleapiclient.errors import HttpError
 
-from .base import get_auth_token, get_docs_service
-from .get_document_by_id import _get_document_raw
+from .base import get_auth_token, get_docs_service, get_document_raw, handle_http_error
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +17,7 @@ async def edit_text(
     match_case: bool = True,
     replace_all: bool = False,
     append_to_end: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Edit text in a Google Docs document by replacing old text with new text.
 
     This unified operation handles insert, delete, and replace:
@@ -33,9 +31,8 @@ async def edit_text(
         access_token = get_auth_token()
         service = get_docs_service(access_token)
 
-        # Handle append to end case
         if append_to_end and old_text == "":
-            document = await _get_document_raw(document_id)
+            document = await get_document_raw(document_id)
             end_index = document["body"]["content"][-1]["endIndex"]
 
             requests = [
@@ -60,7 +57,6 @@ async def edit_text(
                 "message": f"Appended {len(new_text)} characters to end of document"
             }
 
-        # Handle normal replace case
         if not old_text:
             return {
                 "success": False,
@@ -68,7 +64,6 @@ async def edit_text(
                 "hint": "Provide the text you want to find and replace."
             }
 
-        # Use replaceAllText for the replacement
         requests = [
             {
                 'replaceAllText': {
@@ -86,7 +81,6 @@ async def edit_text(
             body={"requests": requests}
         ).execute()
 
-        # Count replacements from response
         replies = response.get("replies", [])
         occurrences_changed = 0
         if replies and "replaceAllText" in replies[0]:
@@ -114,9 +108,7 @@ async def edit_text(
         }
 
     except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+        handle_http_error(e, "Google Docs")
     except Exception as e:
         logger.exception(f"Error executing tool edit_text: {e}")
         raise e

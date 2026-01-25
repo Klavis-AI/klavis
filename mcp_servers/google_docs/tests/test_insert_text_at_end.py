@@ -37,7 +37,7 @@ class TestInsertTextAtEndApiCalls:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                 patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {
                         "content": [
@@ -61,7 +61,7 @@ class TestInsertTextAtEndApiCalls:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                 patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {
                         "content": [
@@ -105,7 +105,7 @@ class TestInsertTextAtEndApiCalls:
                 mock_service.reset_mock()
 
                 with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                     patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                     patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                     mock_get_doc.return_value = {
                         "body": {
                             "content": [
@@ -144,7 +144,7 @@ class TestInsertTextAtEndApiCalls:
                 mock_service.reset_mock()
 
                 with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                     patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                     patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                     mock_get_doc.return_value = {
                         "body": {"content": [{"endIndex": 10}]}
                     }
@@ -171,7 +171,7 @@ class TestInsertTextAtEndResponse:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                 patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }
@@ -203,7 +203,7 @@ class TestInsertTextAtEndErrors:
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.insert_text_at_end.get_docs_service', return_value=mock_service), \
-                 patch('tools.insert_text_at_end._get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                 patch('tools.insert_text_at_end.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
                     "body": {"content": [{"endIndex": 10}]}
                 }

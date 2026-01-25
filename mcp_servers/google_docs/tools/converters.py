@@ -1,6 +1,6 @@
 """Document format conversion utilities for Google Docs MCP Server."""
 
-from typing import Any, Dict
+from typing import Any
 
 
 def extract_text_from_document(document: dict[str, Any]) -> str:
@@ -165,14 +165,14 @@ def convert_document_to_structured(document: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
+def normalize_document_response(raw_response: dict[str, Any]) -> dict[str, Any]:
     """
     Normalize the Google Docs API response to a simplified structure.
     Reduces complexity while preserving important information.
     Includes table processing, page info, and list definitions.
     """
 
-    def extract_text_from_paragraph(paragraph: Dict) -> Dict[str, Any]:
+    def extract_text_from_paragraph(paragraph: dict) -> dict[str, Any]:
         """Extract text content and styling from a paragraph."""
         elements = paragraph.get('elements', [])
         text_parts = []
@@ -226,7 +226,7 @@ def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
 
         return result
 
-    def extract_table(table: Dict) -> Dict[str, Any]:
+    def extract_table(table: dict) -> dict[str, Any]:
         """Extract table content in a simplified format."""
         rows = table.get('rows', 0)
         columns = table.get('columns', 0)
@@ -318,37 +318,121 @@ def normalize_document_response(raw_response: Dict[str, Any]) -> Dict[str, Any]:
     return normalized
 
 
+def filter_content_by_paragraph_range(
+    content: list[dict[str, Any]],
+    start_paragraph: int | None,
+    end_paragraph: int | None
+) -> tuple[list[dict[str, Any]], int]:
+    """Filter document content elements by paragraph number.
+
+    Args:
+        content: List of content elements from document body.
+        start_paragraph: Start paragraph number (1-based, inclusive). None means from beginning.
+        end_paragraph: End paragraph number (1-based, inclusive). None means to end of document.
+
+    Returns:
+        Tuple of (filtered content elements, total paragraph count).
+        Only includes paragraph elements in the specified range.
+    """
+    # Count paragraphs and filter
+    paragraphs = []
+    for element in content:
+        if "paragraph" in element:
+            paragraphs.append(element)
+
+    total_paragraphs = len(paragraphs)
+
+    if start_paragraph is None and end_paragraph is None:
+        return content, total_paragraphs
+
+    # Convert to 0-based index for slicing
+    start_idx = (start_paragraph - 1) if start_paragraph is not None else 0
+    end_idx = end_paragraph if end_paragraph is not None else total_paragraphs
+
+    # Validate range
+    start_idx = max(0, start_idx)
+    end_idx = min(total_paragraphs, end_idx)
+
+    # Get the selected paragraphs
+    selected_paragraphs = set(id(p) for p in paragraphs[start_idx:end_idx])
+
+    # Filter content to only include selected paragraphs (preserving tables etc. that fall within range)
+    filtered = []
+    for element in content:
+        if "paragraph" in element:
+            if id(element) in selected_paragraphs:
+                filtered.append(element)
+        # Note: tables and other non-paragraph elements are excluded in paragraph-based filtering
+
+    return filtered, total_paragraphs
+
+
 def format_document_response(
     document: dict[str, Any],
-    response_format: str = "raw"
+    response_format: str = "raw",
+    start_paragraph: int | None = None,
+    end_paragraph: int | None = None
 ) -> dict[str, Any]:
-    """Format document response based on requested format."""
+    """Format document response based on requested format.
+
+    Args:
+        document: Raw Google Docs API response.
+        response_format: Output format - 'raw', 'plain_text', 'markdown', 'structured', or 'normalized'.
+        start_paragraph: Optional start paragraph number (1-based, inclusive) for partial content retrieval.
+        end_paragraph: Optional end paragraph number (1-based, inclusive) for partial content retrieval.
+    """
+    total_paragraphs = None
+
+    # Filter content if range is specified
+    if start_paragraph is not None or end_paragraph is not None:
+        body = document.get("body", {})
+        content = body.get("content", [])
+        filtered_content, total_paragraphs = filter_content_by_paragraph_range(
+            content, start_paragraph, end_paragraph
+        )
+        # Create a modified document with filtered content
+        document = {**document, "body": {**body, "content": filtered_content}}
+
+    def add_filter_info(result: dict[str, Any]) -> dict[str, Any]:
+        """Add filtering information to result if paragraph filtering was applied."""
+        if start_paragraph is not None or end_paragraph is not None:
+            result["filtered_range"] = {
+                "start_paragraph": start_paragraph,
+                "end_paragraph": end_paragraph,
+                "total_paragraphs": total_paragraphs
+            }
+        return result
+
     if response_format == "raw":
-        return document
+        return add_filter_info(document) if (start_paragraph or end_paragraph) else document
 
     elif response_format == "plain_text":
         text = extract_text_from_document(document)
-        return {
+        result = {
             "document_id": document.get("documentId", ""),
             "title": document.get("title", ""),
             "content": text,
             "word_count": len(text.split())
         }
+        return add_filter_info(result)
 
     elif response_format == "markdown":
         markdown = convert_document_to_markdown(document)
-        return {
+        result = {
             "document_id": document.get("documentId", ""),
             "title": document.get("title", ""),
             "content": markdown,
             "word_count": len(extract_text_from_document(document).split())
         }
+        return add_filter_info(result)
 
     elif response_format == "structured":
-        return convert_document_to_structured(document)
+        result = convert_document_to_structured(document)
+        return add_filter_info(result)
 
     elif response_format == "normalized":
-        return normalize_document_response(document)
+        result = normalize_document_response(document)
+        return add_filter_info(result)
 
     else:
         # Default to raw if unknown format

@@ -1,12 +1,11 @@
 """Apply style tool for Google Docs MCP Server."""
 
-import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from googleapiclient.errors import HttpError
 
-from .base import get_auth_token, get_docs_service
+from .base import get_auth_token, get_docs_service, handle_http_error
 from .converters import hex_to_rgb
 
 logger = logging.getLogger(__name__)
@@ -32,7 +31,7 @@ async def apply_style(
     line_spacing: float | None = None,
     space_above: float | None = None,
     space_below: float | None = None
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Apply formatting styles to a specified range in a Google Docs document."""
     logger.info(f"Executing tool: apply_style with document_id: {document_id}, range: [{start_index}, {end_index})")
     try:
@@ -42,7 +41,6 @@ async def apply_style(
         requests = []
         applied_styles = []
 
-        # Build text style request
         text_style = {}
         text_style_fields = []
 
@@ -105,7 +103,6 @@ async def apply_style(
                 }
             })
 
-        # Build paragraph style request
         paragraph_style = {}
         paragraph_style_fields = []
 
@@ -153,8 +150,7 @@ async def apply_style(
                 "hint": "Available styles: bold, italic, underline, strikethrough, font_size, font_family, foreground_color, background_color, link_url, heading_type, alignment, line_spacing, space_above, space_below"
             }
 
-        # Execute batch update
-        response = service.documents().batchUpdate(
+        service.documents().batchUpdate(
             documentId=document_id,
             body={"requests": requests}
         ).execute()
@@ -171,9 +167,7 @@ async def apply_style(
         }
 
     except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+        handle_http_error(e, "Google Docs")
     except Exception as e:
         logger.exception(f"Error executing tool apply_style: {e}")
         raise e

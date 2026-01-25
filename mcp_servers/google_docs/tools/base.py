@@ -5,9 +5,11 @@ import json
 import logging
 import os
 from contextvars import ContextVar
+from typing import Any
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 logger = logging.getLogger(__name__)
 
@@ -63,3 +65,31 @@ def get_auth_token() -> str:
         return auth_token_context.get()
     except LookupError:
         raise RuntimeError("Authentication token not found in request context")
+
+
+async def get_document_raw(document_id: str) -> dict[str, Any]:
+    """Get raw Google Docs API response."""
+    access_token = get_auth_token()
+    service = get_docs_service(access_token)
+    request = service.documents().get(documentId=document_id)
+    response = request.execute()
+    return dict(response)
+
+
+def handle_http_error(e: HttpError, api_name: str = "Google Docs") -> None:
+    """Convert HttpError to RuntimeError with readable message.
+
+    Args:
+        e: The HttpError exception from Google API.
+        api_name: Name of the API for error message (e.g., "Google Docs", "Google Drive").
+
+    Raises:
+        RuntimeError: Always raises with formatted error message.
+    """
+    logger.error(f"{api_name} API error: {e}")
+    try:
+        error_detail = json.loads(e.content.decode('utf-8'))
+        message = error_detail.get('error', {}).get('message', 'Unknown error')
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        message = str(e)
+    raise RuntimeError(f"{api_name} API Error ({e.resp.status}): {message}")

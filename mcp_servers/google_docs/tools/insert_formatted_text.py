@@ -1,13 +1,11 @@
 """Insert formatted text tool for Google Docs MCP Server."""
 
-import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from googleapiclient.errors import HttpError
 
-from .base import get_auth_token, get_docs_service
-from .get_document_by_id import _get_document_raw
+from .base import get_auth_token, get_docs_service, get_document_raw, handle_http_error
 from .markdown_parser import parse_markdown_text
 
 logger = logging.getLogger(__name__)
@@ -17,7 +15,7 @@ async def insert_formatted_text(
     document_id: str,
     formatted_text: str,
     position: str = "end"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Insert formatted text using markdown-like syntax.
 
     Supported markup:
@@ -33,21 +31,15 @@ async def insert_formatted_text(
         access_token = get_auth_token()
         service = get_docs_service(access_token)
 
-        # Parse markdown
         plain_text, style_ranges, paragraph_styles = parse_markdown_text(formatted_text)
-
-        # Get document to find insertion point
-        document = await _get_document_raw(document_id)
+        document = await get_document_raw(document_id)
 
         if position == "beginning":
             insert_index = 1
         else:  # "end"
             insert_index = document["body"]["content"][-1]["endIndex"] - 1
 
-        # Build requests list
         requests = []
-
-        # First, insert the plain text
         requests.append({
             'insertText': {
                 'location': {'index': insert_index},
@@ -95,7 +87,6 @@ async def insert_formatted_text(
                     }
                 })
 
-        # Apply paragraph styles (headings)
         for para_style in reversed(paragraph_styles):
             start = insert_index + para_style["start"]
             end = insert_index + para_style["end"]
@@ -108,13 +99,11 @@ async def insert_formatted_text(
                 }
             })
 
-        # Execute all requests in a single batch
-        response = service.documents().batchUpdate(
+        service.documents().batchUpdate(
             documentId=document_id,
             body={"requests": requests}
         ).execute()
 
-        # Count applied styles
         style_counts = {
             "headings": len(paragraph_styles),
             "bold_ranges": sum(1 for s in style_ranges if s["style"].get("bold")),
@@ -137,9 +126,7 @@ async def insert_formatted_text(
         }
 
     except HttpError as e:
-        logger.error(f"Google Docs API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Docs API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+        handle_http_error(e, "Google Docs")
     except Exception as e:
         logger.exception(f"Error executing tool insert_formatted_text: {e}")
         raise e

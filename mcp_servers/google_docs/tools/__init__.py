@@ -6,6 +6,7 @@ from .base import (
     get_docs_service,
     get_drive_service,
     extract_access_token,
+    get_document_raw,
 )
 from .converters import (
     extract_text_from_document,
@@ -20,7 +21,7 @@ from .markdown_parser import (
     parse_markdown_text,
     parse_inline_formatting,
 )
-from .get_document_by_id import get_document_by_id, _get_document_raw
+from .get_document_by_id import get_document_by_id
 from .get_all_documents import get_all_documents
 from .insert_text_at_end import insert_text_at_end
 from .create_blank_document import create_blank_document
@@ -36,6 +37,7 @@ __all__ = [
     "get_docs_service",
     "get_drive_service",
     "extract_access_token",
+    "get_document_raw",
     # Converters
     "extract_text_from_document",
     "get_paragraph_heading_type",
@@ -49,7 +51,6 @@ __all__ = [
     "parse_inline_formatting",
     # Tools
     "get_document_by_id",
-    "_get_document_raw",
     "get_all_documents",
     "insert_text_at_end",
     "create_blank_document",

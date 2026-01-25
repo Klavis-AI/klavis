@@ -1,17 +1,16 @@
 """Get all documents tool for Google Docs MCP Server."""
 
-import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from googleapiclient.errors import HttpError
 
-from .base import get_auth_token, get_drive_service
+from .base import get_auth_token, get_drive_service, handle_http_error
 
 logger = logging.getLogger(__name__)
 
 
-async def get_all_documents() -> Dict[str, Any]:
+async def get_all_documents() -> dict[str, Any]:
     """Get all Google Docs documents from the user's Drive."""
     logger.info("Executing tool: get_all_documents")
     try:
@@ -43,9 +42,7 @@ async def get_all_documents() -> Dict[str, Any]:
             'total_count': len(documents)
         }
     except HttpError as e:
-        logger.error(f"Google Drive API error: {e}")
-        error_detail = json.loads(e.content.decode('utf-8'))
-        raise RuntimeError(f"Google Drive API Error ({e.resp.status}): {error_detail.get('error', {}).get('message', 'Unknown error')}")
+        handle_http_error(e, "Google Drive")
     except Exception as e:
         logger.exception(f"Error executing tool get_all_documents: {e}")
         raise e

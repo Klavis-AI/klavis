@@ -79,7 +79,9 @@ def main(
                 description="""Retrieve a Google Docs document by ID.
 
 Response formats: 'normalized' (default), 'raw', 'plain_text', 'markdown', 'structured'.
-Use 'structured' to get character indices for editing with apply_style.""",
+Use 'structured' to get character indices for editing with apply_style.
+
+Partial retrieval: Use start_paragraph/end_paragraph to fetch specific paragraphs (1-based, inclusive).""",
                 inputSchema={
                     "type": "object",
                     "required": ["document_id"],
@@ -92,6 +94,14 @@ Use 'structured' to get character indices for editing with apply_style.""",
                             "type": "string",
                             "enum": ["raw", "plain_text", "markdown", "structured", "normalized"],
                             "description": "Output format. Default: 'normalized' (backward compatible)",
+                        },
+                        "start_paragraph": {
+                            "type": "integer",
+                            "description": "Start paragraph number (1-based, inclusive). Example: 5 retrieves from 5th paragraph.",
+                        },
+                        "end_paragraph": {
+                            "type": "integer",
+                            "description": "End paragraph number (1-based, inclusive). Example: 10 retrieves up to 10th paragraph.",
                         },
                     },
                 },
@@ -347,9 +357,16 @@ Escape with backslash: \\* \\_ \\` for literal characters.""",
 
             # Get response_format with default 'normalized' for backward compatibility
             response_format = arguments.get("response_format", "normalized")
+            start_paragraph = arguments.get("start_paragraph")
+            end_paragraph = arguments.get("end_paragraph")
 
             try:
-                result = await get_document_by_id(document_id, response_format)
+                result = await get_document_by_id(
+                    document_id,
+                    response_format,
+                    start_paragraph=start_paragraph,
+                    end_paragraph=end_paragraph
+                )
                 return [
                     types.TextContent(
                         type="text",

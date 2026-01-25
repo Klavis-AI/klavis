@@ -155,7 +155,7 @@ class TestGetDocumentByIdFormatDispatch:
                     # Verify format_document_response was called with correct format
                     mock_format.assert_called_once()
                     call_args = mock_format.call_args
-                    assert call_args[0][1] == fmt, f"Expected format '{fmt}', got '{call_args[0][1]}'"
+                    assert call_args.kwargs["response_format"] == fmt, f"Expected format '{fmt}', got '{call_args.kwargs['response_format']}'"
             finally:
                 auth_token_context.reset(token)
 
@@ -252,6 +252,203 @@ class TestGetDocumentByIdFormatDispatch:
                 result = await get_document_by_id("doc123", "normalized")
                 assert isinstance(result, dict)
                 assert "content" in result
+        finally:
+            auth_token_context.reset(token)
+
+
+class TestGetDocumentByIdPartialRetrieval:
+    """Tests for partial document retrieval with start_paragraph and end_paragraph."""
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_with_start_paragraph_only(self):
+        """Test partial retrieval with only start_paragraph specified."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 1\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 2\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 3\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "structured", start_paragraph=2)
+                # Should include paragraphs 2 and 3
+                assert len(result["elements"]) == 2
+                assert result["filtered_range"]["start_paragraph"] == 2
+                assert result["filtered_range"]["end_paragraph"] is None
+                assert result["filtered_range"]["total_paragraphs"] == 3
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_with_end_paragraph_only(self):
+        """Test partial retrieval with only end_paragraph specified."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 1\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 2\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 3\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "structured", end_paragraph=2)
+                # Should include paragraphs 1 and 2
+                assert len(result["elements"]) == 2
+                assert result["filtered_range"]["start_paragraph"] is None
+                assert result["filtered_range"]["end_paragraph"] == 2
+                assert result["filtered_range"]["total_paragraphs"] == 3
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_with_both_paragraphs(self):
+        """Test partial retrieval with both start_paragraph and end_paragraph."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 1\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 2\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 3\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 4\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 5\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "structured", start_paragraph=2, end_paragraph=4)
+                # Should include paragraphs 2, 3, and 4
+                assert len(result["elements"]) == 3
+                assert result["filtered_range"]["start_paragraph"] == 2
+                assert result["filtered_range"]["end_paragraph"] == 4
+                assert result["filtered_range"]["total_paragraphs"] == 5
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_out_of_range(self):
+        """Test partial retrieval when range is beyond document length."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 1\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 2\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "structured", start_paragraph=10, end_paragraph=20)
+                # No paragraphs in that range
+                assert len(result["elements"]) == 0
+                assert result["filtered_range"]["total_paragraphs"] == 2
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_returns_full_doc_when_no_range(self):
+        """Test that full document is returned when no range is specified."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 1\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 2\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Paragraph 3\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "structured")
+                # All elements should be included
+                assert len(result["elements"]) == 3
+                assert "filtered_range" not in result
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_works_with_plain_text_format(self):
+        """Test partial retrieval with plain_text format includes filtered_range."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "Hello\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "World\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Test\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "plain_text", start_paragraph=1, end_paragraph=2)
+                assert "filtered_range" in result
+                assert result["filtered_range"]["start_paragraph"] == 1
+                assert result["filtered_range"]["end_paragraph"] == 2
+                # Content should only contain paragraphs 1 and 2
+                assert "Hello" in result["content"]
+                assert "World" in result["content"]
+        finally:
+            auth_token_context.reset(token)
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_partial_retrieval_single_paragraph(self):
+        """Test retrieving a single paragraph."""
+        mock_service = MagicMock()
+        mock_service.documents.return_value.get.return_value.execute.return_value = {
+            "documentId": "doc123",
+            "title": "Test",
+            "body": {
+                "content": [
+                    {"paragraph": {"elements": [{"textRun": {"content": "First\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Second\n"}}]}},
+                    {"paragraph": {"elements": [{"textRun": {"content": "Third\n"}}]}}
+                ]
+            }
+        }
+
+        token = auth_token_context.set("test_token")
+        try:
+            with patch('tools.get_document_by_id.get_docs_service', return_value=mock_service):
+                result = await get_document_by_id("doc123", "plain_text", start_paragraph=2, end_paragraph=2)
+                # Should only include paragraph 2
+                assert "Second" in result["content"]
+                assert "First" not in result["content"]
+                assert "Third" not in result["content"]
         finally:
             auth_token_context.reset(token)
 
