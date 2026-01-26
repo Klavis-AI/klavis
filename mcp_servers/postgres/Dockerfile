@@ -9,10 +9,10 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy project files
-COPY pyproject.toml ./
-COPY src ./src
-COPY LICENSE ./
-COPY README.md ./
+COPY mcp_servers/postgres/pyproject.toml ./
+COPY mcp_servers/postgres/src ./src
+COPY mcp_servers/postgres/LICENSE ./
+COPY mcp_servers/postgres/README.md ./
 
 # Create virtual environment and install dependencies
 RUN python -m venv /app/.venv
@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
   net-tools \
   && rm -rf /var/lib/apt/lists/*
 
-COPY docker-entrypoint.sh /app/
+COPY mcp_servers/postgres/docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 
 USER app
