@@ -31762,7 +31762,19 @@
           "confluence",
           "discord",
           "snowflake",
-          "google_cloud"
+          "google_cloud",
+          "arxiv_latex",
+          "arxiv",
+          "calculator",
+          "clinicaltrialsgov",
+          "context7",
+          "met_museum",
+          "open_library",
+          "osm",
+          "pubmed",
+          "us_weather",
+          "whois",
+          "wikipedia"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
