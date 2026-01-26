@@ -1,32 +1,56 @@
-FROM node:22.12-alpine AS builder
+# First, build the application in the `/app` directory.
+FROM python:3.12-slim-bookworm AS builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to install dependencies
-COPY mcp_servers/postgres/package.json mcp_servers/postgres/package-lock.json ./
+# Install build dependencies
+RUN apt-get update \
+  && apt-get install -y libpq-dev gcc \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies (ignoring scripts to prevent running the prepare script)
-RUN npm install --ignore-scripts
+# Copy project files
+COPY pyproject.toml ./
+COPY src ./src
+COPY LICENSE ./
+COPY README.md ./
 
-# Copy the rest of the application source code
-COPY mcp_servers/postgres .
+# Create virtual environment and install dependencies
+RUN python -m venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -e .
 
-# Build the application using TypeScript
-RUN npm run build
 
-FROM node:22-alpine AS release
+FROM python:3.12-slim-bookworm
+# It is important to use the image that matches the builder, as the path to the
+# Python executable must be the same, e.g., using `python:3.11-slim-bookworm`
+# will fail.
 
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
+RUN groupadd -r app && useradd -r -g app app
 
-ENV NODE_ENV=production
+COPY --from=builder --chown=app:app /app /app
 
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Install runtime system dependencies
+RUN apt-get update && apt-get install -y \
+  libpq-dev \
+  iputils-ping \
+  dnsutils \
+  net-tools \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
+USER app
+
+# Expose the SSE port
 EXPOSE 5000
 
-WORKDIR /app
-
-RUN npm ci --ignore-scripts --omit-dev
-
-ENTRYPOINT ["node", "dist/index.js"]
+# Run the postgres-mcp server
+# Users can pass a database URI or individual connection arguments:
+#   docker run -it --rm postgres-mcp postgres://user:pass@host:port/dbname
+#   docker run -it --rm postgres-mcp -h myhost -p 5432 -U myuser -d mydb
+ENTRYPOINT ["/app/docker-entrypoint.sh", "postgres-mcp"]
+CMD []
