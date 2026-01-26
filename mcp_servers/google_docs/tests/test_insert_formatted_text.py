@@ -19,42 +19,24 @@ class TestInsertFormattedTextInput:
             await insert_formatted_text()
 
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_formatted_text_is_required(self):
-        """Test that formatted_text parameter is required."""
+    async def test_anchor_text_is_required(self):
+        """Test that anchor_text parameter is required."""
         with pytest.raises(TypeError):
             await insert_formatted_text("doc123")
 
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_position_defaults_to_end(self):
-        """Test that position parameter defaults to 'end'."""
-        mock_service = MagicMock()
-        mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
-
-        token = auth_token_context.set("test_token")
-        try:
-            with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
-                 patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
-                mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 50}]}
-                }
-
-                result = await insert_formatted_text("doc123", "plain text")
-
-                # Should insert at end (endIndex - 1)
-                call_args = mock_service.documents.return_value.batchUpdate.call_args
-                requests = call_args.kwargs["body"]["requests"]
-                insert_request = requests[0]["insertText"]
-                assert insert_request["location"]["index"] == 49
-        finally:
-            auth_token_context.reset(token)
+    async def test_formatted_text_is_required(self):
+        """Test that formatted_text parameter is required."""
+        with pytest.raises(TypeError):
+            await insert_formatted_text("doc123", "anchor")
 
 
 class TestInsertFormattedTextApiCalls:
     """Tests for Google Docs API call parameters."""
 
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_insert_text_request_at_end(self):
-        """Test that insertText request is created at document end."""
+    async def test_anchor_text_found_and_replaced(self):
+        """Test that anchor text is found and replaced with formatted text."""
         mock_service = MagicMock()
         mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
@@ -62,42 +44,74 @@ class TestInsertFormattedTextApiCalls:
         try:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
+                # Mock document with "Hello World" content
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 100}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "Hello World\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "Hello World", position="end")
+                result = await insert_formatted_text(
+                    "doc123",
+                    "World",
+                    "World **is great**"
+                )
 
+                assert result["success"] is True
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
-                insert_request = requests[0]["insertText"]
 
-                assert insert_request["location"]["index"] == 99  # endIndex - 1
-                assert insert_request["text"] == "Hello World"
+                # First request should be deleteContentRange for "World"
+                assert "deleteContentRange" in requests[0]
+                delete_range = requests[0]["deleteContentRange"]["range"]
+                assert delete_range["startIndex"] == 7  # "Hello " = 6 chars, so "World" starts at 7 (1-based)
+                assert delete_range["endIndex"] == 12  # 7 + 5 = 12
+
+                # Second request should be insertText
+                assert "insertText" in requests[1]
+                assert requests[1]["insertText"]["location"]["index"] == 7
         finally:
             auth_token_context.reset(token)
 
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_insert_text_request_at_beginning(self):
-        """Test that insertText request is created at document beginning."""
+    async def test_anchor_text_not_found_returns_error(self):
+        """Test that missing anchor text returns an error."""
         mock_service = MagicMock()
-        mock_service.documents.return_value.batchUpdate.return_value.execute.return_value = {}
 
         token = auth_token_context.set("test_token")
         try:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 100}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "Hello World\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "Hello World", position="beginning")
+                result = await insert_formatted_text(
+                    "doc123",
+                    "NotFound",
+                    "NotFound with **bold**"
+                )
 
-                call_args = mock_service.documents.return_value.batchUpdate.call_args
-                requests = call_args.kwargs["body"]["requests"]
-                insert_request = requests[0]["insertText"]
-
-                assert insert_request["location"]["index"] == 1
+                assert result["success"] is False
+                assert "not found" in result["error"].lower()
         finally:
             auth_token_context.reset(token)
 
@@ -112,16 +126,24 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor text\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "**bold text**")
+                await insert_formatted_text("doc123", "anchor", "anchor **bold text**")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
 
-                # First request should be insertText
-                assert "insertText" in requests[0]
                 # Should have style request for bold
                 style_requests = [r for r in requests if "updateTextStyle" in r]
                 assert len(style_requests) > 0
@@ -143,10 +165,20 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor text\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "*italic text*")
+                await insert_formatted_text("doc123", "anchor", "anchor *italic text*")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
@@ -170,10 +202,20 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "# Heading 1")
+                await insert_formatted_text("doc123", "anchor", "# Heading 1")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
@@ -197,10 +239,20 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "[click here](https://example.com)")
+                await insert_formatted_text("doc123", "anchor", "anchor [click here](https://example.com)")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
@@ -224,10 +276,20 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "Use `access_token` variable")
+                await insert_formatted_text("doc123", "anchor", "anchor Use `access_token` variable")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
@@ -252,16 +314,26 @@ class TestInsertFormattedTextApiCalls:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                await insert_formatted_text("doc123", "Use \\_underscore\\_ text")
+                await insert_formatted_text("doc123", "anchor", "anchor Use \\_underscore\\_ text")
 
                 call_args = mock_service.documents.return_value.batchUpdate.call_args
                 requests = call_args.kwargs["body"]["requests"]
 
                 # Insert text should contain literal underscores
-                insert_request = requests[0]["insertText"]
+                insert_request = requests[1]["insertText"]
                 assert "_underscore_" in insert_request["text"]
 
                 # Should not have any italic style requests
@@ -287,15 +359,27 @@ class TestInsertFormattedTextResponse:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
-                result = await insert_formatted_text("doc123", "**bold** and *italic*")
+                result = await insert_formatted_text("doc123", "anchor", "anchor **bold** and *italic*")
 
                 assert result["success"] is True
                 assert result["document_id"] == "doc123"
+                assert result["anchor_text"] == "anchor"
                 assert "inserted_range" in result
                 assert "characters_inserted" in result
+                assert "characters_replaced" in result
                 assert "styles_applied" in result
         finally:
             auth_token_context.reset(token)
@@ -311,11 +395,22 @@ class TestInsertFormattedTextResponse:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
                 result = await insert_formatted_text(
                     "doc123",
+                    "anchor",
                     "# Heading\n**bold** and *italic* with `code`"
                 )
 
@@ -349,10 +444,20 @@ class TestInsertFormattedTextErrors:
             with patch('tools.insert_formatted_text.get_docs_service', return_value=mock_service), \
                  patch('tools.insert_formatted_text.get_document_raw', new_callable=AsyncMock) as mock_get_doc:
                 mock_get_doc.return_value = {
-                    "body": {"content": [{"endIndex": 10}]}
+                    "body": {
+                        "content": [
+                            {
+                                "paragraph": {
+                                    "elements": [
+                                        {"textRun": {"content": "anchor\n"}}
+                                    ]
+                                }
+                            }
+                        ]
+                    }
                 }
 
                 with pytest.raises(RuntimeError, match="Google Docs API Error"):
-                    await insert_formatted_text("doc123", "text")
+                    await insert_formatted_text("doc123", "anchor", "anchor text")
         finally:
             auth_token_context.reset(token)

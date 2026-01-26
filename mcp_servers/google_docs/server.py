@@ -312,26 +312,28 @@ To find the correct indices, use google_docs_get_document_by_id with response_fo
             ),
             types.Tool(
                 name="google_docs_insert_formatted_text",
-                description="""Insert formatted text using markdown-like syntax.
+                description="""Insert formatted text by replacing anchor text with formatted content.
+
+The formatted_text must contain the anchor_text. This enables inserting at any position.
+Example: anchor_text="Chapter 1", formatted_text="Chapter 1\\n**New paragraph**"
 
 Supported: **bold**, *italic*, ~~strikethrough~~, `code`, [link](url), # headings (1-6), - bullets.
 Escape with backslash: \\* \\_ \\` for literal characters.""",
                 inputSchema={
                     "type": "object",
-                    "required": ["document_id", "formatted_text"],
+                    "required": ["document_id", "anchor_text", "formatted_text"],
                     "properties": {
                         "document_id": {
                             "type": "string",
                             "description": "The ID of the Google Docs document.",
                         },
+                        "anchor_text": {
+                            "type": "string",
+                            "description": "Text to find in the document. Will be replaced by formatted_text.",
+                        },
                         "formatted_text": {
                             "type": "string",
-                            "description": "Text with markdown-like syntax for formatting.",
-                        },
-                        "position": {
-                            "type": "string",
-                            "enum": ["end", "beginning"],
-                            "description": "Where to insert the text. Default: 'end'",
+                            "description": "Replacement text with markdown-like syntax. Should contain anchor_text.",
                         },
                     },
                 },
@@ -583,23 +585,22 @@ Escape with backslash: \\* \\_ \\` for literal characters.""",
 
         elif name == "google_docs_insert_formatted_text":
             document_id = arguments.get("document_id")
+            anchor_text = arguments.get("anchor_text")
             formatted_text = arguments.get("formatted_text")
 
-            if not document_id or not formatted_text:
+            if not document_id or not anchor_text or not formatted_text:
                 return [
                     types.TextContent(
                         type="text",
-                        text="Error: document_id and formatted_text parameters are required",
+                        text="Error: document_id, anchor_text, and formatted_text parameters are required",
                     )
                 ]
-
-            position = arguments.get("position", "end")
 
             try:
                 result = await insert_formatted_text(
                     document_id=document_id,
+                    anchor_text=anchor_text,
                     formatted_text=formatted_text,
-                    position=position
                 )
                 return [
                     types.TextContent(
