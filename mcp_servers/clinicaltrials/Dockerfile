@@ -1,10 +1,4 @@
-# Dockerfile for clinicaltrialsgov-mcp-server
-#
-# Original work Copyright (c) 2024-2025 Casey Hand (@cyanheads)
-# Source: https://github.com/cyanheads/clinicaltrialsgov-mcp-server
-# Licensed under the Apache License, Version 2.0
-#
-# Modifications Copyright (c) 2025 Klavis AI
+# Copyright 2025 Klavis AI
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# This file is part of a derivative work based on clinicaltrialsgov-mcp-server
+# by Casey Hand (@cyanheads), available at:
+# https://github.com/cyanheads/clinicaltrialsgov-mcp-server
 
 # Use Node.js image for proper npm install, then run with Bun
 FROM node:22-slim AS deps
@@ -28,9 +26,6 @@ COPY mcp_servers/clinicaltrials/package.json ./
 
 # Install dependencies with npm (more reliable than bun for complex packages)
 RUN npm install --legacy-peer-deps --ignore-scripts
-
-# Verify zod dist exists
-RUN ls -la node_modules/zod/dist/ || echo "DIST MISSING"
 
 # Final image with Bun for runtime
 FROM oven/bun:1
