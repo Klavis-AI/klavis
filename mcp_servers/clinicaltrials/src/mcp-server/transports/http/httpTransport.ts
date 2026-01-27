@@ -234,25 +234,8 @@ export function createHttpApp(
       protocolVersion,
     });
 
-    // Per MCP Spec 2025-06-18: MCP-Protocol-Version header MUST be validated
-    // Server MUST respond with 400 Bad Request for unsupported versions
-    // We default to 2025-03-26 for backward compatibility if not provided
-    const supportedVersions = ['2025-03-26', '2025-06-18'];
-    if (!supportedVersions.includes(protocolVersion)) {
-      logger.warning('Unsupported MCP protocol version requested.', {
-        ...transportContext,
-        protocolVersion,
-        supportedVersions,
-      });
-      return c.json(
-        {
-          error: 'Unsupported MCP protocol version',
-          protocolVersion,
-          supportedVersions,
-        },
-        400,
-      );
-    }
+    // Protocol version validation is handled by @hono/mcp and @modelcontextprotocol/sdk
+    // The MCP spec is backward compatible, so we allow any version the SDK supports
 
     const providedSessionId = c.req.header('mcp-session-id');
     const sessionId = providedSessionId ?? generateSecureSessionId();
