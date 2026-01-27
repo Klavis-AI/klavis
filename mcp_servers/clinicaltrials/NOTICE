@@ -1,0 +1,21 @@
+clinicaltrialsgov-mcp-server
+Copyright 2025 Casey Hand @cyanheads
+
+This product includes software developed by Casey Hand (@cyanheads).
+Original source: https://github.com/cyanheads/clinicaltrialsgov-mcp-server
+
+Licensed under the Apache License, Version 2.0.
+
+================================================================================
+
+MODIFICATIONS
+
+This is a modified version of the original clinicaltrialsgov-mcp-server.
+The following changes have been made by Klavis AI:
+
+1. Added Dockerfile for containerized deployment
+2. Removed peer dependency version restrictions on @modelcontextprotocol/sdk
+3. Updated various package dependencies to newer versions
+
+For the original, unmodified source code, please visit:
+https://github.com/cyanheads/clinicaltrialsgov-mcp-server

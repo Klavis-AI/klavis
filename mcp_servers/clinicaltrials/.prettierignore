@@ -1,0 +1,16 @@
+# Ignore paths for Prettier
+
+# Build output
+dist
+coverage
+docs
+
+# Lockfiles
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs
+*.log
+logs

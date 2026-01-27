@@ -1,0 +1,31 @@
+{
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "topFilesLength": 5,
+    "showLineNumbers": true,
+    "copyToClipboard": false
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      ".clinerules/",
+      ".github/",
+      ".storage/",
+      ".vscode/",
+      "CHANGELOG.md",
+      "changelog/",
+      "coverage/",
+      "docs/",
+      "repomix.config.json",
+      ".husky/_"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
