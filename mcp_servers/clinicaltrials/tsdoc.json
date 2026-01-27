@@ -1,0 +1,49 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "tagDefinitions": [
+    {
+      "tagName": "@fileoverview",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@module",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@type",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@typedef",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@function",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@template",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@property",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@class",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@static",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@private",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@constant",
+      "syntaxKind": "block"
+    }
+  ]
+}

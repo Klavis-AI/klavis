@@ -1,0 +1,189 @@
+{
+  "name": "clinicaltrialsgov-mcp-server",
+  "version": "1.5.0",
+  "mcpName": "io.github.cyanheads/clinicaltrialsgov-mcp-server",
+  "description": "ClinicalTrials.gov Model Context Protocol (MCP) Server that provides a suite of tools for interacting with the official ClinicalTrials.gov v2 API. Enables AI agents and LLMs to programmatically search, retrieve, compare, analyze, and find eligible clinical trials.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "clinicaltrialsgov-mcp-server": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": "./dist/*"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyanheads/clinicaltrialsgov-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cyanheads/clinicaltrialsgov-mcp-server/issues"
+  },
+  "homepage": "https://github.com/cyanheads/clinicaltrialsgov-mcp-server#readme",
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "build:worker": "bun build ./src/worker.ts --outdir ./dist --target bun --no-external",
+    "deploy:dev": "MCP_TRANSPORT_TYPE=http bunx wrangler dev",
+    "deploy:prod": "MCP_TRANSPORT_TYPE=http bunx wrangler deploy",
+    "start": "bun ./dist/index.js",
+    "start:stdio": "MCP_TRANSPORT_TYPE=stdio bun ./dist/index.js",
+    "start:http": "MCP_TRANSPORT_TYPE=http bun ./dist/index.js",
+    "dev": "bun --watch src/index.ts",
+    "dev:stdio": "MCP_LOG_LEVEL=debug MCP_TRANSPORT_TYPE=stdio bun --watch src/index.ts",
+    "dev:http": "MCP_LOG_LEVEL=debug MCP_TRANSPORT_TYPE=http bun --watch src/index.ts",
+    "devdocs": "bun run scripts/devdocs.ts",
+    "devcheck": "bun run scripts/devcheck.ts",
+    "rebuild": "bun run scripts/clean.ts && bun run build",
+    "docs:generate": "bunx typedoc",
+    "depcheck": "bunx depcheck",
+    "lint": "bunx eslint .",
+    "lint:fix": "bunx eslint . --fix",
+    "typecheck": "bunx tsc --noEmit",
+    "tree": "bun run scripts/tree.ts",
+    "fetch-spec": "bun run scripts/fetch-openapi-spec.ts",
+    "format": "bunx prettier --write \"**/*.{ts,js,json,md,html,css}\"",
+    "prepare": "bunx husky",
+    "inspector": "bunx mcp-inspector --config mcp.json --server clinicaltrialsgov-mcp-server",
+    "test": "bunx vitest run",
+    "test:coverage": "bunx vitest run --coverage",
+    "coverage:update": "bun run scripts/update-coverage.ts",
+    "coverage:commit": "bun run scripts/update-coverage.ts --commit",
+    "audit": "bun audit",
+    "audit:fix": "bun audit --fix",
+    "publish-mcp": "bun scripts/validate-mcp-publish-schema.ts"
+  },
+  "resolutions": {
+    "@hono/node-server": "1.19.5",
+    "chrono-node": "2.9.0",
+    "dotenv": "17.2.3",
+    "hono": "4.9.12",
+    "zod": "3.23.8",
+    "typescript": "5.9.3"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "ai-agent",
+    "llm",
+    "llm-agent",
+    "typescript",
+    "clinical-trials",
+    "clinicaltrials.gov",
+    "patient-matching",
+    "eligibility-criteria",
+    "trial-finder",
+    "api-client",
+    "research-tools",
+    "bioinformatics",
+    "health-tech",
+    "hono",
+    "stdio",
+    "http"
+  ],
+  "author": "Casey Hand @cyanheads",
+  "email": "casey@caseyjhand.com",
+  "license": "Apache-2.0",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/cyanheads"
+    },
+    {
+      "type": "buy_me_a_coffee",
+      "url": "https://www.buymeacoffee.com/cyanheads"
+    }
+  ],
+  "packageManager": "bun@1.2.21",
+  "engines": {
+    "bun": ">=1.2.0",
+    "node": ">=20.0.0"
+  },
+  "depcheck": {
+    "ignores": [
+      "bun",
+      "repomix",
+      "clinicaltrialsgov-mcp-server"
+    ]
+  },
+  "devDependencies": {
+    "@anatine/zod-mock": "^3.14.0",
+    "@cloudflare/workers-types": "^4.20251011.0",
+    "@eslint/js": "^9.37.0",
+    "@faker-js/faker": "^10.1.0",
+    "@hono/mcp": "^0.1.4",
+    "@hono/node-server": "^1.19.5",
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.65.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.206.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.206.0",
+    "@opentelemetry/instrumentation-pino": "^0.53.0",
+    "@opentelemetry/resources": "^2.1.0",
+    "@opentelemetry/sdk-metrics": "^2.1.0",
+    "@opentelemetry/sdk-node": "^0.206.0",
+    "@opentelemetry/sdk-trace-node": "^2.1.0",
+    "@opentelemetry/semantic-conventions": "^1.37.0",
+    "@supabase/supabase-js": "^2.75.0",
+    "@types/bun": "^1.3.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.7.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/papaparse": "^5.3.16",
+    "@types/sanitize-html": "^2.16.0",
+    "@types/supertest": "^6.0.3",
+    "@types/validator": "13.15.3",
+    "@vitest/coverage-v8": "3.2.4",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "axios": "^1.12.2",
+    "bun-types": "^1.3.0",
+    "chrono-node": "^2.9.0",
+    "clipboardy": "^5.0.0",
+    "depcheck": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.37.0",
+    "execa": "^9.6.0",
+    "fast-xml-parser": "^5.3.0",
+    "globals": "^16.4.0",
+    "hono": "^4.9.12",
+    "husky": "^9.1.7",
+    "ignore": "^7.0.5",
+    "jose": "^6.1.0",
+    "js-yaml": "^4.1.0",
+    "msw": "^2.11.5",
+    "node-cron": "^4.2.1",
+    "openai": "^6.3.0",
+    "papaparse": "^5.5.3",
+    "partial-json": "^0.1.7",
+    "pdf-lib": "^1.17.1",
+    "pino": "^10.0.0",
+    "pino-pretty": "^13.1.2",
+    "prettier": "^3.6.2",
+    "reflect-metadata": "^0.2.2",
+    "repomix": "^1.7.0",
+    "sanitize-html": "^2.17.0",
+    "supertest": "^7.1.4",
+    "tslib": "^2.8.1",
+    "tsyringe": "^4.10.0",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "8.46.1",
+    "validator": "13.15.15",
+    "vite": "7.1.10",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4",
+    "zod": "^3.23.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
