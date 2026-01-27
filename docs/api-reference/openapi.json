@@ -20181,6 +20181,620 @@
         }
       }
     },
+    "/sandbox/postgres/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize postgres sandbox with data",
+        "description": "Initialize the sandbox with postgres-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_postgres__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PostgresData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "schemas": [
+                      {
+                        "name": "public",
+                        "tables": [
+                          {
+                            "name": "users",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "username": "varchar(50) NOT NULL",
+                              "email": "varchar(100) NOT NULL UNIQUE",
+                              "created_at": "timestamp DEFAULT CURRENT_TIMESTAMP",
+                              "is_active": "boolean DEFAULT true"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "username": "john_doe",
+                                "email": "john@example.com",
+                                "created_at": "2025-01-15 10:30:00",
+                                "is_active": true
+                              },
+                              {
+                                "id": 2,
+                                "username": "jane_smith",
+                                "email": "jane@example.com",
+                                "created_at": "2025-01-16 14:20:00",
+                                "is_active": true
+                              },
+                              {
+                                "id": 3,
+                                "username": "bob_wilson",
+                                "email": "bob@example.com",
+                                "created_at": "2025-01-17 09:15:00",
+                                "is_active": false
+                              }
+                            ]
+                          },
+                          {
+                            "name": "posts",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "user_id": "integer REFERENCES users(id)",
+                              "title": "varchar(200) NOT NULL",
+                              "content": "text",
+                              "view_count": "integer DEFAULT 0",
+                              "published_at": "timestamp"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "user_id": 1,
+                                "title": "Getting Started with PostgreSQL",
+                                "content": "PostgreSQL is a powerful open-source relational database...",
+                                "view_count": 150,
+                                "published_at": "2025-01-18 08:00:00"
+                              },
+                              {
+                                "id": 2,
+                                "user_id": 1,
+                                "title": "Advanced SQL Queries",
+                                "content": "Learn how to write complex queries with joins and subqueries...",
+                                "view_count": 89,
+                                "published_at": "2025-01-19 10:30:00"
+                              },
+                              {
+                                "id": 3,
+                                "user_id": 2,
+                                "title": "Database Optimization Tips",
+                                "content": "Improve your database performance with these proven techniques...",
+                                "view_count": 234,
+                                "published_at": "2025-01-20 15:45:00"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "comments",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "post_id": "integer REFERENCES posts(id)",
+                              "user_id": "integer REFERENCES users(id)",
+                              "comment_text": "text NOT NULL",
+                              "created_at": "timestamp DEFAULT CURRENT_TIMESTAMP"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "post_id": 1,
+                                "user_id": 2,
+                                "comment_text": "Great article! Very helpful for beginners.",
+                                "created_at": "2025-01-18 10:30:00"
+                              },
+                              {
+                                "id": 2,
+                                "post_id": 1,
+                                "user_id": 3,
+                                "comment_text": "Thanks for sharing this resource.",
+                                "created_at": "2025-01-18 12:15:00"
+                              },
+                              {
+                                "id": 3,
+                                "post_id": 2,
+                                "user_id": 2,
+                                "comment_text": "The section on JOIN operations was particularly useful.",
+                                "created_at": "2025-01-19 14:20:00"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "analytics",
+                        "tables": [
+                          {
+                            "name": "page_views",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "page_url": "varchar(255) NOT NULL",
+                              "visitor_ip": "inet",
+                              "user_agent": "text",
+                              "visit_timestamp": "timestamp DEFAULT CURRENT_TIMESTAMP"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "page_url": "/posts/1",
+                                "visitor_ip": "192.168.1.100",
+                                "user_agent": "Mozilla/5.0",
+                                "visit_timestamp": "2025-01-21 09:00:00"
+                              },
+                              {
+                                "id": 2,
+                                "page_url": "/posts/2",
+                                "visitor_ip": "192.168.1.101",
+                                "user_agent": "Chrome/120.0",
+                                "visit_timestamp": "2025-01-21 09:15:00"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "metrics",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "metric_name": "varchar(100) NOT NULL",
+                              "metric_value": "numeric(10,2)",
+                              "recorded_at": "timestamp DEFAULT CURRENT_TIMESTAMP"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "metric_name": "total_users",
+                                "metric_value": 3,
+                                "recorded_at": "2025-01-22 00:00:00"
+                              },
+                              {
+                                "id": 2,
+                                "metric_name": "total_posts",
+                                "metric_value": 3,
+                                "recorded_at": "2025-01-22 00:00:00"
+                              },
+                              {
+                                "id": 3,
+                                "metric_name": "avg_views_per_post",
+                                "metric_value": 157.67,
+                                "recorded_at": "2025-01-22 00:00:00"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "inventory",
+                        "tables": [
+                          {
+                            "name": "products",
+                            "columns": {
+                              "id": "serial PRIMARY KEY",
+                              "product_name": "varchar(100) NOT NULL",
+                              "sku": "varchar(50) UNIQUE",
+                              "price": "decimal(10,2) NOT NULL",
+                              "stock_quantity": "integer DEFAULT 0",
+                              "last_updated": "timestamp DEFAULT CURRENT_TIMESTAMP"
+                            },
+                            "rows": [
+                              {
+                                "id": 1,
+                                "product_name": "Laptop Pro 15",
+                                "sku": "LAPTOP-001",
+                                "price": 1299.99,
+                                "stock_quantity": 45,
+                                "last_updated": "2025-01-20 08:00:00"
+                              },
+                              {
+                                "id": 2,
+                                "product_name": "Wireless Mouse",
+                                "sku": "MOUSE-002",
+                                "price": 29.99,
+                                "stock_quantity": 200,
+                                "last_updated": "2025-01-20 08:00:00"
+                              },
+                              {
+                                "id": 3,
+                                "product_name": "USB-C Cable",
+                                "sku": "CABLE-003",
+                                "price": 12.99,
+                                "stock_quantity": 500,
+                                "last_updated": "2025-01-20 08:00:00"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/postgres/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export postgres sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_postgres__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_PostgresData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/mongodb/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize mongodb sandbox with data",
+        "description": "Initialize the sandbox with mongodb-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_mongodb__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MongoData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "databases": [
+                      {
+                        "name": "ecommerce",
+                        "collections": [
+                          {
+                            "name": "users",
+                            "documents": [
+                              {
+                                "name": "Alice Smith",
+                                "email": "alice@example.com",
+                                "role": "admin",
+                                "created_at": "2023-01-01T10:00:00Z"
+                              },
+                              {
+                                "name": "Bob Jones",
+                                "email": "bob@example.com",
+                                "role": "customer",
+                                "created_at": "2023-01-02T11:30:00Z"
+                              }
+                            ],
+                            "indexes": [
+                              {
+                                "name": "email_unique",
+                                "keys": [
+                                  [
+                                    "email",
+                                    1
+                                  ]
+                                ],
+                                "options": {
+                                  "unique": true
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "products",
+                            "documents": [
+                              {
+                                "sku": "PROD-001",
+                                "name": "Wireless Headphones",
+                                "price": 99.99,
+                                "category": "Electronics",
+                                "stock": 50
+                              },
+                              {
+                                "sku": "PROD-002",
+                                "name": "Running Shoes",
+                                "price": 79.99,
+                                "category": "Sports",
+                                "stock": 100
+                              }
+                            ],
+                            "indexes": [
+                              {
+                                "name": "sku_1",
+                                "keys": [
+                                  [
+                                    "sku",
+                                    1
+                                  ]
+                                ],
+                                "options": {
+                                  "unique": true
+                                }
+                              },
+                              {
+                                "name": "category_price_idx",
+                                "keys": [
+                                  [
+                                    "category",
+                                    1
+                                  ],
+                                  [
+                                    "price",
+                                    -1
+                                  ]
+                                ],
+                                "options": {}
+                              }
+                            ]
+                          },
+                          {
+                            "name": "orders",
+                            "documents": [
+                              {
+                                "order_id": "ORD-1001",
+                                "user_email": "bob@example.com",
+                                "total": 99.99,
+                                "items": [
+                                  {
+                                    "sku": "PROD-001",
+                                    "quantity": 1,
+                                    "price": 99.99
+                                  }
+                                ],
+                                "status": "completed"
+                              }
+                            ],
+                            "indexes": []
+                          }
+                        ]
+                      },
+                      {
+                        "name": "analytics",
+                        "collections": [
+                          {
+                            "name": "page_views",
+                            "documents": [
+                              {
+                                "path": "/home",
+                                "visitor_id": "v1",
+                                "timestamp": "2023-10-01T08:00:00Z"
+                              },
+                              {
+                                "path": "/products",
+                                "visitor_id": "v1",
+                                "timestamp": "2023-10-01T08:05:00Z"
+                              },
+                              {
+                                "path": "/home",
+                                "visitor_id": "v2",
+                                "timestamp": "2023-10-01T09:00:00Z"
+                              }
+                            ],
+                            "indexes": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/mongodb/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export mongodb sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_mongodb__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_MongoData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/universes": {
       "get": {
         "tags": [
@@ -20683,7 +21297,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AirtableTable"
+                  "$ref": "#/components/schemas/AirtableTable-Input"
                 },
                 "type": "array"
               },
@@ -20703,7 +21317,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "AirtableField": {
+      "AirtableField-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -20737,7 +21351,11 @@
         "title": "AirtableField",
         "description": "Airtable Field definition (column schema)"
       },
-      "AirtableRecord": {
+      "AirtableField-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AirtableRecord-Input": {
         "properties": {
           "fields": {
             "additionalProperties": true,
@@ -20753,7 +21371,11 @@
         "title": "AirtableRecord",
         "description": "Airtable Record object (a row in a table)"
       },
-      "AirtableTable": {
+      "AirtableRecord-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AirtableTable-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -20776,7 +21398,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AirtableField"
+                  "$ref": "#/components/schemas/AirtableField-Input"
                 },
                 "type": "array"
               },
@@ -20791,7 +21413,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AirtableRecord"
+                  "$ref": "#/components/schemas/AirtableRecord-Input"
                 },
                 "type": "array"
               },
@@ -20809,6 +21431,10 @@
         ],
         "title": "AirtableTable",
         "description": "Airtable Table object"
+      },
+      "AirtableTable-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "ApiKeyAuth": {
         "properties": {
@@ -20847,7 +21473,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AsanaProject"
+                  "$ref": "#/components/schemas/AsanaProject-Input"
                 },
                 "type": "array"
               },
@@ -20867,7 +21493,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "AsanaProject": {
+      "AsanaProject-Input": {
         "properties": {
           "gid": {
             "anyOf": [
@@ -20902,7 +21528,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AsanaTask"
+                  "$ref": "#/components/schemas/AsanaTask-Input"
                 },
                 "type": "array"
               },
@@ -20921,7 +21547,11 @@
         "title": "AsanaProject",
         "description": "Asana Project object"
       },
-      "AsanaStory": {
+      "AsanaProject-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AsanaStory-Input": {
         "properties": {
           "gid": {
             "anyOf": [
@@ -20948,7 +21578,11 @@
         "title": "AsanaStory",
         "description": "Asana Story object (comment on a task)"
       },
-      "AsanaTask": {
+      "AsanaStory-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "AsanaTask-Input": {
         "properties": {
           "gid": {
             "anyOf": [
@@ -21044,7 +21678,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/AsanaStory"
+                  "$ref": "#/components/schemas/AsanaStory-Input"
                 },
                 "type": "array"
               },
@@ -21062,6 +21696,10 @@
         ],
         "title": "AsanaTask",
         "description": "Asana Task object"
+      },
+      "AsanaTask-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "AttendeeResponseStatus": {
         "type": "string",
@@ -21939,7 +22577,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ClickUpSpace"
+                  "$ref": "#/components/schemas/ClickUpSpace-Input"
                 },
                 "type": "array"
               },
@@ -21959,7 +22597,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "ClickUpFolder": {
+      "ClickUpFolder-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -21970,7 +22608,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ClickUpList"
+                  "$ref": "#/components/schemas/ClickUpList-Input"
                 },
                 "type": "array"
               },
@@ -21989,7 +22627,11 @@
         "title": "ClickUpFolder",
         "description": "ClickUp Folder object"
       },
-      "ClickUpList": {
+      "ClickUpFolder-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ClickUpList-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -22012,7 +22654,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ClickUpTask"
+                  "$ref": "#/components/schemas/ClickUpTask-Input"
                 },
                 "type": "array"
               },
@@ -22031,7 +22673,11 @@
         "title": "ClickUpList",
         "description": "ClickUp List object"
       },
-      "ClickUpSpace": {
+      "ClickUpList-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ClickUpSpace-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -22042,7 +22688,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ClickUpFolder"
+                  "$ref": "#/components/schemas/ClickUpFolder-Input"
                 },
                 "type": "array"
               },
@@ -22057,7 +22703,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ClickUpList"
+                  "$ref": "#/components/schemas/ClickUpList-Input"
                 },
                 "type": "array"
               },
@@ -22076,7 +22722,11 @@
         "title": "ClickUpSpace",
         "description": "ClickUp Space object"
       },
-      "ClickUpTask": {
+      "ClickUpSpace-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ClickUpTask-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -22130,7 +22780,11 @@
         "title": "ClickUpTask",
         "description": "ClickUp Task object"
       },
-      "CloseContact": {
+      "ClickUpTask-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CloseContact-Input": {
         "properties": {
           "name": {
             "anyOf": [
@@ -22181,13 +22835,17 @@
         "title": "CloseContact",
         "description": "Close Contact object - child of Lead"
       },
+      "CloseContact-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "CloseData-Input": {
         "properties": {
           "leads": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/CloseLead"
+                  "$ref": "#/components/schemas/CloseLead-Input"
                 },
                 "type": "array"
               },
@@ -22207,7 +22865,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "CloseLead": {
+      "CloseLead-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -22230,7 +22888,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/CloseContact"
+                  "$ref": "#/components/schemas/CloseContact-Input"
                 },
                 "type": "array"
               },
@@ -22245,7 +22903,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/CloseOpportunity"
+                  "$ref": "#/components/schemas/CloseOpportunity-Input"
                 },
                 "type": "array"
               },
@@ -22260,7 +22918,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/CloseTask"
+                  "$ref": "#/components/schemas/CloseTask-Input"
                 },
                 "type": "array"
               },
@@ -22279,7 +22937,11 @@
         "title": "CloseLead",
         "description": "Close Lead object - parent object containing contacts, opportunities, and tasks"
       },
-      "CloseOpportunity": {
+      "CloseLead-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CloseOpportunity-Input": {
         "properties": {
           "note": {
             "type": "string",
@@ -22330,7 +22992,11 @@
         "title": "CloseOpportunity",
         "description": "Close Opportunity object - child of Lead"
       },
-      "CloseTask": {
+      "CloseOpportunity-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CloseTask-Input": {
         "properties": {
           "description": {
             "type": "string",
@@ -22380,6 +23046,10 @@
         ],
         "title": "CloseTask",
         "description": "Close Task object - child of Lead"
+      },
+      "CloseTask-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "ComputeInstance": {
         "properties": {
@@ -22453,7 +23123,7 @@
         "title": "ComputeInstance",
         "description": "Compute Engine instance"
       },
-      "ConfluenceComment": {
+      "ConfluenceComment-Input": {
         "properties": {
           "content": {
             "type": "string",
@@ -22468,11 +23138,15 @@
         "title": "ConfluenceComment",
         "description": "Confluence Comment object"
       },
+      "ConfluenceComment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "ConfluenceData-Input": {
         "properties": {
           "spaces": {
             "items": {
-              "$ref": "#/components/schemas/ConfluenceSpace"
+              "$ref": "#/components/schemas/ConfluenceSpace-Input"
             },
             "type": "array",
             "title": "Spaces",
@@ -22518,7 +23192,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ConfluenceComment"
+                  "$ref": "#/components/schemas/ConfluenceComment-Input"
                 },
                 "type": "array"
               },
@@ -22542,7 +23216,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "ConfluenceSpace": {
+      "ConfluenceSpace-Input": {
         "properties": {
           "identifier": {
             "type": "string",
@@ -22589,6 +23263,10 @@
         ],
         "title": "ConfluenceSpace",
         "description": "Confluence Space object"
+      },
+      "ConfluenceSpace-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "ConnectionType": {
         "type": "string",
@@ -22965,7 +23643,7 @@
         ],
         "title": "DeleteUserResponse"
       },
-      "DiscordChannel": {
+      "DiscordChannel-Input": {
         "properties": {
           "channel_id": {
             "anyOf": [
@@ -22983,7 +23661,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/DiscordMessage"
+                  "$ref": "#/components/schemas/DiscordMessage-Input"
                 },
                 "type": "array"
               },
@@ -22999,13 +23677,17 @@
         "title": "DiscordChannel",
         "description": "Discord Channel - uses existing channel by ID"
       },
+      "DiscordChannel-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "DiscordData-Input": {
         "properties": {
           "channels": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/DiscordChannel"
+                  "$ref": "#/components/schemas/DiscordChannel-Input"
                 },
                 "type": "array"
               },
@@ -23025,7 +23707,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "DiscordMessage": {
+      "DiscordMessage-Input": {
         "properties": {
           "content": {
             "type": "string",
@@ -23036,7 +23718,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/DiscordReaction"
+                  "$ref": "#/components/schemas/DiscordReaction-Input"
                 },
                 "type": "array"
               },
@@ -23055,7 +23737,11 @@
         "title": "DiscordMessage",
         "description": "Discord Message object"
       },
-      "DiscordReaction": {
+      "DiscordMessage-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "DiscordReaction-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -23069,6 +23755,10 @@
         ],
         "title": "DiscordReaction",
         "description": "Discord Reaction object"
+      },
+      "DiscordReaction-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "DropboxData": {
         "properties": {
@@ -23811,6 +24501,37 @@
         ],
         "title": "DumpSandboxResponse[MoneybirdData]"
       },
+      "DumpSandboxResponse_MongoData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MongoData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[MongoData]"
+      },
       "DumpSandboxResponse_MotionData_": {
         "properties": {
           "sandbox_id": {
@@ -23996,6 +24717,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[OutlookMailData]"
+      },
+      "DumpSandboxResponse_PostgresData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PostgresData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[PostgresData]"
       },
       "DumpSandboxResponse_QuickBooksData_": {
         "properties": {
@@ -26699,7 +27451,7 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "HubSpotCompany": {
+      "HubSpotCompany-Input": {
         "properties": {
           "company_name": {
             "type": "string",
@@ -26810,7 +27562,11 @@
         "title": "HubSpotCompany",
         "description": "HubSpot Company object.\nBase object, typically doesn't associate upwards in this schema, but contacts/deals associate to it."
       },
-      "HubSpotContact": {
+      "HubSpotCompany-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "HubSpotContact-Input": {
         "properties": {
           "first_name": {
             "type": "string",
@@ -26861,13 +27617,17 @@
         "title": "HubSpotContact",
         "description": "HubSpot Contact object.\nCan be associated with: Companies."
       },
+      "HubSpotContact-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "HubSpotData-Input": {
         "properties": {
           "companies": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/HubSpotCompany"
+                  "$ref": "#/components/schemas/HubSpotCompany-Input"
                 },
                 "type": "array"
               },
@@ -26882,7 +27642,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/HubSpotContact"
+                  "$ref": "#/components/schemas/HubSpotContact-Input"
                 },
                 "type": "array"
               },
@@ -26897,7 +27657,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/HubSpotDeal"
+                  "$ref": "#/components/schemas/HubSpotDeal-Input"
                 },
                 "type": "array"
               },
@@ -26912,7 +27672,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/HubSpotTicket"
+                  "$ref": "#/components/schemas/HubSpotTicket-Input"
                 },
                 "type": "array"
               },
@@ -26927,7 +27687,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/HubSpotTask"
+                  "$ref": "#/components/schemas/HubSpotTask-Input"
                 },
                 "type": "array"
               },
@@ -26947,7 +27707,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "HubSpotDeal": {
+      "HubSpotDeal-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -27010,7 +27770,11 @@
         "title": "HubSpotDeal",
         "description": "HubSpot Deal object.\nCan be associated with: Contacts, Companies."
       },
-      "HubSpotTask": {
+      "HubSpotDeal-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "HubSpotTask-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -27073,7 +27837,11 @@
         "title": "HubSpotTask",
         "description": "HubSpot Task object.\nCan be associated with: Contacts, Companies, Deals, Tickets."
       },
-      "HubSpotTicket": {
+      "HubSpotTask-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "HubSpotTicket-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -27136,6 +27904,10 @@
         "title": "HubSpotTicket",
         "description": "HubSpot Ticket object.\nCan be associated with: Contacts, Companies."
       },
+      "HubSpotTicket-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "InitializeSandboxResponse": {
         "properties": {
           "sandbox_id": {
@@ -27195,7 +27967,7 @@
         ],
         "title": "IntegrationItem"
       },
-      "JiraBoard": {
+      "JiraBoard-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -27240,6 +28012,10 @@
         "title": "JiraBoard",
         "description": "Jira Board object"
       },
+      "JiraBoard-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "JiraComment": {
         "properties": {
           "body": {
@@ -27259,7 +28035,7 @@
         "properties": {
           "projects": {
             "items": {
-              "$ref": "#/components/schemas/JiraProject"
+              "$ref": "#/components/schemas/JiraProject-Input"
             },
             "type": "array",
             "title": "Projects",
@@ -27267,7 +28043,7 @@
           },
           "boards": {
             "items": {
-              "$ref": "#/components/schemas/JiraBoard"
+              "$ref": "#/components/schemas/JiraBoard-Input"
             },
             "type": "array",
             "title": "Boards",
@@ -27275,7 +28051,7 @@
           },
           "sprints": {
             "items": {
-              "$ref": "#/components/schemas/JiraSprint"
+              "$ref": "#/components/schemas/JiraSprint-Input"
             },
             "type": "array",
             "title": "Sprints",
@@ -27290,7 +28066,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "JiraIssue": {
+      "JiraIssue-Input": {
         "properties": {
           "summary": {
             "type": "string",
@@ -27362,7 +28138,11 @@
         "title": "JiraIssue",
         "description": "Jira Issue object"
       },
-      "JiraProject": {
+      "JiraIssue-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "JiraProject-Input": {
         "properties": {
           "key": {
             "type": "string",
@@ -27396,7 +28176,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/JiraIssue"
+                  "$ref": "#/components/schemas/JiraIssue-Input"
                 },
                 "type": "array"
               },
@@ -27416,7 +28196,11 @@
         "title": "JiraProject",
         "description": "Jira Project object"
       },
-      "JiraSprint": {
+      "JiraProject-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "JiraSprint-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -27490,6 +28274,10 @@
         ],
         "title": "JiraSprint",
         "description": "Jira Sprint object"
+      },
+      "JiraSprint-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "Lead": {
         "properties": {
@@ -28430,7 +29218,8 @@
           "Zoho Mail",
           "Sharesight",
           "Weights and Biases",
-          "Instagram"
+          "Instagram",
+          "MongoDB"
         ],
         "title": "McpServerName"
       },
@@ -28713,7 +29502,7 @@
         "title": "Mem0Message",
         "description": "Message object for memory"
       },
-      "MondayBoard": {
+      "MondayBoard-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -28754,7 +29543,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MondayGroup"
+                  "$ref": "#/components/schemas/MondayGroup-Input"
                 },
                 "type": "array"
               },
@@ -28773,13 +29562,17 @@
         "title": "MondayBoard",
         "description": "Monday.com Board object - DELETE SUPPORTED"
       },
+      "MondayBoard-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "MondayData-Input": {
         "properties": {
           "workspaces": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MondayWorkspace"
+                  "$ref": "#/components/schemas/MondayWorkspace-Input"
                 },
                 "type": "array"
               },
@@ -28792,7 +29585,7 @@
           },
           "boards": {
             "items": {
-              "$ref": "#/components/schemas/MondayBoard"
+              "$ref": "#/components/schemas/MondayBoard-Input"
             },
             "type": "array",
             "title": "Boards",
@@ -28807,7 +29600,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "MondayGroup": {
+      "MondayGroup-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -28830,7 +29623,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MondayItem"
+                  "$ref": "#/components/schemas/MondayItem-Input"
                 },
                 "type": "array"
               },
@@ -28849,7 +29642,11 @@
         "title": "MondayGroup",
         "description": "Monday.com Group (Section) object - DELETE SUPPORTED"
       },
-      "MondayItem": {
+      "MondayGroup-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MondayItem-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -28873,7 +29670,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MondayUpdate"
+                  "$ref": "#/components/schemas/MondayUpdate-Input"
                 },
                 "type": "array"
               },
@@ -28888,7 +29685,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MondaySubitem"
+                  "$ref": "#/components/schemas/MondaySubitem-Input"
                 },
                 "type": "array"
               },
@@ -28907,7 +29704,11 @@
         "title": "MondayItem",
         "description": "Monday.com Item (Task/Row) object - DELETE SUPPORTED"
       },
-      "MondaySubitem": {
+      "MondayItem-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MondaySubitem-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -28935,7 +29736,11 @@
         "title": "MondaySubitem",
         "description": "Monday.com Subitem object (nested item) - DELETE SUPPORTED"
       },
-      "MondayUpdate": {
+      "MondaySubitem-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MondayUpdate-Input": {
         "properties": {
           "body": {
             "type": "string",
@@ -28950,7 +29755,11 @@
         "title": "MondayUpdate",
         "description": "Monday.com Update (Comment) object - DELETE SUPPORTED"
       },
-      "MondayWorkspace": {
+      "MondayUpdate-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MondayWorkspace-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -28982,6 +29791,10 @@
         ],
         "title": "MondayWorkspace",
         "description": "Monday.com Workspace object - DELETE SUPPORTED"
+      },
+      "MondayWorkspace-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "MoneybirdContact": {
         "properties": {
@@ -29531,7 +30344,161 @@
         "title": "MoneybirdTimeEntry",
         "description": "Moneybird time entry - API format\n\nNote: During initialization, this will be linked to a project and contact automatically.\nThe started_at and ended_at timestamps will be generated based on the hours field.\n\nAttributes:\n    description: Description of work performed\n    hours: Number of hours worked\n    billable: Whether this time is billable"
       },
-      "MotionComment": {
+      "MongoCollection-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Collection name"
+          },
+          "documents": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documents",
+            "description": "Documents in this collection"
+          },
+          "indexes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MongoIndex-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indexes",
+            "description": "Indexes definition for this collection"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MongoCollection",
+        "description": "MongoDB Collection object"
+      },
+      "MongoCollection-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MongoData-Input": {
+        "properties": {
+          "databases": {
+            "items": {
+              "$ref": "#/components/schemas/MongoDatabase-Input"
+            },
+            "type": "array",
+            "title": "Databases",
+            "description": "List of databases"
+          }
+        },
+        "type": "object",
+        "title": "MongoData",
+        "description": "Complete MongoDB sandbox data structure."
+      },
+      "MongoData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MongoDatabase-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Database name"
+          },
+          "collections": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MongoCollection-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collections",
+            "description": "Collections in this database"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "MongoDatabase",
+        "description": "MongoDB Database object"
+      },
+      "MongoDatabase-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MongoIndex-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Index name"
+          },
+          "keys": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "type": "array",
+            "title": "Keys",
+            "description": "Index keys as list of (field, direction) tuples"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options",
+            "description": "Additional index options (unique, sparse, etc.)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "keys"
+        ],
+        "title": "MongoIndex",
+        "description": "MongoDB Index definition"
+      },
+      "MongoIndex-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MotionComment-Input": {
         "properties": {
           "text": {
             "type": "string",
@@ -29546,11 +30513,15 @@
         "title": "MotionComment",
         "description": "Motion Comment object - supports DELETE operation"
       },
+      "MotionComment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "MotionData-Input": {
         "properties": {
           "workspaces": {
             "items": {
-              "$ref": "#/components/schemas/MotionWorkspace"
+              "$ref": "#/components/schemas/MotionWorkspace-Input"
             },
             "type": "array",
             "title": "Workspaces",
@@ -29565,7 +30536,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "MotionProject": {
+      "MotionProject-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -29627,7 +30598,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MotionTask"
+                  "$ref": "#/components/schemas/MotionTask-Input"
                 },
                 "type": "array"
               },
@@ -29646,7 +30617,11 @@
         "title": "MotionProject",
         "description": "Motion Project object - supports DELETE operation"
       },
-      "MotionTask": {
+      "MotionProject-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MotionTask-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -29732,7 +30707,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MotionComment"
+                  "$ref": "#/components/schemas/MotionComment-Input"
                 },
                 "type": "array"
               },
@@ -29751,7 +30726,11 @@
         "title": "MotionTask",
         "description": "Motion Task object - supports DELETE operation"
       },
-      "MotionWorkspace": {
+      "MotionTask-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "MotionWorkspace-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -29762,7 +30741,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/MotionProject"
+                  "$ref": "#/components/schemas/MotionProject-Input"
                 },
                 "type": "array"
               },
@@ -29780,6 +30759,10 @@
         ],
         "title": "MotionWorkspace",
         "description": "Motion Workspace object - typically NOT deleted (organization level)"
+      },
+      "MotionWorkspace-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "MsTeamsData-Input": {
         "properties": {
@@ -29855,7 +30838,7 @@
         "title": "MsTeamsData",
         "description": "Complete Microsoft Teams sandbox data structure"
       },
-      "NotionBlock": {
+      "NotionBlock-Input": {
         "properties": {
           "block_type": {
             "type": "string",
@@ -29876,7 +30859,11 @@
         "title": "NotionBlock",
         "description": "Notion Block object - fundamental content unit.\n\nBlocks can be: paragraph, heading_1, heading_2, heading_3, bulleted_list_item,\nnumbered_list_item, to_do, toggle, code, quote, callout, etc."
       },
-      "NotionComment": {
+      "NotionBlock-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "NotionComment-Input": {
         "properties": {
           "content": {
             "type": "string",
@@ -29891,13 +30878,17 @@
         "title": "NotionComment",
         "description": "Notion Comment object - can be attached to pages or blocks"
       },
+      "NotionComment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "NotionData-Input": {
         "properties": {
           "databases": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionDatabase"
+                  "$ref": "#/components/schemas/NotionDatabase-Input"
                 },
                 "type": "array"
               },
@@ -29912,7 +30903,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionPage"
+                  "$ref": "#/components/schemas/NotionPage-Input"
                 },
                 "type": "array"
               },
@@ -29932,7 +30923,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "NotionDataSource": {
+      "NotionDataSource-Input": {
         "properties": {
           "label": {
             "type": "string",
@@ -29968,7 +30959,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionPage"
+                  "$ref": "#/components/schemas/NotionPage-Input"
                 },
                 "type": "array"
               },
@@ -29987,7 +30978,11 @@
         "title": "NotionDataSource",
         "description": "Notion Data Source object - represents a table within a database.\n\nNew in API version 2025-09-03:\n- A database can contain multiple data sources\n- Each data source has its own schema (properties)\n- Pages within a data source follow that schema"
       },
-      "NotionDatabase": {
+      "NotionDataSource-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "NotionDatabase-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -30022,7 +31017,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionDataSource"
+                  "$ref": "#/components/schemas/NotionDataSource-Input"
                 },
                 "type": "array"
               },
@@ -30041,7 +31036,11 @@
         "title": "NotionDatabase",
         "description": "Notion Database object - container for data sources.\n\nDatabases organize structured data and can contain multiple data sources.\nEach data source represents a table with its own schema."
       },
-      "NotionPage": {
+      "NotionDatabase-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "NotionPage-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -30065,7 +31064,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionBlock"
+                  "$ref": "#/components/schemas/NotionBlock-Input"
                 },
                 "type": "array"
               },
@@ -30080,7 +31079,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/NotionComment"
+                  "$ref": "#/components/schemas/NotionComment-Input"
                 },
                 "type": "array"
               },
@@ -30110,6 +31109,10 @@
         ],
         "title": "NotionPage",
         "description": "Notion Page object.\n\nPages can be:\n1. Standalone pages (top-level in workspace)\n2. Items/rows within a database data source\n\nFor pages in databases, properties should match the data source schema."
+      },
+      "NotionPage-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "OAuthServerName": {
         "type": "string",
@@ -30839,6 +31842,106 @@
         "title": "Post",
         "description": "WordPress post data"
       },
+      "PostgresData-Input": {
+        "properties": {
+          "schemas": {
+            "items": {
+              "$ref": "#/components/schemas/PostgresSchema"
+            },
+            "type": "array",
+            "title": "Schemas",
+            "description": "List of Postgres schemas"
+          }
+        },
+        "type": "object",
+        "title": "PostgresData",
+        "description": "Complete Postgres sandbox data structure"
+      },
+      "PostgresData-Output": {
+        "properties": {
+          "schemas": {
+            "items": {
+              "$ref": "#/components/schemas/PostgresSchema"
+            },
+            "type": "array",
+            "title": "Schemas",
+            "description": "List of Postgres schemas"
+          }
+        },
+        "type": "object",
+        "title": "PostgresData",
+        "description": "Complete Postgres sandbox data structure"
+      },
+      "PostgresSchema": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Schema name"
+          },
+          "tables": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PostgresTable"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tables",
+            "description": "List of tables in the schema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "PostgresSchema",
+        "description": "Postgres Schema object"
+      },
+      "PostgresTable": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Table name"
+          },
+          "columns": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Columns",
+            "description": "Table schema mapping column names to types"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows",
+            "description": "Table data rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "columns"
+        ],
+        "title": "PostgresTable",
+        "description": "Postgres Table object"
+      },
       "QuickBooksData": {
         "properties": {
           "accounts": {
@@ -31001,7 +32104,7 @@
         "title": "ReleaseUniverseResponse",
         "description": "Response after releasing a universe to idle state"
       },
-      "ResendBroadcast": {
+      "ResendBroadcast-Input": {
         "properties": {
           "id": {
             "anyOf": [
@@ -31142,7 +32245,11 @@
         "title": "ResendBroadcast",
         "description": "Resend Broadcast object - child of Segment, requires parent segment"
       },
-      "ResendContact": {
+      "ResendBroadcast-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ResendContact-Input": {
         "properties": {
           "id": {
             "anyOf": [
@@ -31218,13 +32325,17 @@
         "title": "ResendContact",
         "description": "Resend Contact object - standalone, independent of segments"
       },
+      "ResendContact-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "ResendData-Input": {
         "properties": {
           "emails": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ResendEmail"
+                  "$ref": "#/components/schemas/ResendEmail-Input"
                 },
                 "type": "array"
               },
@@ -31239,7 +32350,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ResendContact"
+                  "$ref": "#/components/schemas/ResendContact-Input"
                 },
                 "type": "array"
               },
@@ -31254,7 +32365,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ResendSegment"
+                  "$ref": "#/components/schemas/ResendSegment-Input"
                 },
                 "type": "array"
               },
@@ -31274,7 +32385,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "ResendEmail": {
+      "ResendEmail-Input": {
         "properties": {
           "id": {
             "anyOf": [
@@ -31412,7 +32523,11 @@
         "title": "ResendEmail",
         "description": "Resend Email object - standalone transactional email"
       },
-      "ResendSegment": {
+      "ResendEmail-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ResendSegment-Input": {
         "properties": {
           "id": {
             "anyOf": [
@@ -31447,7 +32562,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/ResendBroadcast"
+                  "$ref": "#/components/schemas/ResendBroadcast-Input"
                 },
                 "type": "array"
               },
@@ -31465,6 +32580,10 @@
         ],
         "title": "ResendSegment",
         "description": "Resend Segment object - parent containing broadcasts that target this segment"
+      },
+      "ResendSegment-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "ResetSandboxResponse": {
         "properties": {
@@ -31763,6 +32882,8 @@
           "discord",
           "snowflake",
           "google_cloud",
+          "postgres",
+          "mongodb",
           "arxiv_latex",
           "arxiv",
           "calculator",
@@ -32182,7 +33303,7 @@
         "title": "ShopifyProduct",
         "description": "Simplified Shopify product data.\n\nSingle-variant products are supported directly with price/sku/stock fields.\nFor multi-variant products, use the implementation's API directly.\n\nAttributes:\n    title: Product name\n    description: Product description (plain text or HTML)\n    vendor: Brand or vendor name\n    category: Product category/type\n    price: Product price as string (e.g., '29.99')\n    sku: Stock Keeping Unit identifier\n    stock: Available inventory count\n    status: Product status (active, draft, archived)"
       },
-      "SlackChannel": {
+      "SlackChannel-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32230,13 +33351,17 @@
         "title": "SlackChannel",
         "description": "Slack Channel (Conversation) object"
       },
+      "SlackChannel-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "SlackData-Input": {
         "properties": {
           "channels": {
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SlackChannel"
+                  "$ref": "#/components/schemas/SlackChannel-Input"
                 },
                 "type": "array"
               },
@@ -32267,7 +33392,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SlackReaction"
+                  "$ref": "#/components/schemas/SlackReaction-Input"
                 },
                 "type": "array"
               },
@@ -32305,7 +33430,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "SlackReaction": {
+      "SlackReaction-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32320,7 +33445,11 @@
         "title": "SlackReaction",
         "description": "Slack Reaction object"
       },
-      "SnowflakeColumn": {
+      "SlackReaction-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeColumn-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32359,11 +33488,15 @@
         "title": "SnowflakeColumn",
         "description": "Snowflake Table Column definition"
       },
+      "SnowflakeColumn-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "SnowflakeData-Input": {
         "properties": {
           "databases": {
             "items": {
-              "$ref": "#/components/schemas/SnowflakeDatabase"
+              "$ref": "#/components/schemas/SnowflakeDatabase-Input"
             },
             "type": "array",
             "title": "Databases",
@@ -32378,7 +33511,7 @@
         "additionalProperties": true,
         "type": "object"
       },
-      "SnowflakeDatabase": {
+      "SnowflakeDatabase-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32401,7 +33534,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SnowflakeSchema"
+                  "$ref": "#/components/schemas/SnowflakeSchema-Input"
                 },
                 "type": "array"
               },
@@ -32420,7 +33553,11 @@
         "title": "SnowflakeDatabase",
         "description": "Snowflake Database object"
       },
-      "SnowflakeRow": {
+      "SnowflakeDatabase-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeRow-Input": {
         "properties": {
           "values": {
             "additionalProperties": true,
@@ -32436,7 +33573,11 @@
         "title": "SnowflakeRow",
         "description": "Snowflake Table Row data"
       },
-      "SnowflakeSchema": {
+      "SnowflakeRow-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeSchema-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32447,7 +33588,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SnowflakeTable"
+                  "$ref": "#/components/schemas/SnowflakeTable-Input"
                 },
                 "type": "array"
               },
@@ -32466,7 +33607,11 @@
         "title": "SnowflakeSchema",
         "description": "Snowflake Schema object (namespace within a database)"
       },
-      "SnowflakeTable": {
+      "SnowflakeSchema-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "SnowflakeTable-Input": {
         "properties": {
           "name": {
             "type": "string",
@@ -32475,7 +33620,7 @@
           },
           "columns": {
             "items": {
-              "$ref": "#/components/schemas/SnowflakeColumn"
+              "$ref": "#/components/schemas/SnowflakeColumn-Input"
             },
             "type": "array",
             "title": "Columns",
@@ -32485,7 +33630,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/SnowflakeRow"
+                  "$ref": "#/components/schemas/SnowflakeRow-Input"
                 },
                 "type": "array"
               },
@@ -32504,6 +33649,10 @@
         ],
         "title": "SnowflakeTable",
         "description": "Snowflake Table object"
+      },
+      "SnowflakeTable-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "StatusResponse": {
         "properties": {
