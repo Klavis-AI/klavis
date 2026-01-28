@@ -418,6 +418,13 @@
                     ]
                   },
                   {
+                    "group": "Local Dev",
+                    "pages": [
+                      "api-reference/sandbox/local_dev/initialize-local-dev",
+                      "api-reference/sandbox/local_dev/dump-local-dev"
+                    ]
+                  },
+                  {
                     "group": "Mem0",
                     "pages": [
                       "api-reference/sandbox/mem0/initialize-mem0",
