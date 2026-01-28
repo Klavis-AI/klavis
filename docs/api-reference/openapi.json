@@ -7653,6 +7653,114 @@
         }
       }
     },
+    "/sandbox/local_dev/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize local dev with files",
+        "description": "Upload files to the local dev workspace at /workspace.",
+        "operationId": "initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/local_dev/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export local dev files",
+        "description": "Download all files from local dev as a tar archive.",
+        "operationId": "dump_local_dev_sandbox_local_dev__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/jira/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -22094,6 +22202,24 @@
         "title": "BigQueryTable",
         "description": "BigQuery table"
       },
+      "Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "Files to upload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post"
+      },
       "CalcomData-Input": {
         "properties": {
           "schedules": {
@@ -23418,10 +23544,20 @@
             "title": "Sandbox Id",
             "description": "Unique identifier for the acquired sandbox"
           },
-          "server_url": {
-            "type": "string",
-            "title": "Server Url",
-            "description": "URL to connect to the MCP server"
+          "server_urls": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Urls",
+            "description": "MCP server URLs keyed by server name"
           },
           "server_name": {
             "$ref": "#/components/schemas/SandboxMCPServer",
@@ -23440,7 +23576,6 @@
         "type": "object",
         "required": [
           "sandbox_id",
-          "server_url",
           "server_name",
           "status",
           "message"
@@ -32884,6 +33019,7 @@
           "google_cloud",
           "postgres",
           "mongodb",
+          "local_dev",
           "arxiv_latex",
           "calculator",
           "clinicaltrialsgov",
