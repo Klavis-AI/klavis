@@ -32885,7 +32885,6 @@
           "postgres",
           "mongodb",
           "arxiv_latex",
-          "arxiv",
           "calculator",
           "clinicaltrialsgov",
           "met_museum",
@@ -32894,7 +32893,15 @@
           "pubmed",
           "us_weather",
           "whois",
-          "wikipedia"
+          "wikipedia",
+          "weather",
+          "twelvedata",
+          "national_parks",
+          "lara_translate",
+          "e2b",
+          "context7",
+          "alchemy",
+          "weights_and_biases"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
