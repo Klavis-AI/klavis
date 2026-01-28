@@ -13554,6 +13554,212 @@
         }
       }
     },
+    "/sandbox/woocommerce/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize woocommerce sandbox with data",
+        "description": "Initialize the sandbox with woocommerce-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_woocommerce__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/WooCommerceData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "products": [
+                      {
+                        "name": "[Sandbox] Premium Quality Tee",
+                        "type": "simple",
+                        "regular_price": "29.99",
+                        "description": "A high quality t-shirt for testing purposes.",
+                        "short_description": "Test Tee",
+                        "status": "publish",
+                        "manage_stock": false
+                      },
+                      {
+                        "name": "[Sandbox] Cool Hoodie",
+                        "type": "simple",
+                        "regular_price": "59.99",
+                        "description": "Warm and cozy hoodie.",
+                        "short_description": "Hoodie",
+                        "status": "publish",
+                        "manage_stock": false
+                      }
+                    ],
+                    "customers": [
+                      {
+                        "email": "john.doe@example.com",
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "username": "johndoe",
+                        "billing": {
+                          "first_name": "John",
+                          "last_name": "Doe",
+                          "company": "",
+                          "address_1": "969 Market",
+                          "address_2": "",
+                          "city": "San Francisco",
+                          "state": "CA",
+                          "postcode": "94103",
+                          "country": "US",
+                          "email": "john.doe@example.com",
+                          "phone": "(555) 555-5555"
+                        },
+                        "shipping": {
+                          "first_name": "John",
+                          "last_name": "Doe",
+                          "company": "",
+                          "address_1": "969 Market",
+                          "address_2": "",
+                          "city": "San Francisco",
+                          "state": "CA",
+                          "postcode": "94103",
+                          "country": "US"
+                        }
+                      }
+                    ],
+                    "orders": [
+                      {
+                        "customer_index": 0,
+                        "status": "processing",
+                        "payment_method": "bacs",
+                        "payment_method_title": "Direct Bank Transfer",
+                        "line_items": [
+                          {
+                            "product_index": 0,
+                            "quantity": 2
+                          },
+                          {
+                            "product_index": 1,
+                            "quantity": 1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/woocommerce/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export woocommerce sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_woocommerce__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_WooCommerceData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/outlook_calendar/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -20903,6 +21109,276 @@
         }
       }
     },
+    "/sandbox/localmemory/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize localmemory sandbox with data",
+        "description": "Initialize the sandbox with localmemory-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_localmemory__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/LocalMemoryData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "entities": [
+                      {
+                        "name": "Alice",
+                        "entityType": "person",
+                        "observations": [
+                          "Software engineer at TechCorp",
+                          "Specializes in Python and machine learning",
+                          "Team lead for the AI project"
+                        ]
+                      },
+                      {
+                        "name": "Bob",
+                        "entityType": "person",
+                        "observations": [
+                          "Frontend developer at TechCorp",
+                          "Expert in React and TypeScript",
+                          "Works on the dashboard team"
+                        ]
+                      },
+                      {
+                        "name": "Carol",
+                        "entityType": "person",
+                        "observations": [
+                          "Product manager at TechCorp",
+                          "Manages the AI and Dashboard projects",
+                          "Previously worked at StartupXYZ"
+                        ]
+                      },
+                      {
+                        "name": "TechCorp",
+                        "entityType": "organization",
+                        "observations": [
+                          "Technology company founded in 2015",
+                          "Headquarters in San Francisco",
+                          "Specializes in AI-powered business solutions"
+                        ]
+                      },
+                      {
+                        "name": "AI Project",
+                        "entityType": "project",
+                        "observations": [
+                          "Machine learning recommendation system",
+                          "Started in Q1 2024",
+                          "Uses TensorFlow and Python"
+                        ]
+                      },
+                      {
+                        "name": "Dashboard Project",
+                        "entityType": "project",
+                        "observations": [
+                          "Analytics dashboard for enterprise clients",
+                          "Built with React and Node.js",
+                          "Launched in 2023"
+                        ]
+                      },
+                      {
+                        "name": "Python",
+                        "entityType": "technology",
+                        "observations": [
+                          "Programming language",
+                          "Used for backend and ML development"
+                        ]
+                      },
+                      {
+                        "name": "React",
+                        "entityType": "technology",
+                        "observations": [
+                          "JavaScript library for building UIs",
+                          "Maintained by Meta"
+                        ]
+                      }
+                    ],
+                    "relations": [
+                      {
+                        "from": "Alice",
+                        "to": "TechCorp",
+                        "relationType": "works_at"
+                      },
+                      {
+                        "from": "Bob",
+                        "to": "TechCorp",
+                        "relationType": "works_at"
+                      },
+                      {
+                        "from": "Carol",
+                        "to": "TechCorp",
+                        "relationType": "works_at"
+                      },
+                      {
+                        "from": "Alice",
+                        "to": "AI Project",
+                        "relationType": "leads"
+                      },
+                      {
+                        "from": "Alice",
+                        "to": "Bob",
+                        "relationType": "collaborates_with"
+                      },
+                      {
+                        "from": "Carol",
+                        "to": "AI Project",
+                        "relationType": "manages"
+                      },
+                      {
+                        "from": "Carol",
+                        "to": "Dashboard Project",
+                        "relationType": "manages"
+                      },
+                      {
+                        "from": "Bob",
+                        "to": "Dashboard Project",
+                        "relationType": "contributes_to"
+                      },
+                      {
+                        "from": "AI Project",
+                        "to": "Python",
+                        "relationType": "uses"
+                      },
+                      {
+                        "from": "Dashboard Project",
+                        "to": "React",
+                        "relationType": "uses"
+                      },
+                      {
+                        "from": "Alice",
+                        "to": "Python",
+                        "relationType": "skilled_in"
+                      },
+                      {
+                        "from": "Bob",
+                        "to": "React",
+                        "relationType": "skilled_in"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/localmemory/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export localmemory sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_localmemory__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_LocalMemoryData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/universes": {
       "get": {
         "tags": [
@@ -24543,6 +25019,37 @@
         ],
         "title": "DumpSandboxResponse[LinearData]"
       },
+      "DumpSandboxResponse_LocalMemoryData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LocalMemoryData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[LocalMemoryData]"
+      },
       "DumpSandboxResponse_Mem0Data_": {
         "properties": {
           "sandbox_id": {
@@ -25100,6 +25607,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[SupabaseData]"
+      },
+      "DumpSandboxResponse_WooCommerceData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WooCommerceData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[WooCommerceData]"
       },
       "DumpSandboxResponse_WordPressData_": {
         "properties": {
@@ -28996,6 +29534,118 @@
         ],
         "title": "ListUniversesResponse",
         "description": "Response listing available universes"
+      },
+      "LocalMemoryData-Input": {
+        "properties": {
+          "entities": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LocalMemoryEntity-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entities",
+            "description": "List of entities in the knowledge graph"
+          },
+          "relations": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LocalMemoryRelation-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relations",
+            "description": "List of relations between entities"
+          }
+        },
+        "type": "object",
+        "title": "LocalMemoryData",
+        "description": "Complete Local Memory sandbox data structure.\n\nRepresents a knowledge graph with:\n- Entities: nodes containing information\n- Relations: edges connecting entities"
+      },
+      "LocalMemoryData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "LocalMemoryEntity-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Unique name/identifier for the entity"
+          },
+          "entityType": {
+            "type": "string",
+            "title": "Entitytype",
+            "description": "Type/category of the entity (e.g., 'person', 'organization', 'concept')"
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations",
+            "description": "List of observations/facts about this entity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "entityType"
+        ],
+        "title": "LocalMemoryEntity",
+        "description": "Local Memory Entity object - a node in the knowledge graph"
+      },
+      "LocalMemoryEntity-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "LocalMemoryRelation-Input": {
+        "properties": {
+          "from": {
+            "type": "string",
+            "title": "From",
+            "description": "Source entity name"
+          },
+          "to": {
+            "type": "string",
+            "title": "To",
+            "description": "Target entity name"
+          },
+          "relationType": {
+            "type": "string",
+            "title": "Relationtype",
+            "description": "Type of relationship between entities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "relationType"
+        ],
+        "title": "LocalMemoryRelation",
+        "description": "Local Memory Relation object - an edge connecting two entities"
+      },
+      "LocalMemoryRelation-Output": {
+        "additionalProperties": true,
+        "type": "object"
       },
       "LogBucket": {
         "properties": {
@@ -33007,6 +33657,7 @@
           "moneybird",
           "dropbox",
           "shopify",
+          "woocommerce",
           "outlook_calendar",
           "resend",
           "wordpress",
@@ -33020,6 +33671,7 @@
           "postgres",
           "mongodb",
           "local_dev",
+          "localmemory",
           "arxiv_latex",
           "calculator",
           "clinicaltrialsgov",
@@ -35005,6 +35657,397 @@
           "success"
         ],
         "title": "WhiteLabelingResponse"
+      },
+      "WooCommerceCustomer": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Customer email address"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name",
+            "description": "First name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "Last name"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "Username"
+          },
+          "billing": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Billing",
+            "description": "Billing address"
+          },
+          "shipping": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping",
+            "description": "Shipping address"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "WooCommerceCustomer",
+        "description": "Simplified WooCommerce customer data.\n\nAttributes:\n    email: Customer email address\n    first_name: First name\n    last_name: Last name\n    username: Username\n    billing: Billing address details\n    shipping: Shipping address details"
+      },
+      "WooCommerceData-Input": {
+        "properties": {
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "customers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceCustomer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customers",
+            "description": "List of customers to create"
+          },
+          "orders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceOrder"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders",
+            "description": "List of orders to create"
+          }
+        },
+        "type": "object",
+        "title": "WooCommerceData",
+        "description": "Complete WooCommerce sandbox data structure.\n\nProducts and customers are created first, then orders are created with proper references."
+      },
+      "WooCommerceData-Output": {
+        "properties": {
+          "products": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceProduct"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Products",
+            "description": "List of products to create"
+          },
+          "customers": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceCustomer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customers",
+            "description": "List of customers to create"
+          },
+          "orders": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WooCommerceOrder"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orders",
+            "description": "List of orders to create"
+          }
+        },
+        "type": "object",
+        "title": "WooCommerceData",
+        "description": "Complete WooCommerce sandbox data structure.\n\nProducts and customers are created first, then orders are created with proper references."
+      },
+      "WooCommerceOrder": {
+        "properties": {
+          "customer_index": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Customer Index",
+            "description": "Index of the customer in the customers list (0-based)"
+          },
+          "line_items": {
+            "items": {
+              "$ref": "#/components/schemas/WooCommerceOrderLineItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Line Items",
+            "description": "List of line items"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Order status",
+            "default": "pending"
+          },
+          "payment_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Method",
+            "description": "Payment method ID",
+            "default": "bacs"
+          },
+          "payment_method_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Method Title",
+            "description": "Payment method title",
+            "default": "Direct Bank Transfer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_index",
+          "line_items"
+        ],
+        "title": "WooCommerceOrder",
+        "description": "Simplified WooCommerce order data.\n\nOrders reference customers and products by their index in the respective lists.\n\nAttributes:\n    customer_index: Index of the customer in the customers list (0-based)\n    line_items: List of line items\n    status: Order status (pending, processing, completed, etc.)\n    payment_method: Payment method ID\n    payment_method_title: Payment method title"
+      },
+      "WooCommerceOrderLineItem": {
+        "properties": {
+          "product_index": {
+            "type": "integer",
+            "minimum": 0,
+            "title": "Product Index",
+            "description": "Index of the product in the products list (0-based)"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "title": "Quantity",
+            "description": "Quantity of the product to order",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_index"
+        ],
+        "title": "WooCommerceOrderLineItem",
+        "description": "Line item for a WooCommerce order.\n\nAttributes:\n    product_index: Index of the product in the products list (0-based)\n    quantity: Quantity of the product to order"
+      },
+      "WooCommerceProduct": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Product name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Product description"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description",
+            "description": "Product short description"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Product type",
+            "default": "simple"
+          },
+          "regular_price": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regular Price",
+            "description": "Product regular price"
+          },
+          "sku": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sku",
+            "description": "Stock Keeping Unit identifier"
+          },
+          "stock_quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stock Quantity",
+            "description": "Available inventory count"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Product status",
+            "default": "publish"
+          },
+          "manage_stock": {
+            "type": "boolean",
+            "title": "Manage Stock",
+            "description": "Whether to manage stock",
+            "default": true
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories",
+            "description": "List of categories"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images",
+            "description": "List of images"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "WooCommerceProduct",
+        "description": "Simplified WooCommerce product data.\n\nAttributes:\n    name: Product name\n    description: Product description\n    short_description: Product short description\n    type: Product type (simple, variable, etc.)\n    regular_price: Product price as string\n    sku: Stock Keeping Unit identifier\n    stock_quantity: Available inventory count\n    status: Product status (publish, draft, private)\n    manage_stock: Whether to manage stock\n    categories: List of category names\n    images: List of image URLs"
       },
       "WordPressData": {
         "properties": {
