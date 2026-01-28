@@ -177,7 +177,7 @@
     "typedoc": "^0.28.14",
     "typescript": "^5.9.3",
     "typescript-eslint": "8.46.1",
-    "validator": "13.15.15",
+    "validator": "13.15.22",
     "vite": "7.1.10",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
