@@ -40,6 +40,7 @@ COPY mcp_servers/clinicaltrials .
 
 # Set environment variables for streamable HTTP transport
 ENV MCP_TRANSPORT_TYPE=http
+ENV MCP_HTTP_ENDPOINT_PATH=/mcp/
 ENV MCP_HTTP_HOST=0.0.0.0
 ENV MCP_HTTP_PORT=5000
 ENV MCP_LOG_LEVEL=info
