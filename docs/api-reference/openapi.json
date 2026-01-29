@@ -7417,6 +7417,33 @@
         }
       }
     },
+    "/sandbox": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "List all sandboxes",
+        "description": "Get all sandboxes associated with the API key's account.",
+        "operationId": "list_sandboxes_sandbox_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSandboxesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/sandbox/{server_name}": {
       "post": {
         "tags": [
@@ -29713,6 +29740,30 @@
         "title": "LinearProject",
         "description": "Linear Project object"
       },
+      "ListSandboxesResponse": {
+        "properties": {
+          "sandboxes": {
+            "items": {
+              "$ref": "#/components/schemas/SandboxListItem"
+            },
+            "type": "array",
+            "title": "Sandboxes",
+            "description": "List of sandboxes"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total number of sandboxes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandboxes",
+          "total_count"
+        ],
+        "title": "ListSandboxesResponse",
+        "description": "Response model for listing all sandboxes"
+      },
       "ListToolsRequest": {
         "properties": {
           "serverUrl": {
@@ -33908,6 +33959,45 @@
         "title": "SandboxInfo",
         "description": "Detailed information about a sandbox"
       },
+      "SandboxListItem": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Unique identifier for the sandbox"
+          },
+          "server_name": {
+            "type": "string",
+            "title": "Server Name",
+            "description": "The MCP server name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SandboxStatus",
+            "description": "Current status of the sandbox"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At",
+            "description": "Last update timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "status"
+        ],
+        "title": "SandboxListItem",
+        "description": "Individual sandbox item in list response"
+      },
       "SandboxMCPServer": {
         "type": "string",
         "enum": [
@@ -33970,7 +34060,8 @@
           "e2b",
           "context7",
           "alchemy",
-          "weights_and_biases"
+          "weights_and_biases",
+          "huggingface"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
