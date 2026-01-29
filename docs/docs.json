@@ -293,6 +293,7 @@
             "pages": [
               "api-reference/sandbox/create",
               "api-reference/sandbox/get",
+              "api-reference/sandbox/list",
               "api-reference/sandbox/delete",
               "api-reference/sandbox/reset",
               {
