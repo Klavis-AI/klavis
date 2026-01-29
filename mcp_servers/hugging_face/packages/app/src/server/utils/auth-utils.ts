@@ -1,6 +1,35 @@
 import { logger } from '../utils/logger.js';
 
 /**
+ * Extracts access token from AUTH_DATA env or x-auth-data header
+ */
+export function getAccessToken(headers: Record<string, string>): string {
+	let authData = '';
+
+	const headerValue = headers['x-auth-data'];
+	if (headerValue) {
+		try {
+			authData = atob(headerValue);
+		} catch (e) {
+			logger.warn({ error: e }, 'Failed to decode x-auth-data header');
+			return '';
+		}
+	}
+
+	if (!authData) {
+		return '';
+	}
+
+	try {
+		const authJson = JSON.parse(authData);
+		return authJson.access_token || '';
+	} catch (e) {
+		logger.warn({ error: e }, 'Failed to parse auth data JSON');
+		return '';
+	}
+}
+
+/**
  * Extracts HF token, bouquet, mix, and gradio from headers and environment
  */
 function parseListParam(value: string | undefined): string[] | undefined {
@@ -24,8 +53,9 @@ export function extractAuthBouquetAndMix(headers: Record<string, string> | null)
 	let gradio: string | undefined;
 
 	if (headers) {
-		// Extract token from Authorization header
-		if ('authorization' in headers) {
+		// Extract token from x-auth-data header first, then Authorization header
+		tokenFromHeader = getAccessToken(headers);
+		if (!tokenFromHeader && 'authorization' in headers) {
 			const authHeader = headers.authorization || '';
 			if (authHeader.startsWith('Bearer ')) {
 				tokenFromHeader = authHeader.slice(7).trim();

@@ -1,4 +1,3 @@
-
 FROM node:22-alpine
 
 RUN corepack enable pnpm
@@ -6,14 +5,14 @@ RUN corepack enable pnpm
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY pnpm-workspace.yaml pnpm-lock.yaml package*.json ./
-COPY packages/mcp/package.json ./packages/mcp/
-COPY packages/app/package.json ./packages/app/
+COPY mcp_servers/hugging_face/pnpm-workspace.yaml mcp_servers/hugging_face/pnpm-lock.yaml mcp_servers/hugging_face/package*.json ./
+COPY mcp_servers/hugging_face/packages/mcp/package.json ./packages/mcp/
+COPY mcp_servers/hugging_face/packages/app/package.json ./packages/app/
 
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
-COPY . .
+COPY mcp_servers/hugging_face/ .
 
 
 # Clean any existing build artifacts to prevent export issues
@@ -57,10 +56,10 @@ WORKDIR /app
 # Set environment variables
 ENV NODE_ENV=production
 ENV TRANSPORT=streamableHttpJson
-ENV PORT=3000
+ENV PORT=5000
 
 # Expose port
-EXPOSE 3000
+EXPOSE 5000
 
 # Run the startup script
 CMD ["/bin/sh", "./start.sh"]

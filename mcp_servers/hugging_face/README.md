@@ -128,7 +128,7 @@ The following transports are supported:
 - StreamableHTTP
 - StreamableHTTP in Stateless JSON Mode (**StreamableHTTPJson**)
 
-The Web Application and HTTP Transports start by default on Port 3000.
+The Web Application and HTTP Transports start by default on Port 5000.
 
 The StreamableHTTP service is available at `/mcp`. Although though not strictly enforced by the specification this is common convention.
 
@@ -149,11 +149,11 @@ To run with docker:
 
 ```bash
 docker pull ghcr.io/evalstate/hf-mcp-server:latest
-docker run --rm -p 3000:3000 ghcr.io/evalstate/hf-mcp-server:latest
+docker run --rm -p 5000:5000 ghcr.io/evalstate/hf-mcp-server:latest
 ```
 ![image](https://github.com/user-attachments/assets/2fc0ef58-2c7a-4fae-82b5-e6442bfcbd99)
 
-All commands above start the Management Web interface on http://localhost:3000/. The Streamable HTTP server is accessible on  http://localhost:3000/mcp. See [Environment Variables](#Environment Variables) for configuration options. Docker defaults to Streamable HTTP (JSON RPC) mode.
+All commands above start the Management Web interface on http://localhost:5000/. The Streamable HTTP server is accessible on  http://localhost:5000/mcp. See [Environment Variables](#Environment Variables) for configuration options. Docker defaults to Streamable HTTP (JSON RPC) mode.
 
 ### Developing OpenAI Apps SDK Components
 
@@ -201,14 +201,14 @@ Build the image:
 docker build -t hf-mcp-server .
 ```
 
-Run with default settings (Streaming HTTP JSON Mode), Dashboard on Port 3000:
+Run with default settings (Streaming HTTP JSON Mode), Dashboard on Port 5000:
 ```bash
-docker run --rm -p 3000:3000 -e DEFAULT_HF_TOKEN=hf_xxx hf-mcp-server
+docker run --rm -p 5000:5000 -e DEFAULT_HF_TOKEN=hf_xxx hf-mcp-server
 ```
 
 Run STDIO MCP Server:
 ```bash
-docker run -i --rm -e TRANSPORT=stdio -p 3000:3000 -e DEFAULT_HF_TOKEN=hf_xxx hf-mcp-server
+docker run -i --rm -e TRANSPORT=stdio -p 5000:5000 -e DEFAULT_HF_TOKEN=hf_xxx hf-mcp-server
 ```
 
 `TRANSPORT` can be `stdio`, `streamableHttp` or `streamableHttpJson` (default).
