@@ -21109,6 +21109,254 @@
         }
       }
     },
+    "/sandbox/youtube/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize youtube sandbox with data",
+        "description": "Initialize the sandbox with youtube-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_youtube__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/YouTubeData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "playlists": [
+                      {
+                        "title": "AI Engineering Fundamentals",
+                        "description": "A comprehensive series covering core concepts in AI engineering—from neural networks to production deployment. Perfect for developers looking to build real-world AI systems.",
+                        "privacy_status": "public",
+                        "items": [
+                          {
+                            "video_id": "dQw4w9WgXcQ",
+                            "title": "What is an LLM? Large Language Models Explained",
+                            "position": 0
+                          },
+                          {
+                            "video_id": "jNQXAC9IVRw",
+                            "title": "Vector Databases: The Foundation of RAG Systems",
+                            "position": 1
+                          },
+                          {
+                            "video_id": "9bZkp7q19f0",
+                            "title": "Fine-Tuning vs RAG: When to Use What",
+                            "position": 2
+                          },
+                          {
+                            "video_id": "kJQP7kiw5Fk",
+                            "title": "Building Production AI Pipelines with LangChain",
+                            "position": 3
+                          }
+                        ]
+                      },
+                      {
+                        "title": "Developer Productivity Hacks",
+                        "description": "Quick tips and workflows to 10x your development speed. Keyboard shortcuts, CLI tools, and automation scripts that actually work.",
+                        "privacy_status": "public",
+                        "items": [
+                          {
+                            "video_id": "JGwWNGJkkx8",
+                            "title": "Terminal Workflows That Will Change Your Life",
+                            "position": 0
+                          },
+                          {
+                            "video_id": "OPf0YbXqDm0",
+                            "title": "Git Aliases and Workflows for Teams",
+                            "position": 1
+                          },
+                          {
+                            "video_id": "0ksZWGaJKnY",
+                            "title": "Cursor IDE: AI-Powered Coding Deep Dive",
+                            "position": 2
+                          }
+                        ]
+                      },
+                      {
+                        "title": "System Design Interviews",
+                        "description": "Real system design problems broken down step by step. Designed for senior engineering interviews at FAANG and top startups.",
+                        "privacy_status": "public",
+                        "items": [
+                          {
+                            "video_id": "F4neLJQC1_E",
+                            "title": "Design a URL Shortener (Complete Walkthrough)",
+                            "position": 0
+                          },
+                          {
+                            "video_id": "fRh_vgS2dFE",
+                            "title": "Design Twitter's Timeline Feed",
+                            "position": 1
+                          },
+                          {
+                            "video_id": "ALZHF5UqnU4",
+                            "title": "Design a Rate Limiter",
+                            "position": 2
+                          },
+                          {
+                            "video_id": "YQHsXMglC9A",
+                            "title": "Design Uber's Ride Matching System",
+                            "position": 3
+                          },
+                          {
+                            "video_id": "PapZ9gZ9O6A",
+                            "title": "Design a Distributed Message Queue",
+                            "position": 4
+                          }
+                        ]
+                      },
+                      {
+                        "title": "Work in Progress",
+                        "description": "Drafts and upcoming content. Not ready for public viewing yet.",
+                        "privacy_status": "private",
+                        "items": [
+                          {
+                            "video_id": "CevxZvSJLk8",
+                            "title": "[DRAFT] Kubernetes for AI Workloads",
+                            "position": 0
+                          }
+                        ]
+                      },
+                      {
+                        "title": "Conference Talks 2025",
+                        "description": "Recordings of my talks at various tech conferences this year.",
+                        "privacy_status": "unlisted",
+                        "items": [
+                          {
+                            "video_id": "pB0W8uty0aA",
+                            "title": "The Future of AI Agents (KubeCon 2025)",
+                            "position": 0
+                          },
+                          {
+                            "video_id": "nfWlot6h_JM",
+                            "title": "Scaling RAG to 1B Documents (AI Summit)",
+                            "position": 1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/youtube/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export youtube sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_youtube__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_YouTubeData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/localmemory/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -25669,6 +25917,37 @@
           "data"
         ],
         "title": "DumpSandboxResponse[WordPressData]"
+      },
+      "DumpSandboxResponse_YouTubeData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/YouTubeData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[YouTubeData]"
       },
       "ExternalServerInfo": {
         "properties": {
@@ -31947,6 +32226,7 @@
           "Vercel",
           "WordPress",
           "Xero",
+          "YouTube",
           "Zendesk",
           "PayPal",
           "Sentry",
@@ -33670,6 +33950,7 @@
           "google_cloud",
           "postgres",
           "mongodb",
+          "youtube",
           "local_dev",
           "localmemory",
           "arxiv_latex",
@@ -36063,6 +36344,156 @@
         "type": "object",
         "title": "WordPressData",
         "description": "WordPress sandbox data structure"
+      },
+      "YouTubeData-Input": {
+        "properties": {
+          "playlists": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/YouTubePlaylist"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playlists",
+            "description": "List of playlists"
+          }
+        },
+        "type": "object",
+        "title": "YouTubeData",
+        "description": "Complete YouTube sandbox data structure.\n\nHierarchy:\n- Playlists contain Playlist Items (videos)"
+      },
+      "YouTubeData-Output": {
+        "properties": {
+          "playlists": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/YouTubePlaylist"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Playlists",
+            "description": "List of playlists"
+          }
+        },
+        "type": "object",
+        "title": "YouTubeData",
+        "description": "Complete YouTube sandbox data structure.\n\nHierarchy:\n- Playlists contain Playlist Items (videos)"
+      },
+      "YouTubePlaylist": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Playlist title (required)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Playlist description"
+          },
+          "privacy_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Privacy Status",
+            "description": "Privacy status: 'private', 'public', or 'unlisted'",
+            "default": "private"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/YouTubePlaylistItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items",
+            "description": "Videos in this playlist"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "YouTubePlaylist",
+        "description": "YouTube Playlist object"
+      },
+      "YouTubePlaylistItem": {
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "title": "Video Id",
+            "description": "YouTube video ID (e.g., 'dQw4w9WgXcQ')"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title",
+            "description": "Video title (read-only on dump)"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Note/description for the playlist item"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position",
+            "description": "Position in playlist (0-indexed)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video_id"
+        ],
+        "title": "YouTubePlaylistItem",
+        "description": "YouTube Playlist Item - represents a video in a playlist"
       }
     },
     "securitySchemes": {
