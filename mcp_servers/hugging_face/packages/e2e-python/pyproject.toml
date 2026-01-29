@@ -1,0 +1,43 @@
+[project]
+name = "hf-mcp-e2e-python"
+version = "0.1.0"
+description = "End-to-end tests for HF MCP Server"
+requires-python = ">=3.13.5"
+dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "fast-agent-mcp>=0.3.14",
+    "huggingface_hub>=0.34.0"
+]
+
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "api: marks tests as API tests",
+    "gradio: marks tests as Gradio integration tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

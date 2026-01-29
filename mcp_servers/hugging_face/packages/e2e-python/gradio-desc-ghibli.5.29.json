@@ -1,0 +1,18 @@
+{
+    "tools": [
+        {
+            "name": "abidlabs_EasyGhiblisingle_condition_generate_image",
+            "description": "Convert an image into a Studio Ghibli style image",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "spatial_img": {
+                        "title": "ImageData",
+                        "type": "string",
+                        "format": "a http or https url to a file"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "./packages/mcp" },
+		{ "path": "./packages/app/tsconfig.web.json" },
+		{ "path": "./packages/app/tsconfig.server.json" }
+	],
+	"compilerOptions": {
+		"composite": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true
+	}
+}

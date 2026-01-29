@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"target": "es2022",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"useDefineForClassFields": true,
+		"outDir": "dist",
+		"declaration": true,
+		"declarationMap": true,
+		"removeComments": true,
+		"sourceMap": true,
+		"lib": ["es2022", "dom", "dom.iterable"],
+		"rootDir": "src"
+	},
+	"include": ["src/server/**/*.ts", "src/shared/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

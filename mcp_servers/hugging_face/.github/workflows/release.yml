@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: 'Version bump type'
+        required: true
+        options:
+          - patch
+          - minor
+          - major
+      prerelease:
+        type: boolean
+        description: 'Create as prerelease'
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump versions
+        id: version
+        run: |
+          # Bump root version
+          npm version ${{ inputs.version }} --no-git-tag-version
+
+          # Get the new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # Sync versions in workspaces
+          cd packages/app && npm version $NEW_VERSION --no-git-tag-version
+          cd ../mcp && npm version $NEW_VERSION --no-git-tag-version
+          cd ../..
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Create Release Commit
+        run: |
+          git add .
+          git commit -m "chore: release v${{ steps.version.outputs.new-version }}"
+          git tag "v${{ steps.version.outputs.new-version }}"
+
+      - name: Push changes
+        run: |
+          git push origin main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new-version }}
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
+
+      - name: Publish to npm
+        if: ${{ !inputs.prerelease }}
+        run: |
+          # Publish the mcp package first (dependency)
+          cd packages/mcp
+          pnpm publish --access public --no-git-checks
+
+          # Then publish the main app package  
+          cd ../app
+          pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

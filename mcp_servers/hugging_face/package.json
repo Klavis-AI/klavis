@@ -1,0 +1,44 @@
+{
+	"name": "hf-mcp",
+	"version": "0.3.1",
+	"type": "module",
+	"packageManager": "pnpm@10.26.0",
+	"pnpm": {
+		"shamefullyHoist": true,
+		"strictPeerDependencies": false
+	},
+	"scripts": {
+		"dev": "concurrently \"pnpm run --filter=@llmindset/hf-mcp dev\" \"pnpm run --filter=@llmindset/hf-mcp-server dev\"",
+		"dev:sse": "concurrently \"pnpm run --filter=@llmindset/hf-mcp dev\" \"pnpm run --filter=@llmindset/hf-mcp-server dev:sse\"",
+		"dev:json": "concurrently \"pnpm run --filter=@llmindset/hf-mcp dev\" \"pnpm run --filter=@llmindset/hf-mcp-server dev:json\"",
+		"dev:watch": "concurrently \"pnpm run --filter=@llmindset/hf-mcp dev\" \"pnpm run --filter=@llmindset/hf-mcp-server dev:watch\"",
+		"dev:stdio": "concurrently \"pnpm run --filter=@llmindset/hf-mcp dev\" \"pnpm run --filter=@llmindset/hf-mcp-server dev:stdio\"",
+		"start": "cd packages/app && pnpm start",
+		"start:json": "cd packages/app && pnpm start:json",
+		"test": "pnpm run -r test",
+		"lint": "pnpm run -r lint",
+		"lint:check": "pnpm run -r lint:check",
+		"typecheck": "pnpm -r exec tsc --noEmit",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"build": "pnpm -r build",
+		"clean": "pnpm run -r clean",
+		"buildrun": "pnpm run clean && pnpm run build && pnpm run lint:check && pnpm run test && pnpm run start",
+		"prepublishOnly": "pnpm run build"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.32.0",
+		"@typescript-eslint/eslint-plugin": "^8.39.0",
+		"@typescript-eslint/parser": "^8.39.0",
+		"concurrently": "^9.2.0",
+		"cross-env": "^10.0.0",
+		"eslint-plugin-prettier": "^5.5.4",
+		"globals": "^16.3.0",
+		"prettier": "^3.6.2",
+		"rimraf": "^6.0.1",
+		"typescript": "~5.9.2"
+	},
+	"dependencies": {
+		"npm": "^11.7.0"
+	}
+}

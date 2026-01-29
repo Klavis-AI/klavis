@@ -1,0 +1,263 @@
+[
+	{
+		"author": "ginipick",
+		"authorData": {
+			"_id": "65acd60b57f263e3d0ff0647",
+			"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/65acd60b57f263e3d0ff0647/HENR9sR3CDchSDldrYOdS.png",
+			"fullname": "ginipick",
+			"name": "ginipick",
+			"type": "user",
+			"isPro": true,
+			"isHf": false,
+			"isHfAdmin": false,
+			"isMod": false,
+			"followerCount": 602
+		},
+		"colorFrom": "gray",
+		"colorTo": "pink",
+		"createdAt": "2024-08-22T02:55:22.000Z",
+		"emoji": "🦀🏆🦀",
+		"id": "ginipick/FLUXllama",
+		"lastModified": "2025-05-21T13:20:06.000Z",
+		"likes": 378,
+		"pinned": false,
+		"private": false,
+		"sdk": "gradio",
+		"repoType": "space",
+		"runtime": {
+			"stage": "RUNNING",
+			"hardware": {
+				"current": "zero-a10g",
+				"requested": "zero-a10g"
+			},
+			"storage": null,
+			"gcTimeout": 172800,
+			"replicas": {
+				"current": 1,
+				"requested": 1
+			},
+			"devMode": false,
+			"domains": [
+				{
+					"domain": "ginipick-fluxllama.hf.space",
+					"stage": "READY"
+				}
+			],
+			"sha": "36a649401e539c622e2a397528ad02ce5f84fe20"
+		},
+		"shortDescription": "mcp_server & FLUX 4-bit Quantization(just 8GB VRAM)",
+		"title": "FLUXllama",
+		"isLikedByUser": false,
+		"originSpace": {
+			"name": "nyanko7/flux1-dev-nf4",
+			"author": {
+				"_id": "63467f5a7fb9f11870c411ee",
+				"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/63467f5a7fb9f11870c411ee/Ztk8IModHk8lDxZWnM1DJ.png",
+				"fullname": "Nyanko",
+				"name": "nyanko7",
+				"type": "user",
+				"isPro": false,
+				"isHf": false,
+				"isHfAdmin": false,
+				"isMod": false,
+				"followerCount": 206
+			}
+		},
+		"ai_short_description": "Generate images using text prompts",
+		"ai_category": "Image Generation",
+		"trendingScore": 8,
+		"semanticRelevancyScore": 0.9137691233545246
+	},
+	{
+		"author": "ginipick",
+		"authorData": {
+			"_id": "65acd60b57f263e3d0ff0647",
+			"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/65acd60b57f263e3d0ff0647/HENR9sR3CDchSDldrYOdS.png",
+			"fullname": "ginipick",
+			"name": "ginipick",
+			"type": "user",
+			"isPro": true,
+			"isHf": false,
+			"isHfAdmin": false,
+			"isMod": false,
+			"followerCount": 602
+		},
+		"colorFrom": "yellow",
+		"colorTo": "pink",
+		"createdAt": "2024-09-14T01:07:20.000Z",
+		"emoji": "💬⚡",
+		"id": "ginipick/Realtime-FLUX",
+		"lastModified": "2025-05-21T13:28:38.000Z",
+		"likes": 106,
+		"pinned": true,
+		"private": false,
+		"sdk": "gradio",
+		"repoType": "space",
+		"runtime": {
+			"stage": "RUNNING",
+			"hardware": {
+				"current": "zero-a10g",
+				"requested": "zero-a10g"
+			},
+			"storage": null,
+			"gcTimeout": 172800,
+			"replicas": {
+				"current": 1,
+				"requested": 1
+			},
+			"devMode": false,
+			"domains": [
+				{
+					"domain": "ginipick-realtime-flux.hf.space",
+					"stage": "READY"
+				}
+			],
+			"sha": "6293da23835f10d329d91eb82fb32ba90f7b7b6d"
+		},
+		"shortDescription": "mcp_server & High quality Images in Realtime",
+		"title": "Realtime FLUX Image",
+		"isLikedByUser": false,
+		"originSpace": {
+			"name": "KingNish/Realtime-FLUX",
+			"author": {
+				"_id": "6612aedf09f16e7347dfa7e1",
+				"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/6612aedf09f16e7347dfa7e1/bPYjBXCedY_1fSIPjoBTY.jpeg",
+				"fullname": "Nishith Jain",
+				"name": "KingNish",
+				"type": "user",
+				"isPro": false,
+				"isHf": false,
+				"isHfAdmin": false,
+				"isMod": false,
+				"followerCount": 1206
+			}
+		},
+		"ai_short_description": "Generate images from text prompts",
+		"ai_category": "Image Generation",
+		"trendingScore": 3.5,
+		"semanticRelevancyScore": 0.6803295182592884
+	},
+	{
+		"author": "evalstate",
+		"authorData": {
+			"_id": "6319b36409baf858241f0f89",
+			"avatarUrl": "/avatars/909635453bf62a2a7118a01dd51b811c.svg",
+			"fullname": "shaun smith",
+			"name": "evalstate",
+			"type": "user",
+			"isPro": true,
+			"isHf": false,
+			"isHfAdmin": false,
+			"isMod": false,
+			"followerCount": 3
+		},
+		"colorFrom": "yellow",
+		"colorTo": "pink",
+		"createdAt": "2024-12-08T17:01:13.000Z",
+		"emoji": "🏎️💨",
+		"id": "evalstate/flux1_schnell",
+		"lastModified": "2025-04-30T18:45:28.000Z",
+		"likes": 1,
+		"pinned": false,
+		"private": false,
+		"sdk": "gradio",
+		"repoType": "space",
+		"runtime": {
+			"stage": "RUNNING",
+			"hardware": {
+				"current": "zero-a10g",
+				"requested": "zero-a10g"
+			},
+			"storage": null,
+			"gcTimeout": 172800,
+			"replicas": {
+				"current": 1,
+				"requested": 1
+			},
+			"devMode": false,
+			"domains": [
+				{
+					"domain": "evalstate-flux-1-schnell.hf.space",
+					"stage": "READY"
+				},
+				{
+					"domain": "evalstate-flux1-schnell.hf.space",
+					"stage": "READY"
+				}
+			],
+			"sha": "ae85ed512e3324ffbabb8c1e2a2e490fd5e1e252"
+		},
+		"title": "FLUX.1 [Schnell]",
+		"isLikedByUser": false,
+		"originSpace": {
+			"name": "black-forest-labs/FLUX.1-schnell",
+			"author": {
+				"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/62cfefa74b3e8dc1e32e38bf/GgkglHn3sIo6C5XGTtZSs.png",
+				"fullname": "Black Forest Labs",
+				"name": "black-forest-labs",
+				"type": "org",
+				"isHf": false,
+				"isHfAdmin": false,
+				"isMod": false,
+				"isEnterprise": false,
+				"followerCount": 18355
+			}
+		},
+		"ai_short_description": "Generate images from text prompts",
+		"ai_category": "Image Generation",
+		"trendingScore": 0,
+		"semanticRelevancyScore": 0.25
+	},
+	{
+		"author": "black-forest-labs",
+		"authorData": {
+			"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/62cfefa74b3e8dc1e32e38bf/GgkglHn3sIo6C5XGTtZSs.png",
+			"fullname": "Black Forest Labs",
+			"name": "black-forest-labs",
+			"type": "org",
+			"isHf": false,
+			"isHfAdmin": false,
+			"isMod": false,
+			"isEnterprise": false,
+			"followerCount": 18356
+		},
+		"colorFrom": "yellow",
+		"colorTo": "pink",
+		"createdAt": "2024-08-01T09:32:41.000Z",
+		"emoji": "🏎️💨",
+		"id": "black-forest-labs/FLUX.1-schnell",
+		"lastModified": "2024-08-09T14:51:04.000Z",
+		"likes": 4804,
+		"pinned": false,
+		"private": false,
+		"sdk": "gradio",
+		"repoType": "space",
+		"runtime": {
+			"stage": "RUNNING",
+			"hardware": {
+				"current": "zero-a10g",
+				"requested": "zero-a10g"
+			},
+			"storage": null,
+			"gcTimeout": 172800,
+			"replicas": {
+				"current": 1,
+				"requested": "auto"
+			},
+			"devMode": false,
+			"domains": [
+				{
+					"domain": "black-forest-labs-flux-1-schnell.hf.space",
+					"stage": "READY"
+				}
+			],
+			"sha": "86f96a46582e9bbbc6245e4b1eb7d72cd8ec7bda"
+		},
+		"title": "FLUX.1 [Schnell]",
+		"isLikedByUser": false,
+		"ai_short_description": "Generate images from text prompts",
+		"ai_category": "Image Generation",
+		"trendingScore": 24,
+		"semanticRelevancyScore": 0.6919353880044354
+	}
+]

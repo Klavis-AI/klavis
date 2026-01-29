@@ -1,0 +1,38 @@
+# FastAgent Configuration File
+
+# Default Model Configuration:
+#
+# Takes format:
+#   <provider>.<model_string>.<reasoning_effort?> (e.g. anthropic.claude-3-5-sonnet-20241022 or openai.o3-mini.low)
+# Accepts aliases for Anthropic Models: haiku, haiku3, sonnet, sonnet35, opus, opus3
+# and OpenAI Models: gpt-4.1, gpt-4.1-mini, o1, o1-mini, o3-mini
+#
+# If not specified, defaults to "haiku".
+# Can be overriden with a command line switch --model=<model>, or within the Agent constructor.
+
+default_model: slow
+
+# Logging and Console Configuration:
+logger:
+  # level: "debug" | "info" | "warning" | "error"
+  # type: "none" | "console" | "file" | "http"
+  # path: "/path/to/logfile.jsonl"
+
+  # Switch the progress display on or off
+  progress_display: true
+
+  # Show chat User/Assistant messages on the console
+  show_chat: true
+  # Show tool calls on the console
+  show_tools: true
+  # Truncate long tool responses on the console
+  truncate_tools: true
+
+# MCP Servers
+mcp:
+  servers:
+    qwen:
+      transport: http
+      url: http://localhost:3001/mcp?gradio=mcp-tools/qwen-image
+      headers:
+        Authorization: Bearer

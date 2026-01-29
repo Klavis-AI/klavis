@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+
+
+pnpm-debug.log*
+lerna-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+node_modules
+dist/
+.vite/
+dist-ssr
+*.local
+
+# TypeScript
+*.tsbuildinfo
+.tsc-cache/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+hf-mcp-server.code-workspace
+.env.test
+packages/e2e-python/fastagent.secrets.yaml
+packages/e2e-python/fastagent.jsonl
+.env.test-analytics
+packages/e2e-python/qwen-test/fastagent.secrets.yaml
+
+# Generated files
+packages/app/src/server/resources/gradio-widget-content.ts
+.fast-agent/sessions/
