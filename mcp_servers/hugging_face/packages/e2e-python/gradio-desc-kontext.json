@@ -1,0 +1,56 @@
+{
+    "tools": [
+        {
+            "name": "FLUX_1_Kontext_Dev_infer",
+            "description": "Perform image editing using the FLUX.1 Kontext pipeline. This function takes an input image and a text prompt to generate a modified version of the image based on the provided instructions. It uses the FLUX.1 Kontext model for contextual image editing tasks. If a user passes a file as an input, use the upload_file_to_gradio tool, if present, to upload the file to the gradio app and create a Gradio File Input. Then use the returned path as the input to the tool. Returns: A 3-tuple containing:, PIL.Image.Image: The generated/edited image, int: The seed value used for generation (useful when randomize_seed=True), gr.update: Gradio update object to make the reuse button visible, , >>> edited_image, used_seed, button_update = infer(, ...     input_image=my_image,, ...     prompt=\"Add sunglasses\",, ...     seed=123,, ...     randomize_seed=False,, ...     guidance_scale=2.5, ... )",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "input_image": {
+                        "title": "ImageData",
+                        "type": "string",
+                        "description": "The input image to be edited. Will be converted",
+                        "format": "Gradio File Input - a http or https url to a file"
+                    },
+                    "prompt": {
+                        "type": "string",
+                        "description": "Text description of the desired edit to apply to the image."
+                    },
+                    "seed": {
+                        "type": "number",
+                        "description": "Random seed for reproducible generation. Defaults to 42."
+                    },
+                    "randomize_seed": {
+                        "type": "boolean",
+                        "description": "If True, generates a random seed instead of",
+                        "default": true
+                    },
+                    "guidance_scale": {
+                        "type": "number",
+                        "description": "Controls how closely the model follows the",
+                        "default": 2.5
+                    },
+                    "steps": {
+                        "type": "number",
+                        "description": "Controls how many steps to run the diffusion model for.",
+                        "default": 28
+                    }
+                }
+            }
+        },
+        {
+            "name": "FLUX_1_Kontext_Dev__lambda_",
+            "description": " If a user passes a file as an input, use the upload_file_to_gradio tool, if present, to upload the file to the gradio app and create a Gradio File Input. Then use the returned path as the input to the tool",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "image": {
+                        "title": "ImageData",
+                        "type": "string",
+                        "format": "Gradio File Input - a http or https url to a file"
+                    }
+                }
+            }
+        }
+    ]
+}

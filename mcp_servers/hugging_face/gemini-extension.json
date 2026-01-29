@@ -1,0 +1,11 @@
+{
+	"name": "huggingface",
+	"description": "Provides access to the Hugging Face Hub.",
+	"version": "0.2.47",
+	"contextFileName": "huggingface.md",
+	"mcpServers": {
+		"huggingface": {
+			"httpUrl": "https://huggingface.co/mcp?login"
+		}
+	}
+}

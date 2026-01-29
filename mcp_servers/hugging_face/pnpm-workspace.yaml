@@ -1,0 +1,9 @@
+packages:
+  - packages/mcp
+  - packages/app
+ignoredBuiltDependencies:
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - esbuild
+prefer-workspace-packages: true
+shared-workspace-lockfile: true

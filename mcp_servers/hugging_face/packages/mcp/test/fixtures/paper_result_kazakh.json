@@ -1,0 +1,854 @@
+[
+	{
+		"paper": {
+			"id": "2404.04487",
+			"authors": [
+				{
+					"_id": "661508c74476535462a61577",
+					"user": {
+						"_id": "6426341dad1e3b0e6e90ebd6",
+						"avatarUrl": "/avatars/449b0957c458b8aedb6e56b015852bc3.svg",
+						"isPro": false,
+						"fullname": "Rustem Yeshpanov",
+						"user": "yeshpanovrustem",
+						"type": "user"
+					},
+					"name": "Rustem Yeshpanov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2024-11-29T10:08:36.253Z",
+					"hidden": false
+				},
+				{
+					"_id": "661508c74476535462a61578",
+					"user": {
+						"_id": "603f8056076aa73940921525",
+						"avatarUrl": "/avatars/6aeffe1021af17ced8480a4c718083f6.svg",
+						"isPro": false,
+						"fullname": "Pavel Efimov",
+						"user": "pefimov",
+						"type": "user"
+					},
+					"name": "Pavel Efimov",
+					"status": "extracted_confirmed",
+					"statusLastChangedAt": "2024-04-09T09:23:55.492Z",
+					"hidden": false
+				},
+				{
+					"_id": "661508c74476535462a61579",
+					"user": {
+						"_id": "61623a7bb45ca126bca65688",
+						"avatarUrl": "/avatars/cdbd04afdb5401d1cbbd390416f3c1e3.svg",
+						"isPro": false,
+						"fullname": "Leo Boytsov",
+						"user": "searchivarius",
+						"type": "user"
+					},
+					"name": "Leonid Boytsov",
+					"status": "extracted_confirmed",
+					"statusLastChangedAt": "2024-04-09T17:59:21.864Z",
+					"hidden": false
+				},
+				{
+					"_id": "661508c74476535462a6157a",
+					"user": {
+						"_id": "63a2880ce36f2e4d5b2340a3",
+						"avatarUrl": "/avatars/753ea60d96bc3109d1a3a40f3ac19256.svg",
+						"isPro": false,
+						"fullname": "Ardak Shalkarbayuly",
+						"user": "ardakshalkar",
+						"type": "user"
+					},
+					"name": "Ardak Shalkarbayuli",
+					"status": "extracted_pending",
+					"statusLastChangedAt": "2024-04-09T09:22:15.652Z",
+					"hidden": false
+				},
+				{
+					"_id": "661508c74476535462a6157b",
+					"user": {
+						"_id": "6361fd8dda0599dc08caac11",
+						"avatarUrl": "/avatars/30c26ccb60282d2567c40749965a9708.svg",
+						"isPro": false,
+						"fullname": "Pavel Braslavski",
+						"user": "pbras",
+						"type": "user"
+					},
+					"name": "Pavel Braslavski",
+					"status": "extracted_pending",
+					"statusLastChangedAt": "2024-04-09T09:22:15.652Z",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2024-04-06T03:40:36.000Z",
+			"title": "KazQAD: Kazakh Open-Domain Question Answering Dataset",
+			"summary": "We introduce KazQAD -- a Kazakh open-domain question answering (ODQA) dataset\n-- that can be used in both reading comprehension and full ODQA settings, as\nwell as for information retrieval experiments. KazQAD contains just under 6,000\nunique questions with extracted short answers and nearly 12,000 passage-level\nrelevance judgements. We use a combination of machine translation, Wikipedia\nsearch, and in-house manual annotation to ensure annotation efficiency and data\nquality. The questions come from two sources: translated items from the Natural\nQuestions (NQ) dataset (only for training) and the original Kazakh Unified\nNational Testing (UNT) exam (for development and testing). The accompanying\ntext corpus contains more than 800,000 passages from the Kazakh Wikipedia. As a\nsupplementary dataset, we release around 61,000 question-passage-answer triples\nfrom the NQ dataset that have been machine-translated into Kazakh. We develop\nbaseline retrievers and readers that achieve reasonable scores in retrieval\n(NDCG@10 = 0.389 MRR = 0.382), reading comprehension (EM = 38.5 F1 = 54.2), and\nfull ODQA (EM = 17.8 F1 = 28.7) settings. Nevertheless, these results are\nsubstantially lower than state-of-the-art results for English QA collections,\nand we think that there should still be ample room for improvement. We also\nshow that the current OpenAI's ChatGPTv3.5 is not able to answer KazQAD test\nquestions in the closed-book setting with acceptable quality. The dataset is\nfreely available under the Creative Commons licence (CC BY-SA) at\nhttps://github.com/IS2AI/KazQAD.",
+			"upvotes": 1,
+			"discussionId": "661508c74476535462a6158d",
+			"ai_keywords": [
+				"open-domain question answering (ODQA)",
+				"reading comprehension",
+				"full ODQA",
+				"information retrieval",
+				"machine translation",
+				"Wikipedia search",
+				"Natural Questions (NQ) dataset",
+				"Kazakh Unified National Testing (UNT) exam",
+				"NDCG@10",
+				"MRR",
+				"EM",
+				"F1",
+				"closed-book setting",
+				"ChatGPTv3.5"
+			]
+		},
+		"publishedAt": "2024-04-05T23:40:36.000Z",
+		"title": "KazQAD: Kazakh Open-Domain Question Answering Dataset",
+		"summary": "We introduce KazQAD -- a Kazakh open-domain question answering (ODQA) dataset\n-- that can be used in both reading comprehension and full ODQA settings, as\nwell as for information retrieval experiments. KazQAD contains just under 6,000\nunique questions with extracted short answers and nearly 12,000 passage-level\nrelevance judgements. We use a combination of machine translation, Wikipedia\nsearch, and in-house manual annotation to ensure annotation efficiency and data\nquality. The questions come from two sources: translated items from the Natural\nQuestions (NQ) dataset (only for training) and the original Kazakh Unified\nNational Testing (UNT) exam (for development and testing). The accompanying\ntext corpus contains more than 800,000 passages from the Kazakh Wikipedia. As a\nsupplementary dataset, we release around 61,000 question-passage-answer triples\nfrom the NQ dataset that have been machine-translated into Kazakh. We develop\nbaseline retrievers and readers that achieve reasonable scores in retrieval\n(NDCG@10 = 0.389 MRR = 0.382), reading comprehension (EM = 38.5 F1 = 54.2), and\nfull ODQA (EM = 17.8 F1 = 28.7) settings. Nevertheless, these results are\nsubstantially lower than state-of-the-art results for English QA collections,\nand we think that there should still be ample room for improvement. We also\nshow that the current OpenAI's ChatGPTv3.5 is not able to answer KazQAD test\nquestions in the closed-book setting with acceptable quality. The dataset is\nfreely available under the Creative Commons licence (CC BY-SA) at\nhttps://github.com/IS2AI/KazQAD.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2404.04487.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "KazQAD: " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": " Open-Domain Question Answering Dataset" }
+		],
+		"highlightedSummary": [
+			{ "type": "text", "text": "We introduce KazQAD -- a " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": " open-domain question answering (ODQA) dataset\n-- that can be used in both reading comprehension and full ODQA settings, as\nwell as for information retrieval experiments. KazQAD contains just under 6,000\nunique questions with extracted short answers and nearly 12,000 passage-level\nrelevance judgements. We use a combination of machine translation, Wikipedia\nsearch, and in-house manual annotation to ensure annotation efficiency and data\nquality. The questions come from two sources: translated items from the Natural\nQuestions (NQ) dataset (only for training) and the original Kazakh Unified\nNational Testing (UNT) exam (for development and testing). The accompanying\ntext corpus contains more than 800,000 passages from the Kazakh Wikipedia. As a\nsupplementary dataset, we release around 61,000 question-passage-answer triples\nfrom the NQ dataset that have been machine-translated into Kazakh. We develop\nbaseline retrievers and readers that achieve reasonable scores in retrieval\n(NDCG@10 = 0.389 MRR = 0.382), reading comprehension (EM = 38.5 F1 = 54.2), and\nfull ODQA (EM = 17.8 F1 = 28.7) settings. Nevertheless, these results are\nsubstantially lower than state-of-the-art results for English QA collections,\nand we think that there should still be ample room for improvement. We also\nshow that the current OpenAI's ChatGPTv3.5 is not able to answer KazQAD test\nquestions in the closed-book setting with acceptable quality. The dataset is\nfreely available under the Creative Commons licence (CC BY-SA) at\nhttps://github.com/IS2AI/KazQAD."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2403.19399",
+			"authors": [
+				{
+					"_id": "66198cc11e0c93ea29ffe643",
+					"user": {
+						"_id": "6426341dad1e3b0e6e90ebd6",
+						"avatarUrl": "/avatars/449b0957c458b8aedb6e56b015852bc3.svg",
+						"isPro": false,
+						"fullname": "Rustem Yeshpanov",
+						"user": "yeshpanovrustem",
+						"type": "user"
+					},
+					"name": "Rustem Yeshpanov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2024-11-29T10:08:41.389Z",
+					"hidden": false
+				},
+				{
+					"_id": "66198cc11e0c93ea29ffe644",
+					"name": "Alina Polonskaya",
+					"hidden": false
+				},
+				{
+					"_id": "66198cc11e0c93ea29ffe645",
+					"name": "Huseyin Atakan Varol",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2024-03-28T13:19:16.000Z",
+			"title": "KazParC: Kazakh Parallel Corpus for Machine Translation",
+			"summary": "We introduce KazParC, a parallel corpus designed for machine translation\nacross Kazakh, English, Russian, and Turkish. The first and largest publicly\navailable corpus of its kind, KazParC contains a collection of 371,902 parallel\nsentences covering different domains and developed with the assistance of human\ntranslators. Our research efforts also extend to the development of a neural\nmachine translation model nicknamed Tilmash. Remarkably, the performance of\nTilmash is on par with, and in certain instances, surpasses that of industry\ngiants, such as Google Translate and Yandex Translate, as measured by standard\nevaluation metrics, such as BLEU and chrF. Both KazParC and Tilmash are openly\navailable for download under the Creative Commons Attribution 4.0 International\nLicense (CC BY 4.0) through our GitHub repository.",
+			"upvotes": 0,
+			"discussionId": "66198cc11e0c93ea29ffe669",
+			"ai_keywords": [
+				"parallel corpus",
+				"machine translation",
+				"parallel sentences",
+				"machine translation model",
+				"BLEU",
+				"chrF"
+			]
+		},
+		"publishedAt": "2024-03-28T09:19:16.000Z",
+		"title": "KazParC: Kazakh Parallel Corpus for Machine Translation",
+		"summary": "We introduce KazParC, a parallel corpus designed for machine translation\nacross Kazakh, English, Russian, and Turkish. The first and largest publicly\navailable corpus of its kind, KazParC contains a collection of 371,902 parallel\nsentences covering different domains and developed with the assistance of human\ntranslators. Our research efforts also extend to the development of a neural\nmachine translation model nicknamed Tilmash. Remarkably, the performance of\nTilmash is on par with, and in certain instances, surpasses that of industry\ngiants, such as Google Translate and Yandex Translate, as measured by standard\nevaluation metrics, such as BLEU and chrF. Both KazParC and Tilmash are openly\navailable for download under the Creative Commons Attribution 4.0 International\nLicense (CC BY 4.0) through our GitHub repository.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2403.19399.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "KazParC: " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": " Parallel Corpus for Machine Translation" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "We introduce KazParC, a parallel corpus designed for machine translation\nacross "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": ", English, Russian, and Turkish. The first and largest publicly\navailable corpus of its kind, KazParC contains a collection of 371,902 parallel\nsentences covering different domains and developed with the assistance of human\ntranslators. Our research efforts also extend to the development of a neural\nmachine translation model nicknamed Tilmash. Remarkably, the performance of\nTilmash is on par with, and in certain instances, surpasses that of industry\ngiants, such as Google Translate and Yandex Translate, as measured by standard\nevaluation metrics, such as BLEU and chrF. Both KazParC and Tilmash are openly\navailable for download under the Creative Commons Attribution 4.0 International\nLicense (CC BY 4.0) through our GitHub repository."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2403.19335",
+			"authors": [
+				{
+					"_id": "66061e688be9fc54368de92f",
+					"user": {
+						"_id": "6426341dad1e3b0e6e90ebd6",
+						"avatarUrl": "/avatars/449b0957c458b8aedb6e56b015852bc3.svg",
+						"isPro": false,
+						"fullname": "Rustem Yeshpanov",
+						"user": "yeshpanovrustem",
+						"type": "user"
+					},
+					"name": "Rustem Yeshpanov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2024-11-22T10:02:19.912Z",
+					"hidden": false
+				},
+				{
+					"_id": "66061e688be9fc54368de930",
+					"name": "Huseyin Atakan Varol",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2024-03-28T11:51:11.000Z",
+			"title": "KazSAnDRA: Kazakh Sentiment Analysis Dataset of Reviews and Attitudes",
+			"summary": "This paper presents KazSAnDRA, a dataset developed for Kazakh sentiment\nanalysis that is the first and largest publicly available dataset of its kind.\nKazSAnDRA comprises an extensive collection of 180,064 reviews obtained from\nvarious sources and includes numerical ratings ranging from 1 to 5, providing a\nquantitative representation of customer attitudes. The study also pursued the\nautomation of Kazakh sentiment classification through the development and\nevaluation of four machine learning models trained for both polarity\nclassification and score classification. Experimental analysis included\nevaluation of the results considering both balanced and imbalanced scenarios.\nThe most successful model attained an F1-score of 0.81 for polarity\nclassification and 0.39 for score classification on the test sets. The dataset\nand fine-tuned models are open access and available for download under the\nCreative Commons Attribution 4.0 International License (CC BY 4.0) through our\nGitHub repository.",
+			"upvotes": 0,
+			"discussionId": "66061e688be9fc54368de946"
+		},
+		"publishedAt": "2024-03-28T07:51:11.000Z",
+		"title": "KazSAnDRA: Kazakh Sentiment Analysis Dataset of Reviews and Attitudes",
+		"summary": "This paper presents KazSAnDRA, a dataset developed for Kazakh sentiment\nanalysis that is the first and largest publicly available dataset of its kind.\nKazSAnDRA comprises an extensive collection of 180,064 reviews obtained from\nvarious sources and includes numerical ratings ranging from 1 to 5, providing a\nquantitative representation of customer attitudes. The study also pursued the\nautomation of Kazakh sentiment classification through the development and\nevaluation of four machine learning models trained for both polarity\nclassification and score classification. Experimental analysis included\nevaluation of the results considering both balanced and imbalanced scenarios.\nThe most successful model attained an F1-score of 0.81 for polarity\nclassification and 0.39 for score classification on the test sets. The dataset\nand fine-tuned models are open access and available for download under the\nCreative Commons Attribution 4.0 International License (CC BY 4.0) through our\nGitHub repository.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2403.19335.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "KazSAnDRA: " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": " Sentiment Analysis Dataset of Reviews and Attitudes"
+			}
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "This paper presents KazSAnDRA, a dataset developed for "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": " sentiment\nanalysis that is the first and largest publicly available dataset of its kind.\nKazSAnDRA comprises an extensive collection of 180,064 reviews obtained from\nvarious sources and includes numerical ratings ranging from 1 to 5, providing a\nquantitative representation of customer attitudes. The study also pursued the\nautomation of Kazakh sentiment classification through the development and\nevaluation of four machine learning models trained for both polarity\nclassification and score classification. Experimental analysis included\nevaluation of the results considering both balanced and imbalanced scenarios.\nThe most successful model attained an F1-score of 0.81 for polarity\nclassification and 0.39 for score classification on the test sets. The dataset\nand fine-tuned models are open access and available for download under the\nCreative Commons Attribution 4.0 International License (CC BY 4.0) through our\nGitHub repository."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2111.13419",
+			"authors": [
+				{
+					"_id": "67404bb4f8ad6c78246b416d",
+					"user": {
+						"_id": "6426341dad1e3b0e6e90ebd6",
+						"avatarUrl": "/avatars/449b0957c458b8aedb6e56b015852bc3.svg",
+						"isPro": false,
+						"fullname": "Rustem Yeshpanov",
+						"user": "yeshpanovrustem",
+						"type": "user"
+					},
+					"name": "Rustem Yeshpanov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2024-11-29T10:08:23.718Z",
+					"hidden": false
+				},
+				{
+					"_id": "67404bb4f8ad6c78246b416e",
+					"name": "Yerbolat Khassanov",
+					"hidden": false
+				},
+				{
+					"_id": "67404bb4f8ad6c78246b416f",
+					"name": "Huseyin Atakan Varol",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2021-11-26T10:56:19.000Z",
+			"title": "KazNERD: Kazakh Named Entity Recognition Dataset",
+			"summary": "We present the development of a dataset for Kazakh named entity recognition.\nThe dataset was built as there is a clear need for publicly available annotated\ncorpora in Kazakh, as well as annotation guidelines containing\nstraightforward--but rigorous--rules and examples. The dataset annotation,\nbased on the IOB2 scheme, was carried out on television news text by two native\nKazakh speakers under the supervision of the first author. The resulting\ndataset contains 112,702 sentences and 136,333 annotations for 25 entity\nclasses. State-of-the-art machine learning models to automatise Kazakh named\nentity recognition were also built, with the best-performing model achieving an\nexact match F1-score of 97.22% on the test set. The annotated dataset,\nguidelines, and codes used to train the models are freely available for\ndownload under the CC BY 4.0 licence from https://github.com/IS2AI/KazNERD.",
+			"upvotes": 0,
+			"discussionId": "67404bb5f8ad6c78246b4197"
+		},
+		"publishedAt": "2021-11-26T05:56:19.000Z",
+		"title": "KazNERD: Kazakh Named Entity Recognition Dataset",
+		"summary": "We present the development of a dataset for Kazakh named entity recognition.\nThe dataset was built as there is a clear need for publicly available annotated\ncorpora in Kazakh, as well as annotation guidelines containing\nstraightforward--but rigorous--rules and examples. The dataset annotation,\nbased on the IOB2 scheme, was carried out on television news text by two native\nKazakh speakers under the supervision of the first author. The resulting\ndataset contains 112,702 sentences and 136,333 annotations for 25 entity\nclasses. State-of-the-art machine learning models to automatise Kazakh named\nentity recognition were also built, with the best-performing model achieving an\nexact match F1-score of 97.22% on the test set. The annotated dataset,\nguidelines, and codes used to train the models are freely available for\ndownload under the CC BY 4.0 licence from https://github.com/IS2AI/KazNERD.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2111.13419.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "KazNERD: " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": " Named Entity Recognition Dataset" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "We present the development of a dataset for "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": " named entity recognition.\nThe dataset was built as there is a clear need for publicly available annotated\ncorpora in Kazakh, as well as annotation guidelines containing\nstraightforward--but rigorous--rules and examples. The dataset annotation,\nbased on the IOB2 scheme, was carried out on television news text by two native\nKazakh speakers under the supervision of the first author. The resulting\ndataset contains 112,702 sentences and 136,333 annotations for 25 entity\nclasses. State-of-the-art machine learning models to automatise Kazakh named\nentity recognition were also built, with the best-performing model achieving an\nexact match F1-score of 97.22% on the test set. The annotated dataset,\nguidelines, and codes used to train the models are freely available for\ndownload under the CC BY 4.0 licence from https://github.com/IS2AI/KazNERD."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2404.01033",
+			"authors": [
+				{
+					"_id": "674a0701239ce8cdc0ce3390",
+					"name": "Adal Abilbekov",
+					"hidden": false
+				},
+				{
+					"_id": "674a0701239ce8cdc0ce3391",
+					"name": "Saida Mussakhojayeva",
+					"hidden": false
+				},
+				{
+					"_id": "674a0701239ce8cdc0ce3392",
+					"user": {
+						"_id": "6426341dad1e3b0e6e90ebd6",
+						"avatarUrl": "/avatars/449b0957c458b8aedb6e56b015852bc3.svg",
+						"isPro": false,
+						"fullname": "Rustem Yeshpanov",
+						"user": "yeshpanovrustem",
+						"type": "user"
+					},
+					"name": "Rustem Yeshpanov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2024-11-29T21:10:05.527Z",
+					"hidden": false
+				},
+				{
+					"_id": "674a0701239ce8cdc0ce3393",
+					"name": "Huseyin Atakan Varol",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2024-04-01T10:32:04.000Z",
+			"title": "KazEmoTTS: A Dataset for Kazakh Emotional Text-to-Speech Synthesis",
+			"summary": "This study focuses on the creation of the KazEmoTTS dataset, designed for\nemotional Kazakh text-to-speech (TTS) applications. KazEmoTTS is a collection\nof 54,760 audio-text pairs, with a total duration of 74.85 hours, featuring\n34.23 hours delivered by a female narrator and 40.62 hours by two male\nnarrators. The list of the emotions considered include \"neutral\", \"angry\",\n\"happy\", \"sad\", \"scared\", and \"surprised\". We also developed a TTS model\ntrained on the KazEmoTTS dataset. Objective and subjective evaluations were\nemployed to assess the quality of synthesized speech, yielding an MCD score\nwithin the range of 6.02 to 7.67, alongside a MOS that spanned from 3.51 to\n3.57. To facilitate reproducibility and inspire further research, we have made\nour code, pre-trained model, and dataset accessible in our GitHub repository.",
+			"upvotes": 0,
+			"discussionId": "674a0702239ce8cdc0ce33dc"
+		},
+		"publishedAt": "2024-04-01T06:32:04.000Z",
+		"title": "KazEmoTTS: A Dataset for Kazakh Emotional Text-to-Speech Synthesis",
+		"summary": "This study focuses on the creation of the KazEmoTTS dataset, designed for\nemotional Kazakh text-to-speech (TTS) applications. KazEmoTTS is a collection\nof 54,760 audio-text pairs, with a total duration of 74.85 hours, featuring\n34.23 hours delivered by a female narrator and 40.62 hours by two male\nnarrators. The list of the emotions considered include \"neutral\", \"angry\",\n\"happy\", \"sad\", \"scared\", and \"surprised\". We also developed a TTS model\ntrained on the KazEmoTTS dataset. Objective and subjective evaluations were\nemployed to assess the quality of synthesized speech, yielding an MCD score\nwithin the range of 6.02 to 7.67, alongside a MOS that spanned from 3.51 to\n3.57. To facilitate reproducibility and inspire further research, we have made\nour code, pre-trained model, and dataset accessible in our GitHub repository.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2404.01033.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "KazEmoTTS: A Dataset for " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": " Emotional Text-to-Speech Synthesis" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "This study focuses on the creation of the KazEmoTTS dataset, designed for\nemotional "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": " text-to-speech (TTS) applications. KazEmoTTS is a collection\nof 54,760 audio-text pairs, with a total duration of 74.85 hours, featuring\n34.23 hours delivered by a female narrator and 40.62 hours by two male\nnarrators. The list of the emotions considered include \"neutral\", \"angry\",\n\"happy\", \"sad\", \"scared\", and \"surprised\". We also developed a TTS model\ntrained on the KazEmoTTS dataset. Objective and subjective evaluations were\nemployed to assess the quality of synthesized speech, yielding an MCD score\nwithin the range of 6.02 to 7.67, alongside a MOS that spanned from 3.51 to\n3.57. To facilitate reproducibility and inspire further research, we have made\nour code, pre-trained model, and dataset accessible in our GitHub repository."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2502.13640",
+			"authors": [
+				{
+					"_id": "67b9e1c192e751667385cd01",
+					"name": "Maiya Goloburda",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd02",
+					"name": "Nurkhan Laiyk",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd03",
+					"name": "Diana Turmakhan",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd04",
+					"name": "Yuxia Wang",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd05",
+					"name": "Mukhammed Togmanov",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd06",
+					"user": {
+						"_id": "6509feb92257a3afbaeecfea",
+						"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/6509feb92257a3afbaeecfea/a_UbA-2WtZeLTf0ugVzSh.jpeg",
+						"isPro": false,
+						"fullname": "Jonibek Mansurov",
+						"user": "MJonibek",
+						"type": "user"
+					},
+					"name": "Jonibek Mansurov",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2025-02-26T08:38:13.169Z",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd07",
+					"name": "Askhat Sametov",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd08",
+					"name": "Nurdaulet Mukhituly",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd09",
+					"name": "Minghan Wang",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd0a",
+					"name": "Daniil Orel",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd0b",
+					"user": {
+						"_id": "637e8b1b66ee00bcb2468ed0",
+						"avatarUrl": "https://cdn-avatars.huggingface.co/v1/production/uploads/1669240174964-637e8b1b66ee00bcb2468ed0.jpeg",
+						"isPro": false,
+						"fullname": "Zain",
+						"user": "zainmujahid",
+						"type": "user"
+					},
+					"name": "Zain Muhammad Mujahid",
+					"status": "claimed_verified",
+					"statusLastChangedAt": "2025-02-24T09:20:09.961Z",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd0c",
+					"name": "Fajri Koto",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd0d",
+					"name": "Timothy Baldwin",
+					"hidden": false
+				},
+				{
+					"_id": "67b9e1c192e751667385cd0e",
+					"name": "Preslav Nakov",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2025-02-19T11:33:22.000Z",
+			"title": "Qorgau: Evaluating LLM Safety in Kazakh-Russian Bilingual Contexts",
+			"summary": "Large language models (LLMs) are known to have the potential to generate\nharmful content, posing risks to users. While significant progress has been\nmade in developing taxonomies for LLM risks and safety evaluation prompts, most\nstudies have focused on monolingual contexts, primarily in English. However,\nlanguage- and region-specific risks in bilingual contexts are often overlooked,\nand core findings can diverge from those in monolingual settings. In this\npaper, we introduce Qorgau, a novel dataset specifically designed for safety\nevaluation in Kazakh and Russian, reflecting the unique bilingual context in\nKazakhstan, where both Kazakh (a low-resource language) and Russian (a\nhigh-resource language) are spoken. Experiments with both multilingual and\nlanguage-specific LLMs reveal notable differences in safety performance,\nemphasizing the need for tailored, region-specific datasets to ensure the\nresponsible and safe deployment of LLMs in countries like Kazakhstan. Warning:\nthis paper contains example data that may be offensive, harmful, or biased.",
+			"upvotes": 0,
+			"discussionId": "67b9e1c292e751667385cd52",
+			"ai_keywords": [
+				"transformers",
+				"LLM risks",
+				"safety Evaluationence prompts",
+				"monolingual contexts",
+				"language-specific risks",
+				"bilingual contexts",
+				"safety evaluation",
+				"dataset",
+				"Kazakh",
+				"Russian",
+				"low-resource language",
+				"high-resource language",
+				"safety performances",
+				"region-specific datasets",
+				"multilingual LLMs",
+				"language-specific LLMs",
+				"responsible deployment",
+				"LLM deployment"
+			]
+		},
+		"publishedAt": "2025-02-19T06:33:22.000Z",
+		"title": "Qorgau: Evaluating LLM Safety in Kazakh-Russian Bilingual Contexts",
+		"summary": "Large language models (LLMs) are known to have the potential to generate\nharmful content, posing risks to users. While significant progress has been\nmade in developing taxonomies for LLM risks and safety evaluation prompts, most\nstudies have focused on monolingual contexts, primarily in English. However,\nlanguage- and region-specific risks in bilingual contexts are often overlooked,\nand core findings can diverge from those in monolingual settings. In this\npaper, we introduce Qorgau, a novel dataset specifically designed for safety\nevaluation in Kazakh and Russian, reflecting the unique bilingual context in\nKazakhstan, where both Kazakh (a low-resource language) and Russian (a\nhigh-resource language) are spoken. Experiments with both multilingual and\nlanguage-specific LLMs reveal notable differences in safety performance,\nemphasizing the need for tailored, region-specific datasets to ensure the\nresponsible and safe deployment of LLMs in countries like Kazakhstan. Warning:\nthis paper contains example data that may be offensive, harmful, or biased.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2502.13640.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{ "type": "text", "text": "Qorgau: Evaluating LLM Safety in " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": "-Russian Bilingual Contexts" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "Large language models (LLMs) are known to have the potential to generate\nharmful content, posing risks to users. While significant progress has been\nmade in developing taxonomies for LLM risks and safety evaluation prompts, most\nstudies have focused on monolingual contexts, primarily in English. However,\nlanguage- and region-specific risks in bilingual contexts are often overlooked,\nand core findings can diverge from those in monolingual settings. In this\npaper, we introduce Qorgau, a novel dataset specifically designed for safety\nevaluation in Kazakh and Russian, reflecting the unique bilingual context in\nKazakhstan, where both Kazakh (a low-resource language) and Russian (a\nhigh-resource language) are spoken. Experiments with both multilingual and\nlanguage-specific LLMs reveal notable differences in safety performance,\nemphasizing the need for tailored, region-specific datasets to ensure the\nresponsible and safe deployment of LLMs in countries like Kazakhstan. Warning:\nthis paper contains example data that may be offensive, harmful, or biased."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2503.01493",
+			"authors": [
+				{
+					"_id": "67c7e45823ded64a09851f7d",
+					"name": "Fajri Koto",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f7e",
+					"name": "Rituraj Joshi",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f7f",
+					"name": "Nurdaulet Mukhituly",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f80",
+					"name": "Yuxia Wang",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f81",
+					"name": "Zhuohan Xie",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f82",
+					"name": "Rahul Pal",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f83",
+					"name": "Daniil Orel",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f84",
+					"name": "Parvez Mullah",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f85",
+					"name": "Diana Turmakhan",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f86",
+					"name": "Maiya Goloburda",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f87",
+					"name": "Mohammed Kamran",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f88",
+					"name": "Samujjwal Ghosh",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f89",
+					"name": "Bokang Jia",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8a",
+					"name": "Jonibek Mansurov",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8b",
+					"name": "Mukhammed Togmanov",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8c",
+					"name": "Debopriyo Banerjee",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8d",
+					"name": "Nurkhan Laiyk",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8e",
+					"name": "Akhmed Sakip",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f8f",
+					"name": "Xudong Han",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f90",
+					"name": "Ekaterina Kochmar",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f91",
+					"name": "Alham Fikri Aji",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f92",
+					"name": "Aaryamonvikram Singh",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f93",
+					"name": "Alok Anil Jadhav",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f94",
+					"name": "Satheesh Katipomu",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f95",
+					"name": "Samta Kamboj",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f96",
+					"name": "Monojit Choudhury",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f97",
+					"name": "Gurpreet Gosal",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f98",
+					"name": "Gokul Ramakrishnan",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f99",
+					"name": "Biswajit Mishra",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9a",
+					"name": "Sarath Chandran",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9b",
+					"name": "Avraham Sheinin",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9c",
+					"name": "Natalia Vassilieva",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9d",
+					"name": "Neha Sengupta",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9e",
+					"name": "Larry Murray",
+					"hidden": false
+				},
+				{
+					"_id": "67c7e45823ded64a09851f9f",
+					"name": "Preslav Nakov",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2025-03-03T13:05:48.000Z",
+			"title": "Llama-3.1-Sherkala-8B-Chat: An Open Large Language Model for Kazakh",
+			"summary": "Llama-3.1-Sherkala-8B-Chat, or Sherkala-Chat (8B) for short, is a\nstate-of-the-art instruction-tuned open generative large language model (LLM)\ndesigned for Kazakh. Sherkala-Chat (8B) aims to enhance the inclusivity of LLM\nadvancements for Kazakh speakers. Adapted from the LLaMA-3.1-8B model,\nSherkala-Chat (8B) is trained on 45.3B tokens across Kazakh, English, Russian,\nand Turkish. With 8 billion parameters, it demonstrates strong knowledge and\nreasoning abilities in Kazakh, significantly outperforming existing open Kazakh\nand multilingual models of similar scale while achieving competitive\nperformance in English. We release Sherkala-Chat (8B) as an open-weight\ninstruction-tuned model and provide a detailed overview of its training,\nfine-tuning, safety alignment, and evaluation, aiming to advance research and\nsupport diverse real-world applications.",
+			"upvotes": 1,
+			"discussionId": "67c7e45e23ded64a09852231",
+			"ai_keywords": [
+				"instruction-tuned",
+				"open generative large language model",
+				"LLaMA-3.1-8B",
+				"token",
+				"parameter-efficient fine-tuning",
+				"safety alignment"
+			]
+		},
+		"publishedAt": "2025-03-03T08:05:48.000Z",
+		"title": "Llama-3.1-Sherkala-8B-Chat: An Open Large Language Model for Kazakh",
+		"summary": "Llama-3.1-Sherkala-8B-Chat, or Sherkala-Chat (8B) for short, is a\nstate-of-the-art instruction-tuned open generative large language model (LLM)\ndesigned for Kazakh. Sherkala-Chat (8B) aims to enhance the inclusivity of LLM\nadvancements for Kazakh speakers. Adapted from the LLaMA-3.1-8B model,\nSherkala-Chat (8B) is trained on 45.3B tokens across Kazakh, English, Russian,\nand Turkish. With 8 billion parameters, it demonstrates strong knowledge and\nreasoning abilities in Kazakh, significantly outperforming existing open Kazakh\nand multilingual models of similar scale while achieving competitive\nperformance in English. We release Sherkala-Chat (8B) as an open-weight\ninstruction-tuned model and provide a detailed overview of its training,\nfine-tuning, safety alignment, and evaluation, aiming to advance research and\nsupport diverse real-world applications.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2503.01493.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{
+				"type": "text",
+				"text": "Llama-3.1-Sherkala-8B-Chat: An Open Large Language Model for "
+			},
+			{ "type": "highlight", "text": "Kazakh" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "Llama-3.1-Sherkala-8B-Chat, or Sherkala-Chat (8B) for short, is a\nstate-of-the-art instruction-tuned open generative large language model (LLM)\ndesigned for "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": ". Sherkala-Chat (8B) aims to enhance the inclusivity of LLM\nadvancements for Kazakh speakers. Adapted from the LLaMA-3.1-8B model,\nSherkala-Chat (8B) is trained on 45.3B tokens across Kazakh, English, Russian,\nand Turkish. With 8 billion parameters, it demonstrates strong knowledge and\nreasoning abilities in Kazakh, significantly outperforming existing open Kazakh\nand multilingual models of similar scale while achieving competitive\nperformance in English. We release Sherkala-Chat (8B) as an open-weight\ninstruction-tuned model and provide a detailed overview of its training,\nfine-tuning, safety alignment, and evaluation, aiming to advance research and\nsupport diverse real-world applications."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2108.01280",
+			"authors": [
+				{
+					"_id": "678a5b3060c77cb881de2a69",
+					"name": "Saida Mussakhojayeva",
+					"hidden": false
+				},
+				{
+					"_id": "678a5b3060c77cb881de2a6a",
+					"name": "Yerbolat Khassanov",
+					"hidden": false
+				},
+				{
+					"_id": "678a5b3060c77cb881de2a6b",
+					"name": "Huseyin Atakan Varol",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2021-08-03T04:04:01.000Z",
+			"title": "A Study of Multilingual End-to-End Speech Recognition for Kazakh,\n  Russian, and English",
+			"summary": "We study training a single end-to-end (E2E) automatic speech recognition\n(ASR) model for three languages used in Kazakhstan: Kazakh, Russian, and\nEnglish. We first describe the development of multilingual E2E ASR based on\nTransformer networks and then perform an extensive assessment on the\naforementioned languages. We also compare two variants of output grapheme set\nconstruction: combined and independent. Furthermore, we evaluate the impact of\nLMs and data augmentation techniques on the recognition performance of the\nmultilingual E2E ASR. In addition, we present several datasets for training and\nevaluation purposes. Experiment results show that the multilingual models\nachieve comparable performances to the monolingual baselines with a similar\nnumber of parameters. Our best monolingual and multilingual models achieved\n20.9% and 20.5% average word error rates on the combined test set,\nrespectively. To ensure the reproducibility of our experiments and results, we\nshare our training recipes, datasets, and pre-trained models.",
+			"upvotes": 0,
+			"discussionId": "678a5b3060c77cb881de2aa2",
+			"ai_keywords": [
+				"end-to-end (E2E) automatic speech recognition (ASR)",
+				"multilingual E2E ASR",
+				"Transformer networks",
+				"output grapheme set construction",
+				"language models (LMs)",
+				"data augmentation techniques",
+				"decoding",
+				"evaluation",
+				"word error rates (WER)",
+				"monolingual baselines",
+				"training recipes",
+				"pre-trained models"
+			]
+		},
+		"publishedAt": "2021-08-03T00:04:01.000Z",
+		"title": "A Study of Multilingual End-to-End Speech Recognition for Kazakh,\n  Russian, and English",
+		"summary": "We study training a single end-to-end (E2E) automatic speech recognition\n(ASR) model for three languages used in Kazakhstan: Kazakh, Russian, and\nEnglish. We first describe the development of multilingual E2E ASR based on\nTransformer networks and then perform an extensive assessment on the\naforementioned languages. We also compare two variants of output grapheme set\nconstruction: combined and independent. Furthermore, we evaluate the impact of\nLMs and data augmentation techniques on the recognition performance of the\nmultilingual E2E ASR. In addition, we present several datasets for training and\nevaluation purposes. Experiment results show that the multilingual models\nachieve comparable performances to the monolingual baselines with a similar\nnumber of parameters. Our best monolingual and multilingual models achieved\n20.9% and 20.5% average word error rates on the combined test set,\nrespectively. To ensure the reproducibility of our experiments and results, we\nshare our training recipes, datasets, and pre-trained models.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2108.01280.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{
+				"type": "text",
+				"text": "A Study of Multilingual End-to-End Speech Recognition for "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": ",\n  Russian, and English" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "We study training a single end-to-end (E2E) automatic speech recognition\n(ASR) model for three languages used in "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": "stan: " },
+			{ "type": "highlight", "text": "Kazakh" },
+			{
+				"type": "text",
+				"text": ", Russian, and\nEnglish. We first describe the development of multilingual E2E ASR based on\nTransformer networks and then perform an extensive assessment on the\naforementioned languages. We also compare two variants of output grapheme set\nconstruction: combined and independent. Furthermore, we evaluate the impact of\nLMs and data augmentation techniques on the recognition performance of the\nmultilingual E2E ASR. In addition, we present several datasets for training and\nevaluation purposes. Experiment results show that the multilingual models\nachieve comparable performances to the monolingual baselines with a similar\nnumber of parameters. Our best monolingual and multilingual models achieved\n20.9% and 20.5% average word error rates on the combined test set,\nrespectively. To ensure the reproducibility of our experiments and results, we\nshare our training recipes, datasets, and pre-trained models."
+			}
+		]
+	},
+	{
+		"paper": {
+			"id": "2107.10637",
+			"authors": [
+				{
+					"_id": "64f63bf05f2dee8a6b87948e",
+					"user": {
+						"_id": "619957e7d7f09e0d8b7714fa",
+						"avatarUrl": "/avatars/71120837c2e7816f3ec8b2c42978ce9f.svg",
+						"isPro": false,
+						"fullname": "Ilnar Salimzianov",
+						"user": "ifs",
+						"type": "user"
+					},
+					"name": "Ilnar Salimzianov",
+					"status": "extracted_pending",
+					"statusLastChangedAt": "2023-09-04T20:20:01.065Z",
+					"hidden": false
+				}
+			],
+			"publishedAt": "2021-07-19T14:17:42.000Z",
+			"title": "A baseline model for computationally inexpensive speech recognition for\n  Kazakh using the Coqui STT framework",
+			"summary": "Mobile devices are transforming the way people interact with computers, and\nspeech interfaces to applications are ever more important. Automatic Speech\nRecognition systems recently published are very accurate, but often require\npowerful machinery (specialised Graphical Processing Units) for inference,\nwhich makes them impractical to run on commodity devices, especially in\nstreaming mode. Impressed by the accuracy of, but dissatisfied with the\ninference times of the baseline Kazakh ASR model of (Khassanov et al.,2021)\nwhen not using a GPU, we trained a new baseline acoustic model (on the same\ndataset as the aforementioned paper) and three language models for use with the\nCoqui STT framework. Results look promising, but further epochs of training and\nparameter sweeping or, alternatively, limiting the vocabulary that the ASR\nsystem must support, is needed to reach a production-level accuracy.",
+			"upvotes": 0,
+			"discussionId": "64f63bf15f2dee8a6b87949a",
+			"ai_keywords": ["Automatic Speech Recognition", "acoustic model", "language models", "Coqui STT framework"]
+		},
+		"publishedAt": "2021-07-19T10:17:42.000Z",
+		"title": "A baseline model for computationally inexpensive speech recognition for\n  Kazakh using the Coqui STT framework",
+		"summary": "Mobile devices are transforming the way people interact with computers, and\nspeech interfaces to applications are ever more important. Automatic Speech\nRecognition systems recently published are very accurate, but often require\npowerful machinery (specialised Graphical Processing Units) for inference,\nwhich makes them impractical to run on commodity devices, especially in\nstreaming mode. Impressed by the accuracy of, but dissatisfied with the\ninference times of the baseline Kazakh ASR model of (Khassanov et al.,2021)\nwhen not using a GPU, we trained a new baseline acoustic model (on the same\ndataset as the aforementioned paper) and three language models for use with the\nCoqui STT framework. Results look promising, but further epochs of training and\nparameter sweeping or, alternatively, limiting the vocabulary that the ASR\nsystem must support, is needed to reach a production-level accuracy.",
+		"thumbnail": "https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2107.10637.png",
+		"numComments": 0,
+		"upvoted": false,
+		"isAuthorParticipating": false,
+		"highlightedTitle": [
+			{
+				"type": "text",
+				"text": "A baseline model for computationally inexpensive speech recognition for\n  "
+			},
+			{ "type": "highlight", "text": "Kazakh" },
+			{ "type": "text", "text": " using the Coqui STT framework" }
+		],
+		"highlightedSummary": [
+			{
+				"type": "text",
+				"text": "Mobile devices are transforming the way people interact with computers, and\nspeech interfaces to applications are ever more important. Automatic Speech\nRecognition systems recently published are very accurate, but often require\npowerful machinery (specialised Graphical Processing Units) for inference,\nwhich makes them impractical to run on commodity devices, especially in\nstreaming mode. Impressed by the accuracy of, but dissatisfied with the\ninference times of the baseline Kazakh ASR model of (Khassanov et al.,2021)\nwhen not using a GPU, we trained a new baseline acoustic model (on the same\ndataset as the aforementioned paper) and three language models for use with the\nCoqui STT framework. Results look promising, but further epochs of training and\nparameter sweeping or, alternatively, limiting the vocabulary that the ASR\nsystem must support, is needed to reach a production-level accuracy."
+			}
+		]
+	}
+]

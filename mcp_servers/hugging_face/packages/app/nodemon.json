@@ -1,0 +1,9 @@
+{
+	"watch": ["dist/server/**/*"],
+	"ignore": ["dist/web/**/*", "src/**/*", "node_modules/**/*"],
+	"ext": "js",
+	"delay": 1000,
+	"env": {
+		"NODE_ENV": "development"
+	}
+}

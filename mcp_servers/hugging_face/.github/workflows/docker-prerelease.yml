@@ -1,0 +1,94 @@
+name: Docker Pre-release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Tag suffix for pre-release (e.g., alpha, beta, rc1)'
+        required: false
+        default: 'alpha'
+      push_to_registry:
+        description: 'Push to registry (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  docker-prerelease:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event.inputs.push_to_registry != 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        run: |
+          # Get version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+
+          # Generate tag based on trigger
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use provided suffix
+            SUFFIX="${{ github.event.inputs.tag_suffix }}"
+            TAG="${VERSION}-${SUFFIX}.$(date +%Y%m%d-%H%M%S)"
+          else
+            # Branch push - use branch name and commit
+            BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | sed 's/[^a-zA-Z0-9-]/-/g')
+            SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+            TAG="${VERSION}-${BRANCH_NAME}.${SHORT_SHA}"
+          fi
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "docker_tag=ghcr.io/${{ github.repository }}:${TAG}" >> $GITHUB_OUTPUT
+          echo "docker_tag_latest=ghcr.io/${{ github.repository }}:${BRANCH_NAME}-latest" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event.inputs.push_to_registry != 'false' }}
+          tags: |
+            ${{ steps.meta.outputs.docker_tag }}
+            ${{ steps.meta.outputs.docker_tag_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_VERSION=${{ steps.meta.outputs.version }}
+            BUILD_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+
+      - name: Output image details
+        run: |
+          echo "### 🐳 Docker Pre-release Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.meta.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ steps.meta.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.push_to_registry }}" != "false" ]; then
+            echo "**Images pushed to:**" >> $GITHUB_STEP_SUMMARY
+            echo "- \`${{ steps.meta.outputs.docker_tag }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`${{ steps.meta.outputs.docker_tag_latest }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Pull command:**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ steps.meta.outputs.docker_tag }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Note:** Image was built but not pushed to registry" >> $GITHUB_STEP_SUMMARY
+          fi

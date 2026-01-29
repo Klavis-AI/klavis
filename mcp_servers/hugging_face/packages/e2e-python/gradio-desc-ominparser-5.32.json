@@ -1,0 +1,33 @@
+{
+    "tools": [
+        {
+            "name": "OmniParser_v2_process",
+            "description": "Parses a GUI screen and returns an array of structured elements and a marked-up image showing the bounding boxes. Element array contains: Type (e.g. Icon, Text, Label), Bounding Box, Interactivity and Content",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "image_input": {
+                        "title": "ImageData",
+                        "type": "string",
+                        "format": "a http or https url to a file"
+                    },
+                    "box_threshold": {
+                        "type": "number",
+                        "description": "numeric value between 0.01 and 1.0",
+                        "default": 0.05
+                    },
+                    "iou_threshold": {
+                        "type": "number",
+                        "description": "numeric value between 0.01 and 1.0",
+                        "default": 0.1
+                    },
+                    "imgsz": {
+                        "type": "number",
+                        "description": "numeric value between 640 and 1920",
+                        "default": 640
+                    }
+                }
+            }
+        }
+    ]
+}

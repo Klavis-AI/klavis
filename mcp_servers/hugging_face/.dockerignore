@@ -1,0 +1,18 @@
+
+# Dependencies
+node_modules
+**/node_modules
+packages/*/node_modules
+
+# Build outputs  
+dist
+**/dist
+packages/*/dist
+
+npm-debug.log
+.git
+.gitignore
+.env*
+.vscode
+*.md
+!README.md
