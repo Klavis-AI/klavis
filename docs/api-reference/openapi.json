@@ -7450,7 +7450,7 @@
           "sandbox"
         ],
         "summary": "Acquire a sandbox",
-        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally specify a test_account_email to acquire a specific test account.",
+        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally specify a test_account_email to acquire a specific test account, or choose a benchmark (e.g., 'MCP Atlas') to specify the initial environment.",
         "operationId": "create_sandbox_sandbox__server_name__post",
         "security": [
           {
@@ -22077,6 +22077,17 @@
             ],
             "title": "Test Account Email",
             "description": "Optional email of a specific test account to acquire. If provided, the system will attempt to acquire the sandbox associated with this test account email instead of a random idle sandbox."
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BenchmarkEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional benchmark to specify the initial environment for the sandbox."
           }
         },
         "type": "object",
@@ -22629,6 +22640,14 @@
           "message"
         ],
         "title": "AzureADOAuthSuccessResponse"
+      },
+      "BenchmarkEnum": {
+        "type": "string",
+        "enum": [
+          "MCP_Atlas"
+        ],
+        "title": "BenchmarkEnum",
+        "description": "Supported benchmarks for sandbox initial environment"
       },
       "BigQueryDataset": {
         "properties": {
@@ -33936,6 +33955,18 @@
             "$ref": "#/components/schemas/SandboxStatus",
             "description": "Current status of the sandbox"
           },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark",
+            "description": "Benchmark for the sandbox initial environment"
+          },
           "updated_at": {
             "anyOf": [
               {
@@ -33974,6 +34005,18 @@
           "status": {
             "$ref": "#/components/schemas/SandboxStatus",
             "description": "Current status of the sandbox"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark",
+            "description": "Benchmark for the sandbox initial environment"
           },
           "updated_at": {
             "anyOf": [
