@@ -22066,6 +22066,17 @@
       },
       "AcquireSandboxRequest": {
         "properties": {
+          "benchmark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BenchmarkEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional benchmark to specify the initial environment for the sandbox."
+          },
           "test_account_email": {
             "anyOf": [
               {
@@ -22077,17 +22088,6 @@
             ],
             "title": "Test Account Email",
             "description": "Optional email of a specific test account to acquire. If provided, the system will attempt to acquire the sandbox associated with this test account email instead of a random idle sandbox."
-          },
-          "benchmark": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/BenchmarkEnum"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional benchmark to specify the initial environment for the sandbox."
           }
         },
         "type": "object",
