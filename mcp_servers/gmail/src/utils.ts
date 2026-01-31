@@ -342,3 +342,314 @@ export async function warmupContactSearch(peopleClient: any, contactType: 'perso
         console.warn(`Warmup request failed for ${contactType} contacts:`, error);
     }
 }
+
+// ============================================================================
+// ERROR HANDLING MODULE
+// ============================================================================
+
+export enum GmailErrorType {
+    // Authentication & Authorization
+    AUTH_ERROR = 'AUTH_ERROR',
+    INVALID_TOKEN = 'INVALID_TOKEN',
+    INSUFFICIENT_PERMISSIONS = 'INSUFFICIENT_PERMISSIONS',
+
+    // API Errors
+    GMAIL_API_ERROR = 'GMAIL_API_ERROR',
+    PEOPLE_API_ERROR = 'PEOPLE_API_ERROR',
+
+    // Rate Limiting & Quota
+    RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+    QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
+
+    // Validation Errors
+    VALIDATION_ERROR = 'VALIDATION_ERROR',
+    INVALID_EMAIL_FORMAT = 'INVALID_EMAIL_FORMAT',
+    INVALID_MESSAGE_ID = 'INVALID_MESSAGE_ID',
+    INVALID_THREAD_ID = 'INVALID_THREAD_ID',
+    INVALID_LABEL_ID = 'INVALID_LABEL_ID',
+
+    // Resource Errors
+    NOT_FOUND = 'NOT_FOUND',
+    MESSAGE_NOT_FOUND = 'MESSAGE_NOT_FOUND',
+    THREAD_NOT_FOUND = 'THREAD_NOT_FOUND',
+    ATTACHMENT_NOT_FOUND = 'ATTACHMENT_NOT_FOUND',
+
+    // Document Processing Errors
+    PDF_EXTRACTION_ERROR = 'PDF_EXTRACTION_ERROR',
+    DOCX_EXTRACTION_ERROR = 'DOCX_EXTRACTION_ERROR',
+    XLSX_EXTRACTION_ERROR = 'XLSX_EXTRACTION_ERROR',
+    UNSUPPORTED_FORMAT = 'UNSUPPORTED_FORMAT',
+
+    // Network & Transient Errors
+    NETWORK_ERROR = 'NETWORK_ERROR',
+    TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+    SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+
+    // Other
+    UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+}
+
+export class GmailMCPError extends Error {
+    readonly type: GmailErrorType;
+    readonly status?: number;
+    readonly originalError?: any;
+    readonly timestamp: Date;
+
+    constructor(
+        type: GmailErrorType,
+        message: string,
+        options?: {
+            status?: number;
+            originalError?: any;
+        }
+    ) {
+        super(message);
+        this.name = 'GmailMCPError';
+        this.type = type;
+        this.status = options?.status;
+        this.originalError = options?.originalError;
+        this.timestamp = new Date();
+
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        }
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            type: this.type,
+            message: this.message,
+            status: this.status,
+            timestamp: this.timestamp.toISOString(),
+        };
+    }
+}
+
+export function parseGoogleApiError(error: any): GmailMCPError {
+    const status = error.code || error.status;
+    const message = error.message || error.error || 'Unknown Gmail API error';
+
+    switch (status) {
+        case 401:
+            return new GmailMCPError(
+                GmailErrorType.INVALID_TOKEN,
+                'Authentication failed. Your access token may be invalid or expired.',
+                { status, originalError: error }
+            );
+        case 403:
+            if (message.toLowerCase().includes('quota')) {
+                return new GmailMCPError(
+                    GmailErrorType.QUOTA_EXCEEDED,
+                    'Gmail API quota exceeded. Please try again later.',
+                    { status, originalError: error }
+                );
+            }
+            return new GmailMCPError(
+                GmailErrorType.INSUFFICIENT_PERMISSIONS,
+                'Insufficient permissions. Your token may lack required Gmail API scopes.',
+                { status, originalError: error }
+            );
+        case 404:
+            return new GmailMCPError(
+                GmailErrorType.NOT_FOUND,
+                'Resource not found. The message, thread, or label may not exist.',
+                { status, originalError: error }
+            );
+        case 429:
+            return new GmailMCPError(
+                GmailErrorType.RATE_LIMIT_EXCEEDED,
+                'Rate limit exceeded. Please wait before making more requests.',
+                { status, originalError: error }
+            );
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+            return new GmailMCPError(
+                GmailErrorType.SERVICE_UNAVAILABLE,
+                'Gmail service temporarily unavailable. Please try again.',
+                { status, originalError: error }
+            );
+        default:
+            return new GmailMCPError(
+                GmailErrorType.GMAIL_API_ERROR,
+                message,
+                { status, originalError: error }
+            );
+    }
+}
+
+export function parseZodError(error: any): GmailMCPError {
+    const issues = error.errors || error.issues || [];
+    const messages = issues.map((issue: any) =>
+        `${issue.path.join('.')}: ${issue.message}`
+    );
+
+    return new GmailMCPError(
+        GmailErrorType.VALIDATION_ERROR,
+        `Input validation failed:\n${messages.join('\n')}`,
+        { originalError: error }
+    );
+}
+
+export function formatGmailError(
+    error: GmailMCPError,
+    operation: string,
+    resource?: string
+): string {
+    let message = `Failed to ${operation}`;
+    if (resource) {
+        message += `: "${resource}"`;
+    }
+    message += `\n\nError Type: ${error.type}\n`;
+    message += `Message: ${error.message}\n`;
+
+    if (error.status) {
+        message += `HTTP Status: ${error.status}\n`;
+    }
+
+    return message;
+}
+
+export function addErrorGuidance(
+    errorMessage: string,
+    error: GmailMCPError,
+    context?: {
+        resource?: string;
+        operation?: string;
+        suggestions?: string[];
+    }
+): string {
+    let enhanced = errorMessage;
+
+    if (error.status === 401) {
+        enhanced += `\n\nCommon Solutions:\n`;
+        enhanced += `- Verify your access token is valid and not expired\n`;
+        enhanced += `- Ensure token has Gmail API permissions\n`;
+        enhanced += `- Check AUTH_DATA environment variable or x-auth-data header\n`;
+    } else if (error.status === 403) {
+        enhanced += `\n\nCommon Solutions:\n`;
+        enhanced += `- Check OAuth scopes include Gmail access\n`;
+        enhanced += `- Verify you have permission to access this resource\n`;
+        enhanced += `- If quota error, wait and try again later\n`;
+    } else if (error.status === 404) {
+        enhanced += `\n\nCommon Solutions:\n`;
+        enhanced += `- Verify the ${context?.resource || 'resource'} ID is correct\n`;
+        enhanced += `- Check that the ${context?.resource || 'resource'} hasn't been deleted\n`;
+        enhanced += `- Ensure you have access to view this ${context?.resource || 'resource'}\n`;
+    } else if (error.status === 429) {
+        enhanced += `\n\nRate Limit Guidance:\n`;
+        enhanced += `- Wait a few moments before retrying\n`;
+        enhanced += `- Reduce frequency of requests\n`;
+        enhanced += `- Consider batching operations\n`;
+    }
+
+    if (context?.suggestions && context.suggestions.length > 0) {
+        enhanced += `\n\nAdditional Suggestions:\n`;
+        context.suggestions.forEach(suggestion => {
+            enhanced += `- ${suggestion}\n`;
+        });
+    }
+
+    return enhanced;
+}
+
+// ============================================================================
+// VALIDATION MODULE
+// ============================================================================
+
+export function validateEmailAddresses(emails: string[]): void {
+    if (!emails || emails.length === 0) {
+        throw new GmailMCPError(
+            GmailErrorType.VALIDATION_ERROR,
+            'At least one email address is required'
+        );
+    }
+
+    for (const email of emails) {
+        if (!validateEmail(email)) {
+            throw new GmailMCPError(
+                GmailErrorType.INVALID_EMAIL_FORMAT,
+                `Invalid email address format: "${email}". Email must be in format: user@domain.com`
+            );
+        }
+    }
+}
+
+const ID_ERROR_TYPE_MAP: Record<string, GmailErrorType> = {
+    message: GmailErrorType.INVALID_MESSAGE_ID,
+    thread: GmailErrorType.INVALID_THREAD_ID,
+    label: GmailErrorType.INVALID_LABEL_ID,
+};
+
+export function validateId(id: string, type: 'message' | 'thread' | 'label'): void {
+    const errorType = ID_ERROR_TYPE_MAP[type];
+
+    if (!id || id.trim() === '') {
+        throw new GmailMCPError(errorType, `${type} ID cannot be empty`);
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+        throw new GmailMCPError(errorType, `Invalid ${type} ID format: "${id}"`);
+    }
+}
+
+export function validateIds(ids: string[], type: 'message' | 'thread' | 'label'): void {
+    for (const id of ids) {
+        validateId(id, type);
+    }
+}
+
+export function validateApiResponse<T>(
+    response: any,
+    expectedFields: string[],
+    resourceType: string = 'resource'
+): T {
+    if (!response) {
+        throw new GmailMCPError(
+            GmailErrorType.GMAIL_API_ERROR,
+            `Gmail API returned empty response for ${resourceType}`
+        );
+    }
+
+    const missingFields: string[] = [];
+    for (const field of expectedFields) {
+        if (!(field in response)) {
+            missingFields.push(field);
+        }
+    }
+
+    if (missingFields.length > 0) {
+        console.warn(
+            `Response missing expected fields for ${resourceType}: ${missingFields.join(', ')}`
+        );
+    }
+
+    return response as T;
+}
+
+export function validateMessageResponse(response: any): void {
+    validateApiResponse(response, ['id', 'threadId'], 'message');
+}
+
+export function validateThreadResponse(response: any): void {
+    validateApiResponse(response, ['id', 'messages'], 'thread');
+
+    if (!Array.isArray(response.messages) || response.messages.length === 0) {
+        throw new GmailMCPError(
+            GmailErrorType.GMAIL_API_ERROR,
+            'Thread contains no messages'
+        );
+    }
+}
+
+export function sanitizeEmailContent(content: string): string {
+    if (!content) return '';
+
+    let sanitized = content
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+
+    return sanitized;
+}
