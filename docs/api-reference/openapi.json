@@ -34113,7 +34113,8 @@
         "type": "string",
         "enum": [
           "idle",
-          "occupied"
+          "occupied",
+          "error"
         ],
         "title": "SandboxStatus",
         "description": "Status of a sandbox instance - matches database enum"
