@@ -14,12 +14,12 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 from dotenv import load_dotenv
 
-from .utils import extract_access_token, auth_token_context
-from .tools.transcripts import get_youtube_video_transcript
-from .tools.account import get_liked_videos, get_user_subscriptions, get_my_videos, get_recent_uploads
-from .tools.channels import get_my_channel_info, get_channel_videos, search_channels, get_my_channel_analytics
-from .tools.videos import get_video_details, rate_video, search_videos, get_my_video_analytics
-from .tools.playlists import create_playlist, add_video_to_playlist, list_playlists, get_playlist_items
+from tools.base import extract_access_token, auth_token_context
+from tools.transcripts import get_youtube_video_transcript
+from tools.account import get_liked_videos, get_user_subscriptions, get_my_videos, get_recent_uploads
+from tools.channels import get_my_channel_info, get_channel_videos, search_channels, get_my_channel_analytics
+from tools.videos import get_video_details, rate_video, search_videos, get_my_video_analytics
+from tools.playlists import create_playlist, add_video_to_playlist, list_playlists, get_playlist_items
 
 # Configure logging
 logger = logging.getLogger(__name__)
