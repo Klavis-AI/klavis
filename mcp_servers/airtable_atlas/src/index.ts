@@ -141,7 +141,7 @@ class AirtableServer {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
-          name: "list_bases",
+          name: "airtable_list_bases",
           description: "List all accessible Airtable bases",
           inputSchema: {
             type: "object",
@@ -150,7 +150,7 @@ class AirtableServer {
           },
         },
         {
-          name: "list_tables",
+          name: "airtable_list_tables",
           description: "List all tables in a base",
           inputSchema: {
             type: "object",
@@ -164,7 +164,7 @@ class AirtableServer {
           },
         },
         {
-          name: "create_table",
+          name: "airtable_create_table",
           description: "Create a new table in a base",
           inputSchema: {
             type: "object",
@@ -212,7 +212,7 @@ class AirtableServer {
           },
         },
         {
-          name: "update_table",
+          name: "airtable_update_table",
           description: "Update a table's schema",
           inputSchema: {
             type: "object",
@@ -238,7 +238,7 @@ class AirtableServer {
           },
         },
         {
-          name: "create_field",
+          name: "airtable_create_field",
           description: "Create a new field in a table",
           inputSchema: {
             type: "object",
@@ -278,7 +278,7 @@ class AirtableServer {
           },
         },
         {
-          name: "update_field",
+          name: "airtable_update_field",
           description: "Update a field in a table",
           inputSchema: {
             type: "object",
@@ -317,7 +317,7 @@ class AirtableServer {
           },
         },
         {
-          name: "list_records",
+          name: "airtable_list_records",
           description: "List records in a table",
           inputSchema: {
             type: "object",
@@ -339,7 +339,7 @@ class AirtableServer {
           },
         },
         {
-          name: "create_record",
+          name: "airtable_create_record",
           description: "Create a new record in a table",
           inputSchema: {
             type: "object",
@@ -361,7 +361,7 @@ class AirtableServer {
           },
         },
         {
-          name: "update_record",
+          name: "airtable_update_record",
           description: "Update an existing record in a table",
           inputSchema: {
             type: "object",
@@ -387,7 +387,7 @@ class AirtableServer {
           },
         },
         {
-          name: "delete_record",
+          name: "airtable_delete_record",
           description: "Delete a record from a table",
           inputSchema: {
             type: "object",
@@ -409,7 +409,7 @@ class AirtableServer {
           },
         },
         {
-          name: "search_records",
+          name: "airtable_search_records",
           description: "Search for records in a table",
           inputSchema: {
             type: "object",
@@ -435,7 +435,7 @@ class AirtableServer {
           },
         },
         {
-          name: "get_record",
+          name: "airtable_get_record",
           description: "Get a single record by its ID",
           inputSchema: {
             type: "object",
@@ -462,7 +462,7 @@ class AirtableServer {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
         switch (request.params.name) {
-          case "list_bases": {
+          case "airtable_list_bases": {
             const response = await getAxiosInstance().get("/meta/bases");
             return {
               content: [{
@@ -472,7 +472,7 @@ class AirtableServer {
             };
           }
 
-          case "list_tables": {
+          case "airtable_list_tables": {
             const { base_id } = request.params.arguments as { base_id: string };
             const response = await getAxiosInstance().get(`/meta/bases/${base_id}/tables`);
             return {
@@ -483,7 +483,7 @@ class AirtableServer {
             };
           }
 
-          case "create_table": {
+          case "airtable_create_table": {
             const { base_id, table_name, description, fields } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -508,7 +508,7 @@ class AirtableServer {
             };
           }
 
-          case "update_table": {
+          case "airtable_update_table": {
             const { base_id, table_id, name, description } = request.params.arguments as {
               base_id: string;
               table_id: string;
@@ -529,7 +529,7 @@ class AirtableServer {
             };
           }
 
-          case "create_field": {
+          case "airtable_create_field": {
             const { base_id, table_id, field } = request.params.arguments as {
               base_id: string;
               table_id: string;
@@ -552,7 +552,7 @@ class AirtableServer {
             };
           }
 
-          case "update_field": {
+          case "airtable_update_field": {
             const { base_id, table_id, field_id, updates } = request.params.arguments as {
               base_id: string;
               table_id: string;
@@ -573,7 +573,7 @@ class AirtableServer {
             };
           }
 
-          case "list_records": {
+          case "airtable_list_records": {
             const { base_id, table_name, max_records } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -590,7 +590,7 @@ class AirtableServer {
             };
           }
 
-          case "create_record": {
+          case "airtable_create_record": {
             const { base_id, table_name, fields } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -607,7 +607,7 @@ class AirtableServer {
             };
           }
 
-          case "update_record": {
+          case "airtable_update_record": {
             const { base_id, table_name, record_id, fields } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -626,7 +626,7 @@ class AirtableServer {
             };
           }
 
-          case "delete_record": {
+          case "airtable_delete_record": {
             const { base_id, table_name, record_id } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -643,7 +643,7 @@ class AirtableServer {
             };
           }
 
-          case "search_records": {
+          case "airtable_search_records": {
             const { base_id, table_name, field_name, value } = request.params.arguments as {
               base_id: string;
               table_name: string;
@@ -663,7 +663,7 @@ class AirtableServer {
             };
           }
 
-          case "get_record": {
+          case "airtable_get_record": {
             const { base_id, table_name, record_id } = request.params.arguments as {
               base_id: string;
               table_name: string;
