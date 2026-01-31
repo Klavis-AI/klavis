@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY mcp_servers/youtube/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the server code
 COPY mcp_servers/youtube/server.py .
+COPY mcp_servers/youtube/utils.py .
+COPY mcp_servers/youtube/tools/ ./tools/
 
 COPY mcp_servers/youtube/.env.example .env
 
