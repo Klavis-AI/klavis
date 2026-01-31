@@ -38,6 +38,16 @@ import {
     extractEmailContent,
     processBatches,
     warmupContactSearch,
+    // Error handling
+    GmailMCPError,
+    GmailErrorType,
+    parseGoogleApiError,
+    parseZodError,
+    formatGmailError,
+    addErrorGuidance,
+    // Validation
+    validateEmailAddresses,
+    validateId,
 } from "./utils.js";
 
 // Create AsyncLocalStorage for request context
@@ -159,64 +169,99 @@ const getGmailMcpServer = () => {
         const gmail = getGmailClient();
 
         async function handleEmailAction(action: "send" | "draft", validatedArgs: any) {
-            const message = createEmailMessage(validatedArgs);
+            try {
+                // Validate inputs before making API calls
+                validateEmailAddresses(validatedArgs.to);
+                if (validatedArgs.cc) {
+                    validateEmailAddresses(validatedArgs.cc);
+                }
+                if (validatedArgs.bcc) {
+                    validateEmailAddresses(validatedArgs.bcc);
+                }
+                if (validatedArgs.threadId) {
+                    validateId(validatedArgs.threadId, 'thread');
+                }
 
-            const encodedMessage = Buffer.from(message).toString('base64')
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
+                const message = createEmailMessage(validatedArgs);
 
-            // Define the type for messageRequest
-            interface GmailMessageRequest {
-                raw: string;
-                threadId?: string;
-            }
+                const encodedMessage = Buffer.from(message).toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
 
-            const messageRequest: GmailMessageRequest = {
-                raw: encodedMessage,
-            };
+                // Define the type for messageRequest
+                interface GmailMessageRequest {
+                    raw: string;
+                    threadId?: string;
+                }
 
-            // Add threadId if specified
-            if (validatedArgs.threadId) {
-                messageRequest.threadId = validatedArgs.threadId;
-            }
-
-            if (action === "send") {
-                const response = await gmail.users.messages.send({
-                    userId: 'me',
-                    requestBody: messageRequest,
-                });
-                const resultPayload = {
-                    message: `Email sent successfully with ID: ${response.data.id}`,
-                    messageId: response.data.id ?? null,
+                const messageRequest: GmailMessageRequest = {
+                    raw: encodedMessage,
                 };
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(resultPayload, null, 2),
+
+                // Add threadId if specified
+                if (validatedArgs.threadId) {
+                    messageRequest.threadId = validatedArgs.threadId;
+                }
+
+                if (action === "send") {
+                    const response = await gmail.users.messages.send({
+                        userId: 'me',
+                        requestBody: messageRequest,
+                    });
+                    const resultPayload = {
+                        message: `Email sent successfully with ID: ${response.data.id}`,
+                        messageId: response.data.id ?? null,
+                    };
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                } else {
+                    const response = await gmail.users.drafts.create({
+                        userId: 'me',
+                        requestBody: {
+                            message: messageRequest,
                         },
+                    });
+                    const resultPayload = {
+                        message: `Email draft created successfully with ID: ${response.data.id}`,
+                        draftId: response.data.id ?? null,
+                    };
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: JSON.stringify(resultPayload, null, 2),
+                            },
+                        ],
+                    };
+                }
+            } catch (error: any) {
+                const gmailError = error instanceof GmailMCPError
+                    ? error
+                    : parseGoogleApiError(error);
+
+                const errorMessage = formatGmailError(
+                    gmailError,
+                    action === 'send' ? 'send email' : 'create draft'
+                );
+                const enhanced = addErrorGuidance(errorMessage, gmailError, {
+                    operation: action === 'send' ? 'gmail_send_email' : 'gmail_draft_email',
+                    suggestions: [
+                        'Verify all email addresses are valid',
+                        'Check that the access token has Gmail send permissions',
                     ],
-                };
-            } else {
-                const response = await gmail.users.drafts.create({
-                    userId: 'me',
-                    requestBody: {
-                        message: messageRequest,
-                    },
                 });
-                const resultPayload = {
-                    message: `Email draft created successfully with ID: ${response.data.id}`,
-                    draftId: response.data.id ?? null,
-                };
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(resultPayload, null, 2),
-                        },
-                    ],
-                };
+
+                throw new GmailMCPError(gmailError.type, enhanced, {
+                    status: gmailError.status,
+                    originalError: gmailError.originalError,
+                });
             }
         }
 
@@ -970,15 +1015,38 @@ const getGmailMcpServer = () => {
                 }
 
                 default:
-                    throw new Error(`Unknown tool: ${name}`);
+                    throw new GmailMCPError(
+                        GmailErrorType.VALIDATION_ERROR,
+                        `Unknown tool: ${name}`
+                    );
             }
         } catch (error: any) {
-            const errorPayload = { error: error.message };
+            let gmailError: GmailMCPError;
+
+            if (error instanceof GmailMCPError) {
+                gmailError = error;
+            } else if (error.name === 'ZodError') {
+                gmailError = parseZodError(error);
+            } else {
+                gmailError = parseGoogleApiError(error);
+            }
+
+            console.error(`[${name}] Error:`, {
+                type: gmailError.type,
+                message: gmailError.message,
+                status: gmailError.status,
+                timestamp: gmailError.timestamp.toISOString(),
+            });
+
             return {
                 content: [
                     {
                         type: "text",
-                        text: JSON.stringify(errorPayload, null, 2),
+                        text: JSON.stringify({
+                            error: gmailError.message,
+                            type: gmailError.type,
+                            ...(gmailError.status && { httpStatus: gmailError.status }),
+                        }, null, 2),
                     },
                 ],
             };
