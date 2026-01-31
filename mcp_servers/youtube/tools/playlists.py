@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict, Optional
 from googleapiclient.errors import HttpError
 
-from ..utils import get_auth_token, get_youtube_service
+from .base import get_auth_token, get_youtube_service
 
 logger = logging.getLogger(__name__)
 

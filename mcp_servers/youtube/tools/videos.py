@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 from googleapiclient.errors import HttpError
 
-from ..utils import get_auth_token, get_youtube_service, get_youtube_analytics_service, _make_youtube_request
+from .base import get_auth_token, get_youtube_service, get_youtube_analytics_service, _make_youtube_request
 
 logger = logging.getLogger(__name__)
 

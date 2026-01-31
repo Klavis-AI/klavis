@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from ..utils import _extract_video_id, _format_time, youtube_transcript_api, TRANSCRIPT_LANGUAGES
+from .base import _extract_video_id, _format_time, youtube_transcript_api, TRANSCRIPT_LANGUAGES
 from .videos import get_video_details
 
 logger = logging.getLogger(__name__)
