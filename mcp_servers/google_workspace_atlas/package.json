@@ -1,0 +1,34 @@
+{
+  "name": "google-workspace-server",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "google-workspace-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0",
+    "googleapis": "^144.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "body-parser": "2.2.1"
+  }
+}

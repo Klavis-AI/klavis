@@ -1,0 +1,6 @@
+node_modules/
+build/
+*.log
+.env*
+credentials.json
+token.json
