@@ -1,9 +1,6 @@
-#!/usr/bin/env node
-
 import express, { Request, Response } from 'express';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
   CallToolRequestSchema,
@@ -781,50 +778,6 @@ app.delete('/mcp', async (req: Request, res: Response) => {
 });
 
 //=============================================================================
-// DEPRECATED HTTP+SSE TRANSPORT (PROTOCOL VERSION 2024-11-05)
-//=============================================================================
-
-const transports = new Map<string, SSEServerTransport>();
-
-app.get("/sse", async (req: Request, res: Response) => {
-  const transport = new SSEServerTransport(`/messages`, res);
-
-  // Set up cleanup when connection closes
-  res.on('close', async () => {
-    console.log(`SSE connection closed for transport: ${transport.sessionId}`);
-    try {
-      transports.delete(transport.sessionId);
-    } finally {
-      // Cleanup complete
-    }
-  });
-
-  transports.set(transport.sessionId, transport);
-
-  const airtableServer = createAirtableServer();
-  const server = airtableServer.getServer();
-  await server.connect(transport);
-
-  console.log(`SSE connection established with transport: ${transport.sessionId}`);
-});
-
-app.post("/messages", async (req: Request, res: Response) => {
-  const sessionId = req.query.sessionId as string;
-
-  const transport = sessionId ? transports.get(sessionId) : undefined;
-  if (transport) {
-    const accessToken = extractAccessToken(req);
-
-    asyncLocalStorage.run({ accessToken }, async () => {
-      await transport.handlePostMessage(req, res);
-    });
-  } else {
-    console.error(`Transport not found for session ID: ${sessionId}`);
-    res.status(404).send({ error: "Transport not found" });
-  }
-});
-
-//=============================================================================
 // MAIN ENTRY POINT
 //=============================================================================
 
@@ -839,10 +792,9 @@ if (TRANSPORT === 'stdio') {
     process.exit(1);
   });
 } else {
-  // Run in HTTP mode (for production with SSE and Streamable HTTP)
+  // Run in HTTP mode (for production with Streamable HTTP)
   app.listen(PORT, () => {
     console.log(`Airtable MCP server running on port ${PORT}`);
     console.log(`  - Streamable HTTP: POST /mcp`);
-    console.log(`  - SSE: GET /sse, POST /messages`);
   });
 }
