@@ -1,0 +1,49 @@
+{
+  "name": "@felores/airtable-mcp-server",
+  "version": "0.3.0",
+  "description": "An Airtable Model Context Protocol Server",
+  "type": "module",
+  "bin": {
+    "airtable-server": "build/index.js"
+  },
+  "files": [
+    "build",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/post-build.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "start": "node build/index.js",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "axios": "^1.7.9",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "body-parser": ">=2.2.1"
+  },
+  "author": "Felipe Restrepo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/felores/airtable-mcp"
+  },
+  "keywords": [
+    "airtable",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "api"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
