@@ -363,9 +363,15 @@ def main(
                             "description": "Optional list of channel IDs to search within.",
                         },
                         "to_me": {
-                            "type": "boolean",
-                            "description": "If true, searches for messages that mention the authenticated user. Automatically adds 'to:@<user_id>' to the query.",
-                            "default": False,
+                            "type": "string",
+                            "enum": ["dm", "mention", "off"],
+                            "description": (
+                                "Filter messages addressed to the authenticated user. "
+                                "'dm': Search only direct messages sent to you. "
+                                "'mention': Search messages where you are @mentioned in channels. "
+                                "'off': No recipient filtering, searches all accessible messages (default)."
+                            ),
+                            "default": "off",
                         },
                         "sort": {
                             "type": "string",
@@ -798,7 +804,7 @@ def main(
                 ]
 
             channel_ids = arguments.get("channel_ids")
-            to_me = arguments.get("to_me", False)
+            to_me = arguments.get("to_me", "off")
             sort = arguments.get("sort")
             sort_dir = arguments.get("sort_dir")
             count = arguments.get("count")
