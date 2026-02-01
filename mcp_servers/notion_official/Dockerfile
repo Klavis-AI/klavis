@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Use Node.js LTS as the base image
 FROM node:20-slim AS builder
 
@@ -10,16 +8,16 @@ WORKDIR /app
 COPY mcp_servers/notion_official/package*.json ./
 
 # Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --omit-dev
+RUN npm ci --ignore-scripts --omit-dev
 
 # Copy source code from notion_official directory
 COPY mcp_servers/notion_official/ .
 
 # Build the package
-RUN --mount=type=cache,target=/root/.npm npm run build
+RUN npm run build
 
 # Install package globally
-RUN --mount=type=cache,target=/root/.npm npm link
+RUN npm link
 
 # Minimal image for runtime
 FROM node:20-slim
