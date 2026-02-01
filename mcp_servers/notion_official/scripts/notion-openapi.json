@@ -1,0 +1,2217 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notion API",
+    "version": "2.0.0",
+    "description": "Notion API 2025-09-03 - Data Source Edition. Breaking change: Database endpoints replaced with data source endpoints.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "parameters": {
+      "notionVersion": {
+        "name": "Notion-Version",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "2025-09-03"
+        },
+        "description": "The Notion API version"
+      }
+    },
+    "schemas": {
+      "richTextRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "link": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "pageIdParentRequest": {
+        "type": "object",
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "page_id"
+        ]
+      },
+      "dataSourceIdParentRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "database_id"
+          },
+          "database_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "database_id"
+        ]
+      },
+      "parentRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/pageIdParentRequest"
+          },
+          {
+            "$ref": "#/components/schemas/dataSourceIdParentRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "workspace"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "movePageParentRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "page_id"
+              },
+              "page_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "type",
+              "page_id"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "database_id"
+              },
+              "database_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "type",
+              "database_id"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "workspace"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "sortObject": {
+        "type": "object",
+        "required": [
+          "property",
+          "direction"
+        ],
+        "properties": {
+          "property": {
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "ascending",
+              "descending"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "paragraphBlockRequest": {
+        "type": "object",
+        "properties": {
+          "paragraph": {
+            "type": "object",
+            "properties": {
+              "rich_text": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/richTextRequest"
+                },
+                "maxItems": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "rich_text"
+            ]
+          },
+          "type": {
+            "enum": [
+              "paragraph"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "bulletedListItemBlockRequest": {
+        "type": "object",
+        "properties": {
+          "bulleted_list_item": {
+            "type": "object",
+            "properties": {
+              "rich_text": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/richTextRequest"
+                },
+                "maxItems": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "rich_text"
+            ]
+          },
+          "type": {
+            "enum": [
+              "bulleted_list_item"
+            ],
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "blockObjectRequest": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/paragraphBlockRequest"
+          },
+          {
+            "$ref": "#/components/schemas/bulletedListItemBlockRequest"
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Databases",
+      "description": "Database endpoints for retrieving database metadata"
+    },
+    {
+      "name": "Data sources",
+      "description": "Data source endpoints for querying and managing databases"
+    },
+    {
+      "name": "Pages",
+      "description": "Page endpoints for creating and managing pages"
+    },
+    {
+      "name": "Blocks",
+      "description": "Block endpoints for managing page content"
+    },
+    {
+      "name": "Users",
+      "description": "User endpoints"
+    },
+    {
+      "name": "Search",
+      "description": "Search endpoints"
+    },
+    {
+      "name": "Comments",
+      "description": "Comment endpoints"
+    }
+  ],
+  "paths": {
+    "/v1/users/{user_id}": {
+      "get": {
+        "summary": "Retrieve a user",
+        "description": "",
+        "operationId": "get-user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {}
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": {}
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "summary": "List all users",
+        "operationId": "get-users",
+        "parameters": [
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": {}
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "summary": "Retrieve your token's bot user",
+        "description": "",
+        "operationId": "get-self",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": {
+                      "object": "user",
+                      "id": "16d84278-ab0e-484c-9bdd-b35da3bd8905",
+                      "name": "pied piper",
+                      "avatar_url": null,
+                      "type": "bot",
+                      "bot": {
+                        "owner": {
+                          "type": "user",
+                          "user": {
+                            "object": "user",
+                            "id": "5389a034-eb5c-47b5-8a9e-f79c99ef166c",
+                            "name": "christine makenotion",
+                            "avatar_url": null,
+                            "type": "person",
+                            "person": {
+                              "email": "christine@makenotion.com"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "user"
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "16d84278-ab0e-484c-9bdd-b35da3bd8905"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "pied piper"
+                    },
+                    "avatar_url": {},
+                    "type": {
+                      "type": "string",
+                      "example": "bot"
+                    },
+                    "bot": {
+                      "type": "object",
+                      "properties": {
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "user"
+                            },
+                            "user": {
+                              "type": "object",
+                              "properties": {
+                                "object": {
+                                  "type": "string",
+                                  "example": "user"
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "example": "5389a034-eb5c-47b5-8a9e-f79c99ef166c"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "example": "christine makenotion"
+                                },
+                                "avatar_url": {},
+                                "type": {
+                                  "type": "string",
+                                  "example": "person"
+                                },
+                                "person": {
+                                  "type": "object",
+                                  "properties": {
+                                    "email": {
+                                      "type": "string",
+                                      "example": "christine@makenotion.com"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "summary": "Search by title",
+        "description": "",
+        "operationId": "post-search",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The text that the API compares page and database titles against."
+                  },
+                  "sort": {
+                    "type": "object",
+                    "description": "A set of criteria, `direction` and `timestamp` keys, that orders the results. The **only** supported timestamp value is `\"last_edited_time\"`. Supported `direction` values are `\"ascending\"` and `\"descending\"`. If `sort` is not provided, then the most recently edited results are returned first.",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "description": "The direction to sort. Possible values include `ascending` and `descending`."
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "description": "The name of the timestamp to sort against. Possible values include `last_edited_time`."
+                      }
+                    }
+                  },
+                  "filter": {
+                    "type": "object",
+                    "description": "A set of criteria, `value` and `property` keys, that limits the results to either only pages or only data sources. Possible `value` values are `\"page\"` or `\"data_source\"`. The only supported `property` value is `\"object\"`.",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "description": "The value of the property to filter the results by.  Possible values for object type include `page` or `data_source`.  **Limitation**: Currently the only filter allowed is `object` which will filter by type of object (either `page` or `data_source`)",
+                        "enum": [
+                          "page",
+                          "data_source"
+                        ]
+                      },
+                      "property": {
+                        "type": "string",
+                        "description": "The name of the property to filter by. Currently the only property you can filter by is the object type.  Possible values include `object`.   Limitation: Currently the only filter allowed is `object` which will filter by type of object (either `page` or `data_source`)"
+                      }
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string",
+                    "description": "A `cursor` value returned in a previous response that If supplied, limits the response to results starting after the `cursor`. If not supplied, then the first page of results is returned. Refer to [pagination](https://developers.notion.com/reference/intro#pagination) for more details."
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "The number of items from the full list to include in the response. Maximum: `100`.",
+                    "default": 100,
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/blocks/{block_id}/children": {
+      "get": {
+        "summary": "Retrieve block children",
+        "description": "",
+        "operationId": "get-block-children",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a [block](ref:block)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Append block children",
+        "description": "",
+        "operationId": "patch-block-children",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a [block](ref:block). Also accepts a [page](ref:page) ID.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "children"
+                ],
+                "properties": {
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/blockObjectRequest"
+                    },
+                    "description": "Child content to append to a container block as an array of [block objects](ref:block)"
+                  },
+                  "after": {
+                    "type": "string",
+                    "description": "The ID of the existing block that the new block should be appended after."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/blocks/{block_id}": {
+      "get": {
+        "summary": "Retrieve a block",
+        "description": "",
+        "operationId": "retrieve-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Update a block",
+        "description": "",
+        "operationId": "update-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "object",
+                    "description": "The [block object `type`](ref:block#block-object-keys) value with the properties to be updated. Currently only `text` (for supported block types) and `checked` (for `to_do` blocks) fields can be updated.",
+                    "properties": {}
+                  },
+                  "archived": {
+                    "type": "boolean",
+                    "description": "Set to true to archive (delete) a block. Set to false to un-archive (restore) a block.",
+                    "default": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "delete": {
+        "summary": "Delete a block",
+        "description": "",
+        "operationId": "delete-a-block",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "path",
+            "description": "Identifier for a Notion block",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages/{page_id}": {
+      "get": {
+        "summary": "Retrieve a page",
+        "description": "",
+        "operationId": "retrieve-a-page",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "Identifier for a Notion page",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter_properties",
+            "in": "query",
+            "description": "A list of page property value IDs associated with the page. Use this param to limit the response to a specific page property value or values. To retrieve multiple properties, specify each page property ID. For example: `?filter_properties=iAk8&filter_properties=b7dh`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Update page properties",
+        "description": "",
+        "operationId": "patch-page",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "The identifier for the Notion page to be updated.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "properties": {
+                    "description": "The property values to update for the page. The keys are the names or IDs of the property and the values are property values. If a page property ID is not included, then it is not changed.",
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "in_trash": {
+                    "type": "boolean",
+                    "description": "Set to true to delete a block. Set to false to restore a block.",
+                    "default": false
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  },
+                  "icon": {
+                    "description": "A page icon for the page. Supported types are [external file object](https://developers.notion.com/reference/file-object) or [emoji object](https://developers.notion.com/reference/emoji-object).",
+                    "type": "object",
+                    "properties": {
+                      "emoji": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "emoji"
+                    ]
+                  },
+                  "cover": {
+                    "type": "object",
+                    "description": "A cover image for the page. Only [external file objects](https://developers.notion.com/reference/file-object) are supported.",
+                    "properties": {
+                      "external": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "url"
+                        ]
+                      },
+                      "type": {
+                        "enum": [
+                          "external"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "external"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages": {
+      "post": {
+        "summary": "Create a page",
+        "description": "",
+        "operationId": "post-page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "properties"
+                ],
+                "properties": {
+                  "parent": {
+                    "$ref": "#/components/schemas/parentRequest"
+                  },
+                  "properties": {
+                    "description": "The property values for the new page. The keys are the names or IDs of the property and the values are property values.",
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "children": {
+                    "type": "array",
+                    "description": "The content to be rendered on the new page, represented as an array of [block objects](https://developers.notion.com/reference/block).",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "The icon of the new page. Either an [emoji object](https://developers.notion.com/reference/emoji-object) or an [external file object](https://developers.notion.com/reference/file-object)..",
+                    "format": "json"
+                  },
+                  "cover": {
+                    "type": "string",
+                    "description": "The cover image of the new page, represented as a [file object](https://developers.notion.com/reference/file-object).",
+                    "format": "json"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages/{page_id}/properties/{property_id}": {
+      "get": {
+        "summary": "Retrieve a page property item",
+        "description": "",
+        "operationId": "retrieve-a-page-property",
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "Identifier for a Notion page",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "property_id",
+            "in": "path",
+            "description": "Identifier for a page [property](https://developers.notion.com/reference/page#all-property-values)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "For paginated properties. The max number of property item objects on a page. The default size is 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "For paginated properties.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/comments": {
+      "get": {
+        "summary": "Retrieve comments",
+        "description": "Retrieves a list of un-resolved [Comment objects](ref:comment-object) from a page or block.",
+        "operationId": "retrieve-a-comment",
+        "parameters": [
+          {
+            "name": "block_id",
+            "in": "query",
+            "description": "Identifier for a Notion block or page",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "description": "If supplied, this endpoint will return a page of results starting after the cursor provided. If not supplied, this endpoint will return the first page of results.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "The number of items from the full list desired in the response. Maximum: 100",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "OK": {
+                    "value": {
+                      "object": "list",
+                      "results": [
+                        {
+                          "object": "comment",
+                          "id": "94cc56ab-9f02-409d-9f99-1037e9fe502f",
+                          "parent": {
+                            "type": "page_id",
+                            "page_id": "5c6a2821-6bb1-4a7e-b6e1-c50111515c3d"
+                          },
+                          "discussion_id": "f1407351-36f5-4c49-a13c-49f8ba11776d",
+                          "created_time": "2022-07-15T16:52:00.000Z",
+                          "last_edited_time": "2022-07-15T19:16:00.000Z",
+                          "created_by": {
+                            "object": "user",
+                            "id": "9b15170a-9941-4297-8ee6-83fa7649a87a"
+                          },
+                          "rich_text": [
+                            {
+                              "type": "text",
+                              "text": {
+                                "content": "Single comment",
+                                "link": null
+                              },
+                              "annotations": {
+                                "bold": false,
+                                "italic": false,
+                                "strikethrough": false,
+                                "underline": false,
+                                "code": false,
+                                "color": "default"
+                              },
+                              "plain_text": "Single comment",
+                              "href": null
+                            }
+                          ]
+                        }
+                      ],
+                      "next_cursor": null,
+                      "has_more": false,
+                      "type": "comment",
+                      "comment": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "post": {
+        "summary": "Create comment",
+        "description": "Creates a comment in a page or existing discussion thread.",
+        "operationId": "create-a-comment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "rich_text"
+                ],
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "description": "The page that contains the comment",
+                    "required": [
+                      "page_id"
+                    ],
+                    "properties": {
+                      "page_id": {
+                        "type": "string",
+                        "description": "the page ID"
+                      }
+                    }
+                  },
+                  "rich_text": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "object",
+                          "required": [
+                            "content"
+                          ],
+                          "properties": {
+                            "content": {
+                              "type": "string",
+                              "description": "The content of the comment"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": {
+                      "object": "comment",
+                      "id": "b52b8ed6-e029-4707-a671-832549c09de3",
+                      "parent": {
+                        "type": "page_id",
+                        "page_id": "5c6a2821-6bb1-4a7e-b6e1-c50111515c3d"
+                      },
+                      "discussion_id": "f1407351-36f5-4c49-a13c-49f8ba11776d",
+                      "created_time": "2022-07-15T20:53:00.000Z",
+                      "last_edited_time": "2022-07-15T20:53:00.000Z",
+                      "created_by": {
+                        "object": "user",
+                        "id": "067dee40-6ebd-496f-b446-093c715fb5ec"
+                      },
+                      "rich_text": [
+                        {
+                          "type": "text",
+                          "text": {
+                            "content": "Hello world",
+                            "link": null
+                          },
+                          "annotations": {
+                            "bold": false,
+                            "italic": false,
+                            "strikethrough": false,
+                            "underline": false,
+                            "code": false,
+                            "color": "default"
+                          },
+                          "plain_text": "Hello world",
+                          "href": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/data_sources/{data_source_id}/query": {
+      "post": {
+        "summary": "Query a data source",
+        "description": "Query a data source (database) using filters and sorts",
+        "operationId": "query-data-source",
+        "tags": [
+          "Data sources"
+        ],
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "description": "Identifier for a Notion data source (database)",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter_properties",
+            "in": "query",
+            "description": "A list of page property value IDs to limit the response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filter": {
+                    "type": "object",
+                    "description": "Filter conditions for querying the data source"
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/sortObject"
+                    }
+                  },
+                  "start_cursor": {
+                    "type": "string"
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "default": 100
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  },
+                  "in_trash": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/data_sources/{data_source_id}": {
+      "get": {
+        "summary": "Retrieve a data source",
+        "description": "Retrieve metadata and schema for a data source",
+        "operationId": "retrieve-a-data-source",
+        "tags": [
+          "Data sources"
+        ],
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "description": "Identifier for a Notion data source",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      },
+      "patch": {
+        "summary": "Update a data source",
+        "description": "Update properties of a data source",
+        "operationId": "update-a-data-source",
+        "tags": [
+          "Data sources"
+        ],
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "description": "Identifier for a Notion data source",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/richTextRequest"
+                    }
+                  },
+                  "description": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/richTextRequest"
+                    },
+                    "maxItems": 100
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "Property schema updates"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/data_sources": {
+      "post": {
+        "summary": "Create a data source",
+        "description": "Create a new data source (database)",
+        "operationId": "create-a-data-source",
+        "tags": [
+          "Data sources"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent",
+                  "properties"
+                ],
+                "properties": {
+                  "parent": {
+                    "$ref": "#/components/schemas/pageIdParentRequest"
+                  },
+                  "properties": {
+                    "type": "object",
+                    "description": "Property schema of data source"
+                  },
+                  "title": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/richTextRequest"
+                    },
+                    "maxItems": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/data_sources/{data_source_id}/templates": {
+      "get": {
+        "summary": "List templates in a data source",
+        "description": "List available templates for a data source",
+        "operationId": "list-data-source-templates",
+        "tags": [
+          "Data sources"
+        ],
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "description": "Identifier for a Notion data source",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "start_cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/databases/{database_id}": {
+      "get": {
+        "summary": "Retrieve a database",
+        "description": "Retrieves a database object using the ID specified. Returns database metadata including the list of data source IDs contained in the database.",
+        "operationId": "retrieve-a-database",
+        "tags": [
+          "Databases"
+        ],
+        "parameters": [
+          {
+            "name": "database_id",
+            "in": "path",
+            "description": "Identifier for a Notion database",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    },
+    "/v1/pages/{page_id}/move": {
+      "post": {
+        "summary": "Move a page",
+        "description": "Move a page to a different parent location",
+        "operationId": "move-page",
+        "tags": [
+          "Pages"
+        ],
+        "parameters": [
+          {
+            "name": "page_id",
+            "in": "path",
+            "description": "Identifier for a Notion page",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/notionVersion"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent"
+                ],
+                "properties": {
+                  "parent": {
+                    "$ref": "#/components/schemas/movePageParentRequest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": []
+      }
+    }
+  }
+}
