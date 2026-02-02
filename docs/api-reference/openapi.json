@@ -16281,14 +16281,14 @@
         }
       }
     },
-    "/sandbox/github_atlas/{sandbox_id}/initialize": {
+    "/sandbox/github/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize github_atlas sandbox with data",
-        "description": "Initialize the sandbox with github_atlas-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_github_atlas__sandbox_id__initialize_post",
+        "summary": "Initialize github sandbox with data",
+        "description": "Initialize the sandbox with github-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_github__sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -16459,14 +16459,14 @@
         }
       }
     },
-    "/sandbox/github_atlas/{sandbox_id}/dump": {
+    "/sandbox/github/{sandbox_id}/dump": {
       "get": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Export github_atlas sandbox data",
+        "summary": "Export github sandbox data",
         "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_github_atlas__sandbox_id__dump_get",
+        "operationId": "dump_sandbox_sandbox_github__sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -34143,7 +34143,7 @@
         "type": "string",
         "enum": [
           "jira",
-          "github_atlas",
+          "github",
           "salesforce",
           "hubspot",
           "notion",
