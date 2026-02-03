@@ -7546,7 +7546,7 @@
           "sandbox"
         ],
         "summary": "Acquire a sandbox",
-        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally specify a test_account_email to acquire a specific test account, or choose a benchmark (e.g., 'MCP Atlas') to specify the initial environment.",
+        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally choose a benchmark (e.g., 'MCP Atlas') to specify the initial environment and dedicated MCP servers, or specify a test_account_email to acquire a specific test account.",
         "operationId": "create_sandbox_sandbox__server_name__post",
         "security": [
           {
@@ -21750,6 +21750,135 @@
         }
       }
     },
+    "/sandbox/googleworkspaceatlas/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize googleworkspaceatlas sandbox with data",
+        "description": "Initialize the sandbox with googleworkspaceatlas-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_googleworkspaceatlas__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/GoogleWorkspaceAtlasData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/googleworkspaceatlas/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export googleworkspaceatlas sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_googleworkspaceatlas__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleWorkspaceAtlasData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/universes": {
       "get": {
         "tags": [
@@ -25316,6 +25445,37 @@
         ],
         "title": "DumpSandboxResponse[GoogleSheetsData]"
       },
+      "DumpSandboxResponse_GoogleWorkspaceAtlasData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GoogleWorkspaceAtlasData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[GoogleWorkspaceAtlasData]"
+      },
       "DumpSandboxResponse_HubSpotData_": {
         "properties": {
           "sandbox_id": {
@@ -27226,7 +27386,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -27248,7 +27408,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -27264,149 +27424,7 @@
         "title": "GoogleCalendarData",
         "description": "Complete Google Calendar sandbox data structure"
       },
-      "GoogleCalendarEvent-Input": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Title",
-            "description": "Event title/summary (required)"
-          },
-          "startTime": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Starttime",
-            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
-          },
-          "endTime": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Endtime",
-            "description": "RFC3339 timestamp for timed events"
-          },
-          "startDate": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Startdate",
-            "description": "All-day event start date in YYYY-MM-DD format"
-          },
-          "endDate": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enddate",
-            "description": "All-day event end date in YYYY-MM-DD format"
-          },
-          "timezone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Timezone",
-            "description": "IANA timezone (e.g., America/Los_Angeles)"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Event description"
-          },
-          "location": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Location",
-            "description": "Event location"
-          },
-          "visibility": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Visibility",
-            "description": "Visibility (default, public, private, confidential)"
-          },
-          "recurrence": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recurrence",
-            "description": "Recurrence rules (RRULE format)"
-          },
-          "attendees": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarAttendee"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attendees",
-            "description": "List of event attendees"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title"
-        ],
-        "title": "GoogleCalendarEvent",
-        "description": "Google Calendar event object"
-      },
-      "GoogleCalendarEvent-Output": {
+      "GoogleCalendarEvent": {
         "properties": {
           "title": {
             "type": "string",
@@ -28531,6 +28549,50 @@
         ],
         "title": "GoogleSheetsSpreadsheet",
         "description": "Google Sheets spreadsheet object"
+      },
+      "GoogleWorkspaceAtlasData-Input": {
+        "properties": {
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events",
+            "description": "List of Google Calendar events"
+          }
+        },
+        "type": "object",
+        "title": "GoogleWorkspaceAtlasData",
+        "description": "Complete Google workspace for MCP atlas sandbox data structure"
+      },
+      "GoogleWorkspaceAtlasData-Output": {
+        "properties": {
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events",
+            "description": "List of Google Calendar events"
+          }
+        },
+        "type": "object",
+        "title": "GoogleWorkspaceAtlasData",
+        "description": "Complete Google workspace for MCP atlas sandbox data structure"
       },
       "HTTPValidationError": {
         "properties": {
@@ -34184,6 +34246,7 @@
           "youtube",
           "local_dev",
           "localmemory",
+          "googleworkspaceatlas",
           "arxiv_latex",
           "calculator",
           "clinicaltrialsgov",
@@ -36727,6 +36790,290 @@
         ],
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
+      },
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Event title/summary (required)"
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "RFC3339 timestamp for timed events"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdate",
+            "description": "All-day event start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "All-day event end date in YYYY-MM-DD format"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., America/Los_Angeles)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Event description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Event location"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility",
+            "description": "Visibility (default, public, private, confidential)"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence",
+            "description": "Recurrence rules (RRULE format)"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleCalendarAttendee"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attendees",
+            "description": "List of event attendees"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleCalendarEvent",
+        "description": "Google Calendar event object"
+      },
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title",
+            "description": "Event title/summary (required)"
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime",
+            "description": "RFC3339 timestamp for timed events (e.g., 2025-12-01T09:00:00-07:00)"
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime",
+            "description": "RFC3339 timestamp for timed events"
+          },
+          "startDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startdate",
+            "description": "All-day event start date in YYYY-MM-DD format"
+          },
+          "endDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enddate",
+            "description": "All-day event end date in YYYY-MM-DD format"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA timezone (e.g., America/Los_Angeles)"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Event description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location",
+            "description": "Event location"
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visibility",
+            "description": "Visibility (default, public, private, confidential)"
+          },
+          "recurrence": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurrence",
+            "description": "Recurrence rules (RRULE format)"
+          },
+          "attendees": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GoogleCalendarAttendee"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attendees",
+            "description": "List of event attendees"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "GoogleCalendarEvent",
+        "description": "Google Calendar event object"
       }
     },
     "securitySchemes": {
