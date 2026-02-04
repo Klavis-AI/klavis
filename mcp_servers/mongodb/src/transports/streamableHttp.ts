@@ -46,6 +46,17 @@ export class StreamableHttpRunner extends TransportRunnerBase {
         );
 
         app.enable("trust proxy"); // needed for reverse proxy support
+
+        // Health check endpoint for Cloud Run / Kubernetes probes
+        app.get("/health", (_req, res) => {
+            res.status(200).json({ status: "healthy" });
+        });
+
+        // Root endpoint for basic health checks
+        app.get("/", (_req, res) => {
+            res.status(200).json({ status: "ok", service: "mongodb-mcp-server" });
+        });
+
         app.use(express.json({ limit: this.userConfig.httpBodyLimit }));
         app.use((req, res, next) => {
             for (const [key, value] of Object.entries(this.userConfig.httpHeaders)) {
