@@ -34,7 +34,7 @@
 	"dependencies": {
 		"@huggingface/hub": "^2.6.12",
 		"@mcp-ui/server": "^5.12.0",
-		"@modelcontextprotocol/sdk": "^1.25.3",
+		"@modelcontextprotocol/sdk": "^1.26.0",
 		"shell-quote": "^1.8.3",
 		"turndown": "^7.2.0",
 		"zod": "^3.24.4"
