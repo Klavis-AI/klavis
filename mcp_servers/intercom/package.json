@@ -32,7 +32,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "p-queue": "^8.0.1",
