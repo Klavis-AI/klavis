@@ -31,7 +31,6 @@ export abstract class ToolBase {
     protected get annotations(): ToolAnnotations {
         const annotations: ToolAnnotations = {
             title: this.name,
-            description: this.description,
         };
 
         switch (this.operationType) {
@@ -112,7 +111,6 @@ export abstract class ToolBase {
             }
 
             if (updates.description) {
-                existingTool.annotations.description = updates.description;
                 existingTool.description = updates.description;
                 this.description = updates.description;
             }

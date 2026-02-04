@@ -4,6 +4,57 @@ import argv from "yargs-parser";
 
 import { ReadConcernLevel, ReadPreferenceMode, W } from "mongodb";
 
+/**
+ * Extracts connection string from the x-auth-data header.
+ * The header value should be a base64-encoded JSON string containing
+ * a `connection_string` field.
+ *
+ * Logic follows the same pattern as the resend MCP server's extractApiKey function:
+ * 1. First check if CONNECTION_STRING env var is set - return it directly if present
+ * 2. If not, check for x-auth-data header
+ * 3. Decode from base64 to UTF-8
+ * 4. Parse as JSON
+ * 5. Return the connection_string field
+ *
+ * @param headers - Request headers containing x-auth-data
+ * @returns The connection string if found, undefined otherwise
+ */
+export function extractConnectionStringFromAuthData(
+    headers?: Record<string, string | string[] | undefined>
+): string | undefined {
+    // First check environment variable
+    let authData = process.env.CONNECTION_STRING;
+
+    if (authData) {
+        return authData;
+    }
+
+    // If no env var, check for x-auth-data header
+    if (!authData && headers?.["x-auth-data"]) {
+        try {
+            const headerValue = Array.isArray(headers["x-auth-data"])
+                ? headers["x-auth-data"][0]
+                : headers["x-auth-data"];
+            authData = Buffer.from(headerValue as string, "base64").toString("utf8");
+        } catch (error) {
+            console.error("Error decoding x-auth-data base64:", error);
+            return undefined;
+        }
+    }
+
+    if (!authData) {
+        return undefined;
+    }
+
+    try {
+        const authDataJson = JSON.parse(authData);
+        return authDataJson.connection_string ?? authDataJson.connectionString ?? undefined;
+    } catch (error) {
+        console.error("Error parsing x-auth-data JSON:", error);
+        return undefined;
+    }
+}
+
 export interface ConnectOptions {
     readConcern: ReadConcernLevel;
     readPreference: ReadPreferenceMode;

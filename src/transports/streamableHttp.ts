@@ -3,7 +3,7 @@ import http from "http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { TransportRunnerBase } from "./base.js";
-import { UserConfig } from "../common/config.js";
+import { UserConfig, extractConnectionStringFromAuthData } from "../common/config.js";
 import logger, { LogId } from "../common/logger.js";
 import { randomUUID } from "crypto";
 import { SessionStore } from "../common/sessionStore.js";
@@ -106,7 +106,21 @@ export class StreamableHttpRunner extends TransportRunnerBase {
                     return;
                 }
 
-                const server = this.setupServer(this.userConfig);
+                // Extract connection string from x-auth-data header if not already set
+                let sessionConfig = this.userConfig;
+                if (!sessionConfig.connectionString) {
+                    const connectionStringFromAuthData = extractConnectionStringFromAuthData(
+                        req.headers as Record<string, string | string[] | undefined>
+                    );
+                    if (connectionStringFromAuthData) {
+                        sessionConfig = {
+                            ...this.userConfig,
+                            connectionString: connectionStringFromAuthData,
+                        };
+                    }
+                }
+
+                const server = this.setupServer(sessionConfig);
                 const transport = new StreamableHTTPServerTransport({
                     sessionIdGenerator: () => randomUUID().toString(),
                     onsessioninitialized: (sessionId) => {

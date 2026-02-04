@@ -60,7 +60,7 @@ export class Session extends EventEmitter<{
     async disconnect(): Promise<void> {
         if (this.serviceProvider) {
             try {
-                await this.serviceProvider.close(true);
+                await this.serviceProvider.close();
             } catch (err: unknown) {
                 const error = err instanceof Error ? err : new Error(String(err));
                 logger.error(LogId.mongodbDisconnectFailure, "Error closing service provider:", error.message);
