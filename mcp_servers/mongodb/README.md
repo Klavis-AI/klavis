@@ -324,13 +324,13 @@ NOTE: atlas tools are only available when you set credentials on [configuration]
 - `explain` - Returns statistics describing the execution of the winning plan chosen by the query optimizer for the evaluated method
 - `export` - Export a query or aggregation results in the specified EJSON format.
 - `find` - Run a find query against a MongoDB collection
-- `insert-many` - Insert an array of documents into a MongoDB collection. If the list of documents is above com.mongodb/maxRequestPayloadBytes, consider inserting them in batches.
+- `insert-many` - Insert an array of documents into a MongoDB collection.
 - `list-collections` - List all collections for a given database
 - `list-databases` - List all databases for a MongoDB connection
 - `mongodb-logs` - Returns the most recent logged mongod events
 - `rename-collection` - Renames a collection in a MongoDB database
 - `switch-connection` - Switch to a different MongoDB connection
-- `update-many` - Updates all documents that match the specified filter for a collection. If the list of documents is above com.mongodb/maxRequestPayloadBytes, consider updating them in batches.
+- `update-many` - Updates all documents that match the specified filter for a collection.
 
 ## 📄 Supported Resources
 
