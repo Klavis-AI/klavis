@@ -1,27 +1,26 @@
 import { z } from "zod";
-import { type OperationType, type ToolArgs } from "../../tool.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
 import { makeCurrentIpAccessListEntry, DEFAULT_ACCESS_LIST_COMMENT } from "../../../common/atlas/accessListUtils.js";
-import { AtlasArgs, CommonArgs } from "../../args.js";
-
-export const CreateAccessListArgs = {
-    projectId: AtlasArgs.projectId().describe("Atlas project ID"),
-    ipAddresses: z.array(AtlasArgs.ipAddress()).describe("IP addresses to allow access from").optional(),
-    cidrBlocks: z.array(AtlasArgs.cidrBlock()).describe("CIDR blocks to allow access from").optional(),
-    currentIpAddress: z.boolean().describe("Add the current IP address").default(false),
-    comment: CommonArgs.string()
-        .describe("Comment for the access list entries")
-        .default(DEFAULT_ACCESS_LIST_COMMENT)
-        .optional(),
-};
 
 export class CreateAccessListTool extends AtlasToolBase {
     public name = "atlas-create-access-list";
-    public description = "Allow Ip/CIDR ranges to access your MongoDB Atlas clusters.";
-    static operationType: OperationType = "create";
-    public argsShape = {
-        ...CreateAccessListArgs,
+    protected description = "Allow Ip/CIDR ranges to access your MongoDB Atlas clusters.";
+    public operationType: OperationType = "create";
+    protected argsShape = {
+        projectId: z.string().describe("Atlas project ID"),
+        ipAddresses: z
+            .array(z.string().ip({ version: "v4" }))
+            .describe("IP addresses to allow access from")
+            .optional(),
+        cidrBlocks: z.array(z.string().cidr()).describe("CIDR blocks to allow access from").optional(),
+        currentIpAddress: z.boolean().describe("Add the current IP address").default(false),
+        comment: z
+            .string()
+            .describe("Comment for the access list entries")
+            .default(DEFAULT_ACCESS_LIST_COMMENT)
+            .optional(),
     };
 
     protected async execute({
@@ -43,7 +42,7 @@ export class CreateAccessListTool extends AtlasToolBase {
 
         if (currentIpAddress) {
             const input = await makeCurrentIpAccessListEntry(
-                this.apiClient,
+                this.session.apiClient,
                 projectId,
                 comment || DEFAULT_ACCESS_LIST_COMMENT
             );
@@ -58,7 +57,7 @@ export class CreateAccessListTool extends AtlasToolBase {
 
         const inputs = [...ipInputs, ...cidrInputs];
 
-        await this.apiClient.createAccessListEntry({
+        await this.session.apiClient.createProjectIpAccessList({
             params: {
                 path: {
                     groupId: projectId,
@@ -75,32 +74,5 @@ export class CreateAccessListTool extends AtlasToolBase {
                 },
             ],
         };
-    }
-
-    protected getConfirmationMessage({
-        projectId,
-        ipAddresses,
-        cidrBlocks,
-        comment,
-        currentIpAddress,
-    }: ToolArgs<typeof this.argsShape>): string {
-        const accessDescription = [];
-        if (ipAddresses?.length) {
-            accessDescription.push(`- **IP addresses**: ${ipAddresses.join(", ")}`);
-        }
-        if (cidrBlocks?.length) {
-            accessDescription.push(`- **CIDR blocks**: ${cidrBlocks.join(", ")}`);
-        }
-        if (currentIpAddress) {
-            accessDescription.push("- **Current IP address**");
-        }
-
-        return (
-            `You are about to add the following entries to the access list for Atlas project "${projectId}":\n\n` +
-            accessDescription.join("\n") +
-            `\n\n**Comment**: ${comment || DEFAULT_ACCESS_LIST_COMMENT}\n\n` +
-            "This will allow network access to your MongoDB Atlas clusters from these IP addresses/ranges. " +
-            "Do you want to proceed?"
-        );
     }
 }

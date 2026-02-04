@@ -1,6 +1,6 @@
-import type { Document } from "mongodb";
+import { Document } from "mongodb";
+import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ErrorCodes, MongoDBError } from "../common/errors.js";
-import { LogId, type LoggerBase } from "../common/logger.js";
 
 /**
  * Check if the query plan uses an index
@@ -55,19 +55,13 @@ export function getIndexCheckErrorMessage(database: string, collection: string, 
 /**
  * Generic function to perform index usage check
  */
-export async function checkIndexUsage({
-    database,
-    collection,
-    operation,
-    explainCallback,
-    logger,
-}: {
-    database: string;
-    collection: string;
-    operation: string;
-    explainCallback: () => Promise<Document>;
-    logger: LoggerBase;
-}): Promise<void> {
+export async function checkIndexUsage(
+    provider: NodeDriverServiceProvider,
+    database: string,
+    collection: string,
+    operation: string,
+    explainCallback: () => Promise<Document>
+): Promise<void> {
     try {
         const explainResult = await explainCallback();
 
@@ -84,10 +78,6 @@ export async function checkIndexUsage({
 
         // If explain itself fails, log but do not prevent query execution
         // This avoids blocking normal queries in special cases (e.g., permission issues)
-        logger.warning({
-            id: LogId.mongodbIndexCheckFailure,
-            context: "Index Usage Check",
-            message: `Index check failed to execute explain for ${operation} on ${database}.${collection}: ${error instanceof Error ? error.message : String(error)}`,
-        });
+        console.warn(`Index check failed to execute explain for ${operation} on ${database}.${collection}:`, error);
     }
 }

@@ -1,22 +1,18 @@
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { type OperationType, type ToolArgs, formatUntrustedData } from "../../tool.js";
+import { z } from "zod";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
-import { AtlasArgs } from "../../args.js";
-
-export const InspectAccessListArgs = {
-    projectId: AtlasArgs.projectId().describe("Atlas project ID"),
-};
+import { ToolArgs, OperationType } from "../../tool.js";
 
 export class InspectAccessListTool extends AtlasToolBase {
     public name = "atlas-inspect-access-list";
-    public description = "Inspect Ip/CIDR ranges with access to your MongoDB Atlas clusters.";
-    static operationType: OperationType = "read";
-    public argsShape = {
-        ...InspectAccessListArgs,
+    protected description = "Inspect Ip/CIDR ranges with access to your MongoDB Atlas clusters.";
+    public operationType: OperationType = "read";
+    protected argsShape = {
+        projectId: z.string().describe("Atlas project ID"),
     };
 
     protected async execute({ projectId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        const accessList = await this.apiClient.listAccessListEntries({
+        const accessList = await this.session.apiClient.listProjectIpAccessLists({
             params: {
                 path: {
                     groupId: projectId,
@@ -24,22 +20,23 @@ export class InspectAccessListTool extends AtlasToolBase {
             },
         });
 
-        const results = accessList.results ?? [];
-
-        if (!results.length) {
-            return {
-                content: [{ type: "text", text: "No access list entries found." }],
-            };
+        if (!accessList?.results?.length) {
+            throw new Error("No access list entries found.");
         }
 
-        const entries = results.map((entry) => ({
-            ipAddress: entry.ipAddress,
-            cidrBlock: entry.cidrBlock,
-            comment: entry.comment,
-        }));
-
         return {
-            content: formatUntrustedData(`Found ${results.length} access list entries`, JSON.stringify(entries)),
+            content: [
+                {
+                    type: "text",
+                    text: `IP ADDRESS | CIDR | COMMENT
+------|------|------
+${(accessList.results || [])
+    .map((entry) => {
+        return `${entry.ipAddress} | ${entry.cidrBlock} | ${entry.comment}`;
+    })
+    .join("\n")}`,
+                },
+            ],
         };
     }
 }

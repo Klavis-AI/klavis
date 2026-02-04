@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import type { BaseEvent } from "./types.js";
+import { BaseEvent } from "./types.js";
 
 /**
  * Singleton class for in-memory telemetry event caching
@@ -34,18 +34,11 @@ export class EventCache {
     }
 
     /**
-     * Gets the number of currently cached events
-     */
-    public get size(): number {
-        return this.cache.size;
-    }
-
-    /**
-     * Gets a copy of the currently cached events along with their ids
+     * Gets a copy of the currently cached events
      * @returns Array of cached BaseEvent objects
      */
-    public getEvents(): { id: number; event: BaseEvent }[] {
-        return Array.from(this.cache.entries()).map(([id, event]) => ({ id, event }));
+    public getEvents(): BaseEvent[] {
+        return Array.from(this.cache.values());
     }
 
     /**
@@ -60,11 +53,10 @@ export class EventCache {
     }
 
     /**
-     * Removes cached events by their ids
+     * Clears all cached events
      */
-    public removeEvents(ids: number[]): void {
-        for (const id of ids) {
-            this.cache.delete(id);
-        }
+    public clearEvents(): void {
+        this.cache.clear();
+        this.nextId = 0;
     }
 }

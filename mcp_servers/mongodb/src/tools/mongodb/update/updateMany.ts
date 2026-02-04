@@ -1,30 +1,31 @@
 import { z } from "zod";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
-import type { ToolArgs, OperationType } from "../../tool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
 import { checkIndexUsage } from "../../../helpers/indexCheck.js";
-import { zEJSON } from "../../args.js";
 
 export class UpdateManyTool extends MongoDBToolBase {
     public name = "update-many";
-    public description =
-        "Updates all documents that match the specified filter for a collection.";
-    public argsShape = {
+    protected description = "Updates all documents that match the specified filter for a collection";
+    protected argsShape = {
         ...DbOperationArgs,
-        filter: zEJSON()
+        filter: z
+            .object({})
+            .passthrough()
             .optional()
             .describe(
                 "The selection criteria for the update, matching the syntax of the filter argument of db.collection.updateOne()"
             ),
-        update: zEJSON().describe(
-            "An update document describing the modifications to apply using update operator expressions"
-        ),
+        update: z
+            .object({})
+            .passthrough()
+            .describe("An update document describing the modifications to apply using update operator expressions"),
         upsert: z
             .boolean()
             .optional()
             .describe("Controls whether to insert a new document if no documents match the filter"),
     };
-    static operationType: OperationType = "update";
+    public operationType: OperationType = "update";
 
     protected async execute({
         database,
@@ -37,27 +38,21 @@ export class UpdateManyTool extends MongoDBToolBase {
 
         // Check if update operation uses an index if enabled
         if (this.config.indexCheck) {
-            await checkIndexUsage({
-                database,
-                collection,
-                operation: "updateMany",
-                explainCallback: async () => {
-                    return provider.runCommandWithCheck(database, {
-                        explain: {
-                            update: collection,
-                            updates: [
-                                {
-                                    q: filter || {},
-                                    u: update,
-                                    upsert: upsert || false,
-                                    multi: true,
-                                },
-                            ],
-                        },
-                        verbosity: "queryPlanner",
-                    });
-                },
-                logger: this.session.logger,
+            await checkIndexUsage(provider, database, collection, "updateMany", async () => {
+                return provider.runCommandWithCheck(database, {
+                    explain: {
+                        update: collection,
+                        updates: [
+                            {
+                                q: filter || {},
+                                u: update,
+                                upsert: upsert || false,
+                                multi: true,
+                            },
+                        ],
+                    },
+                    verbosity: "queryPlanner",
+                });
             });
         }
 

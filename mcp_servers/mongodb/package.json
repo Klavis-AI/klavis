@@ -1,50 +1,54 @@
 {
-  "name": "@klavis-ai/mcp-server-mongodb",
+  "name": "mongodb-mcp-server",
   "description": "MongoDB Model Context Protocol Server",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "version": "0.2.0",
+  "main": "dist/index.js",
+  "author": "MongoDB <info@mongodb.com>",
+  "homepage": "https://github.com/mongodb-js/mongodb-mcp-server",
+  "repository": {
+    "url": "https://github.com/mongodb-js/mongodb-mcp-server.git"
+  },
   "bin": {
     "mongodb-mcp-server": "dist/index.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
   "scripts": {
-    "build": "tsc && chmod +x dist/index.js",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js --transport http --loggers stderr mcp",
+    "prepare": "npm run build",
+    "build:clean": "rm -rf dist",
+    "build:compile": "tsc --project tsconfig.build.json",
+    "build:chmod": "chmod +x dist/index.js",
+    "build": "npm run build:clean && npm run build:compile && npm run build:chmod"
   },
   "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^24.0.12",
+    "@types/simple-oauth2": "^5.0.7",
+    "@types/yargs-parser": "^21.0.3",
+    "typescript": "^5.8.3"
+  },
   "dependencies": {
-    "@mcp-ui/server": "^5.13.1",
-    "@modelcontextprotocol/sdk": "^1.24.2",
+    "@modelcontextprotocol/sdk": "^1.15.0",
     "@mongodb-js/device-id": "^0.3.1",
-    "@mongodb-js/devtools-proxy-support": "^0.7.2",
-    "@mongosh/arg-parser": "3.23.0",
-    "@mongosh/service-provider-node-driver": "^3.17.5",
-    "ai": "^6.0.33",
+    "@mongodb-js/devtools-connect": "^3.9.2",
+    "@mongosh/service-provider-node-driver": "^3.10.2",
     "bson": "^6.10.4",
     "express": "^5.1.0",
     "lru-cache": "^11.1.0",
-    "mongodb-build-info": "^1.9.0",
-    "mongodb-connection-string-url": "^3.0.1 || ^7.0.0",
+    "mongodb": "^6.17.0",
+    "mongodb-connection-string-url": "^3.0.2",
     "mongodb-log-writer": "^2.4.1",
-    "mongodb-redact": "^1.3.0",
+    "mongodb-redact": "^1.1.8",
     "mongodb-schema": "^12.6.2",
-    "node-fetch": "^3.3.2",
     "node-machine-id": "1.1.12",
-    "oauth4webapi": "^3.8.0",
-    "openapi-fetch": "^0.15.0",
-    "ts-levenshtein": "^1.0.7",
-    "voyage-ai-provider": "^3.0.0",
+    "openapi-fetch": "^0.14.0",
+    "simple-oauth2": "^5.1.0",
+    "yargs-parser": "^22.0.0",
     "zod": "^3.25.76"
-  },
-  "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.5.2",
-    "typescript": "^5.9.2"
-  },
-  "optionalDependencies": {
-    "@mongodb-js/atlas-local": "^1.1.0",
-    "kerberos": "^2.2.2"
   },
   "engines": {
     "node": "^20.19.0 || ^22.12.0 || >= 23.0.0"
