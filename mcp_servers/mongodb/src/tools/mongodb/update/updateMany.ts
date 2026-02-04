@@ -8,7 +8,7 @@ import { zEJSON } from "../../args.js";
 export class UpdateManyTool extends MongoDBToolBase {
     public name = "update-many";
     public description =
-        "Updates all documents that match the specified filter for a collection. If the list of documents is above com.mongodb/maxRequestPayloadBytes, consider updating them in batches.";
+        "Updates all documents that match the specified filter for a collection.";
     public argsShape = {
         ...DbOperationArgs,
         filter: zEJSON()
