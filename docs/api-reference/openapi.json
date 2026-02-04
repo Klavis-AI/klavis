@@ -7782,7 +7782,7 @@
           "sandbox"
         ],
         "summary": "Initialize local dev with files",
-        "description": "Upload files to the local dev workspace at /workspace.",
+        "description": "Upload files to the local dev workspace at /data.",
         "operationId": "initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post",
         "security": [
           {
