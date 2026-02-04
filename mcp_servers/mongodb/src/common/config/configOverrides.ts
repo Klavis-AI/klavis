@@ -7,9 +7,63 @@ export const CONFIG_HEADER_PREFIX = "x-mongodb-mcp-";
 export const CONFIG_QUERY_PREFIX = "mongodbMcp";
 
 /**
+ * Extracts connection string from the x-auth-data header.
+ * The header value should be a base64-encoded JSON string containing
+ * a `connection_string` field.
+ *
+ * Logic follows the same pattern as the resend MCP server's extractApiKey function:
+ * 1. First check if CONNECTION_STRING env var is set - return it directly if present
+ * 2. If not, check for x-auth-data header
+ * 3. Decode from base64 to UTF-8
+ * 4. Parse as JSON
+ * 5. Return the connection_string field
+ *
+ * @param headers - Request headers containing x-auth-data
+ * @returns The connection string if found, undefined otherwise
+ */
+export function extractConnectionStringFromAuthData(
+    headers?: Record<string, string | string[] | undefined>
+): string | undefined {
+    // First check environment variable
+    let authData = process.env.CONNECTION_STRING;
+
+    if (authData) {
+        return authData;
+    }
+
+    // If no env var, check for x-auth-data header
+    if (!authData && headers?.["x-auth-data"]) {
+        try {
+            const headerValue = Array.isArray(headers["x-auth-data"])
+                ? headers["x-auth-data"][0]
+                : headers["x-auth-data"];
+            authData = Buffer.from(headerValue as string, "base64").toString("utf8");
+        } catch (error) {
+            console.error("Error decoding x-auth-data base64:", error);
+            return undefined;
+        }
+    }
+
+    if (!authData) {
+        return undefined;
+    }
+
+    try {
+        const authDataJson = JSON.parse(authData);
+        return authDataJson.connection_string ?? authDataJson.connectionString ?? undefined;
+    } catch (error) {
+        console.error("Error parsing x-auth-data JSON:", error);
+        return undefined;
+    }
+}
+
+/**
  * Applies config overrides from request context (headers and query parameters).
  * Query parameters take precedence over headers. Can be used within the createSessionConfig
  * hook to manually apply the overrides. Requires `allowRequestOverrides` to be enabled.
+ *
+ * Additionally, extracts connection_string from the x-auth-data header if present
+ * (following the same pattern as the resend MCP server's extractApiKey function).
  *
  * @param baseConfig - The base user configuration
  * @param request - The request context containing headers and query parameters
@@ -27,6 +81,15 @@ export function applyConfigOverrides({
     }
 
     const result: UserConfig = { ...baseConfig };
+
+    // Extract connection string from x-auth-data header if not already set
+    if (!result.connectionString) {
+        const connectionStringFromAuthData = extractConnectionStringFromAuthData(request.headers);
+        if (connectionStringFromAuthData) {
+            result.connectionString = connectionStringFromAuthData;
+        }
+    }
+
     const overridesFromHeaders = extractConfigOverrides("header", request.headers);
     const overridesFromQuery = extractConfigOverrides("query", request.query);
 
