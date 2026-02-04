@@ -1,65 +1,53 @@
-import type { Session } from "../common/session.js";
-import type { BaseEvent, CommonProperties } from "./types.js";
-import type { UserConfig } from "../common/config/userConfig.js";
-import { LogId } from "../common/logger.js";
-import type { ApiClient } from "../common/atlas/apiClient.js";
+import { Session } from "../common/session.js";
+import { BaseEvent, CommonProperties } from "./types.js";
+import { UserConfig } from "../common/config.js";
+import logger, { LogId } from "../common/logger.js";
+import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
+import nodeMachineId from "node-machine-id";
+import { getDeviceId } from "@mongodb-js/device-id";
 import { detectContainerEnv } from "../helpers/container.js";
-import type { DeviceId } from "../helpers/deviceId.js";
-import { EventEmitter } from "events";
-import { redact } from "mongodb-redact";
 
 type EventResult = {
     success: boolean;
     error?: Error;
 };
 
-export interface TelemetryEvents {
-    "events-emitted": [];
-    "events-send-failed": [];
-    "events-skipped": [];
-}
+export const DEVICE_ID_TIMEOUT = 3000;
 
 export class Telemetry {
     private isBufferingEvents: boolean = true;
     /** Resolves when the setup is complete or a timeout occurs */
     public setupPromise: Promise<[string, boolean]> | undefined;
-    public readonly events: EventEmitter<TelemetryEvents> = new EventEmitter();
-
+    private deviceIdAbortController = new AbortController();
     private eventCache: EventCache;
-    private deviceId: DeviceId;
+    private getRawMachineId: () => Promise<string>;
 
     private constructor(
         private readonly session: Session,
         private readonly userConfig: UserConfig,
         private readonly commonProperties: CommonProperties,
-        { eventCache, deviceId }: { eventCache: EventCache; deviceId: DeviceId }
+        { eventCache, getRawMachineId }: { eventCache: EventCache; getRawMachineId: () => Promise<string> }
     ) {
         this.eventCache = eventCache;
-        this.deviceId = deviceId;
+        this.getRawMachineId = getRawMachineId;
     }
 
     static create(
         session: Session,
         userConfig: UserConfig,
-        deviceId: DeviceId,
         {
-            commonProperties = {},
+            commonProperties = { ...MACHINE_METADATA },
             eventCache = EventCache.getInstance(),
+            getRawMachineId = () => nodeMachineId.machineId(true),
         }: {
-            commonProperties?: Partial<CommonProperties>;
             eventCache?: EventCache;
+            getRawMachineId?: () => Promise<string>;
+            commonProperties?: CommonProperties;
         } = {}
     ): Telemetry {
-        const mergedProperties = {
-            ...MACHINE_METADATA,
-            ...commonProperties,
-        };
-        const instance = new Telemetry(session, userConfig, mergedProperties, {
-            eventCache,
-            deviceId,
-        });
+        const instance = new Telemetry(session, userConfig, commonProperties, { eventCache, getRawMachineId });
 
         void instance.setup();
         return instance;
@@ -67,69 +55,58 @@ export class Telemetry {
 
     private async setup(): Promise<void> {
         if (!this.isTelemetryEnabled()) {
-            this.session.logger.info({
-                id: LogId.telemetryEmitFailure,
-                context: "telemetry",
-                message: "Telemetry is disabled.",
-                noRedaction: true,
-            });
             return;
         }
+        this.setupPromise = Promise.all([
+            getDeviceId({
+                getMachineId: () => this.getRawMachineId(),
+                onError: (reason, error) => {
+                    switch (reason) {
+                        case "resolutionError":
+                            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
+                            break;
+                        case "timeout":
+                            logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+                            break;
+                        case "abort":
+                            // No need to log in the case of aborts
+                            break;
+                    }
+                },
+                abortSignal: this.deviceIdAbortController.signal,
+            }),
+            detectContainerEnv(),
+        ]);
 
-        this.setupPromise = Promise.all([this.deviceId.get(), detectContainerEnv()]);
-        const [deviceIdValue, containerEnv] = await this.setupPromise;
+        const [deviceId, containerEnv] = await this.setupPromise;
 
-        this.commonProperties.device_id = deviceIdValue;
-        this.commonProperties.is_container_env = containerEnv ? "true" : "false";
+        this.commonProperties.device_id = deviceId;
+        this.commonProperties.is_container_env = containerEnv;
 
         this.isBufferingEvents = false;
     }
 
     public async close(): Promise<void> {
+        this.deviceIdAbortController.abort();
         this.isBufferingEvents = false;
-
-        this.session.logger.debug({
-            id: LogId.telemetryClose,
-            message: `Closing telemetry and flushing ${this.eventCache.size} events`,
-            context: "telemetry",
-        });
-
-        // Wait up to 5 seconds for events to be sent before closing, but don't throw if it times out
-        const flushMaxWaitTime = 5000;
-        let flushTimeout: NodeJS.Timeout | undefined;
-        await Promise.race([
-            new Promise<void>((resolve) => {
-                flushTimeout = setTimeout(() => {
-                    this.session.logger.debug({
-                        id: LogId.telemetryClose,
-                        message: `Failed to flush remaining events within ${flushMaxWaitTime}ms timeout`,
-                        context: "telemetry",
-                    });
-                    resolve();
-                }, flushMaxWaitTime);
-                // This is Node-specific and can cause issues when running in electron otherwise. See https://github.com/electron/electron/issues/21162
-                if (typeof flushTimeout.unref === "function") {
-                    flushTimeout.unref();
-                }
-            }),
-            this.emit([]),
-        ]);
-
-        clearTimeout(flushTimeout);
+        await this.emitEvents(this.eventCache.getEvents());
     }
 
     /**
      * Emits events through the telemetry pipeline
      * @param events - The events to emit
      */
-    public emitEvents(events: BaseEvent[]): void {
-        if (!this.isTelemetryEnabled()) {
-            this.events.emit("events-skipped");
-            return;
+    public async emitEvents(events: BaseEvent[]): Promise<void> {
+        try {
+            if (!this.isTelemetryEnabled()) {
+                logger.info(LogId.telemetryEmitFailure, "telemetry", `Telemetry is disabled.`);
+                return;
+            }
+
+            await this.emit(events);
+        } catch {
+            logger.debug(LogId.telemetryEmitFailure, "telemetry", `Error emitting telemetry events.`);
         }
-        // Don't wait for events to be sent - we should not block regular server
-        // operations on telemetry
-        void this.emit(events);
     }
 
     /**
@@ -140,10 +117,10 @@ export class Telemetry {
         return {
             ...this.commonProperties,
             transport: this.userConfig.transport,
-            mcp_client_version: this.session.mcpClient?.version,
-            mcp_client_name: this.session.mcpClient?.name,
+            mcp_client_version: this.session.agentRunner?.version,
+            mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
-            config_atlas_auth: this.session.apiClient?.isAuthConfigured() ? "true" : "false",
+            config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
             config_connection_string: this.userConfig.connectionString ? "true" : "false",
         };
     }
@@ -175,65 +152,43 @@ export class Telemetry {
             return;
         }
 
-        // If no API client is available, cache the events
-        if (!this.session.apiClient) {
-            this.eventCache.appendEvents(events);
+        const cachedEvents = this.eventCache.getEvents();
+        const allEvents = [...cachedEvents, ...events];
+
+        logger.debug(
+            LogId.telemetryEmitStart,
+            "telemetry",
+            `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`
+        );
+
+        const result = await this.sendEvents(this.session.apiClient, allEvents);
+        if (result.success) {
+            this.eventCache.clearEvents();
+            logger.debug(
+                LogId.telemetryEmitSuccess,
+                "telemetry",
+                `Sent ${allEvents.length} events successfully: ${JSON.stringify(allEvents, null, 2)}`
+            );
             return;
         }
 
-        try {
-            const cachedEvents = this.eventCache.getEvents();
-            const allEvents = [...cachedEvents.map((e) => e.event), ...events];
-
-            this.session.logger.debug({
-                id: LogId.telemetryEmitStart,
-                context: "telemetry",
-                message: `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`,
-            });
-
-            const result = await this.sendEvents(this.session.apiClient, allEvents);
-            if (result.success) {
-                this.eventCache.removeEvents(cachedEvents.map((e) => e.id));
-                this.session.logger.debug({
-                    id: LogId.telemetryEmitSuccess,
-                    context: "telemetry",
-                    message: `Sent ${allEvents.length} events successfully: ${JSON.stringify(allEvents)}`,
-                });
-                this.events.emit("events-emitted");
-                return;
-            }
-
-            this.session.logger.debug({
-                id: LogId.telemetryEmitFailure,
-                context: "telemetry",
-                message: `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`,
-            });
-            this.eventCache.appendEvents(events);
-            this.events.emit("events-send-failed");
-        } catch (error) {
-            this.session.logger.debug({
-                id: LogId.telemetryEmitFailure,
-                context: "telemetry",
-                message: `Error emitting telemetry events: ${error instanceof Error ? error.message : String(error)}`,
-                noRedaction: true,
-            });
-            this.events.emit("events-send-failed");
-        }
+        logger.debug(
+            LogId.telemetryEmitFailure,
+            "telemetry",
+            `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`
+        );
+        this.eventCache.appendEvents(events);
     }
 
     /**
-     * Attempts to send events through the provided API client.
-     * Events are redacted before being sent to ensure no sensitive data is transmitted
+     * Attempts to send events through the provided API client
      */
     private async sendEvents(client: ApiClient, events: BaseEvent[]): Promise<EventResult> {
         try {
             await client.sendEvents(
                 events.map((event) => ({
                     ...event,
-                    properties: {
-                        ...redact(this.getCommonProperties(), this.session.keychain.allSecrets),
-                        ...redact(event.properties, this.session.keychain.allSecrets),
-                    },
+                    properties: { ...this.getCommonProperties(), ...event.properties },
                 }))
             );
             return { success: true };

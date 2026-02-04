@@ -1,0 +1,15 @@
+dist
+node_modules
+.vscode/mcp.json
+.github/prompts/*
+
+# Environment variables
+.env
+
+# Sensitive
+state.json
+
+tests/tmp
+coverage
+# Generated assets by accuracy runs
+.accuracy

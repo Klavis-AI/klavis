@@ -1,32 +1,21 @@
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
-import type { ToolArgs, OperationType, ToolExecutionContext } from "../../tool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
 
 export class CollectionStorageSizeTool extends MongoDBToolBase {
     public name = "collection-storage-size";
-    public description = "Gets the size of the collection";
-    public argsShape = DbOperationArgs;
+    protected description = "Gets the size of the collection";
+    protected argsShape = DbOperationArgs;
 
-    static operationType: OperationType = "metadata";
+    public operationType: OperationType = "metadata";
 
-    protected async execute(
-        { database, collection }: ToolArgs<typeof DbOperationArgs>,
-        { signal }: ToolExecutionContext
-    ): Promise<CallToolResult> {
+    protected async execute({ database, collection }: ToolArgs<typeof DbOperationArgs>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
         const [{ value }] = (await provider
-            .aggregate(
-                database,
-                collection,
-                [
-                    { $collStats: { storageStats: {} } },
-                    { $group: { _id: null, value: { $sum: "$storageStats.size" } } },
-                ],
-                {
-                    // @ts-expect-error signal is available in the driver but not NodeDriverServiceProvider MONGOSH-3142
-                    signal,
-                }
-            )
+            .aggregate(database, collection, [
+                { $collStats: { storageStats: {} } },
+                { $group: { _id: null, value: { $sum: "$storageStats.size" } } },
+            ])
             .toArray()) as [{ value: number }];
 
         const { units, value: scaledValue } = CollectionStorageSizeTool.getStats(value);
@@ -53,7 +42,6 @@ export class CollectionStorageSizeTool extends MongoDBToolBase {
                         type: "text",
                     },
                 ],
-                isError: true,
             };
         }
 

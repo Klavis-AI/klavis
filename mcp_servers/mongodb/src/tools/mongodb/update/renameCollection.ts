@@ -1,17 +1,17 @@
 import { z } from "zod";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
-import type { ToolArgs, OperationType } from "../../tool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
 
 export class RenameCollectionTool extends MongoDBToolBase {
     public name = "rename-collection";
-    public description = "Renames a collection in a MongoDB database";
-    public argsShape = {
+    protected description = "Renames a collection in a MongoDB database";
+    protected argsShape = {
         ...DbOperationArgs,
         newName: z.string().describe("The new name for the collection"),
         dropTarget: z.boolean().optional().default(false).describe("If true, drops the target collection if it exists"),
     };
-    static operationType: OperationType = "update";
+    public operationType: OperationType = "update";
 
     protected async execute({
         database,
@@ -48,7 +48,6 @@ export class RenameCollectionTool extends MongoDBToolBase {
                                 type: "text",
                             },
                         ],
-                        isError: true,
                     };
                 case "NamespaceExists":
                     return {
@@ -58,7 +57,6 @@ export class RenameCollectionTool extends MongoDBToolBase {
                                 type: "text",
                             },
                         ],
-                        isError: true,
                     };
             }
         }
