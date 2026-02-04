@@ -33,9 +33,9 @@ RUN npm ci --omit=dev --ignore-scripts
 ENV NODE_ENV=production
 ENV MDB_MCP_TRANSPORT=http
 ENV MDB_MCP_HTTP_HOST=0.0.0.0
-ENV MDB_MCP_HTTP_PORT=8080
+ENV MDB_MCP_HTTP_PORT=5000
 
-EXPOSE 8080
+EXPOSE 5000
 
 # Specify the command to run the application
 ENTRYPOINT ["node", "dist/index.js"]
