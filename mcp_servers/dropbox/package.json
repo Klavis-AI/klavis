@@ -23,7 +23,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@types/mime-types": "^3.0.1",
     "dotenv": "^17.2.0",
     "dropbox": "^10.34.0",
