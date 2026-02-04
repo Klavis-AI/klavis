@@ -1,4 +1,4 @@
-export { ConnectTool } from "./connect/connect.js";
+// export { ConnectTool } from "./connect/connect.js";
 export { ListCollectionsTool } from "./metadata/listCollections.js";
 export { CollectionIndexesTool } from "./metadata/collectionIndexes.js";
 export { ListDatabasesTool } from "./metadata/listDatabases.js";
@@ -18,6 +18,6 @@ export { DropCollectionTool } from "./delete/dropCollection.js";
 export { ExplainTool } from "./metadata/explain.js";
 export { CreateCollectionTool } from "./create/createCollection.js";
 export { LogsTool } from "./metadata/logs.js";
-export { ExportTool } from "./read/export.js";
-export { DropIndexTool } from "./delete/dropIndex.js";
+// export { ExportTool } from "./read/export.js";
+// export { DropIndexTool } from "./delete/dropIndex.js";
 export { SwitchConnectionTool } from "./connect/switchConnection.js";
