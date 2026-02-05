@@ -7,6 +7,7 @@ import { UserConfig, extractConnectionStringFromAuthData } from "../common/confi
 import logger, { LogId } from "../common/logger.js";
 import { randomUUID } from "crypto";
 import { SessionStore } from "../common/sessionStore.js";
+import { EJSON } from "bson";
 
 const JSON_RPC_ERROR_CODE_PROCESSING_REQUEST_FAILED = -32000;
 const JSON_RPC_ERROR_CODE_SESSION_ID_REQUIRED = -32001;
@@ -36,6 +37,35 @@ function withErrorHandling(
     };
 }
 
+// Custom middleware to parse JSON using EJSON instead of regular JSON.parse
+// This is needed to properly handle BSON types like ObjectId, Date, etc.
+function ejsonParser(req: express.Request, res: express.Response, next: express.NextFunction) {
+    if (req.is("application/json")) {
+        let data = "";
+        req.setEncoding("utf8");
+        req.on("data", (chunk) => {
+            data += chunk;
+        });
+        req.on("end", () => {
+            try {
+                req.body = data ? EJSON.parse(data) : {};
+                next();
+            } catch (error) {
+                res.status(400).json({
+                    jsonrpc: "2.0",
+                    error: {
+                        code: JSON_RPC_ERROR_CODE_PROCESSING_REQUEST_FAILED,
+                        message: "Invalid JSON",
+                        data: error instanceof Error ? error.message : String(error),
+                    },
+                });
+            }
+        });
+    } else {
+        next();
+    }
+}
+
 export class StreamableHttpRunner extends TransportRunnerBase {
     private httpServer: http.Server | undefined;
     private sessionStore: SessionStore;
@@ -48,7 +78,7 @@ export class StreamableHttpRunner extends TransportRunnerBase {
     async start() {
         const app = express();
         app.enable("trust proxy"); // needed for reverse proxy support
-        app.use(express.json());
+        app.use(ejsonParser); // Use EJSON parser instead of express.json() to handle BSON types
 
         const handleSessionRequest = async (req: express.Request, res: express.Response) => {
             const sessionId = req.headers["mcp-session-id"];
