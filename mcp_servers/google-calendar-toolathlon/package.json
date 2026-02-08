@@ -1,0 +1,58 @@
+{
+  "name": "@gongrzhe/server-calendar-autoauth-mcp",
+  "version": "1.0.2",
+  "description": "A Model Context Protocol server for Google Calendar integration with auto authentication",
+  "main": "build/index.js",
+  "type": "module",
+  "bin": {
+    "server-calendar-autoauth-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "auth": "node ./build/index.js auth"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "keywords": [
+    "calendar",
+    "events",
+    "scheduling",
+    "mcp",
+    "model-context-protocol",
+    "google-calendar",
+    "claude",
+    "cursor",
+    "auto-auth"
+  ],
+  "author": "gongrzhe",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gongrzhe/server-calendar-autoauth-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gongrzhe/server-calendar-autoauth-mcp/issues"
+  },
+  "homepage": "https://github.com/gongrzhe/server-calendar-autoauth-mcp#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/open": "^6.2.1",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "googleapis": "^133.0.0",
+    "open": "^8.4.2",
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

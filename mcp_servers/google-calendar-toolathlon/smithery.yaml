@@ -1,0 +1,23 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - calendarOauthPath
+      - calendarCredentialsPath
+    properties:
+      calendarOauthPath:
+        type: string
+        default: ~/.calendar-mcp/gcp-oauth.keys.json
+        description: Path to the Google OAuth credentials file.
+      calendarCredentialsPath:
+        type: string
+        default: ~/.calendar-mcp/credentials.json
+        description: Path where the OAuth tokens will be stored.
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({ command: 'node', args: ['build/index.js'], env: { CALENDAR_OAUTH_PATH: config.calendarOauthPath, CALENDAR_CREDENTIALS_PATH: config.calendarCredentialsPath } })
