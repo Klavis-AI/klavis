@@ -11,25 +11,24 @@ RUN apk update && \
         bash \
         curl \
         tini \
-        curl \
         coreutils \
         git
 
 # Set tini as the init system to handle PID 1
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "-s", "--"]
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Ensure uv is on PATH (installer places it in /root/.local/bin for root)
 ENV PATH="/root/.local/bin:${PATH}"
 
-COPY .python-version .
+COPY mcp_servers/google_sheets_toolathlon/.python-version .
 
 RUN uv venv
 
 FROM base AS builder
 
-COPY . .
+COPY mcp_servers/google_sheets_toolathlon/ .
 
 RUN uv sync
 
@@ -42,4 +41,4 @@ COPY --from=builder /app/dist/*.whl /app/
 
 RUN uv pip install /app/*.whl
 
-CMD ["uv", "run", "mcp-google-sheets", "--transport", "sse"]
+CMD ["uv", "run", "mcp-google-sheets"]

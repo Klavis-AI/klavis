@@ -5,17 +5,25 @@ A Model Context Protocol (MCP) server built with FastMCP for interacting with Go
 """
 
 import base64
+import contextlib
+import logging
 import os
 import sys
 from typing import List, Dict, Any, Optional, Union
 import json
-from dataclasses import dataclass
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextvars import ContextVar
 
 # MCP imports
 from mcp.server.fastmcp import FastMCP, Context
 from mcp.types import ToolAnnotations
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
 
 # Google API imports
 from google.oauth2.credentials import Credentials
@@ -61,12 +69,74 @@ def _parse_enabled_tools() -> Optional[set]:
 
 ENABLED_TOOLS = _parse_enabled_tools()
 
-@dataclass
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Context variable to store the access token for each request
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+
+    if not auth_data:
+        return ""
+
+    try:
+        # Parse the JSON auth data to extract access_token
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
+
 class SpreadsheetContext:
     """Context for Google Spreadsheet service"""
-    sheets_service: Any
-    drive_service: Any
-    folder_id: Optional[str] = None
+    def __init__(self, sheets_service=None, drive_service=None, folder_id=None):
+        self._sheets_service = sheets_service
+        self._drive_service = drive_service
+        self.folder_id = folder_id
+
+    @property
+    def sheets_service(self):
+        try:
+            token = auth_token_context.get()
+            if token:
+                creds = Credentials(token=token)
+                return build('sheets', 'v4', credentials=creds)
+        except LookupError:
+            pass
+        if self._sheets_service:
+            return self._sheets_service
+        raise RuntimeError("No authentication available for Sheets API")
+
+    @property
+    def drive_service(self):
+        try:
+            token = auth_token_context.get()
+            if token:
+                creds = Credentials(token=token)
+                return build('drive', 'v3', credentials=creds)
+        except LookupError:
+            pass
+        if self._drive_service:
+            return self._drive_service
+        raise RuntimeError("No authentication available for Drive API")
 
 
 @asynccontextmanager
@@ -140,12 +210,15 @@ async def spreadsheet_lifespan(server: FastMCP) -> AsyncIterator[SpreadsheetCont
             print(f"Successfully authenticated using ADC for project: {project}")
         except Exception as e:
             print(f"Error using Application Default Credentials: {e}")
-            raise Exception("All authentication methods failed. Please configure credentials.")
-    
-    # Build the services
-    sheets_service = build('sheets', 'v4', credentials=creds)
-    drive_service = build('drive', 'v3', credentials=creds)
-    
+            print("No server-side credentials configured. Relying on per-request auth tokens.")
+
+    # Build the services if credentials are available
+    sheets_service = None
+    drive_service = None
+    if creds:
+        sheets_service = build('sheets', 'v4', credentials=creds)
+        drive_service = build('drive', 'v3', credentials=creds)
+
     try:
         # Provide the service in the context
         yield SpreadsheetContext(
@@ -161,11 +234,11 @@ async def spreadsheet_lifespan(server: FastMCP) -> AsyncIterator[SpreadsheetCont
 # Initialize the MCP server with lifespan management
 # Resolve host/port from environment variables with flexible names
 _resolved_host = os.environ.get('HOST') or os.environ.get('FASTMCP_HOST') or "0.0.0.0"
-_resolved_port_str = os.environ.get('PORT') or os.environ.get('FASTMCP_PORT') or "8000"
+_resolved_port_str = os.environ.get('PORT') or os.environ.get('FASTMCP_PORT') or "5000"
 try:
     _resolved_port = int(_resolved_port_str)
 except ValueError:
-    _resolved_port = 8000
+    _resolved_port = 5000
 
 # Initialize the MCP server with explicit host/port to ensure binding as configured
 mcp = FastMCP("Google Spreadsheet",
@@ -1390,17 +1463,93 @@ def batch_update(spreadsheet_id: str,
 
 
 def main():
+    import uvicorn
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
     # Log tool filtering configuration if enabled
     if ENABLED_TOOLS is not None:
         print(f"Tool filtering enabled. Active tools: {', '.join(sorted(ENABLED_TOOLS))}")
     else:
         print("Tool filtering disabled. All tools are enabled.")
-    
-    # Run the server
-    transport = "stdio"
+
+    # Check for --transport flag for backwards compatibility (e.g. stdio)
+    transport = "streamable-http"
     for i, arg in enumerate(sys.argv):
         if arg == "--transport" and i + 1 < len(sys.argv):
             transport = sys.argv[i + 1]
             break
 
-    mcp.run(transport=transport)
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+        return
+
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
+        auth_token = extract_access_token(request)
+        token = auth_token_context.set(auth_token)
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await mcp._mcp_server.run(
+                    streams[0], streams[1], mcp._mcp_server.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=mcp._mcp_server,
+        event_store=None,
+        json_response=False,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        logger.info("Handling StreamableHTTP request")
+        auth_token = extract_access_token(scope)
+        token = auth_token_context.set(auth_token)
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
+
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    port = _resolved_port
+    host = _resolved_host
+    logger.info(f"Server starting on {host}:{port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
+    uvicorn.run(starlette_app, host=host, port=port)
