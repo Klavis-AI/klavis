@@ -1,0 +1,35 @@
+[project]
+name = "mcp-google-sheets"
+dynamic = ["version"]
+description = "This MCP server integrates with your Google Drive and Google Sheets, to enable creating and modifying spreadsheets."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.8.0",
+    "google-auth>=2.28.1",
+    "google-auth-oauthlib>=1.2.0",
+    "google-api-python-client>=2.117.0",
+]
+[[project.authors]]
+name = "Xing Wu"
+email = "xingwu.cs@gmail.com"
+
+[project.urls]
+"Homepage" = "https://github.com/xing5/mcp-google-sheets"
+"Bug Tracker" = "https://github.com/xing5/mcp-google-sheets/issues"
+"Repository" = "https://github.com/xing5/mcp-google-sheets.git"
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+pattern = "default"
+strict = true
+fallback-version = "0.0.0"
+
+[project.scripts]
+mcp-google-sheets = "mcp_google_sheets:main"
