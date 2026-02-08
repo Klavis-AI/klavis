@@ -23208,6 +23208,18 @@
             "type": "array",
             "title": "Files",
             "description": "Files to upload"
+          },
+          "paths": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paths",
+            "description": "JSON-encoded list of relative paths corresponding to each uploaded file. Use this to preserve folder structure (e.g. [\"src/main.py\", \"src/utils/helpers.py\"]). Must have the same length as the files list. If omitted, each file's original filename is used (flat, no directories)."
           }
         },
         "type": "object",
@@ -27387,7 +27399,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -27409,7 +27421,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -28557,7 +28569,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -28579,7 +28591,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -36157,6 +36169,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",
@@ -36792,7 +36811,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -36934,7 +36953,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
