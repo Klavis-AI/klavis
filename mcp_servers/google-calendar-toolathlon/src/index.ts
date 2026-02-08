@@ -1,120 +1,56 @@
 #!/usr/bin/env node
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import express, { Request, Response } from 'express';
 import { google } from 'googleapis';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { OAuth2Client } from 'google-auth-library';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import http from 'http';
-import open from 'open';
-import os from 'os';
+import { AsyncLocalStorage } from 'async_hooks';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Create AsyncLocalStorage for request context
+const asyncLocalStorage = new AsyncLocalStorage<{
+    calendar: any;
+}>();
 
-// Configuration paths
-const CONFIG_DIR = path.join(os.homedir(), '.calendar-mcp');
-const OAUTH_PATH = process.env.CALENDAR_OAUTH_PATH || path.join(CONFIG_DIR, 'gcp-oauth.keys.json');
-const CREDENTIALS_PATH = process.env.CALENDAR_CREDENTIALS_PATH || path.join(CONFIG_DIR, 'credentials.json');
-
-// OAuth2 configuration
-let oauth2Client: OAuth2Client;
-
-async function loadCredentials() {
-    try {
-        // Create config directory if it doesn't exist
-        if (!fs.existsSync(CONFIG_DIR)) {
-            fs.mkdirSync(CONFIG_DIR, { recursive: true });
-        }
-
-        // Check for OAuth keys in current directory first, then in config directory
-        const localOAuthPath = path.join(process.cwd(), 'gcp-oauth.keys.json');
-        let oauthPath = OAUTH_PATH;
-        
-        if (fs.existsSync(localOAuthPath)) {
-            // If found in current directory, copy to config directory
-            fs.copyFileSync(localOAuthPath, OAUTH_PATH);
-            console.log('OAuth keys found in current directory, copied to global config.');
-        }
-
-        if (!fs.existsSync(OAUTH_PATH)) {
-            console.error('Error: OAuth keys file not found. Please place gcp-oauth.keys.json in current directory or', CONFIG_DIR);
-            process.exit(1);
-        }
-
-        const keysContent = JSON.parse(fs.readFileSync(OAUTH_PATH, 'utf8'));
-        const keys = keysContent.installed || keysContent.web;
-        
-        if (!keys) {
-            console.error('Error: Invalid OAuth keys file format. File should contain either "installed" or "web" credentials.');
-            process.exit(1);
-        }
-
-        oauth2Client = new OAuth2Client(
-            keys.client_id,
-            keys.client_secret,
-            'http://localhost:3000/oauth2callback'
-        );
-
-        if (fs.existsSync(CREDENTIALS_PATH)) {
-            const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, 'utf8'));
-            oauth2Client.setCredentials(credentials);
-        }
-    } catch (error) {
-        console.error('Error loading credentials:', error);
-        process.exit(1);
-    }
+function getCalendar() {
+    return asyncLocalStorage.getStore()!.calendar;
 }
 
-async function authenticate() {
-    const server = http.createServer();
-    server.listen(3000);
+function extractAccessToken(req: Request): string {
+    // First try environment variable
+    let authData = process.env.AUTH_DATA;
 
-    return new Promise<void>((resolve, reject) => {
-        const authUrl = oauth2Client.generateAuthUrl({
-            access_type: 'offline',
-            scope: ['https://www.googleapis.com/auth/calendar'],
-        });
-
-        console.log('Please visit this URL to authenticate:', authUrl);
-        open(authUrl);
-
-        server.on('request', async (req, res) => {
-            if (!req.url?.startsWith('/oauth2callback')) return;
-
-            const url = new URL(req.url, 'http://localhost:3000');
-            const code = url.searchParams.get('code');
-
-            if (!code) {
-                res.writeHead(400);
-                res.end('No code provided');
-                reject(new Error('No code provided'));
-                return;
-            }
-
+    // If not in env, try to get from x-auth-data header
+    if (!authData) {
+        const headerValue = req.headers["x-auth-data"];
+        if (headerValue) {
             try {
-                const { tokens } = await oauth2Client.getToken(code);
-                oauth2Client.setCredentials(tokens);
-                fs.writeFileSync(CREDENTIALS_PATH, JSON.stringify(tokens));
-
-                res.writeHead(200);
-                res.end('Authentication successful! You can close this window.');
-                server.close();
-                resolve();
+                // Header value is base64 encoded JSON
+                authData = Buffer.from(headerValue as string, "base64").toString("utf8");
             } catch (error) {
-                res.writeHead(500);
-                res.end('Authentication failed');
-                reject(error);
+                console.error("Error decoding x-auth-data header:", error);
             }
-        });
-    });
+        }
+    }
+
+    if (!authData) {
+        // No auth data available - this is normal for initialization requests
+        return "";
+    }
+
+    try {
+        // Parse the JSON auth data to extract access_token
+        const authJson = JSON.parse(authData);
+        return authJson.access_token ?? "";
+    } catch (error) {
+        console.error("Failed to parse auth data JSON:", authData);
+        return "";
+    }
 }
 
 // Schema definitions
@@ -162,28 +98,23 @@ const ListEventsSchema = z.object({
     orderBy: z.enum(['startTime', 'updated']).optional().describe("Sort order"),
 });
 
-// Main function
-async function main() {
-    await loadCredentials();
-
-    if (process.argv[2] === 'auth') {
-        await authenticate();
-        console.log('Authentication completed successfully');
-        process.exit(0);
-    }
-
-    // Initialize Google Calendar API
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+// Get Google Calendar MCP Server
+const getGoogleCalendarMcpServer = () => {
     const calendarId = 'primary';
 
-    // Server implementation
-    const server = new Server({
-        name: "google-calendar",
-        version: "1.0.0",
-        capabilities: {
-            tools: {},
+    const server = new Server(
+        {
+            name: "google-calendar",
+            version: "1.0.0",
         },
-    });
+        {
+            capabilities: {
+                tools: {},
+            },
+        },
+    );
+
+    server.onerror = (error) => console.error("[MCP Error]", error);
 
     // Tool handlers
     server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -218,6 +149,7 @@ async function main() {
 
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { name, arguments: args } = request.params;
+        const calendar = getCalendar();
 
         try {
             switch (name) {
@@ -330,13 +262,71 @@ async function main() {
         }
     });
 
-    // Start the server
-    const transport = new StdioServerTransport();
-    server.connect(transport).catch((error) => {
-        console.error("Fatal error running server:", error);
-        process.exit(1);
-    });
-    console.error('Google Calendar MCP Server running on stdio');
-}
+    return server;
+};
 
-main().catch(console.error);
+// Create Express App
+const app = express();
+app.use(express.json());
+
+app.post("/mcp", async (req: Request, res: Response) => {
+    const accessToken = extractAccessToken(req);
+
+    // Initialize Calendar client with the access token
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
+    const calendarClient = google.calendar({ version: 'v3', auth });
+
+    const server = getGoogleCalendarMcpServer();
+    try {
+        const transport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: undefined,
+        });
+        await server.connect(transport);
+        asyncLocalStorage.run({ calendar: calendarClient }, async () => {
+            await transport.handleRequest(req, res, req.body);
+        });
+        res.on("close", () => {
+            transport.close();
+            server.close();
+        });
+    } catch (error) {
+        console.error("Error handling MCP request:", error);
+        if (!res.headersSent) {
+            res.status(500).json({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32603,
+                    message: "Internal server error",
+                },
+                id: null,
+            });
+        }
+    }
+});
+
+app.get("/mcp", async (_req: Request, res: Response) => {
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: { code: -32000, message: "Method not allowed." },
+        id: null,
+    }));
+});
+
+app.delete("/mcp", async (_req: Request, res: Response) => {
+    res.writeHead(405).end(JSON.stringify({
+        jsonrpc: "2.0",
+        error: { code: -32000, message: "Method not allowed." },
+        id: null,
+    }));
+});
+
+app.get("/health", (_req: Request, res: Response) => {
+    res.json({ status: "ok" });
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Google Calendar MCP server running on port ${PORT}`);
+});

@@ -9,8 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build",
-    "auth": "node ./build/index.js auth"
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "build",
@@ -41,14 +40,14 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
-    "@types/open": "^6.2.1",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.4.0",
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "express": "^4.21.0",
     "googleapis": "^133.0.0",
-    "open": "^8.4.2",
     "zod": "^3.24.1",
     "zod-to-json-schema": "^3.22.4"
   },
