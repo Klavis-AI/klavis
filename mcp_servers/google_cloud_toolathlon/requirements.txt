@@ -47,7 +47,7 @@ opentelemetry-api==1.36.0
 packaging==25.0
 attrs==25.3.0
 cachetools==5.5.2
-pyasn1==0.6.1
+pyasn1==0.6.2
 pyasn1-modules==0.4.2
 rsa==4.9.1
 python-dotenv==1.1.1
