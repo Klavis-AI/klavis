@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM golang:1.25.6-alpine AS build
 ARG VERSION="dev"
 
