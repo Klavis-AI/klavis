@@ -15,19 +15,26 @@ logger = logging.getLogger(__name__)
 class CloudStorageManager:
     """Cloud Storage bucket management class"""
     
-    def __init__(self, project_id: str, service_account_json: str = "service-account-key.json"):
+    def __init__(self, project_id: str, service_account_json: str = "service-account-key.json", credentials=None):
         """
         Initialize Cloud Storage manager
-        
+
         Args:
             project_id: GCP project ID
             service_account_json: Path to service account JSON file
+            credentials: Pre-built credentials object (e.g. OAuth2 token)
         """
         self.project_id = project_id
-        self.client = storage.Client.from_service_account_json(
-            json_credentials_path=service_account_json,
-            project=project_id
-        )
+        if credentials:
+            self.client = storage.Client(
+                project=project_id,
+                credentials=credentials
+            )
+        else:
+            self.client = storage.Client.from_service_account_json(
+                json_credentials_path=service_account_json,
+                project=project_id
+            )
     
     def list_buckets(self) -> List[Dict[str, Any]]:
         """

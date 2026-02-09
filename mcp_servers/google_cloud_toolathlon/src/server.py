@@ -4,18 +4,41 @@ Model Context Protocol server for Google Cloud Platform operations
 """
 
 import os
+import sys
+import base64
+import json
 import logging
 import argparse
+import contextlib
 from typing import List, Dict, Any, Optional, Set
+from collections.abc import AsyncIterator
+from contextvars import ContextVar
+
 from mcp.server.fastmcp import FastMCP
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
+
+from google.oauth2.credentials import Credentials as OAuthCredentials
 
 from .big_query import BigQueryManager
 from .cloud_storage import CloudStorageManager
 from .cloud_logging import CloudLoggingManager
 from .compute_engine import ComputeEngineManager
 
+# Resolve host/port from environment variables
+_resolved_host = os.environ.get('HOST') or os.environ.get('FASTMCP_HOST') or "0.0.0.0"
+_resolved_port_str = os.environ.get('PORT') or os.environ.get('FASTMCP_PORT') or "5000"
+try:
+    _resolved_port = int(_resolved_port_str)
+except ValueError:
+    _resolved_port = 5000
+
 # Initialize MCP server
-mcp = FastMCP("google-cloud-mcp")
+mcp = FastMCP("google-cloud-mcp", host=_resolved_host, port=_resolved_port)
 
 # Global configuration
 PROJECT_ID = None
@@ -33,6 +56,90 @@ compute_manager = None
 
 logger = logging.getLogger(__name__)
 
+# Context variable to store the access token for each request
+auth_token_context: ContextVar[str] = ContextVar('auth_token')
+
+
+def extract_access_token(request_or_scope) -> str:
+    """Extract access token from x-auth-data header."""
+    auth_data = os.getenv("AUTH_DATA")
+
+    if not auth_data:
+        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+        if hasattr(request_or_scope, 'headers'):
+            # SSE request object
+            auth_data = request_or_scope.headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+            # StreamableHTTP scope object
+            headers = dict(request_or_scope.get("headers", []))
+            auth_data = headers.get(b'x-auth-data')
+            if auth_data:
+                auth_data = base64.b64decode(auth_data).decode('utf-8')
+
+    if not auth_data:
+        return ""
+
+    try:
+        auth_json = json.loads(auth_data)
+        return auth_json.get('access_token', '')
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.warning(f"Failed to parse auth data JSON: {e}")
+        return ""
+
+
+def _get_oauth_credentials() -> Optional[OAuthCredentials]:
+    """Get OAuth credentials from the current request's auth token context."""
+    try:
+        token = auth_token_context.get()
+        if token:
+            return OAuthCredentials(token=token)
+    except LookupError:
+        pass
+    return None
+
+
+def get_bigquery_manager() -> BigQueryManager:
+    """Get a BigQuery manager, using per-request OAuth token if available."""
+    creds = _get_oauth_credentials()
+    if creds:
+        return BigQueryManager(PROJECT_ID, credentials=creds)
+    if bigquery_manager:
+        return bigquery_manager
+    raise RuntimeError("No authentication available for BigQuery")
+
+
+def get_storage_manager() -> CloudStorageManager:
+    """Get a Cloud Storage manager, using per-request OAuth token if available."""
+    creds = _get_oauth_credentials()
+    if creds:
+        return CloudStorageManager(PROJECT_ID, credentials=creds)
+    if storage_manager:
+        return storage_manager
+    raise RuntimeError("No authentication available for Cloud Storage")
+
+
+def get_logging_manager() -> CloudLoggingManager:
+    """Get a Cloud Logging manager, using per-request OAuth token if available."""
+    creds = _get_oauth_credentials()
+    if creds:
+        return CloudLoggingManager(PROJECT_ID, credentials=creds)
+    if logging_manager:
+        return logging_manager
+    raise RuntimeError("No authentication available for Cloud Logging")
+
+
+def get_compute_manager() -> ComputeEngineManager:
+    """Get a Compute Engine manager, using per-request OAuth token if available."""
+    creds = _get_oauth_credentials()
+    if creds:
+        return ComputeEngineManager(PROJECT_ID, credentials=creds)
+    if compute_manager:
+        return compute_manager
+    raise RuntimeError("No authentication available for Compute Engine")
+
+
 def setup_server(
     project_id: str,
     service_account_path: Optional[str] = None,
@@ -45,36 +152,35 @@ def setup_server(
     global PROJECT_ID, SERVICE_ACCOUNT_PATH, ALLOWED_BUCKETS, ALLOWED_DATASETS
     global ALLOWED_LOG_BUCKETS, ALLOWED_INSTANCES
     global bigquery_manager, storage_manager, logging_manager, compute_manager
-    
+
     PROJECT_ID = project_id
     SERVICE_ACCOUNT_PATH = service_account_path
-    
+
     # Parse allowed resources (comma-separated)
     ALLOWED_BUCKETS = set(s.strip() for s in allowed_buckets.split(',') if s.strip()) if allowed_buckets else set()
-    ALLOWED_DATASETS = set(s.strip() for s in allowed_datasets.split(',') if s.strip()) if allowed_datasets else set() 
+    ALLOWED_DATASETS = set(s.strip() for s in allowed_datasets.split(',') if s.strip()) if allowed_datasets else set()
     ALLOWED_LOG_BUCKETS = set(s.strip() for s in allowed_log_buckets.split(',') if s.strip()) if allowed_log_buckets else set()
     ALLOWED_INSTANCES = set(s.strip() for s in allowed_instances.split(',') if s.strip()) if allowed_instances else set()
-    
-    # Initialize service managers
+
+    # Initialize service managers (optional - per-request OAuth tokens can be used instead)
     try:
         bigquery_manager = BigQueryManager(project_id, service_account_path)
         storage_manager = CloudStorageManager(project_id, service_account_path or "service-account-key.json")
         logging_manager = CloudLoggingManager(project_id, service_account_path)
         compute_manager = ComputeEngineManager(project_id, service_account_path)
-        
         logger.info(f"Initialized Google Cloud MCP server for project: {project_id}")
-        if ALLOWED_BUCKETS:
-            logger.info(f"Allowed buckets: {ALLOWED_BUCKETS}")
-        if ALLOWED_DATASETS:
-            logger.info(f"Allowed datasets: {ALLOWED_DATASETS}")
-        if ALLOWED_LOG_BUCKETS:
-            logger.info(f"Allowed log buckets: {ALLOWED_LOG_BUCKETS}")
-        if ALLOWED_INSTANCES:
-            logger.info(f"Allowed instances: {ALLOWED_INSTANCES}")
-            
     except Exception as e:
-        logger.error(f"Failed to initialize service managers: {e}")
-        raise
+        logger.warning(f"Failed to initialize server-side service managers: {e}")
+        logger.info("Server will rely on per-request OAuth tokens for authentication.")
+
+    if ALLOWED_BUCKETS:
+        logger.info(f"Allowed buckets: {ALLOWED_BUCKETS}")
+    if ALLOWED_DATASETS:
+        logger.info(f"Allowed datasets: {ALLOWED_DATASETS}")
+    if ALLOWED_LOG_BUCKETS:
+        logger.info(f"Allowed log buckets: {ALLOWED_LOG_BUCKETS}")
+    if ALLOWED_INSTANCES:
+        logger.info(f"Allowed instances: {ALLOWED_INSTANCES}")
 
 def _matches_allowed_pattern(resource_name: str, allowed_set: Set[str]) -> bool:
     """
@@ -133,7 +239,7 @@ async def bigquery_run_query(query: str, dry_run: bool = False, max_results: int
         Query results or error message
     """
     try:
-        result = bigquery_manager.run_query(
+        result = get_bigquery_manager().run_query(
             query=query,
             dry_run=dry_run,
             max_results=max_results
@@ -177,7 +283,7 @@ async def bigquery_list_datasets() -> str:
     try:
         # Use the BigQuery client directly since manager doesn't have this method
         datasets = []
-        for dataset_ref in bigquery_manager.client.list_datasets():
+        for dataset_ref in get_bigquery_manager().client.list_datasets():
             # DatasetListItem only has dataset_id, project, and reference
             # For performance, we'll just show basic info and avoid extra API calls
             dataset_info = {
@@ -220,7 +326,7 @@ async def bigquery_create_dataset(dataset_id: str, description: str = "", locati
         if description:
             dataset.description = description
         
-        dataset = bigquery_manager.client.create_dataset(dataset)
+        dataset = get_bigquery_manager().client.create_dataset(dataset)
         return f"Successfully created dataset '{dataset_id}' in location '{location}'"
         
     except Exception as e:
@@ -242,7 +348,7 @@ async def bigquery_get_dataset_info(dataset_id: str) -> str:
     try:
         from google.cloud import bigquery
         dataset_ref = bigquery.DatasetReference(PROJECT_ID, dataset_id)
-        dataset = bigquery_manager.client.get_dataset(dataset_ref)
+        dataset = get_bigquery_manager().client.get_dataset(dataset_ref)
         
         result = f"Dataset Information for '{dataset_id}':\n"
         result += f"Full Name: {dataset.full_dataset_id}\n"
@@ -276,7 +382,7 @@ async def bigquery_load_csv_data(dataset_id: str, table_id: str, csv_file_path: 
         return f"Access denied: Dataset '{dataset_id}' is not in allowed datasets list"
     
     try:
-        result = bigquery_manager.load_data_from_csv(
+        result = get_bigquery_manager().load_data_from_csv(
             dataset_id=dataset_id,
             table_id=table_id,
             csv_path=csv_file_path,
@@ -311,7 +417,7 @@ async def bigquery_export_table(dataset_id: str, table_id: str, destination_buck
         destination_uri = f"gs://{destination_bucket}/{destination_path}"
         
         if file_format.upper() == "CSV":
-            result = bigquery_manager.export_table_to_csv(
+            result = get_bigquery_manager().export_table_to_csv(
                 dataset_id=dataset_id,
                 table_id=table_id,
                 destination_uri=destination_uri
@@ -337,7 +443,7 @@ async def bigquery_list_jobs(max_results: int = 50, state_filter: str = "") -> s
         List of jobs or error message
     """
     try:
-        jobs = bigquery_manager.list_jobs(max_results=max_results, state_filter=state_filter)
+        jobs = get_bigquery_manager().list_jobs(max_results=max_results, state_filter=state_filter)
         
         if not jobs:
             return "No BigQuery jobs found"
@@ -368,7 +474,7 @@ async def bigquery_cancel_job(job_id: str) -> str:
         Success message or error
     """
     try:
-        success = bigquery_manager.cancel_job(job_id)
+        success = get_bigquery_manager().cancel_job(job_id)
         if success:
             return f"Successfully cancelled BigQuery job '{job_id}'"
         else:
@@ -386,7 +492,7 @@ async def storage_list_buckets() -> str:
         List of buckets or error message
     """
     try:
-        buckets = storage_manager.list_buckets()
+        buckets = get_storage_manager().list_buckets()
 
         if ALLOWED_BUCKETS:
             # Filter buckets based on allowed list with wildcard support
@@ -412,7 +518,7 @@ async def storage_create_bucket(bucket_name: str, location: str = "US") -> str:
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.create_bucket(bucket_name, location)
+        result = get_storage_manager().create_bucket(bucket_name, location)
         return f"Successfully created bucket '{bucket_name}' in location '{location}'"
         
     except Exception as e:
@@ -433,7 +539,7 @@ async def storage_list_objects(bucket_name: str, prefix: str = "") -> str:
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        objects = storage_manager.list_objects(bucket_name, prefix)
+        objects = get_storage_manager().list_objects(bucket_name, prefix)
         return f"Found {len(objects)} objects in bucket '{bucket_name}':\n" + "\n".join([f"- {obj['name']}: {obj.get('size', 0)} bytes" for obj in objects[:20]]) + ("..." if len(objects) > 20 else "")
         
     except Exception as e:
@@ -455,7 +561,7 @@ async def storage_upload_file(bucket_name: str, source_file_path: str, destinati
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.upload_file(bucket_name, source_file_path, destination_blob_name)
+        result = get_storage_manager().upload_file(bucket_name, source_file_path, destination_blob_name)
         return f"Successfully uploaded '{source_file_path}' to '{bucket_name}/{destination_blob_name}'"
         
     except Exception as e:
@@ -477,7 +583,7 @@ async def storage_download_file(bucket_name: str, source_blob_name: str, destina
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.download_file(bucket_name, source_blob_name, destination_file_path)
+        result = get_storage_manager().download_file(bucket_name, source_blob_name, destination_file_path)
         return f"Successfully downloaded '{bucket_name}/{source_blob_name}' to '{destination_file_path}'"
         
     except Exception as e:
@@ -498,7 +604,7 @@ async def storage_delete_object(bucket_name: str, blob_name: str) -> str:
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.delete_object(bucket_name, blob_name)
+        result = get_storage_manager().delete_object(bucket_name, blob_name)
         if result:
             return f"Successfully deleted '{blob_name}' from bucket '{bucket_name}'"
         else:
@@ -521,7 +627,7 @@ async def storage_get_bucket_info(bucket_name: str) -> str:
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        info = storage_manager.get_bucket_info(bucket_name)
+        info = get_storage_manager().get_bucket_info(bucket_name)
         result = f"Bucket Information for '{bucket_name}':\n"
         result += f"Location: {info.get('location', 'Unknown')}\n"
         result += f"Storage Class: {info.get('storage_class', 'Unknown')}\n" 
@@ -551,7 +657,7 @@ async def storage_generate_signed_url(bucket_name: str, blob_name: str, expirati
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        url = storage_manager.generate_signed_url(bucket_name, blob_name, expiration_minutes, method)
+        url = get_storage_manager().generate_signed_url(bucket_name, blob_name, expiration_minutes, method)
         return f"Signed URL for '{bucket_name}/{blob_name}' (expires in {expiration_minutes} minutes):\n{url}"
         
     except Exception as e:
@@ -576,7 +682,7 @@ async def storage_copy_object(source_bucket: str, source_blob: str, dest_bucket:
         return f"Access denied: Destination bucket '{dest_bucket}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.copy_object(source_bucket, source_blob, dest_bucket, dest_blob)
+        result = get_storage_manager().copy_object(source_bucket, source_blob, dest_bucket, dest_blob)
         return f"Successfully copied '{source_bucket}/{source_blob}' to '{dest_bucket}/{dest_blob}'"
         
     except Exception as e:
@@ -601,7 +707,7 @@ async def storage_move_object(source_bucket: str, source_blob: str, dest_bucket:
         return f"Access denied: Destination bucket '{dest_bucket}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.move_object(source_bucket, source_blob, dest_bucket, dest_blob)
+        result = get_storage_manager().move_object(source_bucket, source_blob, dest_bucket, dest_blob)
         return f"Successfully moved '{source_bucket}/{source_blob}' to '{dest_bucket}/{dest_blob}'"
         
     except Exception as e:
@@ -622,7 +728,7 @@ async def storage_enable_versioning(bucket_name: str, enabled: bool = True) -> s
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        result = storage_manager.enable_versioning(bucket_name, enabled)
+        result = get_storage_manager().enable_versioning(bucket_name, enabled)
         status = "enabled" if enabled else "disabled"
         return f"Successfully {status} versioning for bucket '{bucket_name}'"
         
@@ -643,7 +749,7 @@ async def storage_get_bucket_size(bucket_name: str) -> str:
         return f"Access denied: Bucket '{bucket_name}' is not in allowed buckets list"
     
     try:
-        info = storage_manager.get_bucket_size(bucket_name)
+        info = get_storage_manager().get_bucket_size(bucket_name)
         result = f"Bucket Size Statistics for '{bucket_name}':\n"
         result += f"Total Objects: {info.get('total_objects', 0)}\n"
         result += f"Total Size: {info.get('total_size_bytes', 0)} bytes\n"
@@ -671,7 +777,7 @@ async def storage_set_bucket_lifecycle(bucket_name: str, age_days: int = 30, act
     
     try:
         # Call storage manager method with correct parameters
-        result = storage_manager.set_bucket_lifecycle(
+        result = get_storage_manager().set_bucket_lifecycle(
             bucket_name=bucket_name,
             age_days=age_days,
             action=action
@@ -698,7 +804,7 @@ async def logging_write_log(log_name: str, message: str, severity: str = "INFO")
         return f"Access denied: Log '{log_name}' is not in allowed log buckets list"
     
     try:
-        result = logging_manager.write_log(log_name, message, severity)
+        result = get_logging_manager().write_log(log_name, message, severity)
         return f"Successfully wrote log entry to '{log_name}' with severity '{severity}'"
         
     except Exception as e:
@@ -716,7 +822,7 @@ async def logging_read_logs(log_filter: str = "", max_entries: int = 50) -> str:
         Log entries or error message
     """
     try:
-        entries = logging_manager.read_logs(log_filter, max_results=max_entries)
+        entries = get_logging_manager().read_logs(log_filter, max_results=max_entries)
         
         # Filter entries based on allowed log buckets if configured
         if ALLOWED_LOG_BUCKETS:
@@ -765,7 +871,7 @@ async def logging_list_logs() -> str:
         # If log buckets are restricted, show bucket-based access control
         if ALLOWED_LOG_BUCKETS:
             # List all log buckets
-            all_buckets = logging_manager.list_log_buckets()
+            all_buckets = get_logging_manager().list_log_buckets()
 
             # Filter to only allowed buckets with wildcard support
             allowed_buckets = [b for b in all_buckets if validate_log_bucket_access(b.get('display_name'))]
@@ -774,10 +880,10 @@ async def logging_list_logs() -> str:
                 return f"No accessible log buckets found. Allowed buckets: {', '.join(ALLOWED_LOG_BUCKETS)}"
 
             # List all log sinks to understand routing
-            sinks = logging_manager.list_log_sinks()
+            sinks = get_logging_manager().list_log_sinks()
 
             # Get recent log entries to show what's actually in the buckets
-            recent_entries = logging_manager.read_logs(filter_string='', max_results=100, time_range_hours=24*7)
+            recent_entries = get_logging_manager().read_logs(filter_string='', max_results=100, time_range_hours=24*7)
 
             # Extract unique log names from recent entries
             log_names_in_use = set()
@@ -826,7 +932,7 @@ async def logging_list_logs() -> str:
             return result
         else:
             # No restrictions - list all log names
-            logs = logging_manager.list_logs()
+            logs = get_logging_manager().list_logs()
 
             if not logs:
                 return "No logs found"
@@ -850,7 +956,7 @@ async def logging_delete_log(log_name: str) -> str:
         return f"Access denied: Log '{log_name}' is not in allowed log buckets list"
     
     try:
-        success = logging_manager.delete_log(log_name)
+        success = get_logging_manager().delete_log(log_name)
         if success:
             return f"Successfully deleted log '{log_name}'"
         else:
@@ -872,7 +978,7 @@ async def logging_create_log_sink(sink_name: str, destination: str, log_filter: 
         Success message or error
     """
     try:
-        result = logging_manager.create_log_sink(
+        result = get_logging_manager().create_log_sink(
             sink_name=sink_name,
             destination=destination,
             filter_string=log_filter if log_filter else None
@@ -890,11 +996,11 @@ async def logging_list_log_sinks() -> str:
         List of log sinks or error message
     """
     try:
-        sinks = logging_manager.list_log_sinks()
-        
+        sinks = get_logging_manager().list_log_sinks()
+
         if not sinks:
             return "No log sinks found"
-            
+
         result = f"Found {len(sinks)} log sinks:\n"
         for sink in sinks:
             result += f"- {sink.get('name', 'Unknown')}\n"
@@ -917,7 +1023,7 @@ async def logging_delete_log_sink(sink_name: str) -> str:
         Success message or error
     """
     try:
-        success = logging_manager.delete_log_sink(sink_name)
+        success = get_logging_manager().delete_log_sink(sink_name)
         if success:
             return f"Successfully deleted log sink '{sink_name}'"
         else:
@@ -943,7 +1049,7 @@ async def logging_export_logs_to_bigquery(dataset_id: str, table_id: str, log_fi
         return f"Access denied: Dataset '{dataset_id}' is not in allowed datasets list"
     
     try:
-        result = logging_manager.export_logs_to_bigquery(
+        result = get_logging_manager().export_logs_to_bigquery(
             dataset_id=dataset_id,
             table_id=table_id,
             filter_=log_filter,
@@ -970,7 +1076,7 @@ async def logging_create_log_bucket(bucket_id: str, location: str = "global", re
         return f"Access denied: Log bucket '{bucket_id}' is not in allowed log buckets list"
     
     try:
-        result = logging_manager.create_log_bucket(
+        result = get_logging_manager().create_log_bucket(
             bucket_id=bucket_id,
             retention_days=retention_days
         )
@@ -991,7 +1097,7 @@ async def compute_list_instances(zone: str = "") -> str:
         List of instances or error message
     """
     try:
-        instances = compute_manager.list_instances(zone if zone else None)
+        instances = get_compute_manager().list_instances(zone if zone else None)
         
         if ALLOWED_INSTANCES:
             # Filter instances based on allowed list with wildcard support
@@ -1018,7 +1124,7 @@ async def compute_create_instance(instance_name: str, zone: str, machine_type: s
         return f"Access denied: Instance '{instance_name}' is not in allowed instances list"
     
     try:
-        result = compute_manager.create_instance(instance_name, zone, machine_type)
+        result = get_compute_manager().create_instance(instance_name, zone, machine_type)
         return f"Successfully initiated creation of instance '{instance_name}' in zone '{zone}'"
         
     except Exception as e:
@@ -1039,7 +1145,7 @@ async def compute_delete_instance(instance_name: str, zone: str) -> str:
         return f"Access denied: Instance '{instance_name}' is not in allowed instances list"
     
     try:
-        result = compute_manager.delete_instance(instance_name, zone)
+        result = get_compute_manager().delete_instance(instance_name, zone)
         return f"Successfully initiated deletion of instance '{instance_name}' in zone '{zone}'"
         
     except Exception as e:
@@ -1060,7 +1166,7 @@ async def compute_start_instance(instance_name: str, zone: str) -> str:
         return f"Access denied: Instance '{instance_name}' is not in allowed instances list"
     
     try:
-        result = compute_manager.start_instance(instance_name, zone)
+        result = get_compute_manager().start_instance(instance_name, zone)
         return f"Successfully initiated start of instance '{instance_name}' in zone '{zone}'"
         
     except Exception as e:
@@ -1081,7 +1187,7 @@ async def compute_stop_instance(instance_name: str, zone: str) -> str:
         return f"Access denied: Instance '{instance_name}' is not in allowed instances list"
     
     try:
-        result = compute_manager.stop_instance(instance_name, zone)
+        result = get_compute_manager().stop_instance(instance_name, zone)
         return f"Successfully initiated stop of instance '{instance_name}' in zone '{zone}'"
         
     except Exception as e:
@@ -1104,7 +1210,7 @@ async def compute_restart_instance(instance_name: str, zone: str) -> str:
     try:
         # First check instance status
         try:
-            instance_info = compute_manager.get_instance(instance_name, zone)
+            instance_info = get_compute_manager().get_instance(instance_name, zone)
             current_status = instance_info.get('status', 'UNKNOWN')
             
             if current_status not in ['RUNNING', 'STOPPING']:
@@ -1113,7 +1219,7 @@ async def compute_restart_instance(instance_name: str, zone: str) -> str:
             # If we can't get status, proceed anyway
             pass
         
-        result = compute_manager.restart_instance(instance_name, zone)
+        result = get_compute_manager().restart_instance(instance_name, zone)
         return f"Successfully initiated restart of instance '{instance_name}' in zone '{zone}'"
         
     except Exception as e:
@@ -1137,7 +1243,7 @@ async def compute_get_instance(instance_name: str, zone: str) -> str:
         return f"Access denied: Instance '{instance_name}' is not in allowed instances list"
     
     try:
-        info = compute_manager.get_instance(instance_name, zone)
+        info = get_compute_manager().get_instance(instance_name, zone)
         result = f"Instance Information for '{instance_name}':\n"
         result += f"Status: {info.get('status', 'Unknown')}\n"
         result += f"Zone: {info.get('zone', 'Unknown')}\n"
@@ -1161,7 +1267,7 @@ async def compute_list_zones() -> str:
         List of zones or error message
     """
     try:
-        zones = compute_manager.list_zones()
+        zones = get_compute_manager().list_zones()
         return f"Found {len(zones)} available zones:\n" + "\n".join([f"- {zone}" for zone in zones[:20]]) + ("..." if len(zones) > 20 else "")
         
     except Exception as e:
@@ -1181,7 +1287,7 @@ async def compute_wait_for_operation(operation_name: str, zone: str, timeout_min
     """
     try:
         timeout_seconds = timeout_minutes * 60
-        success = compute_manager.wait_for_operation(operation_name, zone, timeout_seconds)
+        success = get_compute_manager().wait_for_operation(operation_name, zone, timeout_seconds)
         if success:
             return f"Operation '{operation_name}' completed successfully"
         else:
@@ -1192,6 +1298,13 @@ async def compute_wait_for_operation(operation_name: str, zone: str, timeout_min
 
 def main():
     """Main function to run the MCP server"""
+    import uvicorn
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
     parser = argparse.ArgumentParser(description='Google Cloud MCP Server')
     parser.add_argument('--project-id', type=str, required=True,
                         help='Google Cloud Project ID')
@@ -1205,9 +1318,13 @@ def main():
                         help='Comma-separated list of allowed log buckets')
     parser.add_argument('--allowed-instances', type=str, default="",
                         help='Comma-separated list of allowed compute instances')
-    
+    parser.add_argument('--transport', type=str, default="streamable-http",
+                        help='Transport type (streamable-http or stdio)')
+    parser.add_argument('--json-response', action='store_true', default=False,
+                        help='Use JSON responses instead of streaming')
+
     args = parser.parse_args()
-    
+
     # Setup server with configuration
     setup_server(
         project_id=args.project_id,
@@ -1217,9 +1334,79 @@ def main():
         allowed_log_buckets=args.allowed_log_buckets,
         allowed_instances=args.allowed_instances
     )
-    
-    # Run the server
-    mcp.run(transport='stdio')
+
+    # Support stdio transport for backwards compatibility
+    if args.transport == "stdio":
+        mcp.run(transport="stdio")
+        return
+
+    # Set up SSE transport
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request):
+        logger.info("Handling SSE connection")
+        auth_token = extract_access_token(request)
+        token = auth_token_context.set(auth_token)
+        try:
+            async with sse.connect_sse(
+                request.scope, request.receive, request._send
+            ) as streams:
+                await mcp._mcp_server.run(
+                    streams[0], streams[1], mcp._mcp_server.create_initialization_options()
+                )
+        finally:
+            auth_token_context.reset(token)
+        return Response()
+
+    # Set up StreamableHTTP transport
+    session_manager = StreamableHTTPSessionManager(
+        app=mcp._mcp_server,
+        event_store=None,
+        json_response=args.json_response,
+        stateless=True,
+    )
+
+    async def handle_streamable_http(
+        scope: Scope, receive: Receive, send: Send
+    ) -> None:
+        logger.info("Handling StreamableHTTP request")
+        auth_token = extract_access_token(scope)
+        token = auth_token_context.set(auth_token)
+        try:
+            await session_manager.handle_request(scope, receive, send)
+        finally:
+            auth_token_context.reset(token)
+
+    @contextlib.asynccontextmanager
+    async def lifespan(app: Starlette) -> AsyncIterator[None]:
+        """Context manager for session manager."""
+        async with session_manager.run():
+            logger.info("Application started with dual transports!")
+            try:
+                yield
+            finally:
+                logger.info("Application shutting down...")
+
+    starlette_app = Starlette(
+        debug=True,
+        routes=[
+            # SSE routes
+            Route("/sse", endpoint=handle_sse, methods=["GET"]),
+            Mount("/messages/", app=sse.handle_post_message),
+            # StreamableHTTP route
+            Mount("/mcp", app=handle_streamable_http),
+        ],
+        lifespan=lifespan,
+    )
+
+    port = _resolved_port
+    host = _resolved_host
+    logger.info(f"Server starting on {host}:{port} with dual transports:")
+    logger.info(f"  - SSE endpoint: http://localhost:{port}/sse")
+    logger.info(f"  - StreamableHTTP endpoint: http://localhost:{port}/mcp")
+
+    uvicorn.run(starlette_app, host=host, port=port)
+
 
 if __name__ == "__main__":
     main()

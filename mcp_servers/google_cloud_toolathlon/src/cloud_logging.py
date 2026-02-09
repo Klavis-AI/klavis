@@ -17,31 +17,36 @@ logger = python_logging.getLogger(__name__)
 class CloudLoggingManager:
     """Cloud Logging management class"""
     
-    def __init__(self, project_id: str, service_account_path: Optional[str] = None):
+    def __init__(self, project_id: str, service_account_path: Optional[str] = None, credentials=None):
         """
         Initialize Cloud Logging manager
-        
+
         Args:
             project_id: GCP project ID
             service_account_path: Path to service account JSON file
+            credentials: Pre-built credentials object (e.g. OAuth2 token)
         """
         self.project_id = project_id
-        
-        if service_account_path:
-            credentials = service_account.Credentials.from_service_account_file(
+
+        if credentials:
+            self.client = logging_v2.Client(
+                project=project_id,
+                credentials=credentials
+            )
+            self.config_client = config_service_v2.ConfigServiceV2Client(credentials=credentials)
+        elif service_account_path:
+            sa_credentials = service_account.Credentials.from_service_account_file(
                 service_account_path,
                 scopes=["https://www.googleapis.com/auth/cloud-platform"]
             )
             self.client = logging_v2.Client(
                 project=project_id,
-                credentials=credentials
+                credentials=sa_credentials
             )
-            # Create config client for bucket/sink management
-            self.config_client = config_service_v2.ConfigServiceV2Client(credentials=credentials)
+            self.config_client = config_service_v2.ConfigServiceV2Client(credentials=sa_credentials)
         else:
             # Use default credentials
             self.client = logging_v2.Client(project=project_id)
-            # Create config client with default credentials
             self.config_client = config_service_v2.ConfigServiceV2Client()
     
     def write_log(

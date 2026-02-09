@@ -15,26 +15,31 @@ logger = logging.getLogger(__name__)
 class ComputeEngineManager:
     """Compute Engine virtual machine management class"""
     
-    def __init__(self, project_id: str, service_account_path: Optional[str] = None):
+    def __init__(self, project_id: str, service_account_path: Optional[str] = None, credentials=None):
         """
         Initialize Compute Engine manager
-        
+
         Args:
             project_id: GCP project ID
             service_account_path: Path to service account JSON file (optional)
+            credentials: Pre-built credentials object (e.g. OAuth2 token)
         """
         self.project_id = project_id
-        
+
         try:
-            if service_account_path and os.path.exists(service_account_path):
-                # Use service account file
-                credentials = service_account.Credentials.from_service_account_file(
-                    service_account_path,
-                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
-                )
+            if credentials:
                 self.instances_client = compute_v1.InstancesClient(credentials=credentials)
                 self.zones_client = compute_v1.ZonesClient(credentials=credentials)
                 self.operations_client = compute_v1.ZoneOperationsClient(credentials=credentials)
+            elif service_account_path and os.path.exists(service_account_path):
+                # Use service account file
+                sa_credentials = service_account.Credentials.from_service_account_file(
+                    service_account_path,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                self.instances_client = compute_v1.InstancesClient(credentials=sa_credentials)
+                self.zones_client = compute_v1.ZonesClient(credentials=sa_credentials)
+                self.operations_client = compute_v1.ZoneOperationsClient(credentials=sa_credentials)
             elif os.path.exists("service-account-key.json"):
                 # Use default service account file
                 self.instances_client = compute_v1.InstancesClient.from_service_account_json("service-account-key.json")
@@ -45,7 +50,7 @@ class ComputeEngineManager:
                 self.instances_client = compute_v1.InstancesClient()
                 self.zones_client = compute_v1.ZonesClient()
                 self.operations_client = compute_v1.ZoneOperationsClient()
-                
+
         except Exception as e:
             logger.error(f"Failed to initialize Compute Engine clients: {e}")
             raise

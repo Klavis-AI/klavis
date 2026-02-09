@@ -1,0 +1,12 @@
+# Google Cloud MCP Server Requirements
+# Generated from pyproject.toml
+
+fastmcp>=2.10.5
+mcp[cli]>=1.11.0
+google-cloud-bigquery>=3.23.0
+google-cloud-storage>=2.14.0
+google-cloud-logging>=3.8.0
+google-cloud-compute>=1.19.0
+pandas>=2.0.0
+uvicorn>=0.27.0
+starlette>=0.36.0

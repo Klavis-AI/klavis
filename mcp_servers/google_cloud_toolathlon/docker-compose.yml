@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  google-cloud-mcp:
+    build:
+      context: ../..
+      dockerfile: mcp_servers/google_cloud_toolathlon/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      # Required: Set your Google Cloud Project ID
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      
+      # Optional: Application-level credentials
+      # If not set, will use default credentials or service account mount
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}
+      
+      # Server configuration
+      - HOST=0.0.0.0
+      - PORT=5000
+      
+      # Optional: Access control lists (comma-separated)
+      - ALLOWED_BUCKETS=${ALLOWED_BUCKETS:-}
+      - ALLOWED_DATASETS=${ALLOWED_DATASETS:-}
+      - ALLOWED_LOG_BUCKETS=${ALLOWED_LOG_BUCKETS:-}
+      - ALLOWED_INSTANCES=${ALLOWED_INSTANCES:-}
+      
+      # Optional: OAuth support
+      - AUTH_DATA=${AUTH_DATA:-}
+    
+    # Optional: Mount service account key file
+    # Uncomment and set path to your service account JSON file
+    # volumes:
+    #   - ./service-account-key.json:/app/service-account-key.json:ro
+    # environment:
+    #   - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+    
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/sse')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
