@@ -56,37 +56,82 @@ compute_manager = None
 
 logger = logging.getLogger(__name__)
 
-# Context variable to store the access token for each request
+# Context variables to store per-request auth data
 auth_token_context: ContextVar[str] = ContextVar('auth_token')
+auth_project_context: ContextVar[str] = ContextVar('auth_project')
+auth_refresh_token_context: ContextVar[str] = ContextVar('auth_refresh_token')
+auth_token_uri_context: ContextVar[str] = ContextVar('auth_token_uri')
+auth_client_id_context: ContextVar[str] = ContextVar('auth_client_id')
+auth_client_secret_context: ContextVar[str] = ContextVar('auth_client_secret')
 
 
-def extract_access_token(request_or_scope) -> str:
-    """Extract access token from x-auth-data header."""
+def _parse_auth_data_env() -> dict:
+    """Parse AUTH_DATA environment variable and return the JSON dict."""
     auth_data = os.getenv("AUTH_DATA")
-
     if not auth_data:
-        # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-        if hasattr(request_or_scope, 'headers'):
-            # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-            # StreamableHTTP scope object
-            headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        return {}
+    try:
+        return json.loads(auth_data)
+    except (json.JSONDecodeError, TypeError):
+        return {}
 
-    if not auth_data:
-        return ""
+
+def _get_auth_data_raw(request_or_scope) -> str:
+    """Get raw auth data string from env or request headers."""
+    auth_data = os.getenv("AUTH_DATA")
+    if auth_data:
+        return auth_data
+
+    # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object
+        auth_data = request_or_scope.headers.get(b'x-auth-data')
+        if auth_data:
+            return base64.b64decode(auth_data).decode('utf-8')
+    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        auth_data = headers.get(b'x-auth-data')
+        if auth_data:
+            return base64.b64decode(auth_data).decode('utf-8')
+
+    return ""
+
+
+def extract_auth_data(request_or_scope) -> tuple:
+    """Extract access token, project_id, and OAuth refresh fields from auth data.
+
+    Returns:
+        (access_token, project_id, refresh_token, token_uri, client_id, client_secret) tuple
+    """
+    raw = _get_auth_data_raw(request_or_scope)
+    if not raw:
+        return "", "", "", "", "", ""
 
     try:
-        auth_json = json.loads(auth_data)
-        return auth_json.get('access_token', '')
+        auth_json = json.loads(raw)
+        return (
+            auth_json.get('access_token', ''),
+            auth_json.get('project_id', ''),
+            auth_json.get('refresh_token', ''),
+            auth_json.get('token_uri', ''),
+            auth_json.get('client_id', ''),
+            auth_json.get('client_secret', ''),
+        )
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
-        return ""
+        return "", "", "", "", "", ""
+
+
+def _get_project_id() -> str:
+    """Get the effective project ID, preferring per-request auth data over global."""
+    try:
+        project = auth_project_context.get()
+        if project:
+            return project
+    except LookupError:
+        pass
+    return PROJECT_ID or ''
 
 
 def _get_oauth_credentials() -> Optional[OAuthCredentials]:
@@ -94,7 +139,24 @@ def _get_oauth_credentials() -> Optional[OAuthCredentials]:
     try:
         token = auth_token_context.get()
         if token:
-            return OAuthCredentials(token=token)
+            refresh_token = None
+            token_uri = None
+            client_id = None
+            client_secret = None
+            try:
+                refresh_token = auth_refresh_token_context.get() or None
+                token_uri = auth_token_uri_context.get() or "https://oauth2.googleapis.com/token"
+                client_id = auth_client_id_context.get() or None
+                client_secret = auth_client_secret_context.get() or None
+            except LookupError:
+                pass
+            return OAuthCredentials(
+                token=token,
+                refresh_token=refresh_token,
+                token_uri=token_uri,
+                client_id=client_id,
+                client_secret=client_secret,
+            )
     except LookupError:
         pass
     return None
@@ -104,7 +166,7 @@ def get_bigquery_manager() -> BigQueryManager:
     """Get a BigQuery manager, using per-request OAuth token if available."""
     creds = _get_oauth_credentials()
     if creds:
-        return BigQueryManager(PROJECT_ID, credentials=creds)
+        return BigQueryManager(_get_project_id(), credentials=creds)
     if bigquery_manager:
         return bigquery_manager
     raise RuntimeError("No authentication available for BigQuery")
@@ -114,7 +176,7 @@ def get_storage_manager() -> CloudStorageManager:
     """Get a Cloud Storage manager, using per-request OAuth token if available."""
     creds = _get_oauth_credentials()
     if creds:
-        return CloudStorageManager(PROJECT_ID, credentials=creds)
+        return CloudStorageManager(_get_project_id(), credentials=creds)
     if storage_manager:
         return storage_manager
     raise RuntimeError("No authentication available for Cloud Storage")
@@ -124,7 +186,7 @@ def get_logging_manager() -> CloudLoggingManager:
     """Get a Cloud Logging manager, using per-request OAuth token if available."""
     creds = _get_oauth_credentials()
     if creds:
-        return CloudLoggingManager(PROJECT_ID, credentials=creds)
+        return CloudLoggingManager(_get_project_id(), credentials=creds)
     if logging_manager:
         return logging_manager
     raise RuntimeError("No authentication available for Cloud Logging")
@@ -134,7 +196,7 @@ def get_compute_manager() -> ComputeEngineManager:
     """Get a Compute Engine manager, using per-request OAuth token if available."""
     creds = _get_oauth_credentials()
     if creds:
-        return ComputeEngineManager(PROJECT_ID, credentials=creds)
+        return ComputeEngineManager(_get_project_id(), credentials=creds)
     if compute_manager:
         return compute_manager
     raise RuntimeError("No authentication available for Compute Engine")
@@ -1306,9 +1368,10 @@ def main():
     )
 
     parser = argparse.ArgumentParser(description='Google Cloud MCP Server')
+    auth_data_project = _parse_auth_data_env().get('project_id', '')
     parser.add_argument('--project-id', type=str,
-                        default=os.environ.get('PROJECT_ID', os.environ.get('GOOGLE_CLOUD_PROJECT', '')),
-                        help='Google Cloud Project ID (or set PROJECT_ID / GOOGLE_CLOUD_PROJECT env var)')
+                        default=os.environ.get('PROJECT_ID', os.environ.get('GOOGLE_CLOUD_PROJECT', auth_data_project)),
+                        help='Google Cloud Project ID (or set PROJECT_ID, GOOGLE_CLOUD_PROJECT, or project_id in AUTH_DATA)')
     parser.add_argument('--service-account-path', type=str, default=None,
                         help='Path to service account JSON file')
     parser.add_argument('--allowed-buckets', type=str, default="",
@@ -1327,7 +1390,7 @@ def main():
     args = parser.parse_args()
 
     if not args.project_id:
-        parser.error("Project ID is required. Set --project-id, PROJECT_ID, or GOOGLE_CLOUD_PROJECT env var.")
+        logger.warning("No project ID configured at startup. It must be provided per-request via AUTH_DATA.")
 
     # Setup server with configuration
     setup_server(
@@ -1349,8 +1412,13 @@ def main():
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        auth_token = extract_access_token(request)
+        auth_token, auth_project, refresh_token, token_uri, client_id, client_secret = extract_auth_data(request)
         token = auth_token_context.set(auth_token)
+        project = auth_project_context.set(auth_project)
+        rt = auth_refresh_token_context.set(refresh_token)
+        tu = auth_token_uri_context.set(token_uri)
+        ci = auth_client_id_context.set(client_id)
+        cs = auth_client_secret_context.set(client_secret)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -1360,6 +1428,11 @@ def main():
                 )
         finally:
             auth_token_context.reset(token)
+            auth_project_context.reset(project)
+            auth_refresh_token_context.reset(rt)
+            auth_token_uri_context.reset(tu)
+            auth_client_id_context.reset(ci)
+            auth_client_secret_context.reset(cs)
         return Response()
 
     # Set up StreamableHTTP transport
@@ -1374,12 +1447,22 @@ def main():
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        auth_token = extract_access_token(scope)
+        auth_token, auth_project, refresh_token, token_uri, client_id, client_secret = extract_auth_data(scope)
         token = auth_token_context.set(auth_token)
+        project = auth_project_context.set(auth_project)
+        rt = auth_refresh_token_context.set(refresh_token)
+        tu = auth_token_uri_context.set(token_uri)
+        ci = auth_client_id_context.set(client_id)
+        cs = auth_client_secret_context.set(client_secret)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
             auth_token_context.reset(token)
+            auth_project_context.reset(project)
+            auth_refresh_token_context.reset(rt)
+            auth_token_uri_context.reset(tu)
+            auth_client_id_context.reset(ci)
+            auth_client_secret_context.reset(cs)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
