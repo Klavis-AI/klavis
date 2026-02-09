@@ -60,7 +60,7 @@ jsonschema==4.25.0
 jsonschema-specifications==2025.4.1
 referencing==0.36.2
 rpds-py==0.26.0
-authlib==1.6.1
+authlib==1.6.6
 cryptography==45.0.5
 cffi==1.17.1
 pycparser==2.22
