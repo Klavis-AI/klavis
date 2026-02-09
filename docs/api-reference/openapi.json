@@ -7781,8 +7781,8 @@
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize local dev with files",
-        "description": "Upload files to the local dev workspace at /data.",
+        "summary": "Initialize local dev with a tar.gz archive",
+        "description": "Upload a gzip-compressed tar archive whose contents are extracted into the workspace at /data. Directory structure inside the archive is preserved.",
         "operationId": "initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post",
         "security": [
           {
@@ -7802,16 +7802,6 @@
             "description": "The unique sandbox identifier"
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7842,7 +7832,7 @@
           "sandbox"
         ],
         "summary": "Export local dev files",
-        "description": "Download all files from local dev as a tar archive.",
+        "description": "Download all files from /data as a gzip-compressed tar archive.",
         "operationId": "dump_local_dev_sandbox_local_dev__sandbox_id__dump_get",
         "security": [
           {
@@ -23198,36 +23188,6 @@
         "title": "BigQueryTable",
         "description": "BigQuery table"
       },
-      "Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post": {
-        "properties": {
-          "files": {
-            "items": {
-              "type": "string",
-              "format": "binary"
-            },
-            "type": "array",
-            "title": "Files",
-            "description": "Files to upload"
-          },
-          "paths": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Paths",
-            "description": "JSON-encoded list of relative paths corresponding to each uploaded file. Use this to preserve folder structure (e.g. [\"src/main.py\", \"src/utils/helpers.py\"]). Must have the same length as the files list. If omitted, each file's original filename is used (flat, no directories)."
-          }
-        },
-        "type": "object",
-        "required": [
-          "files"
-        ],
-        "title": "Body_initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post"
-      },
       "CalcomData-Input": {
         "properties": {
           "schedules": {
@@ -29092,21 +29052,6 @@
             "type": "string",
             "title": "Message",
             "description": "Initialization result message"
-          },
-          "records_created": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "integer"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Records Created",
-            "description": "Count of records created per object type"
           }
         },
         "type": "object",
