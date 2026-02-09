@@ -2,7 +2,7 @@
 # Pinned versions from uv.lock to avoid slow pip resolution
 
 fastmcp==2.10.6
-mcp==1.12.2
+mcp==1.23.0
 google-cloud-bigquery==3.35.1
 google-cloud-storage==3.2.0
 google-cloud-logging==3.12.1
