@@ -421,6 +421,7 @@
                   {
                     "group": "Local Dev",
                     "pages": [
+                      "api-reference/sandbox/local_dev/get-upload-url-local-dev",
                       "api-reference/sandbox/local_dev/initialize-local-dev",
                       "api-reference/sandbox/local_dev/dump-local-dev"
                     ]
