@@ -2,12 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
+# Copy and install dependencies
 COPY mcp_servers/google_cloud_toolathlon/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,4 +19,5 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 5000
 
 # Command to run the server
+# PROJECT_ID must be provided at runtime via -e or .env
 CMD ["python", "-m", "src.server"]

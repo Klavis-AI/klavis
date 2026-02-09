@@ -1306,8 +1306,9 @@ def main():
     )
 
     parser = argparse.ArgumentParser(description='Google Cloud MCP Server')
-    parser.add_argument('--project-id', type=str, required=True,
-                        help='Google Cloud Project ID')
+    parser.add_argument('--project-id', type=str,
+                        default=os.environ.get('PROJECT_ID', os.environ.get('GOOGLE_CLOUD_PROJECT', '')),
+                        help='Google Cloud Project ID (or set PROJECT_ID / GOOGLE_CLOUD_PROJECT env var)')
     parser.add_argument('--service-account-path', type=str, default=None,
                         help='Path to service account JSON file')
     parser.add_argument('--allowed-buckets', type=str, default="",
@@ -1324,6 +1325,9 @@ def main():
                         help='Use JSON responses instead of streaming')
 
     args = parser.parse_args()
+
+    if not args.project_id:
+        parser.error("Project ID is required. Set --project-id, PROJECT_ID, or GOOGLE_CLOUD_PROJECT env var.")
 
     # Setup server with configuration
     setup_server(
