@@ -1,0 +1,56 @@
+{
+  "annotations": {
+    "title": "Open new issue",
+    "readOnlyHint": false
+  },
+  "description": "Create a new issue in a GitHub repository.",
+  "inputSchema": {
+    "properties": {
+      "assignees": {
+        "description": "Usernames to assign to this issue",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "body": {
+        "description": "Issue body content",
+        "type": "string"
+      },
+      "labels": {
+        "description": "Labels to apply to this issue",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "milestone": {
+        "description": "Milestone number",
+        "type": "number"
+      },
+      "owner": {
+        "description": "Repository owner",
+        "type": "string"
+      },
+      "repo": {
+        "description": "Repository name",
+        "type": "string"
+      },
+      "title": {
+        "description": "Issue title",
+        "type": "string"
+      },
+      "type": {
+        "description": "Type of this issue",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo",
+      "title"
+    ],
+    "type": "object"
+  },
+  "name": "create_issue"
+}
