@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	ghcontext "github.com/github/github-mcp-server/pkg/context"
 	"github.com/github/github-mcp-server/pkg/http/oauth"
@@ -15,14 +18,18 @@ func ExtractUserToken(oauthCfg *oauth.Config) func(next http.Handler) http.Handl
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenType, token, err := utils.ParseAuthorizationHeader(r)
 			if err != nil {
-				// For missing Authorization header, return 401 with WWW-Authenticate header per MCP spec
 				if errors.Is(err, utils.ErrMissingAuthorizationHeader) {
-					sendAuthChallenge(w, r, oauthCfg)
+					// Fall back to x-auth-data header
+					token, tokenType = extractTokenFromAuthData(r)
+					if token == "" {
+						sendAuthChallenge(w, r, oauthCfg)
+						return
+					}
+				} else {
+					// For other auth errors (bad format, unsupported), return 400
+					http.Error(w, err.Error(), http.StatusBadRequest)
 					return
 				}
-				// For other auth errors (bad format, unsupported), return 400
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
 			}
 
 			ctx := r.Context()
@@ -35,6 +42,43 @@ func ExtractUserToken(oauthCfg *oauth.Config) func(next http.Handler) http.Handl
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// extractTokenFromAuthData extracts the access token from auth data.
+// It first checks the AUTH_DATA environment variable (plain JSON).
+// If not set, it falls back to the x-auth-data request header (base64-encoded JSON).
+// The resulting JSON is parsed to extract the access_token field.
+func extractTokenFromAuthData(r *http.Request) (string, utils.TokenType) {
+	// First check AUTH_DATA env var (plain JSON)
+	authData := os.Getenv("AUTH_DATA")
+
+	if authData == "" {
+		// Fall back to x-auth-data header (base64-encoded)
+		headerVal := r.Header.Get("x-auth-data")
+		if headerVal != "" {
+			decoded, err := base64.StdEncoding.DecodeString(headerVal)
+			if err != nil {
+				return "", utils.TokenTypeUnknown
+			}
+			authData = string(decoded)
+		}
+	}
+
+	if authData == "" {
+		return "", utils.TokenTypeUnknown
+	}
+
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(authData), &data); err != nil {
+		return "", utils.TokenTypeUnknown
+	}
+
+	token, ok := data["access_token"].(string)
+	if !ok || token == "" {
+		return "", utils.TokenTypeUnknown
+	}
+
+	return token, utils.DetectTokenType(token)
 }
 
 // sendAuthChallenge sends a 401 Unauthorized response with WWW-Authenticate header

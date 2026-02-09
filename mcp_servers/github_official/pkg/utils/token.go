@@ -60,16 +60,24 @@ func ParseAuthorizationHeader(req *http.Request) (tokenType TokenType, token str
 		}
 	}
 
-	for prefix, tokenType := range supportedGitHubPrefixes {
+	tokenType = DetectTokenType(token)
+	if tokenType == TokenTypeUnknown {
+		return 0, "", ErrBadAuthorizationHeader
+	}
+	return tokenType, token, nil
+}
+
+// DetectTokenType identifies the type of a GitHub token based on its prefix.
+func DetectTokenType(token string) TokenType {
+	for prefix, tt := range supportedGitHubPrefixes {
 		if strings.HasPrefix(token, prefix) {
-			return tokenType, token, nil
+			return tt
 		}
 	}
 
-	matchesOldTokenPattern := oldPatternRegexp.MatchString(token)
-	if matchesOldTokenPattern {
-		return TokenTypePersonalAccessToken, token, nil
+	if oldPatternRegexp.MatchString(token) {
+		return TokenTypePersonalAccessToken
 	}
 
-	return 0, "", ErrBadAuthorizationHeader
+	return TokenTypeUnknown
 }

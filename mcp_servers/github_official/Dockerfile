@@ -27,8 +27,8 @@ WORKDIR /server
 # Copy the binary from the build stage
 COPY --from=build /bin/github-mcp-server .
 # Expose the default port
-EXPOSE 8082
+EXPOSE 5000
 # Set the entrypoint to the server binary
 ENTRYPOINT ["/server/github-mcp-server"]
 # Default arguments for ENTRYPOINT
-CMD ["stdio"]
+CMD ["http", "--port", "5000"]
