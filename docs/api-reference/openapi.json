@@ -7776,13 +7776,63 @@
         }
       }
     },
+    "/sandbox/local_dev/{sandbox_id}/upload-url": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Get a signed URL to upload a tar.gz archive",
+        "description": "Returns a signed GCS URL that the client can PUT a tar.gz archive to directly. After uploading, call the /initialize endpoint to extract it into the pod.",
+        "operationId": "get_upload_url_sandbox_local_dev__sandbox_id__upload_url_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/local_dev/{sandbox_id}/initialize": {
       "post": {
         "tags": [
           "sandbox"
         ],
-        "summary": "Initialize local dev with a tar.gz archive",
-        "description": "Upload a gzip-compressed tar archive whose contents are extracted into the workspace at /data. Directory structure inside the archive is preserved.",
+        "summary": "Initialize local dev from a GCS-uploaded tar.gz archive",
+        "description": "Extract the previously uploaded tar.gz archive from GCS into the workspace at /data. Call /upload-url first and PUT the archive, then call this endpoint.",
         "operationId": "initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post",
         "security": [
           {
@@ -36122,6 +36172,27 @@
           "message"
         ],
         "title": "UpdateServerInstanceResponse"
+      },
+      "UploadUrlResponse": {
+        "properties": {
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url",
+            "description": "Signed GCS URL to PUT the tar.gz archive to"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes",
+            "description": "Minutes until the upload URL expires"
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_url",
+          "expires_in_minutes"
+        ],
+        "title": "UploadUrlResponse",
+        "description": "Response for the upload URL endpoint."
       },
       "UserInfo": {
         "properties": {
