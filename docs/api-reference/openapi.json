@@ -7882,7 +7882,7 @@
           "sandbox"
         ],
         "summary": "Export local dev files",
-        "description": "Download all files from /data as a gzip-compressed tar archive.",
+        "description": "Packages the workspace as tar.gz, uploads it to GCS from the pod, and returns a short-lived signed download URL. This avoids WebSocket timeouts for large workspaces.",
         "operationId": "dump_local_dev_sandbox_local_dev__sandbox_id__dump_get",
         "security": [
           {
@@ -7907,7 +7907,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/DumpUrlResponse"
+                }
               }
             }
           },
@@ -26287,6 +26289,27 @@
         ],
         "title": "DumpSandboxResponse[YouTubeData]"
       },
+      "DumpUrlResponse": {
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "title": "Download Url",
+            "description": "Signed GCS URL to GET the tar.gz archive from"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes",
+            "description": "Minutes until the download URL expires"
+          }
+        },
+        "type": "object",
+        "required": [
+          "download_url",
+          "expires_in_minutes"
+        ],
+        "title": "DumpUrlResponse",
+        "description": "Response for the dump endpoint — returns a signed download URL."
+      },
       "ExternalServerInfo": {
         "properties": {
           "name": {
@@ -27422,7 +27445,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -27444,7 +27467,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -28592,7 +28615,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28614,7 +28637,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -36879,7 +36902,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -37021,7 +37044,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
