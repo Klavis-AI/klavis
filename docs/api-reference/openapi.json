@@ -7519,8 +7519,33 @@
           "sandbox"
         ],
         "summary": "List all sandboxes",
-        "description": "Get all sandboxes associated with the API key's account.",
+        "description": "Get all sandboxes associated with the API key's account. Optionally filter by tags.",
         "operationId": "list_sandboxes_sandbox_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional JSON string of tags to filter by (e.g., '{\"env\": \"prod\"}')",
+              "title": "Tags"
+            },
+            "description": "Optional JSON string of tags to filter by (e.g., '{\"env\": \"prod\"}')"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7531,13 +7556,18 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/sandbox/{server_name}": {
@@ -27445,7 +27475,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -27467,7 +27497,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -28615,7 +28645,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -28637,7 +28667,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -34261,6 +34291,19 @@
             "title": "Benchmark",
             "description": "Benchmark for the sandbox initial environment"
           },
+          "tags": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Custom tags for the sandbox"
+          },
           "updated_at": {
             "anyOf": [
               {
@@ -36902,7 +36945,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -37044,7 +37087,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
