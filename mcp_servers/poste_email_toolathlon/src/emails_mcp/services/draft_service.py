@@ -148,10 +148,10 @@ class DraftService:
         except Exception as e:
             raise EmailMCPError(f"Failed to export drafts: {str(e)}")
     
-    def import_drafts(self, import_path: str) -> int:
-        """Import drafts from file"""
+    def import_drafts(self, json_string: str) -> int:
+        """Import drafts from a JSON string"""
         try:
-            imported_emails = self.file_backend.import_emails(import_path)
+            imported_emails = self.file_backend.import_emails(json_string)
             imported_count = 0
             
             for email_obj in imported_emails:

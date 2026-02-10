@@ -6,7 +6,6 @@ from typing import List
 from datetime import datetime
 from ..models.email import EmailMessage
 from ..utils.exceptions import ValidationError
-from ..utils.validators import validate_file_path
 from ..utils.email_parser import parse_raw_email
 import logging
 from email import encoders
@@ -50,34 +49,30 @@ class FileBackend:
         except Exception as e:
             raise ValidationError(f"Export failed: {str(e)}")
     
-    def import_emails(self, import_path: str) -> List[EmailMessage]:
-        """Import emails from file with time-based sorting (newest first)"""
+    def import_emails(self, json_string: str) -> List[EmailMessage]:
+        """Import emails from a JSON string with time-based sorting (newest first)
         
-        # Validate import path
-        valid, error = validate_file_path(import_path, must_exist=True)
-        if not valid:
-            raise ValidationError(f"Invalid import path: {error}")
+        Args:
+            json_string: JSON string containing email data with 'emails' key
+        """
+        try:
+            import_data = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            raise ValidationError(f"Invalid JSON string: {str(e)}")
         
         try:
-            import_file = Path(import_path)
+            if 'emails' not in import_data:
+                raise ValidationError("Invalid JSON format: missing 'emails' key")
             
-            emails = []
-            if import_file.suffix.lower() == '.json':
-                # logging.warning("Importing emails from JSON file")
-                emails = self._import_from_json(import_file)
-            elif import_file.suffix.lower() == '.eml':
-                # logging.warning("Importing emails from EML file")
-                emails = self._import_from_eml(import_file)
-            elif import_file.is_dir():
-                emails = self._import_from_directory(import_file)
-            else:
-                raise ValidationError(f"Unsupported import format: {import_file.suffix}")
+            emails = self._parse_email_data(import_data)
             
             # Sort emails by email_id (oldest first) for consistent import order
             emails.sort(key=lambda email: int(email.email_id) if email.email_id.isdigit() else 0, reverse=False)
 
             return emails
                 
+        except ValidationError:
+            raise
         except Exception as e:
             raise ValidationError(f"Import failed: {str(e)}")
     
@@ -155,11 +150,8 @@ class FileBackend:
                 with open(eml_file, 'wb') as f:
                     f.write(email_obj.raw_message.as_bytes())
     
-    def _import_from_json(self, import_file: Path) -> List[EmailMessage]:
-        """Import emails from JSON format"""
-        with open(import_file, 'r', encoding='utf-8') as f:
-            import_data = json.load(f)
-        
+    def _parse_email_data(self, import_data: dict) -> List[EmailMessage]:
+        """Parse email data from a dictionary (already loaded from JSON)"""
         if 'emails' not in import_data:
             raise ValidationError("Invalid JSON format: missing 'emails' key")
         

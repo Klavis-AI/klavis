@@ -312,11 +312,11 @@ def register_management_tools(mcp: FastMCP):
             return f"Error exporting emails: {str(e)}"
     
     @mcp.tool()
-    async def import_emails(import_path: str, target_folder: str = None, preserve_folders: bool = True) -> str:
-        """Import emails from backup file to IMAP server
+    async def import_emails(json_string: str, target_folder: str = None, preserve_folders: bool = True) -> str:
+        """Import emails from a JSON string to IMAP server
         
         Args:
-            import_path: Path to import file (.json or .eml) or a directory
+            json_string: JSON string containing email data with 'emails' key
             target_folder: Target folder for imported emails (if preserve_folders=False)
             preserve_folders: Whether to preserve original folder structure (default: True)
         """
@@ -324,17 +324,16 @@ def register_management_tools(mcp: FastMCP):
             from ..backends.file_backend import FileBackend
             from ..config import config_manager
             
-            # Validate import path  
             workspace_config = config_manager.workspace_config
             file_backend = FileBackend(
                 email_export_path=workspace_config.email_export_path if workspace_config else None,
                 attachment_download_path=workspace_config.attachment_download_path if workspace_config else None
             )
             
-            imported_emails = file_backend.import_emails(import_path)
+            imported_emails = file_backend.import_emails(json_string)
             
             if not imported_emails:
-                return f"No emails found in import file {import_path}"
+                return "No emails found in the provided JSON data"
             
             email_service = _get_email_service()
             
