@@ -216,13 +216,7 @@ class IMAPBackend:
     
     def get_email_ids(self, folder: str, limit: Optional[int] = None) -> List[str]:
         """Get email IDs from folder (newest first)"""
-        quoted_folder_name = self._quote_folder_name(folder)
-        utf7_quoted_folder_name = encode_to_imap_utf7(quoted_folder_name)
-
-        if self.utf8_enabled:
-            total, _ = self.select_folder(quoted_folder_name)
-        else:
-            total, _ = self.select_folder(utf7_quoted_folder_name)
+        total, _ = self.select_folder(folder)
         
         if total == 0:
             return []

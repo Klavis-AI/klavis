@@ -51,7 +51,7 @@ class EmailService:
             emails = []
             for email_id in page_ids:
                 try:
-                    email_obj = self.imap_backend.fetch_email(email_id)
+                    email_obj = self.imap_backend.fetch_email(email_id, folder=folder)
                     emails.append(email_obj)
                 except Exception as e:
                     # Log error but continue with other emails
