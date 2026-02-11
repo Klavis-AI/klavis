@@ -21552,6 +21552,282 @@
         }
       }
     },
+    "/sandbox/poste_email_toolathlon/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Initialize poste_email_toolathlon sandbox with data",
+        "description": "Initialize the sandbox with poste_email_toolathlon-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_sandbox_poste_email_toolathlon__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PosteEmailData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "emails": [
+                      {
+                        "email_id": "1",
+                        "subject": "[COML 2025] Camera-ready instructions for accepted papers",
+                        "from_addr": "COML 2025 <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Wed, 10 Sep 2025 18:31:19 +0000",
+                        "message_id": "<email1@mcp.com>",
+                        "body_text": "Dear Dr. John Smith,\n\nCongratulations on your accepted COML 2025 paper!\n\nThe camera-ready submission is due on 2025-09-19 (11:59pm AoE). Please make sure to follow the steps below before this deadline to avoid your paper being withdrawn from COML.\n\nMandatory actions:\n1. At least one author must register for the conference with the 'Conference' option checked.\n2. At least one author needs to digitally sign the publication consent form.\n3. The presenting author needs to digitally sign the consent form.\n4. The corresponding author needs to sign the PMLR publication agreement form.\n5. Your camera-ready pdf should include a mandatory impact statement.\n6. Complete the camera-ready form on OpenReview.\n\nSincerely,\nDr. Sarah Chen and Prof. Michael Rodriguez, COML 2025 Publications Chairs",
+                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p><strong>Congratulations on your accepted COML 2025 paper!</strong></p><p>The camera-ready submission is due on <strong>2025-09-19 (11:59pm AoE)</strong>.</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "2",
+                        "subject": "[COMLW 2025] Urgent: Camera-Ready Deadline Tomorrow",
+                        "from_addr": "COMLW 2025 <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Wed, 10 Sep 2025 19:01:19 +0000",
+                        "message_id": "<email2@mcp.com>",
+                        "body_text": "Dear Dr. John Smith,\n\nThis is a final reminder that your camera-ready paper for the COML Workshop on Large Language Models (COMLW 2025) is due tomorrow, 2025-09-16 at 23:59 AOE.\n\nAction Required:\n- Your paper titled \"Ipsum Lorem is all you need for a workshop\" has NOT been submitted yet\n- Missing camera-ready submissions will be excluded from the proceedings\n- No extensions will be granted\n\nQuick Submission Guide:\n1. Use the COML 2025 workshop template\n2. 4 pages + references for workshop papers\n3. Submit via OpenReview\n4. Include signed copyright form\n\nBest,\nCOMLW 2025 Organizing Committee",
+                        "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>This is a <strong>final reminder</strong> that your camera-ready paper for COMLW 2025 is due <strong>tomorrow, 2025-09-16 at 23:59 AOE</strong>.</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "3",
+                        "subject": "[LCFM 2025] Invitation to serve as Reviewer",
+                        "from_addr": "LCFM 2025 <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Thu, 11 Sep 2025 13:23:19 +0000",
+                        "message_id": "<email3@mcp.com>",
+                        "body_text": "Dear invitee,\n\nYou have been nominated by the program chair committee of LCFM 2025 to serve as Reviewer. As a respected researcher in the area, we hope you will accept and help us make LCFM 2025 a success. Reviews are due 2025-09-23 AOE, and we are aiming to assign no more than 1 paper to each reviewer.\n\nPlease answer within 3 days.\n\nCheers, and thank you!\nProgram Chairs",
+                        "body_html": "<html><body><p>Dear invitee,</p><p>You have been nominated by the program chair committee of <strong>LCFM 2025</strong> to serve as <strong>Reviewer</strong>. Reviews are due <strong>2025-09-23 AOE</strong>.</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "4",
+                        "subject": "[COML 2025] Oral presentation notification",
+                        "from_addr": "OpenReview <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Thu, 11 Sep 2025 22:31:19 +0000",
+                        "message_id": "<email4@mcp.com>",
+                        "body_text": "Dear Dr. John Smith,\n\nCongratulations! Your Paper Has Been Selected for an Oral Presentation!\n\nWe are happy to notify you that your submission \"Ipsum Lorem is all you need\" has been selected for an oral presentation at COML 2025! 120 submissions were selected for orals this year, representing the top ~1% of all submissions.\n\nPresentation Details:\n- Duration: 12 minutes presentation + 2 minutes Q&A\n- Dates: 2025-11-05, 2025-11-06, or 2025-11-07\n- Format: In-person only\n\nSincerely,\nCOML 2025 Program Chairs",
+                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>Your submission <strong>Ipsum Lorem is all you need</strong> has been selected for an <strong>oral presentation</strong> at COML 2025!</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "5",
+                        "subject": "New citations to your publications",
+                        "from_addr": "Google Scholar <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Sat, 13 Sep 2025 15:01:19 +0000",
+                        "message_id": "<email5@mcp.com>",
+                        "body_text": "Hi Dr. John Smith,\n\nYou have new citations to your publications:\n\n\"Ipsum Lorem is all you need\"\nCited by: Transformer-based Approaches to Lorem Generation - Zhang et al., 2025\n\nYour publication metrics:\n- Total citations: 127 (+3 this week)\n- h-index: 8\n- i10-index: 6\n\nTo see all citations and manage your profile, visit your Google Scholar profile.",
+                        "body_html": "<html><body><p>Hi Dr. John Smith,</p><p>You have new citations to your publications.</p><p><strong>\"Ipsum Lorem is all you need\"</strong><br>Cited by: <em>Transformer-based Approaches to Lorem Generation</em> - Zhang et al., 2025</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "6",
+                        "subject": "Registration Confirmation - COML 2025 Conference",
+                        "from_addr": "COML 2025 Registration <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Sun, 14 Sep 2025 01:01:19 +0000",
+                        "message_id": "<email6@mcp.com>",
+                        "body_text": "Dear Dr. John Smith,\n\nThank you for registering for the Conference on Machine Learning (COML 2025). Your registration has been successfully processed.\n\nRegistration Details:\n- Registration ID: COML2025-REG-8742\n- Registration Type: Virtual Attendance\n- Registration Date: 2025-09-13\n- Amount Paid: $150 USD\n\nImportant Information:\n- Access links for virtual sessions will be sent 24 hours before the conference\n- Conference dates: July 21-26, 2025\n\nBest regards,\nCOML 2025 Registration Team",
+                        "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>Thank you for registering for COML 2025.</p><p><strong>Registration ID:</strong> COML2025-REG-8742<br><strong>Type:</strong> Virtual Attendance<br><strong>Amount:</strong> $150 USD</p></body></html>",
+                        "is_read": true,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "7",
+                        "subject": "[GitHub] Your personal access token will expire in 7 days",
+                        "from_addr": "GitHub <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Sun, 14 Sep 2025 10:01:19 +0000",
+                        "message_id": "<email7@mcp.com>",
+                        "body_text": "Hi @jsmith,\n\nYour personal access token \"ML-research-token\" with repo and workflow scopes will expire on 2025-09-22.\n\nThis token is used by:\n- 2 GitHub Actions workflows\n- Your local development environment\n- CI/CD pipeline in ml-experiments repo\n\nTo ensure uninterrupted access, please regenerate your token before it expires.\n\nGitHub, Inc.",
+                        "body_html": "<html><body><p>Hi @jsmith,</p><p>Your personal access token <strong>\"ML-research-token\"</strong> will expire on <strong>2025-09-22</strong>.</p></body></html>",
+                        "is_read": true,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "8",
+                        "subject": "[COML 2025] Camera-ready deadline reminder",
+                        "from_addr": "COML 2025 <noreply@mcp.com>",
+                        "to_addr": "jsmith@mcp.com",
+                        "date": "Mon, 15 Sep 2025 06:01:19 +0000",
+                        "message_id": "<email8@mcp.com>",
+                        "body_text": "Dear Dr. John Smith,\n\nThe camera-ready submission deadline is extended to 2025-09-26 (11:59pm AoE).\n\nSee instructions here: https://coml.cc/Conferences/2025/AuthorInstructions\n\nWe are aware of the issue with the paper format checker, and are working to resolve it.\n\nRegards,\nCOML 2025 Publications Chairs",
+                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>The camera-ready submission deadline is extended to <strong>2025-09-26 (11:59pm AoE)</strong>.</p></body></html>",
+                        "is_read": false,
+                        "is_important": false,
+                        "folder": "INBOX",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "9",
+                        "subject": "Re: COML 2025 camera-ready submission",
+                        "from_addr": "jsmith@mcp.com",
+                        "to_addr": "COML 2025 <noreply@mcp.com>",
+                        "date": "Mon, 15 Sep 2025 12:30:00 +0000",
+                        "message_id": "<email9@mcp.com>",
+                        "body_text": "Dear Publication Chairs,\n\nThank you for the deadline extension. I will submit the camera-ready version by 2025-09-26.\n\nBest regards,\nDr. John Smith",
+                        "is_read": true,
+                        "is_important": false,
+                        "folder": "Sent",
+                        "attachments": []
+                      },
+                      {
+                        "email_id": "10",
+                        "subject": "Draft: LCFM 2025 reviewer response",
+                        "from_addr": "jsmith@mcp.com",
+                        "to_addr": "longcontextfm2025@googlegroups.com",
+                        "date": "Mon, 15 Sep 2025 14:00:00 +0000",
+                        "message_id": "<email10@mcp.com>",
+                        "body_text": "Dear LCFM 2025 Organizers,\n\nI am writing to confirm my availability as a reviewer for LCFM 2025. I have expertise in long-context modeling and would be happy to review papers in this area.\n\nPlease let me know if you need any additional information.\n\nBest regards,\nDr. John Smith",
+                        "is_read": true,
+                        "is_important": false,
+                        "folder": "Drafts",
+                        "attachments": []
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/poste_email_toolathlon/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "sandbox"
+        ],
+        "summary": "Export poste_email_toolathlon sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_sandbox_poste_email_toolathlon__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_PosteEmailData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sandbox/localmemory/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -25978,6 +26254,37 @@
         ],
         "title": "DumpSandboxResponse[OutlookMailData]"
       },
+      "DumpSandboxResponse_PosteEmailData_": {
+        "properties": {
+          "sandbox_id": {
+            "type": "string",
+            "title": "Sandbox Id",
+            "description": "Sandbox identifier"
+          },
+          "server_name": {
+            "$ref": "#/components/schemas/SandboxMCPServer",
+            "description": "MCP server type"
+          },
+          "dumped_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Dumped At",
+            "description": "Timestamp of dump"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PosteEmailData-Output",
+            "description": "Dumped sandbox data in server-specific format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sandbox_id",
+          "server_name",
+          "dumped_at",
+          "data"
+        ],
+        "title": "DumpSandboxResponse[PosteEmailData]"
+      },
       "DumpSandboxResponse_PostgresData_": {
         "properties": {
           "sandbox_id": {
@@ -27475,7 +27782,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -27497,7 +27804,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -28645,7 +28952,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28667,7 +28974,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -33211,6 +33518,244 @@
         "title": "Post",
         "description": "WordPress post data"
       },
+      "PosteEmail-Input": {
+        "properties": {
+          "email_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Id",
+            "description": "Email ID (optional, auto-assigned if not provided)"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "description": "Email subject line"
+          },
+          "from_addr": {
+            "type": "string",
+            "title": "From Addr",
+            "description": "Sender email address (e.g., 'Name <user@example.com>')"
+          },
+          "to_addr": {
+            "type": "string",
+            "title": "To Addr",
+            "description": "Recipient email address"
+          },
+          "cc_addr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cc Addr",
+            "description": "CC email addresses"
+          },
+          "bcc_addr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bcc Addr",
+            "description": "BCC email addresses"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date",
+            "description": "Email date in RFC 2822 format (e.g., 'Wed, 10 Sep 2025 18:31:19 +0000')"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id",
+            "description": "Message-ID header value"
+          },
+          "body_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Text",
+            "description": "Plain text or HTML body content"
+          },
+          "body_html": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Html",
+            "description": "HTML body content"
+          },
+          "is_read": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Read",
+            "description": "Whether the email has been read",
+            "default": false
+          },
+          "is_important": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Important",
+            "description": "Whether the email is marked as important",
+            "default": false
+          },
+          "folder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folder",
+            "description": "Email folder (INBOX, Sent, Drafts, etc.)",
+            "default": "INBOX"
+          },
+          "attachments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PosteEmailAttachment-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attachments",
+            "description": "Email attachments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject",
+          "from_addr",
+          "to_addr"
+        ],
+        "title": "PosteEmail",
+        "description": "Single email message object matching the poste email backup format"
+      },
+      "PosteEmail-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "PosteEmailAttachment-Input": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Attachment filename"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "MIME content type"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size",
+            "description": "Attachment size in bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename"
+        ],
+        "title": "PosteEmailAttachment",
+        "description": "Email attachment object"
+      },
+      "PosteEmailAttachment-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "PosteEmailData-Input": {
+        "properties": {
+          "emails": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PosteEmail-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emails",
+            "description": "List of email messages"
+          }
+        },
+        "type": "object",
+        "title": "PosteEmailData",
+        "description": "Complete Poste Email sandbox data structure.\n\nMatches the JSON format expected by the poste_email MCP server's import_emails tool.\nThe 'emails' list contains all email messages across all folders."
+      },
+      "PosteEmailData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
       "PostgresData-Input": {
         "properties": {
           "schemas": {
@@ -34370,6 +34915,7 @@
           "postgres",
           "mongodb",
           "youtube",
+          "poste_email_toolathlon",
           "local_dev",
           "localmemory",
           "googleworkspaceatlas",
@@ -36945,7 +37491,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -37087,7 +37633,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
