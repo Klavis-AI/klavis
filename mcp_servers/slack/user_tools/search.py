@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Literal, Optional, List
 from .base import make_slack_user_request
 
 # Configure logging
@@ -100,7 +100,7 @@ def generate_summary(
 async def user_search_messages(
     query: str,
     channel_ids: Optional[List[str]] = None,
-    to_me: bool = False,
+    to_me: Literal["dm", "mention", "off"] = "off",
     sort: Optional[str] = None,
     sort_dir: Optional[str] = None,
     count: Optional[int] = None,
@@ -115,9 +115,14 @@ async def user_search_messages(
     search_query = query
 
     # Add to_me filter if requested
-    if to_me:
+    if to_me == "dm":
+        # Search for DMs sent directly to the authenticated user
         user_id = await get_current_user_id()
         search_query = f"{search_query} to:<@{user_id}>"
+    elif to_me == "mention":
+        # Search for messages where the authenticated user is @mentioned in channels
+        user_id = await get_current_user_id()
+        search_query = f"{search_query} <@{user_id}>"
 
     # Add channel filters if provided
     if channel_ids and len(channel_ids) > 0:
