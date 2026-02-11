@@ -41,16 +41,6 @@ class SMTPBackend:
             # Send EHLO to discover server capabilities
             self.connection.ehlo()
             
-            # Start TLS if configured (only for non-SSL connections)
-            if self.config.use_starttls and not self.config.use_ssl:
-                import ssl
-                context = ssl.create_default_context()
-                context.check_hostname = False
-                context.verify_mode = ssl.CERT_NONE
-                self.connection.starttls(context=context)
-                # Re-send EHLO after STARTTLS so server re-advertises AUTH
-                self.connection.ehlo()
-            
             logging.info(f"SMTP esmtp_features after EHLO: {self.connection.esmtp_features}")
             
             # Login if credentials are provided

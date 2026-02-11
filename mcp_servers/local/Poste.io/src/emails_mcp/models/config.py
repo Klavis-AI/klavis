@@ -13,8 +13,8 @@ class EmailConfig:
     imap_port: int = 993
     smtp_server: str = "localhost" 
     smtp_port: int = 587
-    use_ssl: bool = True
-    use_starttls: bool = True
+    use_ssl: bool = False
+    use_starttls: bool = False
 
 
 @dataclass
