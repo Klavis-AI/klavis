@@ -59,8 +59,8 @@ class ConfigManager:
                 imap_port=account_data.get('imap_port', 993),
                 smtp_server=account_data.get('smtp_server', 'localhost'),
                 smtp_port=account_data.get('smtp_port', 587),
-                use_ssl=account_data.get('use_ssl', True),
-                use_starttls=account_data.get('use_starttls', True)
+                use_ssl=account_data.get('use_ssl', False),
+                use_starttls=account_data.get('use_starttls', False)
             )
             
             # Validate required fields

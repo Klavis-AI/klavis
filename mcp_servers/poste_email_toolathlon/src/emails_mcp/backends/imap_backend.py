@@ -31,12 +31,6 @@ class IMAPBackend:
                     self.config.imap_server,
                     self.config.imap_port
                 )
-                if self.config.use_starttls:
-                    import ssl
-                    context = ssl.create_default_context()
-                    context.check_hostname = False
-                    context.verify_mode = ssl.CERT_NONE
-                    self.connection.starttls(ssl_context=context)
             
             # Login
             self.connection.login(self.config.email, self.config.password)
