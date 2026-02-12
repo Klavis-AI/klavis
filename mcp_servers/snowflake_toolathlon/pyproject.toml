@@ -2,6 +2,7 @@
 name = "mcp_snowflake_server"
 version = "0.4.0"
 description = "A simple Snowflake MCP server"
+readme = {text = "A simple Snowflake MCP server", content-type = "text/markdown"}
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "mcp>=1.0.0",
