@@ -215,13 +215,6 @@ def main():
         # Use traditional configuration method
         connection_args = {**connection_args_from_env, **connection_args}
 
-    assert (
-        "database" in connection_args
-    ), 'You must provide the database as "--database" argument, "SNOWFLAKE_DATABASE" environment variable, or in the TOML file.'
-    assert (
-        "schema" in connection_args
-    ), 'You must provide the schema as "--schema" argument, "SNOWFLAKE_SCHEMA" environment variable, or in the TOML file.'
-
     asyncio.run(
         server.main(
             connection_args=connection_args,
