@@ -53,7 +53,10 @@ def parse_args():
 
     # Add arguments
     parser.add_argument(
-        "--allow_write", required=False, default=False, action="store_true", help="Allow write operations on the database"
+        "--allow_write",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Allow write operations on the database (default: True)",
     )
     parser.add_argument("--log_dir", required=False, default=None, help="Directory to log to")
     parser.add_argument("--log_level", required=False, default="INFO", help="Logging level")
