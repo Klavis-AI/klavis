@@ -51,7 +51,6 @@ class SnowflakeDB:
                     encryption_algorithm=serialization.NoEncryption()
                 )
                 
-                logger.info(f"---- Private key bytes: {pkb}")
 
                 # Replace private_key_content with the actual key bytes
                 self.connection_config["private_key"] = pkb
@@ -119,3 +118,13 @@ class SnowflakeDB:
             memo += f"\n\nSummary:\nAnalysis has revealed {len(self.insights)} key data insights that suggest opportunities for strategic optimization and growth."
 
         return memo
+
+    def close(self):
+        """Close the Snowflake session"""
+        if self.session:
+            try:
+                self.session.close()
+            except Exception as e:
+                logger.warning(f"Error closing Snowflake session: {e}")
+            finally:
+                self.session = None

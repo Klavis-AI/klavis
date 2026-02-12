@@ -1,15 +1,26 @@
+import contextlib
+import contextvars
+import base64
 import importlib.metadata
 import json
 import logging
 import os
 from functools import wraps
 from typing import Any, Callable
+from collections.abc import AsyncIterator
 
 import mcp.server.stdio
 import mcp.types as types
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
+from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from pydantic import AnyUrl, BaseModel
+from starlette.applications import Starlette
+from starlette.responses import Response
+from starlette.routing import Mount, Route
+from starlette.types import Receive, Scope, Send
+import uvicorn
 
 from .db_client import SnowflakeDB
 from .write_detector import SQLWriteDetector
@@ -23,6 +34,58 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("mcp_snowflake_server")
+
+
+# Context for request-specific connection arguments
+connection_context: contextvars.ContextVar[dict[str, Any] | None] = contextvars.ContextVar(
+    "connection_context", default=None
+)
+
+
+def extract_credentials(request_or_scope) -> dict[str, Any] | None:
+    """Extract credentials from x-auth-data header."""
+    auth_data = None
+    
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object (Starlette Request)
+        auth_data = request_or_scope.headers.get('x-auth-data')
+    elif isinstance(request_or_scope, dict) and 'type' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        # keys are bytes, lowercased
+        auth_data_bytes = headers.get(b'x-auth-data')
+        if auth_data_bytes:
+            auth_data = auth_data_bytes.decode('utf-8')
+    
+    if auth_data:
+        try:
+            # Decode base64 then parse JSON
+            decoded = base64.b64decode(auth_data).decode('utf-8')
+            creds_json = json.loads(decoded)
+            
+            # Map keys to Snowflake connection config format
+            mapped_creds = {}
+            mapping = {
+                "SNOWFLAKE_ACCOUNT": "account",
+                "SNOWFLAKE_USER": "user",
+                "SNOWFLAKE_ROLE": "role",
+                "SNOWFLAKE_DATABASE": "database",
+                "SNOWFLAKE_SCHEMA": "schema",
+                "SNOWFLAKE_WAREHOUSE": "warehouse",
+                "SNOWFLAKE_PRIVATE_KEY": "private_key_content",
+            }
+            
+            for env_key, config_key in mapping.items():
+                if env_key in creds_json:
+                    mapped_creds[config_key] = creds_json[env_key]
+            
+            return mapped_creds if mapped_creds else None
+            
+        except Exception as e:
+            logger.warning(f"Failed to parse x-auth-data: {e}")
+            return None
+            
+    return None
 
 
 
@@ -670,6 +733,8 @@ async def main(
     exclude_patterns: dict = None,
     exclude_json_results: bool = False,
     allowed_databases: list[str] = None,
+    transport: str = "stdio",
+    port: int = 8000,
 ):
     # Setup logging
     if log_dir:
@@ -1027,28 +1092,45 @@ async def main(
         if not handler:
             raise ValueError(f"Unknown tool: {name}")
 
-        # Pass exclusion_config to the handler if it's a listing function
-        if name in ["list_databases", "list_schemas", "list_tables"]:
-            return await handler(
-                arguments,
-                db,
-                write_detector,
-                allow_write,
-                server,
-                exclusion_config=exclusion_config,
-                exclude_json_results=exclude_json_results,
-                allowed_databases=allowed_databases,
-            )
-        else:
-            return await handler(
-                arguments,
-                db,
-                write_detector,
-                allow_write,
-                server,
-                exclude_json_results=exclude_json_results,
-                allowed_databases=allowed_databases,
-            )
+        # Create new DB instance for this request
+        # Merge global connection_args with request-specific credentials
+        current_connection_args = connection_args.copy() if connection_args else {}
+        request_creds = connection_context.get()
+        
+        # If request credentials are provided, override defaults
+        if request_creds:
+            current_connection_args.update(request_creds)
+            logger.info(f"Using request-specific credentials for tool {name}")
+        
+        # Always create a new connection for isolation as requested
+        current_db = SnowflakeDB(current_connection_args)
+        current_db.start_init_connection()
+
+        try:
+            # Pass exclusion_config to the handler if it's a listing function
+            if name in ["list_databases", "list_schemas", "list_tables"]:
+                return await handler(
+                    arguments,
+                    current_db,
+                    write_detector,
+                    allow_write,
+                    server,
+                    exclusion_config=exclusion_config,
+                    exclude_json_results=exclude_json_results,
+                    allowed_databases=allowed_databases,
+                )
+            else:
+                return await handler(
+                    arguments,
+                    current_db,
+                    write_detector,
+                    allow_write,
+                    server,
+                    exclude_json_results=exclude_json_results,
+                    allowed_databases=allowed_databases,
+                )
+        finally:
+            current_db.close()
 
     @server.list_tools()
     async def handle_list_tools() -> list[types.Tool]:
@@ -1065,17 +1147,77 @@ async def main(
         return tools
 
     # Start server
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        logger.info("Server running with stdio transport")
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="snowflake",
-                server_version=importlib.metadata.version("mcp_snowflake_server"),
-                capabilities=server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
+    if transport == "stdio":
+        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+            logger.info("Server running with stdio transport")
+            await server.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name="snowflake",
+                    server_version=importlib.metadata.version("mcp_snowflake_server"),
+                    capabilities=server.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
                 ),
-            ),
+            )
+    elif transport == "http":
+        # Set up SSE transport
+        sse = SseServerTransport("/messages/")
+
+        async def handle_sse(request):
+            # Extract credentials and set context
+            creds = extract_credentials(request)
+            token = connection_context.set(creds)
+            try:
+                async with sse.connect_sse(
+                    request.scope, request.receive, request._send
+                ) as streams:
+                    await server.run(
+                        streams[0], streams[1], server.create_initialization_options()
+                    )
+            finally:
+                connection_context.reset(token)
+            return Response()
+
+        # Set up StreamableHTTP transport
+        session_manager = StreamableHTTPSessionManager(
+            app=server,
+            event_store=None,
+            json_response=False,
+            stateless=True,
         )
+
+        async def handle_streamable_http(scope: Scope, receive: Receive, send: Send) -> None:
+            # Extract credentials and set context
+            creds = extract_credentials(scope)
+            token = connection_context.set(creds)
+            try:
+                await session_manager.handle_request(scope, receive, send)
+            finally:
+                connection_context.reset(token)
+
+        @contextlib.asynccontextmanager
+        async def lifespan(app: Starlette) -> AsyncIterator[None]:
+            async with session_manager.run():
+                logger.info(f"Server starting on port {port} with dual transports!")
+                logger.info(f"  - SSE endpoint: http://0.0.0.0:{port}/sse")
+                logger.info(f"  - StreamableHTTP endpoint: http://0.0.0.0:{port}/mcp")
+                yield
+
+        starlette_app = Starlette(
+            debug=True,
+            routes=[
+                Route("/sse", endpoint=handle_sse, methods=["GET"]),
+                Mount("/messages/", app=sse.handle_post_message),
+                Mount("/mcp", app=handle_streamable_http),
+            ],
+            lifespan=lifespan,
+        )
+
+        config = uvicorn.Config(starlette_app, host="0.0.0.0", port=port, log_level=log_level.lower())
+        server_uvicorn = uvicorn.Server(config)
+        await server_uvicorn.serve()
+    else:
+        raise ValueError(f"Unknown transport: {transport}")

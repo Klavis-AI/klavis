@@ -374,7 +374,9 @@ dependencies = [
     { name = "snowflake-connector-python", extra = ["pandas"] },
     { name = "snowflake-snowpark-python" },
     { name = "sqlparse" },
+    { name = "starlette" },
     { name = "tomli" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -393,7 +395,9 @@ requires-dist = [
     { name = "snowflake-connector-python", extras = ["pandas"], specifier = ">=3.12.0,<3.14.0" },
     { name = "snowflake-snowpark-python", specifier = ">=1.26.0" },
     { name = "sqlparse", specifier = ">=0.5.3" },
+    { name = "starlette", specifier = ">=0.37.0" },
     { name = "tomli", specifier = ">=2.0.1" },
+    { name = "uvicorn", specifier = ">=0.29.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -1153,8 +1157,8 @@ name = "uvicorn"
 version = "0.40.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "python_full_version < '3.11' or sys_platform != 'emscripten'" },
-    { name = "h11", marker = "python_full_version < '3.11' or sys_platform != 'emscripten'" },
+    { name = "click" },
+    { name = "h11" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c3/d1/8f3c683c9561a4e6689dd3b1d345c815f10f86acd044ee1fb9a4dcd0b8c5/uvicorn-0.40.0.tar.gz", hash = "sha256:839676675e87e73694518b5574fd0f24c9d97b46bea16df7b8c05ea1a51071ea", size = 81761, upload-time = "2025-12-21T14:16:22.45Z" }

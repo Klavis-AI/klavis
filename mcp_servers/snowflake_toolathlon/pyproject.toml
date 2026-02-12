@@ -15,6 +15,8 @@ dependencies = [
     "cryptography<43.0.0",
     "pyOpenSSL>=24.0.0",
     "setuptools>=75.0.0,<78.0.0",
+    "starlette>=0.37.0",
+    "uvicorn>=0.29.0",
 ]
 
 [build-system]

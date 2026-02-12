@@ -92,6 +92,20 @@ def parse_args():
     )
     
     parser.add_argument(
+        "--transport",
+        default="stdio",
+        choices=["stdio", "http"],
+        help="Transport type: stdio or http"
+    )
+    
+    parser.add_argument(
+        "--port",
+        default=8000,
+        type=int,
+        help="Port to listen on for HTTP transport"
+    )
+    
+    parser.add_argument(
         "--private_key",
         required=False,
         help="Private key content (PEM format) for authentication",
@@ -147,6 +161,8 @@ def parse_args():
         "connection_name": getattr(args, 'connection_name', None),
         "connections_file": getattr(args, 'connections_file', None),
         "allowed_databases": allowed_databases,
+        "transport": args.transport,
+        "port": args.port,
     }
 
     # Add private_key if provided
@@ -216,6 +232,8 @@ def main():
             exclude_tools=server_args["exclude_tools"],
             exclude_json_results=server_args["exclude_json_results"],
             allowed_databases=server_args["allowed_databases"],
+            transport=server_args["transport"],
+            port=server_args["port"],
         )
     )
 
