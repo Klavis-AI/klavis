@@ -1,0 +1,47 @@
+# Example Snowflake connections configuration file
+# Each connection is defined as a top-level section
+
+[production]
+account = "WQXHWCD-NO62401"
+user = "ZIHAOLIN"
+password = "Linzihao1406@@"
+warehouse = "COMPUTE_WH"
+database = "SNOWFLAKE"
+schema = "PUBLIC"
+role = "ORGADMIN"
+
+[staging]
+account = "your_account_id"
+user = "your_username"
+password = "your_password"
+warehouse = "COMPUTE_WH"
+database = "STAGING_DB"
+schema = "PUBLIC"
+role = "DEVELOPER"
+
+[development]
+account = "your_account_id"
+user = "your_username"
+authenticator = "externalbrowser"  # Use browser-based authentication
+warehouse = "DEV_WH"
+database = "DEV_DB"
+schema = "PUBLIC"
+role = "DEVELOPER"
+
+[analytics]
+account = "your_account_id"
+user = "service_user"
+password = "service_password"
+warehouse = "ANALYTICS_WH"
+database = "ANALYTICS_DB"
+schema = "METRICS"
+role = "ANALYTICS_ROLE"
+
+[reporting]
+account = "your_account_id"
+user = "reporting_user"
+private_key_path = "/path/to/private_key.pem"  # Using key-pair authentication
+warehouse = "REPORTING_WH"
+database = "REPORTING_DB"
+schema = "REPORTS"
+role = "REPORTING_ROLE" 

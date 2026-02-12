@@ -1,0 +1,33 @@
+[project]
+name = "mcp_snowflake_server"
+version = "0.4.0"
+description = "A simple Snowflake MCP server"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "mcp>=1.0.0",
+    "snowflake-connector-python[pandas]>=3.12.0,<3.14.0",
+    "pandas>=2.2.3",
+    "python-dotenv>=1.0.1",
+    "sqlparse>=0.5.3",
+    "snowflake-snowpark-python>=1.26.0",
+    "tomli>=2.0.1",
+    "cryptography<43.0.0",
+    "pyOpenSSL>=24.0.0",
+    "setuptools>=75.0.0,<78.0.0",
+    "starlette>=0.37.0",
+    "uvicorn>=0.29.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = ["pyright>=1.1.389"]
+
+[project.scripts]
+mcp_snowflake_server = "mcp_snowflake_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_snowflake_server"]
