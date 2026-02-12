@@ -1,0 +1,14 @@
+{
+  "exclude_patterns": {
+    "databases": [
+      "temp"
+    ],
+    "schemas": [
+      "temp",
+      "information_schema"
+    ],
+    "tables": [
+      "temp"
+    ]
+  }
+}
