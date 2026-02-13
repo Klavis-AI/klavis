@@ -361,7 +361,7 @@ class BigQueryManager:
         """
         try:
             jobs = []
-            for job in self.client.list_jobs(max_results=max_results, state_filter=state_filter):
+            for job in self.client.list_jobs(max_results=max_results, state_filter=state_filter or None):
                 job_info = {
                     "job_id": job.job_id,
                     "job_type": job.job_type,
