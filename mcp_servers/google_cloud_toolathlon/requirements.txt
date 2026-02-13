@@ -14,6 +14,7 @@ grpcio==1.74.0
 grpcio-status==1.74.0
 protobuf==6.31.1
 google-api-core==2.25.1
+google-api-python-client==2.166.0
 google-auth==2.40.3
 google-cloud-core==2.4.3
 google-resumable-media==2.7.2

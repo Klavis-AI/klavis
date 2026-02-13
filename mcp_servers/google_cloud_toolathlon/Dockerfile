@@ -8,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY mcp_servers/google_cloud_toolathlon/src/ ./src/
-COPY mcp_servers/google_cloud_toolathlon/main.py .
 
 # Set environment variables
 ENV HOST=0.0.0.0
