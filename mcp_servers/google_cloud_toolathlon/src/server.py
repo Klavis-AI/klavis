@@ -4,13 +4,12 @@ Model Context Protocol server for Google Cloud Platform operations
 """
 
 import os
-import sys
 import base64
 import json
 import logging
 import argparse
 import contextlib
-from typing import List, Dict, Any, Optional, Set
+from typing import Optional, Set
 from collections.abc import AsyncIterator
 from contextvars import ContextVar
 
@@ -123,15 +122,94 @@ def extract_auth_data(request_or_scope) -> tuple:
         return "", "", "", "", "", ""
 
 
+def _resolve_project_id_from_api(credentials: OAuthCredentials) -> str:
+    """Resolve project ID by listing projects and matching against account email.
+
+    Steps:
+        1. List all active projects. If exactly one, use it.
+        2. If multiple, get the current account email and find the project
+           whose name matches the email prefix (part before '@').
+        3. If no match is found, raise an error listing the available projects.
+    """
+    from google.auth.transport.requests import Request
+    from googleapiclient.discovery import build
+
+    # Refresh credentials if expired
+    if credentials.expired and credentials.refresh_token:
+        logger.info("Token expired, attempting refresh...")
+        credentials.refresh(Request())
+
+    # List all active projects
+    crm_service = build("cloudresourcemanager", "v1", credentials=credentials)
+    projects = []
+    request = crm_service.projects().list(pageSize=100)
+    while request is not None:
+        resp = request.execute()
+        for project in resp.get("projects", []):
+            if project.get("lifecycleState") == "ACTIVE":
+                projects.append(project)
+        request = crm_service.projects().list_next(request, resp)
+
+    if not projects:
+        raise RuntimeError("No accessible Google Cloud projects found.")
+
+    if len(projects) == 1:
+        logger.info(f"Single project found: {projects[0]['projectId']}")
+        return projects[0]["projectId"]
+
+    # Multiple projects – try to match by account email prefix
+    oauth2_service = build("oauth2", "v2", credentials=credentials)
+    user_info = oauth2_service.userinfo().get().execute()
+    email = user_info.get("email", "")
+    logger.info(f"Account email: {email}")
+
+    if email:
+        email_prefix = email.split("@")[0].lower()
+        for project in projects:
+            if project.get("name", "").lower() == email_prefix:
+                return project["projectId"]
+
+    # Nothing matched
+    project_list = ", ".join(p.get("projectId", "unknown") for p in projects)
+    raise RuntimeError(
+        f"Could not determine project ID. Multiple projects found: [{project_list}]. "
+        f"Please provide a project_id in auth data."
+    )
+
+
 def _get_project_id() -> str:
-    """Get the effective project ID, preferring per-request auth data over global."""
+    """Get the effective project ID.
+
+    Resolution order:
+        1. project_id from per-request auth data
+        2. Global PROJECT_ID (from CLI args / env)
+        3. Auto-resolve via Google Cloud Resource Manager API
+    """
+    # 1. Per-request auth data
     try:
         project = auth_project_context.get()
         if project:
             return project
     except LookupError:
         pass
-    return PROJECT_ID or ''
+
+    # 2. Global config
+    if PROJECT_ID:
+        return PROJECT_ID
+
+    # 3. Auto-resolve using OAuth credentials
+    creds = _get_oauth_credentials()
+    if creds and creds.token:
+        resolved = _resolve_project_id_from_api(creds)
+        # Cache in the context so subsequent calls in the same request are fast
+        auth_project_context.set(resolved)
+        return resolved
+
+    raise RuntimeError(
+        "No project ID configured. Provide project_id in auth data, "
+        "set PROJECT_ID / GOOGLE_CLOUD_PROJECT env var, or ensure OAuth "
+        "credentials are available for auto-resolution."
+    )
 
 
 def _get_oauth_credentials() -> Optional[OAuthCredentials]:
@@ -1388,9 +1466,6 @@ def main():
                         help='Use JSON responses instead of streaming')
 
     args = parser.parse_args()
-
-    if not args.project_id:
-        logger.warning("No project ID configured at startup. It must be provided per-request via AUTH_DATA.")
 
     # Setup server with configuration
     setup_server(
