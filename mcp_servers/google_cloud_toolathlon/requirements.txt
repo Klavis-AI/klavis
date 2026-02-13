@@ -1,7 +1,7 @@
 # Google Cloud MCP Server Requirements
 # Pinned versions from uv.lock to avoid slow pip resolution
 
-fastmcp==2.10.6
+fastmcp==2.14.0
 mcp==1.12.2
 google-cloud-bigquery==3.35.1
 google-cloud-storage==3.2.0
