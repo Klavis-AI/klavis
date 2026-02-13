@@ -461,7 +461,8 @@ async def bigquery_create_dataset(dataset_id: str, description: str = "", locati
     
     try:
         from google.cloud import bigquery
-        dataset = bigquery.Dataset(f"{PROJECT_ID}.{dataset_id}")
+        project_id = _get_project_id()
+        dataset = bigquery.Dataset(f"{project_id}.{dataset_id}")
         dataset.location = location
         if description:
             dataset.description = description
@@ -487,7 +488,8 @@ async def bigquery_get_dataset_info(dataset_id: str) -> str:
     
     try:
         from google.cloud import bigquery
-        dataset_ref = bigquery.DatasetReference(PROJECT_ID, dataset_id)
+        project_id = _get_project_id()
+        dataset_ref = bigquery.DatasetReference(project_id, dataset_id)
         dataset = get_bigquery_manager().client.get_dataset(dataset_ref)
         
         result = f"Dataset Information for '{dataset_id}':\n"
