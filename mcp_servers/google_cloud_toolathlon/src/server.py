@@ -166,8 +166,8 @@ def _resolve_project_id_from_api(credentials: OAuthCredentials) -> str:
     if email:
         email_prefix = email.split("@")[0].lower()
         for project in projects:
-            if project.get("name", "").lower() == email_prefix:
-                return project["projectId"]
+            if project.get("displayName", "") == email_prefix:
+                return project.get("projectId")
 
     # Nothing matched
     project_list = ", ".join(p.get("projectId", "unknown") for p in projects)
