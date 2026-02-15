@@ -22277,6 +22277,222 @@
         }
       }
     },
+    "/local-sandbox": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "List local sandboxes",
+        "description": "Lists all active local sandbox environments owned by the user.",
+        "operationId": "list_local_sandboxes_local_sandbox_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListLocalSandboxesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Acquire a local sandbox environment",
+        "description": "Initializes a specialized Virtual Machine environment (Local Sandbox) that hosts multiple interconnected MCP servers.",
+        "operationId": "acquire_local_sandbox_local_sandbox_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcquireLocalSandboxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcquireLocalSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}": {
+      "delete": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Release a local sandbox environment",
+        "description": "Releases the local sandbox VM and all associated servers, cleaning up the shared environment.",
+        "operationId": "release_local_sandbox_local_sandbox__local_sandbox_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The ID of the local sandbox to release",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The ID of the local sandbox to release"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Get local sandbox details",
+        "description": "Retrieves details about a local sandbox environment, including its status and all running servers.",
+        "operationId": "get_local_sandbox_local_sandbox__local_sandbox_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The ID of the local sandbox to retrieve",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The ID of the local sandbox to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalSandboxInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/{local_sandbox_id}/reset": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Reset all sandboxes in a local sandbox environment",
+        "description": "Resets the state of the local sandbox VM and all its servers to their initial state.",
+        "operationId": "reset_local_sandbox_local_sandbox__local_sandbox_id__reset_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "local_sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The ID of the local sandbox to reset",
+              "title": "Local Sandbox Id"
+            },
+            "description": "The ID of the local sandbox to reset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/universes": {
       "get": {
         "tags": [
@@ -22686,6 +22902,112 @@
         ],
         "title": "Account",
         "description": "Company/organization record"
+      },
+      "AcquireLocalSandboxRequest": {
+        "properties": {
+          "server_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LocalSandboxMCPServer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "const": "ALL"
+              }
+            ],
+            "title": "Server Names",
+            "description": "List of MCP servers to acquire, or 'ALL' for all available local servers"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BenchmarkEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Benchmark environment"
+          },
+          "test_account_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Account Email",
+            "description": "Specific test account email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "server_names"
+        ],
+        "title": "AcquireLocalSandboxRequest"
+      },
+      "AcquireLocalSandboxResponse": {
+        "properties": {
+          "local_sandbox_id": {
+            "type": "string",
+            "title": "Local Sandbox Id",
+            "description": "Unique identifier for the entire local sandbox environment"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SandboxStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Overall status of the local sandbox environment"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark",
+            "description": "Benchmark environment configuration used for the local sandbox"
+          },
+          "servers": {
+            "items": {
+              "$ref": "#/components/schemas/LocalSandboxServerItem"
+            },
+            "type": "array",
+            "title": "Servers",
+            "description": "List of interconnected MCP servers running in this sandbox"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Status message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_sandbox_id",
+          "servers"
+        ],
+        "title": "AcquireLocalSandboxResponse"
       },
       "AcquireSandboxRequest": {
         "properties": {
@@ -27832,7 +28154,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -27854,7 +28176,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29002,7 +29324,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -29024,7 +29346,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -30348,6 +30670,29 @@
         "title": "LinearProject",
         "description": "Linear Project object"
       },
+      "ListLocalSandboxesResponse": {
+        "properties": {
+          "local_sandboxes": {
+            "items": {
+              "$ref": "#/components/schemas/LocalSandboxInfo"
+            },
+            "type": "array",
+            "title": "Local Sandboxes",
+            "description": "List of all local sandbox environments"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total number of local sandboxes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_sandboxes",
+          "total_count"
+        ],
+        "title": "ListLocalSandboxesResponse"
+      },
       "ListSandboxesResponse": {
         "properties": {
           "sandboxes": {
@@ -30584,6 +30929,116 @@
       "LocalMemoryRelation-Output": {
         "additionalProperties": true,
         "type": "object"
+      },
+      "LocalSandboxInfo": {
+        "properties": {
+          "local_sandbox_id": {
+            "type": "string",
+            "title": "Local Sandbox Id",
+            "description": "Unique identifier for the local sandbox environment"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "Timestamp when the sandbox was created"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SandboxStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Current status of the local sandbox environment"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark",
+            "description": "Benchmark environment configuration for the local sandbox"
+          },
+          "servers": {
+            "items": {
+              "$ref": "#/components/schemas/LocalSandboxServerItem"
+            },
+            "type": "array",
+            "title": "Servers",
+            "description": "List of MCP servers in this sandbox"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_sandbox_id",
+          "created_at",
+          "servers"
+        ],
+        "title": "LocalSandboxInfo"
+      },
+      "LocalSandboxMCPServer": {
+        "type": "string",
+        "enum": [
+          "filesystem",
+          "git",
+          "terminal",
+          "desktop-commander",
+          "arxiv",
+          "excel",
+          "word",
+          "powerpoint",
+          "code-executor",
+          "code-runner",
+          "pdf-tools",
+          "google_cloud",
+          "poste_email_toolathlon"
+        ],
+        "title": "LocalSandboxMCPServer",
+        "description": "Supported MCP servers for local sandboxing.\nThese are typically stateless or local-only servers."
+      },
+      "LocalSandboxServerItem": {
+        "properties": {
+          "server_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Name",
+            "description": "Name of the MCP server"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for this specific server instance within the sandbox"
+          },
+          "mcp_server_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcp Server Url",
+            "description": "URL to connect to this specific MCP server instance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "LocalSandboxServerItem"
       },
       "LogBucket": {
         "properties": {
@@ -37562,7 +38017,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -37704,7 +38159,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
