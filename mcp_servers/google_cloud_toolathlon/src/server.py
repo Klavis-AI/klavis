@@ -22,6 +22,7 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 
 from google.oauth2.credentials import Credentials as OAuthCredentials
+from googleapiclient.discovery import build
 
 from .big_query import BigQueryManager
 from .cloud_storage import CloudStorageManager
@@ -122,59 +123,46 @@ def extract_auth_data(request_or_scope) -> tuple:
         return "", "", "", "", "", ""
 
 
-def _resolve_project_id_from_api(credentials: OAuthCredentials) -> str:
-    """Resolve project ID by listing projects and matching against account email.
+def _extract_project_id(project):
+    """Extract project ID from a Resource Manager project resource."""
+    project_name = project.get("name", "")
+    if "/" in project_name:
+        return project_name.split("/")[-1]
+    return project.get("projectId")
 
-    Steps:
-        1. List all active projects. If exactly one, use it.
-        2. If multiple, get the current account email and find the project
-           whose name matches the email prefix (part before '@').
-        3. If no match is found, raise an error listing the available projects.
+
+def _resolve_project_id_from_api(credentials) -> str:
+    """Fetch the project ID from Google Cloud Resource Manager API.
+
+    If there is only one project, return it. If there are multiple projects,
+    return the one whose project ID matches the email prefix of the account.
+    Falls back to the first project if no match is found.
     """
-    from google.auth.transport.requests import Request
-    from googleapiclient.discovery import build
-
-    # Refresh credentials if expired
-    if credentials.expired and credentials.refresh_token:
-        logger.info("Token expired, attempting refresh...")
-        credentials.refresh(Request())
-
-    # List all active projects
-    crm_service = build("cloudresourcemanager", "v1", credentials=credentials)
-    projects = []
-    request = crm_service.projects().list(pageSize=100)
-    while request is not None:
-        resp = request.execute()
-        for project in resp.get("projects", []):
-            if project.get("lifecycleState") == "ACTIVE":
-                projects.append(project)
-        request = crm_service.projects().list_next(request, resp)
-
+    crm = build('cloudresourcemanager', 'v3', credentials=credentials)
+    response = crm.projects().search().execute()
+    projects = response.get("projects", [])
     if not projects:
-        raise RuntimeError("No accessible Google Cloud projects found.")
-
+        return None
     if len(projects) == 1:
-        logger.info(f"Single project found: {projects[0]['projectId']}")
-        return projects[0]["projectId"]
+        return _extract_project_id(projects[0])
 
-    # Multiple projects – try to match by account email prefix
-    oauth2_service = build("oauth2", "v2", credentials=credentials)
-    user_info = oauth2_service.userinfo().get().execute()
-    email = user_info.get("email", "")
-    logger.info(f"Account email: {email}")
+    # Multiple projects: find the one matching the account's email prefix
+    try:
+        oauth2 = build('oauth2', 'v2', credentials=credentials)
+        userinfo = oauth2.userinfo().get().execute()
+        email = userinfo.get("email", "")
+        email_prefix = email.split("@")[0] if email else ""
+    except Exception:
+        email_prefix = ""
 
-    if email:
-        email_prefix = email.split("@")[0].lower()
+    if email_prefix:
         for project in projects:
+            logger.info(f"Checking project '{project}' against email prefix '{email_prefix}'")
             if project.get("displayName", "") == email_prefix:
                 return project.get("projectId")
 
-    # Nothing matched
-    project_list = ", ".join(p.get("projectId", "unknown") for p in projects)
-    raise RuntimeError(
-        f"Could not determine project ID. Multiple projects found: [{project_list}]. "
-        f"Please provide a project_id in auth data."
-    )
+    # Fallback to first project
+    return _extract_project_id(projects[0])
 
 
 def _get_project_id() -> str:
