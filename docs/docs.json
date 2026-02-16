@@ -233,62 +233,6 @@
             ]
           },
           {
-            "group": "MCP Server Instance",
-            "pages": [
-              "api-reference/mcp-server/create-a-server-instance",
-              "api-reference/mcp-server/get-server-instance",
-              "api-reference/mcp-server/update-a-server-instance",
-              "api-reference/mcp-server/delete-a-server-instance",
-              "api-reference/mcp-server/list-raw-actions",
-              {
-                "group": "Instance Auth / OAuth",
-                "pages": [
-                  "api-reference/mcp-server/set-instance_auth",
-                  "api-reference/mcp-server/get-instance_auth",
-                  "api-reference/mcp-server/delete-instance_auth"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "User",
-            "pages": [
-              "api-reference/user/get-user",
-              "api-reference/user/get-user-integrations",
-              "api-reference/user/get-all-users",
-              "api-reference/user/delete-user",
-              {
-                "group": "User Auth / OAuth",
-                "pages": [
-                  "api-reference/user/set-user-auth",
-                  "api-reference/user/get-user-auth",
-                  "api-reference/user/delete-user-auth"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "MCP Server Metadata",
-            "pages": [
-              "api-reference/mcp-server/get-all-servers",
-              "api-reference/mcp-server/get-tools"
-            ]
-          },
-          {
-            "group": "Function Calling with MCP",
-            "pages": [
-              "api-reference/mcp-server/list-tools",
-              "api-reference/mcp-server/call-tool"
-            ]
-          },
-          {
-            "group": "White Label OAuth",
-            "pages": [
-              "api-reference/white-labeling/create",
-              "api-reference/white-labeling/get"
-            ]
-          },
-          {
             "group": "Sandbox",
             "pages": [
               "api-reference/sandbox/create",
@@ -548,6 +492,72 @@
                 ]
               },
               "api-reference/sandbox/stateless_mcp"
+            ]
+          },
+          {
+            "group": "Local Sandbox",
+            "pages": [
+              "api-reference/local-sandbox/acquire",
+              "api-reference/local-sandbox/get",
+              "api-reference/local-sandbox/list",
+              "api-reference/local-sandbox/release",
+              "api-reference/local-sandbox/reset"
+            ]
+          },
+          {
+            "group": "MCP Server Instance",
+            "pages": [
+              "api-reference/mcp-server/create-a-server-instance",
+              "api-reference/mcp-server/get-server-instance",
+              "api-reference/mcp-server/update-a-server-instance",
+              "api-reference/mcp-server/delete-a-server-instance",
+              "api-reference/mcp-server/list-raw-actions",
+              {
+                "group": "Instance Auth / OAuth",
+                "pages": [
+                  "api-reference/mcp-server/set-instance_auth",
+                  "api-reference/mcp-server/get-instance_auth",
+                  "api-reference/mcp-server/delete-instance_auth"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "User",
+            "pages": [
+              "api-reference/user/get-user",
+              "api-reference/user/get-user-integrations",
+              "api-reference/user/get-all-users",
+              "api-reference/user/delete-user",
+              {
+                "group": "User Auth / OAuth",
+                "pages": [
+                  "api-reference/user/set-user-auth",
+                  "api-reference/user/get-user-auth",
+                  "api-reference/user/delete-user-auth"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "MCP Server Metadata",
+            "pages": [
+              "api-reference/mcp-server/get-all-servers",
+              "api-reference/mcp-server/get-tools"
+            ]
+          },
+          {
+            "group": "Function Calling with MCP",
+            "pages": [
+              "api-reference/mcp-server/list-tools",
+              "api-reference/mcp-server/call-tool"
+            ]
+          },
+          {
+            "group": "White Label OAuth",
+            "pages": [
+              "api-reference/white-labeling/create",
+              "api-reference/white-labeling/get"
             ]
           },
           {
