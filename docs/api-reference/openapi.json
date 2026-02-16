@@ -21535,8 +21535,8 @@
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Get a signed URL to upload a tar.gz archive",
-        "description": "Returns a signed GCS URL that the client can PUT a tar.gz archive to directly. After uploading, call the /initialize endpoint to extract it into the pod.",
+        "summary": "Get URL to upload your data",
+        "description": "Generates a signed URL to upload a `tar.gz` archive containing your workspace files. Once uploaded, use the `/initialize` endpoint to unpack it into the sandbox.",
         "operationId": "get_upload_url_local_sandbox__local_sandbox_id__upload_url_post",
         "security": [
           {
@@ -21585,8 +21585,8 @@
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Initialize local sandbox from a GCS-uploaded tar.gz archive",
-        "description": "Extract the previously uploaded tar.gz archive from GCS into the workspace at /data. Call /upload-url first and PUT the archive, then call this endpoint.",
+        "summary": "Initialize sandbox from your uploaded data",
+        "description": "Extracts the uploaded `tar.gz` archive into the sandbox workspace. This must be called after successfully uploading the file using the URL from `/upload-url`.",
         "operationId": "initialize_local_sandbox_local_sandbox__local_sandbox_id__initialize_post",
         "security": [
           {
@@ -21635,8 +21635,8 @@
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Export local sandbox files",
-        "description": "Packages the workspace as tar.gz, uploads it to GCS from the pod, and returns a short-lived signed download URL. This avoids WebSocket timeouts for large workspaces.",
+        "summary": "Download sandbox data",
+        "description": "Creates a `tar.gz` archive of the current workspace and provides a temporary download URL. Useful for saving your work or exporting the sandbox state.",
         "operationId": "dump_local_sandbox_local_sandbox__local_sandbox_id__dump_get",
         "security": [
           {
