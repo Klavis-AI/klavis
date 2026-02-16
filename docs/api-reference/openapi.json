@@ -7806,156 +7806,6 @@
         }
       }
     },
-    "/sandbox/local_dev/{sandbox_id}/upload-url": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Get a signed URL to upload a tar.gz archive",
-        "description": "Returns a signed GCS URL that the client can PUT a tar.gz archive to directly. After uploading, call the /initialize endpoint to extract it into the pod.",
-        "operationId": "get_upload_url_sandbox_local_dev__sandbox_id__upload_url_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/sandbox/local_dev/{sandbox_id}/initialize": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Initialize local dev from a GCS-uploaded tar.gz archive",
-        "description": "Extract the previously uploaded tar.gz archive from GCS into the workspace at /data. Call /upload-url first and PUT the archive, then call this endpoint.",
-        "operationId": "initialize_local_dev_sandbox_local_dev__sandbox_id__initialize_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitializeSandboxResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/sandbox/local_dev/{sandbox_id}/dump": {
-      "get": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Export local dev files",
-        "description": "Packages the workspace as tar.gz, uploads it to GCS from the pod, and returns a short-lived signed download URL. This avoids WebSocket timeouts for large workspaces.",
-        "operationId": "dump_local_dev_sandbox_local_dev__sandbox_id__dump_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DumpUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/local_memory/{sandbox_id}/upload-url": {
       "post": {
         "tags": [
@@ -19254,543 +19104,6 @@
         }
       }
     },
-    "/sandbox/google_cloud/{sandbox_id}/initialize": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Initialize google_cloud sandbox with data",
-        "description": "Initialize the sandbox with google_cloud-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_google_cloud__sandbox_id__initialize_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          },
-          {
-            "name": "init_default_data",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "If true, use default test data for initialization",
-              "default": false,
-              "title": "Init Default Data"
-            },
-            "description": "If true, use default test data for initialization"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/GoogleCloudData-Input"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Request Body"
-              },
-              "examples": {
-                "default": {
-                  "summary": "Example initialization data",
-                  "value": {
-                    "datasets": [
-                      {
-                        "id": "sales_analytics",
-                        "description": "Sales and revenue analytics data warehouse",
-                        "location": "US"
-                      },
-                      {
-                        "id": "customer_data",
-                        "description": "Customer information and interactions",
-                        "location": "US"
-                      },
-                      {
-                        "id": "product_catalog",
-                        "description": "Product inventory and catalog data",
-                        "location": "EU"
-                      }
-                    ],
-                    "tables": [
-                      {
-                        "dataset_id": "sales_analytics",
-                        "id": "daily_sales",
-                        "description": "Daily sales transactions",
-                        "fields": [
-                          {
-                            "name": "transaction_id",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Unique transaction identifier"
-                          },
-                          {
-                            "name": "sale_date",
-                            "type": "DATE",
-                            "mode": "REQUIRED",
-                            "description": "Date of sale"
-                          },
-                          {
-                            "name": "product_id",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Product identifier"
-                          },
-                          {
-                            "name": "quantity",
-                            "type": "INTEGER",
-                            "mode": "REQUIRED",
-                            "description": "Quantity sold"
-                          },
-                          {
-                            "name": "unit_price",
-                            "type": "FLOAT",
-                            "mode": "REQUIRED",
-                            "description": "Price per unit"
-                          },
-                          {
-                            "name": "total_amount",
-                            "type": "FLOAT",
-                            "mode": "REQUIRED",
-                            "description": "Total sale amount"
-                          },
-                          {
-                            "name": "region",
-                            "type": "STRING",
-                            "mode": "NULLABLE",
-                            "description": "Sales region"
-                          }
-                        ]
-                      },
-                      {
-                        "dataset_id": "sales_analytics",
-                        "id": "monthly_revenue",
-                        "description": "Monthly revenue aggregation",
-                        "fields": [
-                          {
-                            "name": "month",
-                            "type": "DATE",
-                            "mode": "REQUIRED",
-                            "description": "First day of the month"
-                          },
-                          {
-                            "name": "region",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Sales region"
-                          },
-                          {
-                            "name": "total_revenue",
-                            "type": "FLOAT",
-                            "mode": "REQUIRED",
-                            "description": "Total revenue for the month"
-                          },
-                          {
-                            "name": "transaction_count",
-                            "type": "INTEGER",
-                            "mode": "REQUIRED",
-                            "description": "Number of transactions"
-                          },
-                          {
-                            "name": "avg_order_value",
-                            "type": "FLOAT",
-                            "mode": "NULLABLE",
-                            "description": "Average order value"
-                          }
-                        ]
-                      },
-                      {
-                        "dataset_id": "customer_data",
-                        "id": "customers",
-                        "description": "Customer master data",
-                        "fields": [
-                          {
-                            "name": "customer_id",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Unique customer identifier"
-                          },
-                          {
-                            "name": "email",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Customer email address"
-                          },
-                          {
-                            "name": "name",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Customer full name"
-                          },
-                          {
-                            "name": "created_at",
-                            "type": "TIMESTAMP",
-                            "mode": "REQUIRED",
-                            "description": "Account creation timestamp"
-                          },
-                          {
-                            "name": "tier",
-                            "type": "STRING",
-                            "mode": "NULLABLE",
-                            "description": "Customer tier (bronze, silver, gold)"
-                          },
-                          {
-                            "name": "lifetime_value",
-                            "type": "FLOAT",
-                            "mode": "NULLABLE",
-                            "description": "Customer lifetime value"
-                          }
-                        ]
-                      },
-                      {
-                        "dataset_id": "product_catalog",
-                        "id": "products",
-                        "description": "Product catalog",
-                        "fields": [
-                          {
-                            "name": "product_id",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Product identifier"
-                          },
-                          {
-                            "name": "name",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Product name"
-                          },
-                          {
-                            "name": "category",
-                            "type": "STRING",
-                            "mode": "REQUIRED",
-                            "description": "Product category"
-                          },
-                          {
-                            "name": "price",
-                            "type": "FLOAT",
-                            "mode": "REQUIRED",
-                            "description": "Current price"
-                          },
-                          {
-                            "name": "stock_quantity",
-                            "type": "INTEGER",
-                            "mode": "REQUIRED",
-                            "description": "Available stock"
-                          },
-                          {
-                            "name": "is_active",
-                            "type": "BOOLEAN",
-                            "mode": "REQUIRED",
-                            "description": "Whether product is active"
-                          }
-                        ]
-                      }
-                    ],
-                    "buckets": [
-                      {
-                        "name": "sandbox-data-lake-123",
-                        "location": "US",
-                        "storage_class": "STANDARD",
-                        "versioning_enabled": true,
-                        "lifecycle_rules": [
-                          {
-                            "action": "Delete",
-                            "age_days": 365
-                          }
-                        ]
-                      },
-                      {
-                        "name": "sandbox-exports-123",
-                        "location": "US",
-                        "storage_class": "STANDARD",
-                        "versioning_enabled": false
-                      },
-                      {
-                        "name": "sandbox-backups-123",
-                        "location": "US-EAST1",
-                        "storage_class": "NEARLINE",
-                        "versioning_enabled": true,
-                        "lifecycle_rules": [
-                          {
-                            "action": "SetStorageClass",
-                            "action_storage_class": "COLDLINE",
-                            "age_days": 90
-                          },
-                          {
-                            "action": "Delete",
-                            "age_days": 730
-                          }
-                        ]
-                      },
-                      {
-                        "name": "sandbox-logs-archive-123",
-                        "location": "US",
-                        "storage_class": "ARCHIVE",
-                        "versioning_enabled": false
-                      }
-                    ],
-                    "objects": [
-                      {
-                        "bucket": "sandbox-data-lake-123",
-                        "name": "raw/sales/2025/01/daily_sales_20250101.csv",
-                        "content_type": "text/csv",
-                        "content": "transaction_id,sale_date,product_id,quantity,unit_price,total_amount,region\nTXN001,2025-01-01,PROD001,5,19.99,99.95,North America\nTXN002,2025-01-01,PROD002,3,29.99,89.97,Europe\nTXN003,2025-01-01,PROD001,10,19.99,199.90,Asia Pacific"
-                      },
-                      {
-                        "bucket": "sandbox-data-lake-123",
-                        "name": "raw/sales/2025/01/daily_sales_20250102.csv",
-                        "content_type": "text/csv",
-                        "content": "transaction_id,sale_date,product_id,quantity,unit_price,total_amount,region\nTXN004,2025-01-02,PROD003,2,49.99,99.98,North America\nTXN005,2025-01-02,PROD001,7,19.99,139.93,Europe\nTXN006,2025-01-02,PROD002,4,29.99,119.96,Asia Pacific"
-                      },
-                      {
-                        "bucket": "sandbox-data-lake-123",
-                        "name": "processed/customers/customer_segments.json",
-                        "content_type": "application/json",
-                        "content": "{\"segments\": [{\"name\": \"High Value\", \"count\": 1500, \"avgLTV\": 2500}, {\"name\": \"Medium Value\", \"count\": 5000, \"avgLTV\": 800}, {\"name\": \"Low Value\", \"count\": 12000, \"avgLTV\": 150}]}"
-                      },
-                      {
-                        "bucket": "sandbox-exports-123",
-                        "name": "exports/monthly_report_202501.csv",
-                        "content_type": "text/csv",
-                        "content": "month,total_revenue,total_transactions,avg_order_value\n2025-01,1250000.00,15000,83.33"
-                      },
-                      {
-                        "bucket": "sandbox-data-lake-123",
-                        "name": "config/etl_pipeline_config.yaml",
-                        "content_type": "application/x-yaml",
-                        "content": "pipeline:\n  name: daily_sales_etl\n  schedule: \"0 2 * * *\"\n  source:\n    type: gcs\n    bucket: sandbox-data-lake-123\n    prefix: raw/sales/\n  destination:\n    type: bigquery\n    dataset: sales_analytics\n    table: daily_sales"
-                      }
-                    ],
-                    "log_entries": [
-                      {
-                        "log_name": "application-logs",
-                        "message": "Application started successfully",
-                        "severity": "INFO",
-                        "timestamp": "2025-01-15T08:00:00Z",
-                        "resource_type": "gce_instance",
-                        "resource_labels": {
-                          "instance_id": "1234567890",
-                          "zone": "us-central1-a"
-                        }
-                      },
-                      {
-                        "log_name": "application-logs",
-                        "message": "Database connection established",
-                        "severity": "INFO",
-                        "timestamp": "2025-01-15T08:00:05Z",
-                        "resource_type": "gce_instance",
-                        "resource_labels": {
-                          "instance_id": "1234567890",
-                          "zone": "us-central1-a"
-                        }
-                      },
-                      {
-                        "log_name": "application-logs",
-                        "json_data": {
-                          "event": "user_login",
-                          "user_id": "user_123",
-                          "ip_address": "192.168.1.100",
-                          "success": true
-                        },
-                        "severity": "INFO",
-                        "timestamp": "2025-01-15T09:30:00Z",
-                        "resource_type": "gce_instance",
-                        "resource_labels": {
-                          "instance_id": "1234567890",
-                          "zone": "us-central1-a"
-                        }
-                      },
-                      {
-                        "log_name": "error-logs",
-                        "message": "Failed to process batch: timeout exceeded",
-                        "severity": "ERROR",
-                        "timestamp": "2025-01-15T14:22:00Z",
-                        "resource_type": "cloud_function",
-                        "resource_labels": {
-                          "function_name": "process_batch",
-                          "region": "us-central1"
-                        }
-                      },
-                      {
-                        "log_name": "audit-logs",
-                        "json_data": {
-                          "action": "resource.create",
-                          "resource_type": "storage.bucket",
-                          "resource_name": "new-bucket",
-                          "actor": "admin@example.com"
-                        },
-                        "severity": "NOTICE",
-                        "timestamp": "2025-01-15T10:15:00Z",
-                        "resource_type": "project"
-                      }
-                    ],
-                    "log_sinks": [
-                      {
-                        "name": "bigquery-audit-sink",
-                        "filter": "logName:\"cloudaudit.googleapis.com\"",
-                        "description": "Export audit logs for analysis"
-                      },
-                      {
-                        "name": "error-logs-sink",
-                        "filter": "severity>=ERROR",
-                        "description": "Capture error logs"
-                      },
-                      {
-                        "name": "all-logs-sink",
-                        "description": "Stream all logs for processing"
-                      }
-                    ],
-                    "log_buckets": [
-                      {
-                        "name": "app-logs-bucket5",
-                        "location": "global",
-                        "retention_days": 30,
-                        "description": "Bucket for app logs with 30-day retention"
-                      },
-                      {
-                        "name": "security-logs-bucket5",
-                        "location": "us-central1",
-                        "retention_days": 365,
-                        "description": "Bucket for security logs with 1-year retention"
-                      }
-                    ],
-                    "instances": [
-                      {
-                        "name": "web-server-1",
-                        "zone": "us-central1-a",
-                        "machine_type": "e2-medium",
-                        "description": "Primary web server",
-                        "labels": {
-                          "environment": "production",
-                          "team": "web"
-                        }
-                      },
-                      {
-                        "name": "web-server-2",
-                        "zone": "us-central1-b",
-                        "machine_type": "e2-medium",
-                        "description": "Secondary web server",
-                        "labels": {
-                          "environment": "production",
-                          "team": "web"
-                        }
-                      },
-                      {
-                        "name": "database-server",
-                        "zone": "us-central1-a",
-                        "machine_type": "n2-standard-4",
-                        "description": "Main database server",
-                        "labels": {
-                          "environment": "production",
-                          "team": "database"
-                        }
-                      },
-                      {
-                        "name": "dev-instance",
-                        "zone": "us-west1-a",
-                        "machine_type": "e2-micro",
-                        "description": "Development and testing instance",
-                        "labels": {
-                          "environment": "development",
-                          "team": "engineering"
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitializeSandboxResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/sandbox/google_cloud/{sandbox_id}/dump": {
-      "get": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Export google_cloud sandbox data",
-        "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_google_cloud__sandbox_id__dump_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleCloudData_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/monday/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -21602,282 +20915,6 @@
         }
       }
     },
-    "/sandbox/poste_email_toolathlon/{sandbox_id}/initialize": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Initialize poste_email_toolathlon sandbox with data",
-        "description": "Initialize the sandbox with poste_email_toolathlon-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_poste_email_toolathlon__sandbox_id__initialize_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          },
-          {
-            "name": "init_default_data",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "If true, use default test data for initialization",
-              "default": false,
-              "title": "Init Default Data"
-            },
-            "description": "If true, use default test data for initialization"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/PosteEmailData-Input"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Request Body"
-              },
-              "examples": {
-                "default": {
-                  "summary": "Example initialization data",
-                  "value": {
-                    "emails": [
-                      {
-                        "email_id": "1",
-                        "subject": "[COML 2025] Camera-ready instructions for accepted papers",
-                        "from_addr": "COML 2025 <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Wed, 10 Sep 2025 18:31:19 +0000",
-                        "message_id": "<email1@mcp.com>",
-                        "body_text": "Dear Dr. John Smith,\n\nCongratulations on your accepted COML 2025 paper!\n\nThe camera-ready submission is due on 2025-09-19 (11:59pm AoE). Please make sure to follow the steps below before this deadline to avoid your paper being withdrawn from COML.\n\nMandatory actions:\n1. At least one author must register for the conference with the 'Conference' option checked.\n2. At least one author needs to digitally sign the publication consent form.\n3. The presenting author needs to digitally sign the consent form.\n4. The corresponding author needs to sign the PMLR publication agreement form.\n5. Your camera-ready pdf should include a mandatory impact statement.\n6. Complete the camera-ready form on OpenReview.\n\nSincerely,\nDr. Sarah Chen and Prof. Michael Rodriguez, COML 2025 Publications Chairs",
-                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p><strong>Congratulations on your accepted COML 2025 paper!</strong></p><p>The camera-ready submission is due on <strong>2025-09-19 (11:59pm AoE)</strong>.</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "2",
-                        "subject": "[COMLW 2025] Urgent: Camera-Ready Deadline Tomorrow",
-                        "from_addr": "COMLW 2025 <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Wed, 10 Sep 2025 19:01:19 +0000",
-                        "message_id": "<email2@mcp.com>",
-                        "body_text": "Dear Dr. John Smith,\n\nThis is a final reminder that your camera-ready paper for the COML Workshop on Large Language Models (COMLW 2025) is due tomorrow, 2025-09-16 at 23:59 AOE.\n\nAction Required:\n- Your paper titled \"Ipsum Lorem is all you need for a workshop\" has NOT been submitted yet\n- Missing camera-ready submissions will be excluded from the proceedings\n- No extensions will be granted\n\nQuick Submission Guide:\n1. Use the COML 2025 workshop template\n2. 4 pages + references for workshop papers\n3. Submit via OpenReview\n4. Include signed copyright form\n\nBest,\nCOMLW 2025 Organizing Committee",
-                        "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>This is a <strong>final reminder</strong> that your camera-ready paper for COMLW 2025 is due <strong>tomorrow, 2025-09-16 at 23:59 AOE</strong>.</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "3",
-                        "subject": "[LCFM 2025] Invitation to serve as Reviewer",
-                        "from_addr": "LCFM 2025 <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Thu, 11 Sep 2025 13:23:19 +0000",
-                        "message_id": "<email3@mcp.com>",
-                        "body_text": "Dear invitee,\n\nYou have been nominated by the program chair committee of LCFM 2025 to serve as Reviewer. As a respected researcher in the area, we hope you will accept and help us make LCFM 2025 a success. Reviews are due 2025-09-23 AOE, and we are aiming to assign no more than 1 paper to each reviewer.\n\nPlease answer within 3 days.\n\nCheers, and thank you!\nProgram Chairs",
-                        "body_html": "<html><body><p>Dear invitee,</p><p>You have been nominated by the program chair committee of <strong>LCFM 2025</strong> to serve as <strong>Reviewer</strong>. Reviews are due <strong>2025-09-23 AOE</strong>.</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "4",
-                        "subject": "[COML 2025] Oral presentation notification",
-                        "from_addr": "OpenReview <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Thu, 11 Sep 2025 22:31:19 +0000",
-                        "message_id": "<email4@mcp.com>",
-                        "body_text": "Dear Dr. John Smith,\n\nCongratulations! Your Paper Has Been Selected for an Oral Presentation!\n\nWe are happy to notify you that your submission \"Ipsum Lorem is all you need\" has been selected for an oral presentation at COML 2025! 120 submissions were selected for orals this year, representing the top ~1% of all submissions.\n\nPresentation Details:\n- Duration: 12 minutes presentation + 2 minutes Q&A\n- Dates: 2025-11-05, 2025-11-06, or 2025-11-07\n- Format: In-person only\n\nSincerely,\nCOML 2025 Program Chairs",
-                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>Your submission <strong>Ipsum Lorem is all you need</strong> has been selected for an <strong>oral presentation</strong> at COML 2025!</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "5",
-                        "subject": "New citations to your publications",
-                        "from_addr": "Google Scholar <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Sat, 13 Sep 2025 15:01:19 +0000",
-                        "message_id": "<email5@mcp.com>",
-                        "body_text": "Hi Dr. John Smith,\n\nYou have new citations to your publications:\n\n\"Ipsum Lorem is all you need\"\nCited by: Transformer-based Approaches to Lorem Generation - Zhang et al., 2025\n\nYour publication metrics:\n- Total citations: 127 (+3 this week)\n- h-index: 8\n- i10-index: 6\n\nTo see all citations and manage your profile, visit your Google Scholar profile.",
-                        "body_html": "<html><body><p>Hi Dr. John Smith,</p><p>You have new citations to your publications.</p><p><strong>\"Ipsum Lorem is all you need\"</strong><br>Cited by: <em>Transformer-based Approaches to Lorem Generation</em> - Zhang et al., 2025</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "6",
-                        "subject": "Registration Confirmation - COML 2025 Conference",
-                        "from_addr": "COML 2025 Registration <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Sun, 14 Sep 2025 01:01:19 +0000",
-                        "message_id": "<email6@mcp.com>",
-                        "body_text": "Dear Dr. John Smith,\n\nThank you for registering for the Conference on Machine Learning (COML 2025). Your registration has been successfully processed.\n\nRegistration Details:\n- Registration ID: COML2025-REG-8742\n- Registration Type: Virtual Attendance\n- Registration Date: 2025-09-13\n- Amount Paid: $150 USD\n\nImportant Information:\n- Access links for virtual sessions will be sent 24 hours before the conference\n- Conference dates: July 21-26, 2025\n\nBest regards,\nCOML 2025 Registration Team",
-                        "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>Thank you for registering for COML 2025.</p><p><strong>Registration ID:</strong> COML2025-REG-8742<br><strong>Type:</strong> Virtual Attendance<br><strong>Amount:</strong> $150 USD</p></body></html>",
-                        "is_read": true,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "7",
-                        "subject": "[GitHub] Your personal access token will expire in 7 days",
-                        "from_addr": "GitHub <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Sun, 14 Sep 2025 10:01:19 +0000",
-                        "message_id": "<email7@mcp.com>",
-                        "body_text": "Hi @jsmith,\n\nYour personal access token \"ML-research-token\" with repo and workflow scopes will expire on 2025-09-22.\n\nThis token is used by:\n- 2 GitHub Actions workflows\n- Your local development environment\n- CI/CD pipeline in ml-experiments repo\n\nTo ensure uninterrupted access, please regenerate your token before it expires.\n\nGitHub, Inc.",
-                        "body_html": "<html><body><p>Hi @jsmith,</p><p>Your personal access token <strong>\"ML-research-token\"</strong> will expire on <strong>2025-09-22</strong>.</p></body></html>",
-                        "is_read": true,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "8",
-                        "subject": "[COML 2025] Camera-ready deadline reminder",
-                        "from_addr": "COML 2025 <noreply@mcp.com>",
-                        "to_addr": "jsmith@mcp.com",
-                        "date": "Mon, 15 Sep 2025 06:01:19 +0000",
-                        "message_id": "<email8@mcp.com>",
-                        "body_text": "Dear Dr. John Smith,\n\nThe camera-ready submission deadline is extended to 2025-09-26 (11:59pm AoE).\n\nSee instructions here: https://coml.cc/Conferences/2025/AuthorInstructions\n\nWe are aware of the issue with the paper format checker, and are working to resolve it.\n\nRegards,\nCOML 2025 Publications Chairs",
-                        "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>The camera-ready submission deadline is extended to <strong>2025-09-26 (11:59pm AoE)</strong>.</p></body></html>",
-                        "is_read": false,
-                        "is_important": false,
-                        "folder": "INBOX",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "9",
-                        "subject": "Re: COML 2025 camera-ready submission",
-                        "from_addr": "jsmith@mcp.com",
-                        "to_addr": "COML 2025 <noreply@mcp.com>",
-                        "date": "Mon, 15 Sep 2025 12:30:00 +0000",
-                        "message_id": "<email9@mcp.com>",
-                        "body_text": "Dear Publication Chairs,\n\nThank you for the deadline extension. I will submit the camera-ready version by 2025-09-26.\n\nBest regards,\nDr. John Smith",
-                        "is_read": true,
-                        "is_important": false,
-                        "folder": "Sent",
-                        "attachments": []
-                      },
-                      {
-                        "email_id": "10",
-                        "subject": "Draft: LCFM 2025 reviewer response",
-                        "from_addr": "jsmith@mcp.com",
-                        "to_addr": "longcontextfm2025@googlegroups.com",
-                        "date": "Mon, 15 Sep 2025 14:00:00 +0000",
-                        "message_id": "<email10@mcp.com>",
-                        "body_text": "Dear LCFM 2025 Organizers,\n\nI am writing to confirm my availability as a reviewer for LCFM 2025. I have expertise in long-context modeling and would be happy to review papers in this area.\n\nPlease let me know if you need any additional information.\n\nBest regards,\nDr. John Smith",
-                        "is_read": true,
-                        "is_important": false,
-                        "folder": "Drafts",
-                        "attachments": []
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitializeSandboxResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/sandbox/poste_email_toolathlon/{sandbox_id}/dump": {
-      "get": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Export poste_email_toolathlon sandbox data",
-        "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_poste_email_toolathlon__sandbox_id__dump_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DumpSandboxResponse_PosteEmailData_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/localmemory/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -22477,6 +21514,973 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/local_dev/{sandbox_id}/upload-url": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Get a signed URL to upload a tar.gz archive",
+        "description": "Returns a signed GCS URL that the client can PUT a tar.gz archive to directly. After uploading, call the /initialize endpoint to extract it into the pod.",
+        "operationId": "get_upload_url_local_sandbox_local_dev__sandbox_id__upload_url_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/local_dev/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Initialize local dev from a GCS-uploaded tar.gz archive",
+        "description": "Extract the previously uploaded tar.gz archive from GCS into the workspace at /data. Call /upload-url first and PUT the archive, then call this endpoint.",
+        "operationId": "initialize_local_dev_local_sandbox_local_dev__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/local_dev/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Export local dev files",
+        "description": "Packages the workspace as tar.gz, uploads it to GCS from the pod, and returns a short-lived signed download URL. This avoids WebSocket timeouts for large workspaces.",
+        "operationId": "dump_local_dev_local_sandbox_local_dev__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/google_cloud/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Initialize google_cloud sandbox with data",
+        "description": "Initialize the sandbox with google_cloud-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_local_sandbox_google_cloud__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/GoogleCloudData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "datasets": [
+                      {
+                        "id": "sales_analytics",
+                        "description": "Sales and revenue analytics data warehouse",
+                        "location": "US"
+                      },
+                      {
+                        "id": "customer_data",
+                        "description": "Customer information and interactions",
+                        "location": "US"
+                      },
+                      {
+                        "id": "product_catalog",
+                        "description": "Product inventory and catalog data",
+                        "location": "EU"
+                      }
+                    ],
+                    "tables": [
+                      {
+                        "dataset_id": "sales_analytics",
+                        "id": "daily_sales",
+                        "description": "Daily sales transactions",
+                        "fields": [
+                          {
+                            "name": "transaction_id",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Unique transaction identifier"
+                          },
+                          {
+                            "name": "sale_date",
+                            "type": "DATE",
+                            "mode": "REQUIRED",
+                            "description": "Date of sale"
+                          },
+                          {
+                            "name": "product_id",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Product identifier"
+                          },
+                          {
+                            "name": "quantity",
+                            "type": "INTEGER",
+                            "mode": "REQUIRED",
+                            "description": "Quantity sold"
+                          },
+                          {
+                            "name": "unit_price",
+                            "type": "FLOAT",
+                            "mode": "REQUIRED",
+                            "description": "Price per unit"
+                          },
+                          {
+                            "name": "total_amount",
+                            "type": "FLOAT",
+                            "mode": "REQUIRED",
+                            "description": "Total sale amount"
+                          },
+                          {
+                            "name": "region",
+                            "type": "STRING",
+                            "mode": "NULLABLE",
+                            "description": "Sales region"
+                          }
+                        ]
+                      },
+                      {
+                        "dataset_id": "sales_analytics",
+                        "id": "monthly_revenue",
+                        "description": "Monthly revenue aggregation",
+                        "fields": [
+                          {
+                            "name": "month",
+                            "type": "DATE",
+                            "mode": "REQUIRED",
+                            "description": "First day of the month"
+                          },
+                          {
+                            "name": "region",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Sales region"
+                          },
+                          {
+                            "name": "total_revenue",
+                            "type": "FLOAT",
+                            "mode": "REQUIRED",
+                            "description": "Total revenue for the month"
+                          },
+                          {
+                            "name": "transaction_count",
+                            "type": "INTEGER",
+                            "mode": "REQUIRED",
+                            "description": "Number of transactions"
+                          },
+                          {
+                            "name": "avg_order_value",
+                            "type": "FLOAT",
+                            "mode": "NULLABLE",
+                            "description": "Average order value"
+                          }
+                        ]
+                      },
+                      {
+                        "dataset_id": "customer_data",
+                        "id": "customers",
+                        "description": "Customer master data",
+                        "fields": [
+                          {
+                            "name": "customer_id",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Unique customer identifier"
+                          },
+                          {
+                            "name": "email",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Customer email address"
+                          },
+                          {
+                            "name": "name",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Customer full name"
+                          },
+                          {
+                            "name": "created_at",
+                            "type": "TIMESTAMP",
+                            "mode": "REQUIRED",
+                            "description": "Account creation timestamp"
+                          },
+                          {
+                            "name": "tier",
+                            "type": "STRING",
+                            "mode": "NULLABLE",
+                            "description": "Customer tier (bronze, silver, gold)"
+                          },
+                          {
+                            "name": "lifetime_value",
+                            "type": "FLOAT",
+                            "mode": "NULLABLE",
+                            "description": "Customer lifetime value"
+                          }
+                        ]
+                      },
+                      {
+                        "dataset_id": "product_catalog",
+                        "id": "products",
+                        "description": "Product catalog",
+                        "fields": [
+                          {
+                            "name": "product_id",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Product identifier"
+                          },
+                          {
+                            "name": "name",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Product name"
+                          },
+                          {
+                            "name": "category",
+                            "type": "STRING",
+                            "mode": "REQUIRED",
+                            "description": "Product category"
+                          },
+                          {
+                            "name": "price",
+                            "type": "FLOAT",
+                            "mode": "REQUIRED",
+                            "description": "Current price"
+                          },
+                          {
+                            "name": "stock_quantity",
+                            "type": "INTEGER",
+                            "mode": "REQUIRED",
+                            "description": "Available stock"
+                          },
+                          {
+                            "name": "is_active",
+                            "type": "BOOLEAN",
+                            "mode": "REQUIRED",
+                            "description": "Whether product is active"
+                          }
+                        ]
+                      }
+                    ],
+                    "buckets": [
+                      {
+                        "name": "sandbox-data-lake-123",
+                        "location": "US",
+                        "storage_class": "STANDARD",
+                        "versioning_enabled": true,
+                        "lifecycle_rules": [
+                          {
+                            "action": "Delete",
+                            "age_days": 365
+                          }
+                        ]
+                      },
+                      {
+                        "name": "sandbox-exports-123",
+                        "location": "US",
+                        "storage_class": "STANDARD",
+                        "versioning_enabled": false
+                      },
+                      {
+                        "name": "sandbox-backups-123",
+                        "location": "US-EAST1",
+                        "storage_class": "NEARLINE",
+                        "versioning_enabled": true,
+                        "lifecycle_rules": [
+                          {
+                            "action": "SetStorageClass",
+                            "action_storage_class": "COLDLINE",
+                            "age_days": 90
+                          },
+                          {
+                            "action": "Delete",
+                            "age_days": 730
+                          }
+                        ]
+                      },
+                      {
+                        "name": "sandbox-logs-archive-123",
+                        "location": "US",
+                        "storage_class": "ARCHIVE",
+                        "versioning_enabled": false
+                      }
+                    ],
+                    "objects": [
+                      {
+                        "bucket": "sandbox-data-lake-123",
+                        "name": "raw/sales/2025/01/daily_sales_20250101.csv",
+                        "content_type": "text/csv",
+                        "content": "transaction_id,sale_date,product_id,quantity,unit_price,total_amount,region\nTXN001,2025-01-01,PROD001,5,19.99,99.95,North America\nTXN002,2025-01-01,PROD002,3,29.99,89.97,Europe\nTXN003,2025-01-01,PROD001,10,19.99,199.90,Asia Pacific"
+                      },
+                      {
+                        "bucket": "sandbox-data-lake-123",
+                        "name": "raw/sales/2025/01/daily_sales_20250102.csv",
+                        "content_type": "text/csv",
+                        "content": "transaction_id,sale_date,product_id,quantity,unit_price,total_amount,region\nTXN004,2025-01-02,PROD003,2,49.99,99.98,North America\nTXN005,2025-01-02,PROD001,7,19.99,139.93,Europe\nTXN006,2025-01-02,PROD002,4,29.99,119.96,Asia Pacific"
+                      },
+                      {
+                        "bucket": "sandbox-data-lake-123",
+                        "name": "processed/customers/customer_segments.json",
+                        "content_type": "application/json",
+                        "content": "{\"segments\": [{\"name\": \"High Value\", \"count\": 1500, \"avgLTV\": 2500}, {\"name\": \"Medium Value\", \"count\": 5000, \"avgLTV\": 800}, {\"name\": \"Low Value\", \"count\": 12000, \"avgLTV\": 150}]}"
+                      },
+                      {
+                        "bucket": "sandbox-exports-123",
+                        "name": "exports/monthly_report_202501.csv",
+                        "content_type": "text/csv",
+                        "content": "month,total_revenue,total_transactions,avg_order_value\n2025-01,1250000.00,15000,83.33"
+                      },
+                      {
+                        "bucket": "sandbox-data-lake-123",
+                        "name": "config/etl_pipeline_config.yaml",
+                        "content_type": "application/x-yaml",
+                        "content": "pipeline:\n  name: daily_sales_etl\n  schedule: \"0 2 * * *\"\n  source:\n    type: gcs\n    bucket: sandbox-data-lake-123\n    prefix: raw/sales/\n  destination:\n    type: bigquery\n    dataset: sales_analytics\n    table: daily_sales"
+                      }
+                    ],
+                    "log_entries": [
+                      {
+                        "log_name": "application-logs",
+                        "message": "Application started successfully",
+                        "severity": "INFO",
+                        "timestamp": "2025-01-15T08:00:00Z",
+                        "resource_type": "gce_instance",
+                        "resource_labels": {
+                          "instance_id": "1234567890",
+                          "zone": "us-central1-a"
+                        }
+                      },
+                      {
+                        "log_name": "application-logs",
+                        "message": "Database connection established",
+                        "severity": "INFO",
+                        "timestamp": "2025-01-15T08:00:05Z",
+                        "resource_type": "gce_instance",
+                        "resource_labels": {
+                          "instance_id": "1234567890",
+                          "zone": "us-central1-a"
+                        }
+                      },
+                      {
+                        "log_name": "application-logs",
+                        "json_data": {
+                          "event": "user_login",
+                          "user_id": "user_123",
+                          "ip_address": "192.168.1.100",
+                          "success": true
+                        },
+                        "severity": "INFO",
+                        "timestamp": "2025-01-15T09:30:00Z",
+                        "resource_type": "gce_instance",
+                        "resource_labels": {
+                          "instance_id": "1234567890",
+                          "zone": "us-central1-a"
+                        }
+                      },
+                      {
+                        "log_name": "error-logs",
+                        "message": "Failed to process batch: timeout exceeded",
+                        "severity": "ERROR",
+                        "timestamp": "2025-01-15T14:22:00Z",
+                        "resource_type": "cloud_function",
+                        "resource_labels": {
+                          "function_name": "process_batch",
+                          "region": "us-central1"
+                        }
+                      },
+                      {
+                        "log_name": "audit-logs",
+                        "json_data": {
+                          "action": "resource.create",
+                          "resource_type": "storage.bucket",
+                          "resource_name": "new-bucket",
+                          "actor": "admin@example.com"
+                        },
+                        "severity": "NOTICE",
+                        "timestamp": "2025-01-15T10:15:00Z",
+                        "resource_type": "project"
+                      }
+                    ],
+                    "log_sinks": [
+                      {
+                        "name": "bigquery-audit-sink",
+                        "filter": "logName:\"cloudaudit.googleapis.com\"",
+                        "description": "Export audit logs for analysis"
+                      },
+                      {
+                        "name": "error-logs-sink",
+                        "filter": "severity>=ERROR",
+                        "description": "Capture error logs"
+                      },
+                      {
+                        "name": "all-logs-sink",
+                        "description": "Stream all logs for processing"
+                      }
+                    ],
+                    "log_buckets": [
+                      {
+                        "name": "app-logs-bucket5",
+                        "location": "global",
+                        "retention_days": 30,
+                        "description": "Bucket for app logs with 30-day retention"
+                      },
+                      {
+                        "name": "security-logs-bucket5",
+                        "location": "us-central1",
+                        "retention_days": 365,
+                        "description": "Bucket for security logs with 1-year retention"
+                      }
+                    ],
+                    "instances": [
+                      {
+                        "name": "web-server-1",
+                        "zone": "us-central1-a",
+                        "machine_type": "e2-medium",
+                        "description": "Primary web server",
+                        "labels": {
+                          "environment": "production",
+                          "team": "web"
+                        }
+                      },
+                      {
+                        "name": "web-server-2",
+                        "zone": "us-central1-b",
+                        "machine_type": "e2-medium",
+                        "description": "Secondary web server",
+                        "labels": {
+                          "environment": "production",
+                          "team": "web"
+                        }
+                      },
+                      {
+                        "name": "database-server",
+                        "zone": "us-central1-a",
+                        "machine_type": "n2-standard-4",
+                        "description": "Main database server",
+                        "labels": {
+                          "environment": "production",
+                          "team": "database"
+                        }
+                      },
+                      {
+                        "name": "dev-instance",
+                        "zone": "us-west1-a",
+                        "machine_type": "e2-micro",
+                        "description": "Development and testing instance",
+                        "labels": {
+                          "environment": "development",
+                          "team": "engineering"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/google_cloud/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Export google_cloud sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_local_sandbox_google_cloud__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_GoogleCloudData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/poste_email_toolathlon/{sandbox_id}/initialize": {
+      "post": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Initialize poste_email_toolathlon sandbox with data",
+        "description": "Initialize the sandbox with poste_email_toolathlon-specific data following the defined schema.",
+        "operationId": "initialize_sandbox_local_sandbox_poste_email_toolathlon__sandbox_id__initialize_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "init_default_data",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "If true, use default test data for initialization",
+              "default": false,
+              "title": "Init Default Data"
+            },
+            "description": "If true, use default test data for initialization"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PosteEmailData-Input"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request Body"
+              },
+              "examples": {
+                "default": {
+                  "summary": "Example initialization data",
+                  "value": {
+                    "users": {
+                      "jsmith@mcp.com": {
+                        "emails": [
+                          {
+                            "email_id": "1",
+                            "subject": "[COML 2025] Camera-ready instructions for accepted papers",
+                            "from_addr": "COML 2025 <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Wed, 10 Sep 2025 18:31:19 +0000",
+                            "message_id": "<email1@mcp.com>",
+                            "body_text": "Dear Dr. John Smith,\n\nCongratulations on your accepted COML 2025 paper!\n\nThe camera-ready submission is due on 2025-09-19 (11:59pm AoE). Please make sure to follow the steps below before this deadline to avoid your paper being withdrawn from COML.\n\nMandatory actions:\n1. At least one author must register for the conference with the 'Conference' option checked.\n2. At least one author needs to digitally sign the publication consent form.\n3. The presenting author needs to digitally sign the consent form.\n4. The corresponding author needs to sign the PMLR publication agreement form.\n5. Your camera-ready pdf should include a mandatory impact statement.\n6. Complete the camera-ready form on OpenReview.\n\nSincerely,\nDr. Sarah Chen and Prof. Michael Rodriguez, COML 2025 Publications Chairs",
+                            "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p><strong>Congratulations on your accepted COML 2025 paper!</strong></p><p>The camera-ready submission is due on <strong>2025-09-19 (11:59pm AoE)</strong>.</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "2",
+                            "subject": "[COMLW 2025] Urgent: Camera-Ready Deadline Tomorrow",
+                            "from_addr": "COMLW 2025 <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Wed, 10 Sep 2025 19:01:19 +0000",
+                            "message_id": "<email2@mcp.com>",
+                            "body_text": "Dear Dr. John Smith,\n\nThis is a final reminder that your camera-ready paper for the COML Workshop on Large Language Models (COMLW 2025) is due tomorrow, 2025-09-16 at 23:59 AOE.\n\nAction Required:\n- Your paper titled \"Ipsum Lorem is all you need for a workshop\" has NOT been submitted yet\n- Missing camera-ready submissions will be excluded from the proceedings\n- No extensions will be granted\n\nQuick Submission Guide:\n1. Use the COML 2025 workshop template\n2. 4 pages + references for workshop papers\n3. Submit via OpenReview\n4. Include signed copyright form\n\nBest,\nCOMLW 2025 Organizing Committee",
+                            "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>This is a <strong>final reminder</strong> that your camera-ready paper for COMLW 2025 is due <strong>tomorrow, 2025-09-16 at 23:59 AOE</strong>.</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "3",
+                            "subject": "[LCFM 2025] Invitation to serve as Reviewer",
+                            "from_addr": "LCFM 2025 <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Thu, 11 Sep 2025 13:23:19 +0000",
+                            "message_id": "<email3@mcp.com>",
+                            "body_text": "Dear invitee,\n\nYou have been nominated by the program chair committee of LCFM 2025 to serve as Reviewer. As a respected researcher in the area, we hope you will accept and help us make LCFM 2025 a success. Reviews are due 2025-09-23 AOE, and we are aiming to assign no more than 1 paper to each reviewer.\n\nPlease answer within 3 days.\n\nCheers, and thank you!\nProgram Chairs",
+                            "body_html": "<html><body><p>Dear invitee,</p><p>You have been nominated by the program chair committee of <strong>LCFM 2025</strong> to serve as <strong>Reviewer</strong>. Reviews are due <strong>2025-09-23 AOE</strong>.</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "4",
+                            "subject": "[COML 2025] Oral presentation notification",
+                            "from_addr": "OpenReview <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Thu, 11 Sep 2025 22:31:19 +0000",
+                            "message_id": "<email4@mcp.com>",
+                            "body_text": "Dear Dr. John Smith,\n\nCongratulations! Your Paper Has Been Selected for an Oral Presentation!\n\nWe are happy to notify you that your submission \"Ipsum Lorem is all you need\" has been selected for an oral presentation at COML 2025! 120 submissions were selected for orals this year, representing the top ~1% of all submissions.\n\nPresentation Details:\n- Duration: 12 minutes presentation + 2 minutes Q&A\n- Dates: 2025-11-05, 2025-11-06, or 2025-11-07\n- Format: In-person only\n\nSincerely,\nCOML 2025 Program Chairs",
+                            "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>Your submission <strong>Ipsum Lorem is all you need</strong> has been selected for an <strong>oral presentation</strong> at COML 2025!</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "5",
+                            "subject": "New citations to your publications",
+                            "from_addr": "Google Scholar <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Sat, 13 Sep 2025 15:01:19 +0000",
+                            "message_id": "<email5@mcp.com>",
+                            "body_text": "Hi Dr. John Smith,\n\nYou have new citations to your publications:\n\n\"Ipsum Lorem is all you need\"\nCited by: Transformer-based Approaches to Lorem Generation - Zhang et al., 2025\n\nYour publication metrics:\n- Total citations: 127 (+3 this week)\n- h-index: 8\n- i10-index: 6\n\nTo see all citations and manage your profile, visit your Google Scholar profile.",
+                            "body_html": "<html><body><p>Hi Dr. John Smith,</p><p>You have new citations to your publications.</p><p><strong>\"Ipsum Lorem is all you need\"</strong><br>Cited by: <em>Transformer-based Approaches to Lorem Generation</em> - Zhang et al., 2025</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "6",
+                            "subject": "Registration Confirmation - COML 2025 Conference",
+                            "from_addr": "COML 2025 Registration <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Sun, 14 Sep 2025 01:01:19 +0000",
+                            "message_id": "<email6@mcp.com>",
+                            "body_text": "Dear Dr. John Smith,\n\nThank you for registering for the Conference on Machine Learning (COML 2025). Your registration has been successfully processed.\n\nRegistration Details:\n- Registration ID: COML2025-REG-8742\n- Registration Type: Virtual Attendance\n- Registration Date: 2025-09-13\n- Amount Paid: $150 USD\n\nImportant Information:\n- Access links for virtual sessions will be sent 24 hours before the conference\n- Conference dates: July 21-26, 2025\n\nBest regards,\nCOML 2025 Registration Team",
+                            "body_html": "<html><body><p>Dear Dr. John Smith,</p><p>Thank you for registering for COML 2025.</p><p><strong>Registration ID:</strong> COML2025-REG-8742<br><strong>Type:</strong> Virtual Attendance<br><strong>Amount:</strong> $150 USD</p></body></html>",
+                            "is_read": true,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "7",
+                            "subject": "[GitHub] Your personal access token will expire in 7 days",
+                            "from_addr": "GitHub <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Sun, 14 Sep 2025 10:01:19 +0000",
+                            "message_id": "<email7@mcp.com>",
+                            "body_text": "Hi @jsmith,\n\nYour personal access token \"ML-research-token\" with repo and workflow scopes will expire on 2025-09-22.\n\nThis token is used by:\n- 2 GitHub Actions workflows\n- Your local development environment\n- CI/CD pipeline in ml-experiments repo\n\nTo ensure uninterrupted access, please regenerate your token before it expires.\n\nGitHub, Inc.",
+                            "body_html": "<html><body><p>Hi @jsmith,</p><p>Your personal access token <strong>\"ML-research-token\"</strong> will expire on <strong>2025-09-22</strong>.</p></body></html>",
+                            "is_read": true,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "8",
+                            "subject": "[COML 2025] Camera-ready deadline reminder",
+                            "from_addr": "COML 2025 <noreply@mcp.com>",
+                            "to_addr": "jsmith@mcp.com",
+                            "date": "Mon, 15 Sep 2025 06:01:19 +0000",
+                            "message_id": "<email8@mcp.com>",
+                            "body_text": "Dear Dr. John Smith,\n\nThe camera-ready submission deadline is extended to 2025-09-26 (11:59pm AoE).\n\nSee instructions here: https://coml.cc/Conferences/2025/AuthorInstructions\n\nWe are aware of the issue with the paper format checker, and are working to resolve it.\n\nRegards,\nCOML 2025 Publications Chairs",
+                            "body_html": "<html><body><p>Dear <strong>Dr. John Smith</strong>,</p><p>The camera-ready submission deadline is extended to <strong>2025-09-26 (11:59pm AoE)</strong>.</p></body></html>",
+                            "is_read": false,
+                            "is_important": false,
+                            "folder": "INBOX",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "9",
+                            "subject": "Re: COML 2025 camera-ready submission",
+                            "from_addr": "jsmith@mcp.com",
+                            "to_addr": "COML 2025 <noreply@mcp.com>",
+                            "date": "Mon, 15 Sep 2025 12:30:00 +0000",
+                            "message_id": "<email9@mcp.com>",
+                            "body_text": "Dear Publication Chairs,\n\nThank you for the deadline extension. I will submit the camera-ready version by 2025-09-26.\n\nBest regards,\nDr. John Smith",
+                            "is_read": true,
+                            "is_important": false,
+                            "folder": "Sent",
+                            "attachments": []
+                          },
+                          {
+                            "email_id": "10",
+                            "subject": "Draft: LCFM 2025 reviewer response",
+                            "from_addr": "jsmith@mcp.com",
+                            "to_addr": "longcontextfm2025@googlegroups.com",
+                            "date": "Mon, 15 Sep 2025 14:00:00 +0000",
+                            "message_id": "<email10@mcp.com>",
+                            "body_text": "Dear LCFM 2025 Organizers,\n\nI am writing to confirm my availability as a reviewer for LCFM 2025. I have expertise in long-context modeling and would be happy to review papers in this area.\n\nPlease let me know if you need any additional information.\n\nBest regards,\nDr. John Smith",
+                            "is_read": true,
+                            "is_important": false,
+                            "folder": "Drafts",
+                            "attachments": []
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitializeSandboxResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/local-sandbox/poste_email_toolathlon/{sandbox_id}/dump": {
+      "get": {
+        "tags": [
+          "local-sandbox"
+        ],
+        "summary": "Export poste_email_toolathlon sandbox data",
+        "description": "Export all data from the sandbox in the same format used for initialization.",
+        "operationId": "dump_sandbox_local_sandbox_poste_email_toolathlon__sandbox_id__dump_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The unique sandbox identifier",
+              "title": "Sandbox Id"
+            },
+            "description": "The unique sandbox identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DumpSandboxResponse_PosteEmailData_"
+                }
               }
             }
           },
@@ -28154,7 +28158,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28176,7 +28180,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -29324,7 +29328,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29346,7 +29350,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -34258,6 +34262,25 @@
       },
       "PosteEmailData-Input": {
         "properties": {
+          "users": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PosteEmailUserData-Input"
+            },
+            "type": "object",
+            "title": "Users",
+            "description": "Per-user email data, keyed by email address"
+          }
+        },
+        "type": "object",
+        "title": "PosteEmailData",
+        "description": "Complete Poste Email sandbox data structure.\n\nData is organized per-user, keyed by email address.\nEach user entry contains their list of email messages across all folders.\n\nExample:\n    {\n        \"users\": {\n            \"jsmith@mcp.com\": {\n                \"emails\": [...]\n            }\n        }\n    }"
+      },
+      "PosteEmailData-Output": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "PosteEmailUserData-Input": {
+        "properties": {
           "emails": {
             "anyOf": [
               {
@@ -34271,14 +34294,14 @@
               }
             ],
             "title": "Emails",
-            "description": "List of email messages"
+            "description": "List of email messages for this user"
           }
         },
         "type": "object",
-        "title": "PosteEmailData",
-        "description": "Complete Poste Email sandbox data structure.\n\nMatches the JSON format expected by the poste_email MCP server's import_emails tool.\nThe 'emails' list contains all email messages across all folders."
+        "title": "PosteEmailUserData",
+        "description": "Email data for a single user."
       },
-      "PosteEmailData-Output": {
+      "PosteEmailUserData-Output": {
         "additionalProperties": true,
         "type": "object"
       },
@@ -35437,12 +35460,9 @@
           "confluence",
           "discord",
           "snowflake",
-          "google_cloud",
           "postgres",
           "mongodb",
           "youtube",
-          "poste_email_toolathlon",
-          "local_dev",
           "localmemory",
           "googleworkspaceatlas",
           "arxiv_latex",
@@ -38017,7 +38037,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -38159,7 +38179,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
