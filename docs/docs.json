@@ -493,7 +493,10 @@
               "api-reference/local-sandbox/get",
               "api-reference/local-sandbox/list",
               "api-reference/local-sandbox/release",
-              "api-reference/local-sandbox/reset"
+              "api-reference/local-sandbox/reset",
+              "api-reference/local-sandbox/upload-url",
+              "api-reference/local-sandbox/initialize",
+              "api-reference/local-sandbox/dump"
             ]
           },
           {
