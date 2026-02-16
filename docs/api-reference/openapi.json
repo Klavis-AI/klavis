@@ -21530,14 +21530,14 @@
         }
       }
     },
-    "/local-sandbox/local_dev/{sandbox_id}/upload-url": {
+    "/local-sandbox/{local_sandbox_id}/upload-url": {
       "post": {
         "tags": [
           "local-sandbox"
         ],
         "summary": "Get a signed URL to upload a tar.gz archive",
         "description": "Returns a signed GCS URL that the client can PUT a tar.gz archive to directly. After uploading, call the /initialize endpoint to extract it into the pod.",
-        "operationId": "get_upload_url_local_sandbox_local_dev__sandbox_id__upload_url_post",
+        "operationId": "get_upload_url_local_sandbox__local_sandbox_id__upload_url_post",
         "security": [
           {
             "HTTPBearer": []
@@ -21545,15 +21545,15 @@
         ],
         "parameters": [
           {
-            "name": "sandbox_id",
+            "name": "local_sandbox_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
             },
-            "description": "The unique sandbox identifier"
+            "description": "The local sandbox identifier"
           }
         ],
         "responses": {
@@ -21580,14 +21580,14 @@
         }
       }
     },
-    "/local-sandbox/local_dev/{sandbox_id}/initialize": {
+    "/local-sandbox/{local_sandbox_id}/initialize": {
       "post": {
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Initialize local dev from a GCS-uploaded tar.gz archive",
+        "summary": "Initialize local sandbox from a GCS-uploaded tar.gz archive",
         "description": "Extract the previously uploaded tar.gz archive from GCS into the workspace at /data. Call /upload-url first and PUT the archive, then call this endpoint.",
-        "operationId": "initialize_local_dev_local_sandbox_local_dev__sandbox_id__initialize_post",
+        "operationId": "initialize_local_sandbox_local_sandbox__local_sandbox_id__initialize_post",
         "security": [
           {
             "HTTPBearer": []
@@ -21595,15 +21595,15 @@
         ],
         "parameters": [
           {
-            "name": "sandbox_id",
+            "name": "local_sandbox_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
             },
-            "description": "The unique sandbox identifier"
+            "description": "The local sandbox identifier"
           }
         ],
         "responses": {
@@ -21630,14 +21630,14 @@
         }
       }
     },
-    "/local-sandbox/local_dev/{sandbox_id}/dump": {
+    "/local-sandbox/{local_sandbox_id}/dump": {
       "get": {
         "tags": [
           "local-sandbox"
         ],
-        "summary": "Export local dev files",
+        "summary": "Export local sandbox files",
         "description": "Packages the workspace as tar.gz, uploads it to GCS from the pod, and returns a short-lived signed download URL. This avoids WebSocket timeouts for large workspaces.",
-        "operationId": "dump_local_dev_local_sandbox_local_dev__sandbox_id__dump_get",
+        "operationId": "dump_local_sandbox_local_sandbox__local_sandbox_id__dump_get",
         "security": [
           {
             "HTTPBearer": []
@@ -21645,15 +21645,15 @@
         ],
         "parameters": [
           {
-            "name": "sandbox_id",
+            "name": "local_sandbox_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
+              "description": "The local sandbox identifier",
+              "title": "Local Sandbox Id"
             },
-            "description": "The unique sandbox identifier"
+            "description": "The local sandbox identifier"
           }
         ],
         "responses": {
