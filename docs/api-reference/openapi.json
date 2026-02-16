@@ -31036,6 +31036,80 @@
             ],
             "title": "Mcp Server Url",
             "description": "URL to connect to this specific MCP server instance"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SandboxStatus"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Current status of this server's sandbox"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benchmark",
+            "description": "Benchmark environment configuration"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At",
+            "description": "Last update timestamp"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Additional metadata for the sandbox"
+          },
+          "auth_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auth Data",
+            "description": "Authentication data for the sandbox"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Custom tags for the sandbox"
           }
         },
         "type": "object",
