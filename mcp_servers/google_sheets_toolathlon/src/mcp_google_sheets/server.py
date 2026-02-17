@@ -72,11 +72,13 @@ ENABLED_TOOLS = _parse_enabled_tools()
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Context variable to store the access token for each request
-auth_token_context: ContextVar[str] = ContextVar('auth_token')
+GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
 
-def extract_access_token(request_or_scope) -> str:
-    """Extract access token from x-auth-data header."""
+# Context variable to store the auth info for each request
+auth_token_context: ContextVar[dict] = ContextVar('auth_token')
+
+def extract_auth_info(request_or_scope) -> dict:
+    """Extract auth info (access_token, client_id, client_secret, refresh_token) from x-auth-data header."""
     auth_data = os.getenv("AUTH_DATA")
 
     if not auth_data:
@@ -94,15 +96,20 @@ def extract_access_token(request_or_scope) -> str:
                 auth_data = base64.b64decode(auth_data).decode('utf-8')
 
     if not auth_data:
-        return ""
+        return {"access_token": ""}
 
     try:
-        # Parse the JSON auth data to extract access_token
+        # Parse the JSON auth data to extract auth fields
         auth_json = json.loads(auth_data)
-        return auth_json.get('access_token', '')
+        return {
+            "access_token": auth_json.get('access_token', ''),
+            "client_id": auth_json.get('client_id'),
+            "client_secret": auth_json.get('client_secret'),
+            "refresh_token": auth_json.get('refresh_token'),
+        }
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse auth data JSON: {e}")
-        return ""
+        return {"access_token": ""}
 
 
 class SpreadsheetContext:
@@ -115,9 +122,15 @@ class SpreadsheetContext:
     @property
     def sheets_service(self):
         try:
-            token = auth_token_context.get()
-            if token:
-                creds = Credentials(token=token)
+            auth_info = auth_token_context.get()
+            if auth_info and auth_info.get("access_token"):
+                creds = Credentials(
+                    token=auth_info["access_token"],
+                    refresh_token=auth_info.get("refresh_token"),
+                    token_uri=GOOGLE_TOKEN_URI,
+                    client_id=auth_info.get("client_id"),
+                    client_secret=auth_info.get("client_secret"),
+                )
                 return build('sheets', 'v4', credentials=creds)
         except LookupError:
             pass
@@ -128,9 +141,15 @@ class SpreadsheetContext:
     @property
     def drive_service(self):
         try:
-            token = auth_token_context.get()
-            if token:
-                creds = Credentials(token=token)
+            auth_info = auth_token_context.get()
+            if auth_info and auth_info.get("access_token"):
+                creds = Credentials(
+                    token=auth_info["access_token"],
+                    refresh_token=auth_info.get("refresh_token"),
+                    token_uri=GOOGLE_TOKEN_URI,
+                    client_id=auth_info.get("client_id"),
+                    client_secret=auth_info.get("client_secret"),
+                )
                 return build('drive', 'v3', credentials=creds)
         except LookupError:
             pass
@@ -1492,8 +1511,8 @@ def main():
 
     async def handle_sse(request):
         logger.info("Handling SSE connection")
-        auth_token = extract_access_token(request)
-        token = auth_token_context.set(auth_token)
+        auth_info = extract_auth_info(request)
+        token = auth_token_context.set(auth_info)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -1517,8 +1536,8 @@ def main():
         scope: Scope, receive: Receive, send: Send
     ) -> None:
         logger.info("Handling StreamableHTTP request")
-        auth_token = extract_access_token(scope)
-        token = auth_token_context.set(auth_token)
+        auth_info = extract_auth_info(scope)
+        token = auth_token_context.set(auth_info)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
