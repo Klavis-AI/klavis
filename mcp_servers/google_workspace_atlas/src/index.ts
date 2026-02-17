@@ -26,7 +26,16 @@ function getCalendar() {
   return asyncLocalStorage.getStore()!.calendar;
 }
 
-function extractAccessToken(req: Request): string {
+const GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token";
+
+interface AuthInfo {
+  access_token: string;
+  client_id?: string;
+  client_secret?: string;
+  refresh_token?: string;
+}
+
+function extractAuthInfo(req: Request): AuthInfo {
   // First try environment variable
   let authData = process.env.AUTH_DATA;
 
@@ -45,16 +54,21 @@ function extractAccessToken(req: Request): string {
 
   if (!authData) {
     // No auth data available - this is normal for initialization requests
-    return "";
+    return { access_token: "" };
   }
 
   try {
-    // Parse the JSON auth data to extract access_token
+    // Parse the JSON auth data to extract auth fields
     const authJson = JSON.parse(authData);
-    return authJson.access_token ?? "";
+    return {
+      access_token: authJson.access_token ?? "",
+      client_id: authJson.client_id,
+      client_secret: authJson.client_secret,
+      refresh_token: authJson.refresh_token,
+    };
   } catch (error) {
     console.error("Failed to parse auth data JSON:", authData);
-    return "";
+    return { access_token: "" };
   }
 }
 
@@ -743,11 +757,15 @@ const app = express();
 //=============================================================================
 
 app.post("/mcp", async (req: Request, res: Response) => {
-  const accessToken = extractAccessToken(req);
+  const authInfo = extractAuthInfo(req);
 
-  // Initialize Gmail and Calendar clients with the access token
-  const auth = new google.auth.OAuth2();
-  auth.setCredentials({ access_token: accessToken });
+  // Initialize Gmail and Calendar clients with the access token and refresh credentials
+  const auth = new google.auth.OAuth2(authInfo.client_id, authInfo.client_secret);
+  auth.setCredentials({
+    access_token: authInfo.access_token,
+    refresh_token: authInfo.refresh_token,
+    token_type: "Bearer",
+  });
   const gmailClient = google.gmail({ version: "v1", auth });
   const calendarClient = google.calendar({ version: "v3", auth });
 
