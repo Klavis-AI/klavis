@@ -6,6 +6,7 @@ A Model Context Protocol (MCP) server that provides tools for interacting with G
 
 ## Features
 
+
 ### Gmail Tools
 - `list_emails`: List recent emails from your inbox with optional filtering
 - `search_emails`: Advanced email search with Gmail query syntax

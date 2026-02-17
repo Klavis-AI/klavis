@@ -9,6 +9,7 @@ A Model Context Protocol (MCP) server for Google Calendar integration in Cluade 
 
 ## Features
 
+
 - Create calendar events with title, time, description, and location
 - Retrieve event details by event ID
 - Update existing events (title, time, description, location)
