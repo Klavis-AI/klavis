@@ -7576,7 +7576,7 @@
           "sandbox"
         ],
         "summary": "Acquire a sandbox",
-        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally choose a benchmark (e.g., 'MCP Atlas') to specify the initial environment and dedicated MCP servers, or specify a test_account_email to acquire a specific test account.",
+        "description": "Acquire an idle sandbox instance for a specific MCP server. The sandbox will be marked as 'occupied'. Optionally choose a benchmark (e.g., 'MCP_Atlas', 'Toolathlon') to configure the sandbox. IMPORTANT: The benchmark parameter may affect BOTH (1) the initial data environment (e.g., preloaded data for supported servers like Airtable, Notion, Slack, MongoDB) AND (2) the MCP server implementation itself — some servers are routed to a benchmark-specific MCP server URL (e.g., GitHub, Notion, Google Sheets). You may also specify a test_account_email to acquire a specific test account.",
         "operationId": "create_sandbox_sandbox__server_name__post",
         "security": [
           {
@@ -21345,7 +21345,7 @@
           "local-sandbox"
         ],
         "summary": "Acquire a local sandbox",
-        "description": "Initializes a specialized Virtual Machine environment (Local Sandbox) that hosts multiple interconnected MCP servers.",
+        "description": "Initializes a specialized Virtual Machine environment (Local Sandbox) that hosts multiple interconnected MCP servers. Optionally specify a benchmark (e.g., 'Toolathlon') to configure the sandbox. IMPORTANT: The benchmark parameter may affect BOTH (1) the initial data environment (e.g., preloaded data or pre-configured state for supported servers) AND (2) the MCP server implementation itself — some servers may be routed to a benchmark-specific MCP server with potentially different tools or behaviors.",
         "operationId": "acquire_local_sandbox_local_sandbox_post",
         "requestBody": {
           "content": {
@@ -22934,7 +22934,7 @@
                 "type": "null"
               }
             ],
-            "description": "Benchmark environment"
+            "description": "Optional benchmark to configure the local sandbox. NOTE: This parameter may affect BOTH (1) the initial data environment (preloaded data for supported servers) AND (2) the MCP server implementation (some servers are routed to a benchmark-specific MCP server with potentially different tools or behaviors)."
           },
           "test_account_email": {
             "anyOf": [
@@ -23024,7 +23024,7 @@
                 "type": "null"
               }
             ],
-            "description": "Optional benchmark to specify the initial environment for the sandbox."
+            "description": "Optional benchmark to configure the sandbox. NOTE: This parameter may affect BOTH (1) the initial data environment (preloaded data for supported servers) AND (2) the MCP server implementation (some servers are routed to a benchmark-specific MCP server URL with potentially different tools or behaviors)."
           },
           "test_account_email": {
             "anyOf": [
@@ -28158,7 +28158,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Input"
                 },
                 "type": "array"
               },
@@ -28180,7 +28180,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/GoogleCalendarEvent"
+                  "$ref": "#/components/schemas/sandbox__schemas__google_calendar__GoogleCalendarEvent-Output"
                 },
                 "type": "array"
               },
@@ -29328,7 +29328,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -29350,7 +29350,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output"
+                  "$ref": "#/components/schemas/GoogleCalendarEvent"
                 },
                 "type": "array"
               },
@@ -38111,7 +38111,7 @@
         "title": "YouTubePlaylistItem",
         "description": "YouTube Playlist Item - represents a video in a playlist"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Input": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Input": {
         "properties": {
           "title": {
             "type": "string",
@@ -38253,7 +38253,7 @@
         "title": "GoogleCalendarEvent",
         "description": "Google Calendar event object"
       },
-      "sandbox__schemas__google_workspace_atlas__GoogleCalendarEvent-Output": {
+      "sandbox__schemas__google_calendar__GoogleCalendarEvent-Output": {
         "properties": {
           "title": {
             "type": "string",
