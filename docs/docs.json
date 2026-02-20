@@ -499,6 +499,13 @@
                     ]
                   },
                   {
+                    "group": "WooCommerce",
+                    "pages": [
+                      "api-reference/sandbox/woocommerce/initialize-woocommerce",
+                      "api-reference/sandbox/woocommerce/dump-woocommerce"
+                    ]
+                  },
+                  {
                     "group": "WordPress",
                     "pages": [
                       "api-reference/sandbox/wordpress/initialize-wordpress",
