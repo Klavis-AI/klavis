@@ -477,6 +477,10 @@ paths:
     get:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: dump_supabase_sandbox
+  "/sandbox/woocommerce/{sandbox_id}/dump":
+    get:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: dump_woocommerce_sandbox
   "/sandbox/wordpress/{sandbox_id}/dump":
     get:
       x-fern-sdk-group-name: sandbox
@@ -622,6 +626,10 @@ paths:
     post:
       x-fern-sdk-group-name: sandbox
       x-fern-sdk-method-name: initialize_supabase_sandbox
+  "/sandbox/woocommerce/{sandbox_id}/initialize":
+    post:
+      x-fern-sdk-group-name: sandbox
+      x-fern-sdk-method-name: initialize_woocommerce_sandbox
   "/sandbox/wordpress/{sandbox_id}/initialize":
     post:
       x-fern-sdk-group-name: sandbox
