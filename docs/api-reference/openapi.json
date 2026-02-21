@@ -7806,56 +7806,6 @@
         }
       }
     },
-    "/sandbox/local_memory/{sandbox_id}/upload-url": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Get a signed URL to upload a memory JSONL file",
-        "description": "Returns a signed GCS URL that the client can PUT a memory JSONL file to directly. The upload writes to the final memory path — no extra initialize step needed.",
-        "operationId": "get_memory_upload_url_sandbox_local_memory__sandbox_id__upload_url_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MemoryUploadUrlResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/jira/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -20915,276 +20865,6 @@
         }
       }
     },
-    "/sandbox/localmemory/{sandbox_id}/initialize": {
-      "post": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Initialize localmemory sandbox with data",
-        "description": "Initialize the sandbox with localmemory-specific data following the defined schema.",
-        "operationId": "initialize_sandbox_sandbox_localmemory__sandbox_id__initialize_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          },
-          {
-            "name": "init_default_data",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "If true, use default test data for initialization",
-              "default": false,
-              "title": "Init Default Data"
-            },
-            "description": "If true, use default test data for initialization"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/LocalMemoryData-Input"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Request Body"
-              },
-              "examples": {
-                "default": {
-                  "summary": "Example initialization data",
-                  "value": {
-                    "entities": [
-                      {
-                        "name": "Alice",
-                        "entityType": "person",
-                        "observations": [
-                          "Software engineer at TechCorp",
-                          "Specializes in Python and machine learning",
-                          "Team lead for the AI project"
-                        ]
-                      },
-                      {
-                        "name": "Bob",
-                        "entityType": "person",
-                        "observations": [
-                          "Frontend developer at TechCorp",
-                          "Expert in React and TypeScript",
-                          "Works on the dashboard team"
-                        ]
-                      },
-                      {
-                        "name": "Carol",
-                        "entityType": "person",
-                        "observations": [
-                          "Product manager at TechCorp",
-                          "Manages the AI and Dashboard projects",
-                          "Previously worked at StartupXYZ"
-                        ]
-                      },
-                      {
-                        "name": "TechCorp",
-                        "entityType": "organization",
-                        "observations": [
-                          "Technology company founded in 2015",
-                          "Headquarters in San Francisco",
-                          "Specializes in AI-powered business solutions"
-                        ]
-                      },
-                      {
-                        "name": "AI Project",
-                        "entityType": "project",
-                        "observations": [
-                          "Machine learning recommendation system",
-                          "Started in Q1 2024",
-                          "Uses TensorFlow and Python"
-                        ]
-                      },
-                      {
-                        "name": "Dashboard Project",
-                        "entityType": "project",
-                        "observations": [
-                          "Analytics dashboard for enterprise clients",
-                          "Built with React and Node.js",
-                          "Launched in 2023"
-                        ]
-                      },
-                      {
-                        "name": "Python",
-                        "entityType": "technology",
-                        "observations": [
-                          "Programming language",
-                          "Used for backend and ML development"
-                        ]
-                      },
-                      {
-                        "name": "React",
-                        "entityType": "technology",
-                        "observations": [
-                          "JavaScript library for building UIs",
-                          "Maintained by Meta"
-                        ]
-                      }
-                    ],
-                    "relations": [
-                      {
-                        "from": "Alice",
-                        "to": "TechCorp",
-                        "relationType": "works_at"
-                      },
-                      {
-                        "from": "Bob",
-                        "to": "TechCorp",
-                        "relationType": "works_at"
-                      },
-                      {
-                        "from": "Carol",
-                        "to": "TechCorp",
-                        "relationType": "works_at"
-                      },
-                      {
-                        "from": "Alice",
-                        "to": "AI Project",
-                        "relationType": "leads"
-                      },
-                      {
-                        "from": "Alice",
-                        "to": "Bob",
-                        "relationType": "collaborates_with"
-                      },
-                      {
-                        "from": "Carol",
-                        "to": "AI Project",
-                        "relationType": "manages"
-                      },
-                      {
-                        "from": "Carol",
-                        "to": "Dashboard Project",
-                        "relationType": "manages"
-                      },
-                      {
-                        "from": "Bob",
-                        "to": "Dashboard Project",
-                        "relationType": "contributes_to"
-                      },
-                      {
-                        "from": "AI Project",
-                        "to": "Python",
-                        "relationType": "uses"
-                      },
-                      {
-                        "from": "Dashboard Project",
-                        "to": "React",
-                        "relationType": "uses"
-                      },
-                      {
-                        "from": "Alice",
-                        "to": "Python",
-                        "relationType": "skilled_in"
-                      },
-                      {
-                        "from": "Bob",
-                        "to": "React",
-                        "relationType": "skilled_in"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitializeSandboxResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/sandbox/localmemory/{sandbox_id}/dump": {
-      "get": {
-        "tags": [
-          "sandbox"
-        ],
-        "summary": "Export localmemory sandbox data",
-        "description": "Export all data from the sandbox in the same format used for initialization.",
-        "operationId": "dump_sandbox_sandbox_localmemory__sandbox_id__dump_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "sandbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "The unique sandbox identifier",
-              "title": "Sandbox Id"
-            },
-            "description": "The unique sandbox identifier"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DumpSandboxResponse_LocalMemoryData_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/sandbox/googleworkspaceatlas/{sandbox_id}/initialize": {
       "post": {
         "tags": [
@@ -26289,37 +25969,6 @@
         ],
         "title": "DumpSandboxResponse[LinearData]"
       },
-      "DumpSandboxResponse_LocalMemoryData_": {
-        "properties": {
-          "sandbox_id": {
-            "type": "string",
-            "title": "Sandbox Id",
-            "description": "Sandbox identifier"
-          },
-          "server_name": {
-            "$ref": "#/components/schemas/SandboxMCPServer",
-            "description": "MCP server type"
-          },
-          "dumped_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Dumped At",
-            "description": "Timestamp of dump"
-          },
-          "data": {
-            "$ref": "#/components/schemas/LocalMemoryData-Output",
-            "description": "Dumped sandbox data in server-specific format"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sandbox_id",
-          "server_name",
-          "dumped_at",
-          "data"
-        ],
-        "title": "DumpSandboxResponse[LocalMemoryData]"
-      },
       "DumpSandboxResponse_Mem0Data_": {
         "properties": {
           "sandbox_id": {
@@ -30822,118 +30471,6 @@
         "title": "ListUniversesResponse",
         "description": "Response listing available universes"
       },
-      "LocalMemoryData-Input": {
-        "properties": {
-          "entities": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/LocalMemoryEntity-Input"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entities",
-            "description": "List of entities in the knowledge graph"
-          },
-          "relations": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/LocalMemoryRelation-Input"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Relations",
-            "description": "List of relations between entities"
-          }
-        },
-        "type": "object",
-        "title": "LocalMemoryData",
-        "description": "Complete Local Memory sandbox data structure.\n\nRepresents a knowledge graph with:\n- Entities: nodes containing information\n- Relations: edges connecting entities"
-      },
-      "LocalMemoryData-Output": {
-        "additionalProperties": true,
-        "type": "object"
-      },
-      "LocalMemoryEntity-Input": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Unique name/identifier for the entity"
-          },
-          "entityType": {
-            "type": "string",
-            "title": "Entitytype",
-            "description": "Type/category of the entity (e.g., 'person', 'organization', 'concept')"
-          },
-          "observations": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Observations",
-            "description": "List of observations/facts about this entity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "entityType"
-        ],
-        "title": "LocalMemoryEntity",
-        "description": "Local Memory Entity object - a node in the knowledge graph"
-      },
-      "LocalMemoryEntity-Output": {
-        "additionalProperties": true,
-        "type": "object"
-      },
-      "LocalMemoryRelation-Input": {
-        "properties": {
-          "from": {
-            "type": "string",
-            "title": "From",
-            "description": "Source entity name"
-          },
-          "to": {
-            "type": "string",
-            "title": "To",
-            "description": "Target entity name"
-          },
-          "relationType": {
-            "type": "string",
-            "title": "Relationtype",
-            "description": "Type of relationship between entities"
-          }
-        },
-        "type": "object",
-        "required": [
-          "from",
-          "to",
-          "relationType"
-        ],
-        "title": "LocalMemoryRelation",
-        "description": "Local Memory Relation object - an edge connecting two entities"
-      },
-      "LocalMemoryRelation-Output": {
-        "additionalProperties": true,
-        "type": "object"
-      },
       "LocalSandboxInfo": {
         "properties": {
           "local_sandbox_id": {
@@ -31001,7 +30538,8 @@
           "code-runner",
           "pdf-tools",
           "google_cloud",
-          "poste_email_toolathlon"
+          "poste_email_toolathlon",
+          "localmemory"
         ],
         "title": "LocalSandboxMCPServer",
         "description": "Supported MCP servers for local sandboxing.\nThese are typically stateless or local-only servers."
@@ -31758,27 +31296,6 @@
         ],
         "title": "Mem0Message",
         "description": "Message object for memory"
-      },
-      "MemoryUploadUrlResponse": {
-        "properties": {
-          "upload_url": {
-            "type": "string",
-            "title": "Upload Url",
-            "description": "Signed GCS URL to PUT the memory JSONL file to"
-          },
-          "expires_in_minutes": {
-            "type": "integer",
-            "title": "Expires In Minutes",
-            "description": "Minutes until the upload URL expires"
-          }
-        },
-        "type": "object",
-        "required": [
-          "upload_url",
-          "expires_in_minutes"
-        ],
-        "title": "MemoryUploadUrlResponse",
-        "description": "Response for the memory upload URL endpoint."
       },
       "MondayBoard-Input": {
         "properties": {
@@ -35406,7 +34923,7 @@
               }
             ],
             "title": "Auth Data",
-            "description": "Authentication data for the sandbox"
+            "description": "Sandbox OAuth/API credentials (e.g. access tokens, API keys) used to authenticate with external services"
           },
           "tags": {
             "anyOf": [
@@ -35537,7 +35054,6 @@
           "postgres",
           "mongodb",
           "youtube",
-          "localmemory",
           "googleworkspaceatlas",
           "arxiv_latex",
           "calculator",
