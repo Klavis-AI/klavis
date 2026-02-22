@@ -273,7 +273,7 @@ async function main() {
       res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE");
       res.setHeader(
         "Access-Control-Allow-Headers",
-        "Content-Type, MCP-Session-Id, MCP-Protocol-Version, X-Context7-API-Key, Context7-API-Key, X-API-Key, Authorization"
+        "Content-Type, MCP-Session-Id, MCP-Protocol-Version, Authorization"
       );
       res.setHeader("Access-Control-Expose-Headers", "MCP-Session-Id");
 
@@ -284,23 +284,7 @@ async function main() {
       next();
     });
 
-    const extractHeaderValue = (value: string | string[] | undefined): string | undefined => {
-      if (!value) return undefined;
-      return typeof value === "string" ? value : value[0];
-    };
-
-    const extractBearerToken = (authHeader: string | string[] | undefined): string | undefined => {
-      const header = extractHeaderValue(authHeader);
-      if (!header) return undefined;
-
-      if (header.startsWith("Bearer ")) {
-        return header.substring(7).trim();
-      }
-
-      return header;
-    };
-
-    const extractAuthData = (req: express.Request): string | undefined => {
+    const extractApiKey = (req: express.Request): string | undefined => {
       const authDataHeader = req.headers['x-auth-data'];
       if (!authDataHeader) return undefined;
 
@@ -315,17 +299,6 @@ async function main() {
       }
     };
 
-    const extractApiKey = (req: express.Request): string | undefined => {
-      return (
-        extractBearerToken(req.headers.authorization) ||
-        extractHeaderValue(req.headers["context7-api-key"]) ||
-        extractHeaderValue(req.headers["x-api-key"]) ||
-        extractHeaderValue(req.headers["context7_api_key"]) ||
-        extractHeaderValue(req.headers["x_api_key"]) ||
-        extractAuthData(req)
-      );
-    };
-
     const handleMcpRequest = async (
       req: express.Request,
       res: express.Response,
@@ -333,6 +306,10 @@ async function main() {
     ) => {
       try {
         const apiKey = extractApiKey(req);
+        const masked = apiKey
+          ? `${apiKey.slice(0, 6)}****${apiKey.slice(-4)}`
+          : "undefined";
+        console.log(`----- [Context7] API key: ${masked}`);
         const resourceUrl = RESOURCE_URL;
         const baseUrl = new URL(resourceUrl).origin;
 
@@ -406,6 +383,7 @@ async function main() {
 
     // Anonymous access endpoint - no authentication required
     app.all("/mcp", async (req, res) => {
+      console.log("----- [Context7] MCP request received");
       await handleMcpRequest(req, res, false);
     });
 
