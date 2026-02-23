@@ -89,10 +89,7 @@ class SnowflakeDB:
         try:
             result = self.session.sql(query).collect()
             
-            if result:
-                result_rows = [row.asDict() for row in result]
-            else:
-                result_rows = [{"status": "success", "message": "Query executed successfully"}]
+            result_rows = [row.asDict() for row in result] if result else []
             data_id = str(uuid.uuid4())
 
             return result_rows, data_id

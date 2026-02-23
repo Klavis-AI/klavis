@@ -151,19 +151,19 @@ class Tool(BaseModel):
 
 # Tool handlers
 async def handle_list_databases(arguments, db, *_, exclusion_config=None, exclude_json_results=False, allowed_databases=None, **__):
-    query = "SELECT DATABASE_NAME FROM INFORMATION_SCHEMA.DATABASES"
+    query = "SHOW DATABASES"
     data, data_id = await db.execute_query(query)
 
     # Filter to only allowed databases if restriction is set
     if allowed_databases is not None:
         allowed_db_set = {db.upper() for db in allowed_databases}
-        data = [item for item in data if item.get("DATABASE_NAME", "").upper() in allowed_db_set]
+        data = [item for item in data if item.get("name", "").upper() in allowed_db_set]
 
     # Filter out excluded databases
     if exclusion_config and "databases" in exclusion_config and exclusion_config["databases"]:
         filtered_data = []
         for item in data:
-            db_name = item.get("DATABASE_NAME", "")
+            db_name = item.get("name", "")
             exclude = False
             for pattern in exclusion_config["databases"]:
                 if pattern.lower() in db_name.lower():
@@ -422,9 +422,8 @@ async def handle_create_databases(arguments, db, _, allow_write, __, allowed_dat
         except Exception as e:
             warnings.append(f"Warning: Creating database '{db_name}' is not allowed, you can only create databases in the following list: {allowed_databases}")
     
-    # Get existing databases to check for duplicates
-    existing_dbs_result, _ = await db.execute_query("SELECT DATABASE_NAME FROM INFORMATION_SCHEMA.DATABASES")
-    existing_db_names = {row["DATABASE_NAME"].upper() for row in existing_dbs_result}
+    existing_dbs_result, _ = await db.execute_query("SHOW DATABASES")
+    existing_db_names = {row["name"].upper() for row in existing_dbs_result}
     
     for db_name in real_database_names:
         db_name_upper = db_name.upper()
@@ -461,9 +460,8 @@ async def handle_drop_databases(arguments, db, _, allow_write, __, allowed_datab
     for db_name in database_names:
         check_database_access(db_name, allowed_databases)
     
-    # Get existing databases to check for non-existent ones
-    existing_dbs_result, _ = await db.execute_query("SELECT DATABASE_NAME FROM INFORMATION_SCHEMA.DATABASES")
-    existing_db_names = {row["DATABASE_NAME"].upper() for row in existing_dbs_result}
+    existing_dbs_result, _ = await db.execute_query("SHOW DATABASES")
+    existing_db_names = {row["name"].upper() for row in existing_dbs_result}
     
     for db_name in database_names:
         db_name_upper = db_name.upper()
