@@ -96,8 +96,8 @@ def _get_header(request_or_scope, header_name: bytes) -> Optional[str]:
 
 
 def extract_folder_id(request_or_scope) -> Optional[str]:
-    """Extract folder ID from x-google-sheets-folder-id header."""
-    folder_id = _get_header(request_or_scope, b'x-google-sheets-folder-id')
+    """Extract folder ID from x-sheets-folder-id header."""
+    folder_id = _get_header(request_or_scope, b'x-sheets-folder-id')
     if folder_id and isinstance(folder_id, bytes):
         folder_id = folder_id.decode('utf-8')
     result = folder_id.strip() if folder_id else None
