@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "click==8.3.1",
     "mcp==1.23.2",
-    "pypdf==6.6.2",
+    "pypdf==6.7.2",
 ]
 
 [project.scripts]
