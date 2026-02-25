@@ -97,7 +97,9 @@ def extract_folder_id(request_or_scope) -> Optional[str]:
     folder_id = _get_header(request_or_scope, b'x-google-sheets-folder-id')
     if folder_id and isinstance(folder_id, bytes):
         folder_id = folder_id.decode('utf-8')
-    return folder_id.strip() if folder_id else None
+    result = folder_id.strip() if folder_id else None
+    logger.info(f"Extracted folder ID from header: {result}")
+    return result
 
 
 def extract_auth_info(request_or_scope) -> dict:
@@ -1021,6 +1023,7 @@ def create_spreadsheet(title: str, folder_id: Optional[str] = None, ctx: Context
         'mimeType': 'application/vnd.google-apps.spreadsheet',
     }
     if target_folder_id:
+        logger.info(f"Creating spreadsheet in folder ID: {target_folder_id}")
         file_body['parents'] = [target_folder_id]
     
     spreadsheet = drive_service.files().create(
