@@ -77,23 +77,41 @@ GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
 # Context variable to store the auth info for each request
 auth_token_context: ContextVar[dict] = ContextVar('auth_token')
 
+# Context variable to store the folder ID from request headers
+folder_id_context: ContextVar[Optional[str]] = ContextVar('folder_id')
+
+def _get_header(request_or_scope, header_name: bytes) -> Optional[str]:
+    """Extract a raw header value from a request object or scope dict."""
+    if hasattr(request_or_scope, 'headers'):
+        # SSE request object
+        return request_or_scope.headers.get(header_name)
+    elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
+        # StreamableHTTP scope object
+        headers = dict(request_or_scope.get("headers", []))
+        return headers.get(header_name)
+    return None
+
+
+def extract_folder_id(request_or_scope) -> Optional[str]:
+    """Extract folder ID from x-google-sheets-folder-id header."""
+    folder_id = _get_header(request_or_scope, b'x-google-sheets-folder-id')
+    if folder_id and isinstance(folder_id, bytes):
+        folder_id = folder_id.decode('utf-8')
+    return folder_id.strip() if folder_id else None
+
+
 def extract_auth_info(request_or_scope) -> dict:
     """Extract auth info (access_token, client_id, client_secret, refresh_token) from x-auth-data header."""
     auth_data = os.getenv("AUTH_DATA")
 
     if not auth_data:
         # Handle different input types (request object for SSE, scope dict for StreamableHTTP)
-        if hasattr(request_or_scope, 'headers'):
-            # SSE request object
-            auth_data = request_or_scope.headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
-        elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-            # StreamableHTTP scope object
-            headers = dict(request_or_scope.get("headers", []))
-            auth_data = headers.get(b'x-auth-data')
-            if auth_data:
-                auth_data = base64.b64decode(auth_data).decode('utf-8')
+        raw = _get_header(request_or_scope, b'x-auth-data')
+        if raw:
+            if isinstance(raw, bytes):
+                auth_data = base64.b64decode(raw).decode('utf-8')
+            else:
+                auth_data = base64.b64decode(raw).decode('utf-8')
 
     if not auth_data:
         return {"access_token": ""}
@@ -117,7 +135,22 @@ class SpreadsheetContext:
     def __init__(self, sheets_service=None, drive_service=None, folder_id=None):
         self._sheets_service = sheets_service
         self._drive_service = drive_service
-        self.folder_id = folder_id
+        self._folder_id = folder_id
+
+    @property
+    def folder_id(self):
+        """Return folder ID from per-request header, falling back to lifespan default."""
+        try:
+            header_folder_id = folder_id_context.get()
+            if header_folder_id:
+                return header_folder_id
+        except LookupError:
+            pass
+        return self._folder_id
+
+    @folder_id.setter
+    def folder_id(self, value):
+        self._folder_id = value
 
     @property
     def sheets_service(self):
@@ -1513,6 +1546,8 @@ def main():
         logger.info("Handling SSE connection")
         auth_info = extract_auth_info(request)
         token = auth_token_context.set(auth_info)
+        folder_id = extract_folder_id(request)
+        folder_token = folder_id_context.set(folder_id)
         try:
             async with sse.connect_sse(
                 request.scope, request.receive, request._send
@@ -1522,6 +1557,7 @@ def main():
                 )
         finally:
             auth_token_context.reset(token)
+            folder_id_context.reset(folder_token)
         return Response()
 
     # Set up StreamableHTTP transport
@@ -1538,10 +1574,13 @@ def main():
         logger.info("Handling StreamableHTTP request")
         auth_info = extract_auth_info(scope)
         token = auth_token_context.set(auth_info)
+        folder_id = extract_folder_id(scope)
+        folder_token = folder_id_context.set(folder_id)
         try:
             await session_manager.handle_request(scope, receive, send)
         finally:
             auth_token_context.reset(token)
+            folder_id_context.reset(folder_token)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: Starlette) -> AsyncIterator[None]:
