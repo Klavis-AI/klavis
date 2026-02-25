@@ -82,14 +82,17 @@ folder_id_context: ContextVar[Optional[str]] = ContextVar('folder_id')
 
 def _get_header(request_or_scope, header_name: bytes) -> Optional[str]:
     """Extract a raw header value from a request object or scope dict."""
+    header_bytes = header_name if isinstance(header_name, bytes) else header_name.encode('utf-8')
+    header_str = header_bytes.decode('utf-8')
+
     if hasattr(request_or_scope, 'headers'):
-        # SSE request object
-        return request_or_scope.headers.get(header_name)
+        headers = request_or_scope.headers
     elif isinstance(request_or_scope, dict) and 'headers' in request_or_scope:
-        # StreamableHTTP scope object
         headers = dict(request_or_scope.get("headers", []))
-        return headers.get(header_name)
-    return None
+    else:
+        return None
+
+    return headers.get(header_str) or headers.get(header_bytes)
 
 
 def extract_folder_id(request_or_scope) -> Optional[str]:
