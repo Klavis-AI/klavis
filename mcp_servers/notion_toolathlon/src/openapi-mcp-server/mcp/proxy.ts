@@ -27,6 +27,7 @@ type NewToolDefinition = {
 export interface MCPProxyOptions {
   pageIds?: string[]
   pageUrls?: string[]
+  notionToken?: string
 }
 
 // import this class, extend and return server
@@ -46,7 +47,7 @@ export class MCPProxy {
     this.httpClient = new HttpClient(
       {
         baseUrl,
-        headers: this.parseHeadersFromEnv(),
+        headers: this.parseHeadersFromEnv(options.notionToken),
       },
       openApiSpec,
     )
@@ -183,8 +184,16 @@ export class MCPProxy {
     }
   }
 
-  private parseHeadersFromEnv(): Record<string, string> {
-    // First try OPENAPI_MCP_HEADERS (existing behavior)
+  private parseHeadersFromEnv(notionToken?: string): Record<string, string> {
+    // First priority: use token passed directly (from request header)
+    if (notionToken) {
+      return {
+        'Authorization': `Bearer ${notionToken}`,
+        'Notion-Version': '2022-06-28'
+      }
+    }
+
+    // Second: try OPENAPI_MCP_HEADERS (existing behavior)
     const headersJson = process.env.OPENAPI_MCP_HEADERS
     if (headersJson) {
       try {
@@ -202,11 +211,11 @@ export class MCPProxy {
       }
     }
 
-    // Alternative: try NOTION_TOKEN
-    const notionToken = process.env.NOTION_TOKEN
-    if (notionToken) {
+    // Third: try NOTION_TOKEN from environment
+    const envNotionToken = process.env.NOTION_TOKEN
+    if (envNotionToken) {
       return {
-        'Authorization': `Bearer ${notionToken}`,
+        'Authorization': `Bearer ${envNotionToken}`,
         'Notion-Version': '2022-06-28'
       }
     }

@@ -2,11 +2,41 @@ import path from 'node:path'
 import { fileURLToPath } from 'url'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
-import { randomUUID, randomBytes } from 'node:crypto'
+import { randomBytes } from 'node:crypto'
 import express from 'express'
 
 import { initProxy, ValidationError } from '../src/init-server.js'
+
+/**
+ * Extract Notion token from request header.
+ * Follows the same logic as google_workspace_atlas extractAccessToken.
+ */
+function extractNotionToken(req: express.Request): string {
+  let authData = process.env.AUTH_DATA
+
+  if (!authData) {
+    const headerValue = req.headers['x-auth-data']
+    if (headerValue) {
+      try {
+        authData = Buffer.from(headerValue as string, 'base64').toString('utf8')
+      } catch (error) {
+        console.error('Error decoding x-auth-data header:', error)
+      }
+    }
+  }
+
+  if (!authData) {
+    return ''
+  }
+
+  try {
+    const authJson = JSON.parse(authData)
+    return authJson.access_token ?? ''
+  } catch (error) {
+    console.error('Failed to parse auth data JSON:', authData)
+    return ''
+  }
+}
 
 export async function startServer(args: string[] = process.argv) {
   const filename = fileURLToPath(import.meta.url)
@@ -21,6 +51,7 @@ export async function startServer(args: string[] = process.argv) {
     let transport = 'stdio'; // default
     let port = 3000;
     let authToken: string | undefined;
+    let disableAuth = false;
     let pageIds: string[] = [];
     let pageUrls: string[] = [];
 
@@ -42,6 +73,8 @@ export async function startServer(args: string[] = process.argv) {
         // Support comma-separated page URLs
         pageUrls = args[i + 1].split(',').map(url => url.trim()).filter(url => url.length > 0);
         i++; // skip next argument
+      } else if (args[i] === '--disable-auth') {
+        disableAuth = true;
       } else if (args[i] === '--help' || args[i] === '-h') {
         console.log(`
 Usage: notion-mcp-server [options]
@@ -50,6 +83,7 @@ Options:
   --transport <type>     Transport type: 'stdio' or 'http' (default: stdio)
   --port <number>        Port for HTTP server when using Streamable HTTP transport (default: 3000)
   --auth-token <token>   Bearer token for HTTP transport authentication (optional)
+  --disable-auth         Disable bearer token authentication for HTTP transport
   --page-id <ids>        Restrict access to these pages and their children (comma-separated page IDs)
   --page-url <urls>      Restrict access to these pages and their children (comma-separated page URLs)
   --help, -h             Show this help message
@@ -65,10 +99,12 @@ Examples:
   notion-mcp-server                                    # Use stdio transport (default)
   notion-mcp-server --transport stdio                  # Use stdio transport explicitly
   notion-mcp-server --transport http                   # Use Streamable HTTP transport on port 3000
+  notion-mcp-server --transport http --port 8080       # Use Streamable HTTP transport on port 8080
+  notion-mcp-server --transport http --auth-token mytoken # Use Streamable HTTP transport with custom auth token
+  notion-mcp-server --transport http --disable-auth    # Use Streamable HTTP transport without authentication
   notion-mcp-server --page-id "abc123"                 # Limit access to page abc123 and its children
   notion-mcp-server --page-id "abc123,def456,ghi789"   # Limit access to multiple pages and their children
   notion-mcp-server --page-url "https://notion.so/xyz" # Limit access to page xyz and its children
-  notion-mcp-server --page-url "https://notion.so/page1,https://notion.so/page2" # Multiple page URLs
 `);
         process.exit(0);
       }
@@ -83,7 +119,7 @@ Examples:
     const finalPageIds = pageIds.length > 0 ? pageIds : envPageIds;
     const finalPageUrls = pageUrls.length > 0 ? pageUrls : envPageUrls;
 
-    return { transport: transport.toLowerCase(), port, authToken, pageIds: finalPageIds, pageUrls: finalPageUrls };
+    return { transport: transport.toLowerCase(), port, authToken, disableAuth, pageIds: finalPageIds, pageUrls: finalPageUrls };
   }
 
   const options = parseArgs()
@@ -102,11 +138,14 @@ Examples:
     const app = express()
     app.use(express.json())
 
-    // Generate or use provided auth token (from CLI arg or env var)
-    const authToken = options.authToken || process.env.AUTH_TOKEN || randomBytes(32).toString('hex')
-    if (!options.authToken && !process.env.AUTH_TOKEN) {
-      console.log(`Generated auth token: ${authToken}`)
-      console.log(`Use this token in the Authorization header: Bearer ${authToken}`)
+    // Generate or use provided auth token (from CLI arg or env var) only if auth is enabled
+    let authToken: string | undefined
+    if (!options.disableAuth) {
+      authToken = options.authToken || process.env.AUTH_TOKEN || randomBytes(32).toString('hex')
+      if (!options.authToken && !process.env.AUTH_TOKEN) {
+        console.log(`Generated auth token: ${authToken}`)
+        console.log(`Use this token in the Authorization header: Bearer ${authToken}`)
+      }
     }
 
     // Authorization middleware
@@ -151,59 +190,33 @@ Examples:
       })
     })
 
-    // Apply authentication to all /mcp routes
-    app.use('/mcp', authenticateToken)
+    // Apply authentication to all /mcp routes only if auth is enabled
+    if (!options.disableAuth) {
+      app.use('/mcp', authenticateToken)
+    }
 
-    // Map to store transports by session ID
-    const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {}
-
-    // Handle POST requests for client-to-server communication
+    // Handle POST requests for client-to-server communication (stateless per-request model)
     app.post('/mcp', async (req, res) => {
+      const notionToken = extractNotionToken(req)
+
       try {
-        // Check for existing session ID
-        const sessionId = req.headers['mcp-session-id'] as string | undefined
-        let transport: StreamableHTTPServerTransport
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined, // Stateless mode
+        })
 
-        if (sessionId && transports[sessionId]) {
-          // Reuse existing transport
-          transport = transports[sessionId]
-        } else if (!sessionId && isInitializeRequest(req.body)) {
-          // New initialization request
-          transport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: () => randomUUID(),
-            onsessioninitialized: (sessionId) => {
-              // Store the transport by session ID
-              transports[sessionId] = transport
-            }
-          })
+        const proxy = await initProxy(specPath, baseUrl, {
+          pageIds: options.pageIds,
+          pageUrls: options.pageUrls,
+          notionToken: notionToken || undefined,
+        })
+        await proxy.connect(transport)
 
-          // Clean up transport when closed
-          transport.onclose = () => {
-            if (transport.sessionId) {
-              delete transports[transport.sessionId]
-            }
-          }
-
-          const proxy = await initProxy(specPath, baseUrl, { 
-            pageIds: options.pageIds, 
-            pageUrls: options.pageUrls 
-          })
-          await proxy.connect(transport)
-        } else {
-          // Invalid request
-          res.status(400).json({
-            jsonrpc: '2.0',
-            error: {
-              code: -32000,
-              message: 'Bad Request: No valid session ID provided',
-            },
-            id: null,
-          })
-          return
-        }
-
-        // Handle the request
         await transport.handleRequest(req, res, req.body)
+
+        res.on('close', () => {
+          transport.close()
+          proxy.getServer().close()
+        })
       } catch (error) {
         console.error('Error handling MCP request:', error)
         if (!res.headersSent) {
@@ -219,28 +232,28 @@ Examples:
       }
     })
 
-    // Handle GET requests for server-to-client notifications via Streamable HTTP
+    // Handle GET requests - not supported in stateless mode
     app.get('/mcp', async (req, res) => {
-      const sessionId = req.headers['mcp-session-id'] as string | undefined
-      if (!sessionId || !transports[sessionId]) {
-        res.status(400).send('Invalid or missing session ID')
-        return
-      }
-      
-      const transport = transports[sessionId]
-      await transport.handleRequest(req, res)
+      res.status(405).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: 'Method not allowed. This server uses stateless mode.',
+        },
+        id: null,
+      })
     })
 
-    // Handle DELETE requests for session termination
+    // Handle DELETE requests - not supported in stateless mode
     app.delete('/mcp', async (req, res) => {
-      const sessionId = req.headers['mcp-session-id'] as string | undefined
-      if (!sessionId || !transports[sessionId]) {
-        res.status(400).send('Invalid or missing session ID')
-        return
-      }
-      
-      const transport = transports[sessionId]
-      await transport.handleRequest(req, res)
+      res.status(405).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: 'Method not allowed. This server uses stateless mode.',
+        },
+        id: null,
+      })
     })
 
     const port = options.port
@@ -248,9 +261,13 @@ Examples:
       console.log(`MCP Server listening on port ${port}`)
       console.log(`Endpoint: http://0.0.0.0:${port}/mcp`)
       console.log(`Health check: http://0.0.0.0:${port}/health`)
-      console.log(`Authentication: Bearer token required`)
-      if (options.authToken) {
-        console.log(`Using provided auth token`)
+      if (options.disableAuth) {
+        console.log(`Authentication: Disabled`)
+      } else {
+        console.log(`Authentication: Bearer token required`)
+        if (options.authToken) {
+          console.log(`Using provided auth token`)
+        }
       }
     })
 
