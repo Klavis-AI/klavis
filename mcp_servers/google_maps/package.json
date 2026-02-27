@@ -1,0 +1,36 @@
+{
+  "name": "@klavis-ai/mcp-server-google-maps",
+  "version": "1.0.0",
+  "description": "MCP server for using the Google Maps API",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "mcp-server-google-maps": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', '755')\"",
+    "start": "node dist/index.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/express": "^5.0.1",
+    "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
