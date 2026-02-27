@@ -98,7 +98,7 @@ class ExaServer {
         : tool.enabled;
 
       if (shouldRegister) {
-        this.server.tool(
+        (this.server.tool as Function)(
           tool.name,
           tool.description,
           tool.schema,
