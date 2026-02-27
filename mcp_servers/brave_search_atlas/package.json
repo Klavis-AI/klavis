@@ -1,0 +1,34 @@
+{
+  "name": "@modelcontextprotocol/server-brave-search",
+  "version": "0.6.2",
+  "description": "MCP server for Brave Search API integration",
+  "license": "MIT",
+  "author": "Anthropic, PBC (https://anthropic.com)",
+  "homepage": "https://modelcontextprotocol.io",
+  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "type": "module",
+  "bin": {
+    "mcp-server-brave-search": "build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.6.2"
+  },
+  "overrides": {
+    "body-parser": ">=2.2.1"
+  }
+}

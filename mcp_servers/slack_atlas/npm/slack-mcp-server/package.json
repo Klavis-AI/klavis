@@ -1,0 +1,39 @@
+{
+  "name": "slack-mcp-server",
+  "version": "1.1.0",
+  "description": "Model Context Protocol (MCP) server for Slack Workspaces. This integration supports both Stdio and SSE transports, proxy settings and does not require any permissions or bots being created or approved by Workspace admins",
+  "main": "bin/index.js",
+  "bin": {
+    "slack-mcp-server": "bin/index.js"
+  },
+  "optionalDependencies": {
+    "slack-mcp-server-darwin-amd64": "1.1.0",
+    "slack-mcp-server-darwin-arm64": "1.1.0",
+    "slack-mcp-server-linux-amd64": "1.1.0",
+    "slack-mcp-server-linux-arm64": "1.1.0",
+    "slack-mcp-server-windows-amd64": "1.1.0",
+    "slack-mcp-server-windows-arm64": "1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/korotovsky/slack-mcp-server.git"
+  },
+  "keywords": [
+    "mcp",
+    "slack",
+    "slack-api",
+    "model context protocol",
+    "model",
+    "context",
+    "protocol"
+  ],
+  "author": {
+    "name": "Dmitrii Korotovskii",
+    "url": "https://www.linkedin.com/in/korotovsky/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/korotovsky/slack-mcp-server/issues"
+  },
+  "homepage": "https://github.com/korotovsky/slack-mcp-server#readme"
+}

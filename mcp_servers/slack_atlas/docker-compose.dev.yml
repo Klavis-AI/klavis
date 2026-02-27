@@ -1,0 +1,25 @@
+services:
+  mcp-server:
+    build:
+        context: .
+        target: dev
+        dockerfile: Dockerfile
+    command: /dlv debug /app/cmd/slack-mcp-server/main.go --accept-multiclient --headless --listen=:40000 --api-version=2 --log -- --transport sse
+    restart: unless-stopped
+    networks:
+      - app-tier
+    ports:
+      - "3001:3001"
+      - "40000:40000"
+    env_file:
+      - .env
+    environment:
+      SLACK_MCP_HOST: "0.0.0.0"
+      SLACK_MCP_PORT: "3001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  app-tier:
+    name: app-tier
+    external: true
