@@ -1,0 +1,29 @@
+services:
+  mcp-server:
+    build:
+        context: .
+        target: production
+        dockerfile: Dockerfile
+    # Uncomment to have delve debug on port 40000
+    # command: /dlv debug /app/cmd/slack-mcp-server/main.go --headless --listen=:40000 --api-version=2 --log -- --transport sse
+    restart: unless-stopped
+    networks:
+      - app-tier
+    ports:
+      - "3001:3001"
+      - "40000:40000"
+    env_file:
+      - .env
+    environment:
+      SLACK_MCP_HOST: "0.0.0.0"
+      SLACK_MCP_PORT: "3001"
+    # If you use this docker-compose file with HTTP Toolkit, you likely want to set
+    # SLACK_MCP_PROXY="http://host.docker.internal:8000"
+    # SLACK_MCP_SERVER_CA_TOOLKIT="yes"
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
+
+networks:
+  app-tier:
+    name: app-tier
+    external: true

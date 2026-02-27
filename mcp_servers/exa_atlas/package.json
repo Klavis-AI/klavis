@@ -1,0 +1,56 @@
+{
+  "name": "exa-mcp-server",
+  "version": "0.3.10",
+  "description": "A Model Context Protocol server with Exa for web search, academic paper search, and Twitter/X.com search. Provides real-time web searches with configurable tool selection, allowing users to enable or disable specific search capabilities. Supports customizable result counts, live crawling options, and returns content from the most relevant websites.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exa-labs/exa-mcp-server.git"
+  },
+  "bin": {
+    "exa-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "exa",
+    "websearch",
+    "claude",
+    "ai",
+    "research",
+    "papers",
+    "linkedin"
+  ],
+  "author": "Exa Labs",
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "prepublishOnly": "npm run build",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "axios": "^1.7.8",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "yargs": "^17.7.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/express": "^5.0.0",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.3.3"
+  },
+  "overrides": {
+    "body-parser": ">=2.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

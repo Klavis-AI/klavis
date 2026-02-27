@@ -1,0 +1,25 @@
+services:
+  mcp-server:
+    image: ghcr.io/korotovsky/slack-mcp-server:latest
+    restart: unless-stopped
+    networks:
+      - app-tier
+    ports:
+      - "3001:3001"
+    volumes:
+      - users_cache:/app/mcp-server/.users_cache.json
+      - channels_cache:/app/mcp-server/.channels_cache.json
+    env_file:
+      - .env
+    environment:
+      SLACK_MCP_HOST: "0.0.0.0"
+      SLACK_MCP_PORT: "3001"
+
+volumes:
+  users_cache:
+  channels_cache:
+
+networks:
+  app-tier:
+    name: app-tier
+    external: true
