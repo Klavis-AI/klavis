@@ -43,6 +43,19 @@ docker run -p 5000:5000 -e AUTH_DATA='{"access_token":"your_gmail_access_token_h
 
 ## 🛠️ Available Tools
 
+| Tool Name | Description |
+|-----------|-------------|
+| `gmail_send_email` | Send a new email with support for HTML body, CC/BCC, and threading |
+| `gmail_draft_email` | Create an email draft without sending |
+| `gmail_read_email` | Retrieve email content and all messages in its thread |
+| `gmail_search_emails` | Search emails using Gmail search syntax |
+| `gmail_modify_email` | Modify email labels (add/remove) |
+| `gmail_delete_email` | Permanently delete an email |
+| `gmail_batch_modify_emails` | Modify labels for multiple emails in batches |
+| `gmail_batch_delete_emails` | Permanently delete multiple emails in batches |
+| `gmail_get_email_attachments` | Get and extract content from attachments (PDF, DOCX, XLSX, images, etc.) |
+| `gmail_search_contacts` | Search contacts across personal, other, and directory sources |
+
 ### Email Operations
 - **Email Reading**: Fetch emails, search messages, get message details
 - **Email Sending**: Send new emails with attachments and rich formatting
