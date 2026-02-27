@@ -22915,6 +22915,21 @@
             ],
             "title": "Test Account Email",
             "description": "Specific test account email"
+          },
+          "ttl_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400,
+                "minimum": 60
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl Seconds",
+            "description": "TTL in seconds. The local sandbox will be automatically released after this duration. Default: 7200 (2 hours). Min: 60 (1 minute). Max: 86400 (24 hours). Set to null to disable auto-release.",
+            "default": 7200
           }
         },
         "type": "object",
@@ -23018,6 +23033,21 @@
             ],
             "title": "Tags",
             "description": "Optional custom tags to associate with the sandbox."
+          },
+          "ttl_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400,
+                "minimum": 60
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl Seconds",
+            "description": "TTL in seconds. The sandbox will be automatically released after this duration. Default: 7200 (2 hours). Min: 60 (1 minute). Max: 86400 (24 hours). Set to null to disable auto-release.",
+            "default": 7200
           }
         },
         "type": "object",
