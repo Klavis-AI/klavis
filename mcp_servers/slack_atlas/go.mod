@@ -8,7 +8,7 @@ require (
 	github.com/mark3labs/mcp-go v0.31.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/openai/openai-go v1.11.0
-	github.com/refraction-networking/utls v1.8.0
+	github.com/refraction-networking/utls v1.8.2
 	github.com/rusq/slack v0.9.6-0.20250408103104-dd80d1b6337f
 	github.com/rusq/slackauth v0.6.1
 	github.com/rusq/slackdump/v3 v3.1.6
