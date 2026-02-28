@@ -158,29 +158,35 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger) *MCPServer
 	logger.Info("Authenticating with Slack API...",
 		zap.String("context", "console"),
 	)
-	ar, err := provider.Slack().AuthTest()
-	if err != nil {
-		logger.Fatal("Failed to authenticate with Slack",
-			zap.String("context", "console"),
-			zap.Error(err),
-		)
-	}
+	var ws string
+	if provider.Slack() != nil {
+		ar, err := provider.Slack().AuthTest()
+		if err != nil {
+			logger.Fatal("Failed to authenticate with Slack",
+				zap.String("context", "console"),
+				zap.Error(err),
+			)
+		}
 
-	logger.Info("Successfully authenticated with Slack",
-		zap.String("context", "console"),
-		zap.String("team", ar.Team),
-		zap.String("user", ar.User),
-		zap.String("enterprise", ar.EnterpriseID),
-		zap.String("url", ar.URL),
-	)
-
-	ws, err := text.Workspace(ar.URL)
-	if err != nil {
-		logger.Fatal("Failed to parse workspace from URL",
+		logger.Info("Successfully authenticated with Slack",
 			zap.String("context", "console"),
+			zap.String("team", ar.Team),
+			zap.String("user", ar.User),
+			zap.String("enterprise", ar.EnterpriseID),
 			zap.String("url", ar.URL),
-			zap.Error(err),
 		)
+
+		ws, err = text.Workspace(ar.URL)
+		if err != nil {
+			logger.Fatal("Failed to parse workspace from URL",
+				zap.String("context", "console"),
+				zap.String("url", ar.URL),
+				zap.Error(err),
+			)
+		}
+	} else {
+		logger.Info("Skipped authentication: Slack client not initialized (dynamic auth mode)")
+		ws = "_" // default workspace value for late-binding
 	}
 
 	s.AddResource(mcp.NewResource(

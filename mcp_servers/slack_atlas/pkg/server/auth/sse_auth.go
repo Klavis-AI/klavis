@@ -90,6 +90,9 @@ func BuildMiddleware(transport string, logger *zap.Logger) server.ToolHandlerMid
 				return nil, err
 			}
 
+			// Add provider late-binding here if transport is streamable-http and authData is present.
+			// Currently handled downstream in handlers.
+
 			logger.Debug("Authentication successful",
 				zap.String("context", "http"),
 				zap.String("transport", transport),

@@ -136,8 +136,8 @@ func newUsersWatcher(p *provider.ApiProvider, once *sync.Once, logger *zap.Logge
 			zap.String("context", "console"),
 		)
 
-		if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") {
-			logger.Info("Demo credentials are set, skip",
+		if p.Slack() == nil {
+			logger.Info("Demo credentials are set or token is empty, skip.",
 				zap.String("context", "console"),
 			)
 			return
@@ -168,8 +168,8 @@ func newChannelsWatcher(p *provider.ApiProvider, once *sync.Once, logger *zap.Lo
 			zap.String("context", "console"),
 		)
 
-		if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") {
-			logger.Info("Demo credentials are set, skip.",
+		if p.Slack() == nil {
+			logger.Info("Demo credentials are set or token is empty, skip.",
 				zap.String("context", "console"),
 			)
 			return

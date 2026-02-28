@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
+
 type Channel struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -45,6 +46,10 @@ func NewChannelsHandler(apiProvider *provider.ApiProvider, logger *zap.Logger) *
 
 func (ch *ChannelsHandler) ChannelsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	ch.logger.Debug("ChannelsResource called", zap.Any("params", request.Params))
+
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
 
 	// mark3labs/mcp-go does not support middlewares for resources.
 	if authenticated, err := auth.IsAuthenticated(ctx, ch.apiProvider.ServerTransport(), ch.logger); !authenticated {
@@ -103,7 +108,11 @@ func (ch *ChannelsHandler) ChannelsResource(ctx context.Context, request mcp.Rea
 }
 
 func (ch *ChannelsHandler) ChannelsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	ch.logger.Debug("ChannelsHandler called")
+	ch.logger.Debug("ChannelsHandler called", zap.Any("params", request.Params))
+
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
 
 	if ready, err := ch.apiProvider.IsReady(); !ready {
 		ch.logger.Error("API provider not ready", zap.Error(err))
