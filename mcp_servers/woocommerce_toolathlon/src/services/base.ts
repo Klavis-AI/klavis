@@ -47,18 +47,27 @@ export function extractAuthData(req?: { headers?: Record<string, any> } | null):
 
     try {
         const json = JSON.parse(authData);
+        const mask = (v: string | undefined) => v ? v.slice(0, 4) + '***' + v.slice(-4) : undefined;
+        console.log('Parsed woocommerce auth data:', {
+            site_url: json.site_url,
+            consumer_key: mask(json.consumer_key),
+            consumer_secret: mask(json.consumer_secret),
+            admin_username: json.admin_username,
+            admin_password: mask(json.admin_password),
+        });
         return {
-            siteUrl: json.wordpress_site_url ?? json.WORDPRESS_SITE_URL ?? '',
-            consumerKey: json.woocommerce_consumer_key ?? json.WOOCOMMERCE_CONSUMER_KEY ?? '',
-            consumerSecret: json.woocommerce_consumer_secret ?? json.WOOCOMMERCE_CONSUMER_SECRET ?? '',
-            username: json.wordpress_username ?? json.WORDPRESS_USERNAME,
-            password: json.wordpress_password ?? json.WORDPRESS_PASSWORD,
+            siteUrl: json.site_url ?? '',
+            consumerKey: json.consumer_key ?? '',
+            consumerSecret: json.consumer_secret ?? '',
+            username: json.admin_username,
+            password: json.admin_password,
         };
     } catch {
         console.error('Error parsing auth data JSON');
         return { siteUrl: '', consumerKey: '', consumerSecret: '' };
     }
 }
+
 
 function getAuth(): WooCommerceAuth {
     const store = asyncLocalStorage.getStore();
