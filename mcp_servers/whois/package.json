@@ -1,0 +1,43 @@
+{
+  "name": "@bharathvaj/whois-mcp",
+  "version": "1.0.1",
+  "description": "MCP to lookup whois information",
+  "author": "Bharathvaj Ganesan",
+  "license": "MIT",
+  "homepage": "https://github.com/bharathvaj-ganesan/whois-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bharathvaj-ganesan/whois-mcp.git"
+  },
+  "type": "module",
+  "bin": {
+    "whois-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js",
+    "start": "node dist/index.js",
+    "prepare": "npm run build",
+    "dev": "tsc --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "whoiser": "2.0.0-beta.3",
+    "ws": "^8.18.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.11.24",
+    "shx": "^0.3.4",
+    "typescript": "^5.3.3"
+  }
+}
