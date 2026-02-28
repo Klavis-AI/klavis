@@ -93,6 +93,10 @@ func NewConversationsHandler(apiProvider *provider.ApiProvider, logger *zap.Logg
 func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	ch.logger.Debug("UsersResource called", zap.Any("params", request.Params))
 
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
+
 	// authentication
 	if authenticated, err := auth.IsAuthenticated(ctx, ch.apiProvider.ServerTransport(), ch.logger); !authenticated {
 		ch.logger.Error("Authentication failed for users resource", zap.Error(err))
@@ -152,6 +156,10 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 // ConversationsAddMessageHandler posts a message and returns it as CSV
 func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsAddMessageHandler called", zap.Any("params", request.Params))
+
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
 
 	params, err := ch.parseParamsToolAddMessage(request)
 	if err != nil {
@@ -232,6 +240,10 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsHistoryHandler called", zap.Any("params", request.Params))
 
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
+
 	params, err := ch.parseParamsToolConversations(request)
 	if err != nil {
 		ch.logger.Error("Failed to parse history params", zap.Error(err))
@@ -273,6 +285,10 @@ func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context,
 func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsRepliesHandler called", zap.Any("params", request.Params))
 
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
+
 	params, err := ch.parseParamsToolConversations(request)
 	if err != nil {
 		ch.logger.Error("Failed to parse replies params", zap.Error(err))
@@ -309,6 +325,10 @@ func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context,
 
 func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsSearchHandler called", zap.Any("params", request.Params))
+
+	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+		return nil, err
+	}
 
 	params, err := ch.parseParamsToolSearch(request)
 	if err != nil {

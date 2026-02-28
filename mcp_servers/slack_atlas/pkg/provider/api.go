@@ -143,6 +143,10 @@ func NewMCPSlackClient(authProvider auth.Provider, logger *zap.Logger) (*MCPSlac
 }
 
 func (c *MCPSlackClient) AuthTest() (*slack.AuthTestResponse, error) {
+	if c == nil {
+		return &slack.AuthTestResponse{}, errors.New("slack client not initialized")
+	}
+
 	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") {
 		return &slack.AuthTestResponse{
 			URL:          "https://_.slack.com",
@@ -290,6 +294,10 @@ func New(transport string, logger *zap.Logger) *ApiProvider {
 	xoxdToken := os.Getenv("SLACK_MCP_XOXD_TOKEN")
 
 	if xoxcToken == "" || xoxdToken == "" {
+		if transport == "streamable-http" {
+			logger.Warn("Authentication required: No SLACK_MCP tokens found. Starting in dynamic auth mode; x-auth-data must be provided in requests.", zap.String("transport", transport))
+			return newWithXOXP(transport, auth.ValueAuth{}, logger)
+		}
 		logger.Fatal("Authentication required: Either SLACK_MCP_XOXP_TOKEN (User OAuth) or both SLACK_MCP_XOXC_TOKEN and SLACK_MCP_XOXD_TOKEN (session-based) environment variables must be provided")
 	}
 
@@ -303,7 +311,7 @@ func New(transport string, logger *zap.Logger) *ApiProvider {
 
 func newWithXOXP(transport string, authProvider auth.ValueAuth, logger *zap.Logger) *ApiProvider {
 	var (
-		client *MCPSlackClient
+		client SlackAPI
 		err    error
 	)
 
@@ -317,8 +325,8 @@ func newWithXOXP(transport string, authProvider auth.ValueAuth, logger *zap.Logg
 		channelsCache = ".channels_cache.json"
 	}
 
-	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") {
-		logger.Info("Demo credentials are set, skip.")
+	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") || authProvider.SlackToken() == "" {
+		logger.Info("Demo credentials are set or token is empty, skip.")
 	} else {
 		client, err = NewMCPSlackClient(authProvider, logger)
 		if err != nil {
@@ -343,7 +351,7 @@ func newWithXOXP(transport string, authProvider auth.ValueAuth, logger *zap.Logg
 
 func newWithXOXC(transport string, authProvider auth.ValueAuth, logger *zap.Logger) *ApiProvider {
 	var (
-		client *MCPSlackClient
+		client SlackAPI
 		err    error
 	)
 
@@ -357,8 +365,8 @@ func newWithXOXC(transport string, authProvider auth.ValueAuth, logger *zap.Logg
 		channelsCache = ".channels_cache_v2.json"
 	}
 
-	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") {
-		logger.Info("Demo credentials are set, skip.")
+	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "demo" || (os.Getenv("SLACK_MCP_XOXC_TOKEN") == "demo" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "demo") || authProvider.SlackToken() == "" {
+		logger.Info("Demo credentials are set or token is empty, skip.")
 	} else {
 		client, err = NewMCPSlackClient(authProvider, logger)
 		if err != nil {
@@ -630,6 +638,9 @@ func (ap *ApiProvider) ProvideChannelsMaps() *ChannelsCache {
 }
 
 func (ap *ApiProvider) IsReady() (bool, error) {
+	if ap.client == nil {
+		return false, errors.New("MCP Slack client is not initialized")
+	}
 	if !ap.usersReady {
 		return false, ErrUsersNotReady
 	}
@@ -644,7 +655,35 @@ func (ap *ApiProvider) ServerTransport() string {
 }
 
 func (ap *ApiProvider) Slack() SlackAPI {
+	if ap.client == nil {
+		return nil
+	}
+	// The problem is that ApiProvider.client is typed as SlackAPI (an interface).
+	// If it was assigned a nil pointer of type *MCPSlackClient, the interface itself is non-nil.
+	// Reflection or a type assertion can check this securely.
+	if c, ok := ap.client.(*MCPSlackClient); ok && c == nil {
+		return nil
+	}
 	return ap.client
+}
+
+func (ap *ApiProvider) SetClient(client *MCPSlackClient) {
+	ap.client = client
+}
+
+func (ap *ApiProvider) RebuildClient(xoxc string, xoxd string) error {
+	authProvider, err := auth.NewValueAuth(xoxc, xoxd)
+	if err != nil {
+		return err
+	}
+	client, err := NewMCPSlackClient(authProvider, ap.logger)
+	if err != nil {
+		return err
+	}
+	ap.client = client
+	ap.usersReady = true
+	ap.channelsReady = true
+	return nil
 }
 
 func mapChannel(
