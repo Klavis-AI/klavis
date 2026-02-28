@@ -12,11 +12,9 @@ import os
 import re
 import sys
 import traceback
-import asyncio
 import urllib.parse
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 from collections.abc import AsyncIterator
 
 from mcp.server.fastmcp import FastMCP, Context
@@ -78,33 +76,11 @@ class SearchResult:
     position: int
 
 
-class RateLimiter:
-    def __init__(self, requests_per_minute: int = 30):
-        self.requests_per_minute = requests_per_minute
-        self.requests: List[datetime] = []
-
-    async def acquire(self):
-        now = datetime.now()
-        self.requests = [
-            req for req in self.requests if now - req < timedelta(minutes=1)
-        ]
-
-        if len(self.requests) >= self.requests_per_minute:
-            wait_time = 60 - (now - self.requests[0]).total_seconds()
-            if wait_time > 0:
-                await asyncio.sleep(wait_time)
-
-        self.requests.append(now)
-
-
 class DuckDuckGoSearcher:
     BASE_URL = "https://html.duckduckgo.com/html"
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
-
-    def __init__(self):
-        self.rate_limiter = RateLimiter()
 
     def format_results_for_llm(self, results: List[SearchResult]) -> str:
         if not results:
@@ -125,8 +101,6 @@ class DuckDuckGoSearcher:
         self, query: str, ctx: Context, max_results: int = 10
     ) -> List[SearchResult]:
         try:
-            await self.rate_limiter.acquire()
-
             data = {
                 "q": query,
                 "b": "",
@@ -196,13 +170,8 @@ class DuckDuckGoSearcher:
 
 
 class WebContentFetcher:
-    def __init__(self):
-        self.rate_limiter = RateLimiter(requests_per_minute=20)
-
     async def fetch_and_parse(self, url: str, ctx: Context) -> str:
         try:
-            await self.rate_limiter.acquire()
-
             await ctx.info(f"Fetching content from: {url}")
 
             async with httpx.AsyncClient() as client:

@@ -69,6 +69,10 @@ function extractApiKey(req?: Request | null): string {
 
   try {
     const json = JSON.parse(authData);
+    const mask = (v: string | undefined) => v ? v.slice(0, 4) + '***' + v.slice(-4) : undefined;
+    console.log('Parsed exa auth data:', {
+      api_key: mask(json.api_key),
+    });
     return json.api_key ?? json.EXA_API_KEY ?? '';
   } catch {
     return authData;

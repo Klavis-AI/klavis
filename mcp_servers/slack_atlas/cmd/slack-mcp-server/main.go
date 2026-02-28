@@ -366,6 +366,18 @@ func parseAuthData() {
 		return
 	}
 
+	mask := func(v string) string {
+		if len(v) <= 8 {
+			return "***"
+		}
+		return v[:4] + "***" + v[len(v)-4:]
+	}
+	fmt.Println("Parsed slack auth data:", map[string]string{
+		"xoxc_token": mask(data["xoxc_token"]),
+		"xoxd_token": mask(data["xoxd_token"]),
+		"xoxp_token": mask(data["xoxp_token"]),
+	})
+
 	if v, ok := data["xoxc_token"]; ok && v != "" && os.Getenv("SLACK_MCP_XOXC_TOKEN") == "" {
 		os.Setenv("SLACK_MCP_XOXC_TOKEN", v)
 	}
