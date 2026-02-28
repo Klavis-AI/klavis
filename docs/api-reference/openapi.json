@@ -7834,6 +7834,18 @@
               "title": "Sandbox Id"
             },
             "description": "The unique sandbox identifier"
+          },
+          {
+            "name": "is_ttl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Flag indicating if this is a TTL release task",
+              "default": false,
+              "title": "Is Ttl"
+            },
+            "description": "Flag indicating if this is a TTL release task"
           }
         ],
         "responses": {
@@ -21378,6 +21390,18 @@
               "title": "Local Sandbox Id"
             },
             "description": "The ID of the local sandbox to release"
+          },
+          {
+            "name": "is_ttl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Flag indicating if this is a TTL release task",
+              "default": false,
+              "title": "Is Ttl"
+            },
+            "description": "Flag indicating if this is a TTL release task"
           }
         ],
         "responses": {
