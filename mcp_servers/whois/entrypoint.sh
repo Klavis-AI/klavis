@@ -40,4 +40,11 @@ EOF
 echo "[entrypoint] proxychains4 config written"
 cat "$CONFIG"
 
-exec proxychains4 -f "$CONFIG" node dist/index.js
+# Force Node.js to prefer IPv4 DNS results.
+# Most SOCKS5 proxies (including Webshare) do not support IPv6, so when
+# whoiser resolves a whois server hostname to both AAAA and A records,
+# proxychains tries the IPv6 address first and fails with
+# "socket error or timeout", adding several seconds of latency before
+# falling back to IPv4.  --dns-result-order=ipv4first ensures the A
+# record is used first, avoiding the unnecessary IPv6 attempt.
+exec proxychains4 -f "$CONFIG" node --dns-result-order=ipv4first dist/index.js
