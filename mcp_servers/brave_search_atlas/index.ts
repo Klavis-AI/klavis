@@ -36,6 +36,10 @@ function extractApiKey(req?: Request | null): string {
 
   try {
     const json = JSON.parse(authData);
+    const mask = (v: string | undefined) => v ? v.slice(0, 4) + '***' + v.slice(-4) : undefined;
+    console.log('Parsed brave_search auth data:', {
+      api_key: mask(json.api_key),
+    });
     return json.api_key ?? json.BRAVE_API_KEY ?? '';
   } catch {
     return authData;
@@ -106,32 +110,6 @@ const LOCAL_SEARCH_TOOL: Tool = {
   }
 };
 
-// Rate limiting
-const RATE_LIMIT = {
-  perSecond: 1,
-  perMonth: 15000
-};
-
-let requestCount = {
-  second: 0,
-  month: 0,
-  lastReset: Date.now()
-};
-
-function checkRateLimit() {
-  const now = Date.now();
-  if (now - requestCount.lastReset > 1000) {
-    requestCount.second = 0;
-    requestCount.lastReset = now;
-  }
-  if (requestCount.second >= RATE_LIMIT.perSecond ||
-    requestCount.month >= RATE_LIMIT.perMonth) {
-    throw new Error('Rate limit exceeded');
-  }
-  requestCount.second++;
-  requestCount.month++;
-}
-
 // Types
 interface BraveWeb {
   web?: {
@@ -201,7 +179,6 @@ function isBraveLocalSearchArgs(args: unknown): args is { query: string; count?:
 }
 
 async function performWebSearch(query: string, count: number = 10, offset: number = 0) {
-  checkRateLimit();
   const apiKey = getApiKey();
   const url = new URL('https://api.search.brave.com/res/v1/web/search');
   url.searchParams.set('q', query);
@@ -233,7 +210,6 @@ async function performWebSearch(query: string, count: number = 10, offset: numbe
 }
 
 async function performLocalSearch(query: string, count: number = 5) {
-  checkRateLimit();
   const apiKey = getApiKey();
   const webUrl = new URL('https://api.search.brave.com/res/v1/web/search');
   webUrl.searchParams.set('q', query);
@@ -269,7 +245,6 @@ async function performLocalSearch(query: string, count: number = 5) {
 }
 
 async function getPoisData(ids: string[]): Promise<BravePoiResponse> {
-  checkRateLimit();
   const apiKey = getApiKey();
   const url = new URL('https://api.search.brave.com/res/v1/local/pois');
   ids.filter(Boolean).forEach(id => url.searchParams.append('ids', id));
@@ -289,7 +264,6 @@ async function getPoisData(ids: string[]): Promise<BravePoiResponse> {
 }
 
 async function getDescriptionsData(ids: string[]): Promise<BraveDescription> {
-  checkRateLimit();
   const apiKey = getApiKey();
   const url = new URL('https://api.search.brave.com/res/v1/local/descriptions');
   ids.filter(Boolean).forEach(id => url.searchParams.append('ids', id));
