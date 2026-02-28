@@ -35575,7 +35575,8 @@
           "context7",
           "alchemy",
           "weights_and_biases",
-          "oxylabs"
+          "oxylabs",
+          "google_maps"
         ],
         "title": "SandboxMCPServer",
         "description": "Supported MCP servers for sandboxing"
