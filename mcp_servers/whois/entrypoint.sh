@@ -31,7 +31,7 @@ strict_chain
 # Do NOT enable proxy_dns – it breaks whoiser by routing DNS through
 # a fake 224.x.x.x subnet which then gets used as the whois server address
 tcp_read_time_out 30000
-tcp_connect_time_out 15000
+tcp_connect_time_out 30000
 
 [ProxyList]
 socks5 ${PROXY_IP} ${PROXY_PORT} ${PROXY_USERNAME} ${PROXY_PASSWORD}
