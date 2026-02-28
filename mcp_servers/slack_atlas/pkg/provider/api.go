@@ -307,7 +307,7 @@ func New(transport string, logger *zap.Logger) *ApiProvider {
 
 func newWithXOXP(transport string, authProvider auth.ValueAuth, logger *zap.Logger) *ApiProvider {
 	var (
-		client *MCPSlackClient
+		client SlackAPI
 		err    error
 	)
 
@@ -347,7 +347,7 @@ func newWithXOXP(transport string, authProvider auth.ValueAuth, logger *zap.Logg
 
 func newWithXOXC(transport string, authProvider auth.ValueAuth, logger *zap.Logger) *ApiProvider {
 	var (
-		client *MCPSlackClient
+		client SlackAPI
 		err    error
 	)
 
@@ -655,7 +655,11 @@ func (ap *ApiProvider) Slack() SlackAPI {
 }
 
 func (ap *ApiProvider) SetClient(client *MCPSlackClient) {
-	ap.client = client
+	if client == nil {
+		ap.client = nil
+	} else {
+		ap.client = client
+	}
 }
 
 func (ap *ApiProvider) RebuildClient(xoxc string, xoxd string) error {
