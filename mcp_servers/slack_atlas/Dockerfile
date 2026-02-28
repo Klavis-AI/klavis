@@ -9,11 +9,11 @@ RUN apt-get update  \
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY mcp_servers/slack_atlas/go.mod mcp_servers/slack_atlas/go.sum ./
 
 RUN --mount=type=cache,target=/go/pkg/mod go mod download
 
-COPY . /app
+COPY mcp_servers/slack_atlas/ /app/
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     go build -ldflags="-s -w" -o /go/bin/mcp-server ./cmd/slack-mcp-server
