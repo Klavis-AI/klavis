@@ -13,6 +13,7 @@ PROXY_PASSWORD="${PROXY_PASSWORD:?Error: PROXY_PASSWORD env var is required}"
 PROXY_HOST="${PROXY_HOST:-p.webshare.io}"
 PROXY_PORT="${PROXY_PORT:-1080}"
 
+
 # Resolve proxy hostname to IP address
 # (proxychains strict_chain can handle hostnames, but resolving avoids DNS issues)
 PROXY_IP=$(getent ahosts "$PROXY_HOST" | awk '{print $1; exit}')
