@@ -85,7 +85,7 @@ const WHOIS_TOOLS = [
 // API handlers
 async function handleWhoisDomain(domain: string) {
   try {
-    const result = await whoisDomain(domain);
+    const result = await whoisDomain(domain, { timeout: 30000 });
     return {
       content: [{ type: 'text', text: `Domain whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
@@ -101,7 +101,7 @@ async function handleWhoisDomain(domain: string) {
 
 async function handleWhoisTld(tld: string) {
   try {
-    const result = await whoisTld(tld);
+    const result = await whoisTld(tld, 30000);
     return {
       content: [{ type: 'text', text: `TLD whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
@@ -117,7 +117,7 @@ async function handleWhoisTld(tld: string) {
 
 async function handleWhoisIp(ip: string) {
   try {
-    const result = await whoisIp(ip);
+    const result = await whoisIp(ip, { timeout: 30000 });
     return {
       content: [{ type: 'text', text: `IP whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
@@ -140,7 +140,7 @@ async function handleWhoisAsn(asn: string) {
         isError: true,
       };
     }
-    const result = await whoisAsn(asnNumber);
+    const result = await whoisAsn(asnNumber, { timeout: 30000 });
     return {
       content: [{ type: 'text', text: `ASN whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
