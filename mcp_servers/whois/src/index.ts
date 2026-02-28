@@ -9,10 +9,28 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
-import { whoisAsn, whoisDomain, whoisTld, whoisIp } from 'whoiser';
+import { whoisAsn, whoisDomain, whoisTld, whoisIp, whoisQuery } from 'whoiser';
+import net from 'net';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+/**
+ * Lookup the authoritative WHOIS server for a query via IANA.
+ *
+ * The built-in `findWhoisServerInIana` inside whoiser has a hardcoded
+ * 1 000 ms timeout which is too short when traffic goes through a
+ * SOCKS5 proxy.  This helper lets us control the timeout.
+ */
+async function findWhoisServer(query: string, timeout = 15000): Promise<string> {
+  const raw = await whoisQuery('whois.iana.org', query, timeout);
+  // Parse the "whois:" field out of the IANA response
+  const match = String(raw).match(/^whois:\s*(.+)$/m);
+  if (!match) {
+    throw new Error(`No WHOIS server found in IANA response for "${query}"`);
+  }
+  return match[1].trim();
+}
 
 // Tool definitions
 const WHOIS_DOMAIN_TOOL: Tool = {
@@ -117,7 +135,13 @@ async function handleWhoisTld(tld: string) {
 
 async function handleWhoisIp(ip: string) {
   try {
-    const result = await whoisIp(ip, { timeout: 30000 });
+    if (!net.isIP(ip)) {
+      throw new Error(`Invalid IP address "${ip}"`);
+    }
+    // Discover the authoritative WHOIS server ourselves with a
+    // generous timeout (the library's internal lookup is only 1 s).
+    const host = await findWhoisServer(ip, 15000);
+    const result = await whoisIp(ip, { host, timeout: 30000 });
     return {
       content: [{ type: 'text', text: `IP whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
@@ -140,7 +164,10 @@ async function handleWhoisAsn(asn: string) {
         isError: true,
       };
     }
-    const result = await whoisAsn(asnNumber, { timeout: 30000 });
+    // Discover the authoritative WHOIS server ourselves with a
+    // generous timeout (the library's internal lookup is only 1 s).
+    const host = await findWhoisServer(String(asnNumber), 15000);
+    const result = await whoisAsn(asnNumber, { host, timeout: 30000 });
     return {
       content: [{ type: 'text', text: `ASN whois lookup for: \n${JSON.stringify(result)}` }],
       isError: false,
