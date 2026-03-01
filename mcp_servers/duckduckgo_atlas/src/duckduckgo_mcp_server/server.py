@@ -28,6 +28,16 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+
+def _get_proxy_url() -> Optional[str]:
+    """Build proxy URL from PROXY_USERNAME and PROXY_PASSWORD env vars."""
+    username = os.environ.get("PROXY_USERNAME")
+    password = os.environ.get("PROXY_PASSWORD")
+    if username and password:
+        return f"http://{username}:{password}@p.webshare.io:80/"
+    return None
+
+
 # DuckDuckGo does not require authentication, but we follow the auth extraction
 # pattern for consistency with other MCP servers.
 
@@ -109,7 +119,8 @@ class DuckDuckGoSearcher:
 
             await ctx.info(f"Searching DuckDuckGo for: {query}")
 
-            async with httpx.AsyncClient() as client:
+            proxy = _get_proxy_url()
+            async with httpx.AsyncClient(proxy=proxy) as client:
                 response = await client.post(
                     self.BASE_URL, data=data, headers=self.HEADERS, timeout=30.0
                 )
@@ -174,7 +185,8 @@ class WebContentFetcher:
         try:
             await ctx.info(f"Fetching content from: {url}")
 
-            async with httpx.AsyncClient() as client:
+            proxy = _get_proxy_url()
+            async with httpx.AsyncClient(proxy=proxy) as client:
                 response = await client.get(
                     url,
                     headers={
