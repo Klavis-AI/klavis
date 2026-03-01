@@ -93,7 +93,7 @@ func NewConversationsHandler(apiProvider *provider.ApiProvider, logger *zap.Logg
 func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	ch.logger.Debug("UsersResource called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	if err := ExtractAuthData(ctx, ch.apiProvider, ch.logger); err != nil {
 		return nil, err
 	}
 
@@ -157,7 +157,7 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsAddMessageHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	if err := ExtractAuthData(ctx, ch.apiProvider, ch.logger); err != nil {
 		return nil, err
 	}
 
@@ -240,7 +240,7 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsHistoryHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	if err := ExtractAuthData(ctx, ch.apiProvider, ch.logger); err != nil {
 		return nil, err
 	}
 
@@ -285,7 +285,7 @@ func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context,
 func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsRepliesHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	if err := ExtractAuthData(ctx, ch.apiProvider, ch.logger); err != nil {
 		return nil, err
 	}
 
@@ -326,7 +326,7 @@ func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context,
 func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsSearchHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	if err := ExtractAuthData(ctx, ch.apiProvider, ch.logger); err != nil {
 		return nil, err
 	}
 

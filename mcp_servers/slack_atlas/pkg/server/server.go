@@ -227,16 +227,40 @@ func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
 	)
 }
 
-func (s *MCPServer) ServeStreamableHTTP() *server.StreamableHTTPServer {
+func (s *MCPServer) ServeStreamableHTTP(addr string) *server.StreamableHTTPServer {
 	s.logger.Info("Creating StreamableHTTP server",
 		zap.String("context", "console"),
 		zap.String("version", version.Version),
 		zap.String("build_time", version.BuildTime),
 		zap.String("commit_hash", version.CommitHash),
 	)
-	return server.NewStreamableHTTPServer(s.server,
+
+	mux := http.NewServeMux()
+	streamableServer := server.NewStreamableHTTPServer(s.server,
 		server.WithStateLess(true),
+		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
+			return context.WithValue(ctx, "request", map[string]interface{}{
+				"headers": map[string][]string(r.Header),
+			})
+		}),
+		server.WithStreamableHTTPServer(&http.Server{
+			Addr:    addr,
+			Handler: mux,
+		}),
 	)
+
+	loggedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.logger.Info("HTTP request",
+			zap.String("method", r.Method),
+			zap.String("path", r.URL.Path),
+			zap.String("remote", r.RemoteAddr),
+		)
+		streamableServer.ServeHTTP(w, r)
+	})
+	mux.Handle("/mcp", loggedHandler)
+	mux.Handle("/mcp/", loggedHandler)
+
+	return streamableServer
 }
 
 func (s *MCPServer) ServeStdio() error {

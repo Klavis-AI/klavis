@@ -101,7 +101,8 @@ func main() {
 			port = strconv.Itoa(defaultSsePort)
 		}
 
-		httpServer := s.ServeStreamableHTTP()
+		listenAddr := host + ":" + port
+		httpServer := s.ServeStreamableHTTP(listenAddr)
 		logger.Info(
 			fmt.Sprintf("StreamableHTTP server listening on %s:%s/mcp", host, port),
 			zap.String("context", "console"),
@@ -115,7 +116,7 @@ func main() {
 			)
 		}
 
-		if err := httpServer.Start(host + ":" + port); err != nil {
+		if err := httpServer.Start(listenAddr); err != nil {
 			logger.Fatal("Server error",
 				zap.String("context", "console"),
 				zap.Error(err),
