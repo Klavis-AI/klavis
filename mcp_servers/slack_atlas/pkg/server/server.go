@@ -2,14 +2,16 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/korotovsky/slack-mcp-server/pkg/handler"
 	"github.com/korotovsky/slack-mcp-server/pkg/provider"
 	"github.com/korotovsky/slack-mcp-server/pkg/server/auth"
-	"github.com/korotovsky/slack-mcp-server/pkg/text"
 	"github.com/korotovsky/slack-mcp-server/pkg/version"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -17,21 +19,22 @@ import (
 )
 
 type MCPServer struct {
-	server *server.MCPServer
-	logger *zap.Logger
+	server      *server.MCPServer
+	logger      *zap.Logger
+	contextFunc func(context.Context, *http.Request) context.Context
 }
 
-func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger) *MCPServer {
+func NewMCPServer(p *provider.ApiProvider, logger *zap.Logger) *MCPServer {
 	s := server.NewMCPServer(
 		"Slack MCP Server",
 		version.Version,
 		server.WithLogging(),
 		server.WithRecovery(),
 		server.WithToolHandlerMiddleware(buildLoggerMiddleware(logger)),
-		server.WithToolHandlerMiddleware(auth.BuildMiddleware(provider.ServerTransport(), logger)),
+		server.WithToolHandlerMiddleware(auth.BuildMiddleware(p.ServerTransport(), logger)),
 	)
 
-	conversationsHandler := handler.NewConversationsHandler(provider, logger)
+	conversationsHandler := handler.NewConversationsHandler(p, logger)
 
 	s.AddTool(mcp.NewTool("conversations_history",
 		mcp.WithDescription("Get messages from the channel (or DM) by channel_id, the last row/column in the response is used as 'cursor' parameter for pagination if not empty"),
@@ -135,7 +138,7 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger) *MCPServer
 		),
 	), conversationsHandler.ConversationsSearchHandler)
 
-	channelsHandler := handler.NewChannelsHandler(provider, logger)
+	channelsHandler := handler.NewChannelsHandler(p, logger)
 
 	s.AddTool(mcp.NewTool("channels_list",
 		mcp.WithDescription("Get list of channels"),
@@ -148,46 +151,16 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger) *MCPServer
 		),
 		mcp.WithNumber("limit",
 			mcp.DefaultNumber(100),
-			mcp.Description("The maximum number of items to return. Must be an integer between 1 and 1000 (maximum 999)."), // context fix for cursor: https://github.com/korotovsky/slack-mcp-server/issues/7
+			mcp.Description("The maximum number of items to return. Must be an integer between 1 and 1000 (maximum 999)."),
 		),
 		mcp.WithString("cursor",
 			mcp.Description("Cursor for pagination. Use the value of the last row and column in the response as next_cursor field returned from the previous request."),
 		),
 	), channelsHandler.ChannelsHandler)
 
-	logger.Info("Authenticating with Slack API...",
-		zap.String("context", "console"),
-	)
-	var ws string
-	if provider.Slack() != nil {
-		ar, err := provider.Slack().AuthTest()
-		if err != nil {
-			logger.Fatal("Failed to authenticate with Slack",
-				zap.String("context", "console"),
-				zap.Error(err),
-			)
-		}
-
-		logger.Info("Successfully authenticated with Slack",
-			zap.String("context", "console"),
-			zap.String("team", ar.Team),
-			zap.String("user", ar.User),
-			zap.String("enterprise", ar.EnterpriseID),
-			zap.String("url", ar.URL),
-		)
-
-		ws, err = text.Workspace(ar.URL)
-		if err != nil {
-			logger.Fatal("Failed to parse workspace from URL",
-				zap.String("context", "console"),
-				zap.String("url", ar.URL),
-				zap.Error(err),
-			)
-		}
-	} else {
-		logger.Info("Skipped authentication: Slack client not initialized (dynamic auth mode)")
-		ws = "_" // default workspace value for late-binding
-	}
+	// Resources use a placeholder workspace; the actual workspace is resolved
+	// per-request inside the resource handler via AuthTest.
+	ws := "_"
 
 	s.AddResource(mcp.NewResource(
 		"slack://"+ws+"/channels",
@@ -203,9 +176,60 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger) *MCPServer
 		mcp.WithMIMEType("text/csv"),
 	), conversationsHandler.UsersResource)
 
+	ctxFunc := buildContextFunc(logger)
+
 	return &MCPServer{
-		server: s,
-		logger: logger,
+		server:      s,
+		logger:      logger,
+		contextFunc: ctxFunc,
+	}
+}
+
+// extractAccessToken reads the xoxp token from AUTH_DATA env var or the
+// x-auth-data HTTP header (base64-encoded JSON), following the standard
+// pattern used across all MCP servers in this repo.
+func extractAccessToken(r *http.Request, logger *zap.Logger) string {
+	authData := os.Getenv("AUTH_DATA")
+
+	if authData == "" {
+		headerData := r.Header.Get("x-auth-data")
+		if headerData != "" {
+			decoded, err := base64.StdEncoding.DecodeString(headerData)
+			if err != nil {
+				logger.Debug("x-auth-data is not base64, trying raw JSON")
+				authData = headerData
+			} else {
+				authData = string(decoded)
+			}
+		}
+	}
+
+	if authData == "" {
+		return ""
+	}
+
+	var tokens map[string]string
+	if err := json.Unmarshal([]byte(authData), &tokens); err != nil {
+		logger.Warn("Failed to parse auth data JSON", zap.Error(err))
+		return ""
+	}
+
+	if t := tokens["xoxp_token"]; t != "" {
+		return t
+	}
+	if t := tokens["access_token"]; t != "" {
+		return t
+	}
+	return ""
+}
+
+func buildContextFunc(logger *zap.Logger) func(context.Context, *http.Request) context.Context {
+	return func(ctx context.Context, r *http.Request) context.Context {
+		token := extractAccessToken(r, logger)
+		if token != "" {
+			return context.WithValue(ctx, provider.TokenContextKey, token)
+		}
+		return ctx
 	}
 }
 
@@ -219,24 +243,40 @@ func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
 	)
 	return server.NewSSEServer(s.server,
 		server.WithBaseURL(fmt.Sprintf("http://%s", addr)),
-		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			ctx = auth.AuthFromRequest(s.logger)(ctx, r)
-
-			return ctx
-		}),
+		server.WithSSEContextFunc(s.contextFunc),
 	)
 }
 
-func (s *MCPServer) ServeStreamableHTTP() *server.StreamableHTTPServer {
+func (s *MCPServer) ServeStreamableHTTP(addr string) *server.StreamableHTTPServer {
 	s.logger.Info("Creating StreamableHTTP server",
 		zap.String("context", "console"),
 		zap.String("version", version.Version),
 		zap.String("build_time", version.BuildTime),
 		zap.String("commit_hash", version.CommitHash),
 	)
-	return server.NewStreamableHTTPServer(s.server,
+
+	mux := http.NewServeMux()
+	streamableServer := server.NewStreamableHTTPServer(s.server,
 		server.WithStateLess(true),
+		server.WithHTTPContextFunc(s.contextFunc),
+		server.WithStreamableHTTPServer(&http.Server{
+			Addr:    addr,
+			Handler: mux,
+		}),
 	)
+
+	loggedHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.logger.Info("HTTP request",
+			zap.String("method", r.Method),
+			zap.String("path", r.URL.Path),
+			zap.String("remote", r.RemoteAddr),
+		)
+		streamableServer.ServeHTTP(w, r)
+	})
+	mux.Handle("/mcp", loggedHandler)
+	mux.Handle("/mcp/", loggedHandler)
+
+	return streamableServer
 }
 
 func (s *MCPServer) ServeStdio() error {

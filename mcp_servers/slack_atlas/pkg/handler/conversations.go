@@ -14,7 +14,6 @@ import (
 
 	"github.com/gocarina/gocsv"
 	"github.com/korotovsky/slack-mcp-server/pkg/provider"
-	"github.com/korotovsky/slack-mcp-server/pkg/server/auth"
 	"github.com/korotovsky/slack-mcp-server/pkg/text"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/slack-go/slack"
@@ -89,28 +88,17 @@ func NewConversationsHandler(apiProvider *provider.ApiProvider, logger *zap.Logg
 	}
 }
 
-// UsersResource streams a CSV of all users
+// UsersResource fetches all users on-demand and streams them as CSV.
 func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	ch.logger.Debug("UsersResource called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
+		ch.logger.Error("Failed to get Slack client", zap.Error(err))
 		return nil, err
 	}
 
-	// authentication
-	if authenticated, err := auth.IsAuthenticated(ctx, ch.apiProvider.ServerTransport(), ch.logger); !authenticated {
-		ch.logger.Error("Authentication failed for users resource", zap.Error(err))
-		return nil, err
-	}
-
-	// provider readiness
-	if ready, err := ch.apiProvider.IsReady(); !ready {
-		ch.logger.Error("API provider not ready", zap.Error(err))
-		return nil, err
-	}
-
-	// Slack auth test
-	ar, err := ch.apiProvider.Slack().AuthTest()
+	ar, err := client.AuthTest()
 	if err != nil {
 		ch.logger.Error("Slack AuthTest failed", zap.Error(err))
 		return nil, err
@@ -125,9 +113,12 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 		return nil, fmt.Errorf("failed to parse workspace from URL: %v", err)
 	}
 
-	// collect users
-	usersMaps := ch.apiProvider.ProvideUsersMap()
-	users := usersMaps.Users
+	users, err := client.GetUsersContext(ctx, slack.GetUsersOptionLimit(1000))
+	if err != nil {
+		ch.logger.Error("Failed to fetch users from Slack API", zap.Error(err))
+		return nil, err
+	}
+
 	usersList := make([]User, 0, len(users))
 	for _, user := range users {
 		usersList = append(usersList, User{
@@ -137,7 +128,6 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 		})
 	}
 
-	// marshal CSV
 	csvBytes, err := gocsv.MarshalBytes(&usersList)
 	if err != nil {
 		ch.logger.Error("Failed to marshal users to CSV", zap.Error(err))
@@ -153,11 +143,12 @@ func (ch *ConversationsHandler) UsersResource(ctx context.Context, request mcp.R
 	}, nil
 }
 
-// ConversationsAddMessageHandler posts a message and returns it as CSV
+// ConversationsAddMessageHandler posts a message and returns it as CSV.
 func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsAddMessageHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -202,7 +193,7 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 		zap.String("thread_ts", params.threadTs),
 		zap.String("content_type", params.contentType),
 	)
-	respChannel, respTimestamp, err := ch.apiProvider.Slack().PostMessageContext(ctx, params.channel, options...)
+	respChannel, respTimestamp, err := client.PostMessageContext(ctx, params.channel, options...)
 	if err != nil {
 		ch.logger.Error("Slack PostMessageContext failed", zap.Error(err))
 		return nil, err
@@ -210,14 +201,13 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 
 	toolConfig := os.Getenv("SLACK_MCP_ADD_MESSAGE_MARK")
 	if toolConfig == "1" || toolConfig == "true" || toolConfig == "yes" {
-		err := ch.apiProvider.Slack().MarkConversationContext(ctx, params.channel, respTimestamp)
+		err := client.MarkConversationContext(ctx, params.channel, respTimestamp)
 		if err != nil {
 			ch.logger.Error("Slack MarkConversationContext failed", zap.Error(err))
 			return nil, err
 		}
 	}
 
-	// fetch the single message we just posted
 	historyParams := slack.GetConversationHistoryParameters{
 		ChannelID: respChannel,
 		Limit:     1,
@@ -225,22 +215,23 @@ func (ch *ConversationsHandler) ConversationsAddMessageHandler(ctx context.Conte
 		Latest:    respTimestamp,
 		Inclusive: true,
 	}
-	history, err := ch.apiProvider.Slack().GetConversationHistoryContext(ctx, &historyParams)
+	history, err := client.GetConversationHistoryContext(ctx, &historyParams)
 	if err != nil {
 		ch.logger.Error("GetConversationHistoryContext failed", zap.Error(err))
 		return nil, err
 	}
 	ch.logger.Debug("Fetched conversation history", zap.Int("message_count", len(history.Messages)))
 
-	messages := ch.convertMessagesFromHistory(history.Messages, historyParams.ChannelID, false)
+	messages := convertMessagesFromHistory(history.Messages, historyParams.ChannelID, false)
 	return marshalMessagesToCSV(messages)
 }
 
-// ConversationsHistoryHandler streams conversation history as CSV
+// ConversationsHistoryHandler streams conversation history as CSV.
 func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsHistoryHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -265,7 +256,7 @@ func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context,
 		Cursor:    params.cursor,
 		Inclusive: false,
 	}
-	history, err := ch.apiProvider.Slack().GetConversationHistoryContext(ctx, &historyParams)
+	history, err := client.GetConversationHistoryContext(ctx, &historyParams)
 	if err != nil {
 		ch.logger.Error("GetConversationHistoryContext failed", zap.Error(err))
 		return nil, err
@@ -273,7 +264,7 @@ func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context,
 
 	ch.logger.Debug("Fetched conversation history", zap.Int("message_count", len(history.Messages)))
 
-	messages := ch.convertMessagesFromHistory(history.Messages, params.channel, params.activity)
+	messages := convertMessagesFromHistory(history.Messages, params.channel, params.activity)
 
 	if len(messages) > 0 && history.HasMore {
 		messages[len(messages)-1].Cursor = history.ResponseMetaData.NextCursor
@@ -281,11 +272,12 @@ func (ch *ConversationsHandler) ConversationsHistoryHandler(ctx context.Context,
 	return marshalMessagesToCSV(messages)
 }
 
-// ConversationsRepliesHandler streams thread replies as CSV
+// ConversationsRepliesHandler streams thread replies as CSV.
 func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsRepliesHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -309,14 +301,14 @@ func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context,
 		Cursor:    params.cursor,
 		Inclusive: false,
 	}
-	replies, hasMore, nextCursor, err := ch.apiProvider.Slack().GetConversationRepliesContext(ctx, &repliesParams)
+	replies, hasMore, nextCursor, err := client.GetConversationRepliesContext(ctx, &repliesParams)
 	if err != nil {
 		ch.logger.Error("GetConversationRepliesContext failed", zap.Error(err))
 		return nil, err
 	}
 	ch.logger.Debug("Fetched conversation replies", zap.Int("count", len(replies)))
 
-	messages := ch.convertMessagesFromHistory(replies, params.channel, params.activity)
+	messages := convertMessagesFromHistory(replies, params.channel, params.activity)
 	if len(messages) > 0 && hasMore {
 		messages[len(messages)-1].Cursor = nextCursor
 	}
@@ -326,7 +318,8 @@ func (ch *ConversationsHandler) ConversationsRepliesHandler(ctx context.Context,
 func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ch.logger.Debug("ConversationsSearchHandler called", zap.Any("params", request.Params))
 
-	if err := ExtractAuthData(ctx, ch.apiProvider); err != nil {
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -344,14 +337,14 @@ func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, 
 		Count:         params.limit,
 		Page:          params.page,
 	}
-	messagesRes, _, err := ch.apiProvider.Slack().SearchContext(ctx, params.query, searchParams)
+	messagesRes, _, err := client.SearchContext(ctx, params.query, searchParams)
 	if err != nil {
 		ch.logger.Error("Slack SearchContext failed", zap.Error(err))
 		return nil, err
 	}
 	ch.logger.Debug("Search completed", zap.Int("matches", len(messagesRes.Matches)))
 
-	messages := ch.convertMessagesFromSearch(messagesRes.Matches)
+	messages := convertMessagesFromSearch(messagesRes.Matches)
 	if len(messages) > 0 && ((messagesRes.Pagination.PerPage * messagesRes.Pagination.PageCount) < messagesRes.Pagination.TotalCount) {
 		nextCursor := fmt.Sprintf("page:%d", messagesRes.Pagination.PageCount+1)
 		messages[len(messages)-1].Cursor = base64.StdEncoding.EncodeToString([]byte(nextCursor))
@@ -381,70 +374,46 @@ func isChannelAllowed(channel string) bool {
 	return !isNegated
 }
 
-func (ch *ConversationsHandler) convertMessagesFromHistory(slackMessages []slack.Message, channel string, includeActivity bool) []Message {
-	usersMap := ch.apiProvider.ProvideUsersMap()
+func convertMessagesFromHistory(slackMessages []slack.Message, channel string, includeActivity bool) []Message {
 	var messages []Message
-	warn := false
-
 	for _, msg := range slackMessages {
 		if msg.SubType != "" && !includeActivity {
 			continue
 		}
-		userName, realName, ok := getUserInfo(msg.User, usersMap.Users)
-		if !ok {
-			warn = true
+		userName := msg.Username
+		if userName == "" {
+			userName = msg.User
 		}
 		messages = append(messages, Message{
 			UserID:   msg.User,
 			UserName: userName,
-			RealName: realName,
+			RealName: msg.User,
 			Text:     text.ProcessText(msg.Text),
 			Channel:  channel,
 			ThreadTs: msg.ThreadTimestamp,
 			Time:     msg.Timestamp,
 		})
 	}
-
-	if ready, err := ch.apiProvider.IsReady(); !ready {
-		if warn && errors.Is(err, provider.ErrUsersNotReady) {
-			ch.logger.Warn(
-				"WARNING: Slack users sync is not ready yet, you may experience some limited functionality and see UIDs instead of resolved names as well as unable to query users by their @handles. Users sync is part of channels sync and operations on channels depend on users collection (IM, MPIM). Please wait until users are synced and try again",
-				zap.Error(err),
-			)
-		}
-	}
 	return messages
 }
 
-func (ch *ConversationsHandler) convertMessagesFromSearch(slackMessages []slack.SearchMessage) []Message {
-	usersMap := ch.apiProvider.ProvideUsersMap()
+func convertMessagesFromSearch(slackMessages []slack.SearchMessage) []Message {
 	var messages []Message
-	warn := false
-
 	for _, msg := range slackMessages {
-		userName, realName, ok := getUserInfo(msg.User, usersMap.Users)
-		if !ok {
-			warn = true
+		userName := msg.Username
+		if userName == "" {
+			userName = msg.User
 		}
 		threadTs, _ := extractThreadTS(msg.Permalink)
 		messages = append(messages, Message{
 			UserID:   msg.User,
 			UserName: userName,
-			RealName: realName,
+			RealName: msg.User,
 			Text:     text.ProcessText(msg.Text),
 			Channel:  fmt.Sprintf("#%s", msg.Channel.Name),
 			ThreadTs: threadTs,
 			Time:     msg.Timestamp,
 		})
-	}
-
-	if ready, err := ch.apiProvider.IsReady(); !ready {
-		if warn && errors.Is(err, provider.ErrUsersNotReady) {
-			ch.logger.Warn(
-				"Slack users sync not ready; you may see raw UIDs instead of names and lose some functionality.",
-				zap.Error(err),
-			)
-		}
 	}
 	return messages
 }
@@ -480,29 +449,12 @@ func (ch *ConversationsHandler) parseParamsToolConversations(request mcp.CallToo
 		}
 	}
 
+	// Channel names (#general, @user) are not resolved server-side.
+	// The caller should provide the channel ID (Cxxxxxxxxxx) directly.
+	// Use the channels_list tool to discover channel IDs.
 	if strings.HasPrefix(channel, "#") || strings.HasPrefix(channel, "@") {
-		if ready, err := ch.apiProvider.IsReady(); !ready {
-			if errors.Is(err, provider.ErrUsersNotReady) {
-				ch.logger.Warn(
-					"WARNING: Slack users sync is not ready yet, you may experience some limited functionality and see UIDs instead of resolved names as well as unable to query users by their @handles. Users sync is part of channels sync and operations on channels depend on users collection (IM, MPIM). Please wait until users are synced and try again",
-					zap.Error(err),
-				)
-			}
-			if errors.Is(err, provider.ErrChannelsNotReady) {
-				ch.logger.Warn(
-					"WARNING: Slack channels sync is not ready yet, you may experience some limited functionality and be able to request conversation only by Channel ID, not by its name. Please wait until channels are synced and try again.",
-					zap.Error(err),
-				)
-			}
-			return nil, fmt.Errorf("channel %q not found in empty cache", channel)
-		}
-		channelsMaps := ch.apiProvider.ProvideChannelsMaps()
-		chn, ok := channelsMaps.ChannelsInv[channel]
-		if !ok {
-			ch.logger.Error("Channel not found in synced cache", zap.String("channel", channel))
-			return nil, fmt.Errorf("channel %q not found in synced cache. Try to remove old cache file and restart MCP Server", channel)
-		}
-		channel = channelsMaps.Channels[chn].ID
+		ch.logger.Warn("Channel name provided instead of ID; passing through as-is",
+			zap.String("channel", channel))
 	}
 
 	return &conversationParams{
@@ -532,15 +484,7 @@ func (ch *ConversationsHandler) parseParamsToolAddMessage(request mcp.CallToolRe
 		ch.logger.Error("channel_id missing in add-message params")
 		return nil, errors.New("channel_id must be a string")
 	}
-	if strings.HasPrefix(channel, "#") || strings.HasPrefix(channel, "@") {
-		channelsMaps := ch.apiProvider.ProvideChannelsMaps()
-		chn, ok := channelsMaps.ChannelsInv[channel]
-		if !ok {
-			ch.logger.Error("Channel not found", zap.String("channel", channel))
-			return nil, fmt.Errorf("channel %q not found", channel)
-		}
-		channel = channelsMaps.Channels[chn].ID
-	}
+
 	if !isChannelAllowed(channel) {
 		ch.logger.Warn("Add-message tool not allowed for channel", zap.String("channel", channel), zap.String("policy", toolConfig))
 		return nil, fmt.Errorf("conversations_add_message tool is not allowed for channel %q, applied policy: %s", channel, toolConfig)
@@ -580,35 +524,15 @@ func (ch *ConversationsHandler) parseParamsToolSearch(req mcp.CallToolRequest) (
 		addFilter(filters, "is", "thread")
 	}
 	if chName := req.GetString("filter_in_channel", ""); chName != "" {
-		f, err := ch.paramFormatChannel(chName)
-		if err != nil {
-			ch.logger.Error("Invalid channel filter", zap.String("filter", chName), zap.Error(err))
-			return nil, err
-		}
-		addFilter(filters, "in", f)
+		addFilter(filters, "in", paramFormatChannel(chName))
 	} else if im := req.GetString("filter_in_im_or_mpim", ""); im != "" {
-		f, err := ch.paramFormatUser(im)
-		if err != nil {
-			ch.logger.Error("Invalid IM/MPIM filter", zap.String("filter", im), zap.Error(err))
-			return nil, err
-		}
-		addFilter(filters, "in", f)
+		addFilter(filters, "in", paramFormatUser(im))
 	}
 	if with := req.GetString("filter_users_with", ""); with != "" {
-		f, err := ch.paramFormatUser(with)
-		if err != nil {
-			ch.logger.Error("Invalid with-user filter", zap.String("filter", with), zap.Error(err))
-			return nil, err
-		}
-		addFilter(filters, "with", f)
+		addFilter(filters, "with", paramFormatUser(with))
 	}
 	if from := req.GetString("filter_users_from", ""); from != "" {
-		f, err := ch.paramFormatUser(from)
-		if err != nil {
-			ch.logger.Error("Invalid from-user filter", zap.String("filter", from), zap.Error(err))
-			return nil, err
-		}
-		addFilter(filters, "from", f)
+		addFilter(filters, "from", paramFormatUser(from))
 	}
 
 	dateMap, err := buildDateFilters(
@@ -665,45 +589,30 @@ func (ch *ConversationsHandler) parseParamsToolSearch(req mcp.CallToolRequest) (
 	}, nil
 }
 
-func (ch *ConversationsHandler) paramFormatUser(raw string) (string, error) {
-	users := ch.apiProvider.ProvideUsersMap()
+// paramFormatChannel passes through the channel identifier for Slack search.
+// Accepts #channel-name or Cxxxxxxxxxx format.
+func paramFormatChannel(raw string) string {
 	raw = strings.TrimSpace(raw)
-	if strings.HasPrefix(raw, "U") {
-		u, ok := users.Users[raw]
-		if !ok {
-			return "", fmt.Errorf("user %q not found", raw)
-		}
-		return fmt.Sprintf("<@%s>", u.ID), nil
+	if strings.HasPrefix(raw, "#") || strings.HasPrefix(raw, "C") {
+		return raw
 	}
-	if strings.HasPrefix(raw, "<@") {
-		raw = raw[2:]
-	}
-	if strings.HasPrefix(raw, "@") {
-		raw = raw[1:]
-	}
-	uid, ok := users.UsersInv[raw]
-	if !ok {
-		return "", fmt.Errorf("user %q not found", raw)
-	}
-	return fmt.Sprintf("<@%s>", uid), nil
+	return "#" + raw
 }
 
-func (ch *ConversationsHandler) paramFormatChannel(raw string) (string, error) {
+// paramFormatUser passes through the user identifier for Slack search.
+// Accepts @username or Uxxxxxxxxxx format.
+func paramFormatUser(raw string) string {
 	raw = strings.TrimSpace(raw)
-	cms := ch.apiProvider.ProvideChannelsMaps()
-	if strings.HasPrefix(raw, "#") {
-		if id, ok := cms.ChannelsInv[raw]; ok {
-			return "#" + cms.Channels[id].Name, nil
-		}
-		return "", fmt.Errorf("channel %q not found", raw)
+	if strings.HasPrefix(raw, "<@") {
+		return raw
 	}
-	if strings.HasPrefix(raw, "C") {
-		if chn, ok := cms.Channels[raw]; ok {
-			return "#" + chn.Name, nil
-		}
-		return "", fmt.Errorf("channel %q not found", raw)
+	if strings.HasPrefix(raw, "@") {
+		return raw
 	}
-	return "", fmt.Errorf("invalid channel format: %q", raw)
+	if strings.HasPrefix(raw, "U") {
+		return fmt.Sprintf("<@%s>", raw)
+	}
+	return "@" + raw
 }
 
 func marshalMessagesToCSV(messages []Message) (*mcp.CallToolResult, error) {
@@ -712,13 +621,6 @@ func marshalMessagesToCSV(messages []Message) (*mcp.CallToolResult, error) {
 		return nil, err
 	}
 	return mcp.NewToolResultText(string(csvBytes)), nil
-}
-
-func getUserInfo(userID string, usersMap map[string]slack.User) (userName, realName string, ok bool) {
-	if u, ok := usersMap[userID]; ok {
-		return u.Name, u.RealName, true
-	}
-	return userID, userID, false
 }
 
 func limitByNumeric(limit string, defaultLimit int) (int, error) {
@@ -776,16 +678,16 @@ func extractThreadTS(rawurl string) (string, error) {
 func parseFlexibleDate(dateStr string) (time.Time, string, error) {
 	dateStr = strings.TrimSpace(dateStr)
 	standardFormats := []string{
-		"2006-01-02",      // YYYY-MM-DD
-		"2006/01/02",      // YYYY/MM/DD
-		"01-02-2006",      // MM-DD-YYYY
-		"01/02/2006",      // MM/DD/YYYY
-		"02-01-2006",      // DD-MM-YYYY
-		"02/01/2006",      // DD/MM/YYYY
-		"Jan 2, 2006",     // Jan 2, 2006
-		"January 2, 2006", // January 2, 2006
-		"2 Jan 2006",      // 2 Jan 2006
-		"2 January 2006",  // 2 January 2006
+		"2006-01-02",
+		"2006/01/02",
+		"01-02-2006",
+		"01/02/2006",
+		"02-01-2006",
+		"02/01/2006",
+		"Jan 2, 2006",
+		"January 2, 2006",
+		"2 Jan 2006",
+		"2 January 2006",
 	}
 	for _, fmtStr := range standardFormats {
 		if t, err := time.Parse(fmtStr, dateStr); err == nil {
@@ -808,7 +710,6 @@ func parseFlexibleDate(dateStr string) (time.Time, string, error) {
 		"december": 12, "dec": 12,
 	}
 
-	// Month-Year patterns
 	monthYear := regexp.MustCompile(`^(\d{4})\s+([A-Za-z]+)$|^([A-Za-z]+)\s+(\d{4})$`)
 	if m := monthYear.FindStringSubmatch(dateStr); m != nil {
 		var year int
@@ -826,7 +727,6 @@ func parseFlexibleDate(dateStr string) (time.Time, string, error) {
 		}
 	}
 
-	// Day-Month-Year and Month-Day-Year patterns
 	dmy1 := regexp.MustCompile(`^(\d{1,2})[-\s]+([A-Za-z]+)[-\s]+(\d{4})$`)
 	if m := dmy1.FindStringSubmatch(dateStr); m != nil {
 		day, _ := strconv.Atoi(m[1])
