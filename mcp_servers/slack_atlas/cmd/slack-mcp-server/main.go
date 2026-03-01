@@ -1,15 +1,11 @@
 package main
 
 import (
-	"context"
-	"encoding/base64"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/korotovsky/slack-mcp-server/pkg/provider"
 	"github.com/korotovsky/slack-mcp-server/pkg/server"
@@ -27,8 +23,6 @@ func main() {
 	flag.StringVar(&transport, "transport", "stdio", "Transport type (stdio, sse, or streamable-http)")
 	flag.Parse()
 
-	parseAuthData()
-
 	logger, err := newLogger(transport)
 	if err != nil {
 		panic(err)
@@ -43,15 +37,8 @@ func main() {
 		)
 	}
 
-	p := provider.New(transport, logger)
+	p := provider.NewApiProvider(transport, logger)
 	s := server.NewMCPServer(p, logger)
-
-	go func() {
-		var once sync.Once
-
-		newUsersWatcher(p, &once, logger)()
-		newChannelsWatcher(p, &once, logger)()
-	}()
 
 	switch transport {
 	case "stdio":
@@ -79,12 +66,6 @@ func main() {
 			zap.String("port", port),
 		)
 
-		if ready, _ := p.IsReady(); !ready {
-			logger.Info("Slack MCP Server is still warming up caches",
-				zap.String("context", "console"),
-			)
-		}
-
 		if err := sseServer.Start(host + ":" + port); err != nil {
 			logger.Fatal("Server error",
 				zap.String("context", "console"),
@@ -110,12 +91,6 @@ func main() {
 			zap.String("port", port),
 		)
 
-		if ready, _ := p.IsReady(); !ready {
-			logger.Info("Slack MCP Server is still warming up caches",
-				zap.String("context", "console"),
-			)
-		}
-
 		if err := httpServer.Start(listenAddr); err != nil {
 			logger.Fatal("Server error",
 				zap.String("context", "console"),
@@ -128,70 +103,6 @@ func main() {
 			zap.String("transport", transport),
 			zap.String("allowed", "stdio,sse,streamable-http"),
 		)
-	}
-}
-
-func newUsersWatcher(p *provider.ApiProvider, once *sync.Once, logger *zap.Logger) func() {
-	return func() {
-		logger.Info("Caching users collection...",
-			zap.String("context", "console"),
-		)
-
-		if p.Slack() == nil {
-			logger.Info("Demo credentials are set or token is empty, skip.",
-				zap.String("context", "console"),
-			)
-			return
-		}
-
-		err := p.RefreshUsers(context.Background())
-		if err != nil {
-			logger.Fatal("Error booting provider",
-				zap.String("context", "console"),
-				zap.Error(err),
-			)
-		}
-
-		ready, _ := p.IsReady()
-		if ready {
-			once.Do(func() {
-				logger.Info("Slack MCP Server is fully ready",
-					zap.String("context", "console"),
-				)
-			})
-		}
-	}
-}
-
-func newChannelsWatcher(p *provider.ApiProvider, once *sync.Once, logger *zap.Logger) func() {
-	return func() {
-		logger.Info("Caching channels collection...",
-			zap.String("context", "console"),
-		)
-
-		if p.Slack() == nil {
-			logger.Info("Demo credentials are set or token is empty, skip.",
-				zap.String("context", "console"),
-			)
-			return
-		}
-
-		err := p.RefreshChannels(context.Background())
-		if err != nil {
-			logger.Fatal("Error booting provider",
-				zap.String("context", "console"),
-				zap.Error(err),
-			)
-		}
-
-		ready, _ := p.IsReady()
-		if ready {
-			once.Do(func() {
-				logger.Info("Slack MCP Server is fully ready.",
-					zap.String("context", "console"),
-				)
-			})
-		}
 	}
 }
 
@@ -290,7 +201,6 @@ func newLogger(transport string) (*zap.Logger, error) {
 	return logger, err
 }
 
-// shouldUseJSONFormat determines if JSON format should be used
 func shouldUseJSONFormat() bool {
 	if format := os.Getenv("SLACK_MCP_LOG_FORMAT"); format != "" {
 		return strings.ToLower(format) == "json"
@@ -343,49 +253,4 @@ func getConsoleLevelEncoder(useColors bool) zapcore.LevelEncoder {
 		return zapcore.CapitalColorLevelEncoder
 	}
 	return zapcore.CapitalLevelEncoder
-}
-
-// parseAuthData reads AUTH_DATA env var (or base64-encoded JSON) and sets individual
-// Slack token env vars. This enables the ingress pattern where auth data is passed
-// as a single structured env var instead of individual token vars.
-func parseAuthData() {
-	authData := os.Getenv("AUTH_DATA")
-	if authData == "" {
-		return
-	}
-
-	var raw []byte
-	decoded, err := base64.StdEncoding.DecodeString(authData)
-	if err == nil {
-		raw = decoded
-	} else {
-		raw = []byte(authData)
-	}
-
-	var data map[string]string
-	if err := json.Unmarshal(raw, &data); err != nil {
-		return
-	}
-
-	mask := func(v string) string {
-		if len(v) <= 8 {
-			return "***"
-		}
-		return v[:4] + "***" + v[len(v)-4:]
-	}
-	fmt.Println("Parsed slack auth data:", map[string]string{
-		"xoxc_token": mask(data["xoxc_token"]),
-		"xoxd_token": mask(data["xoxd_token"]),
-		"xoxp_token": mask(data["xoxp_token"]),
-	})
-
-	if v, ok := data["xoxc_token"]; ok && v != "" && os.Getenv("SLACK_MCP_XOXC_TOKEN") == "" {
-		os.Setenv("SLACK_MCP_XOXC_TOKEN", v)
-	}
-	if v, ok := data["xoxd_token"]; ok && v != "" && os.Getenv("SLACK_MCP_XOXD_TOKEN") == "" {
-		os.Setenv("SLACK_MCP_XOXD_TOKEN", v)
-	}
-	if v, ok := data["xoxp_token"]; ok && v != "" && os.Getenv("SLACK_MCP_XOXP_TOKEN") == "" {
-		os.Setenv("SLACK_MCP_XOXP_TOKEN", v)
-	}
 }
