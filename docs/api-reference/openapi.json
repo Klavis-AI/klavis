@@ -7846,6 +7846,24 @@
               "title": "Is Ttl"
             },
             "description": "Flag indicating if this is a TTL release task"
+          },
+          {
+            "name": "instance_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Instance ID for TTL validation; if provided and mismatched, the release is skipped",
+              "title": "Instance Id"
+            },
+            "description": "Instance ID for TTL validation; if provided and mismatched, the release is skipped"
           }
         ],
         "responses": {
