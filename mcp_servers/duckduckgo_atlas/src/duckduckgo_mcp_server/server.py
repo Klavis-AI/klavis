@@ -25,17 +25,28 @@ from starlette.routing import Mount, Route
 from starlette.types import Receive, Scope, Send
 import httpx
 from bs4 import BeautifulSoup
+from ddgs import DDGS
 
 logger = logging.getLogger(__name__)
 
 
 def _get_proxy_url() -> Optional[str]:
-    """Build proxy URL from PROXY_USERNAME and PROXY_PASSWORD env vars."""
+    """Build proxy URL from environment variables.
+
+    Env vars:
+      PROXY_USERNAME, PROXY_PASSWORD  – required
+      PROXY_HOST   – default: p.webshare.io
+      PROXY_PORT   – default: 1080
+      PROXY_SCHEME – default: socks5
+    """
     username = os.environ.get("PROXY_USERNAME")
     password = os.environ.get("PROXY_PASSWORD")
-    if username and password:
-        return f"http://{username}:{password}@p.webshare.io:80/"
-    return None
+    if not (username and password):
+        return None
+    host = os.environ.get("PROXY_HOST", "p.webshare.io")
+    scheme = os.environ.get("PROXY_SCHEME", "http")
+    port = os.environ.get("PROXY_PORT", "1080" if "socks" in scheme else "80")
+    return f"{scheme}://{username}:{password}@{host}:{port}"
 
 
 # DuckDuckGo does not require authentication, but we follow the auth extraction
@@ -87,10 +98,8 @@ class SearchResult:
 
 
 class DuckDuckGoSearcher:
-    BASE_URL = "https://html.duckduckgo.com/html"
-    HEADERS = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+    """Uses the duckduckgo-search library (primp browser impersonation)
+    to avoid CAPTCHAs that raw httpx requests trigger."""
 
     def format_results_for_llm(self, results: List[SearchResult]) -> str:
         if not results:
@@ -111,71 +120,27 @@ class DuckDuckGoSearcher:
         self, query: str, ctx: Context, max_results: int = 10
     ) -> List[SearchResult]:
         try:
-            data = {
-                "q": query,
-                "b": "",
-                "kl": "",
-            }
-
             await ctx.info(f"Searching DuckDuckGo for: {query}")
 
             proxy = _get_proxy_url()
-            async with httpx.AsyncClient(proxy=proxy) as client:
-                response = await client.post(
-                    self.BASE_URL, data=data, headers=self.HEADERS, timeout=30.0
+            ddgs = DDGS(proxy=proxy)
+            raw_results = ddgs.text(query, max_results=max_results, backend="duckduckgo")
+
+            results = [
+                SearchResult(
+                    title=r.get("title", ""),
+                    link=r.get("href", ""),
+                    snippet=r.get("body", ""),
+                    position=i + 1,
                 )
-                response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
-            if not soup:
-                await ctx.error("Failed to parse HTML response")
-                return []
-
-            results = []
-            for result in soup.select(".result"):
-                title_elem = result.select_one(".result__title")
-                if not title_elem:
-                    continue
-
-                link_elem = title_elem.find("a")
-                if not link_elem:
-                    continue
-
-                title = link_elem.get_text(strip=True)
-                link = link_elem.get("href", "")
-
-                if "y.js" in link:
-                    continue
-
-                if link.startswith("//duckduckgo.com/l/?uddg="):
-                    link = urllib.parse.unquote(link.split("uddg=")[1].split("&")[0])
-
-                snippet_elem = result.select_one(".result__snippet")
-                snippet = snippet_elem.get_text(strip=True) if snippet_elem else ""
-
-                results.append(
-                    SearchResult(
-                        title=title,
-                        link=link,
-                        snippet=snippet,
-                        position=len(results) + 1,
-                    )
-                )
-
-                if len(results) >= max_results:
-                    break
+                for i, r in enumerate(raw_results)
+            ]
 
             await ctx.info(f"Successfully found {len(results)} results")
             return results
 
-        except httpx.TimeoutError:
-            await ctx.error("Search request timed out")
-            return []
-        except httpx.HTTPError as e:
-            await ctx.error(f"HTTP error occurred: {str(e)}")
-            return []
         except Exception as e:
-            await ctx.error(f"Unexpected error during search: {str(e)}")
+            await ctx.error(f"Search error: {e}")
             traceback.print_exc(file=sys.stderr)
             return []
 
