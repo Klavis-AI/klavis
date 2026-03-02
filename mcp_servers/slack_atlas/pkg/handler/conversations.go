@@ -323,7 +323,7 @@ func (ch *ConversationsHandler) ConversationsSearchHandler(ctx context.Context, 
 		return nil, err
 	}
 
-	params, err := ch.parseParamsToolSearch(request)
+	params, err := ch.parseParamsToolSearch(ctx, request)
 	if err != nil {
 		ch.logger.Error("Failed to parse search params", zap.Error(err))
 		return nil, err
@@ -516,7 +516,7 @@ func (ch *ConversationsHandler) parseParamsToolAddMessage(request mcp.CallToolRe
 	}, nil
 }
 
-func (ch *ConversationsHandler) parseParamsToolSearch(req mcp.CallToolRequest) (*searchParams, error) {
+func (ch *ConversationsHandler) parseParamsToolSearch(ctx context.Context, req mcp.CallToolRequest) (*searchParams, error) {
 	rawQuery := strings.TrimSpace(req.GetString("search_query", ""))
 	freeText, filters := splitQuery(rawQuery)
 
@@ -524,15 +524,31 @@ func (ch *ConversationsHandler) parseParamsToolSearch(req mcp.CallToolRequest) (
 		addFilter(filters, "is", "thread")
 	}
 	if chName := req.GetString("filter_in_channel", ""); chName != "" {
-		addFilter(filters, "in", paramFormatChannel(chName))
+		f, err := ch.paramFormatChannel(ctx, chName)
+		if err != nil {
+			return nil, err
+		}
+		addFilter(filters, "in", f)
 	} else if im := req.GetString("filter_in_im_or_mpim", ""); im != "" {
-		addFilter(filters, "in", paramFormatUser(im))
+		f, err := ch.paramFormatUser(ctx, im)
+		if err != nil {
+			return nil, err
+		}
+		addFilter(filters, "in", f)
 	}
 	if with := req.GetString("filter_users_with", ""); with != "" {
-		addFilter(filters, "with", paramFormatUser(with))
+		f, err := ch.paramFormatUser(ctx, with)
+		if err != nil {
+			return nil, err
+		}
+		addFilter(filters, "with", f)
 	}
 	if from := req.GetString("filter_users_from", ""); from != "" {
-		addFilter(filters, "from", paramFormatUser(from))
+		f, err := ch.paramFormatUser(ctx, from)
+		if err != nil {
+			return nil, err
+		}
+		addFilter(filters, "from", f)
 	}
 
 	dateMap, err := buildDateFilters(
@@ -589,30 +605,46 @@ func (ch *ConversationsHandler) parseParamsToolSearch(req mcp.CallToolRequest) (
 	}, nil
 }
 
-// paramFormatChannel passes through the channel identifier for Slack search.
-// Accepts #channel-name or Cxxxxxxxxxx format.
-func paramFormatChannel(raw string) string {
+func (ch *ConversationsHandler) paramFormatChannel(ctx context.Context, raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
-	if strings.HasPrefix(raw, "#") || strings.HasPrefix(raw, "C") {
-		return raw
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
+		return "", err
 	}
-	return "#" + raw
+	name := strings.TrimPrefix(raw, "#")
+	channels, err := fetchAllChannels(ctx, client, []string{"public_channel", "private_channel"})
+	if err != nil {
+		return "", err
+	}
+	for _, c := range channels {
+		if c.Name == name || c.ID == raw {
+			return "#" + c.Name, nil
+		}
+	}
+	return "", fmt.Errorf("channel %q not found", raw)
 }
 
-// paramFormatUser passes through the user identifier for Slack search.
-// Accepts @username or Uxxxxxxxxxx format.
-func paramFormatUser(raw string) string {
+func (ch *ConversationsHandler) paramFormatUser(ctx context.Context, raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if strings.HasPrefix(raw, "<@") {
-		return raw
+		raw = strings.TrimSuffix(raw[2:], ">")
+	} else if strings.HasPrefix(raw, "@") {
+		raw = raw[1:]
 	}
-	if strings.HasPrefix(raw, "@") {
-		return raw
+	client, err := ch.apiProvider.GetClient(ctx)
+	if err != nil {
+		return "", err
 	}
-	if strings.HasPrefix(raw, "U") {
-		return fmt.Sprintf("<@%s>", raw)
+	users, err := client.GetUsersContext(ctx, slack.GetUsersOptionLimit(1000))
+	if err != nil {
+		return "", err
 	}
-	return "@" + raw
+	for _, u := range users {
+		if u.ID == raw || u.Name == raw {
+			return fmt.Sprintf("<@%s>", u.ID), nil
+		}
+	}
+	return "", fmt.Errorf("user %q not found", raw)
 }
 
 func marshalMessagesToCSV(messages []Message) (*mcp.CallToolResult, error) {
