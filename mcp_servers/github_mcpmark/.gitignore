@@ -1,0 +1,20 @@
+.idea
+cmd/github-mcp-server/github-mcp-server
+
+# VSCode
+.vscode/*
+!.vscode/launch.json
+
+# Added by goreleaser init:
+dist/
+__debug_bin*
+
+# Go
+vendor
+bin/
+
+# macOS
+.DS_Store
+
+# binary
+github-mcp-server

@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.24.4-alpine AS build
+ARG VERSION="dev"
+
+# Set the working directory
+WORKDIR /build
+
+# Copy source code from the subdirectory (build context is repo root)
+COPY mcp_servers/github_mcpmark/ .
+
+# Install git (needed for go build with ldflags referencing git)
+RUN apk add --no-cache git
+
+# Build the server
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=${VERSION}" \
+    -o /bin/github-mcp-server ./cmd/github-mcp-server
+
+# Make a stage to run the app
+FROM gcr.io/distroless/base-debian12
+
+# Set the working directory
+WORKDIR /server
+# Copy the binary from the build stage
+COPY --from=build /bin/github-mcp-server .
+# Expose the default port
+EXPOSE 5000
+# Set the entrypoint to the server binary
+ENTRYPOINT ["/server/github-mcp-server"]
+# Default arguments for ENTRYPOINT
+CMD ["http", "--port", "5000"]

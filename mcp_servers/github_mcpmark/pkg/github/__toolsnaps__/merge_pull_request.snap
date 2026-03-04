@@ -1,0 +1,47 @@
+{
+  "annotations": {
+    "title": "Merge pull request",
+    "readOnlyHint": false
+  },
+  "description": "Merge a pull request in a GitHub repository.",
+  "inputSchema": {
+    "properties": {
+      "commit_message": {
+        "description": "Extra detail for merge commit",
+        "type": "string"
+      },
+      "commit_title": {
+        "description": "Title for merge commit",
+        "type": "string"
+      },
+      "merge_method": {
+        "description": "Merge method",
+        "enum": [
+          "merge",
+          "squash",
+          "rebase"
+        ],
+        "type": "string"
+      },
+      "owner": {
+        "description": "Repository owner",
+        "type": "string"
+      },
+      "pullNumber": {
+        "description": "Pull request number",
+        "type": "number"
+      },
+      "repo": {
+        "description": "Repository name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo",
+      "pullNumber"
+    ],
+    "type": "object"
+  },
+  "name": "merge_pull_request"
+}

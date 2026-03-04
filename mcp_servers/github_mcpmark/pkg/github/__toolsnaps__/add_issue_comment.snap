@@ -1,0 +1,35 @@
+{
+  "annotations": {
+    "title": "Add comment to issue",
+    "readOnlyHint": false
+  },
+  "description": "Add a comment to a specific issue in a GitHub repository.",
+  "inputSchema": {
+    "properties": {
+      "body": {
+        "description": "Comment content",
+        "type": "string"
+      },
+      "issue_number": {
+        "description": "Issue number to comment on",
+        "type": "number"
+      },
+      "owner": {
+        "description": "Repository owner",
+        "type": "string"
+      },
+      "repo": {
+        "description": "Repository name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "owner",
+      "repo",
+      "issue_number",
+      "body"
+    ],
+    "type": "object"
+  },
+  "name": "add_issue_comment"
+}
