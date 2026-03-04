@@ -5,13 +5,13 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json to install dependencies
-COPY mcp_servers/fetch_url/package.json mcp_servers/fetch_url/package-lock.json ./
+COPY mcp_servers/fetch_toolathlon/package.json mcp_servers/fetch_toolathlon/package-lock.json ./
 
 # Install dependencies (ignoring scripts to prevent running the prepare script)
 RUN npm install --ignore-scripts
 
 # Copy the rest of the application source code
-COPY mcp_servers/fetch_url .
+COPY mcp_servers/fetch_toolathlon .
 
 # Build the application using TypeScript
 RUN npm run build
